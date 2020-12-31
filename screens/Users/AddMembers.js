@@ -1,0 +1,305 @@
+//Create or Edit a team
+
+import React, { Component } from 'react'
+import { StyleSheet, Text, View, TextInput, TouchableHighlight, Alert, FlatList, TouchableOpacity, Keyboard } from 'react-native'
+import { List, Checkbox } from 'react-native-paper'
+
+import moment from 'moment'
+import 'moment/locale/fr'  // without this line it didn't work
+moment.locale('fr')
+
+import firebase from "react-native-firebase"
+
+import Appbar from "../../components/Appbar"
+import SearchBar from "../../components/SearchBar"
+import MyInput from '../../components/TextInput'
+import EmptyList from "../../components/EmptyList"
+import Button from "../../components/Button"
+import Toast from "../../components/Toast"
+import UserItem from '../../components/UserItem'
+
+import * as theme from '../../core/theme'
+import { constants } from '../../core/constants'
+import { nameValidator, load, setToast } from "../../core/utils"
+
+import SearchInput, { createFilter } from 'react-native-search-filter'
+import Loading from '../../components/Loading'
+import { handleSetError } from '../../core/exceptions'
+const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom']
+
+const db = firebase.firestore()
+
+export default class AddMembers extends Component {
+
+    constructor(props) {
+        super(props);
+        this.getFreeUsers = this.getFreeUsers.bind(this)
+        this.validateInputs = this.validateInputs.bind(this)
+        this.addMembers = this.addMembers.bind(this)
+        this.dismiss = this.dismiss.bind(this)
+
+        this.teamId = this.props.navigation.getParam('teamId', '')
+        this.existingMembers = this.props.navigation.getParam('existingMembers', [])
+        this.isCreation = this.props.navigation.getParam('isCreation', false)
+
+        this.state = {
+            title: 'Ajouter des membres',
+            searchInput: '',
+            showInput: false,
+
+            nom: { value: '', error: '' },
+            description: { value: '', error: '' },
+
+            members: [],
+            expanded: true,
+
+            loading: false,
+            error: ''
+        }
+    }
+
+    componentDidMount() {
+        Keyboard.dismiss()
+        this.setState({ loading: true })
+        this.getFreeUsers()
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe()
+    }
+
+    getFreeUsers() {
+        console.log('Getting free users...')
+        this.unsubscribe = db.collection('Users').where('hasTeam', '==', false).onSnapshot((querysnapshot) => {
+            let members = []
+            let membersCount = 0
+
+            querysnapshot.forEach((doc) => {
+                let user = {}
+                user.isPro = doc.data().isPro
+                user.role = doc.data().role
+                user.nom = doc.data().nom
+                user.prenom = doc.data().prenom
+                user.denom = doc.data().denom
+                user.id = doc.id
+                user.checked = false
+
+                members.push(user)
+                membersCount = membersCount + 1
+            })
+
+            this.setState({ members, membersCount, loading: false })
+        })
+    }
+
+    renderMember(member, key) {
+        let { members } = this.state
+
+        const check = (key) => {
+            members[key].checked = !members[key].checked
+            this.setState({ members })
+        }
+
+        return (
+            <UserItem
+                item={member}
+                itemStyle={{ paddingLeft: constants.ScreenWidth * 0.1 }}
+                onPress={check.bind(this, key)}
+                controller={< Checkbox
+                    style={{ flex: 0.1 }}
+                    status={members[key].checked ? 'checked' : 'unchecked'}
+                    onPress={check.bind(this, key)}
+                />} />
+        )
+    }
+
+    componentDidUpdate() {
+        console.log(this.state.members)
+    }
+
+    validateInputs() {
+        let { members } = this.state
+
+        let selectedMembers = members.filter((member) => member.checked === true)
+        selectedMembers = selectedMembers.map((member) => member.id)
+
+        let membersError = ''
+        if (selectedMembers.length === 0)
+            membersError = 'Erreur, une équipe doit contenir au moins un membre.'
+
+        if (membersError)
+            this.setState({ error: membersError })
+
+        return membersError
+    }
+
+    addMembers = async () => {
+        load(this, true)
+
+        let { error, loading } = this.state
+        let { members } = this.state
+        const batch = db.batch()
+
+        //if (loading) return
+        //this.setState({ loading: true })
+
+        //1. INPUTS VALIDATION
+        const membersError = this.validateInputs()
+        if (membersError)
+            return
+
+        //2. ADDING TEAM DOCUMENT
+        console.log('add member')
+        let selectedMembers = []
+        selectedMembers = members.filter((member) => member.checked === true)
+        selectedMembers = selectedMembers.map((member) => member.id)
+
+        if (!this.isCreation)
+            selectedMembers = selectedMembers.concat(this.existingMembers)
+
+        //1. Update Members of Team
+        const teamRef = db.collection('Teams').doc(this.teamId)
+        batch.update(teamRef, { members: selectedMembers })
+
+        //2. Update users belonging to this team (attach them from it)
+        for (const memberId of selectedMembers) {
+            const memberRef = db.collection('Users').doc(memberId)
+            batch.update(memberRef, { hasTeam: true, teamId: this.teamId })
+        }
+
+        // Commit the batch
+        batch.commit()
+            .then(() => {
+                load(this, false)
+                console.log("Batch succeeded !")
+                this.dismiss()
+            })
+            .catch(e => {
+                load(this, false)
+                handleSetError(e)
+            })
+    }
+
+    dismiss() {
+        if (this.isCreation)
+            this.props.navigation.pop(2)
+
+        else
+            this.props.navigation.navigate('ViewTeam', { teamId: this.teamId })
+    }
+
+    render() {
+        let { searchInput, title, nom, description, members, membersCount, loading, error } = this.state
+
+        const filteredMembers = members.filter(createFilter(this.state.searchInput, KEYS_TO_FILTERS))
+
+        if (loading)
+            return (
+                <View style={styles.container}>
+                    <Appbar title titleText='Ajout des membres...' />
+                    <Loading />
+                </View>
+            )
+
+        else return (
+            <View style={styles.container}>
+
+                {membersCount > 0 ?
+                    <SearchBar
+                        close
+                        main={this}
+                        title={!this.state.showInput}
+                        titleText={title}
+                        placeholder='Rechercher un utilisateur'
+                        magnifyStyle={{ right: constants.ScreenWidth * 0.12 }}
+                        showBar={this.state.showInput}
+                        handleSearch={() => this.setState({ searchInput: '', showInput: !this.state.showInput })}
+                        searchInput={this.state.searchInput}
+                        searchUpdated={(searchInput) => this.setState({ searchInput })}
+                        check
+                        handleSubmit={this.addMembers}
+                    />
+                    :
+                    <Appbar title titleText={title} check handleSubmit={this.dismiss} />
+                }
+
+                {
+                    this.isCreation &&
+                    <View style={{ paddingTop: 15, marginBottom: 15, paddingHorizontal: 15 }}>
+                        <Text style={theme.customFontMSbold.h3}>Votre équipe a été crée</Text>
+                        <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder, marginTop: 5, }]}>Rassemblez les personnes qui vont contribuer ensemble dans la réalisation de projets.</Text>
+                    </View>
+                }
+
+                {membersCount > 0 ?
+                    <FlatList
+                        enableEmptySections={true}
+                        data={filteredMembers}
+                        keyExtractor={(item, index) => index.toString()}
+                        renderItem={({ item, index }) => this.renderMember(item, index)}
+                        contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
+                    :
+                    <EmptyList iconName='account' header='Aucun membre disponible' description='Veuillez libérer des membres de leurs équipes, ou ajoutez de nouveaux utilisateurs.' />
+                }
+                <Toast message={error} onDismiss={() => this.setState({ error: '' })} containerStyle={{ bottom: constants.ScreenHeight * 0.05 }} />
+
+                {membersCount === 0 &&
+                    <Button
+                        mode="contained"
+                        onPress={() => this.props.navigation.navigate('UsersManagement')}
+                        style={{ position: 'absolute', bottom: 0, marginVertical: 0, borderRadius: 0 }}>
+                        <Text style={theme.customFontMSbold.body}>Libérer/Créer un utilisateur</Text>
+                    </Button>
+                }
+            </View>
+        )
+    }
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        // backgroundColor: theme.colors.background
+    },
+    fab: {
+        flex: 1,
+        backgroundColor: theme.colors.primary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        margin: 16,
+        right: 0,
+        bottom: 0,
+        width: 50,
+        height: 50,
+        borderRadius: 100,
+    },
+    button: {
+        width: '80%',
+        alignSelf: 'center',
+        bottom: 0
+    }
+});
+
+
+
+/* <List.Accordion
+title="Accordion 1"
+id='team1'
+title="Team 1"
+theme={{ colors: { primary: '#333' } }}
+titleStyle={theme.customFontMSsemibold.header}>
+{this.renderMembers()}
+</List.Accordion> */
+
+
+// {this.state.teamsList.map((team, key) => {
+//     <List.Accordion
+//         id={team.id}
+//         title={team.name}
+//         theme={{ colors: { primary: '#333' } }}
+//         titleStyle={theme.customFontMSsemibold.header}>
+//         {this.renderMembers()}
+//     </List.Accordion>
+// })
+// }

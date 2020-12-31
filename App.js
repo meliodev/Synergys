@@ -1,0 +1,87 @@
+import React, { Component } from 'react'
+import { Dimensions } from 'react-native'
+import firebase from 'react-native-firebase'
+
+//import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import { Provider } from 'react-redux'
+import { MenuProvider } from 'react-native-popup-menu';
+import Store from './Store/configureStore'
+
+import RootController from './Navigation/DrawerNavigator'
+import CustomClaims from './api/CustomClaims'
+
+//import pdfGeneration from './pdfGeneration'
+// const theme = {
+//   ...DefaultTheme,
+//   fonts: {
+//     regular: 'Montserrat-Regular',
+//     medium: 'Montserrat-Medium',
+//     light: 'Montserrat-Light',
+//     thin: 'Montserrat-Thin',
+//   }
+// }
+
+class App extends Component {
+
+  render() {
+    return (
+      <Provider store={Store}>
+        <MenuProvider>
+          {/* <PaperProvider> */}
+          <RootController />
+          {/* </PaperProvider> */}
+        </MenuProvider>
+      </Provider>
+    )
+  }
+}
+
+console.disableYellowBox = true;
+
+export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { createAppContainer } from "react-navigation";
+// import { createStackNavigator } from "react-navigation-stack";
+
+// export default createAppContainer(Router);
+
+// console.disableYellowBox = true;
+
+ //Token: 1/871957774648702:7cbeb89d7d0f667a2c52d8f2b499fec9
+    //id client: 1189147966277746
+    //secret du client: bd601cb4bb2de75b18a8848cde7aa12c
+    //Octroyer un code d’autorisation: https://app.asana.com/-/oauth_authorize?response_type=code&client_id=1189147966277746&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&state=<STATE_PARAM>
+
+
+  // fetch("https://app.asana.com/api/1.0/workspaces/855356051669655/projects", {
+    //   body: '{"data": {"name": "PRIMERA TAREA", "team": "1170903365365273"}}',
+
+    //   headers: {
+    //     Accept: "application/json",
+    //     Authorization: "Bearer 1/871957774648702:7cbeb89d7d0f667a2c52d8f2b499fec9",..
+    //     "Content-Type": "application/json"
+    //   },
+    //   method: "POST"
+    // }).then(response => response.json())
+    //   .then((responseJson) => {
+    //     console.log(responseJson)
+    //   })
+    //   .catch(error => console.log(error))
+
+
