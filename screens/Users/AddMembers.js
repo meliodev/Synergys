@@ -1,32 +1,31 @@
 //Create or Edit a team
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableHighlight, Alert, FlatList, TouchableOpacity, Keyboard } from 'react-native'
+import { StyleSheet, Text, View, TextInput, FlatList, Keyboard } from 'react-native'
 import { List, Checkbox } from 'react-native-paper'
 
 import moment from 'moment'
-import 'moment/locale/fr'  // without this line it didn't work
+import 'moment/locale/fr'
 moment.locale('fr')
 
 import firebase from "react-native-firebase"
 
 import Appbar from "../../components/Appbar"
 import SearchBar from "../../components/SearchBar"
-import MyInput from '../../components/TextInput'
 import EmptyList from "../../components/EmptyList"
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
 import UserItem from '../../components/UserItem'
+import Loading from '../../components/Loading'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { nameValidator, load, setToast } from "../../core/utils"
+import { load } from "../../core/utils"
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
-import Loading from '../../components/Loading'
 import { handleSetError } from '../../core/exceptions'
-const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom']
 
+const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom']
 const db = firebase.firestore()
 
 export default class AddMembers extends Component {
@@ -38,9 +37,9 @@ export default class AddMembers extends Component {
         this.addMembers = this.addMembers.bind(this)
         this.dismiss = this.dismiss.bind(this)
 
+        this.isCreation = this.props.navigation.getParam('isCreation', false) //create or edit data
         this.teamId = this.props.navigation.getParam('teamId', '')
         this.existingMembers = this.props.navigation.getParam('existingMembers', [])
-        this.isCreation = this.props.navigation.getParam('isCreation', false)
 
         this.state = {
             title: 'Ajouter des membres',
@@ -60,7 +59,7 @@ export default class AddMembers extends Component {
 
     componentDidMount() {
         Keyboard.dismiss()
-        this.setState({ loading: true })
+        load(this, true)
         this.getFreeUsers()
     }
 
@@ -70,7 +69,8 @@ export default class AddMembers extends Component {
 
     getFreeUsers() {
         console.log('Getting free users...')
-        this.unsubscribe = db.collection('Users').where('hasTeam', '==', false).onSnapshot((querysnapshot) => {
+        const query = db.collection('Users').where('hasTeam', '==', false).where('deleted', '==', false)
+        this.unsubscribe = query.onSnapshot((querysnapshot) => { //where('isClient', '==', false)
             let members = []
             let membersCount = 0
 
@@ -113,10 +113,6 @@ export default class AddMembers extends Component {
         )
     }
 
-    componentDidUpdate() {
-        console.log(this.state.members)
-    }
-
     validateInputs() {
         let { members } = this.state
 
@@ -134,19 +130,16 @@ export default class AddMembers extends Component {
     }
 
     addMembers = async () => {
-        load(this, true)
-
         let { error, loading } = this.state
         let { members } = this.state
         const batch = db.batch()
 
-        //if (loading) return
-        //this.setState({ loading: true })
+        if (loading) return
+        load(this, true)
 
         //1. INPUTS VALIDATION
         const membersError = this.validateInputs()
-        if (membersError)
-            return
+        if (membersError) return
 
         //2. ADDING TEAM DOCUMENT
         console.log('add member')
@@ -154,18 +147,18 @@ export default class AddMembers extends Component {
         selectedMembers = members.filter((member) => member.checked === true)
         selectedMembers = selectedMembers.map((member) => member.id)
 
+        //2. Update new members documents
+        for (const memberId of selectedMembers) {
+            const memberRef = db.collection('Users').doc(memberId)
+            batch.update(memberRef, { hasTeam: true, teamId: this.teamId })
+        }
+
         if (!this.isCreation)
             selectedMembers = selectedMembers.concat(this.existingMembers)
 
         //1. Update Members of Team
         const teamRef = db.collection('Teams').doc(this.teamId)
         batch.update(teamRef, { members: selectedMembers })
-
-        //2. Update users belonging to this team (attach them from it)
-        for (const memberId of selectedMembers) {
-            const memberRef = db.collection('Users').doc(memberId)
-            batch.update(memberRef, { hasTeam: true, teamId: this.teamId })
-        }
 
         // Commit the batch
         batch.commit()

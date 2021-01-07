@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform } from 'react-native';
 import { Card, Title, TextInput, ProgressBar } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -355,7 +355,8 @@ class UploadDocument extends Component {
                 //Copy document to Synergys/Documents (to open & sign later on and save downloading time)
                 else {
                     const fromPath = this.cachePath
-                    const destPath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/${this.state.attachedFile.name}`
+                    const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
+                    const destPath = `${Dir}/Synergys/Documents/${this.state.attachedFile.name}`
                     await RNFS.copyFile(fromPath, destPath)
                         .then(() => console.log('FILE COPIED !!!'))
                         .catch((e) => console.error(e))

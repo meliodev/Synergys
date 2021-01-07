@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native'
 import { List } from 'react-native-paper'
 import firebase from "react-native-firebase"
 
@@ -9,19 +9,16 @@ import { constants } from '../../core/constants'
 import { myAlert, checkPlural, load } from '../../core/utils'
 import { fetchDocs, deleteTeam } from '../../api/firestore-api'
 
-import SearchBar from '../../components/SearchBar';
-import UserItem from '../../components/UserItem';
-import TeamItem from '../../components/TeamItem';
 import ListItem from '../../components/ListItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
+import Loading from '../../components/Loading'
+
 
 import { withNavigation } from 'react-navigation'
-
 import SearchInput, { createFilter } from 'react-native-search-filter'
-import Loading from '../../components/Loading'
-const KEYS_TO_FILTERS = ['id', 'name']
 
+const KEYS_TO_FILTERS = ['id', 'name']
 const db = firebase.firestore()
 
 class ListTeams extends Component {
@@ -36,9 +33,6 @@ class ListTeams extends Component {
             teamsList: [],
             teamsCount: 0,
             members: [],
-
-            showInput: false,
-            searchInput: '',
 
             loading: false,
         }
@@ -63,13 +57,13 @@ class ListTeams extends Component {
 
     renderTeam(team) {
 
-        let desc = checkPlural(team.members.length, ' membre')
+        let description = checkPlural(team.members.length, ' membre')
 
         return (
             <TouchableOpacity onPress={() => this.viewTeam(team)}>
                 <ListItem
                     title={team.name}
-                    description={desc}
+                    description={description}
                     iconRightName='dots-horizontal'
                     left={props => <List.Icon {...props} icon="account-group" />}
 

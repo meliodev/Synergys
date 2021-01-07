@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 80 + getStatusBarHeight(),
     width: "100%",
+    alignSelf: 'center'
   },
   content: {
     fontWeight: "500"

@@ -79,12 +79,11 @@ class MarkerTypes extends React.Component {
         this.setState({ region })
     }
 
-
     handleSubmit() {
-        if(this.state.loading)
-        return
+        if(this.state.loading) return
     
-        let { address, marker } = this.state
+        const { address, marker } = this.state
+
         address.marker = marker
 
         if (address.description === '') {
@@ -96,7 +95,7 @@ class MarkerTypes extends React.Component {
 
         if (this.prevScreen === 'Profile') {
 
-            if (this.state.address.description !== this.currentAddress.description)
+            if (address.description !== this.currentAddress.description)
                 db.collection('Users').doc(this.userId).update({ address: address })
                     .then(() => this.props.navigation.goBack())
                     .catch((e) => Alert.alert(e))
@@ -113,7 +112,6 @@ class MarkerTypes extends React.Component {
         this.setState({ loading: false })
     }
 
-
     onChangePosition(e) {
         const lat = e.nativeEvent.coordinate.latitude
         const lng = e.nativeEvent.coordinate.longitude
@@ -128,7 +126,6 @@ class MarkerTypes extends React.Component {
 
         this.setState({ marker: e.nativeEvent.coordinate })
     }
-
 
     render() {
         let { showInput, loading } = this.state

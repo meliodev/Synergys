@@ -1,9 +1,8 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Alert, Keyboard } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import firebase from 'react-native-firebase'
-import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
 import AvatarText from '../../components/AvatarText'
@@ -14,8 +13,9 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, setUser, load } from "../../core/utils"
-import { handleSetError } from '../../core/exceptions'
+import { nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, setUser, load, setToast } from "../../core/utils"
+import { handleSetError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
+import { connect } from 'react-redux'
 
 const db = firebase.firestore()
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
@@ -28,27 +28,29 @@ class Profile extends Component {
         this.changePassword = this.changePassword.bind(this)
         this.passwordValidation = this.passwordValidation.bind(this)
         this.refreshToast = this.refreshToast.bind(this)
+        this.handleReauthenticateError = this.handleReauthenticateError.bind(this)
 
         this.userId = this.props.navigation.getParam('userId', firebase.auth().currentUser.uid)
         this.role = this.props.role.id
         this.initialState = {}
-        this.isInit = true
 
         this.state = {
             id: this.userId, //Not editable
             currentUser: firebase.auth().currentUser,
-            isPro: false,
 
+            isPro: false,
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
-
             nom: { value: '', error: '' },
             prenom: { value: '', error: '' },
+
             role: '',
+
             email: { value: '', error: '' },
             phone: { value: '', error: '' },
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
+
             currentPass: { value: '', error: '', show: false },
             newPass: { value: '', error: '', show: false },
 
@@ -65,46 +67,14 @@ class Profile extends Component {
     }
 
     componentDidMount() {
-        this.setState({ loading: true })
+        load(this, true)
         this.setPermissions()
         this.fetchData()
-        this.setState({ loading: false })
+        load(this, false)
     }
 
     componentWillUnmount() {
         this.unsubscribe()
-    }
-
-    fetchData() {
-        this.unsubscribe = db.collection('Users').doc(this.userId).onSnapshot((doc) => {
-            let denom = ''
-            let siret = ''
-            let nom = ''
-            let prenom = ''
-
-            if (doc.data().isPro) {
-                denom = { value: doc.data().denom, error: "" }
-                siret = { value: doc.data().siret, error: "" }
-            }
-
-            else {
-                nom = { value: doc.data().nom, error: '' }
-                prenom = { value: doc.data().prenom, error: '' }
-            }
-
-            let email = { value: doc.data().email, error: '' }
-            let phone = { value: doc.data().phone, error: '' }
-            let role = doc.data().role
-            let address = doc.data().address
-            let isPro = doc.data().isPro
-
-            this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address }, () => {
-                if (this.isInit)
-                    this.initialState = this.state
-
-                this.isInit = false
-            })
-        })
     }
 
     setPermissions() {
@@ -116,8 +86,39 @@ class Profile extends Component {
         if (isOwner)
             this.setState({ isOwner: true })
 
-        if (this.role === 'admin' || isOwner)
+        if (this.role === 'admin' || isOwner) //Only admin & profile owner can edit fields
             this.setState({ canEdit: true })
+    }
+
+    fetchData() {
+        this.unsubscribe = db.collection('Users').doc(this.userId).onSnapshot((doc) => {
+            const user = doc.data()
+
+            let denom = ''
+            let siret = ''
+            let nom = ''
+            let prenom = ''
+
+            if (user.isPro) {
+                denom = { value: user.denom, error: "" }
+                siret = { value: user.siret, error: "" }
+            }
+
+            else {
+                nom = { value: user.nom, error: '' }
+                prenom = { value: user.prenom, error: '' }
+            }
+
+            let email = { value: user.email, error: '' }
+            let phone = { value: user.phone, error: '' }
+            let role = user.role
+            let address = user.address
+            let isPro = user.isPro
+
+            this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address }, () => {
+                this.initialState = this.state //keep the initial state to compare changes
+            })
+        })
     }
 
     validateInputs() {
@@ -125,20 +126,20 @@ class Profile extends Component {
         let nomError = ''
         let prenomError = ''
 
-        if (this.state.isPro)
-            denomError = nameValidator(this.state.denom.value, '"Dénomination sociale"')
+        const { isPro, denom, nom, prenom, phone, address } = this.state
+
+        if (isPro)
+            denomError = nameValidator(denom.value, '"Dénomination sociale"')
 
         else {
-            nomError = nameValidator(this.state.nom.value, '"Nom"')
-            prenomError = nameValidator(this.state.prenom.value, '"Prénom"')
+            nomError = nameValidator(nom.value, '"Nom"')
+            prenomError = nameValidator(prenom.value, '"Prénom"')
         }
 
-        let phoneError = nameValidator(this.state.phone.value, '"Téléphone"')
-        let addressError = nameValidator(this.state.address.description, '"Adresse"')
+        const phoneError = nameValidator(phone.value, '"Téléphone"')
+        const addressError = nameValidator(address.description, '"Adresse"')
 
         if (denomError || nomError || prenomError || phoneError || addressError) {
-
-            let { isPro, denom, nom, prenom, phone } = this.state
 
             phone.error = phoneError
 
@@ -155,7 +156,7 @@ class Profile extends Component {
                 this.setState({ nom, prenom, phone, addressError, loading: false })
             }
 
-            this.setState({ toastType: 'error', toastMessage: 'Erreur de saisie, veuillez verifier les champs.' })
+            setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
 
             return false
         }
@@ -167,60 +168,57 @@ class Profile extends Component {
         //Handle Loading or No edit done
         if (this.state.loading || this.state === this.initialState) return
 
-        this.setState({ loading: true })
+        load(this, true)
 
         const isValid = this.validateInputs()
+        if (!isValid) return
 
-        if (isValid) {
-            let userData = []
-            let { isPro, nom, prenom, denom } = this.state
+        let userData = []
+        let { isPro, nom, prenom, denom } = this.state
 
-            Object.entries(this.state).forEach(([key, value]) => {
-                if (fields.indexOf(key) !== -1)
-                    userData.push([key, value.value])
+        Object.entries(this.state).forEach(([key, value]) => {
+            if (fields.indexOf(key) !== -1)
+                userData.push([key, value.value])
+        })
+
+        userData = Object.fromEntries(userData)
+
+        if (isPro)
+            userData.fullName = `${denom.value}`
+        else
+            userData.fullName = `${prenom.value} ${nom.value}`
+
+        await db.collection('Users').doc(this.userId).set(userData, { merge: true })
+            .then(() => {
+                const nomChanged = nom !== this.initialState.nom
+                const prenomChanged = prenom !== this.initialState.prenom
+                const denomChanged = denom !== this.initialState.denom
+
+                //A cloud function updating firebase auth displayName is triggered -> give it some time to finish...
+                if (nomChanged || prenomChanged || denomChanged)
+                    setTimeout(async () => {
+                        await firebase.auth().currentUser.reload()
+                        const currentUser = firebase.auth().currentUser
+                        this.setState({ currentUser })
+                        setUser(this, currentUser.displayName, true)
+                    }, 5000)
+
+                load(this, false)
+                this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
+            })
+            .catch((e) => {
+                load(this, false)
+                handleSetError(e)
             })
 
-            userData = Object.fromEntries(userData)
-
-            if (isPro)
-                userData.fullName = `${denom.value}`
-            else
-                userData.fullName = `${prenom.value} ${nom.value}`
-
-            await db.collection('Users').doc(this.userId).set(userData, { merge: true })
-                .then(() => {
-                    const nomChanged = this.state.nom !== this.initialState.nom
-                    const prenomChanged = this.state.prenom !== this.initialState.prenom
-                    const denomChanged = this.state.denom !== this.initialState.denom
-
-                    if (nomChanged || prenomChanged || denomChanged)
-                        setTimeout(async () => {
-                            await firebase.auth().currentUser.reload()
-                            const currentUser = firebase.auth().currentUser
-                            this.setState({ currentUser })
-                            setUser(this, currentUser.displayName, true)
-                            load(this, false)
-                            this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
-                        }, 5000)
-
-                    else {
-                        load(this, false)
-                        this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
-                    }
-                })
-                .catch((e) => {
-                    handleSetError(e)
-                    load(this, false)
-                })
-        }
     }
 
     passwordValidation() {
-        let currentPassError = passwordValidator(this.state.currentPass.value)
-        let newPassError = passwordValidator(this.state.newPass.value)
+        const { currentPass, newPass } = this.state
+        const currentPassError = passwordValidator(currentPass.value)
+        const newPassError = passwordValidator(newPass.value)
 
         if (currentPassError || newPassError) {
-            let { currentPass, newPass } = this.state
             currentPass.error = currentPassError
             newPass.error = newPassError
 
@@ -231,56 +229,37 @@ class Profile extends Component {
         else return true
     }
 
-    changePassword() {
-        console.log('Ready to verify password...')
-        this.setState({ loading: true })
+    async changePassword() {
+        load(this, true)
+
         //Validate password
         const isPasswordValid = this.passwordValidation()
+        if (!isPasswordValid) return
 
-        if (isPasswordValid) {
-            let currentPass = this.state.currentPass
-            let newPass = this.state.newPass
+        let { currentPass, newPass, currentUser, email } = this.state
+        const emailCred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPass.value)
 
-            const emailCred = firebase.auth.EmailAuthProvider.credential(this.state.currentUser.email, currentPass.value)
-
-            //1. RE-AUTHENTICATION
-            this.state.currentUser.reauthenticateWithCredential(emailCred)
-                .then(() => {
-                    //2. UPDATE PASSWORD
-                    return this.state.currentUser.updatePassword(newPass.value)
-                        .then(() => {
-                            this.setState({ toastType: 'success', toastMessage: 'Mot de passe modifié avec succès' })
-                        })
-                        .catch(e => {
-                            let error = ''
-                            if (e.code === 'auth/weak-password')
-                                error = "Le nouveau mot de passe que vous avez saisi est faible."
-
-                            else error = "Erreur, veuillez resaisir un nouveau mot de passe"
-
-                            this.setState({ toastType: 'error', toastMessage: error })
-                        })
-                        .finally(() => {
-                            currentPass = { value: '', error: '' }
-                            newPass = { value: '', error: '' }
-                            this.setState({ currentPass, newPass, loading: false, })
-                        })
-                })
-
-                .catch(e => {
-                    let error = ''
-                    if (e.code === 'auth/wrong-password')
-                        error = ("L'ancien mot de passe que vous avez saisi est incorrecte.")
-
-                    else if (e.code === 'auth/user-not-found')
-                        error = (`Aucun utilisateur associé à l'adresse email: ${this.state.email.value}`)
-
-                    currentPass = { value: '', error: '' }
-                    newPass = { value: '', error: '' }
-                    this.setState({ currentPass, newPass, loading: false, toastType: 'error', toastMessage: error })
-                })
-
+        try {
+            await currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
+            await currentUser.updatePassword(newPass.value).catch(e => handleUpdatePasswordError(e))
+            setToast(this, 's', 'Mot de passe modifié avec succès')
+            currentPass = { value: '', error: '' }
+            newPass = { value: '', error: '' }
+            this.setState({ currentPass, newPass })
         }
+
+        catch (e) {
+            console.error(e)
+        }
+
+        load(this, false)
+    }
+
+    handleReauthenticateError(e) {
+        handleReauthenticateError(e)
+        currentPass = { value: '', error: '' }
+        newPass = { value: '', error: '' }
+        this.setState({ currentPass, newPass, loading: false })
     }
 
     refreshToast(toastType, toastMessage) {
@@ -401,7 +380,7 @@ class Profile extends Component {
                                 {isAdmin &&
                                     <TouchableOpacity onPress={() => {
                                         if (isAdmin)
-                                            this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: this.state.role })
+                                            this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
                                     }}>
                                         <MyInput
                                             label="Role"
@@ -410,7 +389,7 @@ class Profile extends Component {
                                             autoCapitalize="none"
                                             editable={false}
                                             right={isAdmin && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                                this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: this.state.role })
+                                                this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
                                             } />} />
                                     </TouchableOpacity>
                                 }

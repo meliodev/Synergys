@@ -1,8 +1,7 @@
 //Create or Edit a team
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TextInput, TouchableHighlight, Alert, FlatList, TouchableOpacity, Keyboard } from 'react-native'
-import { List, Checkbox } from 'react-native-paper'
+import { StyleSheet, Text, View, Keyboard } from 'react-native'
 
 import moment from 'moment'
 import 'moment/locale/fr'  // without this line it didn't work
@@ -13,11 +12,11 @@ import firebase from "react-native-firebase"
 import Appbar from "../../components/Appbar"
 import MyInput from '../../components/TextInput'
 import Toast from "../../components/Toast"
+import Loading from '../../components/Loading'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { nameValidator, updateField, generatetId, setToast, load } from "../../core/utils"
-import Loading from '../../components/Loading'
 import { handleSetError } from '../../core/exceptions'
 
 const db = firebase.firestore()
@@ -27,7 +26,6 @@ export default class CreateTeam extends Component {
     constructor(props) {
         super(props);
         this.validateInputs = this.validateInputs.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
         this.isEdit = this.props.navigation.getParam('isEdit', false)
@@ -56,12 +54,11 @@ export default class CreateTeam extends Component {
             this.setState({ teamId })
         }
 
-        if (this.isEdit) {
+        else {
             const teamId = this.teamId
-            const existingMembers = this.existingMembers
             const name = { value: this.name, error: '' }
             const description = { value: this.description, error: '' }
-            this.setState({ name, description, teamId }, () => this.initialState = { name, description, teamId })
+            this.setState({ teamId, name, description }, () => this.initialState = { teamId, name, description })
         }
     }
 
@@ -71,7 +68,7 @@ export default class CreateTeam extends Component {
 
     validateInputs() {
         let { name } = this.state
-
+        
         let nameError = nameValidator(name.value, `Nom de l'équipe`)
 
         if (nameError) {

@@ -9,7 +9,6 @@ import Button from "../components/Button"
 import { constants } from "../core/constants"
 
 import firebase from 'react-native-firebase'
-import { set } from "react-native-reanimated" 
 
 const functions = firebase.functions()
 

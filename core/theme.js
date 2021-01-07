@@ -1,50 +1,3 @@
-// export const theme = {
-//   ...DefaultTheme,
-//   colors: {
-//     ...DefaultTheme.colors,
-//     statusbar: "#EE7F2D",
-//     primary: "#f56b11",
-//     secondary: "#414757",
-//     tertiary: "#7ab600",
-//     error: "#f13a59",
-//     success: "#00B386",
-//     disabled: '#9E9E9E',
-//   },
-//   fonts: {
-//     pagetitle: {
-//       fontFamily: 'Montserrat-Medium',
-//       fontSize: 20,
-//       color: '#fff'
-//     },
-//     body: { //Long text (black)
-//       fontFamily: 'Montserrat-Regular',
-//       fontSize: 14,
-//     },
-//     modal: { //Short text (light gray)
-//       fontFamily: 'Montserrat-Regular',
-//       fontSize: 16,
-//     },
-//     test: { //Short text (light gray)
-//       fontFamily: 'Montserrat-Regular',
-//       color: '#9E9E9E',
-//       fontSize: 12,
-//     },
-//     input: {
-//       fontFamily: 'Montserrat-Regular',
-//       fontSize: 16,
-//     },
-//     error: {
-//       fontFamily: 'Montserrat-Regular',
-//       fontSize: 12,
-//       color: "#f13a59",
-//     },
-//     menutitle: {
-//       fontFamily: 'Montserrat-SemiBold',
-//       fontSize: 14,
-//     }
-
-//   }
-// }
 
 import { DefaultTheme } from 'react-native-paper'
 
@@ -65,6 +18,7 @@ const colors = {
   black: "#323643",
   white: "#FFFFFF",
   gray: "#BDBDBD",
+  graySilver: '#C0C0C0',
   gray50: '#ECEFF1',
   gray100: '#CFD8DC',
   gray2: "#B0BEC5",
@@ -74,7 +28,9 @@ const colors = {
   transparent: "rgba(255,255,255,0)",
   white_transparent_6: "rgba(255,255,255,0.6)",
   gallery_background: "#EEE",
-  chatBackground: '#305585'
+  chatBackground: '#305585',
+  agenda: '#555CC4',
+  agendaLight: '#829BF8',
 };
 
 const sizes = {

@@ -2,7 +2,7 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native'
-import { List, FAB } from 'react-native-paper'
+import { List } from 'react-native-paper'
 import firebase from "react-native-firebase"
 
 import * as theme from '../../core/theme'
@@ -19,8 +19,8 @@ import { withNavigation } from 'react-navigation'
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import Loading from '../../components/Loading'
-const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom', 'role']
 
+const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom', 'role']
 const db = firebase.firestore()
 
 class ListUsers extends Component {
@@ -56,26 +56,25 @@ class ListUsers extends Component {
     this.myAlert(title, message, handleConfirm)
   }
 
-  //#batch
   deleteUser(user) {
-    // Get a new write batch
+
     const batch = db.batch()
 
-    //1. Update Members of Team
+    //1. Remove user from his team
     if (user.hasTeam) {
       const teamRef = db.collection('Teams').doc(user.teamId)
       batch.update(teamRef, { members: firebase.firestore.FieldValue.arrayRemove(user.id) })
     }
 
-    //2. Update User
+    //2. Update User (deleted = false)
     const userRef = db.collection('Users').doc(user.id)
-    batch.update(userRef, { deleted: true }) //handle user reactivation..
+    batch.update(userRef, { deleted: true, hasTeam: false }) //handle user reactivation..
 
-    //3. Set Deleted user
-    const dltUserRef = db.collection('DeletedUsers').doc(user.id)
-    batch.set(dltUserRef, user)
+    //3. Add user to DeletedUsers collection (OLD)
+    // const dltUserRef = db.collection('DeletedUsers').doc(user.id)
+    // batch.set(dltUserRef, user)
 
-    // //3. Delete the User
+    // //3. Delete the User (OLD)
     // const userRef = db.collection('Users').doc(user.id)
     // batch.delete(userRef)
 
@@ -90,9 +89,9 @@ class ListUsers extends Component {
     return (
       <TouchableOpacity onPress={() => {
         if (item.isPro)
-          this.props.onPress(item.isPro, item.id, item.denom, '')
+          this.props.onPress(item.isPro, item.id, item.denom, '', item.role)
         else
-          this.props.onPress(item.isPro, item.id, item.nom, item.prenom)
+          this.props.onPress(item.isPro, item.id, item.nom, item.prenom, item.role)
       }}>
         <ListItem
           title={item.isPro ? item.denom : item.prenom + ' ' + item.nom}
@@ -128,26 +127,17 @@ class ListUsers extends Component {
   }
 
   renderCountLabel(usersCount) {
-    let text = ''
+    let type = 'utilisateur'
+    if (this.props.userType === 'client') type = 'client'
+    let label = type
+    if (usersCount > 1) label = `${label}s` 
 
-    if (this.props.userType === 'utilisateur') {
-      if (usersCount === 1)
-        text = 'utilisateur'
-      else text = 'utilisateurs'
-    }
-
-    else if (this.props.userType === 'client') {
-      if (usersCount === 1)
-        text = 'client'
-      else text = 'clients'
-    }
-
-    return text
+    return label
   }
 
   render() {
     let { usersCount, usersList, loading } = this.state
-    let text = this.renderCountLabel(usersCount)
+    let label = this.renderCountLabel(usersCount)
 
     const filteredUsers = usersList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
 
@@ -160,7 +150,7 @@ class ListUsers extends Component {
           :
           <View style={[styles.container, { paddingHorizontal: constants.ScreenWidth * 0.015 }]}>
 
-            {usersCount > 0 && <List.Subheader>{usersCount} {text}</List.Subheader>}
+            {usersCount > 0 && <List.Subheader>{usersCount} {label}</List.Subheader>}
             {usersCount > 0 ?
               <FlatList
                 enableEmptySections={true}
@@ -195,4 +185,4 @@ const styles = StyleSheet.create({
     padding: constants.ScreenWidth * 0.04,
     paddingLeft: constants.ScreenWidth * 0.05
   }
-}); 
+})

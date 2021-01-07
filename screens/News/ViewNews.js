@@ -1,7 +1,6 @@
 // screens/ViewNews.js
 import React, { Component } from 'react'
-import { StyleSheet, SafeAreaView, ScrollView, Dimensions, } from 'react-native'
-import { Tile, Title, Screen, Divider, View, Overlay } from '@shoutem/ui'
+import { View, StyleSheet, SafeAreaView, ScrollView, Dimensions, } from 'react-native'
 import HTML from 'react-native-render-html'
 
 import Appbar from '../../components/Appbar'
@@ -50,7 +49,7 @@ export default class ViewNews extends Component {
                                 ignoredStyles={['width', 'height', 'video']}
                                 onLinkPress={(evt, href) => this.onLinkPress(href)}
                             />
-                            <Divider styleName="line" />
+                            {/* <Divider styleName="line" /> */}
                         </View>
                     }
                 </ScrollView>

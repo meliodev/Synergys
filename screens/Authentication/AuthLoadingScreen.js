@@ -1,9 +1,9 @@
-import React, { memo, Component } from "react";
-import { Alert, Text, StyleSheet } from "react-native";
-import firebase from "react-native-firebase";
-import Loading from "../../components/Loading";
+import React, { memo, Component } from "react"
+import { Alert, Text, StyleSheet } from "react-native"
+import firebase from "react-native-firebase"
+import Loading from "../../components/Loading"
 
-import * as theme from "../../core/theme";
+import * as theme from "../../core/theme"
 import { setRole, setUser } from '../../core/utils'
 import { connect } from 'react-redux'
 
@@ -15,41 +15,35 @@ const db = firebase.firestore()
 class AuthLoadingScreen extends Component {
 
   componentDidMount() {
-    firebase.auth().onAuthStateChanged(async user => {
+    this.unsububscribe = firebase.auth().onAuthStateChanged(async user => {
       if (user) {
         setUser(this, user.displayName, true)
-
         const idTokenResult = await user.getIdTokenResult().catch(() => Alert.alert('Aucune donnée en cache pour un fonctionnement Hors-Ligne. Veuillez vous connecter à internet.'))
-
+        
         roles.forEach((role) => {
-          if (idTokenResult.claims[role.id]) {
+          if (idTokenResult.claims[role.id])
             setRole(this, role)
-            return
-          }
         })
 
         await firebase.auth().currentUser.reload()
-        this.props.navigation.navigate("NewsStack")
+        this.props.navigation.navigate("ProjectsStack")
       }
 
       else {
         setRole(this, '')
         setUser(this, '', false)
-        this.props.navigation.navigate("HomeScreen");
+        this.props.navigation.navigate("HomeScreen")
       }
     })
+  }
 
-    // db.collection('Users').doc(firebase.auth().currentUser.uid).onSnapshot((querySnapshot) => {
-    //   querySnapshot.forEach((doc) => {
-
-    //   })
-    // })
-
+  componentWillUnmount() {
+    this.unsububscribe()
   }
 
   render() {
     return (
-      <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={styles.logo}>
         <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
       </LinearGradient>
     )
@@ -73,6 +67,11 @@ const styles = StyleSheet.create({
     marginVertical: 15,
     letterSpacing: 2,
     fontSize: 45
+  },
+  logo: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   }
 })
 

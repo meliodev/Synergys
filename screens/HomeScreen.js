@@ -11,30 +11,18 @@ import { constants } from '../core/constants';
 
 class HomeScreen extends Component {
 
-  constructor(props) {
-    super(props)
-  }
-
-  componentDidMount() {
-    this.props.navigation.setParams({ title: 'Bienvenue' })
-  }
-
   render() {
     return (
 
       <View style={styles.background}>
-        <KeyboardAvoidingView style={styles.container} behavior="padding">
-          <Logo />
-          <Header></Header>
+        <Logo />
 
-          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => this.props.navigation.navigate("LoginScreen")}>
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#09a500', '#69b300', '#9fbc00']} style={[styles.linearGradient, styles.stepContainer]}>
-              <Text style={[theme.customFontMSbold.header, { color: '#fff' }]}>CONNECTION</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => this.props.navigation.navigate("LoginScreen")}>
+          <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#09a500', '#69b300', '#9fbc00']} style={styles.linearGradient}>
+            <Text style={[theme.customFontMSbold.header, { color: '#fff' }]}>CONNECTION</Text>
+          </LinearGradient>
+        </TouchableOpacity>
 
-
-        </KeyboardAvoidingView>
       </View>
     )
   }
@@ -43,29 +31,18 @@ class HomeScreen extends Component {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    width: "100%",
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
     backgroundColor: '#fff'
   },
-  container: {
-    flex: 1,
-    padding: 20,
-    width: "100%",
-    maxWidth: 340,
-    alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center"
-  },
   linearGradient: {
-    //flex: 1,
+    height: 33,
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 25,
     width: constants.ScreenWidth * 0.8,
     borderRadius: 5
-  },
-  stepContainer: {
-    height: 33,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 })
 

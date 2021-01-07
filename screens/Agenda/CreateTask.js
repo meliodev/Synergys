@@ -9,11 +9,9 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
-import MyInput from '../../components/TextInput' //Name, Description !!
-import Picker from "../../components/Picker" //Type, Priority !!
-import Loading from "../../components/Loading" //Type, Priority !!
-//AUTO-GENERATED or CALCULATED: id, createdAt, duration, (Owner, updatedAt, updatedBy)
-//Other screen: Address !!
+import MyInput from '../../components/TextInput' 
+import Picker from "../../components/Picker"
+import Loading from "../../components/Loading" 
 
 //Task state
 import TaskState from "../../components/RequestState"
@@ -77,7 +75,7 @@ class CreateTask extends Component {
             TaskId: '', //Not editable
 
             //TEXTINPUTS
-            name: { value: "Test A", error: '' },
+            name: { value: "Task 1", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
@@ -108,7 +106,6 @@ class CreateTask extends Component {
             await this.fetchTask()
         }
 
-        //#task: avoid conflicts add auto-gen string
         else {
             const TaskId = generatetId('GS-TC-')
             this.setState({ TaskId }, () => this.initialState = this.state)
@@ -130,8 +127,6 @@ class CreateTask extends Component {
 
             // //General info
             TaskId = this.TaskId
-            console.log('onsnapshot..')
-            console.log(task.name)
             name.value = task.name
             assignedTo = task.assignedTo
             description.value = task.description
@@ -165,8 +160,8 @@ class CreateTask extends Component {
         this.setState({ address })
     }
 
-    refreshAssignedTo(isPro, id, prenom, nom) {
-        const assignedTo = { id, fullName: `${prenom} ${nom}`, error: '' }
+    refreshAssignedTo(isPro, id, prenom, nom, role) {
+        const assignedTo = { id, fullName: `${prenom} ${nom}`, role, error: '' }
         this.setState({ assignedTo })
     }
 
@@ -186,7 +181,6 @@ class CreateTask extends Component {
     }
 
     //Inputs validation
-
     validateInputs() {
         let { name, assignedTo, project, address, startDate, dueDate } = this.state
 
@@ -215,7 +209,7 @@ class CreateTask extends Component {
         let { error, loading } = this.state
         let { TaskId, name, assignedTo, description, project, type, priority, status, address, startDate, dueDate } = this.state
 
-        // if (this.state.loading || this.state === this.initialState) return
+        if (loading || this.state === this.initialState) return
 
         //1. Validate inputs
         const isValid = this.validateInputs()
@@ -252,7 +246,7 @@ class CreateTask extends Component {
             await agendaRef.set({ date: agendaId }, { merge: true })
             await agendaRef.collection('Tasks').doc(TaskId).set(task, { merge: true })
             if (this.isEdit)
-                this.props.navigation.state.params.onGoBack(false)
+                this.props.navigation.state.params.onGoBack(false) //Don't refresh tasks in agenda
             this.props.navigation.goBack()
         }
 
@@ -276,7 +270,7 @@ class CreateTask extends Component {
         load(this, true)
         await db.collection('Agenda').doc(this.DateId).collection('Tasks').doc(this.TaskId).delete()
         load(this, false)
-        this.props.navigation.state.params.onGoBack(true)
+        this.props.navigation.state.params.onGoBack(true) //Refresh manually tasks in agenda because onSnapshot doesn't listen to delete operations.
         this.props.navigation.goBack()
     }
 
@@ -467,5 +461,5 @@ const styles = StyleSheet.create({
         height: 50,
         borderRadius: 100,
     }
-});
+})
 

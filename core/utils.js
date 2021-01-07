@@ -1,6 +1,7 @@
 //Input validators
 import firebase from "react-native-firebase";
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
+import ImagePicker from 'react-native-image-picker'
 import RNFetchBlob from 'rn-fetch-blob'
 import FileViewer from 'react-native-file-viewer'
 import { decode as atob, encode as btoa } from "base-64"
@@ -28,6 +29,19 @@ export const nameValidator = (name, label) => {
 
   return "";
 };
+
+export const arrayValidator = (array, label) => {
+  if (array.length === 0) return `Le champs ${label} est obligatoire`
+
+  return ''
+}
+
+export const priceValidator = (price) => {
+  price = Number(price)
+  console.log(price)
+  if (price <= 0) return `Le champs "Prix unitaire" est obligatoire`
+  return ""
+}
 
 export const phoneValidator = phone => {
   const re = /^((\+)33|0)[1-9](\d{2}){4}$/;
@@ -107,18 +121,21 @@ export const myAlert = function myAlert(title, message, handleConfirm) {
   )
 }
 
-export const downloadFile = async (main, fileName, url) => {
+export const downloadFile = async (main, fileName, url) => { //#task configure for ios
 
   //if file already exists in this device read it..
+  console.log('fileName', fileName)
+
   try {
     const { config, fs } = RNFetchBlob
-    let Dir = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messagerie/${fileName}`
+    const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
+    const path = `${Dir}/Synergys/Documents/Messagerie/${fileName}`
 
-    let fileExist = await RNFetchBlob.fs.exists(Dir)
+    let fileExist = await RNFetchBlob.fs.exists(path)
 
     //Open file...
     if (fileExist) {
-      FileViewer.open(Dir, { showOpenWithDialog: true })
+      FileViewer.open(path, { showOpenWithDialog: true })
         .then(() => console.log('OPENING FILE...'))
         .catch(e => console.log(e))
     }
@@ -129,10 +146,11 @@ export const downloadFile = async (main, fileName, url) => {
 
       let options = {
         fileCache: true,
+        //path: path, //#ios
         addAndroidDownloads: {
           useDownloadManager: true,
           notification: true,
-          path: Dir,
+          path: path,
           description: 'Image',
         },
       }
@@ -155,16 +173,17 @@ export const downloadFile = async (main, fileName, url) => {
   }
 }
 
-export const setToast = (main, type, message) => {
-  let t = ''
+export const setToast = (main, type, toastMessage) => {
+  let toastType = ''
   if (type === 'e')
-    t = 'error'
+    toastType = 'error'
   else if (type === 's')
-    t = 'success'
+    toastType = 'success'
   else if (type === 'i')
-    t = 'info'
+    toastType = 'info'
 
-  main.setState({ toastType: t, toastMessage: message })
+  console.log(toastType, toastMessage)
+  main.setState({ toastType, toastMessage })
 }
 
 export const load = (main, bool) => {
@@ -187,11 +206,17 @@ export const setUser = (main, displayName, connected) => {
 
 export const base64ToArrayBuffer = (base64) => {
   const binary_string = atob(base64);
+  // console.log('binary_string', binary_string)
   const len = binary_string.length;
+  //console.log('len', len)
   const bytes = new Uint8Array(len);
+  // console.log('bytes', bytes)
+
   for (let i = 0; i < len; i++) {
     bytes[i] = binary_string.charCodeAt(i);
   }
+
+  console.log(bytes.buffer)
 
   return bytes.buffer;
 }
@@ -210,8 +235,52 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
-//FILTERS
+//Image picker
+const imagePickerOptions = {
+  title: 'Selectionner une image',
+  takePhotoButtonTitle: 'Prendre une photo',
+  chooseFromLibraryButtonTitle: 'Choisir de la librairie',
+  cancelButtonTitle: 'Annuler',
+  noData: true,
+}
 
+export const pickImage = async (previousAttachments) => {
+  return new Promise(((resolve, reject) => {
+
+    ImagePicker.showImagePicker(imagePickerOptions, response => {
+
+      if (response.didCancel) reject('User cancelled image picker')
+      else if (response.error) reject('ImagePicker Error: ', response.error);
+      else if (response.customButton) reject('User tapped custom button: ', response.camera);
+
+      else {
+        let attachments = previousAttachments
+
+        const image = {
+          type: response.type,
+          name: response.fileName,
+          size: response.fileSize,
+          local: true,
+          progress: 0,
+        }
+
+        let { path, uri } = response
+        if (Platform.OS === 'android') {
+          path = 'file://' + path
+          image.path = path
+        }
+
+        else image.uri = uri
+
+        attachments.push(image)
+        resolve(attachments)
+      }
+    })
+
+  }))
+}
+
+//FILTERS
 export const setFilter = (main, field, value) => {
   const update = {}
   update[field] = value

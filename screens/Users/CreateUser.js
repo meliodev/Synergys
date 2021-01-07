@@ -17,9 +17,7 @@ import { constants, rolesRedux } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generatetId, updateField, setToast, load } from "../../core/utils"
 import { handleSetError } from "../../core/exceptions";
 
-import { signInUser, createUserDocument } from "../../api/auth-api";
-
-const roles_l1 = [
+const roles_l1 = [ //level1: Admin
   { label: 'Admin', value: 'Admin' },
   { label: 'Directeur commercial', value: 'Directeur commercial' },
   { label: 'Commercial', value: 'Commercial' },
@@ -28,7 +26,7 @@ const roles_l1 = [
   { label: 'Client', value: 'Client' }
 ]
 
-const roles_l2 = [
+const roles_l2 = [ //level2: Directeur commercial & Responsable technique
   { label: 'Directeur commercial', value: 'Directeur commercial' },
   { label: 'Commercial', value: 'Commercial' },
   { label: 'Responsable technique', value: 'Responsable technique' },
@@ -36,14 +34,14 @@ const roles_l2 = [
   { label: 'Client', value: 'Client' }
 ]
 
-const roles_l3 = [
+const roles_l3 = [ //level3: Commercial & Poseur
   { label: 'Commercial', value: 'Commercial' },
   { label: 'Responsable technique', value: 'Responsable technique' },
   { label: 'Poseur', value: 'Poseur' },
   { label: 'Client', value: 'Client' }
 ]
 
-const roles_l4 = [
+const roles_l4 = [ //level4:: Client
   { label: 'Client', value: 'Client' }
 ]
 
@@ -57,13 +55,20 @@ class CreateUser extends Component {
     this.refreshAddress = this.refreshAddress.bind(this)
 
     this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
+    this.title = 'Créer un utilisateur'
     this.role = this.props.role.id
 
     this.state = {
       userId: '', //Not editable
       role: 'Client',
+
+      checked: 'first', //professional/Particular
+      isPro: false,
       nom: { value: '', error: '' },
       prenom: { value: '', error: '' },
+      denom: { value: "", error: "" },
+      siret: { value: "", error: "" },
+
       address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
       addressError: '',
       email: { value: "", error: "" },
@@ -71,25 +76,19 @@ class CreateUser extends Component {
 
       password: { value: '', error: '', show: false },
 
-      denom: { value: "", error: "" },
-      siret: { value: "", error: "" },
-
       loading: false,
-      checked: 'first',
-      isPro: false,
       error: "",
-
     }
   }
 
   async componentDidMount() {
-    this.setSinglePermissions()
+    this.setRoleBasedPermissions()
     const userId = generatetId('GS-US-')
     this.setState({ userId })
   }
 
-  //#PERMISSIONS: set user's role on state (boolean role)
-  setSinglePermissions() {
+  //#PERMISSIONS:  (exp: isAdmin = true, isDirCom = false, isCom = false, isTech = false, isPoseur = false)
+  setRoleBasedPermissions() {
     rolesRedux.forEach((role, key) => {
       const update = {}
 
@@ -103,7 +102,7 @@ class CreateUser extends Component {
     })
   }
 
-  //#PERMISSIONS: config picker elements (depending on user's role)
+  //#PERMISSIONS: config role picker items (depending on user's role)
   configRolesPicker() {
     let { isAdmin, isDirCom, isCom, isTech, isPoseur } = this.state
     if (isAdmin)
@@ -128,7 +127,7 @@ class CreateUser extends Component {
 
     let { isPro, denom, siret, nom, prenom, phone, email, password } = this.state
 
-    if (this.state.isPro) {
+    if (isPro) {
       denomError = nameValidator(denom.value, '"Dénomination sociale"')
       siretError = nameValidator(siret.value, 'Siret')
     }
@@ -152,16 +151,16 @@ class CreateUser extends Component {
       if (isPro) {
         denom.error = denomError
         siret.error = siretError
-        Keyboard.dismiss()
         this.setState({ denom, siret, phone, addressError, email, password, loading: false })
       }
 
       else {
         nom.error = nomError
         prenom.error = prenomError
-        Keyboard.dismiss()
         this.setState({ nom, prenom, phone, addressError, email, password, loading: false })
       }
+
+      Keyboard.dismiss()
 
       setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
 
@@ -170,6 +169,233 @@ class CreateUser extends Component {
 
     return true
   }
+
+  //#task
+  //check commented code on bottom of this page
+  //should handle the following case: adding a user which has been previously deleted.
+  //users are not deleted but only deleted field is set to false
+  addUser = async (uid, overWrite) => {
+    let { role, isPro, error, loading } = this.state
+    let { userId, nom, prenom, address, phone, email, password } = this.state
+    let { denom, siret } = this.state
+
+    //1. Validate inputs
+    const isValid = await this.validateInputs()
+    if (!isValid) return
+
+    // if (overWrite) {
+    //   var accountDeleted = await this.deleteUserAccount(uid)
+    //   if (!accountDeleted) {
+    //     setToast(this, 'e', "Erreur lors de l'écrasement de l'ancien utilisateur...")
+    //     return
+    //   }
+    // }
+
+    load(this, true)
+    this.title = "Création de l'utilisateur"
+    //2. ADDING USER DOCUMENT
+    let user = {
+      address: address,
+      phone: phone.value,
+      email: email.value.toLowerCase(),
+      role: role,
+      hasTeam: false,
+      password: password.value,
+      deleted: false
+    }
+
+    if (isPro) {
+      user.denom = denom.value
+      user.siret = siret.value
+      user.isPro = true
+      user.fullName = denom.value
+    }
+
+    else if (!isPro) {
+      user.nom = nom.value
+      user.prenom = prenom.value
+      user.isPro = false
+      user.fullName = prenom.value + ' ' + nom.value
+    }
+
+    if (role === 'Client')
+      user.isClient = true
+    else
+      user.isClient = false
+
+    console.log('Ready to add user...')
+    await db.collection('newUsers').doc(userId).set(user).catch(e => handleSetError(e))
+    setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
+      load(this, false)
+      this.title = "Créer un utilisateur"
+      this.props.navigation.navigate(this.prevScreen)
+    }
+      , 6000) //We can reduce this timeout later on...
+
+
+  }
+
+  refreshAddress(address) {
+    this.setState({ address, addressError: '' })
+  }
+
+  render() {
+    let { role, isPro, error, loading } = this.state
+    let { userId, nom, prenom, address, addressError, phone, email, password } = this.state
+    let { denom, siret } = this.state
+
+    const showUserTypeRadio = (role === 'Poseur' || role === 'Client')
+    const roles = this.configRolesPicker()
+
+    return (
+      <View style={{ flex: 1 }}>
+        <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.addUser} />
+
+        {loading ?
+          <Loading size='large' />
+          :
+          <ScrollView style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
+            <MyInput
+              label="Identifiant utilisateur"
+              value={userId}
+              editable={false}
+              style={{ marginBottom: 15 }}
+              disabled
+            />
+
+            {roles &&
+              <Picker
+                label="Rôle"
+                returnKeyType="next"
+                value={this.state.role}
+                error={!!role.error}
+                errorText={role.error}
+                selectedValue={this.state.role}
+                onValueChange={(role) => this.setState({ role })}
+                title="Type d'utilisateur"
+                elements={roles}
+              />
+            }
+
+            {showUserTypeRadio && <RadioButton checked={this.state.checked}
+              firstChoice={{ title: 'Particulier', value: 'Particulier' }}
+              secondChoice={{ title: 'Professionnel', value: 'Professionnel' }}
+              onPress1={() => this.setState({ checked: 'first', isPro: false })}
+              onPress2={() => this.setState({ checked: 'second', isPro: true })}
+              style={{ justifyContent: 'space-between', marginVertical: 5 }} />}
+
+            {!isPro &&
+              <MyInput
+                label="Prénom"
+                returnKeyType="done"
+                value={prenom.value}
+                onChangeText={text => updateField(this, prenom, text)}
+                error={!!prenom.error}
+                errorText={prenom.error}
+              />}
+
+            <MyInput
+              label={isPro ? 'Dénomination sociale' : 'Nom'}
+              returnKeyType="next"
+              value={isPro ? denom.value : nom.value}
+              onChangeText={text => {
+                if (isPro)
+                  updateField(this, denom, text)
+                else
+                  updateField(this, nom, text)
+              }}
+              error={isPro ? !!denom.error : !!nom.error}
+              errorText={isPro ? denom.error : nom.error}
+            />
+
+            {isPro &&
+              <MyInput
+                label='Numéro siret'
+                returnKeyType="next"
+                value={siret.value}
+                onChangeText={text => updateField(this, siret, text)}
+                error={!!siret.error}
+                errorText={siret.error}
+                render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
+              />}
+
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, title: "Adresse de l'utilisateur", currentAddress: this.state.address })}>
+              <MyInput
+                label="Adresse"
+                returnKeyType="done"
+                value={address.description}
+                autoCapitalize="none"
+                multiline={true}
+                editable={false}
+                error={!!addressError}
+                errorText={addressError}
+              />
+            </TouchableOpacity>
+
+            <MyInput
+              label="Téléphone"
+              returnKeyType="done"
+              value={phone.value}
+              onChangeText={text => updateField(this, phone, text)}
+              error={!!phone.error}
+              errorText={phone.error}
+              textContentType='telephoneNumber'
+              keyboardType='phone-pad'
+              dataDetectorTypes='phoneNumber'
+              render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
+
+            <MyInput
+              label="Email"
+              returnKeyType="next"
+              value={email.value}
+              onChangeText={text => updateField(this, email, text)}
+              error={!!email.error}
+              errorText={email.error}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoCompleteType="email"
+              textContentType="emailAddress"
+              keyboardType="email-address"
+            />
+
+            <MyInput
+              label="Mot de passe"
+              returnKeyType="done"
+              value={password.value}
+              onChangeText={text => updateField(this, password, text)}
+              error={!!password.error}
+              errorText={password.error}
+              autoCapitalize="none"
+              secureTextEntry={!password.show}
+              right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
+                password.show = !password.show
+                this.setState({ password })
+              }} />}
+            />
+
+            <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
+
+          </ScrollView >
+        }
+      </View>
+    )
+  }
+}
+
+const mapStateToProps = (state) => {
+
+  return {
+    role: state.roles.role,
+    //fcmToken: state.fcmtoken
+  }
+}
+
+export default connect(mapStateToProps)(CreateUser)
+
+const styles = StyleSheet.create({
+})
+
+
 
   //#BETA
   // async isUserArchived() {
@@ -227,235 +453,3 @@ class CreateUser extends Component {
   //   await batch.commit()
   //   this.props.navigation.navigate(this.prevScreen)
   // }
-
-  addUser = async (uid, overWrite) => {
-    let { role, isPro, error, loading } = this.state
-    let { userId, nom, prenom, address, phone, email, password } = this.state
-    let { denom, siret } = this.state
-
-    //1. Validate inputs
-    const isValid = await this.validateInputs()
-    if (!isValid) return
-
-    // if (overWrite) {
-    //   var accountDeleted = await this.deleteUserAccount(uid)
-    //   if (!accountDeleted) {
-    //     setToast(this, 'e', "Erreur lors de l'écrasement de l'ancien utilisateur...")
-    //     return
-    //   }
-    // }
-
-    load(this, true)
-    //2. ADDING USER DOCUMENT
-    let user = {
-      address: address,
-      phone: phone.value,
-      email: email.value.toLowerCase(),
-      role: role,
-      hasTeam: false,
-      password: password.value,
-      deleted: false
-    }
-
-    if (isPro) {
-      user.denom = denom.value
-      user.siret = siret.value
-      user.isPro = true
-      user.fullName = denom.value
-    }
-
-    else if (!isPro) {
-      user.nom = nom.value
-      user.prenom = prenom.value
-      user.isPro = false
-      user.fullName = prenom + ' ' + nom
-    }
-
-    if (role === 'Client') user.isClient = true
-    else user.isClient = false
-
-    console.log('Ready to add user...')
-    await db.collection('newUsers').doc(userId).set(user)
-      .then(() => {
-        setTimeout(() => {
-          load(this, false)
-          this.props.navigation.navigate(this.prevScreen)
-        }
-          , 4000)
-      })
-      .catch(e => handleSetError(e))
-  }
-
-  refreshAddress(address) {
-    this.setState({ address, addressError: '' })
-  }
-
-  render() {
-    let { role, isPro, error, loading } = this.state
-    let { userId, nom, prenom, address, addressError, phone, email, password } = this.state
-    let { denom, siret } = this.state
-
-    let showUserType = (role === 'Poseur' || role === 'Client')
-
-    let roles = this.configRolesPicker() //permissions
-
-    return (
-      <View style={{ flex: 1 }}>
-        <Appbar back={!loading} close title titleText={!loading ? 'Créer un utilisateur' : "Création de l'utilisateur..."} check={!loading} handleSubmit={this.addUser} />
-
-        {loading ?
-          <Loading size='large' />
-          :
-          <ScrollView style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.09 }}>
-            <MyInput
-              label="Identifiant utilisateur"
-              value={userId}
-              editable={false}
-              style={{ marginBottom: 15 }}
-              disabled
-            />
-
-            {roles &&
-              <Picker
-                label="Rôle"
-                returnKeyType="next"
-                value={this.state.role}
-                error={!!role.error}
-                errorText={role.error}
-                selectedValue={this.state.role}
-                onValueChange={(role) => this.setState({ role }, () => console.log('ROLE: ' + this.state.role))}
-                title="Type d'utilisateur"
-                elements={roles}
-              />
-            }
-
-            {showUserType && <RadioButton checked={this.state.checked}
-              onPress1={() => this.setState({ checked: 'first', isPro: false })}
-              onPress2={() => this.setState({ checked: 'second', isPro: true })} />}
-
-            {!isPro &&
-              <MyInput
-                label="Prénom"
-                returnKeyType="done"
-                value={prenom.value}
-                onChangeText={text => updateField(this, prenom, text)}
-                error={!!prenom.error}
-                errorText={prenom.error}
-              />}
-
-            <MyInput
-              label={isPro ? 'Dénomination sociale' : 'Nom'}
-              returnKeyType="next"
-              value={isPro ? denom.value : nom.value}
-              onChangeText={text => {
-                if (isPro)
-                  updateField(this, denom, text)
-                else
-                  updateField(this, nom, text)
-              }}
-              error={isPro ? !!denom.error : !!nom.error}
-              errorText={isPro ? denom.error : nom.error}
-            />
-
-            {isPro &&
-              <MyInput
-                label='Numéro siret'
-                returnKeyType="next"
-                value={siret.value}
-                onChangeText={text => updateField(this, siret, text)}
-                error={!!siret.error}
-                errorText={siret.error}
-                render={props =>
-                  <TextInputMask
-                    {...props}
-                    mask="[000] [000] [000] [00000]"
-                  />
-                }
-              />}
-
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, title: "Adresse de l'utilisateur", currentAddress: this.state.address })}>
-              <MyInput
-                label="Adresse"
-                returnKeyType="done"
-                value={address.description}
-                autoCapitalize="none"
-                multiline={true}
-                editable={false}
-                error={!!addressError}
-                errorText={addressError}
-              />
-            </TouchableOpacity>
-
-
-            <MyInput
-              label="Téléphone"
-              returnKeyType="done"
-              value={phone.value}
-              // onChangeText={(text) => this.onTextChange(text)}
-              onChangeText={text => updateField(this, phone, text)}
-              error={!!phone.error}
-              errorText={phone.error}
-              textContentType='telephoneNumber'
-              keyboardType='phone-pad'
-              dataDetectorTypes='phoneNumber'
-              render={props =>
-                <TextInputMask
-                  {...props}
-                  mask="+33 [0] [00] [00] [00] [00]"
-                />
-              } />
-
-            <MyInput
-              label="Email"
-              returnKeyType="next"
-              value={email.value}
-              onChangeText={text => {
-                email.value = text
-                email.error = ""
-                this.setState({ email })
-              }}
-              error={!!email.error}
-              errorText={email.error}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoCompleteType="email"
-              textContentType="emailAddress"
-              keyboardType="email-address"
-            />
-
-            <MyInput
-              label="Mot de passe"
-              returnKeyType="done"
-              value={password.value}
-              onChangeText={text => updateField(this, password, text)}
-              error={!!password.error}
-              errorText={password.error}
-              autoCapitalize="none"
-              secureTextEntry={!password.show}
-              right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                password.show = !password.show
-                this.setState({ password })
-              }} />}
-            />
-
-            <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
-
-          </ScrollView >
-        }
-      </View>
-    )
-  }
-}
-
-const mapStateToProps = (state) => {
-
-  return {
-    role: state.roles.role,
-    //fcmToken: state.fcmtoken
-  }
-}
-
-export default connect(mapStateToProps)(CreateUser)
-
-const styles = StyleSheet.create({
-})

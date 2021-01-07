@@ -29,8 +29,8 @@ class ListEmployees extends React.Component {
         }
     }
 
-    getEmployee(isPro, id, nom, prenom) {
-        this.props.navigation.state.params.onGoBack(isPro, id, prenom, nom)
+    getEmployee(isPro, id, nom, prenom, role) {
+        this.props.navigation.state.params.onGoBack(isPro, id, prenom, nom, role)
         this.props.navigation.goBack()
     }
 
@@ -57,7 +57,7 @@ class ListEmployees extends React.Component {
                     prevScreen={this.props.prevScreen}
                     userType='utilisateur'
                     query={queryUsers}
-                    //showButton
+                    //showButton 
                     onPress={this.getEmployee}
                     emptyListHeader='Aucun utilisateur disponible'
                     emptyListDesc="Veuillez créer un nouvel utilisateur via l'interface de gestion des utilisateurs." />

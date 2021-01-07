@@ -5,13 +5,13 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { withNavigation } from 'react-navigation'
 import { Send } from 'react-native-gifted-chat';
 
-import SearchBar from './SearchBar'
+import Loading from './Loading'
 
 import * as theme from '../core/theme'
 
 const Appbar = ({
     white,
-    back, blackBack, close, title, search, dots, check, send, attach, menu, edit, del, refresh, controller,
+    back, blackBack, close, title, search, dots, check, send, attach, menu, edit, del, refresh, loading, controller,
     titleText, controllerIcon,
     searchBar,
     handleSearch, handleSubmit, handleSend, handleAttachement, handleMore, handleEdit, handleAction, handleDelete, handleRefresh,
@@ -28,7 +28,6 @@ const Appbar = ({
         backColor = '#fff'
 
     if (white) {
-
         return (
             <appbar.Header style={[{ backgroundColor: '#ffffff', elevation: 0 }, style]}>
                 <TouchableOpacity onPress={navBack} style={{ marginHorizontal: 5 }} >
@@ -47,22 +46,20 @@ const Appbar = ({
                     <Icon name="menu" size={24} color='#fff' />
                 </TouchableOpacity>
             }
-
-
             {searchBar}
             {title && <appbar.Content title={titleText} titleStyle={theme.customFontMSmedium.title} />}
-
             {refresh && <appbar.Action icon="refresh" onPress={handleRefresh} />}
             {search && <appbar.Action icon="magnify" onPress={handleSearch} />}
             {attach && <appbar.Action icon="attachment" onPress={handleAttachement} />}
             {dots && <appbar.Action icon="dots-vertical" onPress={handleMore} />}
             {del && <appbar.Action icon="delete" onPress={handleDelete} />}
+            {loading && <Loading size='small' color= '#fff' style={{ position: 'absolute', right: 15 }} />}
             {check && <appbar.Action icon="check" onPress={handleSubmit} />}
             {send && <appbar.Action icon="send" onPress={handleSend} />}
             {edit && <appbar.Action icon="pencil" onPress={handleEdit} />}
             {controller && <appbar.Action icon={controllerIcon} onPress={handleAction} />}
         </appbar.Header>
-    )
+   )
 }
 
 export default withNavigation(Appbar)

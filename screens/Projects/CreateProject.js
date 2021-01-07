@@ -16,11 +16,11 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
-import MyInput from '../../components/TextInput' //Name, Description !!
-import Picker from "../../components/Picker" //state, state !!
+import MyInput from '../../components/TextInput'
+import Picker from "../../components/Picker"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
-import DatePicker from 'react-native-date-picker' //startDate, dueDate, startHour, dueHour ??
+import DatePicker from 'react-native-date-picker'
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
@@ -351,7 +351,7 @@ class CreateProject extends Component {
         //await this.deleteAttachments(allImages, currentImage)
     }
 
-    //Delete Images from STORAGE //#RULE1: NEVER DELETE FILES
+    //Delete Images from STORAGE //#RULE: NEVER DELETE FILES
     // async deleteAttachments(allImages, currentImage) {
     //     let urls = []
 
@@ -380,25 +380,16 @@ class CreateProject extends Component {
 
     pickImage() {
         ImagePicker.showImagePicker(imagePickerOptions, response => {
-            console.log('Response = ', response);
 
-            if (response.didCancel) {
-                console.log('User cancelled photo picker');
-            }
-
-            else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            }
-
-            else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            }
+            if (response.didCancel) console.log('User cancelled photo picker')
+            else if (response.error) console.log('ImagePicker Error: ', response.error)
+            else if (response.customButton) console.log('User tapped custom button: ', response.customButton)
 
             else {
                 let attachments = this.state.attachments
 
                 const image = {
-                    path: response.path, //or response.uri
+                    path: response.path,
                     type: response.type,
                     name: response.fileName,
                     size: response.fileSize,
@@ -406,8 +397,6 @@ class CreateProject extends Component {
                 }
 
                 attachments.push(image)
-                this.setState({ attachments })
-
                 this.setState({ attachments })
             }
         })
@@ -891,7 +880,7 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     attachment: {
-        flex: 1,
+        // flex: 1,
         elevation: 1,
         backgroundColor: theme.colors.gray50,
         width: '90%',

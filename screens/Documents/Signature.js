@@ -15,7 +15,6 @@ import Pdf from "react-native-pdf";
 import RNFS from 'react-native-fs'
 import RNFetchBlob from 'rn-fetch-blob'
 import { PDFDocument, StandardFontEmbedder, rgb } from "pdf-lib";
-import fontkit from '@pdf-lib/fontkit'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
@@ -34,6 +33,7 @@ import { NetworkInfo } from "react-native-network-info";
 
 const db = firebase.firestore()
 const functions = firebase.functions()
+const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
 
 class Signature extends Component {
 
@@ -49,9 +49,9 @@ class Signature extends Component {
 
         this.fileName = this.props.navigation.getParam('fileName', '')
         this.sourceUrl = this.props.navigation.getParam('url', '')
-        this.originalFilePath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/${this.fileName}`
+        this.originalFilePath = `${Dir}/Synergys/Documents/${this.fileName}`
 
-        this.termsPath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
+        this.termsPath = `${Dir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
         this.termsURL = 'https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/CONDITIONS%20G%C3%89N%C3%89RALES%20DE%20VENTE%20ET%20DE%20TRAVAUX.pdf?alt=media&token=3bf07ac2-6d9e-439a-91d8-f9908003488f'
 
         this.tick = this.tick.bind(this)
@@ -379,7 +379,7 @@ class Signature extends Component {
 
                     firstPage.drawText(`Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`, {
                         x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
-                        y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight*0.005,
+                        y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight * 0.005,
                         size: 12,
                         //font: helveticaFont,
                         color: rgb(0, 0, 0),
@@ -406,7 +406,7 @@ class Signature extends Component {
                 this.setState({ loadingMessage: 'Génération du document signé...' })
                 const pdfBytes = await pdfDoc.save()
                 const pdfBase64 = uint8ToBase64(pdfBytes);
-                const path = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
+                const path = `${Dir}/Synergys/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
 
                 this.setState({ loadingMessage: 'Enregistrement du document signé...' })
                 RNFS.writeFile(path, pdfBase64, "base64")

@@ -1,10 +1,15 @@
 
 import React, { Component } from 'react';
-import { Alert, StyleSheet, Text, View, TouchableOpacity, FlatList, ScrollView } from 'react-native';
+import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Agenda, LocaleConfig } from 'react-native-calendars';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import _ from 'lodash'
+import firebase from 'react-native-firebase'
+
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
 
 import PickerBar from '../../components/PickerBar'
 import Appbar from '../../components/Appbar'
@@ -12,13 +17,6 @@ import TasksTab from '../../components/TasksTab'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
-
-import { colors, fonts } from '../styles';
-import firebase from 'react-native-firebase';
-
-import moment from 'moment';
-import 'moment/locale/fr'
-moment.locale('fr')
 
 import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as applyFilterAgenda, handleFilterTasks as applyFilterTasks } from '../../core/utils'
 import * as theme from '../../core/theme'
@@ -34,7 +32,6 @@ LocaleConfig.locales['fr'] = {
     dayNamesShort: ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'],
     today: 'Aujourd\'hui'
 }
-
 LocaleConfig.defaultLocale = 'fr'
 
 const db = firebase.firestore()
@@ -65,7 +62,6 @@ const statuses = [
     { label: 'Terminé', value: 'Terminé' },
     { label: 'Annulé', value: 'Annulé' },
 ]
-
 
 class Agenda2 extends Component {
     constructor(props) {
@@ -127,10 +123,10 @@ class Agenda2 extends Component {
             query = agendaRef.collection('Tasks')
 
         else if (roleId === 'dircom')
-            query = agendaRef.collection('Tasks').where('role', '==', 'Directeur commercial')
+            query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'Directeur commercial')
 
         else if (roleId === 'tech')
-            query = agendaRef.collection('Tasks').where('role', '==', 'Responsable technique')
+            query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'Responsable technique')
 
         return query
     }
@@ -138,14 +134,13 @@ class Agenda2 extends Component {
     loadItems(day) {
         setTimeout(async () => {
 
-            db.collection('Agenda').get().then((querysnapshot) => {
+            this.unsubscribe = db.collection('Agenda').onSnapshot((querysnapshot) => {
                 querysnapshot.forEach(async (dateDoc) => {
-                    const date = dateDoc.id
+                    const date = dateDoc.id //exp: 2021-01-07
 
-                    if (!this.state.items[date]) {
-
+                    //if (!this.state.items[date]) {
                         const query = this.setTasksQuery(dateDoc.ref)
-                        this.unsubscribe = query.onSnapshot((tasksSnapshot) => {
+                        query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
                             this.state.items[date] = []
 
                             tasksSnapshot.forEach((taskDoc) => {
@@ -160,15 +155,14 @@ class Agenda2 extends Component {
 
                                 this.state.items[date].push({
                                     id: taskDoc.id,
-                                    key: this.state.items[date].length,
                                     date: date,
                                     name: task.name,
-                                    dayProgress: dayProgress,
                                     type: task.type,
                                     status: task.status,
                                     priority: task.priority.toLowerCase(),
                                     project: task.project,
-                                    assignedTo: task.assignedTo
+                                    assignedTo: task.assignedTo,
+                                    dayProgress: dayProgress
                                 })
 
                                 //Tasks lasting for 2days or more...
@@ -182,15 +176,14 @@ class Agenda2 extends Component {
                                         this.state.items[dateIterator] = []
                                         this.state.items[dateIterator].push({
                                             id: taskDoc.id,
-                                            key: this.state.items[dateIterator].length,
                                             date: dateIterator,
                                             name: task.name,
-                                            dayProgress: dayProgress,
                                             type: task.type,
                                             status: task.status,
                                             priority: task.priority.toLowerCase(),
                                             project: task.project,
-                                            assignedTo: task.assignedTo
+                                            assignedTo: task.assignedTo,
+                                            dayProgress: dayProgress,
                                             // labels: [task.priority.toLowerCase()],
                                         })
 
@@ -206,12 +199,11 @@ class Agenda2 extends Component {
                                 })
                                 this.setState({ items: newItems }, () => {
                                     const taskItems = this.setTaskItems()
-                                    console.log('taskItems', taskItems)
                                     this.setState({ taskItems }, () => this.handleFilter(false))
                                 })
                             })
                         })
-                    }
+                    // }
 
                 })
             })
@@ -219,19 +211,15 @@ class Agenda2 extends Component {
         }, 1000)
     }
 
-    renderTaskStatusController(key, date, taskId, status) {
+    renderTaskStatusController(date, taskId, status) {
         switch (status) {
             case 'En cours':
                 return <MaterialCommunityIcons name='check-circle-outline' size={30} color='#BDBDBD'
-                    onPress={() => {
-                        db.collection('Agenda').doc(date).collection('Tasks').doc(taskId).update({ status: 'Terminé' })
-                    }} />
+                    onPress={() => db.collection('Agenda').doc(date).collection('Tasks').doc(taskId).update({ status: 'Terminé' })} />
 
             case 'Terminé':
                 return <MaterialCommunityIcons name='check-circle' size={30} color={theme.colors.primary}
-                    onPress={() => {
-                        db.collection('Agenda').doc(date).collection('Tasks').doc(taskId).update({ status: 'En cours' })
-                    }} />
+                    onPress={() => db.collection('Agenda').doc(date).collection('Tasks').doc(taskId).update({ status: 'En cours' })} />
 
             case 'Annulé':
                 return <MaterialCommunityIcons name='close-circle-outline' size={30} color={theme.colors.error} />
@@ -248,13 +236,12 @@ class Agenda2 extends Component {
 
         const priority = item.priority
         const label = (
-            <View style={{ padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: priority === 'urgente' ? '#f5276d' : priority === 'faible' ? '#f2d004' : colors.primary, borderRadius: 3 }}>
-                <Text style={{ color: 'white', fontSize: 8 }}>{item.priority}</Text>
+            <View style={{ padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: priority === 'urgente' ? '#f5276d' : priority === 'faible' ? '#f2d004' : theme.colors.agenda, borderRadius: 3 }}>
+                <Text style={{ color: 'white', fontSize: 8 }}>{priority}</Text>
             </View >
         )
 
         return (
-            //Make swipable view to change task status
             <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, isEdit: true, title: 'Modifier la tâche', DateId: item.date, TaskId: item.id })} style={styles.item}>
                 <View style={{ flex: 0.8, justifyContent: 'space-between', height: constants.ScreenHeight * 0.1, marginVertical: 10 }}>
                     <Text numberOfLines={1} style={theme.customFontMSbold.body}>{item.name}</Text>
@@ -263,7 +250,7 @@ class Agenda2 extends Component {
 
                 <View style={{ flex: 0.2, justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5 }}>
                     {label}
-                    {this.renderTaskStatusController(item.key, item.date, item.id, item.status)}
+                    {this.renderTaskStatusController(item.date, item.id, item.status)}
                 </View>
             </TouchableOpacity>
         )
@@ -284,20 +271,18 @@ class Agenda2 extends Component {
     handleFilter(toggle) {
         if (toggle) toggleFilter(this)
 
-        const { items, taskItems, type, status, priority, assignedTo, project, filterOpened } = this.state
+        const { isCalendar, items, taskItems, type, status, priority, assignedTo, project, filterOpened } = this.state
         const fields = [{ label: 'type', value: type }, { label: 'status', value: status }, { label: 'priority', value: priority }, { label: 'project.id', value: project.id }, { label: 'assignedTo.id', value: assignedTo.id }]
 
-        if (this.state.isCalendar) {
+        if (isCalendar) { //Calendar mode
             let filteredItems = {}
             filteredItems = applyFilterAgenda(items, filteredItems, fields, KEYS_TO_FILTERS)
             this.setState({ filteredItems })
         }
 
-        else {
+        else { //List mode
             let filteredTaskItems = []
             filteredTaskItems = applyFilterTasks(taskItems, fields, KEYS_TO_FILTERS)
-            console.log('filteredTaskItems', filteredTaskItems)
-
             this.setState({ filteredTaskItems })
         }
     }
@@ -406,11 +391,11 @@ class Agenda2 extends Component {
                             renderEmptyDate={this.renderEmptyDate.bind(this)}
                             rowHasChanged={(r1, r2) => { return true }}
                             theme={{
-                                dotColor: colors.primaryLight,
+                                dotColor: theme.colors.agendaLight,
                                 todayTextColor: theme.colors.primary,
                                 selectedDayBackgroundColor: theme.colors.primary,
-                                agendaDayTextColor: colors.primaryLight,
-                                agendaDayNumColor: colors.primaryLight,
+                                agendaDayTextColor: theme.colors.agendaLight,
+                                agendaDayNumColor: theme.colors.agendaLight,
                                 agendaTodayColor: theme.colors.primary,
                                 backgroundColor: '#F1F1F8',
                             }}
@@ -424,9 +409,7 @@ class Agenda2 extends Component {
                 <MyFAB onPress={() => this.props.navigation.navigate('CreateTask')} />
             </View>
         )
-
     }
-
 }
 
 const mapStateToProps = (state) => {
@@ -441,7 +424,7 @@ export default connect(mapStateToProps)(Agenda2)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.whiteTwo,
+        backgroundColor: '#fff',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -462,7 +445,7 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 30,
     },
-});
+})
 
 
 

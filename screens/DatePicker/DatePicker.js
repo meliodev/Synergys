@@ -26,17 +26,15 @@ export default class MyDatePicker extends Component {
         }
     }
 
-
-
     handleSubmit() {
         const date = moment(this.state.startDate).format('YYYY-MM-DD')
         const time = moment(this.state.startHour).format('HH:mm')
         let fullDate = moment(date + " " + time);
 
-        if(this.label === 'de début')
-        this.props.navigation.state.params.onGoBack('start', fullDate)
-        else 
-        this.props.navigation.state.params.onGoBack('due', fullDate)
+        if (this.label === 'de début')
+            this.props.navigation.state.params.onGoBack('start', fullDate)
+        else
+            this.props.navigation.state.params.onGoBack('due', fullDate)
 
         this.props.navigation.goBack()
     }
@@ -57,7 +55,6 @@ export default class MyDatePicker extends Component {
                             locale='fr'
                             androidVariant="nativeAndroid"
                             fadeToColor={theme.colors.primary}
-
                         // textColor= {theme.colors.primary}
                         />
                     </View>

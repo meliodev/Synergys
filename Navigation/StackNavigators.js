@@ -8,7 +8,7 @@ import { createAppContainer, NavigationEvents } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
 //Auth screens
-import { HomeScreen, LoginScreen, RegisterScreen, ForgotPasswordScreen, AuthLoadingScreen, Dashboard } from "../screens/Authentication";
+import { HomeScreen, LoginScreen, ForgotPasswordScreen, AuthLoadingScreen, Dashboard } from "../screens/Authentication";
 
 //1. ADMIN SCREENS
 //Users & Teams Management
@@ -47,6 +47,12 @@ import CreateProject from '../screens/Projects/CreateProject'
 import ListDocuments from '../screens/Documents/ListDocuments'
 import UploadDocument from '../screens/Documents/UploadDocument'
 import Signature from '../screens/Documents/Signature'
+
+//Orders
+import ListOrders from '../screens/Orders/ListOrders'
+import AddItem from '../screens/Orders/AddItem'
+import CreateProduct from '../screens/Orders/CreateProduct'
+import CreateOrder from '../screens/Orders/CreateOrder'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -215,6 +221,33 @@ const DocumentsStack = createStackNavigator({
     },
 })
 
+const OrdersStack = createStackNavigator({
+    ListOrders: {
+        screen: ListOrders,
+        navigationOptions: hideHeader
+    },
+    AddItem: {
+        screen: AddItem,
+        navigationOptions: hideHeader
+    },
+    CreateProduct: {
+        screen: CreateProduct,
+        navigationOptions: hideHeader
+    },
+    CreateOrder: {
+        screen: CreateOrder,
+        navigationOptions: hideHeader
+    },
+    ListProjects: {
+        screen: ListProjects,
+        navigationOptions: hideHeader
+    },
+    ListClients: {
+        screen: ListClients,
+        navigationOptions: hideHeader
+    },
+})
+
 const NewsStack = createStackNavigator({
     ListNews: {
         screen: ListNews,
@@ -237,10 +270,10 @@ export const AuthNavigator = createStackNavigator({
         screen: LoginScreen,
         navigationOptions: hideHeader
     },
-    RegisterScreen: {
-        screen: RegisterScreen,
-        navigationOptions: hideHeader
-    },
+    // RegisterScreen: {
+    //     screen: RegisterScreen,
+    //     navigationOptions: hideHeader
+    // },
     ForgotPasswordScreen: {
         screen: ForgotPasswordScreen,
         navigationOptions: hideHeader
@@ -308,9 +341,14 @@ export const AdminStackNavigator = createStackNavigator({
         screen: DocumentsStack,
         navigationOptions: hideHeader
     },
+    OrdersStack: {
+        screen: OrdersStack,
+        navigationOptions: hideHeader
+    },
     NewsStack: {
         screen: NewsStack,
         navigationOptions: hideHeader
     },
+
 
 })

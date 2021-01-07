@@ -1,15 +1,15 @@
 
 
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableHighlight, Alert, FlatList, TouchableOpacity, ScrollView } from 'react-native';
-import { List, FAB, Card, Title, Paragraph, IconButton } from 'react-native-paper';
+import { StyleSheet, Text, View, Alert, FlatList, ScrollView } from 'react-native';
+import { List, Card, Title, Paragraph, IconButton } from 'react-native-paper';
 import firebase from "react-native-firebase";
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { checkPlural, load, myAlert, setToast } from '../../core/utils';
 
-import { deleteTeam } from '../../api/firestore-api';
+// import { deleteTeam } from '../../api/firestore-api';
 
 import Appbar from "../../components/Appbar";
 import ListItem from '../../components/ListItem';
@@ -23,7 +23,7 @@ export default class ViewTeam extends Component {
 
     constructor(props) {
         super(props);
-        this.getMembers = this.getMembers.bind(this);
+        this.getMembersData = this.getMembersData.bind(this);
         this.addMembers = this.addMembers.bind(this);
         this.editDetails = this.editDetails.bind(this);
         // this.myAlert = myAlert.bind(this);
@@ -43,10 +43,11 @@ export default class ViewTeam extends Component {
 
     async componentDidMount() {
         load(this, true)
-        this.unsubscribe = await db.collection('Teams').doc(this.teamId).onSnapshot((doc) => {
-            this.setState({ team: doc.data() }, async () => {
-                await this.getMembers(this.state.team.members)
-            })
+        this.unsubscribe = await db.collection('Teams').doc(this.teamId).onSnapshot(async (doc) => {
+            const team = doc.data()
+            await this.getMembersData(team.members)
+            this.setState({ team })
+            load(this, false)
         })
     }
 
@@ -54,11 +55,8 @@ export default class ViewTeam extends Component {
         this.unsubscribe()
     }
 
-    async getMembers(membersId) {
-        if (membersId === []) {
-            this.setState({ membersId: [] })
-            return
-        }
+    async getMembersData(membersId) {
+        if (membersId === []) return
 
         let members = []
         for (const memberId of membersId) {
@@ -69,41 +67,26 @@ export default class ViewTeam extends Component {
             })
         }
 
-        this.setState({ members, loading: false })
+        this.setState({ members })
         return
     }
 
-    removeMember(memberId) {
-        console.log('Retirer le membre ' + memberId)
+    renderTeam() {
+        const { expanded, loading } = this.state
+        return (
+            <Card style={{ margin: 5, elevation: 2 }}>
+                <List.Accordion
+                    id={this.teamId}
+                    titleComponent={<Text style={theme.customFontMSbold.header}>Membres</Text>}
+                    expanded={expanded}
+                    onPress={() => this.setState({ expanded: !expanded })}
+                    theme={{ colors: { primary: '#333' } }}
+                    titleStyle={theme.customFontMSsemibold.title}>
 
-        load(this, true)
-        const batch = db.batch()
-        let newMembers = this.state.team.members
-        let index = newMembers.indexOf(memberId)
-        newMembers.splice(index, 1)
-
-        //1. Update Members of Team
-        const teamRef = db.collection('Teams').doc(this.teamId)
-        batch.update(teamRef, { members: newMembers })
-
-        //2. Update users belonging to this team (attach them from it)
-        const memberRef = db.collection('Users').doc(memberId)
-        batch.update(memberRef, { hasTeam: false, teamId: '' })
-
-        // Commit the batch
-        batch.commit()
-            .then(() => {
-                load(this, false)
-                console.log("Batch succeeded !")
-            })
-            .catch(e => {
-                load(this, false)
-                setToast(this, 'e', 'Erreur de connection avec la Base de données')
-            })
-    }
-
-    viewProfil(userId) {
-        this.props.navigation.navigate('Profile', { userId: userId })
+                    {loading ? <Loading style={{ margin: constants.ScreenWidth * 0.1 }} /> : this.renderMembers()}
+                </List.Accordion>
+            </Card>
+        )
     }
 
     renderMembers() {
@@ -146,24 +129,7 @@ export default class ViewTeam extends Component {
         )
     }
 
-    renderTeam() {
-        return (
-            <Card style={{ margin: 5, elevation: 2 }}>
-                <List.Accordion
-                    id={this.teamId}
-                    titleComponent={<Text style={theme.customFontMSbold.header}>Membres</Text>}
-                    expanded={this.state.expanded}
-                    onPress={() => this.setState({ expanded: !this.state.expanded })}
-                    theme={{ colors: { primary: '#333' } }}
-                    titleStyle={theme.customFontMSsemibold.title}>
-
-                    {this.state.loading ? <Loading style={{ margin: constants.ScreenWidth * 0.1 }} /> : this.renderMembers()}
-                </List.Accordion>
-            </Card>
-
-        )
-    }
-
+    //Buttons
     addMembers() {
         this.props.navigation.navigate('AddMembers', { teamId: this.teamId, existingMembers: this.state.team.members })
     }
@@ -181,6 +147,38 @@ export default class ViewTeam extends Component {
             })
     }
 
+    removeMember(memberId) {
+        load(this, true)
+        const batch = db.batch()
+
+        const newMembers = this.state.team.members
+        const index = newMembers.indexOf(memberId)
+        newMembers.splice(index, 1)
+
+        //1. Update Members of Team
+        const teamRef = db.collection('Teams').doc(this.teamId)
+        batch.update(teamRef, { members: newMembers })
+
+        //2. Update users belonging to this team (attach them from it)
+        const memberRef = db.collection('Users').doc(memberId)
+        batch.update(memberRef, { hasTeam: false, teamId: '' })
+
+        // Commit the batch
+        batch.commit()
+            .then(() => {
+                load(this, false)
+                console.log("Batch succeeded !")
+            })
+            .catch(e => {
+                load(this, false)
+                setToast(this, 'e', 'Erreur de connection avec la Base de données')
+            })
+    }
+
+    viewProfil(userId) {
+        this.props.navigation.navigate('Profile', { userId: userId })
+    }
+
     // showAlert(team) {
     //     const title = "Supprimer l'équipe"
     //     const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
@@ -190,6 +188,7 @@ export default class ViewTeam extends Component {
 
     render() {
         let { toastMessage, toastType } = this.state
+
         return (
             <View style={{ flex: 1, backgroundColor: '#fff' }}>
                 <Appbar back title titleText={this.state.team.name}
@@ -210,7 +209,6 @@ export default class ViewTeam extends Component {
                             <Paragraph style={theme.customFontMSregular.body}>{this.state.team.description}</Paragraph>
                         </Card.Content>
                     </Card>
-
                     {this.renderTeam()}
                 </ScrollView >
 

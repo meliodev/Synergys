@@ -1,7 +1,6 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Alert, View, ActivityIndicator } from 'react-native'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 
 import Appbar from '../../components/Appbar'
 import AddressSearch from '../../components/AddressSearch'
@@ -12,7 +11,8 @@ import Loading from "../../components/Loading"
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
 
-import { emailValidator, updateField } from "../../core/utils"
+import { emailValidator, updateField, load, setToast } from "../../core/utils"
+import { handleReauthenticateError, handleUpdateEmailError } from "../../core/exceptions"
 
 import firebase from 'react-native-firebase'
 import Dialog from "react-native-dialog"
@@ -27,7 +27,7 @@ export default class Address extends Component {
         this.renderDialog = this.renderDialog.bind(this)
 
         this.userId = this.props.navigation.getParam('userId', '')
-        this.currentUser = firebase.auth().currentUser
+        this.currentUser = firebase.auth().currentUser //only owner can change his email
 
         this.state = {
             newEmail: { value: '', error: '' },
@@ -39,17 +39,15 @@ export default class Address extends Component {
             showDialog: false,
 
             loading: false,
-            statusLabel: "Confirmation de l'identité"
+            statusLabel: "Confirmation de l'identité..."
         }
     }
-
 
     async handleSubmit() {
         let { newEmail, toastType, toastMessage } = this.state
 
         const emailError = this.verifyEmail()
-        if (emailError)
-            return
+        if (emailError) return
 
         this.setState({ showDialog: true })
     }
@@ -59,9 +57,7 @@ export default class Address extends Component {
 
         const emailError = emailValidator(newEmail.value)
         newEmail.error = emailError
-
-        if (emailError)
-            this.setState({ newEmail })
+        if (emailError) this.setState({ newEmail })
 
         return emailError
     }
@@ -92,10 +88,7 @@ export default class Address extends Component {
                             secureTextEntry
                             autoFocus={showDialog} />
                         <Dialog.Button label="Annuler" onPress={() => this.setState({ showDialog: false })} />
-                        <Dialog.Button
-                            label="Confirmer"
-                            onPress={async () => await this.changeEmail()} />
-
+                        <Dialog.Button label="Confirmer" onPress={async () => await this.changeEmail()} />
                     </Dialog.Container>
                 </View>
             )
@@ -104,58 +97,41 @@ export default class Address extends Component {
     async changeEmail() {
 
         let { newEmail, password } = this.state
+        if (!newEmail.value || !password.value) return
 
-        let emailCred = null
+        let emailCred = firebase.auth.EmailAuthProvider.credential(this.currentUser.email, password.value)
 
-        if (newEmail.value && password.value)
-            emailCred = firebase.auth.EmailAuthProvider.credential(this.currentUser.email, password.value)
+        load(this, true)
 
-        else return
-
-        this.setState({ loading: true })
-
-        await this.currentUser.reauthenticateWithCredential(emailCred)
-            .then(() => {
-                this.setState({ statusLabel: "Modification de l'adresse email" })
-
-                return this.currentUser.updateEmail(newEmail.value)
-                    .then(() => db.collection('Users').doc(this.userId).update({ email: newEmail.value }))
-                    .then(function () {
-                        newEmail = { value: '', error: '' }
-                        this.setState({ newEmail, showDialog: false }, () => {
-                            this.props.navigation.state.params.onGoBack('success', 'Adresse email modifié avec succès')
-                            this.props.navigation.goBack()
-                        })
-                    }.bind(this))
-                    .catch(e => {
-                        let error = ''
-                        if (e.code === 'auth/invalid-email')
-                            error = ("Le nouvel email que vous avez saisi est incorrecte.")
-
-                        else if (e.code === 'auth/email-already-in-use')
-                            error = (`Aucun utilisateur associé à l'adresse email: ${this.state.newEmail.value}`)
-
-                        else if (e.code === 'auth/requires-recent-login')
-                            error = (`Veuillez essayer de vous déconnecter puis vous reconnecter avant d'essayer de nouveau cette opération.`)
-
-                        else error = "Erreur, veuillez réessayer plus tard."
-
-                        this.setState({ password, showDialog: false, toastType: 'error', toastMessage: error })
-                    })
+        try {
+            await this.currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
+            this.setState({ statusLabel: "Modification de l'adresse email..." })
+            await this.currentUser.updateEmail(newEmail.value).catch(e => this.handleUpdateEmailError(e))
+            await db.collection('Users').doc(this.userId).update({ email: newEmail.value }) //#task: handle API exceptions
+            newEmail = { value: '', error: '' }
+            this.setState({ newEmail, showDialog: false }, () => {
+                this.props.navigation.state.params.onGoBack('success', 'Adresse email modifiée avec succès')
+                this.props.navigation.goBack()
             })
-            .catch(e => {
-                let error = ''
-                if (e.code === 'auth/wrong-password')
-                    error = ("Le mot de passe que vous avez saisi est invalide.")
+        }
 
-                else if (e.code === 'auth/user-not-found')
-                    error = (`Aucun utilisateur associé à l'adresse email: ${this.state.newEmail.value}`)
+        catch(e) {
+            console.error(e)
+        }
 
-                else error = "Erreur lors de l'authentification, veuillez réessayer."
+        this.setState({ loading: false, statusLabel: "Confirmation de l'identité..." })
+    }
 
-                this.setState({ password, loading: false, showDialog: false, toastType: 'error', toastMessage: error, })
-            })
-            .finally(() => this.setState({ loading: false, statusLabel: "Confirmation de l'identité" }))
+    handleReauthenticateError(e) {
+        // console.log('error Reauthenticate::::::::::::::::', e)
+        handleReauthenticateError(e)
+        this.setState({ loading: false, showDialog: false })
+    }
+
+    handleUpdateEmailError(e) {
+        // console.log('error UpdateEmail::::::::::::::::', e)
+        const errorMessage = handleUpdateEmailError(e)
+        this.setState({ loading: false, showDialog: false }, () => setToast(this, 'e', errorMessage))
     }
 
 

@@ -1,11 +1,7 @@
 import firebase from "react-native-firebase";
 const functions = firebase.functions()
 
-export const logoutUser = () => {
-  firebase.auth().signOut();
-};
-
-//Now.. all users are admins
+//#note: Currently.. all users are admins
 const setAdminClaims = (synuid, email) => {
   const setAdminClaims = functions.httpsCallable('setAdminClaims')
   setAdminClaims({ synuid: synuid, email: email })
@@ -51,20 +47,18 @@ export const signUpUser = async ({ synuid, email, password }) => {
 
 }
 
-export const createUserDocument = async ({ name, email }) => {
-  await firebase.firestore().collection('Users').doc(firebase.auth().currentUser.uid).set({
-    name: name,
-    email: email,
-  })
-    .catch(e => console.error(e))
-}
-
-
+// export const createUserDocument = async ({ name, email }) => {
+//   await firebase.firestore().collection('Users').doc(firebase.auth().currentUser.uid).set({
+//     name: name,
+//     email: email,
+//   })
+//     .catch(e => console.error(e))
+// }
 
 export const loginUser = async ({ email, password }) => {
   try {
-    await firebase.auth().signInWithEmailAndPassword(email, password);
-    return {};
+    await firebase.auth().signInWithEmailAndPassword(email, password)
+    return {}
   }
 
   catch (error) {
@@ -93,10 +87,14 @@ export const loginUser = async ({ email, password }) => {
   }
 }
 
+export const logoutUser = () => {
+  firebase.auth().signOut();
+}
+
 export const sendEmailWithPassword = async email => {
   try {
-    await firebase.auth().sendPasswordResetEmail(email);
-    return {};
+    await firebase.auth().sendPasswordResetEmail(email)
+    return {}
   }
   catch (error) {
     switch (error.code) {
@@ -118,4 +116,4 @@ export const sendEmailWithPassword = async email => {
         };
     }
   }
-};
+}

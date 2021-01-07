@@ -1,19 +1,17 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Alert, View } from 'react-native'
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete'
 
 import Appbar from '../../components/Appbar'
 import AddressSearch from '../../components/AddressSearch'
-import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker";
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
+import { load } from "../../core/utils"
+
 import * as theme from "../../core/theme"
 import { constants, rolesRedux } from '../../core/constants'
-
-import { updateField } from "../../core/utils"
 
 import firebase from 'react-native-firebase'
 const functions = firebase.functions()
@@ -58,23 +56,18 @@ class EditRole extends Component {
     }
 
     async handleSubmit() {
-        console.log(`Changing from ${this.currentRole} to ${this.state.role} role`)
-
-        if (this.currentRole !== this.state.role) {
-            this.setState({ loading: true })
-            db.collection('Users').doc(this.userId).update({ role: this.state.role })
-                .then(() => this.setCustomClaim())
-                .catch(e => {
-                    this.setState({ loading: false })
-                    Alert.alert('Erreur inattendue, veuillez réessayer plus tard.')
-                })
-        }
+        //console.log(`Changing from ${this.currentRole} to ${this.state.role} role`)
+        if (this.currentRole === this.state.role) return
+        load(this, true)
+        this.setCustomClaim()
     }
 
     setCustomClaim() {
         const setCustomClaim = functions.httpsCallable('setCustomClaim')
         setCustomClaim({ role: this.state.role, userId: this.userId })
-            .then(result => {
+            .then(async result => {
+
+                await db.collection('Users').doc(this.userId).update({ role: this.state.role }) //#task handle api exceptions
 
                 if (this.userId === firebase.auth().currentUser.uid) {
                     firebase.auth().currentUser.getIdToken(true)
@@ -86,10 +79,9 @@ class EditRole extends Component {
 
                 this.props.navigation.state.params.onGoBack('success', 'Le rôle a été modifié avec succès')
                 this.props.navigation.goBack()
-
             })
             .catch(err => Alert.alert('Erreur inattendue, veuillez réessayer plus tard.'))
-            .finally(() => this.setState({ loading: false }))
+            .finally(() => load(this, false))
     }
 
     render() {

@@ -23,10 +23,10 @@ const arrMenuAdmin = [
     { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'AgendaStack' },
     { 'id': 4, name: 'Utilisateurs', 'icon': 'account-multiple-outline', 'color': '#2E7D32', 'navScreen': 'UsersManagementStack' },
     { 'id': 5, name: 'Gestion des demandes', 'icon': 'arrow-left-bold', 'color': '#AD1457', 'navScreen': 'RequestsManagementStack' },//Create
-    // { 'id': 6, name: 'Gestion des commandes', 'icon': 'file-document-edit-outline', 'navScreen': 'ListOrders' }, //Create
-    { 'id': 6, name: 'Documents', 'icon': 'file-document', 'color': '#6D4C41', 'navScreen': 'DocumentsStack' }, //Create
-    { 'id': 7, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'NewsStack' },//Create
-    { 'id': 8, name: 'Se déconnecter', 'icon': 'logout', 'color': '#000000', 'navScreen': 'LoginScreen' },
+    { 'id': 6, name: 'Gestion des commandes', 'icon': 'file-document-edit-outline', 'navScreen': 'OrdersStack' }, //Create
+    { 'id': 7, name: 'Documents', 'icon': 'file-document', 'color': '#6D4C41', 'navScreen': 'DocumentsStack' }, //Create
+    { 'id': 8, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'NewsStack' },//Create
+    { 'id': 9, name: 'Se déconnecter', 'icon': 'logout', 'color': '#000000', 'navScreen': 'LoginScreen' },
 ]
 
 const arrMenuDirCom = [

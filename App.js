@@ -10,7 +10,7 @@ import Store from './Store/configureStore'
 import RootController from './Navigation/DrawerNavigator'
 import CustomClaims from './api/CustomClaims'
 
-//import pdfGeneration from './pdfGeneration'
+import PdfGeneration from './PdfGeneration'
 // const theme = {
 //   ...DefaultTheme,
 //   fonts: {
@@ -29,6 +29,7 @@ class App extends Component {
         <MenuProvider>
           {/* <PaperProvider> */}
           <RootController />
+          {/* < PdfGeneration /> */}
           {/* </PaperProvider> */}
         </MenuProvider>
       </Provider>

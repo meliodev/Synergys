@@ -1,27 +1,16 @@
 
 
-import React, { Children, Component } from 'react';
-import {
-    StyleSheet,
-    Text,
-    View,
-    TextInput,
-    TouchableHighlight,
-    Alert,
-    FlatList,
-    TouchableOpacity,
-    ScrollView
-} from 'react-native';
-import { Checkbox } from 'react-native-paper';
+import React, { Children, Component } from 'react'
+import { StyleSheet, Text, View, TextInput, TouchableHighlight, Alert, FlatList, TouchableOpacity, ScrollView } from 'react-native'
+import { Checkbox } from 'react-native-paper'
 
-import { Button } from 'native-base';
-import Icon from 'react-native-vector-icons/Feather';
-import Icon2 from 'react-native-vector-icons/FontAwesome5';
-import Icon3 from 'react-native-vector-icons/Entypo';
-import * as theme from '../core/theme';
-import firebase from "react-native-firebase";
-import { color } from 'react-native-reanimated';
-import { constants } from '../core/constants';
+import Icon from 'react-native-vector-icons/Feather'
+import Icon2 from 'react-native-vector-icons/FontAwesome5'
+import Icon3 from 'react-native-vector-icons/Entypo'
+import * as theme from '../core/theme'
+import firebase from "react-native-firebase"
+import { color } from 'react-native-reanimated'
+import { constants } from '../core/constants'
 
 const TeamItem = ({ main, onPress, teamName, membersCount, controller, iconStyle, ...props }) => {
     return (

@@ -11,16 +11,16 @@ import Button from "../../components/Button";
 import TextInput from "../../components/TextInput";
 
 import * as theme from "../../core/theme";
-import { emailValidator, passwordValidator, updateField } from "../../core/utils";
+import { emailValidator, passwordValidator, updateField, load } from "../../core/utils";
 import { constants } from '../../core/constants'
 import { loginUser } from "../../api/auth-api";
 import Toast from "../../components/Toast";
 
-
 class LoginScreen extends Component {
   constructor(props) {
     super(props)
-    this._onLoginPressed = this._onLoginPressed.bind(this)
+    this.handleLogin = this.handleLogin.bind(this)
+
     this.state = {
       email: { value: "", error: "" },
       password: { value: "", error: "", show: false },
@@ -29,30 +29,40 @@ class LoginScreen extends Component {
     }
   }
 
+  //Re-initialize inputs
   componentWillUnmount() {
     let { email, password } = this.state
-    email.value = ''
-    password.value = ''
+    email = { value: "", error: "" }
+    password = { value: "", error: "", show: false }
     this.setState({ email, password }, () => Keyboard.dismiss())
   }
 
-  _onLoginPressed = async () => {
+  handleLogin = async () => {
     let { loading, email, password, error } = this.state
 
-    if (loading) return;
+    if (loading) return
 
+    load(this, true)
+
+    //Inputs validation
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
 
-    if (emailError || passwordError) {
+    if (emailError) {
       this.setState({ ...email, error: emailError })
-      this.setState({ ...password, error: passwordError })
+      load(this, false)
       return
     }
 
-    this.setState({ loading: true })
+    if (passwordError) {
+      this.setState({ ...password, error: passwordError })
+      load(this, false)
+      return
+    }
+
     const response = await loginUser({ email: email.value, password: password.value })
-    this.setState({ loading: false })
+
+    load(this, false)
 
     if (response.error)
       this.setState({ error: response.error })
@@ -111,7 +121,7 @@ class LoginScreen extends Component {
           </TouchableOpacity>
         </View>
 
-        <Button loading={loading} mode="outlined" onPress={this._onLoginPressed}>
+        <Button loading={loading} mode="outlined" onPress={this.handleLogin}>
           Se connecter
         </Button>
 
