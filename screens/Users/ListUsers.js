@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native'
 import { List } from 'react-native-paper'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'

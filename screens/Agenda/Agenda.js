@@ -5,7 +5,7 @@ import { Agenda, LocaleConfig } from 'react-native-calendars';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import _ from 'lodash'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 import moment from 'moment';
 import 'moment/locale/fr'

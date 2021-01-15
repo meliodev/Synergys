@@ -15,3 +15,5 @@ export const rolesRedux = [
     { id: 'tech', value: 'responsable technique', bool: 'isTech' },
     { id: 'poseur', value: 'poseur', bool: 'isPoseur' }
 ]
+
+export const adminId = "GS-US-xQ6s"

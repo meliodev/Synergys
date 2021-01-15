@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Image, ScrollView, FlatList } from 'react-native';
 import { List } from 'react-native-paper';
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
 

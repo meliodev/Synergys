@@ -7,7 +7,7 @@ import moment from 'moment'
 import 'moment/locale/fr'  // without this line it didn't work
 moment.locale('fr')
 
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 import Appbar from "../../components/Appbar"
 import MyInput from '../../components/TextInput'

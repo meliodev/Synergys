@@ -14,7 +14,7 @@ import { constants } from '../../core/constants'
 import { emailValidator, updateField, load, setToast } from "../../core/utils"
 import { handleReauthenticateError, handleUpdateEmailError } from "../../core/exceptions"
 
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 import Dialog from "react-native-dialog"
 
 const db = firebase.firestore()

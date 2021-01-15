@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, 
 import { Card, Title, ProgressBar, TextInput as PaperInput } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
 import moment from 'moment';

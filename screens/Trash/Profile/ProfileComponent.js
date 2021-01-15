@@ -20,7 +20,7 @@ import Email from './Email'
 import Separator from './Separator'
 import Tel from '../../Profile/Tel'
 import * as theme from '../../../core/theme'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 class Profile extends Component {
 

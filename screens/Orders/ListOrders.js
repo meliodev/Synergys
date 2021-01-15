@@ -15,7 +15,7 @@ import { load, myAlert, toggleFilter, setFilter, handleFilter } from '../../core
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 const KEYS_TO_FILTERS = ['id', 'name', 'state'] //#edit

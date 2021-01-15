@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, 
 import { Card, Title, TextInput, ProgressBar } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
 import FilePickerManager from 'react-native-file-picker';
@@ -75,11 +75,11 @@ class UploadDocument extends Component {
             DocumentId: '', //Not editable
 
             //TEXTINPUTS
-            name: { value: "", error: '' },
-            description: { value: "", error: '' },
+            name: { value: "Doc 1", error: '' },
+            description: { value: "aaa", error: '' },
 
             //Screens
-            project: { id: '', name: '' },
+            project: { id: 'GS-PR-m5Ip', name: 'Projet A' },
             projectError: '',
 
             //Pickers
@@ -88,13 +88,6 @@ class UploadDocument extends Component {
 
             //File Picker
             attachment: {
-                path: '',
-                type: '',
-                name: '',
-                size: '',
-                progress: 0
-            },
-            attachedFile: {
                 path: '',
                 type: '',
                 name: '',
@@ -120,7 +113,7 @@ class UploadDocument extends Component {
 
         if (this.isEdit) {
             await this.fetchDocument()
-            await this.getSignees()
+            await this.fetchSignees()
         }
 
         else {
@@ -137,7 +130,7 @@ class UploadDocument extends Component {
         await db.collection('Documents').doc(this.DocumentId).get().then((doc) => {
             console.log('onsnapshot..')
 
-            let { DocumentId, project, name, description, type, state, attachment, attachedFile } = this.state
+            let { DocumentId, project, name, description, type, state, attachment } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
@@ -159,9 +152,8 @@ class UploadDocument extends Component {
 
             //Attachment
             attachment = doc.data().attachment
-            attachedFile = doc.data().attachment
 
-            this.setState({ DocumentId, project, name, description, state, type, attachment, attachedFile, createdAt, createdBy, editedAt, editedBy }, () => {
+            this.setState({ DocumentId, project, name, description, state, type, attachment, createdAt, createdBy, editedAt, editedBy }, () => {
                 if (this.isInit)
                     this.initialState = this.state
 
@@ -170,7 +162,7 @@ class UploadDocument extends Component {
         })
     }
 
-    async getSignees() {
+    async fetchSignees() {
         let signatures = []
 
         db.collection('Documents').doc(this.DocumentId).collection('Attachments')
@@ -190,6 +182,7 @@ class UploadDocument extends Component {
             })
     }
 
+    //Delete document
     showAlert() {
         const title = "Supprimer le document"
         const message = 'Etes-vous sûr de vouloir supprimer ce document ? Cette opération est irreversible.'
@@ -246,11 +239,11 @@ class UploadDocument extends Component {
 
             //Android only
             if (res.uri.startsWith('content://')) {
-                const uriComponents = res.uri.split('/')
-                const fileNameAndExtension = uriComponents[uriComponents.length - 1]
+                //const uriComponents = res.uri.split('/')
+                //const fileNameAndExtension = uriComponents[uriComponents.length - 1]
                 this.cachePath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}`
 
-                await RNFS.copyFile(res.uri, this.cachePath)
+                await RNFS.copyFile(res.uri, this.cachePath) //copy file to get access to the relative path. DocumentPicker (with android) provides only absolute path which cannot be used with firebase storage
                     .then(() => {
                         const attachment = {
                             path: this.cachePath,
@@ -267,30 +260,28 @@ class UploadDocument extends Component {
         }
 
         catch (err) {
-            if (DocumentPicker.isCancel(err))
-                return
+            if (DocumentPicker.isCancel(err)) return
             else Alert.alert(err)
         }
     }
 
-
-    //Resolve with 'success' or 'failure'
+    //Resolves with 'success' or 'failure'
     async uploadFile() {
-        let attachment = this.state.attachment
+        let { attachment, project, type, name, DocumentId } = this.state
 
         const metadata = {
             uploadedBy: this.currentUser.uid,
-            type: this.state.type,
-            name: this.state.name
+            type: type,
+            name: name.value
         }
 
-        const reference = firebase.storage().ref(`Projects/${this.state.project.id}/Documents/${this.state.type}/${this.state.DocumentId}/${moment().format('ll')}/${attachment.name}`)
+        const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`)
         const uploadTask = reference.putFile(attachment.path, { customMetadata: metadata })
 
         const promise = new Promise((resolve, reject) => {
             uploadTask
-                .on('state_changed', async function (snapshot) {
-                    var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+                .on('state_changed', async function (tasksnapshot) {
+                    var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
                     console.log('Upload attachment ' + progress + '% done')
                     attachment.progress = progress / 100
                     this.setState({ attachment })
@@ -299,7 +290,7 @@ class UploadDocument extends Component {
             uploadTask
                 .then((res) => {
                     attachment.downloadURL = res.downloadURL
-                    this.setState({ attachment, attachedFile: attachment })
+                    this.setState({ attachment })
                     resolve('success')
                 })
                 .catch(err => {
@@ -338,7 +329,7 @@ class UploadDocument extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        //1. Upload attachment
+        //1. Upload attachment & Create Document
         if (this.state.attachment.name) {
 
             //1.1 Delete existing file (edit mode)
@@ -350,36 +341,29 @@ class UploadDocument extends Component {
 
                 this.setState({ uploading: true })
                 const result = await this.uploadFile()
+                this.setState({ uploading: false })
                 if (result === 'failure') return
 
-                //Copy document to Synergys/Documents (to open & sign later on and save downloading time)
-                else {
-                    const fromPath = this.cachePath
-                    const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
-                    const destPath = `${Dir}/Synergys/Documents/${this.state.attachedFile.name}`
-                    await RNFS.copyFile(fromPath, destPath)
-                        .then(() => console.log('FILE COPIED !!!'))
-                        .catch((e) => console.error(e))
-                }
-
-                this.setState({ uploading: false })
+                //Move document to Synergys/Documents (to open & sign later.. without downloading file)
+                const fromPath = this.cachePath
+                const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
+                const destPath = `${Dir}/Synergys/Documents/${this.state.attachment.name}`
+                await RNFS.moveFile(fromPath, destPath)
             }
 
             // 2. ADDING document to firestore
-            let { DocumentId, project, name, description, type, state, attachedFile } = this.state
+            let { DocumentId, project, name, description, type, state, attachment } = this.state
 
-            const attachment = attachedFile
-            attachment.generation = 'upload' //possible values: ['upload', 'sign', 'app'] upload: uploaded by user; sign: generated after signature; app: generated pdf by app
+            attachment.generation = 'upload' //possible values: ['upload', 'sign', 'app'] upload: uploaded by user; sign: generated after signature; app: pdf generated by app
             delete attachment.progress
 
             let document = {
-                DocumentId: DocumentId,
                 project: project,
                 name: name.value,
                 description: description.value,
                 type: type,
                 state: state,
-                attachment: attachment, //Keep track of last attached file
+                attachment: attachment, //To Keep track of last attached file
                 editedAt: moment().format('lll'),
                 editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
                 deleted: false,
@@ -398,15 +382,9 @@ class UploadDocument extends Component {
             batch.set(attachmentsRef, attachment)
 
             batch.commit()
-                .then(() => {
-                    console.log("Batch succeeded !")
-                    this.setState({ loading: false, uploading: false })
-                    this.props.navigation.goBack()
-                })
-                .catch(e => {
-                    this.setState({ loading: false, uploading: false })
-                    handleSetError(e)
-                })
+                .then(() => this.props.navigation.goBack())
+                .catch(e => handleSetError(e))
+                .finally(() => this.setState({ loading: false, uploading: false }))
         }
     }
 

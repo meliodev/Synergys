@@ -6,7 +6,7 @@ import MyFAB from '../../../components/MyFAB'
 import EmptyList from '../../../components/EmptyList';
 
 import { colors, fonts } from '../../styles';
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 
 import moment from 'moment';
 import 'moment/locale/fr'

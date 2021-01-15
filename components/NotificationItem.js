@@ -1,56 +1,74 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import firebase from '@react-native-firebase/app'
+
+import Menu from './Menu'
+
 import * as theme from '../core/theme'
 import { constants } from '../core/constants'
-import { Menu, MenuOptions, MenuOption, MenuTrigger, } from 'react-native-popup-menu';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const NotificationItem = ({ notification, ...props }) => (
-    <View style={styles.container}>
-        <Image source={{ uri: notification.image }} style={styles.avatar} />
-        <View style={styles.content}>
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
 
-            <View style={{ flex: 0.85 }}>
-                <View style={styles.text}>
-                    {/* <Text style={[theme.customFontMSsemibold.body]}>{notification.name}</Text> */}
-                    <Text style={[theme.customFontMSmedium.caption]} numberOfLines={3}>{notification.text}</Text>
+const db = firebase.firestore()
+
+const NotificationItem = ({ notification, ...props }) => {
+
+    const setLeftIcon = (topic) => {
+        switch (topic) {
+            case 'projects':
+                return (
+                    <View style={styles.leftIcon}>
+                        <MaterialCommunityIcons name='alpha-p-box' size={25} />
+                    </View>
+                )
+        }
+    }
+
+    //menu config
+    const options = [
+        { id: 0, title: 'Archiver' },
+    ]
+
+    const functions = [
+        () => db.collection('Users').doc(firebase.auth().currentUser.uid)
+            .collection('Notifications').doc(notification.id).update({ deleted: true }),
+    ]
+
+    return (
+        <View style={[styles.container, { backgroundColor: notification.read ? '#fff' : '#DCEDC8' }]}>
+
+            {setLeftIcon(notification.topic)}
+
+            <View style={styles.content}>
+
+                <View style={{ flex: 0.85 }}>
+                    <View style={styles.text}>
+                        <Text style={[theme.customFontMSsemibold.body]} numberOfLines={1}>{notification.title}</Text>
+                        <Text style={[theme.customFontMSmedium.caption]} numberOfLines={3}>{notification.body}</Text>
+                    </View>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{moment(notification.sentAt).format('LLL')}</Text>
                 </View>
-                <Text style={styles.timeAgo}>2 hours ago</Text>
-            </View>
 
-            <View style={{ flex: 0.15, justifyContent: 'flex-start', alignItems: 'center' }}>
-                <Menu>
-                    <MenuTrigger>
-                        <Icon name={'dots-horizontal'} size={22} color='#333' style={{ padding: 5 }} />
-                    </MenuTrigger>
+                {/* #task:  use the menu component */}
+                <View style={{ flex: 0.15, justifyContent: 'flex-start', alignItems: 'center' }}>
+                    <Menu options={options} functions={functions} />
+                </View>
 
-                    <MenuOptions>
-                        <MenuOption onSelect={() => console.log('Hey')} style={{ flexDirection: 'row', padding: constants.ScreenWidth * 0.03 }}>
-                            <Text style={theme.customFontMSmedium.body}>archiver</Text>
-                        </MenuOption>
-                    </MenuOptions>
-                </Menu>
             </View>
 
         </View>
-    </View>
-)
+    )
+
+}
 
 const styles = StyleSheet.create({
     container: {
         padding: 16,
         flexDirection: 'row',
-        alignItems: 'flex-start'
-    },
-    avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-    },
-    text: {
-        marginBottom: 5,
-        flexDirection: 'row',
-        flexWrap: 'wrap'
+        alignItems: 'flex-start',
     },
     content: {
         flex: 1,
@@ -58,26 +76,19 @@ const styles = StyleSheet.create({
         marginLeft: 10,
         marginRight: 0
     },
-    mainContent: {
-        marginRight: 60
-    },
-    img: {
-        height: 50,
+    leftIcon: {
+        justifyContent: 'center',
+        alignItems: 'center',
         width: 50,
-        margin: 0
+        height: 50,
+        borderRadius: 25,
+        elevation: 1
     },
-    separator: {
-        height: 1,
-        backgroundColor: "#CCCCCC"
+    text: {
+        marginBottom: 5,
+        flexDirection: 'row',
+        flexWrap: 'wrap'
     },
-    timeAgo: {
-        fontSize: 12,
-        color: "#696969"
-    },
-    name: {
-        fontSize: 16,
-        color: "#1E90FF"
-    }
 })
 
 export default NotificationItem

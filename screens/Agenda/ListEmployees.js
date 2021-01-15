@@ -12,7 +12,7 @@ import ListUsers from '../Users/ListUsers';
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 import { withNavigation } from 'react-navigation'
 
 const db = firebase.firestore()

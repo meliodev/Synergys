@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableHighlight, FlatList, ScrollView, Alert } from 'react-native'
 import { List, FAB } from 'react-native-paper'
 import { TouchableOpacity } from 'react-native'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 import SearchBar from '../../components/SearchBar'
 

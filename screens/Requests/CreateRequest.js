@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Card, Title, FAB } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 
 import moment from 'moment';
 import 'moment/locale/fr'

@@ -10,7 +10,7 @@ import { constants } from "../../../core/constants";
 import { emailValidator, passwordValidator, updateField, myAlert } from "../../../core/utils";
 import { signUpUser, createUserDocument } from "../../../api/auth-api";
 import Toast from "../../../components/Toast";
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 
 import Appbar from "../../../components/Appbar"
 

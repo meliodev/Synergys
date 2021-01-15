@@ -3,8 +3,8 @@ import { StyleSheet, SafeAreaView, StatusBar, Text, Alert, Dimensions, Touchable
 import { Avatar } from 'react-native-paper'
 import AvatarText from '../components/AvatarText'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import firebase, { Firebase } from 'react-native-firebase';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import firebase from '@react-native-firebase/app'
 import { logoutUser } from '../api/auth-api'
 
 import { connect } from 'react-redux'
@@ -25,7 +25,7 @@ const arrMenuAdmin = [
     { 'id': 5, name: 'Gestion des demandes', 'icon': 'arrow-left-bold', 'color': '#AD1457', 'navScreen': 'RequestsManagementStack' },//Create
     { 'id': 6, name: 'Gestion des commandes', 'icon': 'file-document-edit-outline', 'navScreen': 'OrdersStack' }, //Create
     { 'id': 7, name: 'Documents', 'icon': 'file-document', 'color': '#6D4C41', 'navScreen': 'DocumentsStack' }, //Create
-    { 'id': 8, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'NewsStack' },//Create
+    { 'id': 8, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'NewsStack' },//Create
     { 'id': 9, name: 'Se déconnecter', 'icon': 'logout', 'color': '#000000', 'navScreen': 'LoginScreen' },
 ]
 
@@ -36,7 +36,7 @@ const arrMenuDirCom = [
     { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
     { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
     { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'ListNews' },//Create
+    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
     { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
 ]
 
@@ -47,7 +47,7 @@ const arrMenuCom = [
     { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
     { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
     { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'ListNews' },//Create
+    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
     { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
 ]
 
@@ -67,7 +67,7 @@ const arrMenuTech = [
     { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
     { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
     { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'ListNews' },//Create
+    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
     { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
 ]
 
@@ -78,7 +78,7 @@ const arrMenuClient = [
     { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
     { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
     { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper-variant-multiple', 'navScreen': 'ListNews' },//Create
+    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
     { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
 ]
 
@@ -111,7 +111,7 @@ class DrawerMenu extends React.Component {
                                         <Text style={[theme.customFontMSmedium.body, { color: '#fff', paddingLeft: 15 }]}>{role.value}</Text>
                                     </View>
                                     <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
-                                        <Ionicons name='ios-settings-sharp' size={20} style={{ color: '#fff' }} />
+                                        <FontAwesome name='gear' size={20} style={{ color: '#fff' }} />
                                     </View>
                                 </View>
                             </View>

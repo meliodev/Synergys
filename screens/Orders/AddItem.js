@@ -12,7 +12,7 @@ import MyInput from '../../components/TextInput'
 
 import { updateField, nameValidator, arrayValidator, priceValidator, setToast, load } from "../../core/utils";
 import { fetchDocs } from '../../api/firestore-api';
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 
 const db = firebase.firestore()
 

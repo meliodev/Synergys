@@ -3,7 +3,7 @@ import { Platform, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, 
 import { List, ProgressBar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 
 import RNFetchBlob from 'rn-fetch-blob'

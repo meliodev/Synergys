@@ -2,7 +2,7 @@
 import React from 'react'
 import { View, Text, TouchableHighlight, TextInput, StyleSheet, Dimensions } from 'react-native'
 
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 const functions = firebase.functions()
 

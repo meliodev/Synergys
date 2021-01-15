@@ -7,10 +7,10 @@ import TabView from '../../components/TabView'
 import SearchBar from '../../components/SearchBar'
 import Appbar from '../../components/Appbar'
 
-import Notifications from './Notifications'
+import ListNotifications from './ListNotifications'
 import ListMessages from './ListMessages'
 
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 const db = firebase.firestore()
 
 class Inbox extends React.Component {
@@ -28,8 +28,8 @@ class Inbox extends React.Component {
     render() {
 
         const routes = [
-            { key: 'first', title: 'MESSAGES' },
-            { key: 'second', title: 'NOTIFICATIONS' },
+            { key: 'first', title: 'NOTIFICATIONS' },
+            { key: 'second', title: 'MESSAGES' },
         ]
 
         let { index } = this.state
@@ -43,8 +43,8 @@ class Inbox extends React.Component {
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListMessages />}
-                    Tab2={<Notifications />} />
+                    Tab1={<ListNotifications />}
+                    Tab2={<ListMessages />} />
             </View>
         )
     }

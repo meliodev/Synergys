@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 import { View, Text, Alert } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as theme from "../core/theme";
@@ -29,9 +29,7 @@ import Inbox from '../screens/Inbox/Inbox'
 import ListMessages from '../screens/Inbox/ListMessages';
 import ViewMessage from '../screens/Inbox/ViewMessage';
 import NewMessage from '../screens/Inbox/NewMessage';
-import Message from '../screens/Inbox/Message';
-import Notifications from '../screens/Inbox/Notifications';
-import Notification from '../screens/Inbox/Notification';
+import ListNotifications from '../screens/Inbox/ListNotifications';
 
 //Agenda
 import Agenda from '../screens/Agenda/Agenda'
@@ -138,16 +136,8 @@ const InboxStack = createStackNavigator({
         screen: NewMessage,
         navigationOptions: hideHeader
     },
-    Message: {
-        screen: Message,
-        navigationOptions: hideHeader
-    },
-    Notifications: {
-        screen: Notifications,
-        navigationOptions: hideHeader
-    },
-    Notification: {
-        screen: Notification,
+    ListNotifications: {
+        screen: ListNotifications,
         navigationOptions: hideHeader
     },
 })

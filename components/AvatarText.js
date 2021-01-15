@@ -1,6 +1,6 @@
 import React from 'react'
 import { Avatar } from 'react-native-paper'
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 import * as theme from '../core/theme';
 
 const AvatarText = ({ label, size = 45, ...props }) => (

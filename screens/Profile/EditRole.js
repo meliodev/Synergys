@@ -13,7 +13,7 @@ import { load } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants, rolesRedux } from '../../core/constants'
 
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 const functions = firebase.functions()
 const db = firebase.firestore()
 

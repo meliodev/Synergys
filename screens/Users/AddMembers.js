@@ -8,7 +8,7 @@ import moment from 'moment'
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 import Appbar from "../../components/Appbar"
 import SearchBar from "../../components/SearchBar"

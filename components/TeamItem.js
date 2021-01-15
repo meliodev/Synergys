@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/Feather'
 import Icon2 from 'react-native-vector-icons/FontAwesome5'
 import Icon3 from 'react-native-vector-icons/Entypo'
 import * as theme from '../core/theme'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 import { color } from 'react-native-reanimated'
 import { constants } from '../core/constants'
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Platform, StyleSheet, Text, View, Image, ScrollView, FlatList, PermissionsAndroid } from 'react-native'
 import { List, Card } from 'react-native-paper'
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 import SearchInput, { createFilter } from 'react-native-search-filter'
 
 import SearchBar from '../../components/SearchBar'

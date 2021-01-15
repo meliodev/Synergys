@@ -5,7 +5,7 @@ import { Card, Title, FAB, ProgressBar, List } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Entypo from 'react-native-vector-icons/Entypo'
-import firebase, { firestore } from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 import ImagePicker from 'react-native-image-picker';
 import ImageView from 'react-native-image-view'
@@ -23,7 +23,7 @@ import Loading from "../../components/Loading"
 import DatePicker from 'react-native-date-picker'
 
 import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
+import { constants, adminId } from "../../core/constants";
 import { generatetId, myAlert, updateField, nameValidator, setToast, load } from "../../core/utils";
 import { handleSetError } from '../../core/exceptions';
 
@@ -82,14 +82,14 @@ class CreateProject extends Component {
             ProjectId: '', //Not editable
 
             //TEXTINPUTS
-            name: { value: "", error: '' },
-            description: { value: "", error: '' },
+            name: { value: "Projet A", error: '' },
+            description: { value: "lorem ipsum", error: '' },
             note: { value: "", error: '' },
 
             //Screens
-            address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+            address: { description: 'aaa', place_id: 'aaa', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            client: { id: '', fullName: '' },
+            client: { id: 'GS-US-Qh6C', fullName: 'Samsung' },
 
             //Pickers
             state: 'En attente',
@@ -307,6 +307,8 @@ class CreateProject extends Component {
             editedAt: moment().format('lll'),
             editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
             attachments: attachedImages,
+            subscribers: [{ id: this.currentUser.uid }],
+            // subscribers: [{ id: this.currentUser.uid }, { id: adminId }], //if admin is editor don't add adminId
             deleted: false,
         }
 

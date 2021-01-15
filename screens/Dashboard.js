@@ -8,7 +8,7 @@ import Button from "../components/Button"
 
 import { constants } from "../core/constants"
 
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 const functions = firebase.functions()
 
@@ -131,7 +131,7 @@ export default Dashboard
 // import Tab2 from './Agenda2';
 // // import Tab1 from './Notifications';
 // import Tab3 from './Messages';
-// import firebase from 'react-native-firebase'
+// import firebase from '@react-native-firebase/app'
 
 // import { Container, Header, Tab, Tabs, ScrollableTab } from 'native-base';
 

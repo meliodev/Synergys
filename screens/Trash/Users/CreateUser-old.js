@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from "react-native";
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 import TextInputMask from 'react-native-text-input-mask';
 
 import Appbar from "../../components/Appbar";

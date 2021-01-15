@@ -1,5 +1,10 @@
 
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
+import '@react-native-firebase/auth'
+import '@react-native-firebase/firestore'
+import '@react-native-firebase/storage'
+import '@react-native-firebase/functions'
+
 const db = firebase.firestore()
 
 //FIRESTORE CRUD
@@ -12,8 +17,9 @@ export const fetchDocs = async (main, query, MyList, MyCount, MyCallBack) => {
     let docsList = []
     let docsCount = 0
 
-    querysnapshot.forEach((doc) => {
+    if (querysnapshot.empty) return
 
+    querysnapshot.forEach((doc) => {
       let id = doc.id
       let document = doc.data()
       document.id = id

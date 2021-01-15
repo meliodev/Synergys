@@ -1,5 +1,10 @@
 //Input validators
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
+import '@react-native-firebase/auth'
+import '@react-native-firebase/firestore'
+import '@react-native-firebase/storage'
+import '@react-native-firebase/functions'
+
 import { Alert, Platform } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 import RNFetchBlob from 'rn-fetch-blob'

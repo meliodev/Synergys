@@ -19,7 +19,7 @@ import Appbar from '../../components/Appbar'
 import Button from '../../components/Button'
 import Toast from '../../components/Toast'
 
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 const db = firebase.firestore()
 const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg";

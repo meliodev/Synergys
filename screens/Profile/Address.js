@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Dimensions, Alert } from 'react-native';
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 import Geocoder from 'react-native-geocoding'
 import MapView, { Marker, ProviderPropType, PROVIDER_GOOGLE } from 'react-native-maps';
 

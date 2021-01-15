@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Platform, PixelRatio, Activit
 import { ProgressBar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 import Dialog from "react-native-dialog"
 
 import moment from 'moment';

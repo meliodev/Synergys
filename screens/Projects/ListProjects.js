@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, ScrollView, FlatList, Keyboard } from 'react-native';
-import { List, Card, Paragraph, Title } from 'react-native-paper';
+import { StyleSheet, Text, View, FlatList, Keyboard } from 'react-native';
+import { List, Card } from 'react-native-paper';
 
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
@@ -13,10 +13,10 @@ import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { load, myAlert, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
-import { fetchDocs } from '../../api/firestore-api'; 
+import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 const KEYS_TO_FILTERS = ['id', 'name', 'state', 'step',]
@@ -56,7 +56,7 @@ class ListProjects extends Component {
             showInput: false,
             searchInput: '',
 
-            //filters
+            //filter fields
             step: '',
             state: '',
             client: { id: '', fullName: '' },
@@ -65,6 +65,7 @@ class ListProjects extends Component {
             loading: false,
         }
     }
+
 
     async componentDidMount() {
         Keyboard.dismiss()
@@ -88,10 +89,16 @@ class ListProjects extends Component {
             this.props.navigation.navigate('CreateProject', { isEdit: true, title: 'Modifier le projet', ProjectId: project.id })
 
         else {
-            console.log('hey')
             this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name })
             this.props.navigation.goBack()
         }
+    }
+
+    sendEmail() {
+        const sendEmail = firebase.functions().httpsCallable('sendEmail')
+        sendEmail({})
+            .then(result => console.log(result))
+            .catch(err => console.error(err))
     }
 
     render() {
@@ -122,6 +129,8 @@ class ListProjects extends Component {
                     searchInput={searchInput}
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
+
+                <Text onPress={this.sendEmail} style={{ marginVertical: 100 }}>Send email</Text>
 
                 {filterActivated && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
 

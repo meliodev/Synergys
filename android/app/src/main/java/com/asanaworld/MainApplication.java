@@ -12,11 +12,6 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
-import io.invertase.firebase.auth.RNFirebaseAuthPackage;
-import io.invertase.firebase.firestore.RNFirebaseFirestorePackage;
-import io.invertase.firebase.functions.RNFirebaseFunctionsPackage; // <-- Add this line
-import io.invertase.firebase.storage.RNFirebaseStoragePackage; // <-- Add this line
-
 public class MainApplication extends Application implements ReactApplication {
 
   private final ReactNativeHost mReactNativeHost =
@@ -32,10 +27,6 @@ public class MainApplication extends Application implements ReactApplication {
           List<ReactPackage> packages = new PackageList(this).getPackages();
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
-          packages.add(new RNFirebaseAuthPackage());
-          packages.add(new RNFirebaseFirestorePackage());
-          packages.add(new RNFirebaseFunctionsPackage()); // <-- Add this line
-          packages.add(new RNFirebaseStoragePackage()); // <-- Add this line
           return packages;
         }
 

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Keyboard } from "react-native";
 import { TextInput } from 'react-native-paper'
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
 

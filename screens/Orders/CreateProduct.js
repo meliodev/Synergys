@@ -4,7 +4,7 @@ import { Card, Title, TextInput } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Modal from 'react-native-modal'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 import ImageView from 'react-native-image-view'
 import { connect } from 'react-redux'
 

@@ -13,7 +13,7 @@ import { myAlert } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
-import firebase from 'react-native-firebase';
+import firebase from '@react-native-firebase/app';
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 const KEYS_TO_FILTERS = ['id', 'client.fullName', 'subject', 'state']

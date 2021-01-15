@@ -2,22 +2,22 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
 import { Card, Title, FAB } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
-import firebase from "react-native-firebase"
+import firebase from '@react-native-firebase/app'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
-import MyInput from '../../components/TextInput' 
+import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
-import Loading from "../../components/Loading" 
+import Loading from "../../components/Loading"
 
 //Task state
 import TaskState from "../../components/RequestState"
 
 import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
+import { constants, adminId } from "../../core/constants";
 import { generatetId, load, myAlert, updateField, nameValidator } from "../../core/utils";
 
 import { fetchDocs } from "../../api/firestore-api";
@@ -230,7 +230,8 @@ class CreateTask extends Component {
             startDate: startDate,
             dueDate: dueDate,
             editedAt: moment().format('lll'),
-            editedBy: { userId: this.currentUser.uid, userName: this.currentUser.displayName }
+            editedBy: { userId: this.currentUser.uid, userName: this.currentUser.displayName },
+            subscribers: [{ id: this.currentUser.uid }, { id: adminId }] //add others (DC, CMX)
         }
 
         if (!this.isEdit) {

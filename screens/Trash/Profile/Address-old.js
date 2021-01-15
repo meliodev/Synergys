@@ -8,7 +8,7 @@ import Appbar from '../../../components/Appbar'
 
 import * as theme from "../../../core/theme"
 import { constants } from '../../../core/constants'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 
 export default class Address extends Component {

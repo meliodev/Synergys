@@ -1,8 +1,14 @@
 import React, { Component } from 'react'
-import { Dimensions } from 'react-native'
-import firebase from 'react-native-firebase'
+import { Button, Dimensions } from 'react-native'
+import notifee, { EventType, AndroidImportance } from '@notifee/react-native'
 
-//import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import firebase from '@react-native-firebase/app'
+import '@react-native-firebase/auth'
+import '@react-native-firebase/firestore'
+import '@react-native-firebase/storage'
+import '@react-native-firebase/functions'
+import '@react-native-firebase/messaging'
+
 import { Provider } from 'react-redux'
 import { MenuProvider } from 'react-native-popup-menu';
 import Store from './Store/configureStore'
@@ -10,27 +16,36 @@ import Store from './Store/configureStore'
 import RootController from './Navigation/DrawerNavigator'
 import CustomClaims from './api/CustomClaims'
 
-import PdfGeneration from './PdfGeneration'
-// const theme = {
-//   ...DefaultTheme,
-//   fonts: {
-//     regular: 'Montserrat-Regular',
-//     medium: 'Montserrat-Medium',
-//     light: 'Montserrat-Light',
-//     thin: 'Montserrat-Thin',
-//   }
-// }
+const db = firebase.firestore()
 
 class App extends Component {
+
+  componentDidMount() {
+    this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
+  }
+
+  //Forground state: messages listener
+  async onForegroundMessageReceived(message) {
+    const channelId = await notifee.createChannel({
+      id: 'projects',
+      name: 'projects',
+      lights: false,
+      vibration: true,
+      importance: AndroidImportance.DEFAULT,
+    })
+
+   await notifee.displayNotification(JSON.parse(message.data.notifee))
+  }
+
+  componentWillUnmount() {
+    this.foregroundMessages()
+  }
 
   render() {
     return (
       <Provider store={Store}>
         <MenuProvider>
-          {/* <PaperProvider> */}
           <RootController />
-          {/* < PdfGeneration /> */}
-          {/* </PaperProvider> */}
         </MenuProvider>
       </Provider>
     )

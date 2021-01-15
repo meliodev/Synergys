@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 import Appbar from '../../components/Appbar'
 import AvatarText from '../../components/AvatarText'

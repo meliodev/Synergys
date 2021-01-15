@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 import { createAppContainer, NavigationEvents } from 'react-navigation';
 import { createDrawerNavigator } from 'react-navigation-drawer';

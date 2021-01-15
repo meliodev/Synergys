@@ -6,7 +6,7 @@ import firebase from '@react-native-firebase/app'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 
-import MessageItem from '../../components/MessageItem'
+import NotificationItem from '../../components/NotificationItem'
 import MyFAB from '../../components/MyFAB'
 
 import { fetchDocs } from "../../api/firestore-api";
@@ -16,7 +16,7 @@ import { withNavigation } from 'react-navigation'
 
 const db = firebase.firestore()
 
-class ListMessages extends Component {
+class ListNotifications extends Component {
     constructor(props) {
         super(props)
         this.myAlert = myAlert.bind(this)
@@ -24,59 +24,59 @@ class ListMessages extends Component {
         this.currentUser = firebase.auth().currentUser
 
         this.state = {
-            messagesList: [],
-            messagesCount: 0,
+            notificationsList: [],
+            notificationsCount: 0,
         }
     }
 
     async componentDidMount() {
-        let query = db.collection('Messages').where('followers', 'array-contains', this.currentUser.uid).orderBy('sentAt', 'DESC')
-        await fetchDocs(this, query, 'messagesList', 'messagesCount', () => { })
+        let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'asc')
+        await fetchDocs(this, query, 'notificationsList', 'notificationsCount', () => { })
     }
 
+    componentWillUnmount() {
+        this.unsubscribe()
+    }
 
-    renderMessage(item) {
-        const message = item.item
+    renderNotification(item) {
+        const notification = item
 
         return (
-            <TouchableOpacity onPress={() => this.markAsReadAndNavigate(message)}>
-                <MessageItem message={message} />
+            <TouchableOpacity onPress={() => this.markAsReadAndNavigate(notification)}>
+                <NotificationItem notification={notification} />
             </TouchableOpacity>
         )
     }
 
-    markAsReadAndNavigate = async (message) => {
-        let haveRead = message.haveRead.find((id) => id === this.currentUser.uid)
+    markAsReadAndNavigate = async (notification) => {
+        const { screen, params } = notification.navigation
 
-        if (!haveRead) {
-            let usersHaveRead = message.haveRead
-            usersHaveRead = usersHaveRead.concat([this.currentUser.uid])
-            await db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
+        if (!notification.read) {
+            await db.collection('Users').doc(this.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
         }
 
-        this.props.navigation.navigate('ViewMessage', { message: message })
+        this.props.navigation.navigate(screen, params) //generic form
     }
 
 
     render() {
-        let { messagesCount } = this.state
+        let { notificationsCount } = this.state
 
         let s = ''
-        if (messagesCount > 1)
+        if (notificationsCount > 1)
             s = 's'
 
         return (
             <View style={styles.container}>
-                <List.Subheader>{messagesCount} message{s}</List.Subheader>
+                <List.Subheader>{notificationsCount} notification{s}</List.Subheader>
                 <FlatList
                     style={styles.root}
                     contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
-                    data={this.state.messagesList}
+                    data={this.state.notificationsList}
                     extraData={this.state}
                     keyExtractor={(item) => { return item.id }}
-                    renderItem={(item) => this.renderMessage(item)}
+                    renderItem={(item) => this.renderNotification(item.item)}
                 />
-                <MyFAB icon='pencil' onPress={() => this.props.navigation.navigate('NewMessage')} />
             </View >
         )
 
@@ -94,4 +94,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default withNavigation(ListMessages)
+export default withNavigation(ListNotifications)

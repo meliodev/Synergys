@@ -15,7 +15,7 @@ import Calendar from '../../Agenda/Calendar';
 
 import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as handleFilter } from '../../../core/utils'
 
-import firebase from "react-native-firebase";
+import firebase from '@react-native-firebase/app';
 import { connect } from 'react-redux'
 
 const db = firebase.firestore()

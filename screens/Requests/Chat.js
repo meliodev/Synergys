@@ -4,7 +4,7 @@ import { ActivityIndicator, View, StyleSheet, Text } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 
 import { IconButton } from 'react-native-paper'
-import firebase from 'react-native-firebase'
+import firebase from '@react-native-firebase/app'
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import Feather from 'react-native-vector-icons/Feather'
