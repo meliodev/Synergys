@@ -1,5 +1,5 @@
 import React, { memo, Component } from "react";
-import { TouchableOpacity, StyleSheet, Text, View, Keyboard } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, View, Keyboard, Image, ImageBackground, KeyboardAvoidingView, Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { TextInput as paperInput } from 'react-native-paper'
 
@@ -59,9 +59,9 @@ class LoginScreen extends Component {
       load(this, false)
       return
     }
-
+    console.log("before res")
     const response = await loginUser({ email: email.value, password: password.value })
-
+  console.log("res ", response)
     load(this, false)
 
     if (response.error)
@@ -75,65 +75,137 @@ class LoginScreen extends Component {
     const height = width * ratio
 
     return (
-      <Background>
-        <TouchableOpacity onPress={() => this.props.navigation.goBack()} style={{ position: 'absolute', top: 15, left: 20 }} >
-          <Icon name="arrow-left" size={24} color='#fff' />
-        </TouchableOpacity>
-
-        <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
-
-        <TextInput
-          style={{ marginVertical: 0 }}
-          label="Email"
-          returnKeyType="next"
-          value={email.value}
-          onChangeText={text => updateField(this, email, text)}
-          error={!!email.error}
-          errorText={email.error}
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoCompleteType="email"
-          textContentType="emailAddress"
-          keyboardType="email-address"
-          whiteTheme
-        />
-
-        <TextInput
-          style={{ marginVertical: 0 }}
-          label="Mot de passe"
-          returnKeyType="done"
-          value={password.value}
-          onChangeText={text => updateField(this, password, text)}
-          error={!!password.error}
-          errorText={password.error}
-          secureTextEntry={!password.show}
-          autoCapitalize="none"
-          whiteTheme
-          right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color='#fff' onPress={() => {
-            password.show = !password.show
-            this.setState({ password })
-          }} />}
-        />
-
-        <View style={styles.forgotPassword}>
-          <TouchableOpacity onPress={() => this.props.navigation.navigate("ForgotPasswordScreen")}>
-            <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Mot de passe oublié?</Text>
-          </TouchableOpacity>
+      <View style={{flex:1, backgroundColor:'#ffff'}}>
+        <View>
+          <ImageBackground source={require('../../assets/login1.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height, top:450}}>
+          </ImageBackground>
+          <ImageBackground source={require('../../assets/login2.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height,top:-450}}>
+          </ImageBackground>
         </View>
+        <View>
+        </View>
+        <View style={{marginTop:200}}>
+        <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
+          <View style={{marginBottom:20}}>
+            
+          <View style={{marginLeft:10, marginRight:10}}>
+          <TextInput
+            style={{ marginVertical: 0}}
+            label="Email"
+            returnKeyType="next"
+            value={email.value}
+            onChangeText={text => updateField(this, email, text)}
+            error={!!email.error}
+            errorText={email.error}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoCompleteType="email"
+            textContentType="emailAddress"
+            keyboardType="email-address"
+              
+          />
+          </View>
 
-        <Button loading={loading} mode="outlined" onPress={this.handleLogin}>
-          Se connecter
-        </Button>
-
-        {/* <View style={styles.row}>
-            <Text style={styles.label}>Vous êtes nouveau? </Text>
-            <TouchableOpacity onPress={() => this.props.navigation.navigate("RegisterScreen")}>
-              <Text style={styles.link}>Inscrivez-vous</Text>
+          </View>
+          <View style={{marginLeft:10, marginRight:10}}>
+            <TextInput
+              style={{ marginVertical: 0 }}
+              label="Mot de passe"
+              returnKeyType="done"
+              value={password.value}
+              onChangeText={text => updateField(this, password, text)}
+              error={!!password.error}
+              errorText={password.error}
+              secureTextEntry={!password.show}
+              autoCapitalize="none"
+              
+              right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color='#fff' onPress={() => {
+                password.show = !password.show
+                this.setState({ password })
+            }} />}
+          />
+          </View>
+          <View style={styles.forgotPassword}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate("ForgotPasswordScreen")}>
+            <Text style={[theme.customFontMSmedium.body, { color: 'green' }]}>Mot de passe oublié?</Text>
             </TouchableOpacity>
-          </View> */}
+          </View>
+          <View style={{alignItems:'center'}}>
+            <Button style={{width:'80%', backgroundColor:'#25D366', color:'red'}}  
+            loading={loading} mode="outlined" 
+            onPress={this.handleLogin}
+            >Se connecter</Button>
+          </View>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Vous êtes nouveau? </Text>
+          <TouchableOpacity onPress={() => this.props.navigation.navigate("RegisterScreen")}>
+            <Text style={styles.link}>Inscrivez-vous</Text>
+          </TouchableOpacity>
+        </View> 
 
-        <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
-      </Background>
+      <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
+      </View>
+      // <Background>
+      //   <TouchableOpacity onPress={() => this.props.navigation.goBack()} style={{ position: 'absolute', top: 15, left: 20 }} >
+      //     <Icon name="arrow-left" size={24} color='#fff' />
+      //   </TouchableOpacity>
+
+
+      //   <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
+
+      //   <TextInput
+      //     style={{ marginVertical: 0 }}
+      //     label="Email"
+      //     returnKeyType="next"
+      //     value={email.value}
+      //     onChangeText={text => updateField(this, email, text)}
+      //     error={!!email.error}
+      //     errorText={email.error}
+      //     autoCapitalize="none"
+      //     autoCorrect={false}
+      //     autoCompleteType="email"
+      //     textContentType="emailAddress"
+      //     keyboardType="email-address"
+      //     whiteTheme
+      //   />
+
+      //   <TextInput
+      //     style={{ marginVertical: 0 }}
+      //     label="Mot de passe"
+      //     returnKeyType="done"
+      //     value={password.value}
+      //     onChangeText={text => updateField(this, password, text)}
+      //     error={!!password.error}
+      //     errorText={password.error}
+      //     secureTextEntry={!password.show}
+      //     autoCapitalize="none"
+      //     whiteTheme
+      //     right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color='#fff' onPress={() => {
+      //       password.show = !password.show
+      //       this.setState({ password })
+      //     }} />}
+      //   />
+
+      //   <View style={styles.forgotPassword}>
+      //     <TouchableOpacity onPress={() => this.props.navigation.navigate("ForgotPasswordScreen")}>
+      //       <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Mot de passe oublié?</Text>
+      //     </TouchableOpacity>
+      //   </View>
+
+      //   <Button loading={loading} mode="outlined" onPress={this.handleLogin}>
+      //     Se connecter
+      //   </Button>
+
+      //   {/* <View style={styles.row}>
+      //       <Text style={styles.label}>Vous êtes nouveau? </Text>
+      //       <TouchableOpacity onPress={() => this.props.navigation.navigate("RegisterScreen")}>
+      //         <Text style={styles.link}>Inscrivez-vous</Text>
+      //       </TouchableOpacity>
+      //     </View> */}
+
+      //   <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
+      // </Background>
 
     )
 
@@ -150,25 +222,26 @@ const styles = StyleSheet.create({
   },
   synergys: {
     textAlign: 'center',
-    color: '#fff',
-    marginVertical: 15,
-    letterSpacing: 2
+    color: 'black',
+    letterSpacing: 2,
   },
   forgotPassword: {
     width: "100%",
     alignItems: "flex-end",
-    marginVertical: 10
+    marginBottom:5
   },
   row: {
     flexDirection: "row",
     marginTop: 4
   },
   label: {
-    color: theme.colors.secondary
+    // color: theme.colors.secondary
+    color:'green'
   },
   link: {
     fontWeight: "bold",
-    color: theme.colors.primary
+    // color: theme.colors.primary
+    color:'black'
   }
 });
 

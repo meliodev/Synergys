@@ -4,7 +4,7 @@ import { DefaultTheme } from 'react-native-paper'
 const colors = {
   statusbar: "#013220",
   background: '#eeeeee',
-  primary: "#046307",
+  primary: "#25D366",
   secondary: "#4CAF50",
   //tertiary: "#4CAF50",
   // tertiary: "#7ab600",

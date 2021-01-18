@@ -10,16 +10,13 @@ import SearchInput, { createFilter } from 'react-native-search-filter'
 
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;
-
   if (!email || email.length <= 0) return "Le champs email est obligatoire.";
   if (!re.test(email)) return "Adresse email non valide.";
-
   return "";
 };
 
 export const passwordValidator = password => {
   if (!password || password.length <= 0) return "Le champs mot de passe est obligatoire.";
-
   return "";
 };
 
@@ -59,13 +56,10 @@ export const checkPlural = (arrayLength, string) => {
   let str = ''
   if (arrayLength === 0)
     str = ''
-
   else if (arrayLength === 1)
     str = arrayLength + string
-
   else
     str = arrayLength + string + 's'
-
   return str
 }
 

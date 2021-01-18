@@ -56,12 +56,15 @@ export const signUpUser = async ({ synuid, email, password }) => {
 // }
 
 export const loginUser = async ({ email, password }) => {
+  console.log("login called ", email, password)
   try {
     await firebase.auth().signInWithEmailAndPassword(email, password)
+    console.log("login")
     return {}
   }
 
   catch (error) {
+    console.log("error in login : ", error)
     switch (error.code) {
       case "auth/invalid-email":
         return {
@@ -88,6 +91,7 @@ export const loginUser = async ({ email, password }) => {
 }
 
 export const logoutUser = () => {
+  console.log("logout")
   firebase.auth().signOut();
 }
 

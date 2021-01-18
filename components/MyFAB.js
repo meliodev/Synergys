@@ -15,13 +15,13 @@ const MyFAB = ({ style, onPress, icon, ...props }) => (
 const styles = StyleSheet.create({
     fab: {
         flex: 1,
-        backgroundColor: '#007f00',
+        backgroundColor: '#25D366',
         justifyContent: 'center',
         alignItems: 'center',
         position: 'absolute',
         margin: 16,
         right: 0,
-        bottom: 0,
+        bottom: 15,
         width: constants.ScreenWidth*0.15,
         height: constants.ScreenWidth*0.15,
         borderRadius: 100,

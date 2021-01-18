@@ -4,25 +4,21 @@ import { List, Card, Paragraph, Title, Avatar } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import LinearGradient from 'react-native-linear-gradient'
-
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
 import Button from './Button'
-
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
-
 import { ThemeColors, withNavigation } from 'react-navigation'
 
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
-
-
+    console.log("project -- ", project)
     const setStateColor = (state) => {
         switch (state) {
             case 'En attente':
-                return theme.colors.gray400
+                return theme.colors.primary
 
             case 'En cours':
                 return theme.colors.primary
@@ -45,15 +41,12 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
         switch (step) {
             case 'Prospect':
                 return [theme.colors.gray400, theme.colors.gray400, theme.colors.gray400]
-
             case 'Chantier':
                 return ['#09a500', '#69b300', '#9fbc00']
                 break
-
             case 'SAV':
                 return ['#0288D1', '#03A9F4', '#4FC3F7']
                 break
-
             default:
                 return '#333'
         }
@@ -61,11 +54,30 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
     return (
         <Card style={{ margin: 10, borderRadius: 15 }} onPress={onPress}>
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(project.step)} style={[styles.linearGradient, styles.stepContainer]}>
-                <Text style={[theme.customFontMSsemibold.header, { color: '#fff' }]}>{project.step}</Text>
-            </LinearGradient>
+            {/* <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(project.step)} style={[styles.linearGradient, styles.stepContainer]}>
+               
+            </LinearGradient> */}
 
-            <Card.Content style={{ flex: 1, flexDirection: 'row', paddingTop: 10 }}>
+            <Card.Title
+            title={project.step}
+            titleStyle = {{
+                color: '#fff',
+                alignSelf: 'center'
+            }}
+            style={{
+                backgroundColor: '#25D366',
+                borderTopLeftRadius: 15,
+                borderTopRightRadius: 15,
+                
+            }}
+            >
+            {/* <Text style={
+                [
+                    // theme.customFontMSsemibold.header, 
+                    { color: '#fff' }
+                    ]}></Text> */}
+            </Card.Title>
+            <Card.Content style={{ flex: 1, flexDirection: 'row', paddingTop: 10, backgroundColor: '#F5F5F5' }}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
                     <Title style={[theme.customFontMSbold.body]} numberOfLines={1}>{project.name}</Title>
                     <Paragraph style={[theme.customFontMSmedium.caption, { marginBottom: 20 }]} numberOfLines={1}>{project.description}</Paragraph>
@@ -85,10 +97,8 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
                     </View>
                 </View>
             </Card.Content>
-
         </Card>
     )
-
 }
 
 const styles = StyleSheet.create({
@@ -96,14 +106,16 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingLeft: 15,
         paddingRight: 15,
-        borderRadius: 5
+        borderRadius: 5,
+        
     },
     stepContainer: {
         height: 33,
         justifyContent: 'center',
         alignItems: 'center',
         borderTopLeftRadius: 15,
-        borderTopRightRadius: 15
+        borderTopRightRadius: 15,
+        
     },
     footer: {
         flexDirection: 'row',

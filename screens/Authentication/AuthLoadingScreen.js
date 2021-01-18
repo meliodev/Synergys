@@ -1,5 +1,5 @@
 import React, { memo, Component } from "react"
-import { Alert, Text, StyleSheet } from "react-native"
+import { Alert, Text, StyleSheet, Image, ImageBackground, Dimensions, View } from "react-native"
 import firebase from "react-native-firebase"
 import Loading from "../../components/Loading"
 
@@ -8,6 +8,7 @@ import { setRole, setUser } from '../../core/utils'
 import { connect } from 'react-redux'
 
 import LinearGradient from 'react-native-linear-gradient'
+// import { View } from "react-native-ui-lib"
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
 const db = firebase.firestore()
@@ -37,15 +38,26 @@ class AuthLoadingScreen extends Component {
     })
   }
 
-  componentWillUnmount() {
-    this.unsububscribe()
-  }
+  // componentWillUnmount() {
+  //   this.unsububscribe()
+  // }
 
   render() {
     return (
-      <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={styles.logo}>
-        <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
-      </LinearGradient>
+      // <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={styles.logo}>
+      //   <Text style={[theme.customFontMSregular.h1, styles.synergys]}>HELLO</Text>
+      // </LinearGradient>
+      <View style={{flex:1, backgroundColor:'white'}}>
+        <View>
+          <ImageBackground source={require('../../assets/login1.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height, top:450}}>
+          </ImageBackground>
+          <ImageBackground source={require('../../assets/login2.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height,top:-450}}>
+          </ImageBackground>
+        </View>
+        <View style={{display:'flex', flex:1, alignItems:'center', justifyContent:'center'}}>
+          <Image source={require('../../assets/splash_logo.png')}/>
+        </View>
+      </View>
     )
   }
 }
