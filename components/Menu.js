@@ -24,7 +24,9 @@ const Menu = ({ options, functions, menuTrigger, ...props }) => (
         return (
           <MenuOption onSelect={() => functions[option.id]()}
             style={{ flexDirection: 'row', padding: constants.ScreenWidth * 0.03 }}>
-            <Text style={theme.customFontMSmedium.body}>{option.title}</Text>
+            <Text style={theme.customFontMSmedium.body}>
+              {option.title}
+              </Text>
           </MenuOption>
         )
       })

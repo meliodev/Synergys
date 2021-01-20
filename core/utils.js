@@ -1,12 +1,13 @@
 //Input validators
+import React from 'react'
 import firebase from "react-native-firebase";
-import { Alert, Platform } from 'react-native'
+import { Alert, Platform, View, Text } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
 import RNFetchBlob from 'rn-fetch-blob'
 import FileViewer from 'react-native-file-viewer'
 import { decode as atob, encode as btoa } from "base-64"
 import SearchInput, { createFilter } from 'react-native-search-filter'
-
+import Modal from 'react-native-modal';
 
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;

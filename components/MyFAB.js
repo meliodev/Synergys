@@ -8,6 +8,7 @@ const MyFAB = ({ style, onPress, icon, ...props }) => (
     <FAB
         style={[styles.fab, style]}
         icon={icon || "plus"}
+        color="white"
         iconSize = {constants.ScreenWidth*0.06}
         onPress={onPress} />
 )

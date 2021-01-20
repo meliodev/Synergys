@@ -53,7 +53,7 @@ const SearchBar = ({
 
     return (
         <appbar.Header style={[{
-             backgroundColor: '#ffffff',
+             backgroundColor: '#F8F8F9',
               elevation: 0 }, style]}>
             {renderLeftIcon()}
             {title && <appbar.Content title={titleText} titleStyle={theme.customFontMSmedium.title} />}
@@ -64,8 +64,8 @@ const SearchBar = ({
                     placeholderTextColor={theme.colors.gray100}
                     onChangeText={(searchInput) => searchUpdated(searchInput)}
                     value={searchInput}
-                    inputStyle={{ color: '#fff' }}
-                    style={{ backgroundColor: theme.colors.primary, elevation: 0, }}
+                    inputStyle={{ color: 'black' }}
+                    style={{ backgroundColor: '#F8F8F9', elevation: 0, }}
                     theme={{ colors: { placeholder: '#fff', text: '#fff' } }}
                     icon={() => null}
                     autoFocus

@@ -7,7 +7,8 @@ import firebase from "react-native-firebase"
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
-
+import SvgUri from 'react-native-svg-uri'
+import SearchBar from '../../components/SearchBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput' 
 import Picker from "../../components/Picker"
@@ -82,7 +83,9 @@ class CreateTask extends Component {
             type: 'Rendez-vous',
             priority: 'Moyenne',
             status: 'En cours',
-
+            showInput: false,
+            searchInput: '',
+      
             //Screens
             assignedTo: { id: 'GS-US-xQ6s', fullName: 'Salim Salim', error: '' },
             project: { id: 'GS-PR-m5Ip', name: 'Projet A', error: '' },
@@ -277,11 +280,22 @@ class CreateTask extends Component {
     render() {
         let { TaskId, name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
-
+        let {showInput, searchInput} = this.state
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
-
+                {/* <Appbar back={!loading} close title titleText={this.title} check handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.alertDeleteTask} /> */}
+                <SearchBar
+          main={this}
+          title={!showInput}
+          titleText="Bon de commande"
+          placeholder="Rechercher un document"
+          showBar={showInput}
+          handleSearch={() =>
+            this.setState({searchInput: '', showInput: !showInput})
+          }
+          searchInput={searchInput}
+          searchUpdated={(searchInput) => this.setState({searchInput})}
+        />
                 {loading ?
                     <Loading size='large' />
                     :
@@ -299,6 +313,13 @@ class CreateTask extends Component {
                                     disabled
                                 />
 
+                                <TouchableOpacity
+                                style={styles.listButton}
+                                >
+                                <SvgUri 
+                                 
+                                 source = {require('../../assets/numero21.svg')}
+                                />
                                 <MyInput
                                     label="Nom de la tâche"
                                     returnKeyType="done"
@@ -307,6 +328,8 @@ class CreateTask extends Component {
                                     error={!!name.error}
                                     errorText={name.error}
                                 />
+                                </TouchableOpacity>
+                                
 
                                 <TouchableOpacity onPress={() => this.props.navigation.navigate('ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', titleText: 'Utilisateurs' })}>
                                     <MyInput
@@ -451,7 +474,6 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.background
     },
     fab: {
-        //flex: 1,
         backgroundColor: theme.colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
@@ -460,6 +482,11 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         borderRadius: 100,
-    }
+    },
+    listButton: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      },
 })
 

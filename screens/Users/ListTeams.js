@@ -53,6 +53,7 @@ class ListTeams extends Component {
         const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
         const handleConfirm = async () => await deleteTeam(team).then(() => console.log('Batch succeeded !!!'))
         this.myAlert(title, message, handleConfirm)
+    
     }
 
     renderTeam(team) {
@@ -60,12 +61,18 @@ class ListTeams extends Component {
         let description = checkPlural(team.members.length, ' membre')
 
         return (
-            <TouchableOpacity onPress={() => this.viewTeam(team)}>
+            <TouchableOpacity 
+            style={{
+                backgroundColor: '#F5F5F5',
+                marginBottom: '4%',
+                borderRadius: 20
+            }}
+            onPress={() => this.viewTeam(team)}>
                 <ListItem
                     title={team.name}
                     description={description}
                     iconRightName='dots-horizontal'
-                    left={props => <List.Icon {...props} icon="account-group" />}
+                    left={props => <List.Icon {...props} icon="account-group" color={theme.colors.primary} />}
 
                     menu
                     options={[
@@ -126,7 +133,8 @@ export default withNavigation(ListTeams)
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: '#ffffff'
     },
     box: {
         padding: 20,

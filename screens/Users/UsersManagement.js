@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
-
+import Modal from 'react-native-modal'
 import TwoTabs from '../../components/TwoTabs'
 import SearchBar from '../../components/SearchBar'
 import TabView from '../../components/TabView'
@@ -45,7 +45,8 @@ class UsersManagement extends React.Component {
         const { index, searchInput } = this.state
 
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
+               
                 <SearchBar
                     main={this}
                     title={!this.state.showInput}
@@ -60,8 +61,13 @@ class UsersManagement extends React.Component {
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListUsers searchInput={searchInput} prevScreen='UsersManagement' userType='utilisateur' menu query={queryUsers} showButton onPress={this.viewProfile.bind(this)} emptyListHeader='Liste des utilisateurs' emptyListDesc='Gérez les utilisateurs. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.'/>}
-                    Tab2={<ListTeams searchInput={searchInput} />} />
+                    Tab1={<ListUsers searchInput={searchInput} 
+                    prevScreen='UsersManagement' userType='utilisateur' 
+                    menu query={queryUsers} showButton 
+                    onPress={this.viewProfile.bind(this)} 
+                    emptyListHeader='Liste des utilisateurs' emptyListDesc='Gérez les utilisateurs. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.'/>}
+                    Tab2={<ListTeams searchInput={searchInput} />} 
+                    />
             </View>
         )
     }

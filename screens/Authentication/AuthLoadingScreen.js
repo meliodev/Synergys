@@ -27,7 +27,7 @@ class AuthLoadingScreen extends Component {
         })
 
         await firebase.auth().currentUser.reload()
-        this.props.navigation.navigate("ProjectsStack")
+        this.props.navigation.navigate("UsersManagementStack")
       }
 
       else {

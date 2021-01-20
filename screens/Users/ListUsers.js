@@ -2,14 +2,14 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native'
-import { List } from 'react-native-paper'
+import { List, Colors } from 'react-native-paper'
 import firebase from "react-native-firebase"
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load, myAlert } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
-
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import UserItem from '../../components/UserItem'
 import ListItem from '../../components/ListItem'
 import EmptyList from '../../components/EmptyList'
@@ -87,7 +87,13 @@ class ListUsers extends Component {
   renderUser = (item) => {
 
     return (
-      <TouchableOpacity onPress={() => {
+      <TouchableOpacity
+      style={{
+        backgroundColor: '#F5F5F5',
+        borderRadius: 20,
+        marginBottom: '4%'
+      }}
+      onPress={() => {
         if (item.isPro)
           this.props.onPress(item.isPro, item.id, item.denom, '', item.role)
         else
@@ -98,13 +104,19 @@ class ListUsers extends Component {
           description={item.role}
           left={props => {
             if (item.role === 'Admin')
-              return <List.Icon {...props} icon="account-cog" />
+              return <List.Icon {...props} 
+              icon="account-tie"
+              color={theme.colors.primary}
+               />
 
             else if (item.isPro)
-              return <List.Icon {...props} icon="briefcase" />
+              return <List.Icon {...props} color={theme.colors.primary} icon="briefcase" />
 
             else if (!item.isPro && item.role !== 'Admin')
-              return <List.Icon {...props} icon="account" />
+              return <List.Icon {...props} 
+              icon="account" 
+              color={theme.colors.primary}
+              />
           }}
 
           //Right icon
@@ -164,7 +176,8 @@ class ListUsers extends Component {
             }
 
             {this.props.showButton &&
-              <MyFAB icon='account-plus' onPress={() => this.props.navigation.navigate('CreateUser', { prevScreen: this.props.prevScreen })} />
+              <MyFAB icon='account-plus' 
+              onPress={() => this.props.navigation.navigate('CreateUser', { prevScreen: this.props.prevScreen })} />
             }
 
           </View>}
@@ -177,7 +190,8 @@ export default withNavigation(ListUsers)
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    backgroundColor: '#ffffff'
   },
   usersCount: {
     flexDirection: 'row',
