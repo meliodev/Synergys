@@ -1,4 +1,5 @@
 {
+
   "name": "Synergys",
   "version": "0.0.1",
   "private": true,
@@ -58,6 +59,7 @@
     "react-native-signature-canvas": "^3.3.0",
     "react-native-status-bar-height": "^3.0.0-alpha.1",
     "react-native-svg": "^9.13.0",
+    "react-native-svg-uri": "^1.2.3",
     "react-native-tab-view": "^2.15.2",
     "react-native-tag-autocomplete": "^1.0.22",
     "react-native-text-input-mask": "^2.0.0",
@@ -86,6 +88,7 @@
     "metro-react-native-babel-preset": "^0.59.0",
     "react-test-renderer": "16.13.1"
   },
+  "rnpm": { "assets": [ "resources/fonts" ] },
   "jest": {
     "preset": "react-native"
   }

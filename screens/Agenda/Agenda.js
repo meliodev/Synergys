@@ -24,6 +24,7 @@ import { constants } from '../../core/constants'
 // const testIDs = require('../testIDs');
 import { withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
+import SearchBar from '../../components/SearchBar';
 
 LocaleConfig.locales['fr'] = {
     monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
@@ -66,7 +67,7 @@ const statuses = [
 class Agenda2 extends Component {
     constructor(props) {
         super(props)
-        this.isAgenda = this.props.navigation.getParam('isAgenda', false) //#task: set it to true
+        this.isAgenda = this.props.navigation.getParam('isAgenda', true) //#task: set it to true
         this.loadItems = this.loadItems.bind(this)
         this.refreshItems = this.refreshItems.bind(this)
         this.handleFilter = this.handleFilter.bind(this)
@@ -77,7 +78,8 @@ class Agenda2 extends Component {
             //Settings
             isAgenda: this.isAgenda,
             isCalendar: true,
-
+            showInput: false,
+            searchInput: '',
             //Calendar mode
             items: {},
             filteredItems: {},
@@ -108,10 +110,10 @@ class Agenda2 extends Component {
     }
 
     setTasksQuery(agendaRef) {
+        console.log(" role is ", this.props.role.id)
         const roleId = this.props.role.id
         const { isAgenda } = this.state
         const { currentUser } = firebase.auth()
-
         let query = null
 
         if (isAgenda) {
@@ -119,30 +121,32 @@ class Agenda2 extends Component {
             return query
         }
 
-        if (roleId === 'admin')
+        if (roleId === 'admin'){
+            console.log(" b ")
             query = agendaRef.collection('Tasks')
-
-        else if (roleId === 'dircom')
+        }
+       
+        else if (roleId === 'dircom'){
+            console.log(" c ")
             query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'Directeur commercial')
+        }
 
-        else if (roleId === 'tech')
+        else if (roleId === 'tech'){
+            console.log(" d " )
             query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'Responsable technique')
-
+        }
         return query
     }
 
     loadItems(day) {
         setTimeout(async () => {
-
             this.unsubscribe = db.collection('Agenda').onSnapshot((querysnapshot) => {
                 querysnapshot.forEach(async (dateDoc) => {
                     const date = dateDoc.id //exp: 2021-01-07
-
-                    //if (!this.state.items[date]) {
                         const query = this.setTasksQuery(dateDoc.ref)
-                        query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
+                        db.collection('Agenda').doc(date).collection("Tasks").onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
                             this.state.items[date] = []
-
+                                
                             tasksSnapshot.forEach((taskDoc) => {
 
                                 const task = taskDoc.data()
@@ -164,7 +168,6 @@ class Agenda2 extends Component {
                                     assignedTo: task.assignedTo,
                                     dayProgress: dayProgress
                                 })
-
                                 //Tasks lasting for 2days or more...
                                 if (isPeriod) {
                                     timeLine = 2
@@ -186,13 +189,11 @@ class Agenda2 extends Component {
                                             dayProgress: dayProgress,
                                             // labels: [task.priority.toLowerCase()],
                                         })
-
                                         timeLine += 1
                                         dateIterator = moment(dateIterator).add(1, 'day').format('YYYY-MM-DD')
                                         predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
                                     }
                                 }
-
                                 const newItems = {}
                                 Object.keys(this.state.items).forEach(key => {
                                     newItems[key] = this.state.items[key]
@@ -203,8 +204,6 @@ class Agenda2 extends Component {
                                 })
                             })
                         })
-                    // }
-
                 })
             })
 
@@ -234,6 +233,7 @@ class Agenda2 extends Component {
 
     renderItem(item) {
 
+
         const priority = item.priority
         const label = (
             <View style={{ padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: priority === 'urgente' ? '#f5276d' : priority === 'faible' ? '#f2d004' : theme.colors.agenda, borderRadius: 3 }}>
@@ -242,10 +242,18 @@ class Agenda2 extends Component {
         )
 
         return (
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, isEdit: true, title: 'Modifier la tâche', DateId: item.date, TaskId: item.id })} style={styles.item}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, isEdit: true, title: 'Modifier la tâche', DateId: item.date, TaskId: item.id })} 
+            style={styles.item}
+            >
                 <View style={{ flex: 0.8, justifyContent: 'space-between', height: constants.ScreenHeight * 0.1, marginVertical: 10 }}>
-                    <Text numberOfLines={1} style={theme.customFontMSbold.body}>{item.name}</Text>
-                    <Text style={[theme.customFontMSsemibold.caption, { color: 'gray', marginTop: 5 }]}>{item.type} {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption, { fontWeight: 'normal' }]}>(jour {item.dayProgress})</Text>}</Text>
+                    <Text numberOfLines={1} 
+                    style={{color: priority === 'urgente' ? '#f5276d' : priority === 'faible' ? '#f2d004' : theme.colors.agenda, fontSize: 20}
+                        }>
+                        {item.name}
+                    </Text>
+                    <Text style={[theme.customFontMSsemibold.caption, { color: 'gray', marginTop: 5 }]}>{item.type} 
+                    {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption, { fontWeight: 'normal' }]}>(jour {item.dayProgress})</Text>}
+                    </Text>
                 </View>
 
                 <View style={{ flex: 0.2, justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5 }}>
@@ -321,10 +329,14 @@ class Agenda2 extends Component {
     }
 
     renderTaskItems() {
+        console.log("renderTaskItems called")
         const { filteredTaskItems } = this.state
         return filteredTaskItems.map((item, key) => {
             return (
                 <View style={{ padding: 15 }}>
+                    {
+                        console.log("day ", item[0].date)
+                    }
                     <Text style={theme.customFontMSbold.header}>{item[0].date}</Text>
                     {item.map((taskItem) => {
                         return this.renderItem(taskItem)
@@ -343,7 +355,7 @@ class Agenda2 extends Component {
         const roleId = this.props.role.id
         let { isCalendar, displayType, items, filteredItems, type, status, priority, assignedTo, project, filterOpened } = this.state //items and filter fields
         const filterActivated = !_.isEqual(items, filteredItems)
-
+        let {showInput, searchInput} = this.state
         return (
             <View style={{ flex: 1 }}>
 
@@ -367,7 +379,20 @@ class Agenda2 extends Component {
                         project={project}
                         assignedTo={assignedTo} />
                     :
-                    <Appbar menu title titleText='Mon agenda' />
+                    <SearchBar
+          main={this}
+          title={!showInput}
+          titleText="Home"
+          placeholder="Rechercher un document"
+          showBar={showInput}
+          handleSearch={() =>
+            this.setState({searchInput: '', showInput: !showInput})
+          }
+          searchInput={searchInput}
+          searchUpdated={(searchInput) => this.setState({searchInput})}
+        />
+                    // <Appbar menu title titleText='Mon agenda' />
+
                 }
 
                 <TasksTab isCalendar={isCalendar} onPress1={() => this.toggleTasksTab(false)} onPress2={() => this.toggleTasksTab(true)} />
@@ -379,10 +404,18 @@ class Agenda2 extends Component {
                 }
 
                 <View style={{ flex: 1 }} >
+                    {/* <View style={{
+                        width: '70%',
+                        height: '5%',
+                        flexDirection: 'row',
+                        backgroundColor: '#F5F5F5'
+                    }}>
+                        <Text> Task's </Text>
+
+                    </View> */}
                     {isCalendar ?
                         <Agenda
                             LocaleConfig
-                            //displayLoadingIndicator
                             renderEmptyData={this.renderEmptyData.bind(this)}
                             items={this.state.filteredItems}
                             loadItemsForMonth={this.loadItems}
@@ -415,7 +448,6 @@ class Agenda2 extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
-        //fcmToken: state.fcmtoken
     }
 }
 
@@ -431,7 +463,7 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: 'white',
+        backgroundColor: '#FFEFF4',
         borderRadius: 5,
         paddingRight: 5,
         paddingLeft: 15,
@@ -446,19 +478,3 @@ const styles = StyleSheet.create({
         paddingTop: 30,
     },
 })
-
-
-
-
-
-
-
-
-
-       // const labels =
-        //     item.labels &&
-        //     item.labels.map(label => (
-        //         <View key={`label-${label}`} style={{ padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: label === 'urgente' ? theme.colors.error : label === 'faible' ? theme.colors.primary : colors.primary, borderRadius: 3 }}>
-        //             <Text style={{ color: 'white', fontSize: 8 }}>{label}</Text>
-        //         </View>
-        //     ))
