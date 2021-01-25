@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     stateStyle: {
         elevation: 3,
         justifyContent: 'center', alignItems: 'center',
-        width: constants.ScreenWidth * 0.3,
+        width: constants.ScreenWidth * 0.25,
         height: constants.ScreenHeight * 0.07
     }
 })

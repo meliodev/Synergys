@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, ScrollView, FlatList } from 'react-native';
-import { List, Card, Paragraph, Title } from 'react-native-paper';
+import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { List } from 'react-native-paper';
 
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
@@ -11,7 +11,7 @@ import Loading from '../../components/Loading'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { load, myAlert, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
@@ -32,7 +32,6 @@ const db = firebase.firestore()
 class ListOrders extends Component {
     constructor(props) {
         super(props)
-        this.myAlert = myAlert.bind(this)
         this.onPressOrder = this.onPressOrder.bind(this) //#edit
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
@@ -59,12 +58,16 @@ class ListOrders extends Component {
 
     async componentDidMount() {
         load(this, true)
+        await this.fetchOrders()
+    }
 
-        let query = db.collection('Orders').where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        await fetchDocs(this, query, 'ordersList', 'ordersCount', async () => {
+    async fetchOrders() {
+        const query = db.collection('Orders').where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        fetchDocs(this, query, 'ordersList', 'ordersCount', async () => {
             let { ordersList } = this.state
 
-            for (let i = 0; i < ordersList.length; i++) { //fetch client dynamicly
+            //Fetch client dynamicly
+            for (let i = 0; i < ordersList.length; i++) {
                 await db.collection('Projects').doc(ordersList[i].project.id).get().then((doc) => {
                     ordersList[i].client = doc.data().client
                 })
@@ -85,8 +88,7 @@ class ListOrders extends Component {
 
     onPressOrder(order) {//#edit
         //if (this.isRoot)
-        console.log('555555')
-        this.props.navigation.navigate('CreateOrder', { isEdit: true, title: 'Modifier la commande', OrderId: order.id })
+        this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
 
         // else {
         //     this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name })
@@ -104,10 +106,7 @@ class ListOrders extends Component {
 
         const filterCount = this.filteredOrders.length
         const filterActivated = filterCount < ordersCount
-
-        let s = ''
-        if (filterCount > 1)
-            s = 's'
+        const s = filterCount > 1 ? 's' : ''
 
         return (
             <View style={styles.container}>

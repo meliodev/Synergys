@@ -51,6 +51,7 @@ import ListOrders from '../screens/Orders/ListOrders'
 import AddItem from '../screens/Orders/AddItem'
 import CreateProduct from '../screens/Orders/CreateProduct'
 import CreateOrder from '../screens/Orders/CreateOrder'
+import CreateTaxe from '../screens/Orders/CreateTaxe'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -62,9 +63,10 @@ import Profile from '../screens/Profile/Profile'
 import EditEmail from '../screens/Profile/EditEmail'
 import EditRole from '../screens/Profile/EditRole'
 import Address from '../screens/Profile/Address'
+import VideoPlayer from '../screens/Helpers/VideoPlayer'
 
-import { constants } from '../core/constants';
-import { Menu, MenuOptions, MenuOption, MenuTrigger, } from 'react-native-popup-menu';
+import { constants } from '../core/constants'
+import { Menu, MenuOptions, MenuOption, MenuTrigger, } from 'react-native-popup-menu'
 
 //Icons: No Icon
 const hideHeader = () => ({
@@ -114,6 +116,11 @@ const RequestsManagementStack = createStackNavigator({
     },
     Chat: {
         screen: Chat,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    VideoPlayer: {
+        screen: VideoPlayer,
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
@@ -172,6 +179,7 @@ const ProjectsStack = createStackNavigator({
     },
     CreateProject: {
         screen: CreateProject,
+        path: 'project/:ProjectId',
         navigationOptions: hideHeader
     },
     ListClients: {
@@ -228,6 +236,10 @@ const OrdersStack = createStackNavigator({
         screen: CreateOrder,
         navigationOptions: hideHeader
     },
+    CreateTaxe: {
+        screen: CreateTaxe,
+        navigationOptions: hideHeader
+    },
     ListProjects: {
         screen: ListProjects,
         navigationOptions: hideHeader
@@ -251,7 +263,7 @@ const NewsStack = createStackNavigator({
 
 //3. ADMIN MAIN STACKS
 //Authentification navigation
-export const AuthNavigator = createStackNavigator({
+export const AuthStack = createStackNavigator({
     HomeScreen: {
         screen: HomeScreen,
         navigationOptions: hideHeader
@@ -282,17 +294,19 @@ export const AuthNavigator = createStackNavigator({
     })
 
 //Admin navigation
-export const AdminStackNavigator = createStackNavigator({
+export const AppStack = createStackNavigator({
     // Dashboard: {
     //     screen: Dashboard,
     //     navigationOptions: hideHeader
     // },
     ProjectsStack: {
         screen: ProjectsStack,
+        path: 'projects',
         navigationOptions: hideHeader
     },
     Profile: {
         screen: Profile,
+        path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },

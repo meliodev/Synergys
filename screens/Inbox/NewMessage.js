@@ -1,37 +1,32 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert, Keyboard } from 'react-native';
 import { List, ProgressBar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
-
-
-import RNFetchBlob from 'rn-fetch-blob'
 import RNFS from 'react-native-fs'
-import ImagePicker from 'react-native-image-picker'
-import FilePickerManager from 'react-native-file-picker';
-
 
 import Appbar from '../../components/Appbar'
 import TextInput from '../../components/TextInput'
 import { TextInput as MessageInput } from 'react-native'
-// import { TextInput as MessageInput } from 'react-native-paper'
 import AutoCompleteUsers from '../../components/AutoCompleteUsers'
+import UploadProgress from '../../components/UploadProgress'
+import Toast from '../../components/Toast'
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { load, setToast, updateField } from '../../core/utils'
+import { load, setToast, updateField, setAttachmentIcon, nameValidator } from '../../core/utils'
+
 import { fetchDocs } from '../../api/firestore-api';
+import { uploadFiles } from '../../api/storage-api';
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
 import DocumentPicker from 'react-native-document-picker';
-import { ThemeColors } from 'react-navigation';
 
 const db = firebase.firestore()
-const reference = firebase.storage().ref()
 
 export default class Message extends Component {
     constructor(props) {
@@ -42,6 +37,8 @@ export default class Message extends Component {
         this.messageGroupeId = this.props.navigation.getParam('messageGroupeId', false)
         this.tagsSelected = this.props.navigation.getParam('tagsSelected', [])
 
+        this.uploadFiles = uploadFiles.bind(this)
+
         if (this.isReply)
             this.title = 'Répondre'
         else
@@ -49,14 +46,13 @@ export default class Message extends Component {
 
         this.state = {
             tagsSelected: [],
-            suggestions: 0,
+            suggestions: [],
             subject: { value: "", error: "" },
             message: { value: "", error: "" },
             messagesCount: 0,
 
-            selectedMessage: {},
             oldMessages: [],
-            previousFollowers: [],
+            previousSubscribers: [],
             accordionExpanded: true,
 
             attachments: [], //attachments picked
@@ -64,6 +60,8 @@ export default class Message extends Component {
 
             loading: false,
             error: "",
+            toastType: '',
+            toastMessage: ''
         }
     }
 
@@ -71,29 +69,25 @@ export default class Message extends Component {
         if (this.isReply)
             await this.replyInitializaton()
 
-        await this.fetchSuggestions()
+        this.fetchSuggestions()
     }
 
-    async fetchSuggestions() {
-        let query = db.collection('Users')
-        await fetchDocs(this, query, 'suggestions', '', () => { })
+    fetchSuggestions() {
+        const query = db.collection('Users')
+        fetchDocs(this, query, 'suggestions', '', () => { })
     }
 
-
-    async replyInitializaton() {
-        console.log('reply initialization...')
-        let { tagsSelected, subject, selectedMessage, oldMessages, previousFollowers } = this.state
+    replyInitializaton() {
+        let { tagsSelected, subject, oldMessages, previousSubscribers } = this.state
         tagsSelected = this.tagsSelected
         subject.value = 'RE: ' + this.props.navigation.getParam('subject', '')
-        selectedMessage = this.props.navigation.getParam('selectedMessage', {})
         oldMessages = this.props.navigation.getParam('oldMessages', [])
-        previousFollowers = this.props.navigation.getParam('followers', [])
-        await this.setState({ tagsSelected, subject, selectedMessage, oldMessages, previousFollowers })
+        previousSubscribers = this.props.navigation.getParam('subscribers', [])
+        this.setState({ tagsSelected, subject, oldMessages, previousSubscribers })
     }
 
     renderOldMessages() {
-        let { selectedMessage, oldMessages } = this.state
-
+        let { oldMessages, loading } = this.state
 
         return (
             <View style={{ marginBottom: 15, marginLeft: constants.ScreenWidth * 0.045 }}>
@@ -112,14 +106,13 @@ export default class Message extends Component {
                                     returnKeyType="done"
                                     value={'Le ' + sentAtDate + ' à ' + sentAtTime + ' \n ' + sender + ' a écrit : ' + '\n ' + message}
                                     onChangeText={text => {
-                                        let updatedOldMessages = oldMessages
                                         oldMessages.splice(key, 1)
-                                        this.setState({ oldMessages: updatedOldMessages })
+                                        this.setState({ oldMessages })
                                     }}
                                     multiline={true}
                                     theme={{ colors: { primary: '#fff', text: '#333' } }}
                                     selectionColor='#333'
-                                    editable={!this.state.loading}
+                                    editable={!loading}
                                 />
                             </View>
                         )
@@ -132,18 +125,18 @@ export default class Message extends Component {
 
     //PICKER
     async pickDocs() {
-        let attachments = this.state.attachments
+        let { attachments } = this.state
 
         try {
             const results = await DocumentPicker.pickMultiple({
                 type: [DocumentPicker.types.allFiles],
             })
 
-            var file
-
             for (const res of results) {
                 let fileCopied = false
                 let i = 0
+
+                console.log(results)
 
                 if (res.uri.startsWith('content://')) {
                     const uriComponents = res.uri.split('/')
@@ -157,7 +150,7 @@ export default class Message extends Component {
                     if (fileCopied) {
                         const document = {
                             path: destPath,
-                            type: 'application/pdf',
+                            type: res.type,
                             name: res.name,
                             size: res.size,
                             progress: 0
@@ -176,163 +169,122 @@ export default class Message extends Component {
             if (DocumentPicker.isCancel(err))
                 console.log('User has canceled picker')
             else
-                alert('Erreur lors de la séléction de fichier(s)')
+                Alert.alert('Erreur lors de la séléction de fichier(s)')
         }
     }
 
-    async uploadFiles() {
-        const promises = []
-        const files = this.state.attachments
-        let attachedFiles = []
-        console.log('2')
+    // async uploadFiles() {
+    //     const promises = []
+    //     const files = this.state.attachments
+    //     const reference = firebase.storage().ref('/Inbox/Messages/')
+    //     let attachedFiles = []
+    //     console.log('2')
 
-        for (let i = 0; i < files.length; i++) {
+    //     for (let i = 0; i < files.length; i++) {
 
-            console.log('3')
-            const reference = firebase.storage().ref('/Inbox/Messages/' + files[i].name)
-            const uploadTask = reference.putFile(files[i].path)
+    //         console.log('3')
+    //         const referenceFile = reference.child(files[i].name)
+    //         const uploadTask = referenceFile.putFile(files[i].path)
+    //         promises.push(uploadTask)
 
-            promises.push(uploadTask) //Use batch instead
+    //         uploadTask.on('state_changed', async function (snapshot) {
+    //             var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
+    //             console.log('Upload file ' + i + ': ' + progress + '% done')
+    //             files[i].progress = progress / 100
+    //             this.setState({ files })
+    //         }.bind(this))
 
-            uploadTask.on('state_changed', async function (snapshot) {
-                var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                console.log('Upload file ' + i + ': ' + progress + '% done')
-                files[i].progress = progress / 100
-                this.setState({ files })
-            }.bind(this))
+    //         uploadTask.then(() => console.log('task ' + i + ' finished'))
+    //     }
 
-            uploadTask.then(() => console.log('task ' + i + ' finished'))
+    //     console.log('4')
 
-        }
+    //     return await Promise.all(promises)
+    //         .then(async (results) => {
 
-        console.log('4')
+    //             for (let i = 0; i < results.length; i++) {
+    //                 const downloadURL = await reference.child(files[i].name).getDownloadURL()
+    //                 const { name, size, contentType } = results[i].metadata
+    //                 const attachedFile = { downloadURL, name, size, contentType }
+    //                 attachedFiles.push(attachedFile)
+    //             }
 
-        return await Promise.all(promises)
-            .then(async (result) => {
-                console.log(result)
-                console.log('4-1')
+    //             this.setState({ attachedFiles })
 
-                attachedFiles = result.map((res) => ({ downloadURL: res.downloadURL, name: res.metadata.name, size: res.metadata.size, contentType: res.metadata.contentType }))
-
-                console.log('4-2')
-                this.setState({ attachedFiles }, () => { console.log(this.state.attachedFiles) })
-
-                console.log('5')
-
-                console.log('ALL FILES ARE UPLOADED')
-                return true
-            })
-            .catch(err => {
-                load(this, false)
-                setToast(this, 'e', "Erreur lors de l'eportation des piéces jointes, veuillez réessayer.")
-            })
-    }
+    //             console.log('5')
+    //             console.log('ALL FILES ARE UPLOADED')
+    //             return true
+    //         })
+    //         .catch(err => {
+    //             load(this, false)
+    //             console.error(err)
+    //             setToast(this, 'e', "Erreur lors de l'eportation des piéces jointes, veuillez réessayer.")
+    //         })
+    // }
 
     renderAttachments() {
         let { attachments, loading } = this.state
 
         return attachments.map((document, key) => {
-            let icon = ''
-            let color = ''
-
-            switch (document.type) {
-                case 'application/pdf': {
-                    icon = 'pdf-box'
-                    color = '#da251b'
-                }
-                    break
-
-                case 'application/msword': {
-                    icon = 'file-word-box'
-                    color = '#295699'
-                }
-                    break
-
-                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
-                    icon = 'file-word-box'
-                    color = '#295699'
-                }
-                    break
-
-                case 'image/jpeg': {
-                    icon = 'image'
-                    color = theme.colors.primary
-                }
-                    break
-
-                case 'image/png': {
-                    icon = 'image'
-                    color = theme.colors.primary
-                }
-                    break
-
-                case 'application/zip':
-                    icon = 'zip'
-                    break
-
-                default:
-                    break
-            }
-
-            let readableSize = document.size / 1000
-            readableSize = readableSize.toFixed(2)
-
-            return (
-                <View style={{ flex: 1, elevation: 1, backgroundColor: theme.colors.gray50, width: '100%', borderRadius: 5, marginBottom: 5 }}>
-                    <View style={{ flex: 0.9, flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={{ flex: 0.17, justifyContent: 'center', alignItems: 'center' }}>
-                            <MaterialCommunityIcons name={icon} size={24} color={color} />
-                        </View>
-
-                        <View style={{ flex: 0.68 }}>
-                            <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{document.name}</Text>
-                            <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
-                        </View>
-
-                        <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
-                            {!loading && <MaterialCommunityIcons
-                                name='close'
-                                size={21}
-                                color={theme.colors.placeholder}
-                                style={{ paddingVertical: 19, paddingHorizontal: 5 }}
-                                onPress={() => {
-                                    attachments.splice(key, 1)
-                                    this.setState({ attachments })
-                                }}
-                            />}
-                        </View>
-                    </View>
-                    <View style={{ flex: 0.1, justifyContent: 'flex-end' }}>
-                        <ProgressBar progress={document.progress} color={theme.colors.primary} visible={true} />
-                    </View>
-                </View>
-            )
+            return <UploadProgress
+                attachment={document}
+                showRightIcon
+                rightIcon={
+                    <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
+                        {!loading && <MaterialCommunityIcons
+                            name='close'
+                            size={21}
+                            color={theme.colors.placeholder}
+                            style={{ paddingVertical: 19, paddingHorizontal: 5 }}
+                            onPress={() => {
+                                attachments.splice(key, 1)
+                                this.setState({ attachments })
+                            }}
+                        />}
+                    </View>}
+            />
         })
     }
 
+    validateInputs() {
+        let { tagsSelected, subject, message } = this.state
+
+        let tagsSelectedError = tagsSelected.length === 0 ? 'Aucun destinataire selectionné' : ''
+        let subjectError = nameValidator(subject.value, '"Sujet"')
+        let messageError = nameValidator(message.value, '"Message"')
+
+        if (tagsSelectedError || subjectError || messageError) {
+            Keyboard.dismiss()
+            load(this, false)
+            const error = tagsSelectedError || subjectError || messageError
+            setToast(this, 'e', error)
+
+            return false
+        }
+
+        return true
+    }
+
     handleSend = async () => {
-
-        //1. Validate inputs
-        //this.validateInputs()
-
+        const { loading, attachments } = this.state
         if (loading) return
         load(this, true)
+
+        //1. Validate inputs
+        const isValid = this.validateInputs()
+        if (!isValid) return
+
         this.title = 'Envoie du message...'
 
         //2. UPLOADING FILES: #task: delete all uploaded files in case one of them fails to upload.
-        console.log('1')
-        if (this.state.attachments.length > 0) {
-            // await this.uploadFiles()
-            const filesUploaded = await this.uploadFiles()
-            console.log('filesUploaded: ' + filesUploaded)
+        if (attachments.length > 0) {
+            const reference = firebase.storage().ref('/Inbox/Messages/')
+            const filesUploaded = await this.uploadFiles(attachments, reference, this.state.attachedFiles)
             if (!filesUploaded) return
         }
 
-        console.log('6')
-
         //3. ADDING MESSAGE DOCUMENT
-        let { error, loading } = this.state
-        let { tagsSelected, subject, message, messagesCount, oldMessages, previousFollowers, attachedFiles } = this.state
+        let { tagsSelected, subject, message, messagesCount, oldMessages, previousSubscribers, attachedFiles } = this.state
 
         //Sender of this message
         let sender = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
@@ -345,46 +297,44 @@ export default class Message extends Component {
         //Speakers: Sender & receivers of this message
         let speakers = receivers.concat([{ id: this.currentUser.uid, fullName: this.currentUser.displayName }])
 
-        //UNION: concat previous followers and new followers (if there is new ones)
-        let followers = speakers.map(speaker => speaker.id)
-        followers = followers.concat(previousFollowers)
-        followers = [...new Set([...followers, ...previousFollowers])]
+        //UNION: concat previous subscribers and new subscribers (if there is new ones)
+        let subscribers = speakers.map(speaker => speaker.id)
+        subscribers = subscribers.concat(previousSubscribers)
+        subscribers = [...new Set([...subscribers, ...previousSubscribers])]
 
-        //Initialize haveRead list: currentUser + followers who will not receive this message
+        //Initialize haveRead list: currentUser + subscribers who will not receive this message
         const receiversId = receivers.map((receiver) => receiver.id)
-        let nonReceivers = followers.filter(f => !receiversId.includes(f))
+        let nonReceivers = subscribers.filter(f => !receiversId.includes(f))
         let haveRead = [this.currentUser.uid]
         haveRead = haveRead.concat(nonReceivers)
 
         //set oldMessages
         oldMessages = oldMessages.filter((msg) => msg !== '')
 
-        let latestMessage = {
+        const latestMessage = {
             sender: sender,
             receivers: receivers, // receivers of the last message
             //speakers: speakers, //sender + receivers
-            followers: followers, //sender + receivers IDs // accumulation: ALL users involved in the discussion
+            subscribers: subscribers, //sender + receivers IDs // accumulation: ALL users involved in the discussion
             mainSubject: subject.value,
             message: message.value,
             sentAt: moment().format('lll'),
             messagesCount: messagesCount + 1,
-            haveRead: haveRead //Add followers who are not receivers of this message (followers - receivers)
+            haveRead: haveRead //Add subscribers who are not receivers of this message (subscribers - receivers)
         }
 
         // if (!this.isReply)
         //     latestMessage.mainSubject = subject.value
 
-        let msg = {
+        const msg = {
             sender: sender,
             receivers: receivers,
             speakers: speakers, //sender + receivers of the current message
-            //followers: followers, //sender + receivers IDs
+            //subscribers: subscribers, //sender + receivers IDs
             subject: subject.value,
             message: message.value,
             sentAt: moment().format('lll'),
-
             oldMessages: oldMessages,
-
             attachments: this.state.attachedFiles
         }
 
@@ -399,41 +349,43 @@ export default class Message extends Component {
         this.props.navigation.goBack()
     }
 
-    async sendReply(latestMessage, msg) {
-        await db.collection('Messages').doc(this.messageGroupeId).collection('AllMessages').add(msg)
-            .then((docRef) => db.collection('Messages').doc(this.messageGroupeId).set(latestMessage, { merge: true }))
-            .then(() => {
-                load(this, false)
-                setToast(this, 'i', 'Message envoyé !')
-            })
-            .catch((e) => {
-                load(this, false)
-                setToast(this, 'e', 'Erreur de connection avec la Base de données')
-            })
+    async sendNewMessage(latestMessage, msg) {
+        try {
+            const docRef = await db.collection('Messages').add(latestMessage)
+            await db.collection('Messages').doc(docRef.id).collection('AllMessages').add(msg)
+            load(this, false)
+            setToast(this, 'i', 'Message envoyé !')
+        }
+
+        catch (e) {
+            load(this, false)
+            setToast(this, 'e', 'Erreur de connection avec la Base de données')
+        }
     }
 
-    async sendNewMessage(latestMessage, msg) {
-        await db.collection('Messages').add(latestMessage)
-            .then((docRef1) => db.collection('Messages').doc(docRef1.id).collection('AllMessages').add(msg))
-            .then(() => {
-                load(this, false)
-                setToast(this, 'i', 'Message envoyé !')
-            })
-            .catch((e) => {
-                load(this, false)
-                setToast(this, 'e', 'Erreur de connection avec la Base de données')
-            })
+    async sendReply(latestMessage, msg) {
+        try {
+            const docRef = await db.collection('Messages').doc(this.messageGroupeId).collection('AllMessages').add(msg)
+            await db.collection('Messages').doc(this.messageGroupeId).set(latestMessage, { merge: true })
+            load(this, false)
+            setToast(this, 'i', 'Message envoyé !')
+        }
+
+        catch (e) {
+            load(this, false)
+            setToast(this, 'e', 'Erreur de connection avec la Base de données')
+        }
     }
 
     render() {
-        let { subject, message, suggestions, tagsSelected, accordionExpanded, oldMessages, loading } = this.state
+        let { tagsSelected, subject, message, suggestions, accordionExpanded, oldMessages, loading, toastType, toastMessage } = this.state
 
         return (
             <View style={styles.container}>
                 <Appbar back close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading} handleAttachement={this.pickDocs.bind(this)} />
                 <ScrollView style={styles.form}>
 
-                    <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight*0.01 }}>
+                    <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>
                         <View style={{ flexDirection: 'row' }}>
                             <Text>De         </Text>
                             <Text>{this.currentUser.displayName}</Text>
@@ -463,7 +415,7 @@ export default class Message extends Component {
                         error={!!subject.error}
                         errorText={subject.error}
                         editable={!this.isReply && !loading}
-                        style= {{marginTop: 15}}
+                        style={{ marginTop: 15 }}
                     />
 
                     <View style={{ flex: 1, backgroundColor: '#fff', elevation: 0 }}>
@@ -513,8 +465,14 @@ export default class Message extends Component {
                     }
 
                 </ScrollView>
+
+                <Toast
+                    containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })} />
             </View >
-        );
+        )
     }
 }
 

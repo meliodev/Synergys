@@ -11,7 +11,7 @@ import Loading from '../../components/Loading'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { load, myAlert, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { fetchDocs } from '../../api/firestore-api';
 
@@ -41,7 +41,6 @@ const db = firebase.firestore()
 class ListProjects extends Component {
     constructor(props) {
         super(props)
-        this.myAlert = myAlert.bind(this)
         this.onPressProject = this.onPressProject.bind(this)
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
@@ -74,10 +73,7 @@ class ListProjects extends Component {
         requestRESPermission()
 
         let query = db.collection('Projects').where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        await fetchDocs(this, query, 'projectsList', 'projectsCount', () => {
-            this.setState({ filteredProjects: this.state.projectsList })
-            load(this, false)
-        })
+        await fetchDocs(this, query, 'projectsList', 'projectsCount', () => load(this, false))
     }
 
     renderProject(project) {
@@ -86,7 +82,7 @@ class ListProjects extends Component {
 
     onPressProject(project) {
         if (this.isRoot)
-            this.props.navigation.navigate('CreateProject', { isEdit: true, title: 'Modifier le projet', ProjectId: project.id })
+            this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
 
         else {
             this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name })
@@ -94,12 +90,12 @@ class ListProjects extends Component {
         }
     }
 
-    sendEmail() {
-        const sendEmail = firebase.functions().httpsCallable('sendEmail')
-        sendEmail({})
-            .then(result => console.log(result))
-            .catch(err => console.error(err))
-    }
+    // sendEmail() {
+    //     const sendEmail = firebase.functions().httpsCallable('sendEmail')
+    //     sendEmail({})
+    //         .then(result => console.log(result))
+    //         .catch(err => console.error(err))
+    // }
 
     render() {
         let { projectsCount, projectsList, loading } = this.state
@@ -112,16 +108,14 @@ class ListProjects extends Component {
         const filterCount = this.filteredProjects.length
         const filterActivated = filterCount < projectsCount
 
-        let s = ''
-        if (filterCount > 1)
-            s = 's'
+        const s = filterCount > 1 ? 's' : ''
 
         return (
             <View style={styles.container}>
                 <SearchBar
                     close={!this.isRoot}
                     main={this}
-                    title={!this.state.showInput}
+                    title={!showInput}
                     titleText={this.titleText}
                     placeholder='Rechercher un projet'
                     showBar={showInput}
@@ -130,7 +124,7 @@ class ListProjects extends Component {
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 
-                <Text onPress={this.sendEmail} style={{ marginVertical: 100 }}>Send email</Text>
+                {/* <Text onPress={this.sendEmail} style={{ marginVertical: 100 }}>Send email</Text> */}
 
                 {filterActivated && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
 

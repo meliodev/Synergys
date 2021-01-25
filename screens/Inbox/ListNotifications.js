@@ -30,7 +30,9 @@ class ListNotifications extends Component {
     }
 
     async componentDidMount() {
-        let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'asc')
+        let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications')
+        //.where('deleted', '==', false)
+        //.orderBy('sentAt', 'asc')
         await fetchDocs(this, query, 'notificationsList', 'notificationsCount', () => { })
     }
 
@@ -49,7 +51,8 @@ class ListNotifications extends Component {
     }
 
     markAsReadAndNavigate = async (notification) => {
-        const { screen, params } = notification.navigation
+        const params = notification.navigation
+        const screen = params.screen
 
         if (!notification.read) {
             await db.collection('Users').doc(this.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })

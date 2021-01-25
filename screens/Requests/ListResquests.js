@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, ScrollView, FlatList } from 'react-native';
+import { StyleSheet, View, FlatList } from 'react-native';
 import { List, Card, Paragraph, Title } from 'react-native-paper';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
 
 import MyFAB from '../../components/MyFAB'
 import RequestItem from '../../components/RequestItem'
-import Button from '../../components/Button'
+import EmptyList from '../../components/EmptyList'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { myAlert } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
@@ -24,7 +22,6 @@ const db = firebase.firestore()
 class ListRequests extends Component {
     constructor(props) {
         super(props)
-        this.myAlert = myAlert.bind(this)
 
         this.state = {
             requestsList: [],
@@ -39,27 +36,29 @@ class ListRequests extends Component {
     }
 
     renderTicketRequest(request) {
-        return <RequestItem request={request} requestType={this.props.requestType} chatId={request.chatId} handleAccept={this.handleAccept} handleReject={this.handleReject} />
+        return <RequestItem request={request} requestType={this.props.requestType} chatId={request.chatId} />
     }
 
     render() {
         let { requestsCount, requestsList } = this.state
-
-        let s = ''
-        if (requestsCount > 1)
-            s = 's'
-
+        const s = requestsCount > 1 ? 's' : ''
         const filteredRequests = requestsList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
 
         return (
             <View style={{ flex: 1 }}>
                 {requestsCount > 0 && <List.Subheader>{requestsCount} nouvelle{s} demande{s}</List.Subheader>}
-                <FlatList
-                    enableEmptySections={true}
-                    data={filteredRequests}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({ item }) => this.renderTicketRequest(item)}
-                    contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
+
+                {requestsCount > 0 ?
+                    <FlatList
+                        enableEmptySections={true}
+                        data={filteredRequests}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) => this.renderTicketRequest(item)}
+                        contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
+                    :
+                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' />
+                }
+
                 <MyFAB onPress={() => this.props.navigation.navigate(this.props.creationScreen)} />
             </View>
         );

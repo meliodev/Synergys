@@ -4,14 +4,10 @@ import React from "react"
 import { View } from 'react-native'
 
 import TabView from '../../components/TabView'
-import SearchBar from '../../components/SearchBar'
 import Appbar from '../../components/Appbar'
 
 import ListNotifications from './ListNotifications'
 import ListMessages from './ListMessages'
-
-import firebase from '@react-native-firebase/app'
-const db = firebase.firestore()
 
 class Inbox extends React.Component {
 

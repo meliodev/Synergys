@@ -63,12 +63,16 @@ class AuthLoadingScreen extends Component {
       }
     })
 
-    //Auth listener
-    this.unsububscribe = firebase.auth().onAuthStateChanged(async user => {
+    //Auth listener & Navigation rooter
+    this.unsububscribe = this.navigationRooterAuthListener()
+  }
+
+  navigationRooterAuthListener() {
+    firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        await firebase.auth().currentUser.reload() //sometimes user is not refreshed (exp: after displayname or email update)
         const currentUser = firebase.auth().currentUser
         setUser(this, currentUser.displayName, true)
+
         const idTokenResult = await currentUser.getIdTokenResult().catch(() => Alert.alert('Pas de données en cache pour un fonctionnement Hors-Ligne. Veuillez vous connecter à internet.'))
 
         roles.forEach((role) => {
@@ -85,7 +89,7 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("ProjectsStack")
+          this.props.navigation.navigate("OrdersStack")
       }
 
       else {

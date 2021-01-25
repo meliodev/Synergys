@@ -9,6 +9,7 @@ import { constants } from '../../core/constants';
 import Appbar from '../../components/Appbar'
 import AutoCompleteProducts from '../../components/AutoCompleteProducts'
 import MyInput from '../../components/TextInput'
+import Picker from "../../components/Picker"
 
 import { updateField, nameValidator, arrayValidator, priceValidator, setToast, load } from "../../core/utils";
 import { fetchDocs } from '../../api/firestore-api';
@@ -16,7 +17,7 @@ import firebase from '@react-native-firebase/app';
 
 const db = firebase.firestore()
 
-export default class template extends Component {
+export default class AddItem extends Component {
     constructor(props) {
         super(props)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -28,19 +29,42 @@ export default class template extends Component {
             description: { value: "", error: '' },
             quantity: { value: '', error: '' },
             price: { value: '', error: '' },
+            taxe: { name: '', rate: '', value: '' },
 
             tagsSelected: [],
             suggestions: [],
+            taxes: [{ label: 'Taxe 5  [75%]', value: '' }],
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        load(this, true)
+        this.fetchTaxes()
         this.fetchSuggestions()
     }
 
-    async fetchSuggestions() {
-        let query = db.collection('Products')
-        await fetchDocs(this, query, 'suggestions', '', () => { }) //load(this, false)
+    componentWillUnmount() {
+        this.unsubscribeTaxes()
+    }
+
+    fetchSuggestions() {
+        const query = db.collection('Products')
+        fetchDocs(this, query, 'suggestions', '', () => { load(this, false) })
+    }
+
+    fetchTaxes() {
+        this.unsubscribeTaxes = db.collection('Taxes').orderBy('rate', 'asc').onSnapshot((querysnapshot) => {
+            let taxes = [{ label: 'Selectionnez une taxe', value: '' }]
+
+            if (querysnapshot.empty) return
+            querysnapshot.forEach((doc) => {
+                const data = doc.data()
+                const taxe = { label: `${data.name}  [${data.rate}%]`, value: data.rate }
+                taxes.push(taxe)
+                this.setState({ taxes })
+                console.log(this.state.taxes)
+            })
+        })
     }
 
     validateInputs() {
@@ -73,13 +97,16 @@ export default class template extends Component {
         if (!isValid) return
 
         // 1. ADDING product to firestore
-        let { tagsSelected, description, quantity, price } = this.state
+        let { tagsSelected, description, quantity, price, taxe } = this.state
+        const taxeValue = (taxe.rate / 100) * price.value * quantity.value
+        taxe.value = taxeValue
 
         let orderLine = {
             product: tagsSelected[0],
             description: description.value,
             quantity: quantity.value,
             price: price.value,
+            taxe: taxe
         }
 
         this.props.navigation.state.params.onGoBack(orderLine)
@@ -95,7 +122,7 @@ export default class template extends Component {
     }
 
     render() {
-        const { item, description, suggestions, tagsSelected, quantity, price, loading } = this.state
+        const { item, description, suggestions, tagsSelected, taxes, quantity, price, taxe, loading } = this.state
         const noItemSelected = tagsSelected.length === 0
 
         return (
@@ -164,8 +191,24 @@ export default class template extends Component {
                                     errorText={price.error}
                                 />
                             </View>
-
                         </View>
+
+                        <View>
+                            <Picker
+                                label="Taxe"
+                                returnKeyType="next"
+                                selectedValue={taxe.rate}
+                                onValueChange={(text, index) => {
+                                    this.setState({ taxe: { name: taxes[index].label, rate: text, value: '' } })
+                                }}
+                                title="Taxe"
+                                elements={taxes}
+                            />
+                            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTaxe')}>
+                                <Text style={[theme.customFontMSmedium.body, { color: theme.colors.primary }]}>+  Ajouter une taxe</Text>
+                            </TouchableOpacity>
+                        </View>
+
 
                     </Card.Content>
                 </Card>

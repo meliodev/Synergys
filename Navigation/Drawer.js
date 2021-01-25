@@ -1,27 +1,24 @@
 import React, { Component } from 'react'
-import { StyleSheet, SafeAreaView, StatusBar, Text, Alert, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
-import { Avatar } from 'react-native-paper'
+import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
 import AvatarText from '../components/AvatarText'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '@react-native-firebase/app'
-import { logoutUser } from '../api/auth-api'
-
 import { connect } from 'react-redux'
+
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
-import { setRole } from '../core/utils';
 
 const screenWidth = Dimensions.get('window').width
 const screenHeight = Dimensions.get('window').height
 
 //Admin menu
 const arrMenuAdmin = [
-    { 'id': 0, name: 'Accueil', 'icon': 'home', 'color': '#64B5F6', 'navScreen': 'ProjectsStack' },
+    { 'id': 0, name: 'Accueil', 'icon': 'home', 'color': 'green', 'navScreen': 'ProjectsStack' },
     { 'id': 1, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'color': '#EF6C00', 'navScreen': 'InboxStack' },
     { 'id': 2, name: 'Projets', 'icon': 'alpha-p-box', 'color': '#3F51B5', 'navScreen': 'ProjectsStack' }, //Create
     { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'AgendaStack' },
-    { 'id': 4, name: 'Utilisateurs', 'icon': 'account-multiple-outline', 'color': '#2E7D32', 'navScreen': 'UsersManagementStack' },
+    { 'id': 4, name: 'Utilisateurs', 'icon': 'account-multiple-outline', 'color': '#3b5998', 'navScreen': 'UsersManagementStack' },
     { 'id': 5, name: 'Gestion des demandes', 'icon': 'arrow-left-bold', 'color': '#AD1457', 'navScreen': 'RequestsManagementStack' },//Create
     { 'id': 6, name: 'Gestion des commandes', 'icon': 'file-document-edit-outline', 'navScreen': 'OrdersStack' }, //Create
     { 'id': 7, name: 'Documents', 'icon': 'file-document', 'color': '#6D4C41', 'navScreen': 'DocumentsStack' }, //Create
@@ -82,12 +79,29 @@ const arrMenuClient = [
     { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
 ]
 
+const db = firebase.firestore()
 
 class DrawerMenu extends React.Component {
 
     constructor(props) {
         super(props)
-        this.navigateToScreen = this.navigateToScreen.bind(this);
+        this.navigateToScreen = this.navigateToScreen.bind(this)
+
+        this.state = {
+            notificationCount: 0
+        }
+    }
+
+    componentDidMount() {
+        this.setNotificationBadge()
+    }
+
+    setNotificationBadge(uid) {
+        db.collection('Users').doc(firebase.auth().currentUser.uid).collection('Notifications').where('deleted', '==', false).where('read', '==', false)
+            .onSnapshot((querysnapshot) => {
+                const notificationCount = querysnapshot.docs.length
+                this.setState({ notificationCount })
+            })
     }
 
     render() {
@@ -101,7 +115,7 @@ class DrawerMenu extends React.Component {
                     <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
                         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                             <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
-                                {user.displayName && <AvatarText size={constants.ScreenWidth * 0.1} label={user.connected ? user.displayName.charAt(0) : ''} />}
+                                {user.displayName && <AvatarText size={constants.ScreenWidth * 0.11} label={user.connected ? user.displayName.charAt(0) : ''} />}
                             </View>
 
                             <View style={{ flex: 0.8 }}>
@@ -176,6 +190,7 @@ class DrawerMenu extends React.Component {
     renderFlatList() {
 
         // let arrMenu = this.setMenuItems()
+        const { notificationCount } = this.state
 
         return (
             <FlatList
@@ -191,7 +206,7 @@ class DrawerMenu extends React.Component {
                                 .catch((e) => console.error(e))}
                             //   style={{backgroundColor: this.props.navigation.state.routeName === ''}}
                             >
-                                <View style={{ height: screenHeight * 0.08, marginTop: screenHeight * 0.19, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                <View style={{ height: screenHeight * 0.077, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                                     <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
                                     <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
                                 </View>
@@ -200,14 +215,16 @@ class DrawerMenu extends React.Component {
 
                     else return (
                         <TouchableOpacity onPress={() => this.navigateToScreen(item.navScreen)}>
-                            <View style={{ height: screenHeight * 0.08, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+                            <View style={{ height: screenHeight * 0.077, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
                                 <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
-                                {item.name === 'Boite de réception' || item.name === 'Gestion des demandes' ?
+                                {item.name === 'Boite de réception' ?
                                     <View style={{ flexDirection: 'row' }}>
                                         <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
-                                        <View style={{ backgroundColor: '#00ACC1', borderRadius: 20, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 5 }}>
-                                            <Text style={[theme.customFontMSmedium.caption, { fontSize: 8, color: '#fff' }]}>BETA</Text>
-                                        </View>
+                                        {notificationCount > 0 &&
+                                            <View style={{ backgroundColor: '#00ACC1', borderRadius: 10, justifyContent: 'center', alignItems: 'center', width: 20, height: 20 }}>
+                                                <Text style={[theme.customFontMSmedium.caption, { fontSize: 8, color: '#fff' }]}>{notificationCount}</Text>
+                                            </View>
+                                        }
                                     </View>
                                     :
                                     <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
@@ -266,8 +283,8 @@ const styles = StyleSheet.create({
         height: 30,
         position: 'absolute',
         bottom: 10,
-        left: 0,
-        right: 0
+        // left: 0,
+        right: 10
     },
     footerText: {
         fontSize: 16,

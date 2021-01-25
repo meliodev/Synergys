@@ -1,25 +1,23 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native'
 import { List } from 'react-native-paper';
-
+import { withNavigation } from 'react-navigation'
 import firebase from '@react-native-firebase/app'
-import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
 
 import MessageItem from '../../components/MessageItem'
 import MyFAB from '../../components/MyFAB'
+import EmptyList from '../../components/EmptyList'
+
+import * as theme from '../../core/theme'
+import { constants } from '../../core/constants'
 
 import { fetchDocs } from "../../api/firestore-api";
-import { myAlert } from "../../core/utils";
-
-import { withNavigation } from 'react-navigation'
 
 const db = firebase.firestore()
 
 class ListMessages extends Component {
     constructor(props) {
         super(props)
-        this.myAlert = myAlert.bind(this)
         this.markAsReadAndNavigate = this.markAsReadAndNavigate.bind(this)
         this.currentUser = firebase.auth().currentUser
 
@@ -30,7 +28,8 @@ class ListMessages extends Component {
     }
 
     async componentDidMount() {
-        let query = db.collection('Messages').where('followers', 'array-contains', this.currentUser.uid).orderBy('sentAt', 'DESC')
+        let query = db.collection('Messages').where('subscribers', 'array-contains', this.currentUser.uid)
+        //.orderBy('sentAt', 'DESC')
         await fetchDocs(this, query, 'messagesList', 'messagesCount', () => { })
     }
 
@@ -68,14 +67,18 @@ class ListMessages extends Component {
         return (
             <View style={styles.container}>
                 <List.Subheader>{messagesCount} message{s}</List.Subheader>
-                <FlatList
-                    style={styles.root}
-                    contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
-                    data={this.state.messagesList}
-                    extraData={this.state}
-                    keyExtractor={(item) => { return item.id }}
-                    renderItem={(item) => this.renderMessage(item)}
-                />
+                {messagesCount > 0 ?
+                    < FlatList
+                        style={styles.root}
+                        contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
+                        data={this.state.messagesList}
+                        extraData={this.state}
+                        keyExtractor={(item) => { return item.id }}
+                        renderItem={(item) => this.renderMessage(item)}
+                    />
+                    :
+                    <EmptyList iconName='email' header='Notifications' description="Vous n'avez aucune notification pour le moment." />
+                }
                 <MyFAB icon='pencil' onPress={() => this.props.navigation.navigate('NewMessage')} />
             </View >
         )

@@ -11,7 +11,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 import FileViewer from 'react-native-file-viewer'
 import { decode as atob, encode as btoa } from "base-64"
 import SearchInput, { createFilter } from 'react-native-search-filter'
-
+import * as theme from './theme'
 
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;
@@ -74,6 +74,41 @@ export const checkPlural = (arrayLength, string) => {
   return str
 }
 
+export const setAttachmentIcon = (type) => {
+
+  switch (type) {
+    case 'application/pdf':
+      return { name: 'pdf-box', color: '#da251b' }
+      break
+
+    case 'application/msword':
+      return { name: 'file-word-box', color: '#295699' }
+      break
+
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+      return { name: 'file-word-box', color: '#295699' }
+      break
+
+    case 'image/jpeg':
+      return { name: 'image', color: theme.colors.primary }
+      break
+
+    case 'image/png':
+      return { name: 'image', color: theme.colors.primary }
+      break
+
+
+    case 'application/zip':
+      return { name: 'zip', color: theme.colors.primary }
+      break
+
+    default:
+      return { name: 'image', color: theme.colors.primary }
+      break
+  }
+
+}
+
 
 // export const generatetId = async (main, projectRequestId, docId, field, suffix) => {
 //   main.unsubscribe = await firebase.firestore().collection('IdCounter').doc(docId).onSnapshot((doc) => {
@@ -102,10 +137,9 @@ export const generatetId = (suffix) => {
   return customId
 }
 
-export const uuidGenerator = () => {
-  return UUIDGenerator.getRandomUUID().then((uuid) => {
-    return uuid
-  })
+export const uuidGenerator = async () => {
+  const uuid = await UUIDGenerator.getRandomUUID()
+  return uuid
 }
 
 export const updateField = (main, field, text) => {
@@ -134,7 +168,7 @@ export const downloadFile = async (main, fileName, url) => { //#task configure f
   try {
     const { config, fs } = RNFetchBlob
     const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
-    const path = `${Dir}/Synergys/Documents/Messagerie/${fileName}`
+    const path = `${Dir}/Synergys/Documents/${fileName}`
 
     let fileExist = await RNFetchBlob.fs.exists(path)
 

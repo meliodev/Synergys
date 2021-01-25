@@ -16,6 +16,8 @@ import Store from './Store/configureStore'
 import RootController from './Navigation/DrawerNavigator'
 import CustomClaims from './api/CustomClaims'
 
+import Video from './VideoPlayer'
+
 const db = firebase.firestore()
 
 class App extends Component {
@@ -34,7 +36,7 @@ class App extends Component {
       importance: AndroidImportance.DEFAULT,
     })
 
-   await notifee.displayNotification(JSON.parse(message.data.notifee))
+    await notifee.displayNotification(JSON.parse(message.data.notifee))
   }
 
   componentWillUnmount() {
@@ -45,6 +47,7 @@ class App extends Component {
     return (
       <Provider store={Store}>
         <MenuProvider>
+          {/* <Video /> */}
           <RootController />
         </MenuProvider>
       </Provider>

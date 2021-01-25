@@ -12,20 +12,20 @@ const db = firebase.firestore()
 
 export const fetchDocs = async (main, query, MyList, MyCount, MyCallBack) => {
   console.log('Fetching docs...')
+  console.log('List', MyList)
 
   main.unsubscribe = await query.onSnapshot((querysnapshot) => {
     let docsList = []
     let docsCount = 0
+    if (querysnapshot)
+      querysnapshot.forEach((doc) => {
 
-    if (querysnapshot.empty) return
-
-    querysnapshot.forEach((doc) => {
-      let id = doc.id
-      let document = doc.data()
-      document.id = id
-      docsList.push(document)
-      docsCount = docsCount + 1
-    })
+        let id = doc.id
+        let document = doc.data()
+        document.id = id
+        docsList.push(document)
+        docsCount = docsCount + 1
+      })
 
     const update1 = {}
     update1[MyList] = docsList

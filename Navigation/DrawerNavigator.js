@@ -1,20 +1,23 @@
 import React, { Component } from 'react'
 import firebase from '@react-native-firebase/app'
 
-import { createAppContainer, NavigationEvents } from 'react-navigation';
+import { createAppContainer, createSwitchNavigator, NavigationEvents } from 'react-navigation';
 import { createDrawerNavigator } from 'react-navigation-drawer';
+import { createStackNavigator } from 'react-navigation-stack';
 
-import { AuthNavigator, AdminStackNavigator } from './StackNavigators'
+import { AuthStack, AppStack } from './StackNavigators'
+import AuthLoadingScreen from '../screens/Authentication/AuthLoadingScreen'
 
 import { constants } from '../core/constants'
 import DrawerMenu from './Drawer'
 
-const DrawerNavigator = createDrawerNavigator({ 
-  Authentication: AuthNavigator,
-  AdminStack: AdminStackNavigator,
+const AppDrawer = createDrawerNavigator({
+  App: {
+    screen: AppStack,
+    path: ''
+  }
 }
   , {
-    initialRouteName: 'Authentication',
     contentComponent: props => <DrawerMenu role={props} {...props} />,
     drawerLockMode: "locked-closed",
     drawerWidth: constants.ScreenWidth * 0.83,
@@ -26,4 +29,21 @@ const DrawerNavigator = createDrawerNavigator({
     },
   })
 
-export default createAppContainer(DrawerNavigator)
+const MainSwitch = createSwitchNavigator(
+  {
+    Starter: AuthLoadingScreen,
+    App: AppDrawer,
+    Auth: AuthStack
+  },
+  {
+    initialRouteName: 'Starter'
+  }
+)
+
+const App = createAppContainer(MainSwitch)
+
+const prefix = /https:\/\/synergys.page.link\/|synergys:\/\//
+
+const MainApp = () => <App uriPrefix={prefix} />
+
+export default MainApp

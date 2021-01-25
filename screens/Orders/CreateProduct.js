@@ -417,7 +417,6 @@ class CreateProduct extends Component {
                                 </View>)}
                         />
 
-
                         <Toast
                             message={toastMessage}
                             type={toastType}

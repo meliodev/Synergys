@@ -21,17 +21,17 @@ const db = firebase.firestore()
 const MessageItem = ({ message, navigation, options, functions, ...props }) => {
     const currentUser = firebase.auth().currentUser
     let haveRead = message.haveRead.find((id) => id === currentUser.uid)
-    const isCurrentUserReceiver = message.receivers.find((receiver) => receiver.id === currentUser.uid)
     const isCurrentuserSender = message.sender.id === currentUser.uid
-    const showMessageDescription = isCurrentUserReceiver || isCurrentuserSender  //currentUser is speaker ?
+    const isCurrentUserReceiver = message.receivers.find((receiver) => receiver.id === currentUser.uid)
+    const showMessageDescription = isCurrentuserSender || isCurrentUserReceiver  //currentUser is speaker ?
 
-    const markAsReadAndNavigate = async (message) => {
+    const markAsReadAndNavigate = (message) => {
         let haveRead = message.haveRead.find((id) => id === currentUser.uid)
 
         if (!haveRead) {
             let usersHaveRead = message.haveRead
             usersHaveRead = usersHaveRead.concat([currentUser.uid])
-            await db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
+            db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
         }
 
         navigation.navigate('ViewMessage', { message: message })
@@ -40,8 +40,8 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
     return (
         <List.Item
             title={
-                <View style= {{flexDirection: 'row'}}>
-                    <Text style= {{fontSize: 16, fontWeight: 'bold'}}>{message.sender.fullName}</Text>
+                <View style={{ flexDirection: 'row' }}>
+                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{message.sender.fullName}</Text>
                 </View>
             }
             description={() => (
@@ -52,9 +52,9 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
                     <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>
                         {showMessageDescription ? message.message : ' '}
                     </Text>
-                </View> 
+                </View>
             )}
-            // left={props => <List.Icon {...props} icon="email" />}
+
             left={props =>
                 <View style={{ justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 }}>
                     <AvatarText label={message.sender.fullName.charAt(0)} size={42} />
@@ -63,7 +63,7 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
 
             right={props =>
                 <View style={{ alignItems: 'center', paddingTop: 9, marginRight: 5 }}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder}]}>{moment(message.sentAt).format("Do MMM")}</Text>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{moment(message.sentAt).format("Do MMM")}</Text>
                     {/* <Menu
                         options={[
                             { id: 0, title: 'Voir le message' },
@@ -77,6 +77,7 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
                     /> */}
                 </View>
             }
+            
             style={{ backgroundColor: haveRead ? '#fff' : '#DCEDC8' }}
         />
     )

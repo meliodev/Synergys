@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, ScrollView, TouchableOpacity } from 'react-native';
-import { Card, Title, FAB } from 'react-native-paper'
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
+import { Card, Title } from 'react-native-paper'
 import firebase from '@react-native-firebase/app';
 
 import moment from 'moment';
@@ -12,10 +11,13 @@ import MyInput from '../../components/TextInput'
 import Appbar from '../../components/Appbar'
 import Picker from "../../components/Picker";
 import RequestState from "../../components/RequestState";
+import Toast from "../../components/Toast";
+import MyFAB from "../../components/MyFAB";
+import Loading from "../../components/Loading";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generatetId, myAlert, updateField } from "../../core/utils";
+import { generatetId, myAlert, updateField, nameValidator, uuidGenerator, setToast, load } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -43,14 +45,11 @@ class CreateRequest extends Component {
         this.isInit = true
         this.currentUser = firebase.auth().currentUser
         this.requestType = this.props.requestType
-        this.isTicket = false
+        this.isTicket = this.requestType === 'ticket' ? true : false
         //this.isProject = false
 
-        if (this.requestType === 'ticket')
-            this.isTicket = true
-
         this.RequestId = this.props.navigation.getParam('RequestId', '')
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
+        this.isEdit = this.RequestId ? true : false
 
         this.state = {
             idCount: 0,
@@ -65,12 +64,14 @@ class CreateRequest extends Component {
             state: 'En attente',
 
             createdAt: '',
-            createdBy: { userId: '', userName: '' },
+            createdBy: { id: '', userName: '' },
             editedAt: '',
-            editedBy: { userId: '', userName: '' },
+            editedBy: { id: '', userName: '' },
 
             error: '',
-            loading: false
+            loading: false,
+            toastMessage: '',
+            toastType: ''
         }
     }
 
@@ -81,47 +82,38 @@ class CreateRequest extends Component {
 
         //Creation
         else {
-            let RequestId = ''
-            if (this.isTicket)
-                RequestId = generatetId('GS-DTC-')
-
-            else
-                RequestId = generatetId('GS-DPR-')
-
-            this.setState({ RequestId }, () =>  this.initialState = this.state)
+            const RequestId = this.isTicket ? generatetId('GS-DTC-') : generatetId('GS-DPR-')
+            this.setState({ RequestId }, () => this.initialState = this.state)
         }
     }
 
-    componentWillUnmount() {
-        //  this.unsubscribe1()
-    }
-
     fetchRequest() {
-        db.collection('Requests').doc(this.RequestId).onSnapshot((doc) => {
+        db.collection('Requests').doc(this.RequestId).get().then((doc) => {
             let { RequestId, department, client, subject, state, description, address } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
-            console.log(createdBy)
+
+            const request = doc.data()
             //General info
-            RequestId = this.RequestId
+            RequestId = doc.id
             client = client
-            subject.value = doc.data().subject
-            description.value = doc.data().description
-            this.chatId = doc.data().chatId
+            subject.value = request.subject
+            description.value = request.description
+            this.chatId = request.chatId
 
             //َActivity
-            createdAt = doc.data().createdAt
-            createdBy = doc.data().createdBy
-            editedAt = doc.data().editedAt
-            editedBy = doc.data().editedBy
+            createdAt = request.createdAt
+            createdBy = request.createdBy
+            editedAt = request.editedAt
+            editedBy = request.editedBy
 
             //State
-            state = doc.data().state
+            state = request.state
 
             if (this.isTicket)
-                department = doc.data().department
+                department = request.department
 
             else
-                address = doc.data().address
+                address = request.address
 
             this.setState({ createdAt, createdBy, editedAt, editedBy })
             this.setState({ RequestId, client, department, subject, description, address, state }, () => {
@@ -134,18 +126,8 @@ class CreateRequest extends Component {
     }
 
     refreshClient(isPro, id, nom, prenom) {
-        let fullName = ''
-        let client = { id: '', fullName: '' }
-
-        if (isPro)
-            fullName = nom
-
-        else
-            fullName = prenom + ' ' + nom
-
-        client.id = id
-        client.fullName = fullName
-
+        const fullName = isPro ? nom : prenom + ' ' + nom
+        const client = { id, fullName }
         this.setState({ client })
     }
 
@@ -154,53 +136,75 @@ class CreateRequest extends Component {
     }
 
     validateInputs() {
-        console.log('Verifying inputs')
+        let { client, subject, address } = this.state
+
+        let clientError = nameValidator(client.fullName, '"Client"')
+        let subjectError = nameValidator(subject.value, '"Sujet"')
+        let addressError = nameValidator(address.description, '"Adresse postale"')
+
+        if (clientError || subjectError || addressError) {
+            subject.error = subjectError
+            Keyboard.dismiss()
+            this.setState({ clientError, subject, addressError, loading: false })
+            setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
+            return false
+        }
+
+        return true
     }
 
-    // async increaseCount(idCount) {
-    //     //condition: project or ticket
-    //     if (this.isTicket)
-    //         await db.collection('IdCounter').doc('requests').update({ tickets: idCount }).then(() => console.log('TICKETS COUNT UPDATED !'))
+    async AddRequestAndChatRoom(RequestId, request) {
+        const chat = {
+            name: this.state.subject.value,
+            latestMessage: {
+                text: `La demande de projet a été initiée.`,
+                createdAt: new Date().getTime()
+            }
+        }
 
-    //     else
-    //         await db.collection('IdCounter').doc('requests').update({ projects: idCount }).then(() => console.log('PRODUCTS COUNT UPDATED !'))
-    // }
+        const systemMessage = {
+            text: `La demande de projet a été initiée.`,
+            createdAt: new Date().getTime(),
+            system: true
+        }
 
-    async AddNewChatRoom(RequestId) {
-        await db.collection('Chats')
-            .add({
-                name: 'Nom du chat',
-                latestMessage: {
-                    text: `La demande de projet a été initiée.`,
-                    createdAt: new Date().getTime()
-                }
-            })
-            .then(docRef => {
-                docRef.collection('Messages').add({
-                    text: `La demande de projet a été initiée.`,
-                    createdAt: new Date().getTime(),
-                    system: true
-                })
-                return docRef
-            })
-            .then((docRef) => {
-                console.log('request ID: ' + RequestId)
-                console.log('Chat doc ID: ' + docRef.id)
-                db.collection('Requests').doc(RequestId).update({ chatId: docRef.id }).catch((e) => console.error(e))
-            })
-            .catch(e => console.error(e))
+        //Batch write
+        const batch = db.batch()
+
+        const chatId = await uuidGenerator()
+        const messageId = await uuidGenerator()
+
+        const requestsRef = db.collection('Requests').doc(RequestId)
+        const chatRef = db.collection('Chats').doc(chatId)
+        const messagesRef = chatRef.collection('Messages').doc(messageId)
+
+        request.chatId = chatId
+
+        batch.set(requestsRef, request, { merge: true })
+        batch.set(chatRef, chat)
+        batch.set(messagesRef, systemMessage)
+
+        await batch.commit().catch((e) => {
+            setToast(this, 'e', 'Erreur lors de la création de la demande, veuillez réessayer.')
+            load(this, false)
+        })
+
+        load(this, false)
     }
 
     async handleSubmit() {
-        let { error, loading } = this.state
-        let { idCount, RequestId, client, department, subject, description, address, state } = this.state
-
-        if (loading) return
+        const { error, loading } = this.state
+        if (loading || this.state === this.initialState) return
+        load(this, true)
 
         //1. Validate inputs
-        this.validateInputs()
+        const isValid = this.validateInputs()
+        if (!isValid) return
 
         //2. ADDING REQUEST DOCUMENT
+        const { RequestId, client, department, subject, description, address, state } = this.state
+        const currentUser = { id: this.currentUser.uid, userName: this.currentUser.displayName }
+
         let request = {
             RequestId: RequestId,
             client: client,
@@ -208,7 +212,7 @@ class CreateRequest extends Component {
             description: description.value,
             state: state,
             editedAt: moment().format('lll'),
-            editedBy: { userId: this.currentUser.uid, userName: this.currentUser.displayName }
+            editedBy: currentUser
         }
 
         if (this.isTicket) {
@@ -223,186 +227,178 @@ class CreateRequest extends Component {
 
         if (!this.isEdit) {
             request.createdAt = moment().format('lll')
-            request.createdBy = { userId: this.currentUser.uid, userName: this.currentUser.displayName }
+            request.createdBy = currentUser
         }
 
-        //Case: No edit done
-        if (this.state === this.initialState) {
-            this.props.navigation.goBack()
-            return
-        }
+        console.log('Ready to add request...')
 
-        console.log('Ready to add ticket request...')
+        if (this.isEdit)
+            await db.collection('Requests').doc(RequestId).set(request, { merge: true })
 
-        db.collection('Requests').doc(RequestId).set(request, { merge: true })
-            .then(async () => {
-                //#trigger:
-                if (!this.isEdit) {
-                    // await this.increaseCount(idCount)
-                    await this.AddNewChatRoom(RequestId)
-                }
+        else
+            await this.AddRequestAndChatRoom(RequestId, request)
 
-                this.props.navigation.goBack()
-            })
-            .catch((e) => this.setState({ error: e }))
-            .finally(() => this.setState({ loading: false }))
+        load(this, false)
+        this.props.navigation.goBack()
     }
 
     renderStateToggle(currentState) {
-        if (this.isTicket)
-            return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, 'ticket')} />
-
-        else
-            return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, 'projet')} />
+        const label = this.isTicket ? 'ticket' : 'projet'
+        return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, label)} />
     }
 
     alertUpdateRequestState(nextState, label) {
-        if (nextState !== this.state.state) {
-            const title = "Mettre à jour le " + label
-            const message = "Etes-vous sûr de vouloir changer l'état de ce " + label + ' ?'
-            const handleConfirm = () => this.updateRequestState(nextState)
+        if (nextState === this.state.state) return
 
-            this.myAlert(title, message, handleConfirm)
-        }
+        const title = "Mettre à jour le " + label
+        const message = "Etes-vous sûr de vouloir changer l'état de ce " + label + ' ?'
+        const handleConfirm = () => this.updateRequestState(nextState)
 
-        else return
+        this.myAlert(title, message, handleConfirm)
     }
 
     updateRequestState(nextState) {
         db.collection('Requests').doc(this.RequestId).update({ state: nextState })
-            .then(() => console.log('Request state updated !'))
-            .catch((e) => console.error(e))
-    }
-
-    componentDidUpdate() {
-        console.log(this.state.client)
+            .then(() => {
+                this.setState({ state: nextState })
+               // this.fetchRequest()
+            })
+            .catch((e) => setToast(this, 'e', "Erreur lors de la mise à jour de l'état de la demande"))
     }
 
     render() {
-        let { RequestId, client, department, subject, state, description, address } = this.state
-        let { createdAt, createdBy, editedAt, editedBy } = this.state
+        const { RequestId, client, department, subject, state, description, address } = this.state
+        const { createdAt, createdBy, editedAt, editedBy, loading, toastMessage, toastType, clientError, addressError } = this.state
+        const { requestType } = this.props
 
-        const title = ' Demande de ' + this.props.requestType
-
-        let prevScreen = ''
-        if (this.props.requestType === 'ticket')
-            prevScreen = 'CreateTicketReq'
-
-        else
-            prevScreen = 'CreateProjectReq'
+        const title = ' Demande de ' + requestType
+        const prevScreen = requestType === 'ticket' ? 'CreateTicketReq' : 'CreateProjectReq'
 
         return (
             <View style={styles.container}>
                 <Appbar back close title titleText={title} check handleSubmit={this.handleSubmit} />
 
-                <ScrollView style={styles.container} contentContainerStyle={{
-                    backgroundColor: '#fff',
-                    padding: constants.ScreenWidth * 0.02,
-                    // paddingBottom: 80
-                }}>
+                {loading ?
+                    <Loading size='large' />
+                    :
+                    <ScrollView style={styles.container} contentContainerStyle={{
+                        backgroundColor: '#fff',
+                        padding: constants.ScreenWidth * 0.02,
+                        // paddingBottom: 80
+                    }}>
 
-                    <Card style={{ marginBottom: 20 }}>
-                        <Card.Content>
-                            <Title>Informations générales</Title>
-                            <MyInput
-                                label="Numéro de la demande"
-                                returnKeyType="done"
-                                value={RequestId}
-                                editable={false}
-                            />
-
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate('ListClients', { onGoBack: this.refreshClient, prevScreen: prevScreen, titleText: 'Clients' })}>
+                        <Card style={{ marginBottom: 20 }}>
+                            <Card.Content>
+                                <Title>Informations générales</Title>
                                 <MyInput
-                                    label="Client"
-                                    value={client.fullName}
+                                    label="Numéro de la demande"
+                                    returnKeyType="done"
+                                    value={RequestId}
                                     editable={false}
                                 />
-                            </TouchableOpacity>
 
-                            {this.isTicket ?
-                                <Picker
-                                    label="Département"
-                                    returnKeyType="next"
-                                    value={department}
-                                    error={!!department.error}
-                                    errorText={department.error}
-                                    selectedValue={department}
-                                    onValueChange={(department) => this.setState({ department })}
-                                    title="Département"
-                                    elements={departments}
-                                />
-                                :
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}>
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListClients', { onGoBack: this.refreshClient, prevScreen: prevScreen, titleText: 'Clients' })}>
                                     <MyInput
-                                        label="Adresse postale"
-                                        value={address.description}
+                                        label="Client"
+                                        value={client.fullName}
+                                        error={!!clientError}
+                                        errorText={clientError}
                                         editable={false}
                                     />
                                 </TouchableOpacity>
-                            }
 
+                                {this.isTicket ?
+                                    <Picker
+                                        label="Département"
+                                        returnKeyType="next"
+                                        value={department}
+                                        error={!!department.error}
+                                        errorText={department.error}
+                                        selectedValue={department}
+                                        onValueChange={(department) => this.setState({ department })}
+                                        title="Département"
+                                        elements={departments}
+                                    />
+                                    :
+                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}>
+                                        <MyInput
+                                            label="Adresse postale"
+                                            value={address.description}
+                                            error={!!addressError}
+                                            errorText={addressError}
+                                            editable={false}
+                                        />
+                                    </TouchableOpacity>
+                                }
 
-                            <MyInput
-                                label="Sujet"
-                                returnKeyType="done"
-                                value={subject.value}
-                                onChangeText={text => updateField(this, subject, text)}
-                                error={!!subject.error}
-                                errorText={subject.error}
-                            />
-
-                            <MyInput
-                                label="Description"
-                                returnKeyType="done"
-                                value={description.value}
-                                onChangeText={text => updateField(this, description, text)}
-                                error={!!description.error}
-                                errorText={description.error}
-                            />
-
-                        </Card.Content>
-                    </Card>
-
-                    {this.isEdit &&
-                        <Card>
-                            <Card.Content>
-                                <Title>Activité</Title>
                                 <MyInput
-                                    label="Date de création"
+                                    label="Sujet"
                                     returnKeyType="done"
-                                    value={createdAt}
-                                    editable={false}
+                                    value={subject.value}
+                                    onChangeText={text => updateField(this, subject, text)}
+                                    error={!!subject.error}
+                                    errorText={subject.error}
                                 />
+
                                 <MyInput
-                                    label="Auteur"
+                                    label="Description"
                                     returnKeyType="done"
-                                    value={createdBy.userName}
-                                    editable={false}
+                                    value={description.value}
+                                    onChangeText={text => updateField(this, description, text)}
+                                    error={!!description.error}
+                                    errorText={description.error}
                                 />
-                                <MyInput
-                                    label="Dernière mise à jour"
-                                    returnKeyType="done"
-                                    value={editedAt}
-                                    editable={false}
-                                />
-                                <MyInput
-                                    label="Dernier intervenant"
-                                    returnKeyType="done"
-                                    value={editedBy.userName}
-                                    editable={false}
-                                />
+
                             </Card.Content>
                         </Card>
-                    }
-                </ScrollView>
+
+                        {this.isEdit &&
+                            <Card>
+                                <Card.Content>
+                                    <Title>Activité</Title>
+                                    <MyInput
+                                        label="Date de création"
+                                        returnKeyType="done"
+                                        value={createdAt}
+                                        editable={false}
+                                    />
+                                    <MyInput
+                                        label="Auteur"
+                                        returnKeyType="done"
+                                        value={createdBy.userName}
+                                        editable={false}
+                                    />
+                                    <MyInput
+                                        label="Dernière mise à jour"
+                                        returnKeyType="done"
+                                        value={editedAt}
+                                        editable={false}
+                                    />
+                                    <MyInput
+                                        label="Dernier intervenant"
+                                        returnKeyType="done"
+                                        value={editedBy.userName}
+                                        editable={false}
+                                    />
+                                </Card.Content>
+                            </Card>
+                        }
+                    </ScrollView>
+
+                }
+
+                <Toast
+                    containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })} />
 
                 {this.isEdit &&
-                    <View style={{ padding: 10, paddingRight: 15 }}>
-                        <FAB
-                            style={[styles.fab]}
-                            small
-                            icon={() => <Ionicons name='chatbubble-ellipses' color='white' size={25} />}
-                            onPress={() => this.props.navigation.navigate('Chat', { chatId: this.chatId })} />
+                    <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingRight: 15, backgroundColor: '#eee', elevation: 3 }}>
+                        <MyFAB
+                            onPress={() => this.props.navigation.navigate('Chat', { chatId: this.chatId })}
+                            icon='chat-processing'
+                            style={styles.fab} />
                         {this.renderStateToggle(state)}
                     </View>}
             </View>
@@ -431,8 +427,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         alignSelf: 'flex-end',
         marginBottom: 10,
-        width: 50,
-        height: 50,
+        width: constants.ScreenWidth * 0.13,
+        height: constants.ScreenWidth * 0.13,
         borderRadius: 100,
     }
 });

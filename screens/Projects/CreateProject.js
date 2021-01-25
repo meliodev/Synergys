@@ -7,9 +7,9 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Entypo from 'react-native-vector-icons/Entypo'
 import firebase from '@react-native-firebase/app'
 
-import ImagePicker from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-picker'
 import ImageView from 'react-native-image-view'
-import { SliderBox } from "react-native-image-slider-box";
+import { SliderBox } from "react-native-image-slider-box"
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -18,9 +18,9 @@ moment.locale('fr')
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
+import AutoCompleteUsers from '../../components/AutoCompleteUsers'
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
-import DatePicker from 'react-native-date-picker'
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
@@ -28,6 +28,7 @@ import { generatetId, myAlert, updateField, nameValidator, setToast, load } from
 import { handleSetError } from '../../core/exceptions';
 
 import { fetchDocs } from "../../api/firestore-api";
+import { uploadFiles } from "../../api/storage-api";
 
 import { connect } from 'react-redux'
 
@@ -66,6 +67,7 @@ class CreateProject extends Component {
         //this.deleteAttachments = this.deleteAttachments.bind(this)
 
         this.myAlert = myAlert.bind(this)
+        this.uploadImages = uploadFiles.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.pickImage = this.pickImage.bind(this)
 
@@ -74,26 +76,30 @@ class CreateProject extends Component {
         this.currentUser = firebase.auth().currentUser
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
-        this.title = this.props.navigation.getParam('title', 'Nouveau projet')
+        this.isEdit = this.ProjectId ? true : false
+        this.title = this.ProjectId ? 'Modifier le projet' : 'Nouveau projet'
 
         this.state = {
             //AUTO-GENERATED
             ProjectId: '', //Not editable
 
             //TEXTINPUTS
-            name: { value: "Projet A", error: '' },
-            description: { value: "lorem ipsum", error: '' },
+            name: { value: "", error: '' },
+            description: { value: "", error: '' },
             note: { value: "", error: '' },
 
             //Screens
-            address: { description: 'aaa', place_id: 'aaa', marker: { latitude: '', longitude: '' } },
+            address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            client: { id: 'GS-US-Qh6C', fullName: 'Samsung' },
+            client: { id: '', fullName: '' },
 
             //Pickers
             state: 'En attente',
             step: 'Prospect',
+
+            //Tag Autocomplete
+            suggestions: [],
+            tagsSelected: [],
 
             //logs (Auto-Gen)
             createdAt: '',
@@ -126,21 +132,26 @@ class CreateProject extends Component {
 
     async componentDidMount() {
         if (this.isEdit) {
+            load(this, true)
             await this.fetchProject()
             this.fetchDocuments()
             this.fetchTasks()
+            load(this, false)
         }
 
         //#task: avoid conflicts add auto-gen string
         else {
             const ProjectId = generatetId('GS-PR-')
+            this.fetchSuggestions()
             this.setState({ ProjectId }, () => this.initialState = this.state)
         }
     }
 
     componentWillUnmount() {
         if (this.isEdit) {
-            this.unsubscribe()
+            this.unsubscribeDocs()
+            this.unsubscribeAgenda()
+            this.unsubscribeTasks()
         }
     }
 
@@ -153,34 +164,35 @@ class CreateProject extends Component {
                 let { error, loading } = this.state
 
                 //General info
+                const project = doc.data()
                 ProjectId = this.ProjectId
-                client = doc.data().client
-                name.value = doc.data().name
-                description.value = doc.data().description
-                note.value = doc.data().note
+                client = project.client
+                name.value = project.name
+                description.value = project.description
+                note.value = project.note
 
                 //َActivity
-                createdAt = doc.data().createdAt
-                createdBy = doc.data().createdBy
-                editedAt = doc.data().editedAt
-                editedBy = doc.data().editedBy
+                createdAt = project.createdAt
+                createdBy = project.createdBy
+                editedAt = project.editedAt
+                editedBy = project.editedBy
 
                 //Images
-                attachedImages = doc.data().attachments
-                attachedImages = attachedImages.filter((image, index) => image.deleted === false)
+                attachedImages = project.attachments
+                attachedImages = attachedImages.filter((image) => !image.deleted)
 
                 //State
-                state = doc.data().state
-                step = doc.data().step
+                state = project.state
+                step = project.step
 
                 //Address
-                address = doc.data().address
+                address = project.address
 
-                let imagesView = attachedImages.map((image, key) => {
+                const imagesView = attachedImages.map((image) => {
                     return ({ source: { uri: image.downloadURL } })
                 })
 
-                let imagesCarousel = attachedImages.map((image) => image.downloadURL)
+                const imagesCarousel = attachedImages.map((image) => image.downloadURL)
 
                 this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, ProjectId, client, name, description, note, address, state, step }, () => {
                     if (this.isInit)
@@ -193,12 +205,13 @@ class CreateProject extends Component {
     }
 
     fetchDocuments() {
-        this.unsubscribe = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
+        this.unsubscribeDocs = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
             let documentsList = []
             let documentTypes = []
             querysnapshot.forEach((doc) => {
-                documentsList.push(doc.data())
-                documentTypes.push(doc.data().type)
+                const document = doc.data()
+                documentsList.push(document)
+                documentTypes.push(document.type)
             })
             documentTypes = [...new Set(documentTypes)]
             this.setState({ documentsList, documentTypes })
@@ -206,13 +219,13 @@ class CreateProject extends Component {
     }
 
     fetchTasks() {
-        db.collection('Agenda').get().then((querysnapshot) => {
+        this.unsubscribeAgenda = db.collection('Agenda').onSnapshot((querysnapshot) => {
             let tasksList = []
             let taskTypes = []
             querysnapshot.forEach(async (dateDoc) => {
                 const date = dateDoc.id
                 const query = dateDoc.ref.collection('Tasks').where('project.id', '==', this.ProjectId)
-                this.unsubscribe = query.onSnapshot((tasksSnapshot) => {
+                this.unsubscribeTasks = query.onSnapshot((tasksSnapshot) => {
                     tasksSnapshot.forEach((doc) => {
                         const task = doc.data()
                         task.id = doc.id
@@ -226,6 +239,11 @@ class CreateProject extends Component {
                 })
             })
         })
+    }
+
+    fetchSuggestions() {
+        const query = db.collection('Users')
+        fetchDocs(this, query, 'suggestions', '', () => { })
     }
 
     //Screen inputs
@@ -255,15 +273,13 @@ class CreateProject extends Component {
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let nameError = nameValidator(name.value, '"Nom du projet"')
-        let addressError = nameValidator(address.description, '"Emplacemmentd"')
+        let addressError = nameValidator(address.description, '"Emplacemment"')
 
         if (clientError || nameError || addressError) {
             name.error = nameError
-
             Keyboard.dismiss()
             this.setState({ clientError, name, addressError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
-
             return false
         }
 
@@ -272,31 +288,39 @@ class CreateProject extends Component {
 
     async handleSubmit() {
         //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+        let { error, loading, attachments } = this.state
+        if (loading || this.state === this.initialState) return
+        load(this, true)
 
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        load(this, true)
 
-        let { error, loading } = this.state
-        let { ProjectId, client, name, description, note, address, state, step } = this.state
+        let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
 
         //1. UPLOADING FILES
         // console.log('1')
-        if (this.state.attachments.length > 0) {
+        if (attachments.length > 0) {
             this.title = 'Exportation des images...'
-            await this.uploadImages()
+            const reference = firebase.storage().ref('/Projects/' + ProjectId + '/Images/')
+            await this.uploadImages(attachments, reference, this.state.attachedImages)
         }
 
-        // console.log('6')
-        let attachedImages = this.state.attachedImages
-        if (this.isEdit && this.initialState.attachedImages !== this.state.attachedImages)
+        let { attachedImages } = this.state
+        if (this.isEdit && this.initialState.attachedImages !== attachedImages)
             attachedImages = attachedImages.concat(this.initialState.attachedImages)
+
+        //subscribers = editedBy + Admin + Tags added
+        const editedBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const admin = { id: adminId, email: 'contact@groupe-synergys.fr' }
+        const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email } })
+        subscribers.push(editedBy)
+
+        if (adminId !== editedBy.id)
+            subscribers.push(admin)
 
         //2. ADDING project DOCUMENT
         let project = {
-            // ProjectId: ProjectId,
             client: client,
             name: name.value,
             description: description.value,
@@ -305,16 +329,15 @@ class CreateProject extends Component {
             step: step,
             address: address,
             editedAt: moment().format('lll'),
-            editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
+            editedBy: editedBy,
             attachments: attachedImages,
-            subscribers: [{ id: this.currentUser.uid }],
-            // subscribers: [{ id: this.currentUser.uid }, { id: adminId }], //if admin is editor don't add adminId
+            subscribers: subscribers,
             deleted: false,
         }
 
         if (!this.isEdit) {
             project.createdAt = moment().format('lll')
-            project.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+            project.createdBy = {}
         }
 
         console.log('Ready to update ticket project...')
@@ -404,61 +427,8 @@ class CreateProject extends Component {
         })
     }
 
-    async uploadImages() {
-        const promises = []
-        const images = this.state.attachments
-        let attachedImages = []
-        let urls = []
-
-        // console.log('2')
-        for (let i = 0; i < images.length; i++) {
-
-            // console.log('3')
-            const reference = firebase.storage().ref('/Projects/' + this.state.ProjectId + '/Images/' + images[i].name)
-            const uploadTask = reference.putFile(images[i].path)
-            promises.push(uploadTask)
-
-            uploadTask.on('state_changed', async function (snapshot) {
-                var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                console.log('Upload file ' + i + ': ' + progress + '% done')
-                images[i].progress = progress / 100
-                this.setState({ images })
-            }.bind(this))
-
-            uploadTask.then((result) => {
-                urls.push(result.downloadURL)
-                console.log('task ' + i + ' finished')
-            })
-        }
-
-        // console.log('4')
-        await Promise.all(promises)
-            .then(async (result) => {
-                // console.log('4-1')
-                attachedImages = result.map((res) => ({ downloadURL: res.downloadURL, name: res.metadata.name, size: res.metadata.size, contentType: res.metadata.contentType, deleted: false }))
-                // console.log('4-2')
-                this.setState({ attachedImages })
-                // console.log('5')
-                // console.log('ALL IMAGES ARE UPLOADED')
-            })
-            .catch(err => {
-                if (this.isEdit)
-                    this.title = 'Modifier le projet'
-                else
-                    this.title = 'Nouveau projet'
-
-                setToast(this, 'e', 'Erreur lors du téléchargement des images, veuillez réessayer.')
-
-                //Delete uploaded images in case of failure of one of them
-                for (let i = 0; i < urls.length; i++) {
-                    firebase.storage().refFromURL(urls[i]).delete()
-                }
-            })
-    }
-
     renderAttachments(attachments, type, isUpload) {
         let { loading } = this.state
-
 
         return attachments.map((image, key) => {
 
@@ -546,7 +516,7 @@ class CreateProject extends Component {
     render() {
         let { ProjectId, client, clientError, name, description, note, address, addressError, state, step } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
-        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId } = this.state
+        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
         let { error, loading, toastMessage, toastType } = this.state
 
         return (
@@ -604,26 +574,40 @@ class CreateProject extends Component {
                                 </TouchableOpacity>
 
                                 <Picker
-                                    label="Etape"
                                     returnKeyType="next"
                                     value={step}
                                     error={!!step.error}
                                     errorText={step.error}
                                     selectedValue={step}
                                     onValueChange={(step) => this.setState({ step })}
-                                    title="Step"
+                                    title="Étape"
                                     elements={steps} />
 
                                 <Picker
-                                    label="Etat"
                                     returnKeyType="next"
                                     value={state}
                                     error={!!state.error}
                                     errorText={state.error}
                                     selectedValue={state}
                                     onValueChange={(state) => this.setState({ state })}
-                                    title="Etat"
+                                    title="État"
                                     elements={states} />
+
+                                <View style={{ marginTop: 10 }}>
+                                    <Text style={[{ fontSize: 12, color: theme.colors.placeholder }]}>Collaborateurs</Text>
+                                    <AutoCompleteUsers
+                                        suggestions={suggestions}
+                                        tagsSelected={tagsSelected}
+                                        main={this}
+                                        placeholder="Ajouter un utilisateur"
+                                        autoFocus={false}
+                                        showInput={true}
+                                        editable={true}
+                                        suggestionsBellow={false}
+                                    />
+                                </View>
+
+
                             </Card.Content>
                         </Card>
                     }

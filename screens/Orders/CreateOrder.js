@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, TextInput } from 'react-native';
-import { Card, Title, ProgressBar, TextInput as PaperInput } from 'react-native-paper'
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import { Card, Title, TextInput as PaperInput } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
@@ -23,7 +22,6 @@ import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToas
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleSetError } from '../../core/exceptions';
-import { sub } from 'react-native-reanimated';
 
 const db = firebase.firestore()
 
@@ -50,8 +48,8 @@ class CreateOrder extends Component {
         this.currentUser = firebase.auth().currentUser
 
         this.OrderId = this.props.navigation.getParam('OrderId', '')
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
-        this.title = this.props.navigation.getParam('title', 'Nouvelle commande')
+        this.isEdit = this.OrderId ? true : false
+        this.title = this.OrderId ? 'Modifier la commande' : 'Nouvelle commande'
 
         this.state = {
             //AUTO-GENERATED
@@ -65,12 +63,15 @@ class CreateOrder extends Component {
             state: 'En cours',
 
             //Order Lines
-            orderLines: [{ "description": "", "price": "900", "product": { "attachments": [[Object], [Object], [Object]], "brand": "LGS", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Machine à coudre", "price": "900", "type": "product" }, "quantity": "1" }],
+            orderLines: [
+                //  { "description": "", "price": "900", "product": { "attachments": [[Object], [Object], [Object]], "brand": "LGS", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Machine à coudre", "price": "900", "type": "product" }, "quantity": "1", "taxe": { "name": "Taxe 1", "rate": "50" } }
+            ],
             //orderLines: [],
             checked: 'first',
             subTotal: 900,
             discount: { type: 'percentage', value: '', error: '' },
             taxe: 0,
+            taxes: [],
             total: 900,
 
             //logs
@@ -91,6 +92,7 @@ class CreateOrder extends Component {
 
         if (this.isEdit) {
             await this.fetchOrder()
+            load(this, false)
         }
 
         else {
@@ -139,10 +141,7 @@ class CreateOrder extends Component {
                 this.isInit = false
 
                 const subTotal = this.calculateSubTotal()
-                this.setState({ subTotal }, () => {
-                    this.calculateTotal()
-                    load(this, false)
-                })
+                this.setState({ subTotal }, () => this.calculateTotal())
             })
         })
     }
@@ -209,10 +208,10 @@ class CreateOrder extends Component {
         if (!isValid) return
 
         // 1. ADDING document to firestore
-        let { OrderId, project, state, orderLines, subTotal, discount, total } = this.state
+        const { OrderId, project, state, orderLines, subTotal, discount, total } = this.state
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
         let order = {
-            OrderId: OrderId,
             project: project,
             state: state,
             orderLines: orderLines,
@@ -221,23 +220,23 @@ class CreateOrder extends Component {
             total: total,
 
             editedAt: moment().format('lll'),
-            editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
+            editedBy: currentUser,
             deleted: false,
         }
 
         if (!this.isEdit) {
             order.createdAt = moment().format('lll')
-            order.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+            order.createdBy = currentUser
         }
 
         console.log('Ready to add order...')
         db.collection('Orders').doc(OrderId).set(order, { merge: true })
             .then(() => {
-                this.setState({ loading: false })
+                load(this, false)
                 this.props.navigation.goBack()
             })
             .catch(e => {
-                this.setState({ loading: false })
+                load(this, false)
                 handleSetError(e)
             })
     }
@@ -254,8 +253,50 @@ class CreateOrder extends Component {
         orderLines.push(orderLine)
         this.setState({ orderLines }, () => {
             const subTotal = this.calculateSubTotal()
-            this.setState({ subTotal }, () => this.calculateTotal())
+
+            this.setState({ subTotal }, () => {
+                const taxes = this.setTaxes(orderLines)
+                this.setState({ taxes }, () => {
+                    this.calculateTotal()
+                })
+            })
         })
+    }
+
+    setTaxes(orderLines) {
+        const taxesTemp = orderLines.map((orderLine) => orderLine.taxe) //name & rate & value (taxe*price*quantity)
+
+        var holder = {}
+        console.log('1')
+        //Sum up taxes with same rate
+        taxesTemp.forEach(function (taxe) {
+
+            if (holder.hasOwnProperty(taxe.name)) {
+                holder[taxe.name] = holder[taxe.name] + Number(taxe.value)
+            }
+
+            else {
+                holder[taxe.name] = Number(taxe.value)
+            }
+        })
+
+        console.log('2')
+
+        var taxes = []
+
+        for (var prop in holder) {
+            const rate = prop.substring(
+                prop.lastIndexOf("[") + 1,
+                prop.lastIndexOf("%")
+            )
+            taxes.push({ name: prop, value: holder[prop], rate })
+        }
+
+        console.log('3')
+
+        return taxes
+
+        // this.setState({ taxes }, () => console.log('taxes!!!!', this.state.taxes))
     }
 
     removeOrderLine(key) {
@@ -280,26 +321,27 @@ class CreateOrder extends Component {
         return subTotal
     }
 
-    setDiscountType(choice) { //set total as well
+    setDiscountType(checked) { //set total as well
         let { subTotal, discount, total } = this.state
-        if (choice === 'first') {
+        if (checked === 'first') {
             discount.type = 'percentage'
             total = subTotal - subTotal * (discount.value / 100)
         }
-        else if (choice === 'second') {
+        else if (checked === 'second') {
             discount.type = 'money'
             total = subTotal - discount.value
         }
 
-        this.setState({ checked: choice, discount, total })
+        this.setState({ checked, discount, total })
     }
 
     calculateTotal() {
-        let { subTotal, discount, taxe, total } = this.state
+        let { subTotal, discount, taxes, total } = this.state
+        console.log('taxes:::::::::', taxes)
 
         total = subTotal
 
-        if (discount.value !== '') {
+        if (discount.value) {
             if (discount.type === 'percentage')
                 total = total - subTotal * (discount.value / 100)
 
@@ -307,8 +349,11 @@ class CreateOrder extends Component {
                 total = subTotal - discount.value
         }
 
-        if (taxe > 0)
-            total = total + subTotal * (taxe / 100)
+        if (taxes.length > 0) {
+            var taxeValues = taxes.map(taxe => taxe.value)
+            const sumTaxes = taxeValues.reduce((prev, next) => prev + next)
+            total = total + sumTaxes
+        }
 
         this.setState({ total })
     }
@@ -352,7 +397,7 @@ class CreateOrder extends Component {
         return (
             < View style={{ flex: 1, flexDirection: 'row', marginTop: 30 }}>
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.body}>Sous total</Text>
+                    <Text style={theme.customFontMSbold.body}>Sous-total</Text>
                 </View>
 
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
@@ -373,8 +418,8 @@ class CreateOrder extends Component {
                         checked={checked}
                         firstChoice={{ title: '%', value: 'percentage' }}
                         secondChoice={{ title: '€', value: 'money' }}
-                        onPress1={() => this.setDiscountType('first')}
-                        onPress2={() => this.setDiscountType('second')}
+                        onPress1={() => this.setDiscountType('first')} //Sets total as well
+                        onPress2={() => this.setDiscountType('second')} //Sets total as well
                         textRight={true} />
                 </View>
 
@@ -398,29 +443,22 @@ class CreateOrder extends Component {
         )
     }
 
-    renderTaxe() {
-        const { taxe } = this.state
+    renderTaxes() {
+        const { taxes } = this.state
 
-        return (
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSregular.body}>Taxe(%)</Text>
-                </View>
+        return taxes.map((taxe) => {
+            return (
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+                    <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                        <Text style={theme.customFontMSregular.body}>{taxe.name}</Text>
+                    </View>
 
-                <View style={{ flex: 0.5, alignItems: 'flex-end', marginBottom: 7 }}>
-                    <TextInput
-                        label=""
-                        returnKeyType="done"
-                        keyboardType='numeric'
-                        value={taxe.value}
-                        onChangeText={taxe => this.setState({ taxe }, () => this.calculateTotal())}
-                        style={{ width: constants.ScreenWidth * 0.33, alignSelf: 'flex-end', textAlign: 'right', borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
-                        editable
-                        maxLength={40}
-                    />
+                    <View style={{ flex: 0.5, alignItems: 'flex-end', marginBottom: 7 }}>
+                        <Text style={theme.customFontMSregular.body}>€{taxe.value}</Text>
+                    </View>
                 </View>
-            </View>
-        )
+            )
+        })
     }
 
     renderTotal() {
@@ -441,7 +479,7 @@ class CreateOrder extends Component {
 
     render() {
         let { OrderId, project, state, client } = this.state
-        let { orderLines, subTotal, discount, total } = this.state
+        let { orderLines, subTotal, discount, taxes, total } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
 
@@ -504,7 +542,7 @@ class CreateOrder extends Component {
                             </Card>
 
                             {orderLines.length > 0 ?
-                                <Card style={{ margin: 5, paddingBottom: 10, paddingHorizontal: 5 }}>
+                                <Card style={{ margin: 5, paddingBottom: 10 }}>
                                     <Card.Content>
                                         <Button icon="plus-circle" loading={loading} mode="outlined" onPress={() => this.props.navigation.navigate('AddItem', { onGoBack: this.refreshOrderLine })} style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
                                             <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
@@ -517,8 +555,8 @@ class CreateOrder extends Component {
 
                                         {this.renderOrderLines()}
                                         {this.renderSubTotal()}
-                                        {this.renderDiscount()}
-                                        {this.renderTaxe()}
+                                        {/* {this.renderDiscount()} */}
+                                        {taxes.length > 0 && this.renderTaxes()}
                                         {this.renderTotal()}
 
                                     </Card.Content>

@@ -38,14 +38,14 @@ class RequestsManagement extends React.Component {
             { key: 'second', title: 'TICKETS' },
         ]
 
-        let { index } = this.state
+        const { index, showInput, searchInput } = this.state
 
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
                     main={this}
-                    title={!this.state.showInput}
-                    titleText = 'Demandes'
+                    title={!showInput}
+                    titleText='Demandes'
                     placeholder='Rechercher une demande'
                     showBar={this.state.showInput}
                     handleSearch={() => this.setState({ searchInput: '', showInput: !this.state.showInput })}
@@ -57,8 +57,8 @@ class RequestsManagement extends React.Component {
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListProjects searchInput={this.state.searchInput}/>}
-                    Tab2={<ListTickets searchInput={this.state.searchInput} />} />
+                    Tab1={<ListProjects searchInput={searchInput} />}
+                    Tab2={<ListTickets searchInput={searchInput} />} />
             </View>
         )
     }

@@ -2,13 +2,13 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, ScrollView, Image } from 'react-native'
-import { List, Avatar, Headline } from 'react-native-paper'
+import { List, Headline } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Entypo from 'react-native-vector-icons/Entypo'
-import RNFetchBlob from 'rn-fetch-blob'
+
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { downloadFile, setToast } from '../../core/utils'
+import { downloadFile, setToast, load } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
 
 import moment from 'moment'
@@ -17,12 +17,12 @@ moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
 import Button from '../../components/Button'
+import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 
 import firebase from '@react-native-firebase/app'
 
 const db = firebase.firestore()
-const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg";
 
 export default class ViewMessage extends Component {
 
@@ -44,39 +44,36 @@ export default class ViewMessage extends Component {
     }
 
     componentDidMount() {
-        this.setState({ loading: true })
-        // await this.getMessages()
+        load(this, true)
         let currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const query = db.collection('Messages').doc(this.message.id).collection('AllMessages').where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')//.where('followers', 'array-contains', currentUser.uid )
-        fetchDocs(this, query, 'messagesList', 'messagesCount', () => { })
+        const query = db.collection('Messages').doc(this.message.id).collection('AllMessages')
+        .where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
+        //.where('subscribers', 'array-contains', currentUser.uid )
+        fetchDocs(this, query, 'messagesList', 'messagesCount', () => { load(this, false) })
     }
 
     componentWillUnmount() {
         this.unsubscribe()
     }
 
-    goToReply(selectedMessage, messagesRendered) {
-        let tagSelected = [selectedMessage.sender]
-        console.log(tagSelected)
-        this.props.navigation.navigate('NewMessage', { isReply: true, messageGroupeId: this.message.id, tagsSelected: tagSelected, subject: this.message.mainSubject, selectedMessage: selectedMessage, oldMessages: messagesRendered, followers: this.message.followers })
+    goToReply(sender, messagesRendered) {
+        let tagSelected = [sender]
+        this.setState({ expandedId: '' })
+        this.props.navigation.navigate('NewMessage', { isReply: true, messageGroupeId: this.message.id, tagsSelected: tagSelected, subject: this.message.mainSubject, oldMessages: messagesRendered, subscribers: this.message.subscribers })
     }
 
-    goToReplyAll(selectedMessage, messagesRendered) {
-        let allTagsSelected = selectedMessage.speakers.filter((follower) => follower.id !== this.currentUser.uid)
+    goToReplyAll(speakers, messagesRendered) {
+        let allTagsSelected = speakers.filter((subscriber) => subscriber.id !== this.currentUser.uid)
         this.setState({ expandedId: '' })
-        this.props.navigation.navigate('NewMessage', { isReply: true, messageGroupeId: this.message.id, tagsSelected: allTagsSelected, subject: this.message.mainSubject, selectedMessage: selectedMessage, oldMessages: messagesRendered, followers: this.message.followers })
+        this.props.navigation.navigate('NewMessage', { isReply: true, messageGroupeId: this.message.id, tagsSelected: allTagsSelected, subject: this.message.mainSubject, oldMessages: messagesRendered, subscribers: this.message.subscribers })
     }
 
     renderMessage(selectedMessage) {
-        //let messagesRendered = [selectedMessage.message].concat(selectedMessage.oldMessages)
-        let messagesRendered = [{ sender: selectedMessage.sender, message: selectedMessage.message, sentAt: selectedMessage.sentAt }].concat(selectedMessage.oldMessages)
+        const { sender, message, sentAt, oldMessages } = selectedMessage
+        let { showOldMessages } = this.state
 
-        let showOldMessages = this.state.showOldMessages
-        let showHideText = ''
-        if (showOldMessages)
-            showHideText = 'Masquer le texte des messages précédents'
-        else
-            showHideText = 'Afficher le texte des messages précédents'
+        let messagesRendered = [{ sender, message, sentAt }].concat(oldMessages)
+        const showHideText = showOldMessages ? 'Masquer le texte des messages précédents' : 'Afficher le texte des messages précédents'
 
         return (
             <View style={{ marginBottom: 15, marginLeft: constants.ScreenWidth * 0.045 }}>
@@ -108,12 +105,12 @@ export default class ViewMessage extends Component {
 
                 {/* {selectedMessage.sender.id !== this.currentUser.uid && */}
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginTop: 10 }}>
-                    <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage, messagesRendered)}
+                    <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage.sender, messagesRendered)}
                         style={{ width: '39%', alignSelf: 'center' }}>
                         <Text style={theme.customFontMSsemibold.body}>Répondre</Text>
                     </Button>
 
-                    <Button loading={false} mode="contained" onPress={() => this.goToReplyAll(selectedMessage, messagesRendered)}
+                    <Button loading={false} mode="contained" onPress={() => this.goToReplyAll(selectedMessage.speakers, messagesRendered)}
                         style={{ width: '55%', alignSelf: 'center', marginLeft: 5 }}>
                         <Text style={theme.customFontMSsemibold.body}>Répondre à tous</Text>
                     </Button>
@@ -124,68 +121,13 @@ export default class ViewMessage extends Component {
         )
     }
 
-    //#DuplicateFunction (on NewMessage)
     renderAttachments(attachments) {
-
         return attachments.map((document, key) => {
-            let icon = 'pdf-box'
-            let color = '#da251b'
-
-            switch (document.contentType) {
-                case 'application/pdf': {
-                    icon = 'pdf-box'
-                    color = '#da251b'
-                }
-                    break
-
-                case 'application/msword': {
-                    icon = 'file-word-box'
-                    color = '#295699'
-                }
-                    break
-
-                case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': {
-                    icon = 'file-word-box'
-                    color = '#295699'
-                }
-                    break
-
-                case 'image/jpeg': {
-                    icon = 'image'
-                    color = theme.colors.primary
-                }
-                    break
-
-                case 'image/png': {
-                    icon = 'image'
-                    color = theme.colors.primary
-                }
-                    break
-
-                case 'application/zip':
-                    icon = 'zip'
-                    break
-
-                default:
-                    break
-            }
-
-            let readableSize = document.size / 1000
-            readableSize = readableSize.toFixed(2)
-
-            let disableDownload = false
-
-            return (
-                <View style={{ flexDirection: 'row', elevation: 2, borderRadius: 5, width: '95%', height: 60, backgroundColor: theme.colors.gray50, alignItems: 'center', marginTop: 5 }}>
-                    <View style={{ flex: 0.17, justifyContent: 'center', alignItems: 'center' }}>
-                        <MaterialCommunityIcons name={icon} size={24} color={color} />
-                    </View>
-
-                    <View style={{ flex: 0.68 }}>
-                        <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{document.name}</Text>
-                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
-                    </View>
-
+            return <UploadProgress
+                attachment={document}
+                showRightIcon
+                showProgress={false}
+                rightIcon={
                     <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialCommunityIcons
                             name={'download'}
@@ -193,9 +135,8 @@ export default class ViewMessage extends Component {
                             color={theme.colors.placeholder}
                             style={{ paddingVertical: 19, paddingHorizontal: 5 }}
                             onPress={() => downloadFile(this, document.name, document.downloadURL)} />
-                    </View>
-                </View>
-            )
+                    </View>}
+            />
         })
     }
 
@@ -216,10 +157,11 @@ export default class ViewMessage extends Component {
     }
 
     renderMessages() {
+        const { expandedId, messagesList } = this.state
 
         return (
             <List.AccordionGroup
-                expandedId={this.state.expandedId}
+                expandedId={expandedId}
                 onAccordionPress={(expandedId) => {
                     if (this.state.expandedId === expandedId)
                         this.setState({ expandedId: '', showOldMessages: false })
@@ -227,9 +169,8 @@ export default class ViewMessage extends Component {
                         this.setState({ expandedId })
                 }}>
 
-                {this.state.messagesList.map((message, key) => {
+                {messagesList.map((message, key) => {
 
-                    const expandedId = this.state.expandedId
                     const isExpanded = (expandedId === message.id)
                     const arrowStyle = this.setArrowStyle(message)
                     let receivers = message.receivers.map((receiver) => receiver.fullName)
@@ -250,12 +191,9 @@ export default class ViewMessage extends Component {
                             description={!isExpanded ? message.message : 'à ' + receivers}
                             theme={{ colors: { primary: '#333' } }}
                             titleStyle={theme.customFontMSsemibold.header}
-                            descriptionStyle={theme.customFontMSmedium.caption}
-                        // left={props => <Avatar.Image size={35} source={{ uri: uri }} />} style={{ marginLeft: 5 }}
-                        >
+                            descriptionStyle={theme.customFontMSmedium.caption}>
 
                             {this.renderMessage(message)}
-                            {/* {this.renderImages(message.images)} */}
 
                         </List.Accordion>
                     )

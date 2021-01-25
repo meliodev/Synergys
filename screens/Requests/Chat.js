@@ -1,114 +1,87 @@
 import React, { Component } from 'react'
 import { GiftedChat, Bubble, Send, SystemMessage, Day, Actions } from 'react-native-gifted-chat'
-import { ActivityIndicator, View, StyleSheet, Text } from 'react-native'
-import ImagePicker from 'react-native-image-picker'
-
+import { TouchableOpacity, ActivityIndicator, View, StyleSheet, Text, Alert, ImageBackground } from 'react-native'
+import DocumentPicker from 'react-native-document-picker';
+import RNFS from 'react-native-fs'
 import { IconButton } from 'react-native-paper'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Video from 'react-native-video'
+import VideoPlayer from 'react-native-video-controls';
+import { Thumbnail } from 'react-native-thumbnail-video'
+import ImageView from 'react-native-image-view'
+
+import moment from 'moment'
+import 'moment/locale/fr'
+moment.locale('fr')
+
+// import ThumbnailLocal from 'react-native-thumbnail'
+
 import firebase from '@react-native-firebase/app'
 
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
-import Feather from 'react-native-vector-icons/Feather'
+import Appbar from '../../components/Appbar'
+import UploadProgress from '../../components/UploadProgress'
+import Toast from '../../components/Toast'
+import Loading from '../../components/Loading'
+
+import { uuidGenerator, setAttachmentIcon, downloadFile } from '../../core/utils'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-
-import Appbar from '../../components/Appbar'
+import { uploadFiles } from '../../api/storage-api'
 
 const db = firebase.firestore()
 
 export default class Chat extends Component {
 
     constructor(props) {
-        super(props);
-        this.currentUser = firebase.auth().currentUser
-        this.fetchMessages = this.fetchMessages.bind(this)
-        this.handleSend = this.handleSend.bind(this)
-        this.handlePickImage = this.handlePickImage.bind(this)
-
+        super(props)
         this.currentUser = firebase.auth().currentUser
         this.chatId = this.props.navigation.getParam('chatId', '')
-        console.log('id ' + this.chatId)
+        this.videoPlayer = null
+
+        this.fetchMessages = this.fetchMessages.bind(this)
+        this.handleSend = this.handleSend.bind(this)
+        this.pickAndUploadFiles = this.pickAndUploadFiles.bind(this)
+        this.uploadFiles = uploadFiles.bind(this)
+        this.renderMessageVideo = this.renderMessageVideo.bind(this)
+        this.renderMessageImage = this.renderMessageImage.bind(this)
+        this.renderCustomView = this.renderCustomView.bind(this)
+        this.toggleImageView = this.toggleImageView.bind(this)
+
         this.state = {
             messages: [],
-            loading: false,
-            error: '',
+            attachments: [],
+            attachedFiles: [],
             imageSource: '',
-            //imageSource: "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg"
+            videoSource: '',
+            file: {},
+
+            showVideoPlayer: false,
+            videoUrl: '',
+
+            displayImageViewer: false,
+            imageUrl: '',
+
+            loading: false,
+            toastMessage: '',
+            toastType: ''
         }
-
     }
 
-    sendSystemMessage(message) {
-        db.collection('Chats').doc(this.chatId)
-            .collection('Messages').add({
-                text: message,
-                createdAt: new Date().getTime(),
-                system: true
-            })
-    }
-
-    componentDidMount() {
+    async componentDidMount() {
         this.fetchMessages()
     }
 
-    fetchMessages() {
-        this.messagesListener =
-            db.collection('Chats').doc(this.chatId)
-                .collection('Messages').orderBy('createdAt', 'desc')
-                .onSnapshot(querySnapshot => {
-                    const messages = querySnapshot.docs.map(doc => {
-                        const firebaseData = doc.data()
-
-                        const data = {
-                            id: doc.id,
-                            text: '',
-                            createdAt: new Date().getTime(),
-                            ...firebaseData
-                        };
-
-                        if (!firebaseData.system) {
-                            data.user = {
-                                ...firebaseData.user,
-                                name: firebaseData.user.email
-                            }
-                        }
-
-                        return data;
-                    })
-
-                    this.setState({ messages })
-                })
+    componentWillUnmount() {
+        this.messagesListener()
     }
 
-    async handleSend(messages) {
-
-        const text = messages[0].text
-
-        const msg = {
-            text,
-            createdAt: new Date().getTime(),
-            user: {
-                id: this.currentUser.uid,
-                email: this.currentUser.email
-            }
-        }
-
-        if (this.state.imageSource !== '')
-            msg.image = this.state.imageSource
-
-        const latestMsg = {
-            latestMessage: {
-                text,
-                createdAt: new Date().getTime()
-            }
-        }
-
-        db.collection('Chats').doc(this.chatId).collection('Messages')
-            .add(msg)
-
-        await db.collection('Chats').doc(this.chatId)
-            .set(latestMsg, { merge: true })
-
+    fetchMessages() {
+        this.messagesListener = db.collection('Chats').doc(this.chatId).collection('Messages').orderBy('createdAt', 'desc')
+            .onSnapshot(querySnapshot => {
+                const messages = querySnapshot.docs.map(doc => { return doc.data() })
+                this.setState({ messages })
+            })
     }
 
     renderDay(props) {
@@ -125,10 +98,12 @@ export default class Chat extends Component {
                 wrapperStyle={{
                     right: {
                         backgroundColor: '#C5E1A5',
-                        borderRadius: 7
+                        borderRadius: 7,
+                        marginVertical: 10
                         // backgroundColor: theme.colors.secondary,
                     }
                 }}
+
                 textStyle={{
                     right: [theme.customFontMSmedium.body, {
                         color: '#333'
@@ -142,13 +117,13 @@ export default class Chat extends Component {
                 }}
 
             />
-        );
+        )
     }
 
     renderLoading() {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size='large' color='#6646ee' />
+                <ActivityIndicator size='large' color='#fff' />
             </View>
         )
     }
@@ -182,47 +157,6 @@ export default class Chat extends Component {
         );
     }
 
-    componentWillUnmount() {
-        this.messagesListener()
-    }
-
-    handlePickImage() {
-        const options = {
-            title: 'Choisissez une image',
-            takePhotoButtonTitle: 'Prendre une photo',
-            cancelButtonTitle: 'Annuler',
-            chooseFromLibraryButtonTitle: 'Choisir de la librairie',
-            mediaType: 'image',
-            //customButtons: [{ name: 'fb', title: 'Choose Photo from Facebook' }],
-            storageOptions: {
-                skipBackup: true,
-                path: 'images',
-            },
-        }
-
-        ImagePicker.showImagePicker(options, (response) => {
-
-            if (response.didCancel) {
-                console.log('User cancelled image picker');
-            }
-
-            else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
-            }
-
-            else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
-            }
-
-            else {
-                const source = { uri: response.uri };
-                this.setState({
-                    imageSource: source,
-                }, () => console.log(this.state.imageSource))
-            }
-        })
-    }
-
     renderActions(props) {
         return (
             <Actions
@@ -231,36 +165,317 @@ export default class Chat extends Component {
                 //     ['Choisir une image']: this.handlePickImage,
                 // }}
                 icon={() => (
-                    <Icon name={'attachment'} size={28} color={theme.colors.primary} />
+                    <MaterialCommunityIcons name={'attachment'} size={28} color={theme.colors.primary} />
                 )}
-                onPressActionButton={this.handlePickImage}
+                onPressActionButton={this.pickAndUploadFiles}
             />
         )
     }
 
-    render() {
-        let { messages } = this.state
+    sendSystemMessage(message) {
+        db.collection('Chats').doc(this.chatId)
+            .collection('Messages').add({
+                text: message,
+                createdAt: new Date().getTime(),
+                system: true
+            })
+    }
+
+    async pickAndUploadFiles() {
+        let attachments = []
+
+        try {
+            const results = await DocumentPicker.pickMultiple({ type: ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'] })
+
+            for (const res of results) {
+                let i = 0
+
+                //android only
+                if (res.uri.startsWith('content://')) {
+
+                    //1. Copy file to Cach to get its relative path (Documentpicker provides only absolute path which can not be used to upload file to firebase)
+                    const uriComponents = res.uri.split('/')
+                    const fileNameAndExtension = uriComponents[uriComponents.length - 1]
+                    const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
+
+                    fileCopied = await RNFS.copyFile(res.uri, destPath)
+                        .then(() => { return true })
+                        .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
+
+                    if (!fileCopied) return
+
+                    const document = {
+                        path: destPath,
+                        type: res.type,
+                        name: res.name, //#task: not used for video/image
+                        size: res.size, //#task: not used for video/image
+                        progress: 0
+                    }
+
+                    const { path, type, name, size } = document
+
+                    if (type === 'video/mp4')
+                        this.setState({ videoSource: path })
+
+                    else if (type === 'image/png' || type === 'image/jpeg')
+                        this.setState({ imageSource: path })
+
+                    else if (type === 'application/pdf' || type === 'application/msword' || type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                        this.setState({ file: { path, name, size, type } })
+
+                    const messageId = await uuidGenerator()
+
+                    await this.handleSend([{ text: '' }], messageId) //#task: get text using chat ref //#task2: add intermediary screen to crop/and adjust images
+
+                    document.messageId = messageId
+                    attachments.push(document)
+
+                }
+
+                fileCopied = false
+                i = i + 1
+            }
+
+            //UPLOAD FILES
+            const reference = firebase.storage().ref(`/Chat/${this.chatId}/`)
+            const filesUploaded = await this.uploadFiles(attachments, reference, this.state.attachedFiles, true, this.chatId)
+
+            if (filesUploaded) {
+                for (const attachedFile of this.state.attachedFiles) { //attachedFile contains uploadTask which can be used to cancel/pause/resume the upload
+
+                    const { downloadURL, name, size, contentType, messageId } = attachedFile
+                    const payload = { pending: false, sent: true, received: true }
+
+                    if (contentType === 'image/jpeg' || contentType === 'image/png')
+                        payload.image = downloadURL
+
+                    else if (contentType === 'video/mp4')
+                        payload.video = downloadURL
+
+
+                    else if (contentType === 'application/pdf' || contentType === 'application/msword' || contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                        payload.file = { source: downloadURL, name, size, type: contentType }
+                    }
+
+                    await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).update(payload)
+                }
+            }
+        }
+
+        catch (err) {
+            console.error(err)
+            if (DocumentPicker.isCancel(err)) console.log('User has canceled picker')
+            else Alert.alert("Erreur lors de l'exportation du fichier")
+        }
+    }
+
+    async handleSend(messages, messageId) {
+
+        const text = messages[0].text
+        const { imageSource, videoSource, file } = this.state
+
+        if (!messageId)
+            messageId = await uuidGenerator()
+
+        const msg = {
+            _id: messageId,
+            text,
+            createdAt: new Date().getTime(),
+            user: {
+                _id: this.currentUser.uid,
+                email: this.currentUser.email
+            },
+            sent: true,
+            received: true,
+            pending: false,
+        }
+
+        //Handle attachments
+        if (imageSource || videoSource || file) {
+            msg.sent = false
+            msg.received = false
+            msg.pending = true //Only local user can see this file
+
+            if (imageSource) {
+                msg.image = imageSource
+                msg.messageType = 'image/jpeg'
+            }
+
+            else if (videoSource) {
+                msg.video = videoSource
+                msg.messageType = 'video/mp4'
+            }
+
+            if (file) {
+                const { path, name, size, type } = file
+                msg.file = { source: path, name, size, type }
+            }
+        }
+
+        const latestMsg = {
+            latestMessage: {
+                text,
+                createdAt: new Date().getTime()
+            }
+        }
+
+        await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).set(msg)
+        await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
+        this.setState({ imageSource: '', videoSource: '', file: {} })
+    }
+
+    //files (pdf, docs...)
+    renderCustomView(props) {
+        // return <ChatCustomView {...props} />
+        const { messageType, pending, file } = props.currentMessage
+
+        if (file && file.source) {
+            const icon = setAttachmentIcon(messageType)
+            const url = pending ? `file:///${file}` : file
+
+            return (
+                <UploadProgress
+                    attachment={file}
+                    showProgress={false}
+                    containerStyle={{ width: constants.ScreenWidth * 0.65, marginHorizontal: 5 }}
+                    onPress={() => {
+                        if (pending) return
+                        downloadFile(this, file.name, file.source)
+                    }}
+                    showRightIcon={pending}
+                    rightIcon={
+                        <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
+                            <Loading size='small' />
+                        </View>
+                    }
+                />
+            )
+        }
+
+        else return null
+    }
+
+    renderMessageVideo(props, navigation) {
+        const { currentMessage } = props
+        const { video, pending } = currentMessage
 
         return (
+            <TouchableOpacity
+                style={[styles.messageVideo, { backgroundColor: '#000' }]}
+                onPress={() => {
+                    if (pending) return
+                    navigation.navigate('VideoPlayer', { videoUrl: video })
+                }}>
+                {pending ?
+                    <Loading size={50} />
+                    :
+                    <MaterialCommunityIcons
+                        name='play-circle'
+                        color='#fff'
+                        size={60}
+                        style={{ position: 'absolute' }} />
+                }
+            </TouchableOpacity>
+        )
+
+        // else return (
+        //     <TouchableOpacity onPress={() => this.runVideoPlayer(currentMessage.video)} style={styles.messageVideo}>
+        //         <Thumbnail url={video} /> //#task: works only with youtube
+        //     </TouchableOpacity >
+        // )
+    }
+
+    renderMessageImage(props) {
+        const { pending, image } = props.currentMessage
+        const uri = pending ? `file:///${image}` : image
+
+        return (
+            <TouchableOpacity onPress={() => this.displayImageViewer(uri)} onLongPress={() => console.log('display UI to delete image')}>
+                <ImageBackground
+                    source={{
+                        uri: uri,
+                        cache: 'only-if-cached'
+                    }}
+                    style={{ width: 200, height: 200, justifyContent: 'center', alignItems: 'center' }}>
+                    {props.currentMessage.pending && <Loading size={50} />}
+                    {/* <MaterialCommunityIcons
+                        onPress={() => props.currentMessage.uploadTask.cancel()}
+                        name='close-circle'
+                        color='pink'
+                        size={33}
+                        style={{ position: 'absolute' }} /> */}
+                </ImageBackground>
+            </TouchableOpacity>
+        )
+    }
+
+    displayImageViewer(url) {
+        this.setState({ isImageViewVisible: true, imageUrl: url })
+    }
+
+    toggleImageView() {
+        this.setState({ isImageViewVisible: !this.state.isImageViewVisible })
+    }
+
+    render() {
+        const { messages, attachments, showVideoPlayer, videoUrl, isImageViewVisible, imageUrl, toastMessage, toastType } = this.state
+        const imagesView = [{
+            source: { uri: imageUrl },
+            width: constants.ScreenWidth,
+            height: constants.ScreenHeight * 0.8,
+        }]
+
+        if (isImageViewVisible)
+            return (
+                <ImageView
+                    images={imagesView}
+                    imageIndex={0}
+                    //onImageChange={(imageIndex) => this.setState({ imageIndex })}
+                    isVisible={isImageViewVisible}
+                    onClose={this.toggleImageView}
+
+                    renderFooter={(currentImage) => (
+                        <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                            <TouchableOpacity style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }} onPress={() => {
+                                this.toggleImageView()
+                                downloadFile(this, `image_${moment().format('DD_MM_YYYY_HH_mm')}`, imagesView[0].source.uri)
+                            }}>
+                                <MaterialCommunityIcons name={'download'} size={24} color='#fff' />
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
+            )
+
+        else return (
             <View style={{ flex: 1 }}>
                 <Appbar back title titleText='Espace messagerie' />
                 <GiftedChat
+                    ref={(ref) => { this.chatRef = ref }}
                     messagesContainerStyle={{ backgroundColor: theme.colors.chatBackground }}
                     messages={messages}
-                    onSend={this.handleSend}
-                    user={{ id: this.currentUser.uid }}
+                    onSend={(mesages) => this.handleSend(messages, '')}
+                    user={{ _id: this.currentUser.uid }}
                     placeholder='Tapez un message'
                     alwaysShowSend
                     showUserAvatar={false}
                     scrollToBottom
+                    renderCustomView={this.renderCustomView}
                     renderBubble={this.renderBubble}
                     renderLoading={this.renderLoading}
                     renderSend={this.renderSend}
                     renderActions={(props) => this.renderActions()}
+                    renderMessageVideo={(props) => this.renderMessageVideo(props, this.props.navigation)}
+                    renderMessageImage={this.renderMessageImage}
                     scrollToBottomComponent={this.scrollToBottomComponent}
                     renderSystemMessage={this.renderSystemMessage}
-                    renderDay={(props) => <Day {...props} dateFormat={'Do MMM YYYY'} textStyle={[{ color: '#fafafa' }]} />}
+                    renderDay={(props) => <Day {...props} dateFormat={'D MMM YYYY'} textStyle={[{ color: '#fafafa' }]} />}
                 />
+                <Toast
+                    containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })} />
             </View>
         )
     }
@@ -271,7 +486,8 @@ const styles = StyleSheet.create({
     loadingContainer: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: theme.colors.chatBackground
     },
     sendingContainer: {
         justifyContent: 'center',
@@ -290,5 +506,35 @@ const styles = StyleSheet.create({
     systemMessageText: {
         color: theme.colors.placeholder,
         textAlign: 'center'
+    },
+    backgroundVideo: {
+        flex: 1,
+    },
+    messageVideo: {
+        width: 200, height: 200, justifyContent: 'center', alignItems: 'center'
     }
-});
+})
+
+
+
+
+
+
+
+
+// return (
+//     // <TouchableOpacity onPress={() => this.runVideoPlayer(currentMessage.video)} style={{ padding: 20, width: 200, height: 200 }}>
+//     /* <Video
+//         //source={require('../../dogs.mp4')}
+//         source={{ uri: uri }}   // Can be a URL or a local file.
+//         // ref={(ref: Video) => { this.video = ref }}
+//         //fullscreen={false}
+//         onBuffer={this.onBuffer}                // Callback when remote video is buffering
+//         onError={this.videoError}               // Callback when video cannot be loaded
+//         style={styles.backgroundVideo}
+//         paused={false}
+//     /> */
+//     <ThumbnailRemote url='https://www.youtube.com/watch?v=8Fd77omIrII&list=RD8Fd77omIrII&start_radio=1' />
+
+//     // </TouchableOpacity >
+// )

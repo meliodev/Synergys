@@ -16,18 +16,19 @@ import { constants } from '../core/constants';
 
 import { ThemeColors, withNavigation } from 'react-navigation'
 
-const RequestItem = ({ request, requestType, chatId, navigation, handleAccept, handleReject, ...props }) => {
+const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => {
 
     let nextScreen = ''
     let params = {}
+
     if (requestType === 'projet') {
         nextScreen = 'CreateProjectReq'
-        params = { RequestId: request.id, isEdit: true }
+        params = { RequestId: request.id }
     }
 
     else if (requestType === 'ticket') {
         nextScreen = 'CreateTicketReq'
-        params = { RequestId: request.id, isEdit: true }
+        params = { RequestId: request.id }
     }
 
     const setStateColor = (state) => {
@@ -59,8 +60,8 @@ const RequestItem = ({ request, requestType, chatId, navigation, handleAccept, h
                 <View style={{ flex: 1 }}>
 
                     <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 19 }}>
-                        <Title style={[theme.customFontMSsemibold.header, {flex: 0.85, paddingRight: constants.ScreenWidth*0.15}]} numberOfLines={1}>{request.subject}</Title>
-                        <Ionicons style= {{flex: 0.15, alignSelf: 'center'}} name='chatbubble-ellipses-outline' size={30} onPress={() => navigation.navigate('Chat', { chatId: chatId })} />
+                        <Title style={[theme.customFontMSsemibold.header, { flex: 0.85, paddingRight: constants.ScreenWidth * 0.15 }]} numberOfLines={1}>{request.subject}</Title>
+                        <Ionicons style={{ flex: 0.15, alignSelf: 'center' }} name='chatbubble-ellipses-outline' size={30} onPress={() => navigation.navigate('Chat', { chatId: chatId })} />
                     </View>
 
                     <Paragraph style={[theme.customFontMSmedium.body]} numberOfLines={1}>{request.description}</Paragraph>
@@ -68,9 +69,9 @@ const RequestItem = ({ request, requestType, chatId, navigation, handleAccept, h
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
                         <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >Par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: request.editedBy.userId })}>{request.editedBy.userName}</Text></Paragraph>
-                            <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2 }}>
-                                <Paragraph style={[theme.customFontMSmedium.caption, { color: '#fff', textAlign: 'center' }]}>{request.state}</Paragraph>
-                            </View>
+                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2 }}>
+                            <Paragraph style={[theme.customFontMSmedium.caption, { color: '#fff', textAlign: 'center' }]}>{request.state}</Paragraph>
+                        </View>
                     </View>
                 </View>
             </Card.Content>

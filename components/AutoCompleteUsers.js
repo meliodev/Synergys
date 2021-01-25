@@ -104,6 +104,7 @@ export default class AutoCompleteUsers extends React.Component {
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
                 editable={this.props.editable}
+                suggestionsBellow = {this.props.suggestionsBellow}
             />
         )
     }
