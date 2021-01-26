@@ -1,5 +1,10 @@
+
+//Category: name : Picker + Dialog (add new cat)
+//Taxe: value : TextInput (numeric)
+//Marque: {id, name, attachment} : AutoCompleteTag (like articles)
+
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Image, Platform } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Image, ImageBackground, Platform, ActivityIndicator } from 'react-native';
 import { Card, Title, TextInput } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -7,6 +12,7 @@ import Modal from 'react-native-modal'
 import firebase from '@react-native-firebase/app'
 import ImageView from 'react-native-image-view'
 import { connect } from 'react-redux'
+import Dialog from "react-native-dialog"
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -18,15 +24,17 @@ import Picker from "../../components/Picker"
 import Button from "../../components/Button"
 import RadioButton from "../../components/RadioButton"
 import UploadProgress from "../../components/UploadProgress"
+import AutoCompleteBrands from "../../components/AutoCompleteBrands"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
+import { uploadFile } from "../../api/storage-api";
+
 import { generatetId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleSetError } from '../../core/exceptions';
-import { ImageBackground } from 'react-native';
 
 const db = firebase.firestore()
 
@@ -35,9 +43,12 @@ class CreateProduct extends Component {
         super(props)
         this.fetchProduct = this.fetchProduct.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.pickImage = this.pickImage.bind(this)
-        this.handleDeleteImage = this.handleDeleteImage.bind(this)
+        this.pickNewBrandLogo = this.pickNewBrandLogo.bind(this)
 
+        this.toggleDialog = this.toggleDialog.bind(this)
+        this.addNewCategory = this.addNewCategory.bind(this)
+
+        this.uploadFile = uploadFile.bind(this)
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
 
@@ -46,18 +57,30 @@ class CreateProduct extends Component {
         this.currentUser = firebase.auth().currentUser
 
         this.ProductId = this.props.navigation.getParam('ProductId', '')
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
-        this.title = this.props.navigation.getParam('title', 'Nouvel article')
+        this.isEdit = this.ProductId ? true : false
+        this.title = this.ProductId ? "Modifier l'article" : "Nouvel article"
 
         this.state = {
             //AUTO-GENERATED
             ProductId: '', //Not editable
-            checked: 'first',
+            checked: 'second',
             type: 'product',
-            name: { value: 'Machine à laver', error: '' },
-            brand: { value: 'LG', error: '' },
-            description: { value: 'lorem ipsum dolor', error: '' },
-            price: { value: '850', error: '' },
+            name: { value: '', error: '' },
+            description: { value: '', error: '' },
+            price: { value: '', error: '' },
+            taxe: { rate: '', error: '' },
+
+            //Category
+            category: { value: '', error: '' }, //Selected category
+            categories: [{ label: 'Selectionnez une catégorie', value: '' }], //Picker with dynamic values
+            showDialog: false, //Dialog to add new category
+            dialogType: '', //category or brand
+            newCategory: '', //New category
+
+            //Brand
+            suggestions: [], //Brands suggestions
+            tagsSelected: [], //Selected brand
+            newBrand: { name: '', attachment: { path: '' } }, //New brand
 
             //logs
             createdBy: { id: '', fullName: '' },
@@ -65,15 +88,9 @@ class CreateProduct extends Component {
             editedBy: { id: '', fullName: '' },
             editededAt: '',
 
-            //Images
-            attachments: [],
-            attachedImages: [],
-            isImageViewVisible: false,
-            imageIndex: 0,
-            imagesView: [],
-
             error: '',
             loading: false,
+            loadingDialog: false,
             toastType: '',
             toastMessage: '',
 
@@ -89,6 +106,39 @@ class CreateProduct extends Component {
             const ProductId = generatetId('GS-AR-')
             this.setState({ ProductId }, () => this.initialState = this.state)
         }
+
+        this.fetchCategories()
+        this.fetchSuggestions()
+    }
+
+    componentWillUnmount() {
+        if (this.unsubscribeCategories)
+            this.unsubscribeCategories()
+
+        if (this.unsubscribe)
+            this.unsubscribe()
+    }
+
+    fetchCategories() {
+        this.unsubscribeCategories = db.collection('ProductCategories').onSnapshot((querysnapshot) => {
+            let categories = [{ label: 'Selectionnez une catégorie', value: '' }]
+
+            if (querysnapshot.empty) return
+
+            querysnapshot.forEach((doc) => {
+                const categoryName = doc.data().name
+                const category = { label: categoryName, value: categoryName }
+                categories.push(category)
+                categories.sort((a, b) => (a.label > b.label) ? 1 : -1) //Sort in alphabetical order
+                this.setState({ categories })
+            })
+
+        })
+    }
+
+    fetchSuggestions() {
+        const query = db.collection('Brands')
+        fetchDocs(this, query, 'suggestions', '', () => { load(this, false) })
     }
 
     //on Edit
@@ -105,12 +155,6 @@ class CreateProduct extends Component {
             brand.value = product.brand
             description.value = product.description
             price.value = product.price
-
-            //Images
-            attachedImages = product.attachments
-            attachedImages = attachedImages.filter((image, index) => image.deleted === false)
-
-            console.log('attachedImages', attachedImages)
 
             //َActivity
             createdAt = product.createdAt
@@ -140,28 +184,30 @@ class CreateProduct extends Component {
             .catch((e) => console.error(e))
     }
 
-    //submit
+    //Handle inputs & Submit
+    setProductType(checked, type) {
+        this.setState({ checked, type })
+    }
+
     validateInputs() {
-        let { name, brand, price } = this.state
+        let { name, brand, price, category } = this.state
 
-        let nameError = nameValidator(name.value, `"Nom de l'article"`)
-        let brandError = nameValidator(brand.value, `"Marque de l'article"`)
-        let priceError = priceValidator(price.value)
+        const categoryError = nameValidator(category.value, `"Catégorie"`)
+        const nameError = nameValidator(name.value, `"Nom de l'article"`)
+        const brandError = nameValidator(brand.value, `"Marque de l'article"`)
+        const priceError = priceValidator(price.value)
 
-        if (nameError || brandError || priceError) {
+        if (categoryError || nameError || brandError || priceError) {
             Keyboard.dismiss()
+            category.error = categoryError
             name.error = nameError
             price.error = priceError
             brand.error = brandError
-            this.setState({ name, brand, price, loading: false })
+            this.setState({ category, name, brand, price, loading: false })
             return false
         }
 
         return true
-    }
-
-    setProductType(checked, type) {
-        this.setState({ checked, type })
     }
 
     async handleSubmit() {
@@ -174,138 +220,256 @@ class CreateProduct extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        //1. UPLOADING FILES
-        if (this.state.attachments.length > 0) { //new attachments
-            this.title = 'Exportation des images...'
-            await this.uploadImages()
-        }
-
         // 2. ADDING product to firestore
-        let { ProductId, type, name, brand, description, price, attachedImages } = this.state
+        // let { ProductId, type, category, name, brand, description, price, attachedImages } = this.state
+        // const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
-        let product = {
-            type: type,
-            name: name.value,
-            brand: brand.value,
-            description: description.value,
-            price: price.value,
-            attachments: attachedImages,
-            editedAt: moment().format('lll'),
-            editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
-            deleted: false,
-        }
+        // let product = {
+        //     type: type,
+        //     category: category.value,
+        //     name: name.value,
+        //     brand: brand.value,
+        //     description: description.value,
+        //     price: price.value,
+        //     //attachments: attachedImages,
+        //     editedAt: moment().format('lll'),
+        //     editedBy: currentUser,
+        //     deleted: false,
+        // }
 
-        if (!this.isEdit) {
-            product.createdAt = moment().format('lll')
-            product.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        }
+        // if (!this.isEdit) {
+        //     product.createdAt = moment().format('lll')
+        //     product.createdBy = currentUser
+        // }
 
-        console.log('Ready to add product...')
-        db.collection('Products').doc(this.ProductId).set(product, { merge: true })
-            .then(() => {
-                this.setState({ loading: false })
-                this.props.navigation.state.params.onGoBack(product)
-                this.props.navigation.goBack()
-            })
-            .catch(e => {
-                this.setState({ loading: false })
-                handleSetError(e)
-            })
+        // console.log('Ready to add product...')
+
+        // db.collection('Products').doc(ProductId).set(product, { merge: true })
+        //     .then(() => {
+        //         load(this, false)
+        //         this.props.navigation.state.params.onGoBack(product)
+        //         this.props.navigation.goBack()
+        //     })
+        //     .catch(e => {
+        //         load(this, false)
+        //         handleSetError(e)
+        //     })
     }
 
-    //Images
-    async pickImage() {
-        const { attachments } = this.state
-        const newAttachments = await pickImage(attachments)
-        console.log('newAttachments', newAttachments)
-        this.setState({ attachments: newAttachments }, () => console.log(this.state.attachments))
+    //Logo brand
+    async pickNewBrandLogo() {
+        let { newBrand } = this.state
+        const attachments = await pickImage([])
+        newBrand.attachment = attachments[0]
+
+        this.setState({ newBrand })
     }
 
-    async uploadImages() {
-        const promises = []
-        const images = this.state.attachments
-        let attachedImages = []
-        let urls = []
-
-        for (let i = 0; i < images.length; i++) {
-            const reference = firebase.storage().ref('/Products/' + this.state.type + '/' + this.state.ProductId + '/Images/' + images[i].name)
-            const uploadTask = reference.putFile(images[i].path) //#only android (uri instead of path for ios)
-            promises.push(uploadTask)
-
-            uploadTask.on('state_changed', async function (snapshot) {
-                var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                console.log('Upload file ' + i + ': ' + progress + '% done')
-                images[i].progress = progress / 100
-                this.setState({ images })
-            }.bind(this))
-
-            uploadTask.then((result) => {
-                urls.push(result.downloadURL)
-                console.log('task ' + i + ' finished')
-            })
-        }
-
-        await Promise.all(promises)
-            .then(async (results) => {
-                attachedImages = results.map((res) => ({ downloadURL: res.downloadURL, name: res.metadata.name, size: res.metadata.size, contentType: res.metadata.contentType, local: false, deleted: false }))
-                attachedImages = attachedImages.concat(this.initialState.attachedImages)
-                this.setState({ attachedImages, attachments: [] })
-                console.log('ALL IMAGES ARE UPLOADED')
-            })
-            .catch(err => {
-                if (this.isEdit) this.title = 'Modifier le projet'
-                else this.title = 'Nouveau projet'
-                setToast(this, 'e', 'Erreur lors du téléchargement des images, veuillez réessayer.')
-
-                //Delete uploaded images in case of failure of one of them
-                for (let i = 0; i < urls.length; i++) {
-                    firebase.storage().refFromURL(urls[i]).delete()
-                }
-            })
+    //Add new category
+    toggleDialog(dialogType) {
+        this.setState({ showDialog: !this.state.showDialog, dialogType })
     }
 
-    renderAttachments() {
-        const { attachments } = this.state
-        return attachments.map((image, key) => {
-            return <UploadProgress attachment={image} />
-        })
+    renderDialog(type) { //Category & Brand
+        const { showDialog, newCategory, newBrand, attachment, loadingDialog } = this.state
+        const isCategory = type === 'category'
+        const label = isCategory ? 'catégorie' : 'marque'
+
+        if (loadingDialog)
+            return (
+                <View style={styles.dialogContainer} >
+                    <Dialog.Container visible={showDialog}>
+                        <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>Ajout de la {label} en cours...</Dialog.Title>
+                        <ActivityIndicator color={theme.colors.primary} size='small' />
+                    </Dialog.Container>
+                </View >
+            )
+
+        else return (
+            < View style={styles.dialogContainer} >
+                <Dialog.Container visible={showDialog}>
+                    {!isCategory ?
+                        newBrand.attachment.path ?
+                            <TouchableOpacity style={{ marginBottom: 20 }} onPress={this.pickNewBrandLogo}>
+                                <Image source={{ uri: newBrand.attachment.path }} style={{ width: 90, height: 90 }} />
+                            </TouchableOpacity>
+                            :
+                            <TouchableOpacity style={styles.imagesBox} onPress={this.pickNewBrandLogo}>
+                                <Text style={[theme.customFontMSsemibold.caption, { color: '#333' }]}>+ Logo de</Text>
+                                <Text style={[theme.customFontMSsemibold.caption, { color: '#333' }]}>la marque</Text>
+                            </TouchableOpacity>
+                        : null
+                    }
+
+                    <Dialog.Input
+                        label={`Nom de la ${label}`}
+                        returnKeyType="done"
+                        value={isCategory ? newCategory : newBrand}
+                        onChangeText={text => {
+                            if (isCategory)
+                                this.setState({ newCategory: text })
+                            else {
+                                newBrand.name = text
+                                this.setState({ newBrand })
+                            }
+                        }}
+                        autoFocus={showDialog}
+                        style={{ borderBottomColor: theme.colors.graySilver, borderBottomWidth: StyleSheet.hairlineWidth }}
+                    />
+                    <Dialog.Button label="Annuler" onPress={() => this.toggleDialog('')} style={{ color: theme.colors.placeholder }} />
+                    <Dialog.Button label="Confirmer" onPress={async () => {
+                        this.setState({ loadingDialog: true })
+
+                        if (isCategory) {
+                            if (!newCategory) return
+                            this.addNewCategory()
+                        }
+
+                        else {
+                            const { name, attachment } = this.state.newBrand
+                            if (!name) return
+
+                            //upload logo
+                            const storageRef = firebase.storage().ref(`/Brands/${name}`)
+                            const response = await this.uploadFile(attachment, storageRef)
+
+                            if (response === 'failure') {
+                                this.setState({ loadingDialog: false })
+                                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
+                                return
+                            }
+
+                            //add brand to db
+                            this.addNewBrand()
+                        }
+                    }} />
+                </Dialog.Container>
+            </View >
+        )
     }
 
-    async handleDeleteImage(deleteAll, index) {
-        const newAttachedImages = this.state.attachedImages
-        newAttachedImages[index].deleted = true
+    async addNewCategory() {
+        const { newCategory } = this.state
 
-        await db.collection('Products').doc(this.ProductId).update({ attachments: newAttachedImages })
-        this.fetchProduct()
-        this.setState({ isImageViewVisible: false })
+        await db.collection('ProductCategories').doc().set({ name: newCategory })
+            .then(() => this.setState({ category: { value: newCategory, error: '' }, newCategory: '' }))
+            .catch((e) => handleSetError(e))
+            .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
     }
+
+    async addNewBrand() {
+        const { newBrand, tagsSelected } = this.state
+
+        let logo = newBrand.attachment
+        delete logo.progress
+        delete logo.local
+
+        tagsSelected.push(newBrand)
+
+        await db.collection('Brands').doc().set({ name: newBrand.name, logo })
+            .then(() => this.setState({ tagsSelected, newBrand: { name: '', attachment: {} } }))
+            .catch((e) => handleSetError(e))
+            .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
+    }
+
+    renderTypeAndLogo() {
+        const { checked, tagsSelected } = this.state
+
+        return (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <View>
+                    <Text style={theme.customFontMSregular.body}>Type de l'article</Text>
+                    <RadioButton
+                        checked={checked}
+                        firstChoice={{ title: 'Service', value: 'service' }}
+                        secondChoice={{ title: 'Produit', value: 'good' }}
+                        onPress1={() => this.setProductType('first', 'service')}
+                        onPress2={() => this.setProductType('second', 'good')}
+                        style={{ marginBottom: 10 }}
+                        textRight={true}
+                        isRow={false} />
+                </View>
+
+                <TouchableOpacity onPress={() => console.log('...')}>
+                    {tagsSelected.length > 0 && tagsSelected[0].logo.downloadURL &&
+                        <Image source={{ uri: tagsSelected[0].logo.downloadURL }} style={{ width: 90, height: 90 }} />
+                    }
+                </TouchableOpacity>
+
+            </View>
+
+        )
+    }
+
+    renderCategory() {
+        const { category, categories, dialogType } = this.state
+        return (
+            <View style={{ marginBottom: 30, }}>
+                <Picker
+                    title="Catégorie"
+                    returnKeyType="next"
+                    selectedValue={category.value}
+                    onValueChange={(text) => updateField(this, category, text)}
+                    elements={categories}
+                    errorText={category.error} />
+
+                <TouchableOpacity onPress={() => this.toggleDialog('category')}>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+  Ajouter une catégorie</Text>
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    renderBrand() {
+        const { suggestions, tagsSelected } = this.state
+        const noItemSelected = tagsSelected.length === 0
+
+        return (
+            <View style={{ marginBottom: 5 }}>
+                <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, marginBottom: 5 }]} >Marque</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+
+                    <View style={{ flex: 0.9 }}>
+                        <AutoCompleteBrands
+                            placeholder='Écrivez pour choisir une marque'
+                            suggestions={suggestions}
+                            tagsSelected={tagsSelected}
+                            main={this}
+                            autoFocus={false}
+                            showInput={noItemSelected}
+                            errorText=''
+                            suggestionsBellow={false}
+                        />
+                    </View>
+
+                    {noItemSelected ?
+                        <TouchableOpacity style={styles.plusIcon} onPress={() => this.toggleDialog('brand')}>
+                            <MaterialCommunityIcons name='plus' color={theme.colors.primary} size={21} />
+                        </TouchableOpacity>
+                        :
+                        <TouchableOpacity style={[styles.plusIcon, { paddingTop: 0 }]} onPress={() => this.setState({ tagsSelected: [] })}>
+                            <MaterialCommunityIcons name='close' color={theme.colors.placeholder} size={21} />
+                        </TouchableOpacity>
+                    }
+                </View>
+            </View>
+        )
+    }
+
 
     render() {
-        let { ProductId, checked, name, brand, description, price } = this.state
-        let { createdAt, createdBy, editedAt, editedBy } = this.state
-        let { error, loading, toastType, toastMessage } = this.state
-        let { attachments, attachedImages, isImageViewVisible, imageIndex } = this.state
-
-        const allImages = attachments.concat(attachedImages) //local images + remote images
-
-        let imagesView = allImages.map((image) => {
-            if (image.local) return ({ source: { uri: image.path } }) //local
-            else return ({ source: { uri: image.downloadURL } }) //remote
-        })
-
-        // let imagesView = [{ source: { uri: "file:///storage/emulated/0/DCIM/Screenshots/Screenshot_20201225-192848.png" } }]
-        // console.log('imagesView', imagesView)
+        const { ProductId, checked, name, brand, description, price, taxe, category, categories, showDialog, dialogType } = this.state
+        const { suggestions, tagsSelected } = this.state
+        const { createdAt, createdBy, editedAt, editedBy } = this.state
+        const { error, loading, toastType, toastMessage } = this.state
+        const { isImageViewVisible } = this.state
 
         return (
             <View style={styles.container}>
                 <Appbar back={!loading} title titleText={this.title} check={!loading} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
-                    <View style={{ flex: 1 }}>
-                        <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
-                            {this.renderAttachments(attachments)}
-                        </ScrollView>
-                    </View>
+                    <Loading />
                     :
                     <View style={{ flex: 1 }}>
 
@@ -314,43 +478,7 @@ class CreateProduct extends Component {
                             <Card style={{ margin: 5, paddingVertical: 10 }}>
                                 <Card.Content>
 
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                        <View>
-                                            <Text style={theme.customFontMSregular.body}>Type de l'article</Text>
-                                            <RadioButton
-                                                checked={checked}
-                                                firstChoice={{ title: 'Service', value: 'service' }}
-                                                secondChoice={{ title: 'Produit', value: 'good' }}
-                                                onPress1={() => this.setProductType('first', 'service')}
-                                                onPress2={() => this.setProductType('second', 'good')}
-                                                style={{ marginBottom: 10 }}
-                                                textRight={true}
-                                                isRow={false} />
-                                        </View>
-
-                                        {imagesView.length === 0 ?
-                                            <TouchableOpacity style={styles.imagesBox} onPress={this.pickImage}>
-                                                <Text style={[theme.customFontMSsemibold.caption, { color: '#333' }]}>+ Ajouter</Text>
-                                                <Text style={[theme.customFontMSsemibold.caption, { color: '#333' }]}>une image</Text>
-                                            </TouchableOpacity>
-                                            :
-                                            <View>
-                                                <TouchableOpacity onPress={() => this.setState({ isImageViewVisible: true })}>
-                                                    <ImageBackground source={{ uri: imagesView[0].source.uri }} style={{ width: 90, height: 90 }}>
-                                                        {imagesView.length > 1 &&
-                                                            <View style={styles.imagesCounter}>
-                                                                <Text style={[theme.customFontMSmedium.caption, { color: '#fff' }]}>+{imagesView.length - 1}</Text>
-                                                            </View>
-                                                        }
-                                                    </ImageBackground>
-                                                </TouchableOpacity>
-                                                <TouchableOpacity style={styles.addImage} onPress={this.pickImage}>
-                                                    <Text style={theme.customFontMSmedium.caption}>+ Ajouter</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        }
-
-                                    </View>
+                                    {this.renderTypeAndLogo()}
 
                                     <MyInput
                                         label="Numéro de l'article"
@@ -360,6 +488,9 @@ class CreateProduct extends Component {
                                         disabled
                                     />
 
+                                    {this.renderCategory()}
+                                    {this.renderBrand()}
+
                                     <MyInput
                                         label="Nom de l'article"
                                         returnKeyType="done"
@@ -367,15 +498,6 @@ class CreateProduct extends Component {
                                         onChangeText={text => updateField(this, name, text)}
                                         error={!!name.error}
                                         errorText={name.error}
-                                        multiline={true} />
-
-                                    <MyInput
-                                        label="Marque de l'article"
-                                        returnKeyType="done"
-                                        value={brand.value}
-                                        onChangeText={text => updateField(this, brand, text)}
-                                        error={!!brand.error}
-                                        errorText={brand.error}
                                         multiline={true} />
 
                                     <MyInput
@@ -395,27 +517,25 @@ class CreateProduct extends Component {
                                         onChangeText={text => updateField(this, price, text)}
                                         error={!!price.error}
                                         errorText={price.error}
-                                        multiline={true} />
+                                    />
+
+                                    <MyInput
+                                        label="Taxe"
+                                        returnKeyType="done"
+                                        keyboardType='numeric'
+                                        value={taxe.rate}
+                                        onChangeText={rate => {
+                                            this.setState({ taxe: { rate, error: '' } })
+                                        }}
+                                        error={!!taxe.error}
+                                        errorText={taxe.error}
+                                    />
                                 </Card.Content>
                             </Card>
 
                         </ScrollView>
 
-                        <ImageView
-                            images={imagesView}
-                            imageIndex={0}
-                            onImageChange={(imageIndex) => this.setState({ imageIndex })}
-                            isVisible={isImageViewVisible}
-                            onClose={() => this.setState({ isImageViewVisible: false })}
-                            renderFooter={(currentImage) => (
-                                <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                                    <TouchableOpacity
-                                        style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }}
-                                        onPress={() => this.handleDeleteImage(false, imageIndex)}>
-                                        <MaterialCommunityIcons name='delete' size={24} color='#fff' />
-                                    </TouchableOpacity>
-                                </View>)}
-                        />
+                        {showDialog && this.renderDialog(dialogType)}
 
                         <Toast
                             message={toastMessage}
@@ -465,6 +585,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: 90,
         height: 90,
+        marginBottom: 20,
         backgroundColor: theme.colors.gray50,
         borderWidth: 1,
         borderStyle: 'dashed',
@@ -495,6 +616,26 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    dialogContainer: {
+        flex: 1,
+        backgroundColor: '#fff',
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    plusIcon: {
+        flex: 0.1,
+        padding: 5,
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+    },
+    emptyLogo: {
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        elevation: 5,
+        width: 90,
+        height: 90
+    }
 })
 
 

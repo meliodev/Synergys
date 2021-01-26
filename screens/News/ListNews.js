@@ -24,7 +24,11 @@ export default class ListNews extends Component {
     }
 
     renderPost(post) {
-        const regex = /(<([^>]+)>)/ig;
+        // if(post._embedded['wp:featuredmedia'])
+        // console.log('POST IMAGE:::', post._embedded['wp:featuredmedia'][0].link, '*****************************')
+        const regex = /(<([^>]+)>)/ig
+
+        const imageUri = post._embedded['wp:featuredmedia'] ? post._embedded['wp:featuredmedia'][0].link : ''
 
         let newspost = {
             postId: post.id,
@@ -34,12 +38,13 @@ export default class ListNews extends Component {
             postExcerpt: post.excerpt.rendered,
             postContent: post.content.rendered,
             postCategory: post.categories,
-            postImageUri: post._embedded['wp:featuredmedia'][0].link
+            postImageUri: imageUri
         }
+
         return (
             <NewsItem
                 title={post.title.rendered.replace(regex, '')}
-                uri={post._embedded['wp:featuredmedia'][0].link}
+                uri={imageUri}
                 //overview= ''
                 onPress={() => this.viewNews(newspost)}
                 style={{ margin: 10 }} />

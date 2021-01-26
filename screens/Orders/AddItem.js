@@ -144,6 +144,7 @@ export default class AddItem extends Component {
                                     autoFocus={false}
                                     showInput={noItemSelected}
                                     errorText=''
+                                    suggestionsBellow={true}
                                 />
                             </View>
 
@@ -191,22 +192,6 @@ export default class AddItem extends Component {
                                     errorText={price.error}
                                 />
                             </View>
-                        </View>
-
-                        <View>
-                            <Picker
-                                label="Taxe"
-                                returnKeyType="next"
-                                selectedValue={taxe.rate}
-                                onValueChange={(text, index) => {
-                                    this.setState({ taxe: { name: taxes[index].label, rate: text, value: '' } })
-                                }}
-                                title="Taxe"
-                                elements={taxes}
-                            />
-                            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTaxe')}>
-                                <Text style={[theme.customFontMSmedium.body, { color: theme.colors.primary }]}>+  Ajouter une taxe</Text>
-                            </TouchableOpacity>
                         </View>
 
 

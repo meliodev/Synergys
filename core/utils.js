@@ -304,16 +304,18 @@ export const pickImage = async (previousAttachments) => {
         }
 
         let { path, uri } = response
+
         if (Platform.OS === 'android') {
           path = 'file://' + path
           image.path = path
         }
 
-        else image.uri = uri
+        else image.uri = uri //ios
 
         attachments.push(image)
         resolve(attachments)
       }
+      
     })
 
   }))

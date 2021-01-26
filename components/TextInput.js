@@ -11,7 +11,7 @@ const TextInput = ({ errorText, style, disabled, whiteTheme, link, ...props }) =
       //fontFamily ={"Montserrat-Regular"}
       selectionColor={whiteTheme ? '#fff' : theme.colors.primary}
       underlineColor="transparent"
-      direction ='rtl'
+      direction='rtl'
       theme={whiteTheme ?
         {
           colors: { primary: '#fff', text: (disabled && props.editable === false) ? theme.colors.placeholder : '#fff', placeholder: '#fff' }

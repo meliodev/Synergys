@@ -149,9 +149,9 @@ class CreateProject extends Component {
 
     componentWillUnmount() {
         if (this.isEdit) {
-            this.unsubscribeDocs()
-            this.unsubscribeAgenda()
-            this.unsubscribeTasks()
+            this.unsubscribeDocs && this.unsubscribeDocs()
+            this.unsubscribeAgenda && this.unsubscribeAgenda()
+            this.unsubscribeTasks && this.unsubscribeTasks()
         }
     }
 
@@ -311,12 +311,12 @@ class CreateProject extends Component {
             attachedImages = attachedImages.concat(this.initialState.attachedImages)
 
         //subscribers = editedBy + Admin + Tags added
-        const editedBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         const admin = { id: adminId, email: 'contact@groupe-synergys.fr' }
         const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email } })
-        subscribers.push(editedBy)
+        subscribers.push(currentUser)
 
-        if (adminId !== editedBy.id)
+        if (adminId !== currentUser.id)
             subscribers.push(admin)
 
         //2. ADDING project DOCUMENT
@@ -329,7 +329,7 @@ class CreateProject extends Component {
             step: step,
             address: address,
             editedAt: moment().format('lll'),
-            editedBy: editedBy,
+            editedBy: currentUser,
             attachments: attachedImages,
             subscribers: subscribers,
             deleted: false,
@@ -337,7 +337,7 @@ class CreateProject extends Component {
 
         if (!this.isEdit) {
             project.createdAt = moment().format('lll')
-            project.createdBy = {}
+            project.createdBy = currentUser
         }
 
         console.log('Ready to update ticket project...')

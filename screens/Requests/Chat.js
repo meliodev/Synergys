@@ -198,7 +198,7 @@ export default class Chat extends Component {
                     const fileNameAndExtension = uriComponents[uriComponents.length - 1]
                     const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
 
-                    fileCopied = await RNFS.copyFile(res.uri, destPath)
+                    const fileCopied = await RNFS.copyFile(res.uri, destPath)
                         .then(() => { return true })
                         .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
 
@@ -272,10 +272,11 @@ export default class Chat extends Component {
     async handleSend(messages, messageId) {
 
         const text = messages[0].text
+
         const { imageSource, videoSource, file } = this.state
 
         if (!messageId)
-            messageId = await uuidGenerator()
+            var messageId = await uuidGenerator()
 
         const msg = {
             _id: messageId,
@@ -290,8 +291,10 @@ export default class Chat extends Component {
             pending: false,
         }
 
-        //Handle attachments
-        if (imageSource || videoSource || file) {
+
+        // Handle attachments
+        if (imageSource || videoSource || file && file.source) {
+
             msg.sent = false
             msg.received = false
             msg.pending = true //Only local user can see this file
@@ -324,7 +327,9 @@ export default class Chat extends Component {
         this.setState({ imageSource: '', videoSource: '', file: {} })
     }
 
+
     //files (pdf, docs...)
+
     renderCustomView(props) {
         // return <ChatCustomView {...props} />
         const { messageType, pending, file } = props.currentMessage
@@ -454,7 +459,8 @@ export default class Chat extends Component {
                     ref={(ref) => { this.chatRef = ref }}
                     messagesContainerStyle={{ backgroundColor: theme.colors.chatBackground }}
                     messages={messages}
-                    onSend={(mesages) => this.handleSend(messages, '')}
+                    onSend={this.handleSend}
+                    // onSend={(mesages) => this.handleSend(messages, '')}
                     user={{ _id: this.currentUser.uid }}
                     placeholder='Tapez un message'
                     alwaysShowSend

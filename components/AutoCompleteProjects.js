@@ -13,7 +13,7 @@ const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/ima
 export default class AutoCompleteInput extends React.Component {
     state = {
         tagsSelected: [],
-    }
+    } 
 
     customFilterData = query => {
         //override suggestion filter, we can search by specific attributes

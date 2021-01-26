@@ -37,6 +37,7 @@ export async function uploadFiles(files, storageRef, attachedFiles, isChat, chat
     return Promise.all(promises)
         .then(async (results) => {
 
+            //Build output files
             for (let i = 0; i < results.length; i++) {
                 const downloadURL = await storageRef.child(files[i].name).getDownloadURL()
                 const { name, size, contentType } = results[i].metadata
@@ -44,7 +45,7 @@ export async function uploadFiles(files, storageRef, attachedFiles, isChat, chat
 
                 if (isChat) {
                     attachedFile.messageId = files[i].messageId
-                    // attachedFile.uploadTask =  files[i].uploadTask
+                    //attachedFile.uploadTask =  files[i].uploadTask
                 }
 
                 attachedFiles.push(attachedFile)
@@ -100,8 +101,6 @@ export async function uploadFile(attachment, storageRef) {
             resolve(attachment)
         })
             .catch(err => {
-                this.setState({ loading: false })
-                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
                 reject('failure')
             })
     })

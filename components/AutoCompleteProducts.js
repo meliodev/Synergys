@@ -4,6 +4,7 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-nativ
 import { Avatar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AutoTags from "react-native-tag-autocomplete"
+import firebase from '@react-native-firebase/app'
 
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
@@ -12,6 +13,7 @@ import { myAlert } from "../core/utils";
 import { withNavigation } from 'react-navigation'
 
 const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg";
+const db = firebase.firestore()
 
 class AutoCompleteProducts extends React.Component {
     constructor(props) {
@@ -47,18 +49,19 @@ class AutoCompleteProducts extends React.Component {
     }
 
     viewProduct(ProductId) {
-        this.props.navigation.navigate('CreateProduct', { isEdit: true, title: "Modifier l'article", ProductId: ProductId, onGoBack: (product) => console.log(product)})
+        console.log('PID', ProductId)
+        this.props.navigation.navigate('CreateProduct', { ProductId: ProductId, onGoBack: (product) => console.log(product) })
     }
 
 
     showAlert(ProductId) {
         const title = "Supprimer l'article"
         const message = 'Etes-vous sûr de vouloir supprimer cet article ? Cette opération est irreversible.'
-        const handleConfirm = () => this.handleDelete(ProductId)
+        const handleConfirm = () => this.handleDeleteProduct(ProductId)
         this.myAlert(title, message, handleConfirm)
     }
 
-    async handleDelete(ProductId) {
+    async handleDeleteProduct(ProductId) {
         await db.collection('Products').doc(ProductId).update({ deleted: true })
             .then(async () => this.props.navigation.goBack())
             .catch((e) => console.error(e))
@@ -127,7 +130,7 @@ class AutoCompleteProducts extends React.Component {
                 listStyle={{ elevation: 3 }}
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
-
+                suggestionsBellow = {this.props.suggestionsBellow}
                 editable={this.props.editable}
             />
         )
