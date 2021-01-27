@@ -43,7 +43,6 @@ class AutoCompleteBrands extends React.Component {
                 {this.props.tagsSelected.map((tag, i) => {
                     return <Text numberOfLines={1} style={{ color: "#000" }}>{tag.name}</Text>
                 })}
-                {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text>}
             </View>
         )
     }
@@ -93,7 +92,7 @@ class AutoCompleteBrands extends React.Component {
 
     handleAddition = brand => {
         //suggestion clicked, push it to our tags array
-        this.props.main.setState({ tagsSelected: this.props.main.state.tagsSelected.concat([brand]) })
+        this.props.main.setState({ tagsSelected: this.props.main.state.tagsSelected.concat([brand]), brandError: '' })
     }
 
     onCustomTagCreated = userInput => {
@@ -106,27 +105,30 @@ class AutoCompleteBrands extends React.Component {
 
     render() {
         return (
-            <AutoTags
-                //required
-                suggestions={this.props.suggestions}
-                tagsSelected={this.props.tagsSelected}
-                handleAddition={this.handleAddition}
-                handleDelete={this.handleDelete}
-                //optional
-                placeholder={this.props.placeholder}
-                filterData={this.customFilterData}
-                renderSuggestion={this.customRenderSuggestion}
-                renderTags={this.customRenderTags}
-                onCustomTagCreated={this.onCustomTagCreated}
-                //handleEmptyDate= {() => console.log('Empty data..')}
-                createTagOnSpace
-                style={styles.autotags}
-                listStyle={{ elevation: 3 }}
-                autoFocus={this.props.autoFocus}
-                showInput={this.props.showInput}
-                suggestionsBellow={this.props.suggestionsBellow}
-                editable={this.props.editable}
-            />
+            <View>
+                <AutoTags
+                    //required
+                    suggestions={this.props.suggestions}
+                    tagsSelected={this.props.tagsSelected}
+                    handleAddition={this.handleAddition}
+                    handleDelete={this.handleDelete}
+                    //optional
+                    placeholder={this.props.placeholder}
+                    filterData={this.customFilterData}
+                    renderSuggestion={this.customRenderSuggestion}
+                    renderTags={this.customRenderTags}
+                    onCustomTagCreated={this.onCustomTagCreated}
+                    //handleEmptyDate= {() => console.log('Empty data..')}
+                    createTagOnSpace
+                    style={styles.autotags}
+                    listStyle={{ elevation: 3 }}
+                    autoFocus={this.props.autoFocus}
+                    showInput={this.props.showInput}
+                    suggestionsBellow={this.props.suggestionsBellow}
+                    editable={this.props.editable}
+                />
+                {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{this.props.errorText}</Text>}
+            </View>
         )
     }
 }

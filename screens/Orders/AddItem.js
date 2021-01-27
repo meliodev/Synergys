@@ -62,7 +62,6 @@ export default class AddItem extends Component {
                 const taxe = { label: `${data.name}  [${data.rate}%]`, value: data.rate }
                 taxes.push(taxe)
                 this.setState({ taxes })
-                console.log(this.state.taxes)
             })
         })
     }
@@ -122,7 +121,7 @@ export default class AddItem extends Component {
     }
 
     render() {
-        const { item, description, suggestions, tagsSelected, taxes, quantity, price, taxe, loading } = this.state
+        const { item, description, suggestions, tagsSelected, quantity, price, loading } = this.state
         const noItemSelected = tagsSelected.length === 0
 
         return (
@@ -193,7 +192,6 @@ export default class AddItem extends Component {
                                 />
                             </View>
                         </View>
-
 
                     </Card.Content>
                 </Card>

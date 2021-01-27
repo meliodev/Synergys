@@ -174,6 +174,7 @@ class CreateProject extends Component {
                 //َActivity
                 createdAt = project.createdAt
                 createdBy = project.createdBy
+                console.log('createdBy', createdBy)
                 editedAt = project.editedAt
                 editedBy = project.editedBy
 

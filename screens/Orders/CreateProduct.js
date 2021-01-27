@@ -31,7 +31,7 @@ import Loading from "../../components/Loading"
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
-import { generatetId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, setToast, load } from "../../core/utils";
+import { generatetId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleSetError } from '../../core/exceptions';
@@ -68,7 +68,7 @@ class CreateProduct extends Component {
             name: { value: '', error: '' },
             description: { value: '', error: '' },
             price: { value: '', error: '' },
-            taxe: { rate: '', error: '' },
+            taxe: { value: '', error: '' },
 
             //Category
             category: { value: '', error: '' }, //Selected category
@@ -80,6 +80,7 @@ class CreateProduct extends Component {
             //Brand
             suggestions: [], //Brands suggestions
             tagsSelected: [], //Selected brand
+            brandError: '',
             newBrand: { name: '', attachment: { path: '' } }, //New brand
 
             //logs
@@ -129,13 +130,14 @@ class CreateProduct extends Component {
                 const categoryName = doc.data().name
                 const category = { label: categoryName, value: categoryName }
                 categories.push(category)
-                categories.sort((a, b) => (a.label > b.label) ? 1 : -1) //Sort in alphabetical order
-                this.setState({ categories })
             })
 
+            categories.sort((a, b) => (a.label > b.label) ? 1 : -1) //Sort in alphabetical order
+            this.setState({ categories })
         })
     }
 
+    //Brands suggestions
     fetchSuggestions() {
         const query = db.collection('Brands')
         fetchDocs(this, query, 'suggestions', '', () => { load(this, false) })
@@ -144,17 +146,19 @@ class CreateProduct extends Component {
     //on Edit
     async fetchProduct() {
         await db.collection('Products').doc(this.ProductId).get().then((doc) => {
-            let { ProductId, type, name, brand, description, price, attachedImages } = this.state
+            let { ProductId, type, category, name, tagsSelected, description, price, taxe } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
             //General info
             const product = doc.data()
             ProductId = doc.id
+            category.value = product.category
             name.value = product.name
-            brand.value = product.brand
+            tagsSelected.push(product.brand)
             description.value = product.description
             price.value = product.price
+            taxe.value = product.taxe
 
             //َActivity
             createdAt = product.createdAt
@@ -162,7 +166,7 @@ class CreateProduct extends Component {
             editedAt = product.editedAt
             editedBy = product.editedBy
 
-            this.setState({ ProductId, name, brand, description, price, attachedImages, createdAt, createdBy, editedAt, editedBy }, () => {
+            this.setState({ ProductId, category, name, tagsSelected, description, price, taxe, createdAt, createdBy, editedAt, editedBy }, () => {
                 if (this.isInit)
                     this.initialState = this.state
 
@@ -190,20 +194,19 @@ class CreateProduct extends Component {
     }
 
     validateInputs() {
-        let { name, brand, price, category } = this.state
+        let { category, tagsSelected, brandError, name, price } = this.state
 
         const categoryError = nameValidator(category.value, `"Catégorie"`)
-        const nameError = nameValidator(name.value, `"Nom de l'article"`)
-        const brandError = nameValidator(brand.value, `"Marque de l'article"`)
+        brandError = arrayValidator(tagsSelected, `"Marque"`)
+        const nameError = nameValidator(name.value, `"Désignation"`)
         const priceError = priceValidator(price.value)
 
-        if (categoryError || nameError || brandError || priceError) {
+        if (categoryError || brandError || nameError || priceError) {
             Keyboard.dismiss()
             category.error = categoryError
             name.error = nameError
             price.error = priceError
-            brand.error = brandError
-            this.setState({ category, name, brand, price, loading: false })
+            this.setState({ category, name, price, brandError, loading: false })
             return false
         }
 
@@ -220,40 +223,40 @@ class CreateProduct extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        // 2. ADDING product to firestore
-        // let { ProductId, type, category, name, brand, description, price, attachedImages } = this.state
-        // const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        //2. ADDING product to firestore
+        let { ProductId, type, category, tagsSelected, name, description, price, taxe } = this.state
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
-        // let product = {
-        //     type: type,
-        //     category: category.value,
-        //     name: name.value,
-        //     brand: brand.value,
-        //     description: description.value,
-        //     price: price.value,
-        //     //attachments: attachedImages,
-        //     editedAt: moment().format('lll'),
-        //     editedBy: currentUser,
-        //     deleted: false,
-        // }
+        let product = {
+            type: type,
+            category: category.value,
+            brand: tagsSelected[0],
+            name: name.value,
+            description: description.value,
+            price: price.value,
+            taxe: taxe.value,
+            editedAt: moment().format('lll'),
+            editedBy: currentUser,
+            deleted: false,
+        }
 
-        // if (!this.isEdit) {
-        //     product.createdAt = moment().format('lll')
-        //     product.createdBy = currentUser
-        // }
+        if (!this.isEdit) {
+            product.createdAt = moment().format('lll')
+            product.createdBy = currentUser
+        }
 
-        // console.log('Ready to add product...')
+        console.log('Ready to add product...')
 
-        // db.collection('Products').doc(ProductId).set(product, { merge: true })
-        //     .then(() => {
-        //         load(this, false)
-        //         this.props.navigation.state.params.onGoBack(product)
-        //         this.props.navigation.goBack()
-        //     })
-        //     .catch(e => {
-        //         load(this, false)
-        //         handleSetError(e)
-        //     })
+        db.collection('Products').doc(ProductId).set(product, { merge: true })
+            .then(() => {
+                load(this, false)
+                this.props.navigation.state.params.onGoBack(product)
+                this.props.navigation.goBack()
+            })
+            .catch(e => {
+                load(this, false)
+                handleSetError(e)
+            })
     }
 
     //Logo brand
@@ -318,16 +321,17 @@ class CreateProduct extends Component {
                     />
                     <Dialog.Button label="Annuler" onPress={() => this.toggleDialog('')} style={{ color: theme.colors.placeholder }} />
                     <Dialog.Button label="Confirmer" onPress={async () => {
-                        this.setState({ loadingDialog: true })
 
                         if (isCategory) {
                             if (!newCategory) return
+                            this.setState({ loadingDialog: true })
                             this.addNewCategory()
                         }
 
                         else {
                             const { name, attachment } = this.state.newBrand
                             if (!name) return
+                            this.setState({ loadingDialog: true })
 
                             //upload logo
                             const storageRef = firebase.storage().ref(`/Brands/${name}`)
@@ -364,16 +368,21 @@ class CreateProduct extends Component {
         delete logo.progress
         delete logo.local
 
+        const name = newBrand.name
+
         tagsSelected.push(newBrand)
 
-        await db.collection('Brands').doc().set({ name: newBrand.name, logo })
+        await db.collection('Brands').doc().set({ name, logo })
             .then(() => this.setState({ tagsSelected, newBrand: { name: '', attachment: {} } }))
             .catch((e) => handleSetError(e))
             .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
     }
 
+    //Renderers
     renderTypeAndLogo() {
         const { checked, tagsSelected } = this.state
+        const isLogoSelected = tagsSelected.length > 0 && tagsSelected[0].logo.downloadURL
+        const logoUrl = isLogoSelected ? tagsSelected[0].logo.downloadURL : ''
 
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -390,9 +399,9 @@ class CreateProduct extends Component {
                         isRow={false} />
                 </View>
 
-                <TouchableOpacity onPress={() => console.log('...')}>
-                    {tagsSelected.length > 0 && tagsSelected[0].logo.downloadURL &&
-                        <Image source={{ uri: tagsSelected[0].logo.downloadURL }} style={{ width: 90, height: 90 }} />
+                <TouchableOpacity>
+                    {isLogoSelected &&
+                        <Image source={{ uri: logoUrl }} style={{ width: 90, height: 90 }} />
                     }
                 </TouchableOpacity>
 
@@ -403,8 +412,9 @@ class CreateProduct extends Component {
 
     renderCategory() {
         const { category, categories, dialogType } = this.state
+
         return (
-            <View style={{ marginBottom: 30, }}>
+            <View style={{ marginBottom: 30 }}>
                 <Picker
                     title="Catégorie"
                     returnKeyType="next"
@@ -421,7 +431,7 @@ class CreateProduct extends Component {
     }
 
     renderBrand() {
-        const { suggestions, tagsSelected } = this.state
+        const { suggestions, tagsSelected, brandError } = this.state
         const noItemSelected = tagsSelected.length === 0
 
         return (
@@ -437,7 +447,7 @@ class CreateProduct extends Component {
                             main={this}
                             autoFocus={false}
                             showInput={noItemSelected}
-                            errorText=''
+                            errorText={brandError}
                             suggestionsBellow={false}
                         />
                     </View>
@@ -456,7 +466,6 @@ class CreateProduct extends Component {
         )
     }
 
-
     render() {
         const { ProductId, checked, name, brand, description, price, taxe, category, categories, showDialog, dialogType } = this.state
         const { suggestions, tagsSelected } = this.state
@@ -466,7 +475,7 @@ class CreateProduct extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} title titleText={this.title} check={!loading} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back={!loading} title titleText={this.title} check={false} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <Loading />
@@ -492,7 +501,7 @@ class CreateProduct extends Component {
                                     {this.renderBrand()}
 
                                     <MyInput
-                                        label="Nom de l'article"
+                                        label="Désignation"
                                         returnKeyType="done"
                                         value={name.value}
                                         onChangeText={text => updateField(this, name, text)}
@@ -520,13 +529,11 @@ class CreateProduct extends Component {
                                     />
 
                                     <MyInput
-                                        label="Taxe"
+                                        label="Taxe (%)"
                                         returnKeyType="done"
                                         keyboardType='numeric'
-                                        value={taxe.rate}
-                                        onChangeText={rate => {
-                                            this.setState({ taxe: { rate, error: '' } })
-                                        }}
+                                        value={taxe.value}
+                                        onChangeText={text => updateField(this, taxe, text)}
                                         error={!!taxe.error}
                                         errorText={taxe.error}
                                     />

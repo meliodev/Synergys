@@ -104,7 +104,7 @@ class CreateOrder extends Component {
         }
     }
 
-    //on Edit
+    //on Edit: fetch data
     async fetchOrder() {
         await db.collection('Orders').doc(this.OrderId).get().then((doc) => {
             let { OrderId, project, state, orderLines, discount, taxe } = this.state
@@ -153,7 +153,7 @@ class CreateOrder extends Component {
         })
     }
 
-    //delete
+    //delete order
     showAlert() {
         const title = "Supprimer la commande"
         const message = 'Etes-vous sûr de vouloir supprimer cette commande ? Cette opération est irreversible.'
@@ -170,7 +170,7 @@ class CreateOrder extends Component {
             .finally(() => load(this, false))
     }
 
-    //submit
+    //inputs validation & submit
     validateOrderLines() {
         if (this.state.orderLines.length === 0)
             Alert.alert('Erreur de saisie', 'Veuillez ajouter au moins une ligne de commande')
@@ -337,7 +337,6 @@ class CreateOrder extends Component {
 
     calculateTotal() {
         let { subTotal, discount, taxes, total } = this.state
-        console.log('taxes:::::::::', taxes)
 
         total = subTotal
 
