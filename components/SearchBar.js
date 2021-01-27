@@ -79,7 +79,13 @@ const SearchBar = ({
       {title && (
         <appbar.Content
           title={titleText}
-          titleStyle={theme.customFontMSmedium.title}
+          // titleStyle={theme.customFontMSmedium.title}
+          titleStyle = {{
+            fontFamily: 'Roboto',
+            fontSize: 18,
+            color: '#1B2331',
+            fontWeight: '200'
+          }}
         />
       )}
       {check && !showBar && (

@@ -58,11 +58,15 @@ export const signUpUser = async ({ synuid, email, password }) => {
 export const loginUser = async ({ email, password }) => {
   console.log("login called ", email, password)
   try {
-    await firebase.auth().signInWithEmailAndPassword(email, password)
+     firebase.auth().signInWithEmailAndPassword(email, password).then((userCredential) => {
+      console.log("Signed in") 
+      var user = userCredential.user;
+      console.log("user ", user)
+      // ...
+    }).catch(error => console.log("error is ", error.message))
     console.log("login")
-    return {}
+    // return {}
   }
-
   catch (error) {
     console.log("error in login : ", error)
     switch (error.code) {

@@ -16,17 +16,14 @@ const Appbar = ({
     searchBar,
     handleSearch, handleSubmit, handleSend, handleAttachement, handleMore, handleEdit, handleAction, handleDelete, handleRefresh,
     navigation, goBack, style, ...props }) => {
-
     // let navBack = () => navigation.pop()
     // if (goBack)
     let navBack = () => navigation.goBack()
 
     const showMenu = () => navigation.openDrawer()
-
-    let backColor = '#ffffff'
+    let backColor = 'black'
     if (close)
-        backColor = '#fff'
-
+        backColor = 'black'
     if (white) {
         return (
             <appbar.Header style={[{ backgroundColor: '#ffffff', elevation: 0 }, style]}>
@@ -39,11 +36,14 @@ const Appbar = ({
     }
 
     else return (
-        <appbar.Header style={[{ backgroundColor: theme.colors.primary, elevation: 0 }, style]}>
-            {back && <appbar.BackAction onPress={navBack} color={backColor} style={{ marginHorizontal: 5 }} />}
+        <appbar.Header style={[{ backgroundColor: '#F8F8F9', elevation: 0 }, style]}>
+            {back && <appbar.BackAction onPress={navBack} color={backColor} style={{ marginHorizontal: 5, }} />}
             {menu &&
                 <TouchableOpacity onPress={showMenu} style={{ marginHorizontal: 10 }} >
-                    <Icon name="menu" size={24} color='#fff' />
+                    <Icon name="menu" size={24} 
+                    color="black"
+                    color='#fff'
+                     />
                 </TouchableOpacity>
             }
             {searchBar}

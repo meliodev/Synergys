@@ -4,7 +4,7 @@ import { View, StyleSheet, SafeAreaView, ScrollView, Dimensions, } from 'react-n
 import HTML from 'react-native-render-html'
 
 import Appbar from '../../components/Appbar'
-
+import SearchBar from '../../components/SearchBar';
 import { constants } from '../../core/constants'
 
 export default class ViewNews extends Component {
@@ -15,6 +15,8 @@ export default class ViewNews extends Component {
 
         this.state = {
             newspost: [],
+            showInput: false,
+            searchInput: '',
         }
     }
 
@@ -24,10 +26,23 @@ export default class ViewNews extends Component {
 
     render() {
         const regex = /[!@#$%^&*<>0-9;]/g
+        const {showInput, searchInput} = this.state
 
         return (
             <SafeAreaView style={styles.safeArea}>
-                <Appbar back title titleText= {this.newspost.postTitle} />
+                {/* <Appbar back title titleText= {this.newspost.postTitle} /> */}
+                <SearchBar
+          main={this}
+          title={!showInput}
+          titleText="Home"
+          placeholder={this.newspost.postTitle}
+          showBar={showInput}
+          handleSearch={() =>
+            this.setState({searchInput: '', showInput: !showInput})
+          }
+          searchInput={searchInput}
+          searchUpdated={(searchInput) => this.setState({searchInput})}
+        />
 
                 <ScrollView>
                     {

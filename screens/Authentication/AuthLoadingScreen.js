@@ -17,23 +17,30 @@ class AuthLoadingScreen extends Component {
 
   componentDidMount() {
     this.unsububscribe = firebase.auth().onAuthStateChanged(async user => {
+      console.log("auth changed")
       if (user) {
         setUser(this, user.displayName, true)
+       
         const idTokenResult = await user.getIdTokenResult().catch(() => Alert.alert('Aucune donnée en cache pour un fonctionnement Hors-Ligne. Veuillez vous connecter à internet.'))
-        
+    
         roles.forEach((role) => {
           if (idTokenResult.claims[role.id])
             setRole(this, role)
         })
+      
+       firebase.auth().currentUser.reload()
+       .then(res => console.log("res ", res))
+       .catch(err => console.log("error ", err))
 
         await firebase.auth().currentUser.reload()
-        this.props.navigation.navigate("AgendaStack")
+        this.props.navigation.navigate("DocumentsStack")
       }
 
       else {
+        console.log("else ")
         setRole(this, '')
         setUser(this, '', false)
-        this.props.navigation.navigate("HomeScreen")
+        this.props.navigation.navigate("LoginScreen")
       }
     })
   }

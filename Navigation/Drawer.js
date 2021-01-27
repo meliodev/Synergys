@@ -239,28 +239,35 @@ class DrawerMenu extends React.Component {
             barStyle="light-content"
           />
 
-          <TouchableOpacity
+          <View
             style={styles.headerContainer}
-            onPress={() => this.navigateToScreen('Profile')}>
+            // onPress={() => this.navigateToScreen('Profile')}
+            >
             <View
               style={{
                 flex: 1,
                 flexDirection: 'row',
-                justifyContent: 'flex-start',
-                alignItems: 'center',
+                // justifyContent: 'flex-start',
+                // alignItems: 'center',
               }}>
               <View
                 style={{
-                  flex: 0.2,
+                  flex: 0.5,
+                  width: '40%',
+                  height: '78%',
                   justifyContent: 'center',
                   alignItems: 'center',
+                  margin: '5%',
+                  backgroundColor: '#F5F5F5',
+                  borderRadius: 10
                 }}>
-                {user.displayName && (
+
+                {/* {user.displayName && (
                   <AvatarText
                     size={constants.ScreenWidth * 0.1}
                     label={user.connected ? user.displayName.charAt(0) : ''}
                   />
-                )}
+                )} */}
               </View>
 
               <View style={{flex: 0.8}}>
@@ -299,7 +306,7 @@ class DrawerMenu extends React.Component {
                 </View>
               </View>
             </View>
-          </TouchableOpacity>
+          </View>
 
           <View style={styles.menuContainer}>{this.renderFlatList()}</View>
 
@@ -428,7 +435,7 @@ class DrawerMenu extends React.Component {
                         <Text
                           style={[
                             styles.menuText,
-                            theme.customFontMSsemibold.body,
+                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -448,7 +455,7 @@ class DrawerMenu extends React.Component {
                         <Text
                           style={[
                             styles.menuText,
-                            theme.customFontMSsemibold.body,
+                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -468,7 +475,7 @@ class DrawerMenu extends React.Component {
                         <Text
                           style={[
                             styles.menuText,
-                            theme.customFontMSsemibold.body,
+                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -496,7 +503,7 @@ class DrawerMenu extends React.Component {
                         <Text
                           style={[
                             styles.menuText,
-                            theme.customFontMSsemibold.body,
+                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -516,7 +523,7 @@ class DrawerMenu extends React.Component {
                         <Text
                           style={[
                             styles.menuText,
-                            theme.customFontMSsemibold.body,
+                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -538,7 +545,7 @@ class DrawerMenu extends React.Component {
                         <Text
                           style={[
                             styles.menuText,
-                            theme.customFontMSsemibold.body,
+                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -596,7 +603,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContainer: {
-    flex: 0.15,
+    flex: 0.22,
     justifyContent: 'center',
     backgroundColor: theme.colors.primary,
   },
@@ -612,8 +619,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   menuText: {
-    marginLeft: constants.ScreenWidth * 0.05,
+    marginLeft: constants.ScreenWidth * 0.03,
     marginRight: constants.ScreenWidth * 0.05,
+    fontWeight: '800',
+    fontSize: 16,
+    fontFamily: 'Roboto'
   },
   footerContainer: {
     flex: 1,

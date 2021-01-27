@@ -59,13 +59,11 @@ class LoginScreen extends Component {
       load(this, false)
       return
     }
-    console.log("before res")
     const response = await loginUser({ email: email.value, password: password.value })
-  console.log("res ", response)
     load(this, false)
 
-    if (response.error)
-      this.setState({ error: response.error })
+    // if (response.error)
+    //   this.setState({ error: response.error })
   }
 
   render() {
@@ -77,16 +75,18 @@ class LoginScreen extends Component {
     return (
       <View style={{flex:1, backgroundColor:'#ffff'}}>
         <View>
-          <ImageBackground source={require('../../assets/login1.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height, top:450}}>
+          <ImageBackground source={require('../../assets/login1.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height, top:455}}>
           </ImageBackground>
-          <ImageBackground source={require('../../assets/login2.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height,top:-450}}>
+          <ImageBackground source={require('../../assets/login2.png')} style={{width:'100%', position:'absolute', height:Dimensions.get('window').height,top:-500}}>
           </ImageBackground>
         </View>
-        <View>
-        </View>
-        <View style={{marginTop:200}}>
+        {/* <View>
+        </View> */}
+        <View style={{marginTop:'45%'}}>
         <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
-          <View style={{marginBottom:20}}>
+          <View 
+          style={{marginBottom:20}}
+          >
             
           <View style={{marginLeft:10, marginRight:10}}>
           <TextInput
@@ -131,10 +131,20 @@ class LoginScreen extends Component {
             </TouchableOpacity>
           </View>
           <View style={{alignItems:'center'}}>
-            <Button style={{width:'80%', backgroundColor:'#25D366', color:'red'}}  
-            loading={loading} mode="outlined" 
+            <TouchableOpacity style={{
+              width:'80%', height: '35%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', 
+              backgroundColor:'#25D366', color:'red',
+            marginTop: '5%'}}  
+            loading={loading} 
+            // mode="outlined" 
             onPress={this.handleLogin}
-            >Se connecter</Button>
+            >
+              <Text style={{
+                color: 'white',
+                fontSize: 15,
+                fontWeight: 'bold'
+              }}> Se connecter </Text>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={styles.row}>
@@ -232,7 +242,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    marginTop: 4
+    // marginTop: 4
   },
   label: {
     // color: theme.colors.secondary

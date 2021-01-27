@@ -9,7 +9,7 @@ import { connect } from 'react-redux'
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
-
+import SearchBar from '../../components/SearchBar';
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
@@ -56,6 +56,10 @@ class CreateOrder extends Component {
         this.state = {
             //AUTO-GENERATED
             OrderId: '', //Not editable
+
+
+            showInput: false,
+            searchInput: '',
 
             //Screens
             project: { id: '', name: '', error: '' },
@@ -270,13 +274,10 @@ class CreateOrder extends Component {
     //helpers
     calculateSubTotal() {
         const { orderLines } = this.state
-
         let subTotal = 0
-
         for (const orderLine of orderLines) {
             subTotal = subTotal + orderLine.quantity * orderLine.price
         }
-
         return subTotal
     }
 
@@ -290,7 +291,6 @@ class CreateOrder extends Component {
             discount.type = 'money'
             total = subTotal - discount.value
         }
-
         this.setState({ checked: choice, discount, total })
     }
 
@@ -302,11 +302,9 @@ class CreateOrder extends Component {
         if (discount.value !== '') {
             if (discount.type === 'percentage')
                 total = total - subTotal * (discount.value / 100)
-
             else if (discount.type === 'money')
                 total = subTotal - discount.value
         }
-
         if (taxe > 0)
             total = total + subTotal * (taxe / 100)
 
@@ -444,11 +442,22 @@ class CreateOrder extends Component {
         let { orderLines, subTotal, discount, total } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
-
+        const {showInput, searchInput} = this.state
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
-
+                {/* <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} /> */}
+                <SearchBar
+          main={this}
+          title={!showInput}
+          titleText="Home"
+          placeholder="Nouvelle commande"
+          showBar={showInput}
+          handleSearch={() =>
+            this.setState({searchInput: '', showInput: !showInput})
+          }
+          searchInput={searchInput}
+          searchUpdated={(searchInput) => this.setState({searchInput})}
+        />
                 {loading ?
                     <View style={{ flex: 1 }}>
                         <Loading size='large' style={styles.loadingContainer} />

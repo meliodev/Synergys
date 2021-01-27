@@ -60,7 +60,6 @@ class UsersManagement extends React.Component {
                 <TabView
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
-
                     Tab1={<ListUsers searchInput={searchInput} 
                     prevScreen='UsersManagement' userType='utilisateur' 
                     menu query={queryUsers} showButton 

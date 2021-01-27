@@ -9,7 +9,6 @@ import Appbar from '../../components/Appbar'
 
 import Notifications from './Notifications'
 import ListMessages from './ListMessages'
-
 import firebase from "react-native-firebase"
 const db = firebase.firestore()
 
@@ -19,6 +18,8 @@ class Inbox extends React.Component {
         super(props)
 
         this.state = {
+            showInput: false,
+            searchInput: '',
             index: 0,
             showInput: false,
             searchInput: ''
@@ -33,11 +34,24 @@ class Inbox extends React.Component {
         ]
 
         let { index } = this.state
+        let {showInput, searchInput} = this.state
 
         return (
             <View style={{ flex: 1 }}>
 
-                <Appbar menu title titleText= 'Boîte de réception'/>
+                {/* <Appbar menu title titleText= 'Boîte de réception'/> */}
+                <SearchBar
+            main={this}
+            title={!showInput}
+            titleText="Home"
+            placeholder="Boîte de réception"
+            showBar={showInput}
+            handleSearch={() =>
+              this.setState({searchInput: '', showInput: !showInput})
+            }
+            searchInput={searchInput}
+            searchUpdated={(searchInput) => this.setState({searchInput})}
+          />
 
                 <TabView
                     navigationState={{ index, routes }}

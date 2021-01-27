@@ -5,7 +5,7 @@ import Appbar from '../../components/Appbar'
 import NewsItem from '../../components/NewsItem'
 
 import { constants } from '../../core/constants'
-
+import SearchBar from '../../components/SearchBar';
 export default class ListNews extends Component {
     constructor(props) {
         super(props)
@@ -14,6 +14,8 @@ export default class ListNews extends Component {
         this.state = {
             news: [],
             loading: false,
+            showInput: false,
+            searchInput: '',
         }
     }
 
@@ -67,10 +69,22 @@ export default class ListNews extends Component {
 
     render() {
         const regex = "/(<([^>]+)>)/ig"
-        const { news } = this.state
+        const { news, showInput, searchInput } = this.state
         return (
             <SafeAreaView style={styles.safeArea}>
-                <Appbar menu title titleText='Actualités' />
+                {/* <Appbar menu title titleText='Actualités' /> */}
+                <SearchBar
+          main={this}
+          title={!showInput}
+          titleText="Home"
+          placeholder='Actualités'
+          showBar={showInput}
+          handleSearch={() =>
+            this.setState({searchInput: '', showInput: !showInput})
+          }
+          searchInput={searchInput}
+          searchUpdated={(searchInput) => this.setState({searchInput})}
+        />
                 <FlatList
                     data={news}
                     keyExtractor={item => item.id.toString()}

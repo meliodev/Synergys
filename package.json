@@ -1,5 +1,4 @@
 {
-
   "name": "Synergys",
   "version": "0.0.1",
   "private": true,
@@ -88,7 +87,11 @@
     "metro-react-native-babel-preset": "^0.59.0",
     "react-test-renderer": "16.13.1"
   },
-  "rnpm": { "assets": [ "resources/fonts" ] },
+  "rnpm": {
+    "assets": [
+      "resources/fonts"
+    ]
+  },
   "jest": {
     "preset": "react-native"
   }

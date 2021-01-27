@@ -5,7 +5,7 @@ import { List } from 'react-native-paper';
 import firebase from 'react-native-firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-
+import SearchBar from '../../components/SearchBar';
 import MessageItem from '../../components/MessageItem'
 import MyFAB from '../../components/MyFAB'
 

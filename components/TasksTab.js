@@ -9,10 +9,11 @@ const TasksTab = ({ isCalendar, onPress1, onPress2, ...props }) => {
     const tabWidth = constants.ScreenWidth * 0.125
 
     return (
-        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={styles.container}>
             <TouchableOpacity
                 style={[styles.stateStyle, {
                     backgroundColor: !isCalendar ? theme.colors.secondary : '#fff',
+                    // backgroundColor: 'red',
                     width: '50%'
                 }]}
                 onPress={onPress1}>
@@ -33,8 +34,15 @@ const TasksTab = ({ isCalendar, onPress1, onPress2, ...props }) => {
 
 
 const styles = StyleSheet.create({
+    container : {
+        backgroundColor:'#EBEBEB',
+        flexDirection: 'row', justifyContent: 'center',
+        height: constants.ScreenHeight * 0.11
+    },
     stateStyle: {
         //elevation: 3,
+        margin: 20,
+        borderRadius: 15,
         justifyContent: 'center', alignItems: 'center',
         width: constants.ScreenWidth * 0.3,
         height: constants.ScreenHeight * 0.07
