@@ -53,7 +53,7 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
                 <Text style={[theme.customFontMSmedium.body]}>{moment(order.editedAt, 'lll').format('ll')}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: setStateColor(order.state), marginRight: 5 }} />
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{order.state.toUpperCase()}</Text>
+                    <Text style={[theme.customFontMSmedium.caption, { color: setStateColor(order.state) }]}>{order.state.toUpperCase()}</Text>
                 </View>
             </View>
         </TouchableOpacity>

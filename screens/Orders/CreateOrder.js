@@ -64,7 +64,7 @@ class CreateOrder extends Component {
 
             //Order Lines
             orderLines: [
-                //  { "description": "", "price": "900", "product": { "attachments": [[Object], [Object], [Object]], "brand": "LGS", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Machine à coudre", "price": "900", "type": "product" }, "quantity": "1", "taxe": { "name": "Taxe 1", "rate": "50" } }
+                //  { "description": "", "price": "900", "product": { "brand": { "name": "LGS", "logo": {} }, "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Machine à coudre", "price": "900", "type": "product", "category": "eee", "taxe": "25" }, "quantity": "1" }
             ],
             //orderLines: [],
             checked: 'first',
@@ -248,9 +248,17 @@ class CreateOrder extends Component {
         this.fetchClient(project.id)
     }
 
-    refreshOrderLine(orderLine) {
+    refreshOrderLine(orderLine, overwriteIndex) {
         let { orderLines } = this.state
-        orderLines.push(orderLine)
+
+        if (overwriteIndex.toString()) {
+            orderLines[overwriteIndex] = orderLine
+        }
+
+        else {
+            orderLines.push(orderLine)
+        }
+
         this.setState({ orderLines }, () => {
             const subTotal = this.calculateSubTotal()
 
@@ -264,10 +272,10 @@ class CreateOrder extends Component {
     }
 
     setTaxes(orderLines) {
-        const taxesTemp = orderLines.map((orderLine) => orderLine.taxe) //name & rate & value (taxe*price*quantity)
+        const taxesTemp = orderLines.map((orderLine) => orderLine.taxe) //taxe = {name, rate, value} ; value = taxe*price*quantity
 
         var holder = {}
-        console.log('1')
+
         //Sum up taxes with same rate
         taxesTemp.forEach(function (taxe) {
 
@@ -280,23 +288,13 @@ class CreateOrder extends Component {
             }
         })
 
-        console.log('2')
-
         var taxes = []
 
         for (var prop in holder) {
-            const rate = prop.substring(
-                prop.lastIndexOf("[") + 1,
-                prop.lastIndexOf("%")
-            )
-            taxes.push({ name: prop, value: holder[prop], rate })
+            taxes.push({ name: prop.toString(), value: holder[prop], rate: prop })
         }
 
-        console.log('3')
-
         return taxes
-
-        // this.setState({ taxes }, () => console.log('taxes!!!!', this.state.taxes))
     }
 
     removeOrderLine(key) {
@@ -360,8 +358,6 @@ class CreateOrder extends Component {
     //renderers
     renderOrderLines() {
         const { orderLines } = this.state
-        // const orderLines = [{ description: "", price: "8000", product: { ProductId: "GS-AR-HCMf", brand: "LG", createdAt: "2 janv. 2021 09:55", createdBy: [Object], deleted: false, description: "lorem ipsum", editedAt: "2 janv. 2021 09:55", editedBy: [Object], id: "GS-AR-HCMf", name: "Panneaux solaires", price: "8000" }, quantity: "1" }]
-        // const orderLines = [{ "description": "", "price": "8000", "product": { "ProductId": "GS-AR-HCMf", "brand": "LG", "createdAt": "2 janv. 2021 09:55", "createdBy": [Object], "deleted": false, "description": "lorem ipsum", "editedAt": "2 janv. 2021 09:55", "editedBy": [Object], "id": "GS-AR-HCMf", "name": "Panneaux solaires", "price": "8000" }, "quantity": "1" }, { "description": "", "price": "500", "product": { "ProductId": "GS-AR-kbgg", "brand": "LG", "createdAt": "2 janv. 2021 12:17", "createdBy": [Object], "deleted": false, "description": "lorem ipsum", "editedAt": "2 janv. 2021 12:17", "editedBy": [Object], "id": "GS-AR-kbgg", "name": "Climatiseur", "price": "500" }, "quantity": "3" }]
 
         return (
             <View style={styles.customTagsContainer}>
@@ -369,21 +365,21 @@ class CreateOrder extends Component {
                     const totalAmount = Number(orderLine.quantity) * Number(orderLine.price)
 
                     return (
-                        <View style={{ flexDirection: 'row', paddingVertical: 10, borderBottomColor: '#E0E0E0', borderBottomWidth: 1 }}>
+                        <TouchableOpacity style={styles.orderLine} onPress={() => this.props.navigation.navigate('AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })}>
                             <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start' }} onPress={() => this.removeOrderLine(key)}>
                                 <MaterialCommunityIcons name='close-circle-outline' color={theme.colors.error} size={20} />
                             </TouchableOpacity>
 
                             <View style={{ flex: 0.65 }}>
                                 <Text style={theme.customFontMSsemibold.body}>{orderLine.product.name}</Text>
-                                <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{orderLine.quantity} x {orderLine.price}</Text>
+                                <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{orderLine.quantity} x {orderLine.price} (+ {orderLine.taxe.name}% TVA)</Text>
                             </View>
 
                             <View style={{ flex: 0.25, alignItems: 'flex-end' }}>
                                 <Text style={theme.customFontMSsemibold.body}>{totalAmount}</Text>
                             </View>
 
-                        </View>
+                        </TouchableOpacity>
                     )
                 })}
             </View>
@@ -449,7 +445,7 @@ class CreateOrder extends Component {
             return (
                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
                     <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                        <Text style={theme.customFontMSregular.body}>{taxe.name}</Text>
+                        <Text style={theme.customFontMSregular.body}>TVA {taxe.name}%</Text>
                     </View>
 
                     <View style={{ flex: 0.5, alignItems: 'flex-end', marginBottom: 7 }}>
@@ -549,7 +545,7 @@ class CreateOrder extends Component {
 
                                         <View style={{ flexDirection: 'row', paddingBottom: 10, paddingTop: 25, justifyContent: 'space-between', alignItems: 'center', borderBottomColor: '#E0E0E0', borderBottomWidth: 1 }}>
                                             <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Articles</Text>
-                                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Prix</Text>
+                                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
                                         </View>
 
                                         {this.renderOrderLines()}
@@ -659,6 +655,12 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center'
+    },
+    orderLine: {
+        flexDirection: 'row',
+        paddingVertical: 10,
+        borderBottomColor: '#E0E0E0',
+        borderBottomWidth: 1
     }
 })
 

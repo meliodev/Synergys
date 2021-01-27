@@ -24,6 +24,10 @@ export default class AddItem extends Component {
         this.handleDelete = this.handleDelete.bind(this)
         this.refreshProduct = this.refreshProduct.bind(this)
 
+        this.orderLine = this.props.navigation.getParam('orderLine', null)
+        this.orderKey = this.props.navigation.getParam('orderKey', '')
+        this.isEdit = this.orderLine ? true : false
+
         this.state = {
             item: { id: '', name: '' },
             description: { value: "", error: '' },
@@ -33,37 +37,29 @@ export default class AddItem extends Component {
 
             tagsSelected: [],
             suggestions: [],
-            taxes: [{ label: 'Taxe 5  [75%]', value: '' }],
         }
     }
 
     async componentDidMount() {
-        load(this, true)
-        this.fetchTaxes()
-        this.fetchSuggestions()
-    }
+        if (this.isEdit) {
+            console.log('order line:', this.orderLine)
+            let { description, quantity, price, taxe, tagsSelected } = this.state
+            description.value = this.orderLine.description
+            quantity.value = this.orderLine.quantity
+            price.value = this.orderLine.price
+            taxe = this.orderLine.taxe
+            tagsSelected.push(this.orderLine.product)
 
-    componentWillUnmount() {
-        this.unsubscribeTaxes()
+            this.setState({ description, quantity, price, taxe, tagsSelected })
+        }
+
+        load(this, true)
+        this.fetchSuggestions()
     }
 
     fetchSuggestions() {
         const query = db.collection('Products')
         fetchDocs(this, query, 'suggestions', '', () => { load(this, false) })
-    }
-
-    fetchTaxes() {
-        this.unsubscribeTaxes = db.collection('Taxes').orderBy('rate', 'asc').onSnapshot((querysnapshot) => {
-            let taxes = [{ label: 'Selectionnez une taxe', value: '' }]
-
-            if (querysnapshot.empty) return
-            querysnapshot.forEach((doc) => {
-                const data = doc.data()
-                const taxe = { label: `${data.name}  [${data.rate}%]`, value: data.rate }
-                taxes.push(taxe)
-                this.setState({ taxes })
-            })
-        })
     }
 
     validateInputs() {
@@ -108,7 +104,7 @@ export default class AddItem extends Component {
             taxe: taxe
         }
 
-        this.props.navigation.state.params.onGoBack(orderLine)
+        this.props.navigation.state.params.onGoBack(orderLine, this.orderKey)
         this.props.navigation.goBack()
     }
 
@@ -121,7 +117,7 @@ export default class AddItem extends Component {
     }
 
     render() {
-        const { item, description, suggestions, tagsSelected, quantity, price, loading } = this.state
+        const { item, description, suggestions, tagsSelected, quantity, price, taxe, loading } = this.state
         const noItemSelected = tagsSelected.length === 0
 
         return (
@@ -191,6 +187,21 @@ export default class AddItem extends Component {
                                     errorText={price.error}
                                 />
                             </View>
+                        </View>
+
+                        <View>
+                            <MyInput
+                                label="Taxe (%)"
+                                returnKeyType="done"
+                                keyboardType='numeric'
+                                value={taxe.name}
+                                onChangeText={rate => {
+                                    let { taxe } = this.state
+                                    taxe.name = rate
+                                    taxe.rate = Number(rate)
+                                    this.setState({ taxe })
+                                }}
+                            />
                         </View>
 
                     </Card.Content>

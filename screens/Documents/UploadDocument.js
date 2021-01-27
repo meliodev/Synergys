@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform } from 'react-native';
 import { Card, Title, TextInput, ProgressBar } from 'react-native-paper'
-import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
-import FilePickerManager from 'react-native-file-picker';
+// import FilePickerManager from 'react-native-file-picker';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob'
 import RNFS from 'react-native-fs'
@@ -19,10 +18,12 @@ import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
 import Button from "../../components/Button"
+import UploadProgress from "../../components/UploadProgress"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
+import { uploadFile } from "../../api/storage-api";
 import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
@@ -56,7 +57,7 @@ class UploadDocument extends Component {
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.refreshProject = this.refreshProject.bind(this)
-        this.uploadFile = this.uploadFile.bind(this)
+        this.uploadFile = uploadFile.bind(this)
         this.deleteFile = this.deleteFile.bind(this)
 
         this.initialState = {}
@@ -64,8 +65,8 @@ class UploadDocument extends Component {
         this.currentUser = firebase.auth().currentUser
 
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
-        this.title = this.props.navigation.getParam('title', '')
+        this.isEdit = this.DocumentId ? true : false
+        this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
         this.project = this.props.navigation.getParam('project', '')
 
         this.cachePath = ''
@@ -110,7 +111,6 @@ class UploadDocument extends Component {
     }
 
     async componentDidMount() {
-
         if (this.isEdit) {
             await this.fetchDocument()
             await this.fetchSignees()
@@ -128,30 +128,30 @@ class UploadDocument extends Component {
     //on Edit
     async fetchDocument() {
         await db.collection('Documents').doc(this.DocumentId).get().then((doc) => {
-            console.log('onsnapshot..')
 
             let { DocumentId, project, name, description, type, state, attachment } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
             //General info
-            DocumentId = this.DocumentId
-            project = doc.data().project
-            name.value = doc.data().name
-            description.value = doc.data().description
+            const document = doc.data()
+            DocumentId = doc.id
+            project = document.project
+            name.value = document.name
+            description.value = document.description
 
             //َActivity
-            createdAt = doc.data().createdAt
-            createdBy = doc.data().createdBy
-            editedAt = doc.data().editedAt
-            editedBy = doc.data().editedBy
+            createdAt = document.createdAt
+            createdBy = document.createdBy
+            editedAt = document.editedAt
+            editedBy = document.editedBy
 
             //State & Type
-            state = doc.data().state
-            type = doc.data().type
+            state = document.state
+            type = document.type
 
             //Attachment
-            attachment = doc.data().attachment
+            attachment = document.attachment
 
             this.setState({ DocumentId, project, name, description, state, type, attachment, createdAt, createdBy, editedAt, editedBy }, () => {
                 if (this.isInit)
@@ -165,21 +165,19 @@ class UploadDocument extends Component {
     async fetchSignees() {
         let signatures = []
 
-        db.collection('Documents').doc(this.DocumentId).collection('Attachments')
-            //.orderBy('signedAt', 'DESC')
-            .get().then((querysnapshot) => {
-                querysnapshot.forEach((doc) => {
-                    console.log(doc.id)
-                    let signData = { signedBy: '', signedAt: '' }
+        db.collection('Documents').doc(this.DocumentId).collection('Attachments').get().then((querysnapshot) => {
+            querysnapshot.forEach((doc) => {
+                const document = doc.data()
+                let signData = { signedBy: '', signedAt: '' }
 
-                    if (doc.data().sign_proofs_data) {
-                        signData.signedBy = doc.data().sign_proofs_data.signedBy
-                        signData.signedAt = doc.data().sign_proofs_data.signedAt
-                        signatures.push(signData)
-                    }
-                })
-                this.setState({ signatures })
+                if (document.sign_proofs_data) {
+                    signData.signedBy = document.sign_proofs_data.signedBy
+                    signData.signedAt = document.sign_proofs_data.signedAt
+                    signatures.push(signData)
+                }
             })
+            this.setState({ signatures })
+        })
     }
 
     //Delete document
@@ -265,44 +263,6 @@ class UploadDocument extends Component {
         }
     }
 
-    //Resolves with 'success' or 'failure'
-    async uploadFile() {
-        let { attachment, project, type, name, DocumentId } = this.state
-
-        const metadata = {
-            uploadedBy: this.currentUser.uid,
-            type: type,
-            name: name.value
-        }
-
-        const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`)
-        const uploadTask = reference.putFile(attachment.path, { customMetadata: metadata })
-
-        const promise = new Promise((resolve, reject) => {
-            uploadTask
-                .on('state_changed', async function (tasksnapshot) {
-                    var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
-                    console.log('Upload attachment ' + progress + '% done')
-                    attachment.progress = progress / 100
-                    this.setState({ attachment })
-                }.bind(this))
-
-            uploadTask
-                .then((res) => {
-                    attachment.downloadURL = res.downloadURL
-                    this.setState({ attachment })
-                    resolve('success')
-                })
-                .catch(err => {
-                    this.setState({ loading: false })
-                    setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
-                    reject('failure')
-                })
-        })
-
-        return promise
-    }
-
     validateInputs() {
         let { project, name, attachment } = this.state
 
@@ -339,22 +299,33 @@ class UploadDocument extends Component {
             //1.2 Upload file
             if (this.isEdit && this.initialState.attachment !== this.state.attachment || !this.isEdit) {
 
+                var { DocumentId, project, name, description, type, state, attachment } = this.state
+
                 this.setState({ uploading: true })
-                const result = await this.uploadFile()
+                // const metadata = {
+                //     uploadedBy: this.currentUser.uid,
+                //     type: type,
+                //     name: name.value
+                // }
+                const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`)
+                const result = await this.uploadFile(attachment, reference, true)
                 this.setState({ uploading: false })
-                if (result === 'failure') return
+
+                if (result === 'failure') {
+                    this.setState({ uploading: false })
+                    setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
+                    return
+                }
 
                 //Move document to Synergys/Documents (to open & sign later.. without downloading file)
                 const fromPath = this.cachePath
                 const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
-                const destPath = `${Dir}/Synergys/Documents/${this.state.attachment.name}`
+                const destPath = `${Dir}/Synergys/Documents/${attachment.name}`
                 await RNFS.moveFile(fromPath, destPath)
             }
 
             // 2. ADDING document to firestore
-            let { DocumentId, project, name, description, type, state, attachment } = this.state
-
-            attachment.generation = 'upload' //possible values: ['upload', 'sign', 'app'] upload: uploaded by user; sign: generated after signature; app: pdf generated by app
+            attachment.generation = 'upload' //possible values: ['upload', 'sign', 'app']      upload: uploaded by user; sign: generated after signature; app: pdf generated by app
             delete attachment.progress
 
             let document = {
@@ -390,12 +361,10 @@ class UploadDocument extends Component {
 
     async deleteFile() {
         let fileRef = firebase.storage().refFromURL(this.initialState.attachment.downloadURL)
-        await fileRef.delete()
-            .then(() => console.log(`File with url: ${this.initialState.attachment.downloadURL} has been deleted !`))
-            .catch(e => {
-                this.setState({ loading: false })
-                setToast(this, 'e', 'Erreur inattendue, veuillez réessayer.')
-            })
+        await fileRef.delete().catch(e => {
+            this.setState({ loading: false })
+            setToast(this, 'e', 'Erreur inattendue, veuillez réessayer.')
+        })
     }
 
     refreshProject(project) {
@@ -403,64 +372,29 @@ class UploadDocument extends Component {
     }
 
     renderAttachment() {
-        let { attachment, loading } = this.state
-
-        let readableSize = attachment.size / 1000
-        readableSize = readableSize.toFixed(2)
-
-        return (
-            <View style={{ elevation: 1, backgroundColor: theme.colors.gray50, width: '90%', height: 60, alignSelf: 'center', borderRadius: 5, marginTop: 15 }}>
-                <View style={{ flex: 0.9, flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ flex: 0.17, justifyContent: 'center', alignItems: 'center' }}>
-                        <MaterialCommunityIcons name='image' size={24} color={theme.colors.primary} />
-                    </View>
-
-                    <View style={{ flex: 0.68 }}>
-                        <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{attachment.name}</Text>
-                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
-                    </View>
-
-                    <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
-                        {!loading &&
-                            <MaterialCommunityIcons
-                                name='close'
-                                size={21}
-                                color={theme.colors.placeholder}
-                                style={{ paddingVertical: 19, paddingHorizontal: 5 }}
-                                onPress={() => {
-                                    const attachment = {
-                                        path: '',
-                                        type: '',
-                                        name: '',
-                                        size: '',
-                                        progress: 0
-                                    }
-                                    this.setState({ attachment })
-                                }}
-                            />
-                        }
-                    </View>
-                </View>
-                <View style={{ flex: 0.1, justifyContent: 'flex-end' }}>
-                    <ProgressBar progress={attachment.progress} color={theme.colors.primary} visible={true} />
-                </View>
-            </View>
-        )
+        const { attachment } = this.state
+        return <UploadProgress attachment={attachment} />
     }
 
     renderSignees() {
         const { signatures } = this.state
-        console.log(signatures)
 
         return signatures.map((signature, index) => {
+            const { signedAt, signedBy } = signature
+            const signDate = moment(signedAt, 'lll').format('ll')
+            const signTime = moment(signedAt, 'lll').format('HH:mm')
+            const navigateToSigneeProfile = () => this.props.navigation.navigate('Profile', { userId: signedBy.id })
+
             return (
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 30, marginBottom: 10 }}>
                     <MaterialCommunityIcons name='pen' size={24} color={theme.colors.placeholder} />
                     <View>
-                        <Text numberOfLines={1} style={[theme.customFontMSmedium.body, { marginLeft: 15 }]}><Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary }]} onPress={() => this.props.navigation.navigate('Profile', { userId: signature.signedBy.id })}>{signature.signedBy.fullName}</Text> a signé le document</Text>
-                        <Text style={[theme.customFontMSmedium.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {moment(signature.signedAt, 'lll').format('ll')} à {moment(signature.signedAt, 'lll').format('HH:mm')}</Text>
+                        <Text numberOfLines={1} style={[theme.customFontMSmedium.body, { marginLeft: 15 }]}>
+                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary }]} onPress={navigateToSigneeProfile}>{signedBy.fullName}</Text>
+                             a signé le document</Text>
+                        <Text style={[theme.customFontMSmedium.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {signDate} à {signTime}</Text>
                     </View>
-                </View >
+                </View>
             )
         })
     }
@@ -483,7 +417,7 @@ class UploadDocument extends Component {
                     <View style={{ flex: 1 }}>
                         {this.isEdit &&
                             <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => {
-                                this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: this.state.attachedFile.name, url: this.state.attachedFile.downloadURL })
+                                this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: attachment.name, url: attachment.downloadURL })
                             }}>
                                 <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
                             </Button>
@@ -618,7 +552,7 @@ class UploadDocument extends Component {
                                 style={[styles.signButton, { backgroundColor: this.isEdit ? theme.colors.primary : theme.colors.gray50 }]}
                                 onPress={() => {
                                     if (this.isEdit)
-                                        this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: this.state.attachedFile.name, url: this.state.attachedFile.downloadURL, initMode: 'sign' })
+                                        this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: attachment.name, url: attachment.downloadURL, initMode: 'sign' })
                                 }}>
                                 <Text style={[theme.customFontMSmedium.body, { color: this.isEdit ? '#fff' : theme.colors.gray }]}>signer</Text>
                             </Button>

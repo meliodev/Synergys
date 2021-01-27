@@ -82,7 +82,7 @@ export async function uploadFiles(files, storageRef, attachedFiles, isChat, chat
 
 
 //Finally not used in chat
-export async function uploadFile(attachment, storageRef) {
+export async function uploadFile(attachment, storageRef, showProgress) {
 
     const uploadTask = storageRef.putFile(attachment.path)
 
@@ -90,8 +90,12 @@ export async function uploadFile(attachment, storageRef) {
         uploadTask.on('state_changed', async function (tasksnapshot) {
             var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
             console.log('Upload attachment ' + progress + '% done')
-            // attachment.progress = progress / 100
-            // this.setState({ attachment })
+
+            if (showProgress) {
+                attachment.progress = progress / 100
+                this.setState({ attachment })
+            }
+
         }.bind(this))
 
         //#task: can be canceled

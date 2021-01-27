@@ -98,7 +98,7 @@ class AutoCompleteProducts extends React.Component {
 
     handleAddition = product => {
         //suggestion clicked, push it to our tags array
-        this.props.main.setState({ tagsSelected: this.props.main.state.tagsSelected.concat([product]), price: { value: product.price, error: '' }, quantity: { value: '1', error: '' } })
+        this.props.main.setState({ tagsSelected: this.props.main.state.tagsSelected.concat([product]), price: { value: product.price, error: '' }, quantity: { value: '1', error: '' }, taxe: { name: product.taxe, rate: product.taxe } })
     }
 
     onCustomTagCreated = userInput => {
@@ -130,7 +130,7 @@ class AutoCompleteProducts extends React.Component {
                 listStyle={{ elevation: 3 }}
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
-                suggestionsBellow = {this.props.suggestionsBellow}
+                suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
             />
         )

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Platform, StyleSheet, Text, View, Image, ScrollView, FlatList, PermissionsAndroid } from 'react-native'
-import { List, Card } from 'react-native-paper'
-import firebase from '@react-native-firebase/app';
+import { StyleSheet, Text, View, FlatList } from 'react-native'
+import { List } from 'react-native-paper'
+import firebase from '@react-native-firebase/app'
 import SearchInput, { createFilter } from 'react-native-search-filter'
 
 import SearchBar from '../../components/SearchBar'
@@ -64,7 +64,8 @@ class ListDocuments extends Component {
     //Fetch documents
     async componentDidMount() {
         load(this, true)
-        let query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        let query = db.collection('Documents').where('deleted', '==', false)
+        //.orderBy('createdAt', 'desc')
         await fetchDocs(this, query, 'documentsList', 'documentsCount', () => load(this, false))
     }
 
@@ -81,7 +82,7 @@ class ListDocuments extends Component {
     }
 
     render() {
-        let { documentsCount, documentsList, loading, loadingMessage } = this.state
+        let { documentsCount, documentsList, loading } = this.state
         let { type, state, project, filterOpened } = this.state
         let { searchInput, showInput } = this.state
 
@@ -89,10 +90,7 @@ class ListDocuments extends Component {
         this.filteredDocuments = handleFilter(documentsList, this.filteredDocuments, fields, searchInput, KEYS_TO_FILTERS)
         const filterCount = this.filteredDocuments.length
         const filterActivated = filterCount < documentsCount
-
-        let s = ''
-        if (filterCount > 1)
-            s = 's'
+        const s = filterCount > 1 ? 's' : ''
 
         return (
             <View style={styles.container}>
@@ -101,13 +99,13 @@ class ListDocuments extends Component {
                     title={!showInput}
                     titleText='Documents'
                     placeholder='Rechercher un document'
-                    showBar={this.state.showInput}
+                    showBar={showInput}
                     handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
                     searchInput={searchInput}
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 
-                {filterActivated && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
+                {filterActivated && <View style={styles.filterActive}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
 
                 { loading ?
                     <View style={styles.container}>
@@ -156,6 +154,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    filterActive: {
+        backgroundColor: theme.colors.secondary,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 5
+    }
 })
 
 export default ListDocuments
