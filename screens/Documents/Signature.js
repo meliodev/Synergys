@@ -18,7 +18,7 @@ import { PDFDocument, StandardFontEmbedder, rgb } from "pdf-lib";
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator, setUser } from '../../core/utils'
+import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator } from '../../core/utils'
 import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
 
 import Appbar from '../../components/Appbar'

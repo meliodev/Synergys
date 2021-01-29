@@ -24,8 +24,8 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generatetId, myAlert, updateField, nameValidator, setToast, load } from "../../core/utils";
-import { handleSetError } from '../../core/exceptions';
+import { generatetId, myAlert, updateField, nameValidator, setToast, load, pickImage } from "../../core/utils";
+import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
@@ -131,6 +131,8 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
+        console.log(this.props.network)
+
         if (this.isEdit) {
             load(this, true)
             await this.fetchProject()
@@ -142,9 +144,10 @@ class CreateProject extends Component {
         //#task: avoid conflicts add auto-gen string
         else {
             const ProjectId = generatetId('GS-PR-')
-            this.fetchSuggestions()
             this.setState({ ProjectId }, () => this.initialState = this.state)
         }
+
+        this.fetchSuggestions()
     }
 
     componentWillUnmount() {
@@ -159,7 +162,7 @@ class CreateProject extends Component {
     async fetchProject() {
         await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
             if (doc.exists) {
-                let { ProjectId, client, name, description, note, address, state, step } = this.state
+                let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
                 let { createdAt, createdBy, editedAt, editedBy, attachedImages } = this.state
                 let { error, loading } = this.state
 
@@ -170,6 +173,7 @@ class CreateProject extends Component {
                 name.value = project.name
                 description.value = project.description
                 note.value = project.note
+                tagsSelected = project.subscribers
 
                 //َActivity
                 createdAt = project.createdAt
@@ -195,7 +199,7 @@ class CreateProject extends Component {
 
                 const imagesCarousel = attachedImages.map((image) => image.downloadURL)
 
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, ProjectId, client, name, description, note, address, state, step }, () => {
+                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, ProjectId, client, name, description, note, address, state, step, tagsSelected }, () => {
                     if (this.isInit)
                         this.initialState = this.state
 
@@ -207,6 +211,8 @@ class CreateProject extends Component {
 
     fetchDocuments() {
         this.unsubscribeDocs = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
+            if (querysnapshot.empty) return
+
             let documentsList = []
             let documentTypes = []
             querysnapshot.forEach((doc) => {
@@ -221,12 +227,16 @@ class CreateProject extends Component {
 
     fetchTasks() {
         this.unsubscribeAgenda = db.collection('Agenda').onSnapshot((querysnapshot) => {
+            if (querysnapshot.empty) return
+
             let tasksList = []
             let taskTypes = []
             querysnapshot.forEach(async (dateDoc) => {
                 const date = dateDoc.id
                 const query = dateDoc.ref.collection('Tasks').where('project.id', '==', this.ProjectId)
                 this.unsubscribeTasks = query.onSnapshot((tasksSnapshot) => {
+                    if (tasksSnapshot.empty) return
+
                     tasksSnapshot.forEach((doc) => {
                         const task = doc.data()
                         task.id = doc.id
@@ -296,7 +306,6 @@ class CreateProject extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-
         let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
 
         //1. UPLOADING FILES
@@ -313,8 +322,8 @@ class CreateProject extends Component {
 
         //subscribers = editedBy + Admin + Tags added
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const admin = { id: adminId, email: 'contact@groupe-synergys.fr' }
-        const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email } })
+        const admin = { id: adminId, email: 'contact@groupe-synergys.fr', fullName: 'Admin' }
+        const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
         subscribers.push(currentUser)
 
         if (adminId !== currentUser.id)
@@ -342,13 +351,14 @@ class CreateProject extends Component {
         }
 
         console.log('Ready to update ticket project...')
-        await db.collection('Projects').doc(ProjectId).set(project, { merge: true })
-            .then(() => this.props.navigation.goBack())
-            .catch((e) => handleSetError(e))
-            .finally(() => {
-                this.title = 'Nouveau projet'
-                load(this, false)
-            })
+
+
+        db.collection('Projects').doc(ProjectId).set(project, { merge: true })
+        setTimeout(() => this.props.navigation.goBack(), 1000)
+
+        // db.collection('Projects').doc(ProjectId).set(project, { merge: true })
+        //     .then(() => this.props.navigation.goBack())
+        //     .catch((e) => handleFirestoreError(e))
     }
 
     showAlert() {
@@ -360,10 +370,14 @@ class CreateProject extends Component {
 
     async handleDeleteProject() {
         load(this, true)
-        await db.collection('Projects').doc(this.ProjectId).update({ deleted: true })
-            .then(() => this.props.navigation.goBack())
-            .catch((e) => setToast(this, 'e', "Erreur lors de l'archivage du projet, veuillez réesayer."))
-            .finally(() => load(this, false))
+
+        db.collection('Projects').doc(this.ProjectId).update({ deleted: true })
+        setTimeout(() => this.props.navigation.goBack(), 1000)
+
+        // await db.collection('Projects').doc(this.ProjectId).update({ deleted: true })
+        //     .then(() => this.props.navigation.goBack())
+        //     .catch((e) => setToast(this, 'e', "Erreur lors de l'archivage du projet, veuillez réesayer."))
+        //     .finally(() => load(this, false))
     }
 
     //Delete URLs from FIRESTORE 
@@ -371,10 +385,12 @@ class CreateProject extends Component {
         const newAttachments = this.state.attachedImages
         newAttachments[currentImage].deleted = true
 
-        await db.collection('Projects').doc(this.ProjectId).update({ attachments: newAttachments })
-        this.fetchProject()
-        this.setState({ isImageViewVisible: false })
-        //await this.deleteAttachments(allImages, currentImage)
+        db.collection('Projects').doc(this.ProjectId).update({ attachments: newAttachments })
+        setTimeout(() => {
+            this.fetchProject()
+            this.setState({ isImageViewVisible: false })
+            //await this.deleteAttachments(allImages, currentImage)
+        }, 1000)
     }
 
     //Delete Images from STORAGE //#RULE: NEVER DELETE FILES
@@ -404,28 +420,10 @@ class CreateProject extends Component {
     //     //     this.fetchProject()
     // }
 
-    pickImage() {
-        ImagePicker.showImagePicker(imagePickerOptions, response => {
-
-            if (response.didCancel) console.log('User cancelled photo picker')
-            else if (response.error) console.log('ImagePicker Error: ', response.error)
-            else if (response.customButton) console.log('User tapped custom button: ', response.customButton)
-
-            else {
-                let attachments = this.state.attachments
-
-                const image = {
-                    path: response.path,
-                    type: response.type,
-                    name: response.fileName,
-                    size: response.fileSize,
-                    progress: 0,
-                }
-
-                attachments.push(image)
-                this.setState({ attachments })
-            }
-        })
+    async pickImage() {
+        let { attachments } = this.state
+        attachments = await pickImage(attachments)
+        this.setState({ attachments })
     }
 
     renderAttachments(attachments, type, isUpload) {
@@ -564,7 +562,15 @@ class CreateProject extends Component {
                                         editable={false} />
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, currentAddress: this.state.address })}>
+                                <TouchableOpacity onPress={() => {
+                                    if (!this.props.network.isConnected) {
+                                        const message = 'La carte est indisponible en mode hors-ligne'
+                                        notAvailableOffline(message)
+                                        return
+                                    }
+
+                                    this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, currentAddress: this.state.address })
+                                }}>
                                     <MyInput
                                         label="Emplacement"
                                         value={address.description}
@@ -828,6 +834,7 @@ class CreateProject extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network,
         //fcmToken: state.fcmtoken
     }
 }

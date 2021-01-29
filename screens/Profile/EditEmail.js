@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { StyleSheet, Alert, View, ActivityIndicator } from 'react-native'
+import { StyleSheet, View, ActivityIndicator } from 'react-native'
 
 import Appbar from '../../components/Appbar'
 import AddressSearch from '../../components/AddressSearch'
@@ -63,13 +63,13 @@ export default class Address extends Component {
     }
 
     renderDialog = () => {
-        let { password, showDialog, toastType, toastMessage, loading } = this.state
+        let { password, showDialog, statusLabel, toastType, toastMessage, loading } = this.state
 
         if (loading)
             return (
                 <View style={styles.dialogContainer}>
                     <Dialog.Container visible={this.state.showDialog}>
-                        <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{this.state.statusLabel}</Dialog.Title>
+                        <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{statusLabel}</Dialog.Title>
                         <ActivityIndicator color={theme.colors.primary} size='small' />
                     </Dialog.Container>
                 </View>
@@ -103,37 +103,44 @@ export default class Address extends Component {
 
         load(this, true)
 
-        try {
-            await this.currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
-            this.setState({ statusLabel: "Modification de l'adresse email..." })
-            await this.currentUser.updateEmail(newEmail.value).catch(e => this.handleUpdateEmailError(e))
-            await db.collection('Users').doc(this.userId).update({ email: newEmail.value }) //#task: handle API exceptions
-            newEmail = { value: '', error: '' }
-            this.setState({ newEmail, showDialog: false }, () => {
-                this.props.navigation.state.params.onGoBack('success', 'Adresse email modifiée avec succès')
-                this.props.navigation.goBack()
-            })
+        const userCredential = await this.currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
+        if (!userCredential) {
+            load(this, false)
+            return
         }
 
-        catch(e) {
-            console.error(e)
+        this.setState({ statusLabel: "Modification de l'adresse email..." })
+        const emailUpdated = await this.currentUser.updateEmail(newEmail.value)
+            .then(() => { return true })
+            .catch(e => {
+                this.handleUpdateEmailError(e)
+                return false
+            })
+
+        if (!emailUpdated) {
+            load(this, false)
+            return
         }
+
+        await db.collection('Users').doc(this.userId).update({ email: newEmail.value })
+        newEmail = { value: '', error: '' }
+        this.setState({ newEmail, showDialog: false }, () => {
+            this.props.navigation.state.params.onGoBack('success', 'Adresse email modifiée avec succès')
+            this.props.navigation.goBack()
+        })
 
         this.setState({ loading: false, statusLabel: "Confirmation de l'identité..." })
     }
 
     handleReauthenticateError(e) {
-        // console.log('error Reauthenticate::::::::::::::::', e)
         handleReauthenticateError(e)
-        this.setState({ loading: false, showDialog: false })
+        this.setState({ loading: false, password: { value: '', error: '' } })
     }
 
     handleUpdateEmailError(e) {
-        // console.log('error UpdateEmail::::::::::::::::', e)
         const errorMessage = handleUpdateEmailError(e)
         this.setState({ loading: false, showDialog: false }, () => setToast(this, 'e', errorMessage))
     }
-
 
     render() {
         let { newEmail } = this.state

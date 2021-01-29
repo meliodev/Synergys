@@ -13,8 +13,9 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, setUser, load, setToast } from "../../core/utils"
-import { handleSetError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
+import { nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast } from "../../core/utils"
+import { setUser } from "../../core/redux"
+import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
 
 const db = firebase.firestore()
@@ -67,6 +68,7 @@ class Profile extends Component {
     }
 
     componentDidMount() {
+
         load(this, true)
         this.setPermissions()
         this.fetchData()
@@ -208,7 +210,7 @@ class Profile extends Component {
             })
             .catch((e) => {
                 load(this, false)
-                handleSetError(e)
+                handleFirestoreError(e)
             })
 
     }
@@ -232,33 +234,35 @@ class Profile extends Component {
     async changePassword() {
         load(this, true)
 
-        //Validate password
+        //Validate passwords (old pass & new pass)
         const isPasswordValid = this.passwordValidation()
         if (!isPasswordValid) return
 
         let { currentPass, newPass, currentUser, email } = this.state
         const emailCred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPass.value)
 
-        try {
-            await currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
-            await currentUser.updatePassword(newPass.value).catch(e => handleUpdatePasswordError(e))
-            setToast(this, 's', 'Mot de passe modifié avec succès')
-            currentPass = { value: '', error: '' }
-            newPass = { value: '', error: '' }
-            this.setState({ currentPass, newPass })
+        //Re-authenticate user (for security)
+        const userCredential = await currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
+        if (!userCredential) {
+            load(this, false)
+            return
         }
 
-        catch (e) {
-            console.error(e)
-        }
-
-        load(this, false)
+        //Update password
+        await currentUser.updatePassword(newPass.value)
+            .then(() => {
+                setToast(this, 's', 'Mot de passe modifié avec succès')
+                const init = { value: '', error: '' }
+                this.setState({ currentPass: init, newPass: init })
+            })
+            .catch(e => handleUpdatePasswordError(e))
+            .finally(() => load(this, false))
     }
 
     handleReauthenticateError(e) {
         handleReauthenticateError(e)
-        currentPass = { value: '', error: '' }
-        newPass = { value: '', error: '' }
+        const currentPass = { value: '', error: '' }
+        const newPass = { value: '', error: '' }
         this.setState({ currentPass, newPass, loading: false })
     }
 

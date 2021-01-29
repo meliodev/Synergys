@@ -17,7 +17,7 @@ import Loading from '../../components/Loading'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { nameValidator, updateField, generatetId, setToast, load } from "../../core/utils"
-import { handleSetError } from '../../core/exceptions'
+import { handleFirestoreError } from '../../core/exceptions'
 
 const db = firebase.firestore()
 
@@ -119,7 +119,7 @@ export default class CreateTeam extends Component {
                 else
                     this.props.navigation.navigate('AddMembers', { teamId: teamId, isCreation: true })
             })
-            .catch((e) => handleSetError(e))
+            .catch((e) => handleFirestoreError(e))
             .finally(() => load(this, false))
     }
 

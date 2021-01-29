@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { Button, Dimensions } from 'react-native'
+import { Button, Dimensions, Alert } from 'react-native'
 import notifee, { EventType, AndroidImportance } from '@notifee/react-native'
+import NetInfo from "@react-native-community/netinfo"
+import { connect } from 'react-redux'
 
 import firebase from '@react-native-firebase/app'
 import '@react-native-firebase/auth'
@@ -16,25 +18,34 @@ import Store from './Store/configureStore'
 import RootController from './Navigation/DrawerNavigator'
 import CustomClaims from './api/CustomClaims'
 
-import Video from './VideoPlayer'
-
 const db = firebase.firestore()
 
 class App extends Component {
 
-  componentDidMount() {
+  async componentDidMount() {
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
-  }
-
-  //Forground state: messages listener
-  async onForegroundMessageReceived(message) {
     const channelId = await notifee.createChannel({
       id: 'projects',
       name: 'projects',
       lights: false,
       vibration: true,
-      importance: AndroidImportance.DEFAULT,
+      importance: AndroidImportance.HIGH,
     })
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe()
+  }
+
+  //Forground state: messages listener
+  async onForegroundMessageReceived(message) {
+    // const channelId = await notifee.createChannel({
+    //   id: 'projects',
+    //   name: 'projects',
+    //   lights: false,
+    //   vibration: true,
+    //   importance: AndroidImportance.HIGH,
+    // })
 
     await notifee.displayNotification(JSON.parse(message.data.notifee))
   }
@@ -47,7 +58,6 @@ class App extends Component {
     return (
       <Provider store={Store}>
         <MenuProvider>
-          {/* <Video /> */}
           <RootController />
         </MenuProvider>
       </Provider>
@@ -55,9 +65,10 @@ class App extends Component {
   }
 }
 
+
 console.disableYellowBox = true;
 
-export default App;
+export default App
 
 
 

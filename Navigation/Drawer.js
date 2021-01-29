@@ -96,9 +96,16 @@ class DrawerMenu extends React.Component {
         this.setNotificationBadge()
     }
 
+    componentWillUnmount() {
+        this.unsubscribenotifications()
+    }
+
     setNotificationBadge(uid) {
-        db.collection('Users').doc(firebase.auth().currentUser.uid).collection('Notifications').where('deleted', '==', false).where('read', '==', false)
+        const { currentUser } = firebase.auth()
+
+        this.unsubscribenotifications = db.collection('Users').doc(currentUser.uid).collection('Notifications').where('deleted', '==', false).where('read', '==', false)
             .onSnapshot((querysnapshot) => {
+                if (querysnapshot.empty) return
                 const notificationCount = querysnapshot.docs.length
                 this.setState({ notificationCount })
             })

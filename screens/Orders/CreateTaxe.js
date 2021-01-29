@@ -14,7 +14,7 @@ import Loading from "../../components/Loading"
 import { updateField, nameValidator, setToast, load } from "../../core/utils";
 import { fetchDocs } from '../../api/firestore-api';
 import firebase from '@react-native-firebase/app';
-import { handleSetError } from '../../core/exceptions';
+import { handleFirestoreError } from '../../core/exceptions';
 
 const db = firebase.firestore()
 
@@ -66,7 +66,7 @@ export default class CreateTask extends Component {
 
         await db.collection('Taxes').doc().set(taxe).catch((e) => {
             load(this, false)
-            handleSetError(e)
+            handleFirestoreError(e)
         })
 
         load(this, false)

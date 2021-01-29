@@ -17,7 +17,7 @@ async function onBackgroundMessageReceived(message) {
         name: 'projects',
         lights: false,
         vibration: true,
-        importance: AndroidImportance.DEFAULT,
+        importance: AndroidImportance.HIGH,
     })
 
     await notifee.displayNotification(JSON.parse(message.data.notifee))

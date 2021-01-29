@@ -15,7 +15,7 @@ import Toast from "../../components/Toast"
 import * as theme from "../../core/theme";
 import { constants, rolesRedux } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generatetId, updateField, setToast, load } from "../../core/utils"
-import { handleSetError } from "../../core/exceptions";
+import { handleFirestoreError } from "../../core/exceptions";
 
 const roles_l1 = [ //level1: Admin
   { label: 'Admin', value: 'Admin' },
@@ -224,7 +224,7 @@ class CreateUser extends Component {
       user.isClient = false
 
     console.log('Ready to add user...')
-    await db.collection('newUsers').doc(userId).set(user).catch(e => handleSetError(e))
+    await db.collection('newUsers').doc(userId).set(user).catch(e => handleFirestoreError(e))
     setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
       load(this, false)
       this.title = "Créer un utilisateur"

@@ -23,7 +23,7 @@ import { constants } from '../../core/constants'
 import { load } from "../../core/utils"
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
-import { handleSetError } from '../../core/exceptions'
+import { handleFirestoreError } from '../../core/exceptions'
 
 const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom']
 const db = firebase.firestore()
@@ -169,7 +169,7 @@ export default class AddMembers extends Component {
             })
             .catch(e => {
                 load(this, false)
-                handleSetError(e)
+                handleFirestoreError(e)
             })
     }
 

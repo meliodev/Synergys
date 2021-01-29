@@ -233,16 +233,6 @@ export const loadLog = (main, bool, message) => {
   main.setState({ loading: bool, loadingMessage: message })
 }
 
-export const setRole = (main, role) => {
-  const action = { type: "ROLE", value: role }
-  main.props.dispatch(action)
-}
-
-export const setUser = (main, displayName, connected) => {
-  const action = { type: "DISPLAYNAME", value: { displayName, connected } }
-  main.props.dispatch(action)
-}
-
 export const base64ToArrayBuffer = (base64) => {
   const binary_string = atob(base64);
   // console.log('binary_string', binary_string)

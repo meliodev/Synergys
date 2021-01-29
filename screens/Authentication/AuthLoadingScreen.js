@@ -3,11 +3,12 @@ import { Alert, Text, StyleSheet } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
 import firebase from '@react-native-firebase/app'
 import notifee, { EventType } from '@notifee/react-native'
+import NetInfo from "@react-native-community/netinfo"
 
 import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
-import { setRole, setUser } from '../../core/utils'
+import { setRole, setUser, setNetwork } from '../../core/redux'
 import { connect } from 'react-redux'
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
@@ -27,9 +28,53 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
-    //Notification action listeners
-    await this.bootstrap()
+    //1. Network listener
+    this.networkListener()
 
+    //2. Notification action listeners
+    await this.bootstrap()
+    this.forgroundNotificationListener()
+    this.backgroundNotificationListener()
+
+    //3. Auth listener & Navigation rooter
+    this.unsububscribe = this.navigationRooterAuthListener()
+  }
+
+  //Network listener
+  networkListener() {
+    this.unsubscribeNetwork = NetInfo.addEventListener(state => {
+      const { type, isConnected } = state
+      const network = { type, isConnected }
+      console.log('network...................', network)
+      setNetwork(this, network)
+    })
+  }
+
+  //User action on a notification has caused app to open
+  async bootstrap() {
+    const initialNotification = await notifee.getInitialNotification()
+    //set screen & params on asyncstorage
+    if (initialNotification) {
+      // console.log('Notification caused application to open from quit state', initialNotification.notification)
+      // console.log('Press action used to open the app', initialNotification.pressAction)
+
+      const { data } = initialNotification.notification
+      const screen = data['screen']
+      delete data.screen //keep only params
+      const params = data
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value === 'true') params[key] = true
+        if (value === 'false') params[key] = false
+      })
+
+      this.setState({ initialNotification: true, screen, params })
+    }
+
+    return initialNotification
+  }
+
+  forgroundNotificationListener() {
     notifee.onForegroundEvent(({ type, detail }) => {
       switch (type) {
         case EventType.DISMISSED:
@@ -40,7 +85,9 @@ class AuthLoadingScreen extends Component {
           break
       }
     })
+  }
 
+  backgroundNotificationListener() {
     notifee.onBackgroundEvent(async ({ type, detail }) => {
       //const { pressAction } = notification.android
       const { notification } = detail
@@ -62,18 +109,16 @@ class AuthLoadingScreen extends Component {
           break
       }
     })
-
-    //Auth listener & Navigation rooter
-    this.unsububscribe = this.navigationRooterAuthListener()
   }
 
+  //Auth Listener & Navigation Rooter
   navigationRooterAuthListener() {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
         const currentUser = firebase.auth().currentUser
         setUser(this, currentUser.displayName, true)
 
-        const idTokenResult = await currentUser.getIdTokenResult().catch(() => Alert.alert('Pas de données en cache pour un fonctionnement Hors-Ligne. Veuillez vous connecter à internet.'))
+        const idTokenResult = await currentUser.getIdTokenResult().catch(() => Alert.alert('', 'Pas de données en cache pour un fonctionnement Hors-Ligne. Veuillez vous connecter à internet.'))
 
         roles.forEach((role) => {
           if (idTokenResult.claims[role.id])
@@ -89,39 +134,15 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("OrdersStack")
+          this.props.navigation.navigate("App")
       }
 
       else {
         setRole(this, '')
         setUser(this, '', false)
-        this.props.navigation.navigate("HomeScreen")
+        this.props.navigation.navigate("Auth")
       }
     })
-  }
-
-  //User action on a notification has caused app to open
-  async bootstrap() {
-    const initialNotification = await notifee.getInitialNotification()
-    //set screen & params on asyncstorage
-    if (initialNotification) {
-      console.log('Notification caused application to open from quit state', initialNotification.notification)
-      console.log('Press action used to open the app', initialNotification.pressAction)
-
-      const { data } = initialNotification.notification
-      const screen = data['screen']
-      delete data.screen //keep only params
-      const params = data
-
-      Object.entries(params).forEach(([key, value]) => {
-        if (value === 'true') params[key] = true
-        if (value === 'false') params[key] = false
-      })
-
-      this.setState({ initialNotification: true, screen, params })
-    }
-
-    return initialNotification
   }
 
   //FCM token configuration
@@ -171,7 +192,7 @@ class AuthLoadingScreen extends Component {
         }
 
         //This token is already registred with current user
-        else console.log(`Token ${token} already belongs to the current user ${currentUserId}`)
+        //else console.log(`Token ${token} already belongs to the current user ${currentUserId}`)
       }
 
       //New token: add it to the current user
@@ -211,10 +232,10 @@ const mapStateToProps = (state) => {
   return {
     role: state.roles.role,
     user: state.user.user,
+    network: state.network,
     //fcmToken: state.fcmtoken
   }
 }
-
 
 const styles = StyleSheet.create({
   synergys: {

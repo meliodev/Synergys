@@ -21,7 +21,7 @@ import { fetchDocs } from "../../api/firestore-api";
 import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, arrayValidator } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { handleSetError } from '../../core/exceptions';
+import { handleFirestoreError } from '../../core/exceptions';
 
 const db = firebase.firestore()
 
@@ -237,7 +237,7 @@ class CreateOrder extends Component {
             })
             .catch(e => {
                 load(this, false)
-                handleSetError(e)
+                handleFirestoreError(e)
             })
     }
 

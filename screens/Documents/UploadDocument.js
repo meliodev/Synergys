@@ -27,7 +27,7 @@ import { uploadFile } from "../../api/storage-api";
 import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { handleSetError } from '../../core/exceptions';
+import { handleFirestoreError } from '../../core/exceptions';
 
 const db = firebase.firestore()
 
@@ -354,7 +354,7 @@ class UploadDocument extends Component {
 
             batch.commit()
                 .then(() => this.props.navigation.goBack())
-                .catch(e => handleSetError(e))
+                .catch(e => handleFirestoreError(e))
                 .finally(() => this.setState({ loading: false, uploading: false }))
         }
     }

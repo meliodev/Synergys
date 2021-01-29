@@ -34,7 +34,7 @@ import { uploadFile } from "../../api/storage-api";
 import { generatetId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { handleSetError } from '../../core/exceptions';
+import { handleFirestoreError } from '../../core/exceptions';
 
 const db = firebase.firestore()
 
@@ -255,7 +255,7 @@ class CreateProduct extends Component {
             })
             .catch(e => {
                 load(this, false)
-                handleSetError(e)
+                handleFirestoreError(e)
             })
     }
 
@@ -357,7 +357,7 @@ class CreateProduct extends Component {
 
         await db.collection('ProductCategories').doc().set({ name: newCategory })
             .then(() => this.setState({ category: { value: newCategory, error: '' }, newCategory: '' }))
-            .catch((e) => handleSetError(e))
+            .catch((e) => handleFirestoreError(e))
             .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
     }
 
@@ -374,7 +374,7 @@ class CreateProduct extends Component {
 
         await db.collection('Brands').doc().set({ name, logo })
             .then(() => this.setState({ tagsSelected, newBrand: { name: '', attachment: {} } }))
-            .catch((e) => handleSetError(e))
+            .catch((e) => handleFirestoreError(e))
             .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
     }
 

@@ -9,6 +9,7 @@ import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import { load } from "../../core/utils"
+import { setRole } from "../../core/redux"
 
 import * as theme from "../../core/theme"
 import { constants, rolesRedux } from '../../core/constants'
@@ -34,7 +35,6 @@ class EditRole extends Component {
         super(props)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.setCustomClaim = this.setCustomClaim.bind(this)
-        this.setRole = this.setRole.bind(this)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.userId = this.props.navigation.getParam('userId', '')
@@ -50,14 +50,10 @@ class EditRole extends Component {
         this.setState({ role: this.currentRole })
     }
 
-    setRole(role) {
-        const action = { type: "ROLE", value: role }
-        this.props.dispatch(action)
-    }
-
     async handleSubmit() {
         //console.log(`Changing from ${this.currentRole} to ${this.state.role} role`)
-        if (this.currentRole === this.state.role) return
+        const { loading } = this.state
+        if (this.currentRole === this.state.role || loading) return
         load(this, true)
         this.setCustomClaim()
     }
@@ -67,20 +63,20 @@ class EditRole extends Component {
         setCustomClaim({ role: this.state.role, userId: this.userId })
             .then(async result => {
 
-                await db.collection('Users').doc(this.userId).update({ role: this.state.role }) //#task handle api exceptions
+                await db.collection('Users').doc(this.userId).update({ role: this.state.role })
 
                 if (this.userId === firebase.auth().currentUser.uid) {
                     firebase.auth().currentUser.getIdToken(true)
                     for (const role of rolesRedux) {
                         if (role.value === this.state.role.toLocaleLowerCase())
-                            this.setRole(role)
+                            setRole(this, role)
                     }
                 }
 
                 this.props.navigation.state.params.onGoBack('success', 'Le rôle a été modifié avec succès')
                 this.props.navigation.goBack()
             })
-            .catch(err => Alert.alert('Erreur inattendue, veuillez réessayer plus tard.'))
+            .catch(err => console.error(err))
             .finally(() => load(this, false))
     }
 

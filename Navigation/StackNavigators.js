@@ -261,7 +261,7 @@ const NewsStack = createStackNavigator({
     },
 })
 
-//3. ADMIN MAIN STACKS
+//3. USER MAIN STACKS (APP & AUTH)
 //Authentification navigation
 export const AuthStack = createStackNavigator({
     HomeScreen: {
@@ -293,7 +293,7 @@ export const AuthStack = createStackNavigator({
         initialRouteName: 'AuthLoadingScreen',
     })
 
-//Admin navigation
+//App modules
 export const AppStack = createStackNavigator({
     // Dashboard: {
     //     screen: Dashboard,
@@ -353,6 +353,4 @@ export const AppStack = createStackNavigator({
         screen: NewsStack,
         navigationOptions: hideHeader
     },
-
-
 })
