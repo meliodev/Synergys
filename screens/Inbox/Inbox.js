@@ -2,7 +2,9 @@
 
 import React from "react"
 import { View } from 'react-native'
+import { connect } from 'react-redux'
 
+import OffLineBar from '../../components/OffLineBar'
 import TabView from '../../components/TabView'
 import Appbar from '../../components/Appbar'
 
@@ -29,24 +31,33 @@ class Inbox extends React.Component {
         ]
 
         let { index } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
-
-                <Appbar menu title titleText= 'Boîte de réception'/>
+                {!isConnected && <OffLineBar />}
+                <Appbar menu title titleText='Boîte de réception' />
 
                 <TabView
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListNotifications />}
-                    Tab2={<ListMessages />} />
+                    Tab1={<ListNotifications offLine={!isConnected} />}
+                    Tab2={<ListMessages offLine={!isConnected} />} />
             </View>
         )
     }
 }
 
-export default Inbox
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(Inbox)
 
 
 

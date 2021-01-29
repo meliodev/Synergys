@@ -3,7 +3,9 @@ import { StyleSheet, Text, View, FlatList } from 'react-native'
 import { List } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
 import SearchInput, { createFilter } from 'react-native-search-filter'
+import { connect } from 'react-redux'
 
+import OffLineBar from '../../components/OffLineBar'
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
 import DocumentItem from '../../components/DocumentItem'
@@ -85,6 +87,7 @@ class ListDocuments extends Component {
         let { documentsCount, documentsList, loading } = this.state
         let { type, state, project, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+        const { isConnected } = this.props.network
 
         const fields = [{ label: 'type', value: type }, { label: 'state', value: state }, { label: 'project.id', value: project.id }]
         this.filteredDocuments = handleFilter(documentsList, this.filteredDocuments, fields, searchInput, KEYS_TO_FILTERS)
@@ -94,6 +97,8 @@ class ListDocuments extends Component {
 
         return (
             <View style={styles.container}>
+                {!isConnected && <OffLineBar />}
+
                 <SearchBar
                     main={this}
                     title={!showInput}
@@ -140,7 +145,7 @@ class ListDocuments extends Component {
                                 renderItem={({ item }) => this.renderDocument(item)}
                                 contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                             :
-                            <EmptyList iconName='file-document' header='Liste des documents' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' />
+                            <EmptyList iconName='file-document' header='Liste des documents' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
                         }
                         <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument')} />
                     </View>}
@@ -162,4 +167,12 @@ const styles = StyleSheet.create({
     }
 })
 
-export default ListDocuments
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(ListDocuments)

@@ -4,7 +4,9 @@ import React, { memo } from "react";
 import { Text, StyleSheet, TouchableOpacity } from 'react-native'
 import { FAB } from 'react-native-paper'
 import Animated from 'react-native-reanimated';
+import { connect } from 'react-redux'
 
+import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import SearchBar from '../../components/SearchBar'
 import TabView from '../../components/TabView'
@@ -39,9 +41,12 @@ class RequestsManagement extends React.Component {
         ]
 
         const { index, showInput, searchInput } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
+                {!isConnected && <OffLineBar />}
+
                 <SearchBar
                     main={this}
                     title={!showInput}
@@ -57,16 +62,22 @@ class RequestsManagement extends React.Component {
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListProjects searchInput={searchInput} />}
-                    Tab2={<ListTickets searchInput={searchInput} />} />
+                    Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} />}
+                    Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} />} />
             </View>
         )
     }
 }
 
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
 
-export default RequestsManagement
-
+export default connect(mapStateToProps)(RequestsManagement)
 
 
 

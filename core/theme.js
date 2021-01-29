@@ -12,6 +12,7 @@ const colors = {
   error: DefaultTheme.colors.error,
   disabled: DefaultTheme.colors.disabled,
   placeholder: DefaultTheme.colors.placeholder,
+  offline: '#0A1172',
   icon: '#757575',
   success: "#00B386",
   accent: "#F3534A",

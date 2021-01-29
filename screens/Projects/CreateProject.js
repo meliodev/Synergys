@@ -15,8 +15,10 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
+import AddressInput from '../../components/AddressInput'
 import Picker from "../../components/Picker"
 import AutoCompleteUsers from '../../components/AutoCompleteUsers'
 import Toast from "../../components/Toast"
@@ -281,10 +283,11 @@ class CreateProject extends Component {
     //Inputs validation
     validateInputs() {
         let { client, name, address } = this.state
+        const { isConnected } = this.prop.network
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let nameError = nameValidator(name.value, '"Nom du projet"')
-        let addressError = nameValidator(address.description, '"Emplacemment"')
+        var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
 
         if (clientError || nameError || addressError) {
             name.error = nameError
@@ -322,12 +325,8 @@ class CreateProject extends Component {
 
         //subscribers = editedBy + Admin + Tags added
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const admin = { id: adminId, email: 'contact@groupe-synergys.fr', fullName: 'Admin' }
         const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
         subscribers.push(currentUser)
-
-        if (adminId !== currentUser.id)
-            subscribers.push(admin)
 
         //2. ADDING project DOCUMENT
         let project = {
@@ -351,7 +350,6 @@ class CreateProject extends Component {
         }
 
         console.log('Ready to update ticket project...')
-
 
         db.collection('Projects').doc(ProjectId).set(project, { merge: true })
         setTimeout(() => this.props.navigation.goBack(), 1000)
@@ -517,9 +515,11 @@ class CreateProject extends Component {
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
         let { error, loading, toastMessage, toastType } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
+                {!isConnected && <OffLineBar />}
                 <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 <ScrollView style={styles.container}>
@@ -562,23 +562,11 @@ class CreateProject extends Component {
                                         editable={false} />
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={() => {
-                                    if (!this.props.network.isConnected) {
-                                        const message = 'La carte est indisponible en mode hors-ligne'
-                                        notAvailableOffline(message)
-                                        return
-                                    }
-
-                                    this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, currentAddress: this.state.address })
-                                }}>
-                                    <MyInput
-                                        label="Emplacement"
-                                        value={address.description}
-                                        error={!!addressError}
-                                        errorText={addressError}
-                                        editable={false}
-                                        multiline={true} />
-                                </TouchableOpacity>
+                                <AddressInput
+                                    offLine
+                                    refreshAddress={this.refreshClient}
+                                    address={address}
+                                    addressError={addressError} />
 
                                 <Picker
                                     returnKeyType="next"
@@ -613,7 +601,6 @@ class CreateProject extends Component {
                                         suggestionsBellow={false}
                                     />
                                 </View>
-
 
                             </Card.Content>
                         </Card>
@@ -699,83 +686,85 @@ class CreateProject extends Component {
                         </Card>
                     }
 
-                    <Card style={{ paddingBottom: 20, margin: 5 }}>
-                        <Card.Content>
+                    {isConnected &&
+                        <Card style={{ paddingBottom: 20, margin: 5 }}>
+                            <Card.Content>
+                                {!loading &&
+                                    <View>
+                                        <Title style={{ marginBottom: 15 }}>Photos et plan du lieu</Title>
+                                    </View>
+                                }
+                                {imagesView.length > 0 &&
+                                    <ImageView
+                                        images={imagesView}
+                                        imageIndex={0}
+                                        onImageChange={(imageIndex) => this.setState({ imageIndex: imageIndex })}
+                                        isVisible={this.state.isImageViewVisible}
+                                        onClose={() => this.setState({ isImageViewVisible: false })}
+                                        renderFooter={(currentImage) => (
+                                            <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                                                <TouchableOpacity
+                                                    style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }}
+                                                    onPress={() => this.handleDeleteImage(false, this.state.imageIndex)}>
+                                                    <MaterialCommunityIcons name='delete' size={24} color='#fff' />
+                                                </TouchableOpacity>
+                                            </View>)}
+                                    />
+                                }
+                            </Card.Content>
+
                             {!loading &&
-                                <View>
-                                    <Title style={{ marginBottom: 15 }}>Photos et plan du lieu</Title>
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                    {imagesCarousel.length > 0 &&
+                                        <SliderBox
+                                            images={imagesCarousel}
+                                            sliderBoxHeight={200}
+                                            onCurrentImagePressed={index => this.setState({ imageIndex: index, isImageViewVisible: true })}
+                                            dotColor={theme.colors.secondary}
+                                            inactiveDotColor="gray"
+                                            paginationBoxVerticalPadding={20}
+                                            //autoplay
+                                            circleLoop
+                                            resizeMethod={'resize'}
+                                            resizeMode={'cover'}
+                                            paginationBoxStyle={{
+                                                position: "absolute",
+                                                bottom: 0,
+                                                padding: 0,
+                                                alignItems: "center",
+                                                alignSelf: "center",
+                                                justifyContent: "center",
+                                                paddingVertical: 10
+                                            }}
+                                            dotStyle={{
+                                                width: 10,
+                                                height: 10,
+                                                borderRadius: 5,
+                                                marginHorizontal: 0,
+                                                padding: 0,
+                                                margin: 0,
+                                                backgroundColor: "rgba(128, 128, 128, 0.92)"
+                                            }}
+                                            ImageComponentStyle={{ borderRadius: 10, width: '95%', marginTop: 5 }}
+                                            imageLoadingColor="#2196F3"
+                                        //onPressDelete={(currentImage) => this.handleDeleteImage(false, currentImage)}
+                                        />}
                                 </View>
                             }
-                            {imagesView.length > 0 &&
-                                <ImageView
-                                    images={imagesView}
-                                    imageIndex={0}
-                                    onImageChange={(imageIndex) => this.setState({ imageIndex: imageIndex })}
-                                    isVisible={this.state.isImageViewVisible}
-                                    onClose={() => this.setState({ isImageViewVisible: false })}
-                                    renderFooter={(currentImage) => (
-                                        <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                                            <TouchableOpacity
-                                                style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }}
-                                                onPress={() => this.handleDeleteImage(false, this.state.imageIndex)}>
-                                                <MaterialCommunityIcons name='delete' size={24} color='#fff' />
-                                            </TouchableOpacity>
-                                        </View>)}
-                                />
+
+                            {this.renderAttachments(attachments, 'image', true)}
+
+                            {!loading ?
+                                <TouchableOpacity onPress={this.pickImage} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 15, marginTop: 15 }}>
+                                    <Entypo name='camera' color={theme.colors.primary} size={19} />
+                                    <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary, textAlign: 'center', marginLeft: 10 }]}>Ajouter une photo</Text>
+                                </TouchableOpacity>
+                                :
+                                <Loading size='small' style={{ marginTop: 15 }} />
                             }
-                        </Card.Content>
 
-                        {!loading &&
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                {imagesCarousel.length > 0 &&
-                                    <SliderBox
-                                        images={imagesCarousel}
-                                        sliderBoxHeight={200}
-                                        onCurrentImagePressed={index => this.setState({ imageIndex: index, isImageViewVisible: true })}
-                                        dotColor={theme.colors.secondary}
-                                        inactiveDotColor="gray"
-                                        paginationBoxVerticalPadding={20}
-                                        //autoplay
-                                        circleLoop
-                                        resizeMethod={'resize'}
-                                        resizeMode={'cover'}
-                                        paginationBoxStyle={{
-                                            position: "absolute",
-                                            bottom: 0,
-                                            padding: 0,
-                                            alignItems: "center",
-                                            alignSelf: "center",
-                                            justifyContent: "center",
-                                            paddingVertical: 10
-                                        }}
-                                        dotStyle={{
-                                            width: 10,
-                                            height: 10,
-                                            borderRadius: 5,
-                                            marginHorizontal: 0,
-                                            padding: 0,
-                                            margin: 0,
-                                            backgroundColor: "rgba(128, 128, 128, 0.92)"
-                                        }}
-                                        ImageComponentStyle={{ borderRadius: 10, width: '95%', marginTop: 5 }}
-                                        imageLoadingColor="#2196F3"
-                                    //onPressDelete={(currentImage) => this.handleDeleteImage(false, currentImage)}
-                                    />}
-                            </View>
-                        }
-
-                        {this.renderAttachments(attachments, 'image', true)}
-
-                        {!loading ?
-                            <TouchableOpacity onPress={this.pickImage} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 15, marginTop: 15 }}>
-                                <Entypo name='camera' color={theme.colors.primary} size={19} />
-                                <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary, textAlign: 'center', marginLeft: 10 }]}>Ajouter une photo</Text>
-                            </TouchableOpacity>
-                            :
-                            <Loading size='small' style={{ marginTop: 15 }} />
-                        }
-
-                    </Card>
+                        </Card>
+                    }
 
                     {this.isEdit && !loading &&
                         <Card style={{ margin: 5 }}>

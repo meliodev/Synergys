@@ -110,7 +110,7 @@ class ListTeams extends Component {
                                 style={{ paddingHorizontal: 15 }}
                                 contentContainerStyle={{ paddingBottom: 75 }} />
                             :
-                            <EmptyList iconName='account-multiple-outline' header='Liste des équipes' description='Gérez les équipes. Appuyez sur le boutton "+" pour en créer un nouvelle.' />
+                            <EmptyList iconName='account-multiple-outline' header='Liste des équipes' description='Gérez les équipes. Appuyez sur le boutton "+" pour en créer un nouvelle.' offLine={this.props.offLine} />
                         }
 
                         <MyFAB onPress={() => this.props.navigation.navigate('CreateTeam')} />

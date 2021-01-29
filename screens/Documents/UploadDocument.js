@@ -456,10 +456,10 @@ class UploadDocument extends Component {
                                         multiline={true}
                                     />
 
-                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'UploadDocument', isRoot: false, title: 'Choix du projet', showFAB: false })}>
+                                    <TouchableOpacity onPress={() => this.props.navigation.push('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'UploadDocument', isRoot: false, titleText: 'Choix du projet', showFAB: false })}>
                                         <MyInput
                                             label="Choisir un projet"
-                                            value={project.name}
+                                            value={project.name} 
                                             error={!!projectError}
                                             errorText={projectError}
                                             editable={false} />

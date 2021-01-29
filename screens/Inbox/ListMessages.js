@@ -60,9 +60,7 @@ class ListMessages extends Component {
     render() {
         let { messagesCount } = this.state
 
-        let s = ''
-        if (messagesCount > 1)
-            s = 's'
+        const s = messagesCount > 1 ? 's' : ''
 
         return (
             <View style={styles.container}>
@@ -77,7 +75,7 @@ class ListMessages extends Component {
                         renderItem={(item) => this.renderMessage(item)}
                     />
                     :
-                    <EmptyList iconName='email' header='Notifications' description="Vous n'avez aucune notification pour le moment." />
+                    <EmptyList iconName='email' header='Notifications' description="Vous n'avez aucune notification pour le moment." offLine={this.props.offLine} />
                 }
                 <MyFAB icon='pencil' onPress={() => this.props.navigation.navigate('NewMessage')} />
             </View >

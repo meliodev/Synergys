@@ -45,7 +45,7 @@ class AuthLoadingScreen extends Component {
     this.unsubscribeNetwork = NetInfo.addEventListener(state => {
       const { type, isConnected } = state
       const network = { type, isConnected }
-      console.log('network...................', network)
+      if(!isConnected) Alert.alert('Mode Hors-Ligne', "L'application risque de ne pas fonctionner de façon optimale en mode hors-ligne. Veuillez rétablir votre connection réseau.")
       setNetwork(this, network)
     })
   }
@@ -140,7 +140,7 @@ class AuthLoadingScreen extends Component {
       else {
         setRole(this, '')
         setUser(this, '', false)
-        this.props.navigation.navigate("Auth")
+        this.props.navigation.navigate("HomeScreen")
       }
     })
   }

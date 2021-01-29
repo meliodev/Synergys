@@ -23,7 +23,6 @@ const db = firebase.firestore()
 class App extends Component {
 
   async componentDidMount() {
-    this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
     const channelId = await notifee.createChannel({
       id: 'projects',
       name: 'projects',
@@ -31,6 +30,8 @@ class App extends Component {
       vibration: true,
       importance: AndroidImportance.HIGH,
     })
+
+    this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
   }
 
   componentWillUnmount() {

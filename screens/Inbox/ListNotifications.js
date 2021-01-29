@@ -7,6 +7,7 @@ import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 
 import NotificationItem from '../../components/NotificationItem'
+import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
 
 import { fetchDocs } from "../../api/firestore-api";
@@ -64,22 +65,23 @@ class ListNotifications extends Component {
 
     render() {
         let { notificationsCount } = this.state
-
-        let s = ''
-        if (notificationsCount > 1)
-            s = 's'
+        const s = notificationsCount > 1 ? 's' : ''
 
         return (
             <View style={styles.container}>
                 <List.Subheader>{notificationsCount} notification{s}</List.Subheader>
-                <FlatList
-                    style={styles.root}
-                    contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
-                    data={this.state.notificationsList}
-                    extraData={this.state}
-                    keyExtractor={(item) => { return item.id }}
-                    renderItem={(item) => this.renderNotification(item.item)}
-                />
+                {notificationsCount > 0 ?
+                    <FlatList
+                        style={styles.root}
+                        contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
+                        data={this.state.notificationsList}
+                        extraData={this.state}
+                        keyExtractor={(item) => { return item.id }}
+                        renderItem={(item) => this.renderNotification(item.item)}
+                    />
+                    :
+                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
+                }
             </View >
         )
 

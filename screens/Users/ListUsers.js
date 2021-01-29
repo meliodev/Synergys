@@ -130,7 +130,7 @@ class ListUsers extends Component {
     let type = 'utilisateur'
     if (this.props.userType === 'client') type = 'client'
     let label = type
-    if (usersCount > 1) label = `${label}s` 
+    if (usersCount > 1) label = `${label}s`
 
     return label
   }
@@ -160,7 +160,7 @@ class ListUsers extends Component {
                 style={{ paddingHorizontal: 10 }}
                 contentContainerStyle={{ paddingBottom: 75 }} />
               :
-              <EmptyList iconName='account' header={this.props.emptyListHeader} description={this.props.emptyListDesc} />
+              <EmptyList iconName='account' header={this.props.emptyListHeader} description={this.props.emptyListDesc} offLine={this.props.offLine} />
             }
 
             {this.props.showButton &&

@@ -11,6 +11,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import OffLineBar from '../../components/OffLineBar'
 import PickerBar from '../../components/PickerBar'
 import Appbar from '../../components/Appbar'
 import TasksTab from '../../components/TasksTab'
@@ -139,70 +140,70 @@ class Agenda2 extends Component {
                     const date = dateDoc.id //exp: 2021-01-07
 
                     //if (!this.state.items[date]) {
-                        const query = this.setTasksQuery(dateDoc.ref)
-                        query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
-                            this.state.items[date] = []
+                    const query = this.setTasksQuery(dateDoc.ref)
+                    query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
+                        this.state.items[date] = []
 
-                            tasksSnapshot.forEach((taskDoc) => {
+                        tasksSnapshot.forEach((taskDoc) => {
 
-                                const task = taskDoc.data()
-                                const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
-                                const startDate = moment(task.startDate).format('YYYY-MM-DD')
-                                const isPeriod = moment(startDate).isBefore(dueDate, 'day')
-                                const duration = moment(dueDate).diff(startDate, 'day') + 1
-                                let timeLine = 1
-                                let dayProgress = `${timeLine}/${duration}`
+                            const task = taskDoc.data()
+                            const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
+                            const startDate = moment(task.startDate).format('YYYY-MM-DD')
+                            const isPeriod = moment(startDate).isBefore(dueDate, 'day')
+                            const duration = moment(dueDate).diff(startDate, 'day') + 1
+                            let timeLine = 1
+                            let dayProgress = `${timeLine}/${duration}`
 
-                                this.state.items[date].push({
-                                    id: taskDoc.id,
-                                    date: date,
-                                    name: task.name,
-                                    type: task.type,
-                                    status: task.status,
-                                    priority: task.priority.toLowerCase(),
-                                    project: task.project,
-                                    assignedTo: task.assignedTo,
-                                    dayProgress: dayProgress
-                                })
+                            this.state.items[date].push({
+                                id: taskDoc.id,
+                                date: date,
+                                name: task.name,
+                                type: task.type,
+                                status: task.status,
+                                priority: task.priority.toLowerCase(),
+                                project: task.project,
+                                assignedTo: task.assignedTo,
+                                dayProgress: dayProgress
+                            })
 
-                                //Tasks lasting for 2days or more...
-                                if (isPeriod) {
-                                    timeLine = 2
-                                    var dateIterator = moment(startDate).add(1, 'day').format('YYYY-MM-DD')
-                                    let predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
+                            //Tasks lasting for 2days or more...
+                            if (isPeriod) {
+                                timeLine = 2
+                                var dateIterator = moment(startDate).add(1, 'day').format('YYYY-MM-DD')
+                                let predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
 
-                                    while (predicate) {
-                                        dayProgress = `${timeLine}/${duration}`
-                                        this.state.items[dateIterator] = []
-                                        this.state.items[dateIterator].push({
-                                            id: taskDoc.id,
-                                            date: dateIterator,
-                                            name: task.name,
-                                            type: task.type,
-                                            status: task.status,
-                                            priority: task.priority.toLowerCase(),
-                                            project: task.project,
-                                            assignedTo: task.assignedTo,
-                                            dayProgress: dayProgress,
-                                            // labels: [task.priority.toLowerCase()],
-                                        })
+                                while (predicate) {
+                                    dayProgress = `${timeLine}/${duration}`
+                                    this.state.items[dateIterator] = []
+                                    this.state.items[dateIterator].push({
+                                        id: taskDoc.id,
+                                        date: dateIterator,
+                                        name: task.name,
+                                        type: task.type,
+                                        status: task.status,
+                                        priority: task.priority.toLowerCase(),
+                                        project: task.project,
+                                        assignedTo: task.assignedTo,
+                                        dayProgress: dayProgress,
+                                        // labels: [task.priority.toLowerCase()],
+                                    })
 
-                                        timeLine += 1
-                                        dateIterator = moment(dateIterator).add(1, 'day').format('YYYY-MM-DD')
-                                        predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
-                                    }
+                                    timeLine += 1
+                                    dateIterator = moment(dateIterator).add(1, 'day').format('YYYY-MM-DD')
+                                    predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
                                 }
+                            }
 
-                                const newItems = {}
-                                Object.keys(this.state.items).forEach(key => {
-                                    newItems[key] = this.state.items[key]
-                                })
-                                this.setState({ items: newItems }, () => {
-                                    const taskItems = this.setTaskItems()
-                                    this.setState({ taskItems }, () => this.handleFilter(false))
-                                })
+                            const newItems = {}
+                            Object.keys(this.state.items).forEach(key => {
+                                newItems[key] = this.state.items[key]
+                            })
+                            this.setState({ items: newItems }, () => {
+                                const taskItems = this.setTaskItems()
+                                this.setState({ taskItems }, () => this.handleFilter(false))
                             })
                         })
+                    })
                     // }
 
                 })
@@ -257,7 +258,8 @@ class Agenda2 extends Component {
     }
 
     renderEmptyData() {
-        return (<EmptyList iconName='format-list-bulleted' header='Liste des tâches' description='Aucune tâche planifiée pour ce jour-ci.' />)
+        const { isConnected } = this.props.network
+        return (<EmptyList iconName='format-list-bulleted' header='Liste des tâches' description='Aucune tâche planifiée pour ce jour-ci.' offLine={!isConnected} />)
     }
 
     renderEmptyDate() {
@@ -343,9 +345,12 @@ class Agenda2 extends Component {
         const roleId = this.props.role.id
         let { isCalendar, displayType, items, filteredItems, type, status, priority, assignedTo, project, filterOpened } = this.state //items and filter fields
         const filterActivated = !_.isEqual(items, filteredItems)
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
+
+                {!isConnected && <OffLineBar />}
 
                 { (roleId === 'admin' || roleId === 'dircom' || roleId === 'tech') ?
                     <PickerBar
@@ -415,6 +420,7 @@ class Agenda2 extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network,
         //fcmToken: state.fcmtoken
     }
 }

@@ -56,7 +56,7 @@ class ListRequests extends Component {
                         renderItem={({ item }) => this.renderTicketRequest(item)}
                         contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                     :
-                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' />
+                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine}/>
                 }
 
                 <MyFAB onPress={() => this.props.navigation.navigate(this.props.creationScreen)} />

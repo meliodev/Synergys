@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { List } from 'react-native-paper';
+import { connect } from 'react-redux'
 
+import OffLineBar from '../../components/OffLineBar'
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
@@ -100,6 +102,7 @@ class ListOrders extends Component {
         let { ordersCount, ordersList, loading } = this.state
         let { state, project, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+        const { isConnected } = this.props.network
 
         const fields = [{ label: 'state', value: state }, { label: 'client.id', value: client.id }, { label: 'project.id', value: project.id }]
         this.filteredOrders = handleFilter(ordersList, this.filteredOrders, fields, searchInput, KEYS_TO_FILTERS)
@@ -110,6 +113,8 @@ class ListOrders extends Component {
 
         return (
             <View style={styles.container}>
+                {!isConnected && <OffLineBar />}
+
                 <SearchBar
                     close={!this.isRoot}
                     main={this}
@@ -157,7 +162,7 @@ class ListOrders extends Component {
                                 renderItem={({ item }) => this.renderOrder(item)}
                                 contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                             :
-                            <EmptyList iconName='file-document-edit-outline' header='Liste des commandes' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' />
+                            <EmptyList iconName='file-document-edit-outline' header='Liste des commandes' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={!isConnected} />
                         }
 
                         {this.showFAB && this.isRoot &&
@@ -175,4 +180,12 @@ const styles = StyleSheet.create({
     },
 });
 
-export default withNavigation(ListOrders)
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(ListOrders)

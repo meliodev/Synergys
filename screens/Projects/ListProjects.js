@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, FlatList, Keyboard } from 'react-native';
 import { List, Card } from 'react-native-paper';
+import { connect } from 'react-redux'
 
+import OffLineBar from '../../components/OffLineBar'
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
@@ -101,6 +103,7 @@ class ListProjects extends Component {
         let { projectsCount, projectsList, loading } = this.state
         let { step, state, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+        const { isConnected } = this.props.network
 
         const fields = [{ label: 'step', value: step }, { label: 'state', value: state }, { label: 'client.id', value: client.id }]
         this.filteredProjects = handleFilter(projectsList, this.filteredProjects, fields, searchInput, KEYS_TO_FILTERS)
@@ -112,6 +115,7 @@ class ListProjects extends Component {
 
         return (
             <View style={styles.container}>
+                {!isConnected && <OffLineBar />}
                 <SearchBar
                     close={!this.isRoot}
                     main={this}
@@ -177,6 +181,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-});
+})
 
-export default withNavigation(ListProjects)
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(ListProjects)
