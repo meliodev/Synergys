@@ -6,13 +6,15 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  ImageBackground,
+  Dimensions,
 } from 'react-native';
 import {Agenda, Calendar, LocaleConfig} from 'react-native-calendars';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import _ from 'lodash';
 import firebase from 'react-native-firebase';
-import TabView from '../../components/TabView'
+import TabView from '../../components/TabView';
 
 import moment from 'moment';
 import 'moment/locale/fr';
@@ -134,10 +136,12 @@ class Agenda2 extends Component {
     this.state = {
       //Settings
       isAgenda: this.isAgenda,
-      isCalendar: true,
+      isCalendar: false,
+      selectedDate : '',
 
       showInput: false,
       searchInput: '',
+      index: 0,
       //Calendar mode
       items: {},
       filteredItems: {},
@@ -198,8 +202,8 @@ class Agenda2 extends Component {
     return query;
   }
 
-  componentDidMount(){
-      this.loadItems()
+  componentDidMount() {
+    this.loadItems();
   }
 
   loadItems(day) {
@@ -284,8 +288,6 @@ class Agenda2 extends Component {
     }, 1000);
   }
 
-
-
   renderTaskStatusController(date, taskId, status) {
     switch (status) {
       case 'En cours':
@@ -347,25 +349,36 @@ class Agenda2 extends Component {
 
   renderItem(item) {
     console.log('item ', item);
-    console.log('item list ', this.state.items);
-    console.log('this.state.filteredItems', this.state.filteredItems);
+    // console.log('item list ', this.state.items);
+    // console.log('this.state.filteredItems', this.state.filteredItems);
 
     const priority = item.priority;
+    const dt = moment(item.date, "YYYY-MM-DD HH:mm:ss")
+    
+    const dayName = dt.format('dddd').substring(0,3)
+    const uppercaseDayName = dayName.charAt(0).toUpperCase() + dayName.slice(1)
+
+    console.log("day name ", uppercaseDayName)
     const label = (
       <View
         style={{
           padding: 5,
+          marginBottom: '4%',
+          width: (Dimensions.get('screen').width/100) * 15,
+          marginRight: '10%',
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor:
-            priority === 'urgente'
-              ? '#f5276d'
-              : priority === 'faible'
-              ? '#f2d004'
-              : theme.colors.agenda,
+          priority === 'urgente'
+          ? '#F5276D'
+          : priority === 'faible'
+          ? '#f2d004' 
+          : priority === 'moyenne'
+          ? '#555CC4'
+          : theme.colors.agenda,
           borderRadius: 3,
         }}>
-        <Text style={{color: 'white', fontSize: 8}}>{priority}</Text>
+        <Text style={{color: 'white', fontSize: 11}}>{priority}</Text>
       </View>
     );
 
@@ -380,23 +393,66 @@ class Agenda2 extends Component {
             TaskId: item.id,
           })
         }
-        style={styles.item}>
+        style={[styles.item, {backgroundColor: priority === 'urgente'
+        ? '#FFEFF4'
+        : priority === 'faible'
+        ? '#f2d004'
+        : theme.colors.agenda,}]}>
+          <View style={{
+            width: '25%',
+            height: '86%',
+            backgroundColor: '#FFFFFF',
+            borderBottomRightRadius: 10,
+            borderBottomLeftRadius:10,
+           
+          }}>
+            <Text style={{
+              fontSize: 37,
+              fontFamily: 'Roboto',
+              alignSelf: 'center',
+              marginTop: '2%',
+              color: priority === 'urgente'
+              ? '#F5276D'
+              : priority === 'faible'
+              ? '#f2d004' 
+              : priority === 'moyenne'
+              ? '#555CC4'
+              : theme.colors.agenda,
+            }}>
+              {item.date.substring(8)}
+            </Text>
+            <Text
+            style={{
+              fontSize: 12,
+              fontFamily: 'Roboto',
+              alignSelf: 'center',
+              // marginTop: '1%',
+              color : '#8D8D8D'
+            }}>
+              {uppercaseDayName}
+            </Text>
+
+          </View>
         <View
           style={{
             flex: 0.8,
-            justifyContent: 'space-between',
+            marginLeft: '6%',
+            marginTop: '3%',
+            // justifyContent: 'space-around',
             height: constants.ScreenHeight * 0.1,
-            marginVertical: 10,
+            // marginVertical: 10,
           }}>
           <Text
             numberOfLines={1}
             style={{
               color:
-                priority === 'urgente'
-                  ? '#f5276d'
-                  : priority === 'faible'
-                  ? '#f2d004'
-                  : theme.colors.agenda,
+              priority === 'urgente'
+              ? '#F5276D'
+              : priority === 'faible'
+              ? '#f2d004' 
+              : priority === 'moyenne'
+              ? '#555CC4'
+              : theme.colors.agenda,
               fontSize: 20,
             }}>
             {item.name}
@@ -404,7 +460,7 @@ class Agenda2 extends Component {
           <Text
             style={[
               theme.customFontMSsemibold.caption,
-              {color: 'gray', marginTop: 5},
+              {color: '#1B2331', marginTop: 5},
             ]}>
             {item.type}
             {item.dayProgress !== '1/1' && (
@@ -421,7 +477,8 @@ class Agenda2 extends Component {
         <View
           style={{
             flex: 0.2,
-            justifyContent: 'space-between',
+            marginTop: '1%',
+            marginRight: '5%',
             alignItems: 'center',
             paddingVertical: 5,
           }}>
@@ -435,11 +492,35 @@ class Agenda2 extends Component {
   // Calendar data
   renderEmptyData() {
     return (
-      <EmptyList
-        iconName="format-list-bulleted"
-        header="Liste des tâches"
-        description="Aucune tâche planifiée pour ce jour-ci."
-      />
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#FFFFFF',
+        }}>
+        <ImageBackground
+          source={require('../../assets/Path19.png')}
+          style={{
+            width: (Dimensions.get('screen').width / 100) * 31,
+            position: 'absolute',
+            bottom: 5,
+            height: (Dimensions.get('screen').height / 100) * 23,
+          }}></ImageBackground>
+
+        <ImageBackground
+          source={require('../../assets/group120.png')}
+          style={{
+            width: (Dimensions.get('screen').width / 100) * 27,
+            position: 'absolute',
+            bottom: 15,
+            right: 5,
+            height: (Dimensions.get('screen').height / 100) * 20,
+          }}></ImageBackground>
+        <EmptyList
+          iconName="format-list-bulleted"
+          header="Liste des tâches"
+          description="Aucune tâche planifiée pour ce jour-ci."
+        />
+      </View>
     );
   }
 
@@ -545,11 +626,33 @@ class Agenda2 extends Component {
   renderTaskItems() {
     console.log('renderTaskItems called');
     const {filteredTaskItems} = this.state;
+    
     return filteredTaskItems.map((item, key) => {
       return (
         <View style={{padding: 15}}>
-          {console.log('day ', item[0].date)}
-          <Text style={theme.customFontMSbold.header}>{item[0].date}</Text>
+          {console.log('day ', item[0].date.substring(8))}
+          <View
+            style={{
+              flexDirection: 'row',
+            }}>
+            <Text style={
+              // theme.customFontMSbold.header
+            {
+              color: '#8D8D8D'
+            }}
+              >{item[0].date}</Text>
+            <View
+              style={{
+                borderBottomColor: '#8D8D8D',
+                borderBottomWidth: 1,
+                width: '77%',
+                height: '2%',
+                alignSelf: 'flex-end',
+                marginLeft: '3%',
+              }}
+            />
+          </View>
+
           {item.map((taskItem) => {
             return this.renderItem(taskItem);
           })}
@@ -563,6 +666,10 @@ class Agenda2 extends Component {
   }
 
   render() {
+    const routes = [
+      {key: 'first', title: 'Mon Agenda'},
+      {key: 'second', title: 'Planning'},
+    ];
     const roleId = this.props.role.id;
     let {
       isCalendar,
@@ -577,9 +684,9 @@ class Agenda2 extends Component {
       filterOpened,
     } = this.state; //items and filter fields
     const filterActivated = !_.isEqual(items, filteredItems);
-    let {showInput, searchInput} = this.state;
+    let {showInput, searchInput, index} = this.state;
     return (
-      <View style={{flex: 1}}>
+      <ScrollView style={{flex: 1}}>
         {roleId === 'admin' || roleId === 'dircom' || roleId === 'tech' ? (
           <PickerBar
             options={[
@@ -614,7 +721,7 @@ class Agenda2 extends Component {
           />
         )}
 
-        {/* <TabView
+        <TabView
           navigationState={{index, routes}}
           onIndexChange={(index) =>
             this.setState({index, searchInput: '', showInput: false})
@@ -622,26 +729,27 @@ class Agenda2 extends Component {
           Tab1={
             <this.TaskList
               searchInput={searchInput}
-              prevScreen=""
-              userType="utilisateur"
-              menu
-              query={queryUsers}
-              showButton
-              onPress={this.viewProfile.bind(this)}
-              emptyListHeader="Liste des utilisateurs"
-              emptyListDesc="Gérez les utilisateurs. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau."
+              items={this.state.items}
+              // prevScreen=""
+              // userType="utilisateur"
+              // menu
+              // query={queryUsers}
+              // showButton
+              //  onPress={this.viewProfile.bind(this)}
+              // emptyListHeader="Liste des utilisateurs"
+              // emptyListDesc="Gérez les utilisateurs. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau."
             />
           }
           Tab2={<this.renderEmptyData searchInput={searchInput} />}
-        /> */}
+        />
 
-        <TasksTab
+        {/* <TasksTab
           isCalendar={isCalendar}
           onPress1={() => this.toggleTasksTab(false)}
           onPress2={() => this.toggleTasksTab(true)}
         />
-    
-        {filterActivated && (
+     */}
+        {/* {filterActivated && (
           <View
             style={{
               flexDirection: 'row',
@@ -654,19 +762,26 @@ class Agenda2 extends Component {
               Filtre activé
             </Text>
           </View>
-        )}
+        )} */}
 
-        <View style={{flex: 1}}>
-          {/* <View style={{
-                        width: '70%',
-                        height: '5%',
-                        flexDirection: 'row',
-                        backgroundColor: '#F5F5F5'
-                    }}>
-                        <Text> Task's </Text>
-
-                    </View> */}
+        {/* <View style={{flex: 1}}>
+          
           {isCalendar ? (
+            <Calendar
+            // disabledDaysIndexes={[0, 6]}
+            onDayPress={(day) => {console.log('selected day', day)}}
+            theme={{
+                // arrowColor: 'white',
+                selectedDayBackgroundColor: theme.colors.primary,
+                'stylesheet.calendar.header': {
+                  week: {
+                    marginTop: 5,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between'
+                  }
+                }
+              }}
+            />
             <Agenda
               LocaleConfig
               renderEmptyData={this.renderEmptyData.bind(this)}
@@ -691,20 +806,7 @@ class Agenda2 extends Component {
           ) : (
             // (
 
-            // <Calendar
-            // // disabledDaysIndexes={[0, 6]}
-            // theme={{
-            //     // arrowColor: 'white',
-            //     selectedDayBackgroundColor: theme.colors.primary,
-            //     'stylesheet.calendar.header': {
-            //       week: {
-            //         marginTop: 5,
-            //         flexDirection: 'row',
-            //         justifyContent: 'space-between'
-            //       }
-            //     }
-            //   }}
-            // />
+            
             // )
             <ScrollView
               contentContainerStyle={{
@@ -713,17 +815,98 @@ class Agenda2 extends Component {
               {this.renderTaskItems()}
             </ScrollView>
           )}
-        </View>
+        </View> */}
         <MyFAB onPress={() => this.props.navigation.navigate('CreateTask')} />
-      </View>
+      </ScrollView>
     );
   }
 
   TaskList = () => {
-      return (
-          <Text> Hello </Text>
-      )
-  }
+    return (
+      <View style={{backgroundColor: '#FFFFFF', flex: 1}}>
+        <ImageBackground
+          source={require('../../assets/Path19.png')}
+          style={{
+            width: (Dimensions.get('screen').width / 100) * 31,
+            position: 'absolute',
+            bottom: 5,
+            height: (Dimensions.get('screen').height / 100) * 23,
+          }}></ImageBackground>
+
+        <ImageBackground
+          source={require('../../assets/group120.png')}
+          style={{
+            width: (Dimensions.get('screen').width / 100) * 27,
+            position: 'absolute',
+            bottom: 15,
+            right: 5,
+            height: (Dimensions.get('screen').height / 100) * 20,
+          }}></ImageBackground>
+        <Calendar
+          style={{
+            margin: '3%',
+          }}
+          markingType='custom'
+          onDayPress={(day) => {
+            console.log('selected day', day);
+            this.setState({
+              ...this.state,
+              selectedDate: day.day
+            })
+          }}
+          markedDates={{
+            [this.state.selectedDate]: { customStyles: {
+              container: {
+                backgroundColor: 'white',
+                elevation: 2
+              },
+              text: {
+                color: 'blue'
+              }
+            }}
+            }}
+          theme={{
+            // arrowColor: 'white',
+
+            selectedDayBackgroundColor: 'black',
+            'stylesheet.calendar.header': {
+              week: {
+                marginTop: 5,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              },
+            },
+          }}
+        />
+
+        <View
+          style={{
+            width: '95%',
+            height: '3%',
+            margin: '3%',
+            borderRadius: 8,
+            backgroundColor: '#F5F5F5',
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}>
+          <Text
+            style={{
+              color: theme.colors.primary,
+              fontFamily: 'Roboto',
+            }}>
+            Task's
+          </Text>
+        </View>
+
+        {/* <ScrollView
+          contentContainerStyle={{
+            paddingBottom: constants.ScreenHeight * 0.1,
+          }}> */}
+          {this.renderTaskItems()}
+        {/* </ScrollView> */}
+      </View>
+    );
+  };
 }
 
 const mapStateToProps = (state) => {
@@ -737,19 +920,18 @@ export default connect(mapStateToProps)(Agenda2);
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   item: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFEFF4',
-    borderRadius: 5,
+    // justifyContent: 'space-between',
+    borderRadius: 20,
     paddingRight: 5,
     paddingLeft: 15,
     marginRight: 10,
-    marginTop: 10,
+    marginTop: '3%',
   },
   emptyDate: {
     justifyContent: 'center',

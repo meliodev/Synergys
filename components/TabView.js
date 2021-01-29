@@ -45,12 +45,19 @@ export default class TabView extends React.Component {
             }}
             >
             <FontAwesome5 
-            name= {route.title === "UTILISATEURS" ? "users" : "object-group" } 
+            name= {route.title === "UTILISATEURS" ? "users" : route.title === "ÉQUIPES" ? "object-group" : 
+            route.title === "Mon Agenda" ? 'users' : route.title === "Mon Agenda" ? 'users' : 'users'} 
             style={{
-              marginRight: '3%'
+              marginRight: '5%'
             }}
             />
-<Text style={[theme.customFontMSsemibold.body, { color: focused ? '#1B2331' : '#8D8D8D' }]}>
+<Text 
+style={
+  [
+    theme.customFontMSsemibold.body, 
+  { color: focused ? '#1B2331' : '#8D8D8D', fontSize: 16 }
+  ]
+}>
               {route.title}
             </Text>
             </View>

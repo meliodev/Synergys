@@ -29,7 +29,7 @@ const colors = {
   white_transparent_6: "rgba(255,255,255,0.6)",
   gallery_background: "#EEE",
   chatBackground: '#305585',
-  agenda: '#555CC4',
+  agenda: '#EEEFFF',
   agendaLight: '#829BF8',
 };
 

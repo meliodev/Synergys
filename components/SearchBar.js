@@ -11,7 +11,8 @@ import {Searchbar} from 'react-native-paper';
 import * as theme from '../core/theme';
 import {constants} from '../core/constants';
 import {withNavigation} from 'react-navigation';
-import CutomIcon from './CutomIcon';
+// import CutomIcon from './CutomIcon';
+import CustomIcons from './CustomIcons';
 
 const SearchBar = ({
   close,
@@ -117,9 +118,11 @@ const SearchBar = ({
                 <Ionicons name="ios-notifications-outline" size={23}  />
                 <Ionicons name="md-refresh" size={23}  /> */}
 
-                <CutomIcon name="searching" color="#1B2331" size={22}/>
-                <CutomIcon name="notification-1" color="#1B2331" size={22}/>
-                <CutomIcon name="refresh-outline" color="#1B2331" size={22}/>
+                {/* <CutomIcon name="refresh-outline-01" color="red" size={20}/>
+                <CutomIcon name="calender" color="red" size={20}/>
+                <CutomIcon name="add-user" color="red" size={40}/>
+                 */}
+                {/* <CustomIcons name="clock" size={40} color={"black"}/> */}
         </View>
       )}
     </appbar.Header>

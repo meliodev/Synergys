@@ -33,7 +33,7 @@ class AuthLoadingScreen extends Component {
        .catch(err => console.log("error ", err))
 
         await firebase.auth().currentUser.reload()
-        this.props.navigation.navigate("DocumentsStack")
+        this.props.navigation.navigate("AgendaStack")
       }
 
       else {

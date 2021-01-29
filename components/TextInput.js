@@ -3,23 +3,36 @@ import { View, StyleSheet, Text } from "react-native";
 import { TextInput as NativeTextInput } from 'react-native';
 import { TextInput as Input } from "react-native-paper";
 import * as theme from "../core/theme";
+import CustomIcons from "./CustomIcons";
 
 const TextInput = ({ errorText, style, disabled, whiteTheme, link, ...props }) => (
   <View style={styles.container}>
     <Input
+      left = {
+        <Input.Icon
+          name={<CustomIcons name="add" color="red" size={20}/>}
+        />
+      }
       style={[theme.fonts.input, styles.input, style]}
       //fontFamily ={"Montserrat-Regular"}
       selectionColor={whiteTheme ? '#fff' : theme.colors.primary}
       underlineColor="transparent"
       direction ='rtl'
-      theme={whiteTheme ?
-        {
-          colors: { primary: '#fff', text: (disabled && props.editable === false) ? theme.colors.placeholder : '#fff', placeholder: '#fff' }
-        }
-        :
-        {
-          colors: { primary: theme.colors.primary, text: (disabled && props.editable === false) ? theme.colors.placeholder : link ? 'green' : '#000' }
-        }}
+      theme = {{
+        colors : {
+          text: '#8D8D8D',
+          placeholder: '#1B2331'
+        },
+        
+      }}
+      // theme={whiteTheme ?
+      //   {
+      //     colors: { primary: '#fff', text: (disabled && props.editable === false) ? theme.colors.placeholder : '#fff', placeholder: '#fff' }
+      //   }
+      //   :
+      //   {
+      //     colors: { primary: theme.colors.primary, text: (disabled && props.editable === false) ? theme.colors.placeholder : link ? 'green' : '#000' }
+      //   }}
 
       {...props} />
     {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
@@ -39,6 +52,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#C7C7CD',
     textAlign: 'center',
     paddingHorizontal: 0,
+    color: '#8D8D8D',
   },
   error: {
     paddingHorizontal: 4,

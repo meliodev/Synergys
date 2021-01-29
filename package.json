@@ -64,7 +64,7 @@
     "react-native-text-input-mask": "^2.0.0",
     "react-native-ui-lib": "^5.12.4",
     "react-native-uuid-generator": "^6.1.1",
-    "react-native-vector-icons": "~6.6.0",
+    "react-native-vector-icons": "^6.6.0",
     "react-native-video-controls": "^2.6.0",
     "react-native-webview": "9.4.0",
     "react-navigation": "^4.4.0",
@@ -89,7 +89,7 @@
   },
   "rnpm": {
     "assets": [
-      "resources/fonts"
+      "resources/fonts/"
     ]
   },
   "jest": {

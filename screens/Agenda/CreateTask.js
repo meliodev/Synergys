@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   Keyboard,
 } from 'react-native';
-import CustomIcon from '../../components/CutomIcon'
+import CustomIcon from '../../components/CustomIcons'
 import {Card, Title, FAB} from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import firebase from 'react-native-firebase';
@@ -15,9 +15,9 @@ import MyFAB from '../../components/MyFAB';
 import moment from 'moment';
 import 'moment/locale/fr';
 moment.locale('fr');
-import SvgUri from 'react-native-svg-uri';
+// import SvgUri from 'react-native-svg-uri';
 import SearchBar from '../../components/SearchBar';
-import Appbar from '../../components/Appbar';
+// import Appbar from '../../components/Appbar';
 import MyInput from '../../components/TextInput';
 import Picker from '../../components/Picker';
 import Loading from '../../components/Loading';
@@ -409,6 +409,9 @@ class CreateTask extends Component {
             </View>
             <Card style={{marginBottom: 20}}>
               <Card.Content>
+                <View style={styles.listButton}>
+                <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+
                 <MyInput
                   label="Numéro de la tâche"
                   returnKeyType="done"
@@ -418,8 +421,12 @@ class CreateTask extends Component {
                   disabled
                 />
 
+
+                </View>
+                
                 <TouchableOpacity style={styles.listButton}>
-                  <SvgUri source={require('../../assets/numero21.svg')} />
+                  {/* <SvgUri source={require('../../assets/numero21.svg')} /> */}
+                  <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
                   <MyInput
                     label="Nom de la tâche"
                     returnKeyType="done"
@@ -431,6 +438,7 @@ class CreateTask extends Component {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                style={styles.listButton}
                   onPress={() =>
                     this.props.navigation.navigate('ListEmployees', {
                       onGoBack: this.refreshAssignedTo,
@@ -438,6 +446,7 @@ class CreateTask extends Component {
                       titleText: 'Utilisateurs',
                     })
                   }>
+                    <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
                   <MyInput
                     label="Attribuée à"
                     value={assignedTo.fullName}
@@ -447,7 +456,11 @@ class CreateTask extends Component {
                   />
                 </TouchableOpacity>
 
-                <MyInput
+                  <View style={styles.listButton}> 
+                  
+                  <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+
+                  <MyInput
                   label="Description"
                   returnKeyType="done"
                   value={description.value}
@@ -455,7 +468,8 @@ class CreateTask extends Component {
                   error={!!description.error}
                   errorText={description.error}
                 />
-
+                  </View>
+                
                 <TouchableOpacity
                   onPress={() =>
                     this.props.navigation.navigate('ListProjects', {
@@ -619,7 +633,7 @@ const styles = StyleSheet.create({
   },
   listButton: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    // justifyContent: 'space-between',
+    // alignItems: 'center',
   },
 });

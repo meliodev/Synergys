@@ -1,10 +1,9 @@
 import React, {Component} from 'react';
 import {
-  Platform,
+  
   StyleSheet,
   Text,
   View,
-  Image,
   ScrollView,
   Dimensions,
   ImageBackground,
@@ -260,7 +259,6 @@ class ListProjects extends Component {
                   height: (Dimensions.get('screen').height/100) * 23,
                }}
              >
-
              </ImageBackground>
 
              <ImageBackground      

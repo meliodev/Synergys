@@ -1,5 +1,5 @@
 import React, { memo, Component } from "react";
-import { TouchableOpacity, StyleSheet, Text, View, Keyboard, Image, ImageBackground, KeyboardAvoidingView, Dimensions } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, View, Keyboard, Image, ImageBackground, KeyboardAvoidingView, ActivityIndicator, Dimensions } from "react-native";
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { TextInput as paperInput } from 'react-native-paper'
 
@@ -15,6 +15,7 @@ import { emailValidator, passwordValidator, updateField, load } from "../../core
 import { constants } from '../../core/constants'
 import { loginUser } from "../../api/auth-api";
 import Toast from "../../components/Toast";
+import Loading from "../../components/Loading";
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -38,6 +39,7 @@ class LoginScreen extends Component {
   }
 
   handleLogin = async () => {
+    
     let { loading, email, password, error } = this.state
 
     if (loading) return
@@ -59,8 +61,15 @@ class LoginScreen extends Component {
       load(this, false)
       return
     }
-    const response = await loginUser({ email: email.value, password: password.value })
+    this.setState({
+      ...this.state,
+      loading: true
+    },
+   await loginUser({ email: email.value, password: password.value })
+    // 
+    )
     load(this, false)
+    
 
     // if (response.error)
     //   this.setState({ error: response.error })
@@ -132,15 +141,25 @@ class LoginScreen extends Component {
           </View>
           <View style={{alignItems:'center'}}>
             <TouchableOpacity style={{
-              width:'80%', height: '35%', borderRadius: 10, justifyContent: 'center', alignItems: 'center', 
+              flexDirection: 'row',
+              justifyContent: 'center',
+              width:'80%', height: '35%', borderRadius: 10, alignItems: 'center', 
               backgroundColor:'#25D366', color:'red',
             marginTop: '5%'}}  
             loading={loading} 
             // mode="outlined" 
             onPress={this.handleLogin}
             >
+
+              {
+                this.state.loading ? (
+                  <ActivityIndicator color={'white'} size={'large'} />
+
+                ): null
+              }
               <Text style={{
                 color: 'white',
+                // alignSelf: 'center',
                 fontSize: 15,
                 fontWeight: 'bold'
               }}> Se connecter </Text>
