@@ -5,6 +5,7 @@ import ListUsers from '../screens/Users/ListUsers'
 import ListTeams from '../screens/Users/ListTeams'
 import * as theme from '../core/theme'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
+import CustomIcons from './CustomIcons';
 const initialLayout = { width: Dimensions.get('window').width }
 
 
@@ -34,7 +35,6 @@ export default class TabView extends React.Component {
           renderLabel={({ route, focused, color }) => (
             <View 
             style={{
-              // paddingVertical: 5,
               paddingVertical: 20,
               paddingHorizontal: 10,
               flexDirection: 'row',
@@ -44,13 +44,23 @@ export default class TabView extends React.Component {
               borderRadius: 10
             }}
             >
-            <FontAwesome5 
+              <CustomIcons 
+             name= {route.title === "UTILISATEURS" ? "mask-group-36" : route.title === "ÉQUIPES" ? "mask-group-35" : 
+             route.title === "Planning" ? 'mask-group-6' : route.title === "Mon Agenda" ? 'mask-group-5' : 'users'} 
+             style={{
+              marginRight: '5%'
+            }}
+            color={focused ? '#1B2331' : '#8D8D8D'}
+            size={20}
+              />
+            {/* <FontAwesome5 
             name= {route.title === "UTILISATEURS" ? "users" : route.title === "ÉQUIPES" ? "object-group" : 
             route.title === "Mon Agenda" ? 'users' : route.title === "Mon Agenda" ? 'users' : 'users'} 
             style={{
               marginRight: '5%'
             }}
-            />
+           
+            /> */}
 <Text 
 style={
   [

@@ -41,6 +41,7 @@ import {constants} from '../../core/constants';
 import {withNavigation} from 'react-navigation';
 import {connect} from 'react-redux';
 import SearchBar from '../../components/SearchBar';
+import CustomIcons from '../../components/CustomIcons';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -348,7 +349,7 @@ class Agenda2 extends Component {
   }
 
   renderItem(item) {
-    console.log('item ', item);
+   
     // console.log('item list ', this.state.items);
     // console.log('this.state.filteredItems', this.state.filteredItems);
 
@@ -730,14 +731,7 @@ class Agenda2 extends Component {
             <this.TaskList
               searchInput={searchInput}
               items={this.state.items}
-              // prevScreen=""
-              // userType="utilisateur"
-              // menu
-              // query={queryUsers}
-              // showButton
-              //  onPress={this.viewProfile.bind(this)}
-              // emptyListHeader="Liste des utilisateurs"
-              // emptyListDesc="Gérez les utilisateurs. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau."
+             
             />
           }
           Tab2={<this.renderEmptyData searchInput={searchInput} />}
@@ -882,17 +876,19 @@ class Agenda2 extends Component {
         <View
           style={{
             width: '95%',
-            height: '3%',
+            height: (Dimensions.get('screen').height/100) * 5,
             margin: '3%',
             borderRadius: 8,
             backgroundColor: '#F5F5F5',
             flexDirection: 'row',
             alignItems: 'center',
           }}>
+          <CustomIcons name="task" size={25} color={theme.colors.primary} style={{marginLeft: '3%', marginRight: '3%'}} />
           <Text
             style={{
               color: theme.colors.primary,
               fontFamily: 'Roboto',
+              fontSize: 15
             }}>
             Task's
           </Text>

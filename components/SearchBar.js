@@ -61,7 +61,8 @@ const SearchBar = ({
           <TouchableOpacity
             onPress={showMenu}
             style={{marginLeft: 10, marginRight: -10}}>
-            <SimpleLineIcons name="menu" size={20} color="#1B2331" />
+            {/* <SimpleLineIcons name="menu" size={20} color="#1B2331" /> */}
+            <CustomIcons name="menu" color="#1B2331" size={30} />
           </TouchableOpacity>
         );
     }
@@ -122,7 +123,10 @@ const SearchBar = ({
                 <CutomIcon name="calender" color="red" size={20}/>
                 <CutomIcon name="add-user" color="red" size={40}/>
                  */}
-                {/* <CustomIcons name="clock" size={40} color={"black"}/> */}
+                <CustomIcons name="searching" size={20} color={"#1B2331"}/>
+                <CustomIcons name="notification-1" size={20} color={"#1B2331"}/>
+                <CustomIcons name="refresh-outline" size={20} color={"#1B2331"}/>
+
         </View>
       )}
     </appbar.Header>

@@ -12,8 +12,10 @@ import {
   Image,
 } from 'react-native';
 import {Avatar} from 'react-native-paper';
+
 import AvatarText from '../components/AvatarText';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -27,6 +29,7 @@ import {connect} from 'react-redux';
 import * as theme from '../core/theme';
 import {constants} from '../core/constants';
 import {setRole} from '../core/utils';
+import CustomIcons from '../components/CustomIcons';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
@@ -69,29 +72,29 @@ const arrMenuAdmin = [
     color: theme.colors.primary,
     navScreen: 'RequestsManagementStack',
   }, //Create
+  // {
+  //   id: 6,
+  //   name: 'Gestion des commandes',
+  //   icon: 'file-document-edit-outline',
+  //   navScreen: 'OrdersStack',
+  //   color: theme.colors.primary,
+  // }, //Create
   {
     id: 6,
-    name: 'Gestion des commandes',
-    icon: 'file-document-edit-outline',
-    navScreen: 'OrdersStack',
-    color: theme.colors.primary,
-  }, //Create
-  {
-    id: 7,
     name: 'Documents',
     icon: 'file-document',
     color: theme.colors.primary,
     navScreen: 'DocumentsStack',
   }, //Create
+  // {
+  //   id: 8,
+  //   name: 'Actualités',
+  //   icon: 'newspaper-variant-multiple',
+  //   navScreen: 'NewsStack',
+  //   color: theme.colors.primary,
+  // }, //Create
   {
-    id: 8,
-    name: 'Actualités',
-    icon: 'newspaper-variant-multiple',
-    navScreen: 'NewsStack',
-    color: theme.colors.primary,
-  }, //Create
-  {
-    id: 9,
+    id: 7,
     name: 'Se déconnecter',
     icon: 'logout',
     color: theme.colors.primary,
@@ -241,14 +244,11 @@ class DrawerMenu extends React.Component {
 
           <View
             style={styles.headerContainer}
-            // onPress={() => this.navigateToScreen('Profile')}
             >
             <View
               style={{
                 flex: 1,
                 flexDirection: 'row',
-                // justifyContent: 'flex-start',
-                // alignItems: 'center',
               }}>
               <View
                 style={{
@@ -261,6 +261,8 @@ class DrawerMenu extends React.Component {
                   backgroundColor: '#F5F5F5',
                   borderRadius: 10
                 }}>
+                  <FontAwesome5 name="user-alt" size={30} color={'#87DFA8'} />
+                 
 
                 {/* {user.displayName && (
                   <AvatarText
@@ -286,7 +288,10 @@ class DrawerMenu extends React.Component {
                     <Text
                       style={[
                         theme.customFontMSmedium.body,
-                        {color: '#fff', paddingLeft: 15},
+                        {
+                          color: '#fff', 
+                          // color: 'red',
+                        paddingLeft: 15},
                       ]}>
                       {role.value}
                     </Text>
@@ -297,11 +302,13 @@ class DrawerMenu extends React.Component {
                     //   justifyContent: 'center',
                     //   alignItems: 'center',
                     }}>
-                    <Ionicons
+                    {/* <Ionicons
                       name="settings"
                       size={20}
                       style={{color: '#fff'}}
-                    />
+                    /> */}
+
+                    <CustomIcons name="mask-group-51" size={40} color={'#FFFFFF'} />
                   </View>
                 </View>
               </View>
@@ -328,45 +335,7 @@ class DrawerMenu extends React.Component {
     return <Icon name="menu" style={{color: '#333'}} />;
   }
 
-  // setMenuItems() {
-  //     let arrMenu = []
-  //     switch (this.props.role.value) {
-  //         case 'admin':
-  //             arrMenu = arrMenuAdmin
-  //             break;
-
-  //         case 'dircom':
-  //             arrMenu = arrMenuDirCom
-  //             break;
-
-  //         case 'com':
-  //             arrMenu = arrMenuCom
-  //             break;
-
-  //         case 'poseur':
-  //             arrMenu = arrMenuPoseur
-  //             break;
-
-  //         case 'tech':
-  //             arrMenu = arrMenuTech
-  //             break;
-
-  //         case 'client':
-  //             arrMenu = arrMenuClient
-  //             break;
-
-  //         case '':
-  //             console.log(`User not logged in`);
-  //             break;
-
-  //         default:
-  //             console.log(`Error while setting drawer menu items`);
-  //     }
-  //     return arrMenu
-  // }
-
   renderFlatList() {
-    // let arrMenu = this.setMenuItems()
 
     return (
       <FlatList
@@ -375,38 +344,45 @@ class DrawerMenu extends React.Component {
         keyExtractor={(item) => item.id.toString()}
         style={{marginTop: 15}}
         renderItem={({item}) => {
-          if (item.icon === 'logout')
+          if (item.name === 'Se déconnecter')
             return (
               <TouchableOpacity
+              style={{
+                marginTop: '20%'
+              }}
                 onPress={() =>
                   firebase
                     .auth()
                     .signOut()
-                    .then(() => this.navigateToScreen('LoginScreen'))
+                    .then(() => console.log("logout done"))
                     .catch((e) => console.error(e))
                 }
-                //   style={{backgroundColor: this.props.navigation.state.routeName === ''}}
               >
                 <View
-                  style={{
-                    height: screenHeight * 0.08,
-                    marginTop: screenHeight * 0.19,
-                    flex: 1,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    justifyContent: 'flex-start',
-                  }}>
-                  {/* <MaterialCommunityIcons
-                    name={item.icon}
-                    size={20}
-                    color={item.color}
-                    style={{paddingLeft: 20}}
-                  />
-                  <Text
-                    style={[styles.menuText, theme.customFontMSsemibold.body]}>
-                    {item.name}
-                  </Text> */}
-                  <Text> Logout </Text>
+                 style={{
+                  height: screenHeight * 0.08,
+                  flex: 1,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                }}>
+                    <>
+                    
+                     <CustomIcons name="mask-group-50" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
+                    <View style={{flexDirection: 'row'}}>
+                      <Text
+                        style={[
+                          styles.menuText,
+                        ]}>
+                        {item.name}
+                      </Text>
+                    </View>
+                  </>
+                  
                 </View>
               </TouchableOpacity>
             );
@@ -425,12 +401,11 @@ class DrawerMenu extends React.Component {
                   {/* <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} /> */}
                   {item.name === 'Boite de réception' && (
                     <>
-                      <Zocial
-                        name="email"
-                        size={20}
-                        color={item.color}
-                        style={{paddingLeft: 20}}
-                      />
+                      <CustomIcons name="mask-group-44" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
@@ -445,12 +420,11 @@ class DrawerMenu extends React.Component {
 
                   {item.name === 'Accueil' && (
                     <>
-                      <FontAwesome
-                        name={item.icon}
-                        size={23}
-                        color={item.color}
-                        style={{paddingLeft: 20}}
-                      />
+                      <CustomIcons name="mask-group-43" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
@@ -465,12 +439,11 @@ class DrawerMenu extends React.Component {
 
                   {item.name === 'Projets' && (
                     <>
-                      <Entypo
-                        name={item.icon}
-                        size={20}
-                        color={item.color}
-                        style={{paddingLeft: 20}}
-                      />
+                      <CustomIcons name="mask-group-45" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
@@ -485,20 +458,11 @@ class DrawerMenu extends React.Component {
 
                   {item.name === 'Planning' && (
                     <>
-                      {/* <Entypo
-                        name={item.icon}
-                        size={20}
-                        color={item.color}
-                        style={{paddingLeft: 20}}
-                      /> */}
-                      <Image
-                        source={require('../assets/planning.png')}
-                        style={{
-                          width: (Dimensions.get('screen').width / 100) * 5,
-                          height: (Dimensions.get('screen').height / 100) * 3,
-                          marginLeft: 20,
-                        }}
-                      />
+                       <CustomIcons name="mask-group-47" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
@@ -513,17 +477,15 @@ class DrawerMenu extends React.Component {
 
                   {item.name === 'Utilisateurs' && (
                     <>
-                      <FontAwesome5
-                        name={item.icon}
-                        size={20}
-                        color={item.color}
-                        style={{paddingLeft: 20}}
-                      />
+                     <CustomIcons name="team-(1)" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
                             styles.menuText,
-                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -533,19 +495,15 @@ class DrawerMenu extends React.Component {
 
                   {item.name === 'Gestion des demandes' && (
                     <>
-                      <Image
-                        source={require('../assets/gestion.png')}
-                        style={{
-                          width: (Dimensions.get('screen').width / 100) * 5,
-                          height: (Dimensions.get('screen').height / 100) * 3,
-                          marginLeft: 20,
-                        }}
-                      />
+                      <CustomIcons name="mask-group-49" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
                             styles.menuText,
-                            // theme.customFontMSsemibold.body,
                           ]}>
                           {item.name}
                         </Text>
@@ -553,16 +511,13 @@ class DrawerMenu extends React.Component {
                     </>
                   )}
 
-{/* {item.name === 'Documents' && (
-                    <>
-                      <Image
-                        source={require('../assets/gestion.png')}
-                        style={{
-                          width: (Dimensions.get('screen').width / 100) * 5,
-                          height: (Dimensions.get('screen').height / 100) * 3,
-                          marginLeft: 20,
-                        }}
-                      />
+{item.name === 'Documents' && (
+                    <>   
+                   <CustomIcons name="mask-group-46" size={25} style={{
+                        width: (Dimensions.get('screen').width / 100) * 5,
+                        height: (Dimensions.get('screen').height / 100) * 3,
+                        marginLeft: 20,
+                      }} color={theme.colors.primary} />
                       <View style={{flexDirection: 'row'}}>
                         <Text
                           style={[
@@ -573,8 +528,8 @@ class DrawerMenu extends React.Component {
                         </Text>
                       </View>
                     </>
-                  )} */}
-
+                  )}
+{/* {console.log("item.name is ", item.name)} */}
                 </View>
               </TouchableOpacity>
             );
@@ -623,7 +578,9 @@ const styles = StyleSheet.create({
     marginRight: constants.ScreenWidth * 0.05,
     fontWeight: '800',
     fontSize: 16,
-    fontFamily: 'Roboto'
+    fontFamily: 'Roboto',
+    color: '#1B2331'
+
   },
   footerContainer: {
     flex: 1,

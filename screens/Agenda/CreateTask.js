@@ -15,14 +15,11 @@ import MyFAB from '../../components/MyFAB';
 import moment from 'moment';
 import 'moment/locale/fr';
 moment.locale('fr');
-// import SvgUri from 'react-native-svg-uri';
 import SearchBar from '../../components/SearchBar';
-// import Appbar from '../../components/Appbar';
 import MyInput from '../../components/TextInput';
 import Picker from '../../components/Picker';
 import Loading from '../../components/Loading';
 
-//Task state
 import TaskState from '../../components/RequestState';
 
 import * as theme from '../../core/theme';
@@ -38,6 +35,7 @@ import {
 import {fetchDocs} from '../../api/firestore-api';
 
 import {connect} from 'react-redux';
+import CustomIcons from '../../components/CustomIcons';
 
 const db = firebase.firestore();
 
@@ -388,7 +386,7 @@ class CreateTask extends Component {
             style={styles.container}
             contentContainerStyle={{
               backgroundColor: '#fff',
-              padding: constants.ScreenWidth * 0.02,
+              // padding: constants.ScreenWidth * 0.02,
             }}>
             <View
               style={{
@@ -396,7 +394,7 @@ class CreateTask extends Component {
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 width: '100%',
-                height: '7%',
+                height: '6%',
                 paddingLeft: '3%',
                 paddingRight: '3%',
                 backgroundColor: '#EBEBEB',
@@ -410,7 +408,7 @@ class CreateTask extends Component {
             <Card style={{marginBottom: 20}}>
               <Card.Content>
                 <View style={styles.listButton}>
-                <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+                <CustomIcon name="mask-group-20" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
 
                 <MyInput
                   label="Numéro de la tâche"
@@ -420,13 +418,11 @@ class CreateTask extends Component {
                   style={{marginBottom: 15}}
                   disabled
                 />
-
-
                 </View>
                 
                 <TouchableOpacity style={styles.listButton}>
                   {/* <SvgUri source={require('../../assets/numero21.svg')} /> */}
-                  <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+                  <CustomIcon name="mask-group-21" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
                   <MyInput
                     label="Nom de la tâche"
                     returnKeyType="done"
@@ -446,7 +442,7 @@ class CreateTask extends Component {
                       titleText: 'Utilisateurs',
                     })
                   }>
-                    <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+                    <CustomIcon name="mask-group-22" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
                   <MyInput
                     label="Attribuée à"
                     value={assignedTo.fullName}
@@ -458,7 +454,7 @@ class CreateTask extends Component {
 
                   <View style={styles.listButton}> 
                   
-                  <CustomIcon name="add" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+                  <CustomIcon name="mask-group-23" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
 
                   <MyInput
                   label="Description"
@@ -480,6 +476,8 @@ class CreateTask extends Component {
                       showFAB: false,
                     })
                   }>
+                  <CustomIcon name="mask-group-24" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+
                   <MyInput
                     label="Choisir un projet"
                     value={project.name}
@@ -489,7 +487,9 @@ class CreateTask extends Component {
                   />
                 </TouchableOpacity>
 
-                <Picker
+                  {/* <TouchableOpacity style={styles.listButton}>
+                  <CustomIcon name="mask-group-24" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/> */}
+                  <Picker
                   label="Type"
                   returnKeyType="next"
                   value={type}
@@ -500,6 +500,8 @@ class CreateTask extends Component {
                   title="Type"
                   elements={types}
                 />
+                  {/* </TouchableOpacity> */}
+               
 
                 <Picker
                   label="État"
@@ -526,11 +528,14 @@ class CreateTask extends Component {
                 />
 
                 <TouchableOpacity
+                style={styles.listButton}
                   onPress={() =>
                     this.props.navigation.navigate('Address', {
                       onGoBack: this.refreshAddress,
                     })
                   }>
+
+                <CustomIcon name="mask-group-28" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
                   <MyInput
                     label="Adresse postale"
                     value={address.description}
@@ -539,12 +544,15 @@ class CreateTask extends Component {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                style={styles.listButton}
                   onPress={() =>
                     this.props.navigation.navigate('DatePicker', {
                       onGoBack: this.refreshDate,
                       label: 'de début',
                     })
                   }>
+                <CustomIcon name="mask-group-29" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+
                   <MyInput
                     label="Date de début"
                     value={moment(startDate).format('lll')}
@@ -553,12 +561,15 @@ class CreateTask extends Component {
                 </TouchableOpacity>
 
                 <TouchableOpacity
+                style={styles.listButton}
                   onPress={() =>
                     this.props.navigation.navigate('DatePicker', {
                       onGoBack: this.refreshDate,
                       label: "d'échéance",
                     })
                   }>
+                <CustomIcon name="mask-group-30" color={'#1B2331'} size={20} style={{marginRight: '3%', marginTop: '3%'}}/>
+
                   <MyInput
                     label="Date d'échéance"
                     value={moment(dueDate).format('lll')}
@@ -599,9 +610,11 @@ class CreateTask extends Component {
                 </Card.Content>
               </Card>
             )}
-            <MyFAB onPress={() => this.handleSubmit()} />
+            
           </ScrollView>
+         
         )}
+         <MyFAB icon="check" onPress={() => this.handleSubmit()} />
       </View>
     );
   }

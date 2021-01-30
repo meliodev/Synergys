@@ -61,14 +61,19 @@ class LoginScreen extends Component {
       load(this, false)
       return
     }
-    this.setState({
-      ...this.state,
-      loading: true
-    },
-   await loginUser({ email: email.value, password: password.value })
+    
+    load(this, true)
+    // this.setState({
+    //   ...this.state,
+    //   loading: true
+    // },
     // 
-    )
-    load(this, false)
+    // )
+    await loginUser({ email: email.value, password: password.value })
+   
+    // load(this, false)
+    updateField(this, email, '')
+    updateField(this, password, '')
     
 
     // if (response.error)
