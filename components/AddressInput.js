@@ -1,7 +1,7 @@
 import React, { memo } from "react";
-import { View, StyleSheet, Text } from "react-native";
-import { TextInput as NativeTextInput } from 'react-native';
-import { TextInput as Input } from "react-native-paper";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native"
+import MyInput from './TextInput'
+
 import * as theme from "../core/theme";
 import { notAvailableOffline } from '../core/exceptions';
 import { withNavigation } from 'react-navigation'

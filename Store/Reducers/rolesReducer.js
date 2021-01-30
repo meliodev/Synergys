@@ -6,6 +6,7 @@ function setRole(state = initialState, action) {
   switch (action.type) {
     case 'ROLE':
       nextState = {
+        ...state,
         role: { id: action.value.id, value: action.value.value,  }
       }
 

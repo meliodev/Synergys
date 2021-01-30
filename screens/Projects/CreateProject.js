@@ -63,6 +63,7 @@ class CreateProject extends Component {
         this.refreshClient = this.refreshClient.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
 
+        this.validateInputs = this.validateInputs.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDeleteProject = this.handleDeleteProject.bind(this)
         this.handleDeleteImage = this.handleDeleteImage.bind(this)
@@ -86,14 +87,14 @@ class CreateProject extends Component {
             ProjectId: '', //Not editable
 
             //TEXTINPUTS
-            name: { value: "", error: '' },
-            description: { value: "", error: '' },
+            name: { value: "Projet A", error: '' },
+            description: { value: "aaa", error: '' },
             note: { value: "", error: '' },
 
             //Screens
-            address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+            address: { description: 'ooo', place_id: 'ooo', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            client: { id: '', fullName: '' },
+            client: { id: '123', fullName: 'Salim' },
 
             //Pickers
             state: 'En attente',
@@ -128,13 +129,12 @@ class CreateProject extends Component {
             expandedTaskId: '',
 
             error: '',
-            loading: false
+            // loading: false
         }
     }
 
     async componentDidMount() {
-        console.log(this.props.network)
-
+        console.log(this.props)
         if (this.isEdit) {
             load(this, true)
             await this.fetchProject()
@@ -166,7 +166,6 @@ class CreateProject extends Component {
             if (doc.exists) {
                 let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
                 let { createdAt, createdBy, editedAt, editedBy, attachedImages } = this.state
-                let { error, loading } = this.state
 
                 //General info
                 const project = doc.data()
@@ -283,7 +282,8 @@ class CreateProject extends Component {
     //Inputs validation
     validateInputs() {
         let { client, name, address } = this.state
-        const { isConnected } = this.prop.network
+        const { isConnected } = this.props.network
+        const { loading, setLoading } = this.props
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let nameError = nameValidator(name.value, '"Nom du projet"')
@@ -292,7 +292,8 @@ class CreateProject extends Component {
         if (clientError || nameError || addressError) {
             name.error = nameError
             Keyboard.dismiss()
-            this.setState({ clientError, name, addressError, loading: false })
+            this.setState({ clientError, name, addressError })
+            setLoading(false)
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -301,35 +302,47 @@ class CreateProject extends Component {
     }
 
     async handleSubmit() {
-        //Handle Loading or No edit done
-        let { error, loading, attachments } = this.state
+        const { isConnected } = this.props.network
+        const { loading } = this.props
+
+        //Updates not allowed on offline mode
+        if (!isConnected && this.isEdit) {
+            Alert.alert('', 'La modification des données est indisponible en mode hors-ligne.')
+            return
+        }
+
         if (loading || this.state === this.initialState) return
-        load(this, true)
+
+        const { attachments } = this.state
+        const { setProject, setLoading } = this.props
+
+        setLoading(true)
 
         const isValid = this.validateInputs()
         if (!isValid) return
 
         let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
 
-        //1. UPLOADING FILES
-        // console.log('1')
-        if (attachments.length > 0) {
-            this.title = 'Exportation des images...'
-            const reference = firebase.storage().ref('/Projects/' + ProjectId + '/Images/')
-            await this.uploadImages(attachments, reference, this.state.attachedImages)
-        }
+        // //1. UPLOADING FILES
+        // // console.log('1')
+        // // if (attachments.length > 0) {
+        // //     this.title = 'Exportation des images...'
+        // //     const reference = firebase.storage().ref('/Projects/' + ProjectId + '/Images/')
+        // //     await this.uploadImages(attachments, reference, this.state.attachedImages)
+        // // }
 
-        let { attachedImages } = this.state
-        if (this.isEdit && this.initialState.attachedImages !== attachedImages)
-            attachedImages = attachedImages.concat(this.initialState.attachedImages)
+        // // let { attachedImages } = this.state
+        // // if (this.isEdit && this.initialState.attachedImages !== attachedImages)
+        // //     attachedImages = attachedImages.concat(this.initialState.attachedImages)
 
+        //2. ADDING project DOCUMENT
         //subscribers = editedBy + Admin + Tags added
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
         subscribers.push(currentUser)
 
-        //2. ADDING project DOCUMENT
         let project = {
+            ProjectId: ProjectId,
             client: client,
             name: name.value,
             description: description.value,
@@ -339,7 +352,7 @@ class CreateProject extends Component {
             address: address,
             editedAt: moment().format('lll'),
             editedBy: currentUser,
-            attachments: attachedImages,
+            //attachments: attachedImages,
             subscribers: subscribers,
             deleted: false,
         }
@@ -350,13 +363,18 @@ class CreateProject extends Component {
         }
 
         console.log('Ready to update ticket project...')
+        if (!isConnected)
+            setProject(project) //Saga to handle offline UPLOAD + data persistence
 
-        db.collection('Projects').doc(ProjectId).set(project, { merge: true })
-        setTimeout(() => this.props.navigation.goBack(), 1000)
+        else {
+            db.collection('Projects').doc(ProjectId).set(project, { merge: true })
+                .then(() => this.props.navigation.goBack())
+                .catch((e) => handleFirestoreError(e))
+                .finally(() => setLoading(false))
+        }
 
-        // db.collection('Projects').doc(ProjectId).set(project, { merge: true })
-        //     .then(() => this.props.navigation.goBack())
-        //     .catch((e) => handleFirestoreError(e))
+        // // db.collection('Projects').doc(ProjectId).set(project, { merge: true })
+        // // setTimeout(() => this.props.navigation.goBack(), 1000)
     }
 
     showAlert() {
@@ -425,7 +443,7 @@ class CreateProject extends Component {
     }
 
     renderAttachments(attachments, type, isUpload) {
-        let { loading } = this.state
+        let { loading } = this.props
 
         return attachments.map((image, key) => {
 
@@ -514,8 +532,9 @@ class CreateProject extends Component {
         let { ProjectId, client, clientError, name, description, note, address, addressError, state, step } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
-        let { error, loading, toastMessage, toastType } = this.state
+        let { error, toastMessage, toastType } = this.state
         const { isConnected } = this.props.network
+        const { loading } = this.props
 
         return (
             <View style={styles.container}>
@@ -824,11 +843,34 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         network: state.network,
+        loading: state.loading.loading
         //fcmToken: state.fcmtoken
     }
 }
 
-export default connect(mapStateToProps)(CreateProject)
+const mapDispatchToProps = (dispatch) => {
+    return {
+        //Update state: post
+        changeNewProject: project => dispatch({
+            type: 'PROJECTS.NEW.CHANGE',
+            project
+        }),
+
+        //Set Firestore Project Document
+        setProject: project => dispatch({
+            type: 'SET_PROJECT',
+            project
+        }),
+
+        setLoading: value => dispatch({
+            type: 'LOADING',
+            value
+        })
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(CreateProject)
 
 
 
