@@ -20,8 +20,6 @@ import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
 import { generatetId, load, myAlert, updateField, nameValidator } from "../../core/utils";
 
-import { fetchDocs } from "../../api/firestore-api";
-
 import { connect } from 'react-redux'
 
 const db = firebase.firestore()

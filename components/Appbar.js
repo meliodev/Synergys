@@ -11,7 +11,7 @@ import * as theme from '../core/theme'
 
 const Appbar = ({
     white,
-    back, blackBack, close, title, search, dots, check, send, attach, menu, edit, del, refresh, loading, controller,
+    back, customBackHandler, blackBack, close, title, search, dots, check, send, attach, menu, edit, del, refresh, loading, controller,
     titleText, controllerIcon,
     searchBar,
     handleSearch, handleSubmit, handleSend, handleAttachement, handleMore, handleEdit, handleAction, handleDelete, handleRefresh,
@@ -40,7 +40,7 @@ const Appbar = ({
 
     else return (
         <appbar.Header style={[{ backgroundColor: theme.colors.primary, elevation: 0 }, style]}>
-            {back && <appbar.BackAction onPress={navBack} color={backColor} style={{ marginHorizontal: 5 }} />}
+            {back && <appbar.BackAction onPress={customBackHandler || navBack} color={backColor} style={{ marginHorizontal: 5 }} />}
             {menu &&
                 <TouchableOpacity onPress={showMenu} style={{ marginHorizontal: 10 }} >
                     <Icon name="menu" size={24} color='#fff' />

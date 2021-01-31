@@ -20,6 +20,7 @@ const db = firebase.firestore()
 export default class AddItem extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.refreshProduct = this.refreshProduct.bind(this)
@@ -59,7 +60,7 @@ export default class AddItem extends Component {
 
     fetchSuggestions() {
         const query = db.collection('Products')
-        fetchDocs(this, query, 'suggestions', '', () => { load(this, false) })
+        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
     }
 
     validateInputs() {

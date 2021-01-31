@@ -30,6 +30,7 @@ class ListUsers extends Component {
     this.myAlert = myAlert.bind(this)
     this.renderUser = this.renderUser.bind(this)
     this.renderCountLabel = this.renderCountLabel.bind(this)
+    this.fetchDocs = fetchDocs.bind(this)
 
     this.state = {
       usersList: [],
@@ -41,8 +42,8 @@ class ListUsers extends Component {
 
   async componentDidMount() {
     load(this, true)
-    let query = this.props.query
-    fetchDocs(this, query, 'usersList', 'usersCount', () => load(this, false))
+    const query = this.props.query
+    this.fetchDocs(query, 'usersList', 'usersCount', () => load(this, false))
   }
 
   componentWillUnmount() {

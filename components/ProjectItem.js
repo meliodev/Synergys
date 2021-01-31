@@ -79,8 +79,16 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
                     <View style={styles.footer}>
                         <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >{moment(project.editedAt, 'lll').format('ll')} - {moment(project.editedAt, 'lll').format('HH:mm')}</Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2 }}>
-                            <Paragraph style={[theme.customFontMSmedium.caption, { color: '#fff', textAlign: 'center' }]}>{project.state}</Paragraph>
+                        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                            <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2 }}>
+                                <Paragraph style={[theme.customFontMSmedium.caption, { color: '#fff', textAlign: 'center' }]}>{project.state}</Paragraph>
+                            </View>
+                            {project.hasPendingWrites &&
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginTop: 15 }}>
+                                    <View style={{ width: 10, height: 10, backgroundColor: theme.colors.error, borderRadius: 5, marginRight: 5 }} />
+                                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.error }]}>Hors-Ligne</Text>
+                                </View>
+                            }
                         </View>
                     </View>
                 </View>
@@ -107,7 +115,7 @@ const styles = StyleSheet.create({
     },
     footer: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'flex-end',
         justifyContent: 'space-between',
     }
 })

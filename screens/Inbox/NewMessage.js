@@ -37,6 +37,7 @@ export default class Message extends Component {
         this.messageGroupeId = this.props.navigation.getParam('messageGroupeId', false)
         this.tagsSelected = this.props.navigation.getParam('tagsSelected', [])
 
+        this.fetchDocs = fetchDocs.bind(this)
         this.uploadFiles = uploadFiles.bind(this)
 
         if (this.isReply)
@@ -74,7 +75,7 @@ export default class Message extends Component {
 
     fetchSuggestions() {
         const query = db.collection('Users')
-        fetchDocs(this, query, 'suggestions', '', () => { })
+        this.fetchDocs(query, 'suggestions', '', () => { })
     }
 
     replyInitializaton() {

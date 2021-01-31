@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform, BackHandler } from 'react-native';
 import { Card, Title, TextInput, ProgressBar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
@@ -14,6 +14,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
@@ -23,7 +24,7 @@ import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
-import { uploadFile } from "../../api/storage-api";
+import { uploadFile, uploadFileOffline } from "../../api/storage-api";
 import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
@@ -50,14 +51,19 @@ const types = [
 class UploadDocument extends Component {
     constructor(props) {
         super(props)
+        this.customBackHandler = this.customBackHandler.bind(this)
         this.fetchDocument = this.fetchDocument.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleUpload = this.handleUpload.bind(this)
+        this.persistDocument = this.persistDocument.bind(this)
+        this.offLineSubmit = this.offLineSubmit.bind(this)
         // this.pickFile = this.pickFile.bind(this)
         this.pickDoc = this.pickDoc.bind(this)
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.refreshProject = this.refreshProject.bind(this)
         this.uploadFile = uploadFile.bind(this)
+        this.uploadFileOffline = uploadFileOffline.bind(this)
         this.deleteFile = this.deleteFile.bind(this)
 
         this.initialState = {}
@@ -66,15 +72,14 @@ class UploadDocument extends Component {
 
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.isEdit = this.DocumentId ? true : false
+        this.DocumentId = this.isEdit ? this.DocumentId : generatetId('GS-DOC-')
+
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
         this.project = this.props.navigation.getParam('project', '')
 
         this.cachePath = ''
 
         this.state = {
-            //AUTO-GENERATED
-            DocumentId: '', //Not editable
-
             //TEXTINPUTS
             name: { value: "Doc 1", error: '' },
             description: { value: "aaa", error: '' },
@@ -88,13 +93,7 @@ class UploadDocument extends Component {
             type: 'Devis',
 
             //File Picker
-            attachment: {
-                path: '',
-                type: '',
-                name: '',
-                size: '',
-                progress: 0
-            },
+            attachment: null,
 
             //logs
             createdBy: { id: '', fullName: '' },
@@ -105,37 +104,44 @@ class UploadDocument extends Component {
 
             error: '',
             loading: false,
+            uploading: false,
             toastType: '',
             toastMessage: ''
         }
     }
 
     async componentDidMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.customBackHandler)
+
         if (this.isEdit) {
             await this.fetchDocument()
             await this.fetchSignees()
+            this.attachmentListener()
         }
 
         else {
             if (this.project)  // coming from CreateProject Screen
-                this.setState({ project: this.project })
+                this.setState({ project: this.project }, () => this.initialState = this.state)
 
-            const DocumentId = generatetId('GS-DOC-')
-            this.setState({ DocumentId }, () => this.initialState = this.state)
+            else this.initialState = this.state
         }
+    }
+
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.customBackHandler)
+        this.unsubscribeAttachmentListener && this.unsubscribeAttachmentListener()
     }
 
     //on Edit
     async fetchDocument() {
         await db.collection('Documents').doc(this.DocumentId).get().then((doc) => {
 
-            let { DocumentId, project, name, description, type, state, attachment } = this.state
+            let { project, name, description, type, state, attachment } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
             //General info
             const document = doc.data()
-            DocumentId = doc.id
             project = document.project
             name.value = document.name
             description.value = document.description
@@ -153,7 +159,7 @@ class UploadDocument extends Component {
             //Attachment
             attachment = document.attachment
 
-            this.setState({ DocumentId, project, name, description, state, type, attachment, createdAt, createdBy, editedAt, editedBy }, () => {
+            this.setState({ project, name, description, state, type, attachment, createdAt, createdBy, editedAt, editedBy }, () => {
                 if (this.isInit)
                     this.initialState = this.state
 
@@ -180,6 +186,24 @@ class UploadDocument extends Component {
         })
     }
 
+    //1. after user come back online... an upload task started previously is now running
+    //2. Detect when attachment is uploaded (pending = false)
+    attachmentListener() {
+        this.unsubscribeAttachmentListener = db.collection('Documents').doc(this.DocumentId).onSnapshot((doc) => {
+            const prevAttachment = this.state.attachment
+            if (!prevAttachment) return
+
+            const nextAttachment = doc.data().attachment
+
+            const prevStatus = prevAttachment.pending
+            const nextStatus = nextAttachment.pending
+
+            if (prevStatus && !nextStatus) {
+                this.setState({ attachment: nextAttachment })
+            }
+        })
+    }
+
     //Delete document
     showAlert() {
         const title = "Supprimer le document"
@@ -189,45 +213,10 @@ class UploadDocument extends Component {
     }
 
     async handleDelete() {
-        let docId = this.DocumentId
-        let docURL = this.initialState.attachment.downloadURL
-
-        await db.collection('Documents').doc(docId).update({ deleted: true })
+        await db.collection('Documents').doc(this.DocumentId).update({ deleted: true })
             .then(async () => this.props.navigation.goBack()) //removed deleteAttachment: Client wants to keep all files archived.
             .catch((e) => console.error(e))
     }
-
-    // async deleteAttachment(docURL) {
-    //     let fileRef = firebase.storage().refFromURL(docURL)
-    //     await fileRef.delete()
-    //         .then(() => console.log('File deleted from cloud storage'))
-    //         .catch(e => console.error(e))
-    // }
-
-    // pickFile() {
-    //     FilePickerManager.showFilePicker(null, (response) => {
-    //         console.log('Response = ', response)
-
-    //         if (response.didCancel) {
-    //             console.log('User cancelled file picker');
-    //         }
-    //         else if (response.error) {
-    //             console.log('FilePickerManager Error: ', response.error);
-    //         }
-    //         else {
-    //             const attachment = {
-    //                 path: response.path,
-    //                 type: response.type,
-    //                 name: `Scan ${moment().format('DD-MM-YYYY HHmmss')}.pdf`,
-    //                 //name: response.fileName,
-    //                 size: response.readableSize,
-    //                 progress: 0
-    //             }
-
-    //             this.setState({ attachment, attachmentError: '' })
-    //         }
-    //     })
-    // }
 
     async pickDoc() {
         try {
@@ -246,7 +235,7 @@ class UploadDocument extends Component {
                         const attachment = {
                             path: this.cachePath,
                             type: 'application/pdf',
-                            name: `Scan ${moment().format('DD-MM-YYYY HHmmss')}.pdf`,
+                            name: `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`,
                             size: res.size,
                             progress: 0
                         }
@@ -261,6 +250,104 @@ class UploadDocument extends Component {
             if (DocumentPicker.isCancel(err)) return
             else Alert.alert(err)
         }
+    }
+
+    //Offline (Creation only) **************************************************************
+    async offLineSubmit() {
+        if (this.isEdit) {
+            Alert.alert('', 'Les mises à jours sont indisponibles en mode hors-ligne')
+            return
+        }
+
+        // //Handle isLoading or No edit done
+        // if (this.state.loading || this.state === this.initialState) return
+
+        // load(this, true)
+
+        // //0. Validate inputs
+        // const isValid = this.validateInputs()
+        // if (!isValid) return
+
+
+        //Upload file (store it on cache so user can view it)
+        await this.handleUploadOffline()
+
+        //SetDocument
+        this.handlePersistOffline()
+    }
+
+    async handleUploadOffline() {
+        //1. Upload file
+        var { project, name, description, type, state, attachment } = this.state
+
+        const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
+        this.uploadFileOffline(attachment, reference, this.DocumentId)
+
+        //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading file)
+        const fromPath = this.cachePath
+        const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir //#issue: DownloadDir (SD card) is not always available on device
+        const destPath = `${Dir}/Synergys/Documents/${attachment.name}`
+        await RNFS.moveFile(fromPath, destPath)
+    }
+
+    handlePersistOffline() {
+        // 2. ADDING document to firestore
+        const { project, name, description, type, state, attachment } = this.state
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        attachment.pending = true
+        console.log('ATTACHMENT', attachment)
+
+        let document = {
+            project: project,
+            name: name.value,
+            description: description.value,
+            type: type,
+            state: state,
+            attachment: attachment, //To Keep track of last attached file
+            editedAt: moment().format('lll'),
+            editedBy: currentUser,
+            deleted: false,
+        }
+
+        if (!this.isEdit) {
+            document.createdAt = moment().format('lll')
+            document.createdBy = currentUser
+        }
+
+        console.log('Ready to add document & attachment...')
+        const batch = db.batch()
+        const documentRef = db.collection('Documents').doc(this.DocumentId)
+        const attachmentsRef = db.collection('Documents').doc(this.DocumentId).collection('Attachments').doc()
+        batch.set(documentRef, document, { merge: true })
+        batch.set(attachmentsRef, attachment)
+        batch.commit() //commit locally
+
+        console.log('going back...')
+        this.props.navigation.goBack() //#task: SetTimeout
+    }
+
+    //Online ******************************************************************************
+    async handleSubmit() {
+        //Handle isLoading or No edit done
+        if (this.state.loading || this.state === this.initialState) return
+
+        load(this, true)
+
+        //0. Validate inputs
+        const isValid = this.validateInputs()
+        if (!isValid) return
+
+        //1. Upload attachment
+        const newAttachment = this.state.attachment
+        const intialAttachment = this.initialState.attachment
+
+
+        if (newAttachment && (this.isEdit && newAttachment !== intialAttachment || !this.isEdit)) {  //Overwrite or Create new attachment
+            const uploadResult = await this.handleUpload()
+            if (uploadResult === 'failure') return
+        }
+
+        await this.persistDocument()
     }
 
     validateInputs() {
@@ -279,84 +366,68 @@ class UploadDocument extends Component {
         return true
     }
 
-    async handleSubmit() {
-        //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+    async handleUpload() {
+        //1. Upload file
+        const promise = new Promise(async (resolve, reject) => {
 
-        load(this, true)
+            var { project, name, description, type, state, attachment } = this.state
 
-        //0. Validate inputs
-        const isValid = this.validateInputs()
-        if (!isValid) return
+            this.setState({ uploading: true })
+            const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
+            const result = await this.uploadFile(attachment, reference, true)
+            this.setState({ uploading: false })
 
-        //1. Upload attachment & Create Document
-        if (this.state.attachment.name) {
-
-            //1.1 Delete existing file (edit mode)
-            // if (this.isEdit && this.initialState.attachment !== this.state.attachment)
-            //     await this.deleteFile()
-
-            //1.2 Upload file
-            if (this.isEdit && this.initialState.attachment !== this.state.attachment || !this.isEdit) {
-
-                var { DocumentId, project, name, description, type, state, attachment } = this.state
-
-                this.setState({ uploading: true })
-                // const metadata = {
-                //     uploadedBy: this.currentUser.uid,
-                //     type: type,
-                //     name: name.value
-                // }
-                const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`)
-                const result = await this.uploadFile(attachment, reference, true)
-                this.setState({ uploading: false })
-
-                if (result === 'failure') {
-                    this.setState({ uploading: false })
-                    setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
-                    return
-                }
-
-                //Move document to Synergys/Documents (to open & sign later.. without downloading file)
-                const fromPath = this.cachePath
-                const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
-                const destPath = `${Dir}/Synergys/Documents/${attachment.name}`
-                await RNFS.moveFile(fromPath, destPath)
+            if (result === 'failure') {
+                this.setState({ uploading: false, loading: false })
+                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
+                reject('failure')
             }
 
-            // 2. ADDING document to firestore
-            attachment.generation = 'upload' //possible values: ['upload', 'sign', 'app']      upload: uploaded by user; sign: generated after signature; app: pdf generated by app
-            delete attachment.progress
+            //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading file)
+            const fromPath = this.cachePath
+            const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir //#issue: DownloadDir (SD card) is not always available on device
+            const destPath = `${Dir}/Synergys/Documents/${attachment.name}`
+            await RNFS.moveFile(fromPath, destPath)
 
-            let document = {
-                project: project,
-                name: name.value,
-                description: description.value,
-                type: type,
-                state: state,
-                attachment: attachment, //To Keep track of last attached file
-                editedAt: moment().format('lll'),
-                editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
-                deleted: false,
-            }
+            resolve('success')
+        })
 
-            if (!this.isEdit) {
-                document.createdAt = moment().format('lll')
-                document.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-            }
+        return promise
+    }
 
-            console.log('Ready to add document & attachment...')
-            const batch = db.batch()
-            const documentRef = db.collection('Documents').doc(DocumentId)
-            const attachmentsRef = db.collection('Documents').doc(DocumentId).collection('Attachments').doc()
-            batch.set(documentRef, document, { merge: true })
-            batch.set(attachmentsRef, attachment)
+    async persistDocument() {
+        // 2. ADDING document to firestore
+        const { project, name, description, type, state, attachment } = this.state
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
-            batch.commit()
-                .then(() => this.props.navigation.goBack())
-                .catch(e => handleFirestoreError(e))
-                .finally(() => this.setState({ loading: false, uploading: false }))
+        let document = {
+            project: project,
+            name: name.value,
+            description: description.value,
+            type: type,
+            state: state,
+            attachment: attachment, //To Keep track of last attached file
+            editedAt: moment().format('lll'),
+            editedBy: currentUser,
+            deleted: false,
         }
+
+        if (!this.isEdit) {
+            document.createdAt = moment().format('lll')
+            document.createdBy = currentUser
+        }
+
+        console.log('Ready to add document & attachment...')
+        const batch = db.batch()
+        const documentRef = db.collection('Documents').doc(this.DocumentId)
+        const attachmentsRef = db.collection('Documents').doc(this.DocumentId).collection('Attachments').doc()
+        batch.set(documentRef, document, { merge: true })
+        batch.set(attachmentsRef, attachment)
+
+        batch.commit()
+            .then(() => this.props.navigation.goBack())
+            .catch(e => handleFirestoreError(e))
+            .finally(() => this.setState({ uploading: false, loading: false }))
     }
 
     async deleteFile() {
@@ -399,14 +470,69 @@ class UploadDocument extends Component {
         })
     }
 
+    customBackHandler() {
+        const { loading, uploading } = this.state
+
+        if (loading || uploading) {
+            this.uploadTask.pause()
+
+            const title = "Annuler l'opération"
+            const message = "Êtes-vous sûr(e) de vouloir annuler l'exportation du document. Toutes les nouvelles données saisies seront perdues."
+
+            const handleConfirm = () => {
+                this.uploadTask.cancel()
+                this.props.navigation.goBack()
+            }
+
+            const handleCancel = () => this.uploadTask.resume()
+
+            this.myAlert(title, message, handleConfirm, handleCancel)
+        }
+
+        else this.props.navigation.goBack(null)
+        return true
+    }
+
+    renderAttachmentInput() {
+        const { attachment } = this.state
+
+        if (attachment && attachment.pending)
+            return (
+                <TouchableOpacity style={{ marginTop: 15 }}>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>Pièce jointe</Text>
+                    <UploadProgress attachment={attachment} showProgress={false} pending={true} onPress={() => {
+                        if (firebase.auth().currentUser.uid === this.state.editedBy.id)
+                            Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
+
+                        else //In case another user views the document while the attachment is still uploading.
+                            Alert.alert("", "Ce document est en cours d'exportation par un autre utilisateur. Le document sera bientôt disponible, veuillez patienter...")
+                    }} />
+                </TouchableOpacity>
+            )
+
+        else return (
+            <TouchableOpacity onPress={this.pickDoc}>
+                <MyInput
+                    label="Pièce jointe"
+                    value={attachment && attachment.name}
+                    editable={false}
+                    multiline
+                    right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.pickDoc} />} />
+            </TouchableOpacity>
+        )
+    }
+
     render() {
-        let { DocumentId, project, name, description, type, state, attachment } = this.state
+        let { project, name, description, type, state, attachment } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, uploading, toastType, toastMessage, projectError } = this.state
 
+        const { isConnected } = this.props.network
+
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                {!isConnected && <OffLineBar />}
+                <Appbar back close customBackHandler={this.customBackHandler} title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={!loading} handleSubmit={isConnected ? this.handleSubmit : this.offLineSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -415,8 +541,9 @@ class UploadDocument extends Component {
                     </View>
                     :
                     <View style={{ flex: 1 }}>
-                        {this.isEdit &&
+                        {this.isEdit && attachment && !attachment.pending && isConnected &&
                             <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => {
+                                const { project, type, attachment } = this.initialState
                                 this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: attachment.name, url: attachment.downloadURL })
                             }}>
                                 <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
@@ -432,19 +559,13 @@ class UploadDocument extends Component {
                                     <MyInput
                                         label="Numéro du document"
                                         returnKeyType="done"
-                                        value={DocumentId}
+                                        value={this.DocumentId}
                                         editable={false}
                                         disabled
                                     />
 
-                                    <TouchableOpacity onPress={this.pickDoc}>
-                                        <MyInput
-                                            label="Pièce jointe"
-                                            value={attachment.name}
-                                            editable={false}
-                                            multiline
-                                            right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.pickDoc} />} />
-                                    </TouchableOpacity>
+
+                                    {this.renderAttachmentInput()}
 
                                     <MyInput
                                         label="Nom du document"
@@ -459,7 +580,7 @@ class UploadDocument extends Component {
                                     <TouchableOpacity onPress={() => this.props.navigation.push('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'UploadDocument', isRoot: false, titleText: 'Choix du projet', showFAB: false })}>
                                         <MyInput
                                             label="Choisir un projet"
-                                            value={project.name} 
+                                            value={project.name}
                                             error={!!projectError}
                                             errorText={projectError}
                                             editable={false} />
@@ -549,12 +670,19 @@ class UploadDocument extends Component {
                         <View style={styles.footerContainer}>
                             <Button
                                 mode={this.isEdit ? "contained" : "outlined"}
-                                style={[styles.signButton, { backgroundColor: this.isEdit ? theme.colors.primary : theme.colors.gray50 }]}
+                                style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
                                 onPress={() => {
-                                    if (this.isEdit)
+                                    const { project, type, attachment } = this.initialState
+                                    if (!isConnected) {
+                                        Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
+                                        return
+                                    }
+
+                                    if (this.isEdit && attachment && !attachment.pending) {
                                         this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: attachment.name, url: attachment.downloadURL, initMode: 'sign' })
+                                    }
                                 }}>
-                                <Text style={[theme.customFontMSmedium.body, { color: this.isEdit ? '#fff' : theme.colors.gray }]}>signer</Text>
+                                <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>signer</Text>
                             </Button>
                         </View>
 
@@ -573,6 +701,7 @@ class UploadDocument extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network
         //fcmToken: state.fcmtoken
     }
 }
@@ -613,3 +742,40 @@ const styles = StyleSheet.create({
     }
 })
 
+
+
+
+
+
+//OLD
+   // async deleteAttachment(docURL) {
+    //     let fileRef = firebase.storage().refFromURL(docURL)
+    //     await fileRef.delete()
+    //         .then(() => console.log('File deleted from cloud storage'))
+    //         .catch(e => console.error(e))
+    // }
+
+    // pickFile() {
+    //     FilePickerManager.showFilePicker(null, (response) => {
+    //         console.log('Response = ', response)
+
+    //         if (response.didCancel) {
+    //             console.log('User cancelled file picker');
+    //         }
+    //         else if (response.error) {
+    //             console.log('FilePickerManager Error: ', response.error);
+    //         }
+    //         else {
+    //             const attachment = {
+    //                 path: response.path,
+    //                 type: response.type,
+    //                 name: `Scan ${moment().format('DD-MM-YYYY HHmmss')}.pdf`,
+    //                 //name: response.fileName,
+    //                 size: response.readableSize,
+    //                 progress: 0
+    //             }
+
+    //             this.setState({ attachment, attachmentError: '' })
+    //         }
+    //     })
+    // }

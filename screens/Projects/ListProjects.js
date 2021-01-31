@@ -21,6 +21,7 @@ import { withNavigation } from 'react-navigation'
 import firebase from '@react-native-firebase/app';
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
+import { TouchableOpacity } from 'react-native-gesture-handler';
 const KEYS_TO_FILTERS = ['id', 'name', 'state', 'step',]
 
 const states = [
@@ -44,6 +45,7 @@ class ListProjects extends Component {
     constructor(props) {
         super(props)
         this.onPressProject = this.onPressProject.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.titleText = this.props.navigation.getParam('titleText', 'Projets')
@@ -53,6 +55,11 @@ class ListProjects extends Component {
         this.state = {
             projectsList: [],
             projectsCount: 0,
+
+            pendingProjectsList: [],
+            pendingProjectsCount: 0,
+
+            showPendingProjects: false,
 
             showInput: false,
             searchInput: '',
@@ -67,15 +74,19 @@ class ListProjects extends Component {
         }
     }
 
-
-    async componentDidMount() {
+    componentDidMount() {
         Keyboard.dismiss()
         load(this, true)
         requestWESPermission()
         requestRESPermission()
 
-        let query = db.collection('Projects').where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        await fetchDocs(this, query, 'projectsList', 'projectsCount', () => load(this, false))
+        const query = db.collection('Projects').where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        this.fetchDocs(query, 'projectsList', 'projectsCount', () => {
+            const pendingProjectsList = this.state.projectsList.filter((project) => project.hasPendingWrites)
+            const pendingProjectsCount = pendingProjectsList.length
+            this.setState({ pendingProjectsList, pendingProjectsCount })
+            load(this, false)
+        })
     }
 
     renderProject(project) {
@@ -92,15 +103,9 @@ class ListProjects extends Component {
         }
     }
 
-    // sendEmail() {
-    //     const sendEmail = firebase.functions().httpsCallable('sendEmail')
-    //     sendEmail({})
-    //         .then(result => console.log(result))
-    //         .catch(err => console.error(err))
-    // }
-
     render() {
-        let { projectsCount, projectsList, loading } = this.state
+
+        let { projectsCount, projectsList, pendingProjectsList, pendingProjectsCount, showPendingProjects, loading } = this.state
         let { step, state, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
         const { isConnected } = this.props.network
@@ -108,10 +113,13 @@ class ListProjects extends Component {
         const fields = [{ label: 'step', value: step }, { label: 'state', value: state }, { label: 'client.id', value: client.id }]
         this.filteredProjects = handleFilter(projectsList, this.filteredProjects, fields, searchInput, KEYS_TO_FILTERS)
 
+        const renderedItems = showPendingProjects ? pendingProjectsList : this.filteredProjects
+
         const filterCount = this.filteredProjects.length
         const filterActivated = filterCount < projectsCount
 
         const s = filterCount > 1 ? 's' : ''
+        const ss = pendingProjectsCount > 1 ? 's' : ''
 
         return (
             <View style={styles.container}>
@@ -120,7 +128,7 @@ class ListProjects extends Component {
                     close={!this.isRoot}
                     main={this}
                     title={!showInput}
-                    titleText={this.titleText}
+                    titleText={showPendingProjects ? 'Projets hors ligne' : this.titleText}
                     placeholder='Rechercher un projet'
                     showBar={showInput}
                     handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
@@ -128,9 +136,19 @@ class ListProjects extends Component {
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 
-                {/* <Text onPress={this.sendEmail} style={{ marginVertical: 100 }}>Send email</Text> */}
+                {pendingProjectsCount > 0 &&
+                    <TouchableOpacity
+                        onPress={() => this.setState({ showPendingProjects: !this.state.showPendingProjects })}
+                        style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: showPendingProjects ? theme.colors.secondary : theme.colors.gray100, paddingVertical: 10 }}>
+                        {showPendingProjects ?
+                            <Text style={[theme.customFontMSbold.caption, { color: theme.colors.white }]}>Afficher tous les projets</Text>
+                            :
+                            <Text style={[theme.customFontMSbold.caption, { color: theme.colors.error }]}>{pendingProjectsCount} projet{ss} hors-ligne</Text>
+                        }
+                    </TouchableOpacity>
+                }
 
-                {filterActivated && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
+                {filterActivated && !showPendingProjects && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
 
                 {loading ?
                     <View style={styles.container}>
@@ -140,7 +158,11 @@ class ListProjects extends Component {
                     <View style={styles.container}>
                         {projectsCount > 0 &&
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.gray50 }}>
-                                <List.Subheader>{filterCount} projet{s}</List.Subheader>
+                                {showPendingProjects ?
+                                    <List.Subheader>{pendingProjectsCount} projet{ss} hors-ligne</List.Subheader>
+                                    :
+                                    <List.Subheader>{filterCount} projet{s}</List.Subheader>
+                                }
 
                                 {this.isRoot && <Filter
                                     main={this}
@@ -160,7 +182,7 @@ class ListProjects extends Component {
                         {projectsCount > 0 ?
                             <FlatList
                                 enableEmptySections={true}
-                                data={this.filteredProjects}
+                                data={renderedItems}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderProject(item)}
                                 contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />

@@ -6,7 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { setAttachmentIcon } from '../core/utils'
 import * as theme from "../core/theme"
 
-const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon, showProgress = true, containerStyle, ...props }) => {
+const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon, showProgress = true, pending = false, containerStyle, ...props }) => {
 
     const { name, color } = setAttachmentIcon(attachment.type || attachment.contentType)
 
@@ -21,9 +21,17 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
                     <MaterialCommunityIcons name={name} size={24} color={color} />
                 </View>
 
-                <View style={{ flex: showRightIcon ? 0.68 : 0.83 }}>
-                    <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{attachment.name}</Text>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
+                <View style={{ flex: showRightIcon ? 0.68 : 0.83, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <View>
+                        <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{attachment.name}</Text>
+                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
+                    </View>
+
+                    {pending &&
+                        <View style={{ paddingRight: 15, }}>
+                            <MaterialCommunityIcons name='clock-alert-outline' size={20} color={theme.colors.error} />
+                        </View>
+                    }
                 </View>
 
                 {showRightIcon && rightIcon}
@@ -43,11 +51,11 @@ const styles = StyleSheet.create({
     container: {
         elevation: 1,
         backgroundColor: theme.colors.gray50,
-        width: '90%',
+        width: '100%',
         height: 60,
         alignSelf: 'center',
         borderRadius: 5,
-        marginTop: 15
+        marginVertical: 10
     },
 })
 

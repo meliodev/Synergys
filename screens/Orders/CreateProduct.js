@@ -41,6 +41,7 @@ const db = firebase.firestore()
 class CreateProduct extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
         this.fetchProduct = this.fetchProduct.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.pickNewBrandLogo = this.pickNewBrandLogo.bind(this)
@@ -140,7 +141,7 @@ class CreateProduct extends Component {
     //Brands suggestions
     fetchSuggestions() {
         const query = db.collection('Brands')
-        fetchDocs(this, query, 'suggestions', '', () => { load(this, false) })
+        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
     }
 
     //on Edit

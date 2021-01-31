@@ -10,41 +10,34 @@ const db = firebase.firestore()
 //FIRESTORE CRUD
 //USERS: GET
 
-export const fetchDocs = async (main, query, MyList, MyCount, MyCallBack) => {
-  console.log('Fetching docs...')
+export function fetchDocs(query, MyList, MyCount, MyCallBack) {
 
-  main.unsubscribe = await query.onSnapshot((querysnapshot) => {
+  this.unsubscribe = query.onSnapshot((querysnapshot) => {
+    var List = []
+    var Count = 0
 
-    var source = querysnapshot.metadata.fromCache ? "cache" : "server"
-    console.log('source', source)
-    // main.setState(source)
-
-    let docsList = []
-    let docsCount = 0
     if (querysnapshot)
       querysnapshot.forEach((doc) => {
+        var hasPendingWrites = doc.metadata.hasPendingWrites ? true : false
 
-        let id = doc.id
         let document = doc.data()
-        document.id = id
-        docsList.push(document)
-        docsCount = docsCount + 1
+        document.id = doc.id
+        document.hasPendingWrites = hasPendingWrites
+
+        List.push(document)
+        Count = Count + 1
       })
 
-
     const update1 = {}
-    update1[MyList] = docsList
-    main.setState(update1, () => MyCallBack())
+    update1[MyList] = List
+    this.setState(update1, () => MyCallBack())
 
-    if (MyCount !== '') {
+    if (MyCount) {
       const update2 = {}
-      update2[MyCount] = docsCount
-      main.setState(update2)
+      update2[MyCount] = Count
+      this.setState(update2)
     }
-
-    return true
   })
-
 }
 
 export const fetchProjectName = async (project) => {

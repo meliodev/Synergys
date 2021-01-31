@@ -44,6 +44,7 @@ class ListDocuments extends Component {
     constructor(props) {
         super(props)
         this.filteredDocuments = []
+        this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             documentsList: [],
@@ -66,20 +67,15 @@ class ListDocuments extends Component {
     //Fetch documents
     async componentDidMount() {
         load(this, true)
-        let query = db.collection('Documents').where('deleted', '==', false)
-        //.orderBy('createdAt', 'desc')
-        await fetchDocs(this, query, 'documentsList', 'documentsCount', () => load(this, false))
+        let query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
+        this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
     }
 
     componentWillUnmount() {
         this.unsubscribe()
     }
 
-    renderDocument(document) {
-        const docId = document.id
-        const docName = document.attachment.name
-        const docURL = document.attachment.downloadURL
-
+    renderDocument(document) {        
         return <DocumentItem document={document} />
     }
 

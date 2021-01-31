@@ -20,6 +20,7 @@ const db = firebase.firestore()
 class ListNotifications extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
         this.myAlert = myAlert.bind(this)
         this.markAsReadAndNavigate = this.markAsReadAndNavigate.bind(this)
         this.currentUser = firebase.auth().currentUser
@@ -34,7 +35,7 @@ class ListNotifications extends Component {
         let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications')
         //.where('deleted', '==', false)
         //.orderBy('sentAt', 'asc')
-        await fetchDocs(this, query, 'notificationsList', 'notificationsCount', () => { })
+        this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { })
     }
 
     componentWillUnmount() {

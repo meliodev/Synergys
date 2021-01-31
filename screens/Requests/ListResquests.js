@@ -22,6 +22,7 @@ const db = firebase.firestore()
 class ListRequests extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             requestsList: [],
@@ -31,8 +32,8 @@ class ListRequests extends Component {
     }
 
     async componentDidMount() {
-        let query = db.collection('Requests').where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
-        await fetchDocs(this, query, 'requestsList', 'requestsCount', () => { })
+        const query = db.collection('Requests').where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
+        this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
     }
 
     renderTicketRequest(request) {
@@ -56,7 +57,7 @@ class ListRequests extends Component {
                         renderItem={({ item }) => this.renderTicketRequest(item)}
                         contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                     :
-                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine}/>
+                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
                 }
 
                 <MyFAB onPress={() => this.props.navigation.navigate(this.props.creationScreen)} />

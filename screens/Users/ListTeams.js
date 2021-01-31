@@ -28,6 +28,7 @@ class ListTeams extends Component {
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.renderTeam = this.renderTeam.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             teamsList: [],
@@ -40,8 +41,8 @@ class ListTeams extends Component {
 
     async componentDidMount() {
         load(this, true)
-        let query = db.collection('Teams').where('deleted', '==', false)
-        await fetchDocs(this, query, 'teamsList', 'teamsCount', () => load(this, false))
+        const query = db.collection('Teams').where('deleted', '==', false)
+        this.fetchDocs(query, 'teamsList', 'teamsCount', () => load(this, false))
     }
 
     viewTeam(team) {

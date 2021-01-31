@@ -30,6 +30,7 @@ export default class ViewMessage extends Component {
         super(props)
         this.currentUser = firebase.auth().currentUser
         this.message = this.props.navigation.getParam('message', '')
+        this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             messagesList: [],
@@ -47,9 +48,9 @@ export default class ViewMessage extends Component {
         load(this, true)
         let currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         const query = db.collection('Messages').doc(this.message.id).collection('AllMessages')
-        .where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
+            .where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
         //.where('subscribers', 'array-contains', currentUser.uid )
-        fetchDocs(this, query, 'messagesList', 'messagesCount', () => { load(this, false) })
+        this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })
     }
 
     componentWillUnmount() {

@@ -34,6 +34,7 @@ const db = firebase.firestore()
 class ListOrders extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
         this.onPressOrder = this.onPressOrder.bind(this) //#edit
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
@@ -65,7 +66,7 @@ class ListOrders extends Component {
 
     async fetchOrders() {
         const query = db.collection('Orders').where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        fetchDocs(this, query, 'ordersList', 'ordersCount', async () => {
+        this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
             let { ordersList } = this.state
 
             //Fetch client dynamicly

@@ -11,6 +11,12 @@ import '@react-native-firebase/storage'
 import '@react-native-firebase/functions'
 import '@react-native-firebase/messaging'
 
+const settings = {
+  cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+}
+
+firebase.firestore().settings(settings)
+
 import { Provider } from 'react-redux'
 import { MenuProvider } from 'react-native-popup-menu';
 import Store from './Store/configureStore'
@@ -23,6 +29,7 @@ const db = firebase.firestore()
 class App extends Component {
 
   async componentDidMount() {
+    //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
       name: 'projects',
@@ -38,21 +45,13 @@ class App extends Component {
     this.unsubscribe()
   }
 
-  //Forground state: messages listener
+  //Forground: messages listener
   async onForegroundMessageReceived(message) {
-    // const channelId = await notifee.createChannel({
-    //   id: 'projects',
-    //   name: 'projects',
-    //   lights: false,
-    //   vibration: true,
-    //   importance: AndroidImportance.HIGH,
-    // })
-
     await notifee.displayNotification(JSON.parse(message.data.notifee))
   }
 
   componentWillUnmount() {
-    this.foregroundMessages()
+    this.foregroundMessages && this.foregroundMessages()
   }
 
   render() {

@@ -148,12 +148,12 @@ export const updateField = (main, field, text) => {
   main.setState({ field })
 }
 
-export const myAlert = function myAlert(title, message, handleConfirm) {
+export const myAlert = function myAlert(title, message, handleConfirm, handleCancel) {
   Alert.alert(
     title,
     message,
     [
-      { text: 'Annuler', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+      { text: 'Annuler', onPress: handleCancel, style: 'cancel' },
       { text: 'Confirmer', onPress: handleConfirm }
     ],
     { cancelable: false }

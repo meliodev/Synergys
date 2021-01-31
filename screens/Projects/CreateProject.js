@@ -60,6 +60,7 @@ const imagePickerOptions = {
 class CreateProject extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
         this.refreshClient = this.refreshClient.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
 
@@ -133,7 +134,6 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
-        console.log(this.props.network)
 
         if (this.isEdit) {
             load(this, true)
@@ -256,7 +256,7 @@ class CreateProject extends Component {
 
     fetchSuggestions() {
         const query = db.collection('Users')
-        fetchDocs(this, query, 'suggestions', '', () => { })
+        this.fetchDocs(query, 'suggestions', '', () => { })
     }
 
     //Screen inputs
@@ -283,13 +283,13 @@ class CreateProject extends Component {
     //Inputs validation
     validateInputs() {
         let { client, name, address } = this.state
-        const { isConnected } = this.prop.network
+        const { isConnected } = this.props.network
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let nameError = nameValidator(name.value, '"Nom du projet"')
-        var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
+        //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
 
-        if (clientError || nameError || addressError) {
+        if (clientError || nameError) {
             name.error = nameError
             Keyboard.dismiss()
             this.setState({ clientError, name, addressError, loading: false })

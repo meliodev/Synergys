@@ -17,7 +17,6 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { fetchDocs } from "../../api/firestore-api";
 import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, arrayValidator } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";

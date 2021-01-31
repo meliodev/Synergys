@@ -19,6 +19,7 @@ class AuthLoadingScreen extends Component {
   constructor(props) {
     super(props)
     this.booted = false
+    this.alertDisplayed = false
 
     this.state = {
       initialNotification: false,
@@ -45,7 +46,8 @@ class AuthLoadingScreen extends Component {
     this.unsubscribeNetwork = NetInfo.addEventListener(state => {
       const { type, isConnected } = state
       const network = { type, isConnected }
-      if(!isConnected) Alert.alert('Mode Hors-Ligne', "L'application risque de ne pas fonctionner de façon optimale en mode hors-ligne. Veuillez rétablir votre connection réseau.")
+      if (!isConnected && !this.alertDisplayed) Alert.alert('Mode Hors-Ligne', "L'application risque de ne pas fonctionner de façon optimale en mode hors-ligne. Veuillez rétablir votre connection réseau.")
+      this.alertDisplayed = true
       setNetwork(this, network)
     })
   }
@@ -134,7 +136,7 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("App")
+          this.props.navigation.navigate("DocumentsStack")
       }
 
       else {

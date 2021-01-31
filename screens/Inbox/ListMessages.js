@@ -18,6 +18,7 @@ const db = firebase.firestore()
 class ListMessages extends Component {
     constructor(props) {
         super(props)
+        this.fetchDocs = fetchDocs.bind(this)
         this.markAsReadAndNavigate = this.markAsReadAndNavigate.bind(this)
         this.currentUser = firebase.auth().currentUser
 
@@ -28,9 +29,9 @@ class ListMessages extends Component {
     }
 
     async componentDidMount() {
-        let query = db.collection('Messages').where('subscribers', 'array-contains', this.currentUser.uid)
+        const query = db.collection('Messages').where('subscribers', 'array-contains', this.currentUser.uid)
         //.orderBy('sentAt', 'DESC')
-        await fetchDocs(this, query, 'messagesList', 'messagesCount', () => { })
+        this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
     }
 
 

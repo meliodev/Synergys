@@ -12,7 +12,6 @@ import Picker from "../../components/Picker"
 import Loading from "../../components/Loading"
 
 import { updateField, nameValidator, setToast, load } from "../../core/utils";
-import { fetchDocs } from '../../api/firestore-api';
 import firebase from '@react-native-firebase/app';
 import { handleFirestoreError } from '../../core/exceptions';
 

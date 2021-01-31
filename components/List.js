@@ -21,6 +21,7 @@ class CustomList extends Component {
     constructor(props) {
         super(props)
         this.myAlert = myAlert.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
         // this.filterMessages = this.filterMessages.bind(this)
 
         this.state = {
@@ -30,13 +31,13 @@ class CustomList extends Component {
     }
 
     async componentDidMount() {
-        let query = this.props.query
+        const query = this.props.query
 
         // if (this.props.isMessage)
         //     //await fetchDocs(this, query, 'List', '', () => {})
         //     // await fetchDocs(this, query, 'List', '', this.filterMessages)
         // else
-            await fetchDocs(this, query, 'List', 'Count', () => { })
+        this.fetchDocs(query, 'List', 'Count', () => { })
     }
 
     //Never display message to the sender if he just sent the first message and there is not yet a reply.

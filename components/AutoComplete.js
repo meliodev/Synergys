@@ -1,12 +1,6 @@
 import Autocomplete from 'react-native-autocomplete-input';
 import React, { Component } from 'react';
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from 'react-native';
-import { fetchDocs } from "../api/firestore-api";
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const API = 'https://swapi.co/api';
 const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII'];
@@ -43,7 +37,7 @@ class AutoComplete extends Component {
           autoCorrect={false}
           containerStyle={styles.autocompleteContainer}
           data={suggestions.length === 1 && comp(query, suggestions[0].title) ? [] : suggestions}
-        //   data={suggestions.length === 1 && comp(query, suggestions[0].title) ? [] : suggestions}
+          //   data={suggestions.length === 1 && comp(query, suggestions[0].title) ? [] : suggestions}
           defaultValue={query}
           onChangeText={text => this.setState({ query: text })}
           placeholder="Enter Star Wars film title"
@@ -64,7 +58,7 @@ class AutoComplete extends Component {
             </Text>
           )}
           </View> */}
-      </View> 
+      </View>
     )
   }
 }
