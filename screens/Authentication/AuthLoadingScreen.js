@@ -1,15 +1,17 @@
 import React, { memo, Component } from "react"
 import { Alert, Text, StyleSheet } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
+import RNFS from 'react-native-fs'
 import firebase from '@react-native-firebase/app'
 import notifee, { EventType } from '@notifee/react-native'
 import NetInfo from "@react-native-community/netinfo"
+import { connect } from 'react-redux'
 
 import Loading from "../../components/Loading"
 
+import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setUser, setNetwork } from '../../core/redux'
-import { connect } from 'react-redux'
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
 const db = firebase.firestore()
@@ -20,6 +22,8 @@ class AuthLoadingScreen extends Component {
     super(props)
     this.booted = false
     this.alertDisplayed = false
+
+    this.uploadFileNew = uploadFileNew.bind(this)
 
     this.state = {
       initialNotification: false,
@@ -33,7 +37,7 @@ class AuthLoadingScreen extends Component {
     this.networkListener()
 
     //2. Notification action listeners
-    await this.bootstrap()
+    await this.bootstrapNotifications()
     this.forgroundNotificationListener()
     this.backgroundNotificationListener()
 
@@ -53,7 +57,7 @@ class AuthLoadingScreen extends Component {
   }
 
   //User action on a notification has caused app to open
-  async bootstrap() {
+  async bootstrapNotifications() {
     const initialNotification = await notifee.getInitialNotification()
     //set screen & params on asyncstorage
     if (initialNotification) {
@@ -120,12 +124,13 @@ class AuthLoadingScreen extends Component {
         const currentUser = firebase.auth().currentUser
         setUser(this, currentUser.displayName, true)
 
-        const idTokenResult = await currentUser.getIdTokenResult().catch(() => Alert.alert('', 'Pas de données en cache pour un fonctionnement Hors-Ligne. Veuillez vous connecter à internet.'))
+        const idTokenResult = await currentUser.getIdTokenResult()
 
-        roles.forEach((role) => {
-          if (idTokenResult.claims[role.id])
-            setRole(this, role)
-        })
+        if (idTokenResult)
+          roles.forEach((role) => {
+            if (idTokenResult.claims[role.id])
+              setRole(this, role)
+          })
 
         await this.requestUserPermission() //iOS only (notifications)
         await this.configureFcmToken()
@@ -235,6 +240,7 @@ const mapStateToProps = (state) => {
     role: state.roles.role,
     user: state.user.user,
     network: state.network,
+    documents: state.documents,
     //fcmToken: state.fcmtoken
   }
 }

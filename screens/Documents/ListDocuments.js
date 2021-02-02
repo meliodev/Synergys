@@ -15,6 +15,7 @@ import Loading from '../../components/Loading'
 
 import { myAlert, downloadFile, loadLog, load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api';
+import { uploadFileNew } from "../../api/storage-api";
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
@@ -45,6 +46,8 @@ class ListDocuments extends Component {
         super(props)
         this.filteredDocuments = []
         this.fetchDocs = fetchDocs.bind(this)
+        this.uploadFileNew = uploadFileNew.bind(this)
+        this.bootstrapUploads = this.bootstrapUploads.bind(this)
 
         this.state = {
             documentsList: [],
@@ -60,23 +63,45 @@ class ListDocuments extends Component {
             project: { id: '', name: '' },
             filterOpened: false,
 
-            loading: false,
+            loading: true,
         }
     }
 
     //Fetch documents
-    async componentDidMount() {
-        load(this, true)
-        let query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
+    componentDidMount() {
+        //Rehydrate killed upload tasks
+        this.bootstrapUploads()
+
+        const query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
         this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
     }
 
-    componentWillUnmount() {
-        this.unsubscribe()
+    bootstrapUploads() {
+        const { newAttachments } = this.props.documents //Documents uploads
+        console.log('1. Pending attachments.....', newAttachments)
+
+        if (newAttachments === {}) return
+
+        Object.entries(newAttachments).forEach(([DocumentId, attachment]) => {
+            this.uploadOfflineBeta(attachment, DocumentId)
+        })
     }
 
-    renderDocument(document) {        
+    uploadOfflineBeta(attachment, DocumentId) {
+        const { storageRefPath } = attachment
+        // console.log('2. uploadOfflineBeta')
+        // console.log('2.1 attachment:', attachment)
+        // console.log('2.2 storageRefPath:', storageRefPath)
+        // console.log('2.3 DocumentId:', DocumentId)
+        this.uploadFileNew(attachment, storageRefPath, DocumentId, true)
+    }
+
+    renderDocument(document) {
         return <DocumentItem document={document} />
+    }
+
+    componentWillUnmount() {
+        this.unsubscribe && this.unsubscribe()
     }
 
     render() {
@@ -167,6 +192,7 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         network: state.network,
+        documents: state.documents
         //fcmToken: state.fcmtoken
     }
 }

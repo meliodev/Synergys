@@ -3,6 +3,8 @@ import { Button, Dimensions, Alert } from 'react-native'
 import notifee, { EventType, AndroidImportance } from '@notifee/react-native'
 import NetInfo from "@react-native-community/netinfo"
 import { connect } from 'react-redux'
+import { persistStore } from 'redux-persist'
+import { PersistGate } from 'redux-persist/es/integration/react'
 
 import firebase from '@react-native-firebase/app'
 import '@react-native-firebase/auth'
@@ -29,8 +31,6 @@ const db = firebase.firestore()
 class App extends Component {
 
   async componentDidMount() {
-   // await this.storageBootStrap()
-
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
@@ -52,23 +52,21 @@ class App extends Component {
     await notifee.displayNotification(JSON.parse(message.data.notifee))
   }
 
-  //Rehydrate killed upload tasks (app killed)
-  async storageBootStrap() {
-
-    //handleUploadOffline
-    //handleUploadOnline (optional)
-  }
-
   componentWillUnmount() {
     this.foregroundMessages && this.foregroundMessages()
   }
 
   render() {
+    let persistor = persistStore(Store)
+   // persistor.purge()
+
     return (
       <Provider store={Store}>
-        <MenuProvider>
-          <RootController />
-        </MenuProvider>
+        <PersistGate persistor={persistor}>
+          <MenuProvider>
+            <RootController />
+          </MenuProvider>
+        </PersistGate>
       </Provider>
     )
   }

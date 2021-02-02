@@ -14,9 +14,11 @@ function handleUploadProgress(state = initialState, action) {
                     [action.value.DocumentId]: {
                         ...state.newAttachments[action.value.DocumentId],
                         name: action.value.name,
+                        // originalPath: action.value.originalPath,
                         path: action.value.path,
                         size: action.value.size,
                         type: action.value.type,
+                        storageRefPath: action.value.storageRefPath,
                         progress: 0
                     }
                 }

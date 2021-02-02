@@ -26,7 +26,7 @@ import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
-import { uploadFile, uploadFileOffline } from "../../api/storage-api";
+import { uploadFileNew } from "../../api/storage-api";
 import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
@@ -56,23 +56,24 @@ class UploadDocument extends Component {
     constructor(props) {
         super(props)
         this.fetchDocument = this.fetchDocument.bind(this)
+
         this.handleSubmit = this.handleSubmit.bind(this)
         this.submitOffline = this.submitOffline.bind(this)
         this.submitOnline = this.submitOnline.bind(this)
 
-
+        this.uploadFileNew = uploadFileNew.bind(this)
         this.uploadOffline = this.uploadOffline.bind(this)
-
         this.uploadOnline = this.uploadOnline.bind(this)
+
         this.persistDocumentOffline = this.persistDocumentOffline.bind(this)
         this.persistDocumentOnline = this.persistDocumentOnline.bind(this)
-        // this.pickFile = this.pickFile.bind(this)
+
+        this.onPressUploadPending = this.onPressUploadPending.bind(this)
+
         this.pickDoc = this.pickDoc.bind(this)
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.refreshProject = this.refreshProject.bind(this)
-        this.uploadFileOnline = uploadFile.bind(this)
-        this.uploadFileOffline = uploadFileOffline.bind(this)
         this.deleteFile = this.deleteFile.bind(this)
 
         this.initialState = {}
@@ -82,10 +83,8 @@ class UploadDocument extends Component {
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.isEdit = this.DocumentId ? true : false
         this.DocumentId = this.isEdit ? this.DocumentId : generatetId('GS-DOC-')
-
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
         this.project = this.props.navigation.getParam('project', '')
-
         this.cachePath = ''
 
         this.state = {
@@ -113,7 +112,6 @@ class UploadDocument extends Component {
 
             error: '',
             loading: false,
-            uploading: false,
             toastType: '',
             toastMessage: ''
         }
@@ -192,8 +190,8 @@ class UploadDocument extends Component {
         })
     }
 
-    //1. after user come back online... an upload task started previously is now running
-    //2. Detect when attachment is uploaded (pending = false)
+    // After user come back online... an upload task started previously is now running
+    // --> Detect when attachment is uploaded (pending = false)
     attachmentListener() {
         this.unsubscribeAttachmentListener = db.collection('Documents').doc(this.DocumentId).onSnapshot((doc) => {
             const prevAttachment = this.state.attachment
@@ -210,20 +208,6 @@ class UploadDocument extends Component {
         })
     }
 
-    //Delete document
-    showAlert() {
-        const title = "Supprimer le document"
-        const message = 'Etes-vous sûr de vouloir supprimer ce document ? Cette opération est irreversible.'
-        const handleConfirm = () => this.handleDelete()
-        this.myAlert(title, message, handleConfirm)
-    }
-
-    async handleDelete() {
-        await db.collection('Documents').doc(this.DocumentId).update({ deleted: true })
-            .then(async () => this.props.navigation.goBack()) //removed deleteAttachment: Client wants to keep all files archived.
-            .catch((e) => console.error(e))
-    }
-
     async pickDoc() {
         try {
             const res = await DocumentPicker.pick({
@@ -232,11 +216,13 @@ class UploadDocument extends Component {
 
             //Android only
             if (res.uri.startsWith('content://')) {
-                //const uriComponents = res.uri.split('/')
-                //const fileNameAndExtension = uriComponents[uriComponents.length - 1]
-                this.cachePath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}`
 
-                await RNFS.copyFile(res.uri, this.cachePath) //copy file to get access to the relative path. DocumentPicker (with android) provides only absolute path which cannot be used with firebase storage
+                const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+                const destFolder = `${Dir}/Synergys/Documents`
+                await RNFS.mkdir(destFolder)
+                this.cachePath = `${destFolder}/${'temporaryDoc'}${Date.now()}`
+                //this.cachePath = `${destFolder}/test.pdf`
+                await RNFS.moveFile(res.uri, this.cachePath)
                     .then(() => {
                         const attachment = {
                             path: this.cachePath,
@@ -265,10 +251,8 @@ class UploadDocument extends Component {
         if (isConnected)
             this.submitOnline()
 
-        else {
-            console.log('offline submit...')
+        else
             this.submitOffline()
-        }
     }
 
     validateInputs() {
@@ -294,38 +278,23 @@ class UploadDocument extends Component {
             return
         }
 
-        //Handle isLoading or No edit done
+        //0. Handle isLoading or No edit done
         if (this.state.loading || this.state === this.initialState) return
         load(this, true)
 
-        //0. Validate inputs
+        //1. Validate inputs
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        await this.uploadOffline()
-
-        // //SetDocument
+        //2. SetDocument
         this.persistDocumentOffline()
-    }
 
-    async uploadOffline() {
-        //1. Upload file
-        var { project, name, description, type, state, attachment } = this.state
-
-        const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
-        this.uploadFileOffline(attachment, reference, this.DocumentId)
-
-        //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading duplicate file)
-        const fromPath = this.cachePath
-        const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-        const destFolder = `${Dir}/Synergys/Documents/`
-        await RNFS.mkdir(destFolder)
-        const destPath = `${destFolder}/${attachment.name}`
-        await RNFS.moveFile(fromPath, destPath).then(() => console.log('moved.'))
+        //3. UploadFile Offline
+        this.uploadOffline()
     }
 
     persistDocumentOffline() {
-        // 2. ADDING document to firestore
+        //1. ADDING document to firestore
         const { project, name, description, type, state, attachment } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         attachment.pending = true
@@ -347,7 +316,7 @@ class UploadDocument extends Component {
             document.createdBy = currentUser
         }
 
-        console.log('Ready to add document & attachment...')
+        console.log('Ready to set document...')
         const batch = db.batch()
         const documentRef = db.collection('Documents').doc(this.DocumentId)
         const attachmentsRef = db.collection('Documents').doc(this.DocumentId).collection('Attachments').doc()
@@ -357,21 +326,27 @@ class UploadDocument extends Component {
         this.props.navigation.goBack()
     }
 
+    uploadOffline() {
+        var { project, type, attachment } = this.state
+        const referencePath = `Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`
+        this.uploadFileNew(attachment, referencePath, this.DocumentId, false)
+    }
+
     //Online submit
     async submitOnline() {
-        //Handle isLoading or No edit done
+        //0. Handle isLoading or No edit done
         if (this.state.loading || this.state === this.initialState) return
-
         load(this, true)
 
-        //0. Validate inputs
+        //1. Validate inputs
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        //1. Upload attachment
+        //2. Upload attachment
         const newAttachment = this.state.attachment
         const intialAttachment = this.initialState.attachment
 
+        //3. SetDocument
         await this.persistDocumentOnline()
 
         if (newAttachment && (this.isEdit && newAttachment !== intialAttachment || !this.isEdit)) {  //Overwrite or Create new attachment
@@ -386,24 +361,21 @@ class UploadDocument extends Component {
 
             var { project, name, description, type, state, attachment } = this.state
 
-            // this.setState({ uploading: true })
-            const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
-            const result = await this.uploadFileOffline(attachment, reference, this.DocumentId)
-            // this.setState({ uploading: false })
+            const storageRefPath = `Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`
+            const result = await this.uploadFileNew(attachment, storageRefPath, this.DocumentId, false)
 
             if (result === 'failure') {
-                // this.setState({ uploading: false, loading: false })
                 setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
                 reject('failure')
             }
 
             //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading duplicate file)
-            const fromPath = this.cachePath
+            const fromPath = attachment.path
             const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
             const destFolder = `${Dir}/Synergys/Documents/`
             await RNFS.mkdir(destFolder)
             const destPath = `${destFolder}/${attachment.name}`
-            RNFS.moveFile(fromPath, destPath) //Don't await becaus in case of error -> upload will not resolve
+            await RNFS.moveFile(fromPath, destPath)
 
             resolve('success')
         })
@@ -444,7 +416,20 @@ class UploadDocument extends Component {
         batch.commit()
             .then(() => this.props.navigation.goBack())
             .catch(e => handleFirestoreError(e))
-            .finally(() => this.setState({ uploading: false, loading: false }))
+            .finally(() => this.setState({ loading: false }))
+    }
+
+    //Delete document
+    showAlert() {
+        const title = "Supprimer le document"
+        const message = 'Etes-vous sûr de vouloir supprimer ce document ? Cette opération est irreversible.'
+        const handleConfirm = () => this.handleDelete()
+        this.myAlert(title, message, handleConfirm)
+    }
+
+    handleDelete() {
+        db.collection('Documents').doc(this.DocumentId).update({ deleted: true })
+        this.props.navigation.goBack() //removed deleteAttachment: Client wants to keep all files archived.
     }
 
     //Delete #task: handle online and offline
@@ -460,6 +445,17 @@ class UploadDocument extends Component {
         this.setState({ project, projectError: '' })
     }
 
+    onPressUploadPending() {
+        if (firebase.auth().currentUser.uid === this.state.editedBy.id) {
+            if (!uploadNotRunning) return //upload is running...
+            Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
+        }
+
+        else //In case remote user press the attachment while it is still uploading.
+            Alert.alert("", "Ce document est en cours d'exportation par un autre utilisateur. Le document sera bientôt disponible, veuillez patienter...")
+    }
+
+    //Renderers
     renderSignees() {
         const { signatures } = this.state
 
@@ -483,18 +479,7 @@ class UploadDocument extends Component {
         })
     }
 
-    onPressUploadPending() {
-        if (firebase.auth().currentUser.uid === this.state.editedBy.id) {
-            if (!uploadNotRunning) return //upload is running...
-            Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
-        }
-
-        else //In case remote user press the attachment while it is still uploading.
-            Alert.alert("", "Ce document est en cours d'exportation par un autre utilisateur. Le document sera bientôt disponible, veuillez patienter...")
-    }
-
-    //#task1: handle online display progress
-    //task2: handle kill app
+    //task: handle kill app
     renderAttachment() {
         const { attachment } = this.state
         const { isConnected } = this.props
@@ -532,11 +517,9 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { error, loading, uploading, toastType, toastMessage, projectError } = this.state
+        let { error, loading, toastType, toastMessage, projectError } = this.state
 
         const { isConnected } = this.props.network
-
-        console.log('ATTACHMENT', attachment)
 
         return (
             <View style={styles.container}>
@@ -545,7 +528,6 @@ class UploadDocument extends Component {
 
                 {loading ?
                     <View style={{ flex: 1 }}>
-                        {uploading && this.renderAttachment()}
                         <Loading size='small' style={{ justifyContent: 'flex-start', marginTop: 15 }} />
                     </View>
                     :
@@ -751,6 +733,64 @@ const styles = StyleSheet.create({
         marginRight: 15
     }
 })
+
+
+
+//OLD
+
+// async pickDoc() {
+//     try {
+//         const res = await DocumentPicker.pick({
+//             type: [DocumentPicker.types.pdf],
+//         })
+
+//         // const attachment = {
+//         //     path: res.uri,
+//         //     type: 'application/pdf',
+//         //     name: `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`,
+//         //     size: res.size,
+//         //     progress: 0
+//         // }
+
+//       //  this.setState({ attachment })
+
+//         //Android only
+//         if (res.uri.startsWith('content://')) {
+//             //const uriComponents = res.uri.split('/')
+//             //const fileNameAndExtension = uriComponents[uriComponents.length - 1]
+//             // this.cachePath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}`
+
+//             const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+//             const destFolder = `${Dir}/Synergys/Documents`
+//             await RNFS.mkdir(destFolder)
+//             //this.cachePath = `${destFolder}/${'temporaryDoc'}${Date.now()}`
+//             this.cachePath = `${destFolder}/test.pdf`
+//             await RNFS.moveFile(res.uri, this.cachePath)
+
+//                 // await RNFS.copyFile(res.uri, this.cachePath) //copy file to get access to the relative path. DocumentPicker (with android) provides only absolute path which cannot be used with firebase storage
+//                 .then(() => {
+//                     const attachment = {
+//                         //originalPath: res.uri,
+//                         path: this.cachePath,
+//                         type: 'application/pdf',
+//                         name: `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`,
+//                         size: res.size,
+//                         progress: 0
+//                     }
+
+//                     RNFS.exists(this.cachePath).then(() => console.log('File exist !'))
+
+//                     this.setState({ attachment })
+//                 })
+//                 .catch((e) => Alert.alert(e))
+//         }
+//     }
+
+//     catch (err) {
+//         if (DocumentPicker.isCancel(err)) return
+//         else Alert.alert(err)
+//     }
+// }
 
 
 //OLD
