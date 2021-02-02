@@ -1,5 +1,8 @@
 import { setToast } from "../core/utils"
 import firebase from '@react-native-firebase/app'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { onUploadProgressStart, onUploadProgressChange, onUploadProgressEnd } from '../core/redux'
+
 const db = firebase.firestore()
 
 export async function uploadFiles(files, storageRef, attachedFiles, isChat, chatId) {
@@ -97,6 +100,15 @@ export async function uploadFile(attachment, storageRef, showProgress) {
                 this.setState({ attachment })
             }
 
+            // switch (tasksnapshot.state) {
+            //     case firebase.storage.TaskState.PAUSED: // or 'paused'
+            //         console.log('Upload is paused')
+            //         break
+            //     case firebase.storage.TaskState.RUNNING: // or 'running'
+            //         console.log('Upload is running')
+            //         break
+            // }
+
         }.bind(this))
 
         //#task: can be canceled
@@ -117,22 +129,47 @@ export async function uploadFile(attachment, storageRef, showProgress) {
     return promise
 }
 
-export async function uploadFileOffline(attachment, storageRef, documentId) {
+export async function uploadFileOffline(attachment, storageRef, DocumentId) { //#task: add showProgress as param
 
-    const uploadTask = storageRef.putFile(attachment.path)
+    const promise = new Promise(async (resolve, reject) => {
 
-    uploadTask
-        .then(async (res) => {
-            attachment.downloadURL = await storageRef.getDownloadURL()
-            attachment.generation = 'upload'
-            attachment.pending = false
-            delete attachment.progress
+        const uploadTask = storageRef.putFile(attachment.path)
 
-            db.collection('Documents').doc(documentId).update({ attachment }).then(() => console.log('Attachment updated'))
-        })
-        .catch((e) => {
-            db.collection('Documents').doc(documentId).update({ attachment: null }).then(() => console.log('Attachment updated'))
-        })
+        var payload = { ...attachment }
+        payload.DocumentId = DocumentId
+        await onUploadProgressStart(this, payload)
+
+        uploadTask
+            .on('state_changed', async function (tasksnapshot) {
+                var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
+                console.log('Upload attachment ' + progress + '% done')
+
+                //dispatch action to update attachment progress with id = DocumentId
+                payload.progress = progress / 100
+                onUploadProgressChange(this, payload)
+
+            }.bind(this))
+
+        uploadTask
+            .then(async (res) => {
+                attachment.downloadURL = await storageRef.getDownloadURL()
+                attachment.generation = 'upload'
+                attachment.pending = false
+                delete attachment.progress
+
+                db.collection('Documents').doc(DocumentId).update({ attachment })
+                onUploadProgressEnd(this, payload)
+            })
+            .catch((e) => {
+                console.error('upload error', e)
+                console.log('Removing attachment from document with Id: ', DocumentId)
+
+                db.collection('Documents').doc(DocumentId).update({ attachment: null })
+                onUploadProgressEnd(this, payload)
+            })
+    })
+
+    return Promise
 }
 
 

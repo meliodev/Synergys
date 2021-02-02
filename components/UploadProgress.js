@@ -29,7 +29,7 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
 
                     {pending &&
                         <View style={{ paddingRight: 15, }}>
-                            <MaterialCommunityIcons name='clock-alert-outline' size={20} color={theme.colors.error} />
+                            <MaterialCommunityIcons name='clock' size={18} color={'#000'} />
                         </View>
                     }
                 </View>

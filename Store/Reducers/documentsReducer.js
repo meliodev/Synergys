@@ -1,36 +1,48 @@
+import { omit } from 'lodash'
 
-const initialState = { newAttachments: [] }
+const initialState = { newAttachments: {} } //add 
 
-function setNetworkStatus(state = initialState, action) {
+function handleUploadProgress(state = initialState, action) {
     let nextState
     switch (action.type) {
-        case 'UPLOAD_PROGRESS_CHANGED':
-            var newAttachmentIndex = state.newAttachments.findIndex(item => item.name === action.value.name) //name is unique (generated from instant date)
-            if (newAttachmentIndex !== -1) {
-                // attachment already on array: edit progress
-                nextState = {
-                    ...state,
-                    newAttachments: state.newAttachments.map(item => item.id === action.value.id ? { ...item, progress: action.value.progress } : item)
+        case 'UPLOAD_PROGRESS_STARTED':
+            console.log('UPLOAD_PROGRESS_STARTED')
+            nextState = {
+                ...state,
+                newAttachments: {
+                    ...state.newAttachments,
+                    [action.value.DocumentId]: {
+                        ...state.newAttachments[action.value.DocumentId],
+                        name: action.value.name,
+                        path: action.value.path,
+                        size: action.value.size,
+                        type: action.value.type,
+                        progress: 0
+                    }
                 }
             }
-            else {
-                // attachment is not on array (just started uploading): add it to array
-                nextState = {
-                    ...state,
-                    newAttachments: [...state.newAttachments, action.value]
+
+            return nextState || state
+
+        case 'UPLOAD_PROGRESS_CHANGED':
+            console.log('UPLOAD_PROGRESS_CHANGED')
+            nextState = {
+                ...state,
+                newAttachments: {
+                    ...state.newAttachments,
+                    [action.value.DocumentId]: {
+                        ...state.newAttachments[action.value.DocumentId],
+                        progress: action.value.progress
+                    }
                 }
             }
 
             return nextState || state
 
         case 'UPLOAD_PROGRESS_FINISHED':
-            var newAttachmentIndex = state.newAttachments.findIndex(item => item.name === action.value.name)
-            // Delete the new attachment from array
-            nextState = {
-                ...state,
-                newAttachments: state.newAttachments.filter((item, index) => index !== newAttachmentIndex)
-            }
-
+            console.log('UPLOAD_PROGRESS_FINISHED')
+            let nextState = Object.assign({}, state)
+            delete nextState.newAttachments[action.value.DocumentId]
             return nextState || state
 
         default:
@@ -38,4 +50,4 @@ function setNetworkStatus(state = initialState, action) {
     }
 }
 
-export default setNetworkStatus
+export default handleUploadProgress

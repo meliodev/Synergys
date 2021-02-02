@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform, BackHandler } from 'react-native';
 import { Card, Title, TextInput, ProgressBar } from 'react-native-paper'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
@@ -30,6 +32,8 @@ import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
 
+import { onUploadProgressStart, onUploadProgressChange, onUploadProgressEnd, setRole } from '../../core/redux'
+
 const db = firebase.firestore()
 
 const states = [
@@ -51,18 +55,23 @@ const types = [
 class UploadDocument extends Component {
     constructor(props) {
         super(props)
-        this.customBackHandler = this.customBackHandler.bind(this)
         this.fetchDocument = this.fetchDocument.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleUpload = this.handleUpload.bind(this)
-        this.persistDocument = this.persistDocument.bind(this)
-        this.offLineSubmit = this.offLineSubmit.bind(this)
+        this.submitOffline = this.submitOffline.bind(this)
+        this.submitOnline = this.submitOnline.bind(this)
+
+
+        this.uploadOffline = this.uploadOffline.bind(this)
+
+        this.uploadOnline = this.uploadOnline.bind(this)
+        this.persistDocumentOffline = this.persistDocumentOffline.bind(this)
+        this.persistDocumentOnline = this.persistDocumentOnline.bind(this)
         // this.pickFile = this.pickFile.bind(this)
         this.pickDoc = this.pickDoc.bind(this)
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.refreshProject = this.refreshProject.bind(this)
-        this.uploadFile = uploadFile.bind(this)
+        this.uploadFileOnline = uploadFile.bind(this)
         this.uploadFileOffline = uploadFileOffline.bind(this)
         this.deleteFile = this.deleteFile.bind(this)
 
@@ -111,8 +120,6 @@ class UploadDocument extends Component {
     }
 
     async componentDidMount() {
-        BackHandler.addEventListener('hardwareBackPress', this.customBackHandler)
-
         if (this.isEdit) {
             await this.fetchDocument()
             await this.fetchSignees()
@@ -128,7 +135,6 @@ class UploadDocument extends Component {
     }
 
     componentWillUnmount() {
-        BackHandler.removeEventListener('hardwareBackPress', this.customBackHandler)
         this.unsubscribeAttachmentListener && this.unsubscribeAttachmentListener()
     }
 
@@ -252,50 +258,77 @@ class UploadDocument extends Component {
         }
     }
 
-    //Offline (Creation only) **************************************************************
-    async offLineSubmit() {
+    //Submit handler
+    handleSubmit() {
+        const { isConnected } = this.props.network
+
+        if (isConnected)
+            this.submitOnline()
+
+        else {
+            console.log('offline submit...')
+            this.submitOffline()
+        }
+    }
+
+    validateInputs() {
+        let { project, name, attachment } = this.state
+
+        let projectError = nameValidator(project.id, '"Projet"')
+        let nameError = nameValidator(name.value, '"Nom du document"')
+
+        if (projectError || nameError) {
+            name.error = nameError
+            Keyboard.dismiss()
+            this.setState({ projectError, name, loading: false })
+            return false
+        }
+
+        return true
+    }
+
+    //Offline submit
+    async submitOffline() {
         if (this.isEdit) {
             Alert.alert('', 'Les mises à jours sont indisponibles en mode hors-ligne')
             return
         }
 
-        // //Handle isLoading or No edit done
-        // if (this.state.loading || this.state === this.initialState) return
+        //Handle isLoading or No edit done
+        if (this.state.loading || this.state === this.initialState) return
+        load(this, true)
 
-        // load(this, true)
+        //0. Validate inputs
+        const isValid = this.validateInputs()
+        if (!isValid) return
 
-        // //0. Validate inputs
-        // const isValid = this.validateInputs()
-        // if (!isValid) return
+        await this.uploadOffline()
 
-
-        //Upload file (store it on cache so user can view it)
-        await this.handleUploadOffline()
-
-        //SetDocument
-        this.handlePersistOffline()
+        // //SetDocument
+        this.persistDocumentOffline()
     }
 
-    async handleUploadOffline() {
+    async uploadOffline() {
         //1. Upload file
         var { project, name, description, type, state, attachment } = this.state
 
         const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
         this.uploadFileOffline(attachment, reference, this.DocumentId)
 
-        //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading file)
+        //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading duplicate file)
         const fromPath = this.cachePath
-        const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir //#issue: DownloadDir (SD card) is not always available on device
-        const destPath = `${Dir}/Synergys/Documents/${attachment.name}`
-        await RNFS.moveFile(fromPath, destPath)
+        const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+        const destFolder = `${Dir}/Synergys/Documents/`
+        await RNFS.mkdir(destFolder)
+        const destPath = `${destFolder}/${attachment.name}`
+        await RNFS.moveFile(fromPath, destPath).then(() => console.log('moved.'))
     }
 
-    handlePersistOffline() {
+    persistDocumentOffline() {
         // 2. ADDING document to firestore
         const { project, name, description, type, state, attachment } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         attachment.pending = true
-        console.log('ATTACHMENT', attachment)
 
         let document = {
             project: project,
@@ -321,13 +354,11 @@ class UploadDocument extends Component {
         batch.set(documentRef, document, { merge: true })
         batch.set(attachmentsRef, attachment)
         batch.commit() //commit locally
-
-        console.log('going back...')
-        this.props.navigation.goBack() //#task: SetTimeout
+        this.props.navigation.goBack()
     }
 
-    //Online ******************************************************************************
-    async handleSubmit() {
+    //Online submit
+    async submitOnline() {
         //Handle isLoading or No edit done
         if (this.state.loading || this.state === this.initialState) return
 
@@ -341,53 +372,38 @@ class UploadDocument extends Component {
         const newAttachment = this.state.attachment
         const intialAttachment = this.initialState.attachment
 
+        await this.persistDocumentOnline()
 
         if (newAttachment && (this.isEdit && newAttachment !== intialAttachment || !this.isEdit)) {  //Overwrite or Create new attachment
-            const uploadResult = await this.handleUpload()
+            const uploadResult = await this.uploadOnline()
             if (uploadResult === 'failure') return
         }
-
-        await this.persistDocument()
     }
 
-    validateInputs() {
-        let { project, name, attachment } = this.state
-
-        let projectError = nameValidator(project.id, '"Projet"')
-        let nameError = nameValidator(name.value, '"Nom du document"')
-
-        if (projectError || nameError) {
-            name.error = nameError
-            Keyboard.dismiss()
-            this.setState({ projectError, name, loading: false })
-            return false
-        }
-
-        return true
-    }
-
-    async handleUpload() {
+    async uploadOnline() {
         //1. Upload file
         const promise = new Promise(async (resolve, reject) => {
 
             var { project, name, description, type, state, attachment } = this.state
 
-            this.setState({ uploading: true })
+            // this.setState({ uploading: true })
             const reference = firebase.storage().ref(`Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
-            const result = await this.uploadFile(attachment, reference, true)
-            this.setState({ uploading: false })
+            const result = await this.uploadFileOffline(attachment, reference, this.DocumentId)
+            // this.setState({ uploading: false })
 
             if (result === 'failure') {
-                this.setState({ uploading: false, loading: false })
-                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
+                // this.setState({ uploading: false, loading: false })
+                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
                 reject('failure')
             }
 
-            //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading file)
+            //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading duplicate file)
             const fromPath = this.cachePath
-            const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir //#issue: DownloadDir (SD card) is not always available on device
-            const destPath = `${Dir}/Synergys/Documents/${attachment.name}`
-            await RNFS.moveFile(fromPath, destPath)
+            const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+            const destFolder = `${Dir}/Synergys/Documents/`
+            await RNFS.mkdir(destFolder)
+            const destPath = `${destFolder}/${attachment.name}`
+            RNFS.moveFile(fromPath, destPath) //Don't await becaus in case of error -> upload will not resolve
 
             resolve('success')
         })
@@ -395,10 +411,11 @@ class UploadDocument extends Component {
         return promise
     }
 
-    async persistDocument() {
+    async persistDocumentOnline() {
         // 2. ADDING document to firestore
         const { project, name, description, type, state, attachment } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        attachment.pending = true
 
         let document = {
             project: project,
@@ -430,6 +447,7 @@ class UploadDocument extends Component {
             .finally(() => this.setState({ uploading: false, loading: false }))
     }
 
+    //Delete #task: handle online and offline
     async deleteFile() {
         let fileRef = firebase.storage().refFromURL(this.initialState.attachment.downloadURL)
         await fileRef.delete().catch(e => {
@@ -440,11 +458,6 @@ class UploadDocument extends Component {
 
     refreshProject(project) {
         this.setState({ project, projectError: '' })
-    }
-
-    renderAttachment() {
-        const { attachment } = this.state
-        return <UploadProgress attachment={attachment} />
     }
 
     renderSignees() {
@@ -470,56 +483,50 @@ class UploadDocument extends Component {
         })
     }
 
-    customBackHandler() {
-        const { loading, uploading } = this.state
-
-        if (loading || uploading) {
-            this.uploadTask.pause()
-
-            const title = "Annuler l'opération"
-            const message = "Êtes-vous sûr(e) de vouloir annuler l'exportation du document. Toutes les nouvelles données saisies seront perdues."
-
-            const handleConfirm = () => {
-                this.uploadTask.cancel()
-                this.props.navigation.goBack()
-            }
-
-            const handleCancel = () => this.uploadTask.resume()
-
-            this.myAlert(title, message, handleConfirm, handleCancel)
+    onPressUploadPending() {
+        if (firebase.auth().currentUser.uid === this.state.editedBy.id) {
+            if (!uploadNotRunning) return //upload is running...
+            Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
         }
 
-        else this.props.navigation.goBack(null)
-        return true
+        else //In case remote user press the attachment while it is still uploading.
+            Alert.alert("", "Ce document est en cours d'exportation par un autre utilisateur. Le document sera bientôt disponible, veuillez patienter...")
     }
 
-    renderAttachmentInput() {
+    //#task1: handle online display progress
+    //task2: handle kill app
+    renderAttachment() {
         const { attachment } = this.state
+        const { isConnected } = this.props
 
-        if (attachment && attachment.pending)
+        //upload task is running -> show progress for local user
+        if (attachment) {
+            var reduxAttachment = this.props.documents.newAttachments[this.DocumentId] || null
+            attachment.progress = reduxAttachment ? reduxAttachment.progress : null
+            var uploadNotRunning = (!reduxAttachment || reduxAttachment && reduxAttachment.progress === 0) //remote user & local user before upload starts
+        }
+
+        if (attachment && attachment.pending) { //local & remote 
             return (
                 <TouchableOpacity style={{ marginTop: 15 }}>
                     <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>Pièce jointe</Text>
-                    <UploadProgress attachment={attachment} showProgress={false} pending={true} onPress={() => {
-                        if (firebase.auth().currentUser.uid === this.state.editedBy.id)
-                            Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
-
-                        else //In case another user views the document while the attachment is still uploading.
-                            Alert.alert("", "Ce document est en cours d'exportation par un autre utilisateur. Le document sera bientôt disponible, veuillez patienter...")
-                    }} />
+                    <UploadProgress attachment={attachment} showProgress={reduxAttachment} pending={uploadNotRunning} onPress={this.onPressUploadPending} />
                 </TouchableOpacity>
             )
+        }
 
-        else return (
-            <TouchableOpacity onPress={this.pickDoc}>
-                <MyInput
-                    label="Pièce jointe"
-                    value={attachment && attachment.name}
-                    editable={false}
-                    multiline
-                    right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.pickDoc} />} />
-            </TouchableOpacity>
-        )
+        else if ((attachment && !attachment.pending) || !attachment) {
+            return (
+                <TouchableOpacity onPress={this.pickDoc}>
+                    <MyInput
+                        label="Pièce jointe"
+                        value={attachment && attachment.name}
+                        editable={false}
+                        multiline
+                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.pickDoc} />} />
+                </TouchableOpacity>
+            )
+        }
     }
 
     render() {
@@ -529,10 +536,12 @@ class UploadDocument extends Component {
 
         const { isConnected } = this.props.network
 
+        console.log('ATTACHMENT', attachment)
+
         return (
             <View style={styles.container}>
                 {!isConnected && <OffLineBar />}
-                <Appbar back close customBackHandler={this.customBackHandler} title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={!loading} handleSubmit={isConnected ? this.handleSubmit : this.offLineSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back close title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -565,7 +574,7 @@ class UploadDocument extends Component {
                                     />
 
 
-                                    {this.renderAttachmentInput()}
+                                    {this.renderAttachment()}
 
                                     <MyInput
                                         label="Nom du document"
@@ -701,7 +710,8 @@ class UploadDocument extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
-        network: state.network
+        network: state.network,
+        documents: state.documents
         //fcmToken: state.fcmtoken
     }
 }
@@ -743,7 +753,29 @@ const styles = StyleSheet.create({
 })
 
 
+//OLD
+// customBackHandler() {
+//     const { loading, uploading } = this.state
 
+//     if (loading || uploading) {
+//         this.uploadTask.pause()
+
+//         const title = "Annuler l'opération"
+//         const message = "Êtes-vous sûr(e) de vouloir annuler l'exportation du document. Toutes les nouvelles données saisies seront perdues."
+
+//         const handleConfirm = () => {
+//             this.uploadTask.cancel()
+//             this.props.navigation.goBack()
+//         }
+
+//         const handleCancel = () => this.uploadTask.resume()
+
+//         this.myAlert(title, message, handleConfirm, handleCancel)
+//     }
+
+//     else this.props.navigation.goBack(null)
+//     return true
+// }
 
 
 

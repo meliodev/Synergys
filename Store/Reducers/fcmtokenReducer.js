@@ -8,6 +8,7 @@ function setFCMToken(state = initialState, action) {
   switch (action.type) {
     case 'FCMTOKEN':
       nextState = {
+        ...state,
         fcmToken: action.value
       }
 

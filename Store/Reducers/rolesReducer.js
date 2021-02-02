@@ -1,12 +1,17 @@
 
-const initialState = { role: { id: '', value: '' }}
+const initialState = { role: { id: '', value: '' } }
 
 function setRole(state = initialState, action) {
   let nextState
   switch (action.type) {
     case 'ROLE':
       nextState = {
-        role: { id: action.value.id, value: action.value.value,  }
+        ...state,
+        role: {
+          ...state.role,
+          id: action.value.id,
+          value: action.value.value,
+        }
       }
 
       return nextState || state

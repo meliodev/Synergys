@@ -298,7 +298,10 @@ export const pickImage = async (previousAttachments) => {
         if (Platform.OS === 'android') {
           path = 'file://' + path
           image.path = path
+          console.log('path', image.path)
+
         }
+
 
         else image.uri = uri //ios
 

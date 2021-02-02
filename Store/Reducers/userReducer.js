@@ -6,7 +6,12 @@ function setDisplayName(state = initialState, action) {
     switch (action.type) {
         case 'DISPLAYNAME':
             nextState = {
-                user: { displayName: action.value.displayName, connected: action.value.connected }
+                ...state,
+                user: {
+                    ...state.user,
+                    displayName: action.value.displayName,
+                    connected: action.value.connected
+                }
             }
 
             return nextState || state

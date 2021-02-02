@@ -13,6 +13,12 @@ export const setNetwork = (main, network) => {
     main.props.dispatch(action)
 }
 
+//Document actions
+export const onUploadProgressStart = (main, attachment) => {
+    const action = { type: "UPLOAD_PROGRESS_STARTED", value: attachment }
+    main.props.dispatch(action)
+}
+
 export const onUploadProgressChange = (main, attachment) => {
     const action = { type: "UPLOAD_PROGRESS_CHANGED", value: attachment }
     main.props.dispatch(action)

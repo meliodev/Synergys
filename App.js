@@ -29,6 +29,8 @@ const db = firebase.firestore()
 class App extends Component {
 
   async componentDidMount() {
+   // await this.storageBootStrap()
+
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
@@ -48,6 +50,13 @@ class App extends Component {
   //Forground: messages listener
   async onForegroundMessageReceived(message) {
     await notifee.displayNotification(JSON.parse(message.data.notifee))
+  }
+
+  //Rehydrate killed upload tasks (app killed)
+  async storageBootStrap() {
+
+    //handleUploadOffline
+    //handleUploadOnline (optional)
   }
 
   componentWillUnmount() {
