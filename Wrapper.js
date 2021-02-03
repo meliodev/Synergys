@@ -35,7 +35,7 @@ class Wrapper extends Component {
     }
 
     render() {
-        const { isConnected } = this.props
+        const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>

@@ -183,6 +183,12 @@ export default class Chat extends Component {
 
     async pickAndUploadFiles() {
         let attachments = []
+        const mp4 = 'video/mp4'
+        const jpeg = 'image/jpeg'
+        const png = 'image/png'
+        const pdf = 'application/pdf'
+        const doc = 'application/msword'
+        const docx = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 
         try {
             const results = await DocumentPicker.pickMultiple({ type: ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'] })
@@ -194,11 +200,9 @@ export default class Chat extends Component {
                 if (res.uri.startsWith('content://')) {
 
                     //1. Copy file to Cach to get its relative path (Documentpicker provides only absolute path which can not be used to upload file to firebase)
-                    const uriComponents = res.uri.split('/')
-                    const fileNameAndExtension = uriComponents[uriComponents.length - 1]
                     const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
 
-                    const fileCopied = await RNFS.copyFile(res.uri, destPath)
+                    var fileCopied = await RNFS.copyFile(res.uri, destPath)
                         .then(() => { return true })
                         .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
 
@@ -214,51 +218,46 @@ export default class Chat extends Component {
 
                     const { path, type, name, size } = document
 
-                    if (type === 'video/mp4')
+                    if (type === mp4)
                         this.setState({ videoSource: path })
 
-                    else if (type === 'image/png' || type === 'image/jpeg')
+                    else if (type === png || type === jpeg)
                         this.setState({ imageSource: path })
 
-                    else if (type === 'application/pdf' || type === 'application/msword' || type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                        this.setState({ file: { path, name, size, type } })
+
+                    else if (type === pdf || type === doc || type === docx)
+                        this.setState({ file: { source: path, type, name, size } })
 
                     const messageId = await uuidGenerator()
-
                     await this.handleSend([{ text: '' }], messageId) //#task: get text using chat ref //#task2: add intermediary screen to crop/and adjust images
 
                     document.messageId = messageId
                     attachments.push(document)
-
                 }
 
                 fileCopied = false
                 i = i + 1
             }
 
-            //UPLOAD FILES
-            const reference = firebase.storage().ref(`/Chat/${this.chatId}/`)
-            const filesUploaded = await this.uploadFiles(attachments, reference, this.state.attachedFiles, true, this.chatId)
+            //UPLOAD FILES 
+            const storageRefPath = `/Chat/${this.chatId}/`
+            const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath, true, this.chatId)
+            if (!uploadedAttachments) return
 
-            if (filesUploaded) {
-                for (const attachedFile of this.state.attachedFiles) { //attachedFile contains uploadTask which can be used to cancel/pause/resume the upload
+            for (const attachedFile of uploadedAttachments) { //attachedFile contains uploadTask which can be used to cancel/pause/resume the upload
+                const { downloadURL, name, size, type, messageId } = attachedFile
+                const payload = { pending: false, sent: true, received: true }
 
-                    const { downloadURL, name, size, contentType, messageId } = attachedFile
-                    const payload = { pending: false, sent: true, received: true }
+                if (type === jpeg || type === png)
+                    payload.image = downloadURL
 
-                    if (contentType === 'image/jpeg' || contentType === 'image/png')
-                        payload.image = downloadURL
+                else if (type === mp4)
+                    payload.video = downloadURL
 
-                    else if (contentType === 'video/mp4')
-                        payload.video = downloadURL
+                else if (type === pdf || type === doc || type === docx)
+                    payload.file = { source: downloadURL, name, size, type: type }
 
-
-                    else if (contentType === 'application/pdf' || contentType === 'application/msword' || contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-                        payload.file = { source: downloadURL, name, size, type: contentType }
-                    }
-
-                    await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).update(payload)
-                }
+                await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).update(payload)
             }
         }
 
@@ -291,9 +290,11 @@ export default class Chat extends Component {
             pending: false,
         }
 
+        console.log('msg', msg)
 
         // Handle attachments
         if (imageSource || videoSource || file && file.source) {
+            console.log('file', file)
 
             msg.sent = false
             msg.received = false
@@ -310,8 +311,8 @@ export default class Chat extends Component {
             }
 
             if (file) {
-                const { path, name, size, type } = file
-                msg.file = { source: path, name, size, type }
+                const { source, name, size, type } = file
+                msg.file = { source, name, size, type }
             }
         }
 
@@ -322,19 +323,26 @@ export default class Chat extends Component {
             }
         }
 
-        await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).set(msg)
-        await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
+        const batch = db.batch()
+        const chatsRef = db.collection('Chats').doc(this.chatId)
+        const messagesRef = db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId)
+
+        batch.set(chatsRef, latestMsg, { merge: true })
+        batch.set(messagesRef, msg)
+        batch.commit()
+
+        // await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).set(msg)
+        // await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
         this.setState({ imageSource: '', videoSource: '', file: {} })
     }
 
-
-    //files (pdf, docs...)
-
+    //Files (pdf, docs...)
     renderCustomView(props) {
         // return <ChatCustomView {...props} />
         const { messageType, pending, file } = props.currentMessage
 
         if (file && file.source) {
+
             const icon = setAttachmentIcon(messageType)
             const url = pending ? `file:///${file}` : file
 
@@ -360,6 +368,7 @@ export default class Chat extends Component {
         else return null
     }
 
+    //Videos
     renderMessageVideo(props, navigation) {
         const { currentMessage } = props
         const { video, pending } = currentMessage
@@ -390,6 +399,7 @@ export default class Chat extends Component {
         // )
     }
 
+    //Images
     renderMessageImage(props) {
         const { pending, image } = props.currentMessage
         const uri = pending ? `file:///${image}` : image

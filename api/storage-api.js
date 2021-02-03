@@ -81,8 +81,13 @@ async function uploadFile1(main, files, attachment, urls, storageRefPath, isChat
                 urls.push(downloadURL) //urls of files stored succesfully
                 resolve(attachment)
             })
-            .catch((e) => {
+            .catch(async (e) => {
                 console.error(e)
+                //Delete failed media message
+                if (isChat) {
+                    await db.collection('Chats').doc(chatId).collection('Messages').doc(attachment.messageId).delete() //#task: set status to uploadFailed to allow user to retry
+                    main.setState({ imageSource: '', videoSource: '', file: {} })
+                }
                 reject('failure')
             })
     })
@@ -105,19 +110,12 @@ export async function uploadFiles(files, storageRefPath, isChat, chatId) {
         .then(attachments => { return attachments })
         .catch(async err => {
 
-            setToast(this, 'e', 'Erreur lors du téléchargement des fichiers, veuillez réessayer.') //L'exportation d'au moins un fichier a échoué.
-
             //Delete the uploaded files
-            for (let i = 0; i < urls.length; i++) {
-                //Delete files from Firebase storage
-                firebase.storage().refFromURL(urls[i]).delete()
-
-                //Delete failed messages
-                if (isChat) {
-                    await db.collection('Chats').doc(chatId).collection('Messages').doc(files[i].messageId).delete() //#task: set status to uploadFailed to allow user to retry
-                    this.setState({ imageSource: '', videoSource: '', file: {} })
+            if (!isChat)
+                for (let i = 0; i < urls.length; i++) {
+                    //Delete files from Firebase storage
+                    firebase.storage().refFromURL(urls[i]).delete()
                 }
-            }
 
             return false
         })
