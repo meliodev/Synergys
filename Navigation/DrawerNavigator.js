@@ -17,7 +17,7 @@ const AppDrawer = createDrawerNavigator({
     path: ''
   }
 }
-  , {
+  ,{
     contentComponent: props => <DrawerMenu role={props} {...props} />,
     drawerLockMode: "locked-closed",
     drawerWidth: constants.ScreenWidth * 0.83,

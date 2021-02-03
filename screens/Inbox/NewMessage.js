@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/Entypo'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
 import RNFS from 'react-native-fs'
+import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
 import TextInput from '../../components/TextInput'
@@ -15,7 +16,7 @@ import Toast from '../../components/Toast'
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { load, setToast, updateField, setAttachmentIcon, nameValidator } from '../../core/utils'
+import { load, setToast, updateField, setAttachmentIcon, nameValidator, uuidGenerator, pickDocs } from '../../core/utils'
 
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFiles } from '../../api/storage-api';
@@ -28,7 +29,7 @@ import DocumentPicker from 'react-native-document-picker';
 
 const db = firebase.firestore()
 
-export default class Message extends Component {
+class NewMessage extends Component {
     constructor(props) {
         super(props)
         this.currentUser = firebase.auth().currentUser
@@ -57,7 +58,6 @@ export default class Message extends Component {
             accordionExpanded: true,
 
             attachments: [], //attachments picked
-            attachedFiles: [], //already attached: Stored on Firebase storage
 
             loading: false,
             error: "",
@@ -123,105 +123,12 @@ export default class Message extends Component {
         )
     }
 
-
     //PICKER
     async pickDocs() {
-        let { attachments } = this.state
-
-        try {
-            const results = await DocumentPicker.pickMultiple({
-                type: [DocumentPicker.types.allFiles],
-            })
-
-            for (const res of results) {
-                let fileCopied = false
-                let i = 0
-
-                console.log(results)
-
-                if (res.uri.startsWith('content://')) {
-                    const uriComponents = res.uri.split('/')
-                    const fileNameAndExtension = uriComponents[uriComponents.length - 1]
-                    const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
-
-                    fileCopied = await RNFS.copyFile(res.uri, destPath)
-                        .then(() => { return true })
-                        .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
-
-                    if (fileCopied) {
-                        const document = {
-                            path: destPath,
-                            type: res.type,
-                            name: res.name,
-                            size: res.size,
-                            progress: 0
-                        }
-
-                        attachments.push(document)
-                        this.setState({ attachments })
-                    }
-                }
-
-                fileCopied = false
-                i = i + 1
-            }
-        }
-        catch (err) {
-            if (DocumentPicker.isCancel(err))
-                console.log('User has canceled picker')
-            else
-                Alert.alert('Erreur lors de la séléction de fichier(s)')
-        }
+        var { attachments } = this.state
+        const newAttachments = await pickDocs(attachments)
+        this.setState({ attachments: newAttachments })
     }
-
-    // async uploadFiles() {
-    //     const promises = []
-    //     const files = this.state.attachments
-    //     const reference = firebase.storage().ref('/Inbox/Messages/')
-    //     let attachedFiles = []
-    //     console.log('2')
-
-    //     for (let i = 0; i < files.length; i++) {
-
-    //         console.log('3')
-    //         const referenceFile = reference.child(files[i].name)
-    //         const uploadTask = referenceFile.putFile(files[i].path)
-    //         promises.push(uploadTask)
-
-    //         uploadTask.on('state_changed', async function (snapshot) {
-    //             var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-    //             console.log('Upload file ' + i + ': ' + progress + '% done')
-    //             files[i].progress = progress / 100
-    //             this.setState({ files })
-    //         }.bind(this))
-
-    //         uploadTask.then(() => console.log('task ' + i + ' finished'))
-    //     }
-
-    //     console.log('4')
-
-    //     return await Promise.all(promises)
-    //         .then(async (results) => {
-
-    //             for (let i = 0; i < results.length; i++) {
-    //                 const downloadURL = await reference.child(files[i].name).getDownloadURL()
-    //                 const { name, size, contentType } = results[i].metadata
-    //                 const attachedFile = { downloadURL, name, size, contentType }
-    //                 attachedFiles.push(attachedFile)
-    //             }
-
-    //             this.setState({ attachedFiles })
-
-    //             console.log('5')
-    //             console.log('ALL FILES ARE UPLOADED')
-    //             return true
-    //         })
-    //         .catch(err => {
-    //             load(this, false)
-    //             console.error(err)
-    //             setToast(this, 'e', "Erreur lors de l'eportation des piéces jointes, veuillez réessayer.")
-    //         })
-    // }
 
     renderAttachments() {
         let { attachments, loading } = this.state
@@ -268,7 +175,10 @@ export default class Message extends Component {
 
     handleSend = async () => {
         const { loading, attachments } = this.state
-        if (loading) return
+        const { isConnected } = this.props.network
+
+        //0. Handle isLoading or No edit done
+        if (loading || this.state === this.initialState) return
         load(this, true)
 
         //1. Validate inputs
@@ -277,15 +187,21 @@ export default class Message extends Component {
 
         this.title = 'Envoie du message...'
 
-        //2. UPLOADING FILES: #task: delete all uploaded files in case one of them fails to upload.
-        if (attachments.length > 0) {
-            const reference = firebase.storage().ref('/Inbox/Messages/')
-            const filesUploaded = await this.uploadFiles(attachments, reference, this.state.attachedFiles)
-            if (!filesUploaded) return
+        //2. UPLOADING FILES #Online 
+        if (isConnected && attachments.length > 0) {
+            const storageRefPath = '/Inbox/Messages/'
+            const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath)
+
+            if (!uploadedAttachments) {
+                this.title = this.isReply ? 'Répondre' : 'Nouveau message'
+                return
+            }
+
+            this.setState({ attachments: uploadedAttachments })
         }
 
         //3. ADDING MESSAGE DOCUMENT
-        let { tagsSelected, subject, message, messagesCount, oldMessages, previousSubscribers, attachedFiles } = this.state
+        let { tagsSelected, subject, message, messagesCount, oldMessages, previousSubscribers } = this.state
 
         //Sender of this message
         let sender = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
@@ -319,7 +235,7 @@ export default class Message extends Component {
             subscribers: subscribers, //sender + receivers IDs // accumulation: ALL users involved in the discussion
             mainSubject: subject.value,
             message: message.value,
-            sentAt: moment().format('lll'),
+            sentAt: moment().format(),
             messagesCount: messagesCount + 1,
             haveRead: haveRead //Add subscribers who are not receivers of this message (subscribers - receivers)
         }
@@ -334,9 +250,12 @@ export default class Message extends Component {
             //subscribers: subscribers, //sender + receivers IDs
             subject: subject.value,
             message: message.value,
-            sentAt: moment().format('lll'),
+            sentAt: moment().format(),
             oldMessages: oldMessages,
-            attachments: this.state.attachedFiles
+        }
+
+        if (isConnected) {
+            msg.attachments = attachments
         }
 
         console.log('Ready to send message...')
@@ -350,40 +269,47 @@ export default class Message extends Component {
         this.props.navigation.goBack()
     }
 
+    //#OOS
     async sendNewMessage(latestMessage, msg) {
-        try {
-            const docRef = await db.collection('Messages').add(latestMessage)
-            await db.collection('Messages').doc(docRef.id).collection('AllMessages').add(msg)
-            load(this, false)
-            setToast(this, 'i', 'Message envoyé !')
-        }
 
-        catch (e) {
-            load(this, false)
-            setToast(this, 'e', 'Erreur de connection avec la Base de données')
-        }
+        const messageId = await uuidGenerator()
+
+        const batch = db.batch()
+        const messagesRef = db.collection('Messages').doc(messageId)
+        const allMessagesRef = messagesRef.collection('AllMessages').doc()
+        batch.set(messagesRef, latestMessage)
+        batch.set(allMessagesRef, msg)
+        batch.commit()
+
+        // const docRef = await db.collection('Messages').add(latestMessage)
+        // await db.collection('Messages').doc(docRef.id).collection('AllMessages').add(msg)
+        // load(this, false)
+        // setToast(this, 'i', 'Message envoyé !')
     }
 
+    //#OOS
     async sendReply(latestMessage, msg) {
-        try {
-            const docRef = await db.collection('Messages').doc(this.messageGroupeId).collection('AllMessages').add(msg)
-            await db.collection('Messages').doc(this.messageGroupeId).set(latestMessage, { merge: true })
-            load(this, false)
-            setToast(this, 'i', 'Message envoyé !')
-        }
 
-        catch (e) {
-            load(this, false)
-            setToast(this, 'e', 'Erreur de connection avec la Base de données')
-        }
+        const batch = db.batch()
+        const messagesRef = db.collection('Messages').doc(this.messageGroupeId)
+        const allMessagesRef = messagesRef.collection('AllMessages').doc()
+        batch.set(messagesRef, latestMessage, { merge: true })
+        batch.set(allMessagesRef, msg)
+        batch.commit()
+
+        // await db.collection('Messages').doc(this.messageGroupeId).collection('AllMessages').add(msg)
+        // await db.collection('Messages').doc(this.messageGroupeId).set(latestMessage, { merge: true })
+        // load(this, false)
+        // setToast(this, 'i', 'Message envoyé !')
     }
 
     render() {
         let { tagsSelected, subject, message, suggestions, accordionExpanded, oldMessages, loading, toastType, toastMessage } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading} handleAttachement={this.pickDocs.bind(this)} />
+                <Appbar back close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} />
                 <ScrollView style={styles.form}>
 
                     <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>
@@ -476,6 +402,19 @@ export default class Message extends Component {
         )
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        documents: state.documents
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(NewMessage)
+
+
 
 const styles = StyleSheet.create({
     container: {

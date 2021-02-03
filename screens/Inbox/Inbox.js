@@ -4,7 +4,6 @@ import React from "react"
 import { View } from 'react-native'
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import TabView from '../../components/TabView'
 import Appbar from '../../components/Appbar'
 
@@ -35,7 +34,6 @@ class Inbox extends React.Component {
 
         return (
             <View style={{ flex: 1 }}>
-                {!isConnected && <OffLineBar />}
                 <Appbar menu title titleText='Boîte de réception' />
 
                 <TabView

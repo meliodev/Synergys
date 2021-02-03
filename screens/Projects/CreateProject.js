@@ -15,7 +15,6 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import AddressInput from '../../components/AddressInput'
@@ -80,12 +79,10 @@ class CreateProject extends Component {
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
         this.isEdit = this.ProjectId ? true : false
-        this.title = this.ProjectId ? 'Modifier le projet' : 'Nouveau projet'
+        this.ProjectId = this.isEdit ? this.ProjectId : generatetId('GS-DOC-')
+        this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
 
         this.state = {
-            //AUTO-GENERATED
-            ProjectId: '', //Not editable
-
             //TEXTINPUTS
             name: { value: "", error: '' },
             description: { value: "", error: '' },
@@ -129,27 +126,22 @@ class CreateProject extends Component {
             expandedTaskId: '',
 
             error: '',
-            loading: false
+            loading: true
         }
     }
 
     async componentDidMount() {
-
+        
         if (this.isEdit) {
-            load(this, true)
             await this.fetchProject()
             this.fetchDocuments()
             this.fetchTasks()
-            load(this, false)
         }
 
-        //#task: avoid conflicts add auto-gen string
-        else {
-            const ProjectId = generatetId('GS-PR-')
-            this.setState({ ProjectId }, () => this.initialState = this.state)
-        }
+        else this.initialState = this.state
 
         this.fetchSuggestions()
+        load(this, false)
     }
 
     componentWillUnmount() {
@@ -164,13 +156,12 @@ class CreateProject extends Component {
     async fetchProject() {
         await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
             if (doc.exists) {
-                let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
+                let { client, name, description, note, address, state, step, tagsSelected } = this.state
                 let { createdAt, createdBy, editedAt, editedBy, attachedImages } = this.state
                 let { error, loading } = this.state
 
                 //General info
                 const project = doc.data()
-                ProjectId = this.ProjectId
                 client = project.client
                 name.value = project.name
                 description.value = project.description
@@ -201,7 +192,7 @@ class CreateProject extends Component {
 
                 const imagesCarousel = attachedImages.map((image) => image.downloadURL)
 
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, ProjectId, client, name, description, note, address, state, step, tagsSelected }, () => {
+                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected }, () => {
                     if (this.isInit)
                         this.initialState = this.state
 
@@ -300,35 +291,42 @@ class CreateProject extends Component {
         return true
     }
 
+    //#OOS
     async handleSubmit() {
         //Handle Loading or No edit done
-        let { error, loading, attachments } = this.state
+        let { loading, attachments } = this.state
         if (loading || this.state === this.initialState) return
         load(this, true)
 
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        let { ProjectId, client, name, description, note, address, state, step, tagsSelected } = this.state
+        let { client, name, description, note, address, state, step, tagsSelected } = this.state
 
-        //1. UPLOADING FILES
-        // console.log('1')
-        if (attachments.length > 0) {
-            this.title = 'Exportation des images...'
-            const reference = firebase.storage().ref('/Projects/' + ProjectId + '/Images/')
-            await this.uploadImages(attachments, reference, this.state.attachedImages)
+        //1. UPLOADING FILES (ONLINE ONLY)
+        const { isConnected } = this.props.documentsList
+
+        if (isConnected) {
+            if (attachments.length > 0) {
+                this.title = 'Exportation des images...'
+                const reference = firebase.storage().ref('/Projects/' + this.ProjectId + '/Images/')
+                await this.uploadImages(attachments, reference, this.state.attachedImages)
+            }
+
+            let { attachedImages } = this.state
+            if (this.isEdit && this.initialState.attachedImages !== attachedImages)
+                attachedImages = attachedImages.concat(this.initialState.attachedImages)
         }
 
-        let { attachedImages } = this.state
-        if (this.isEdit && this.initialState.attachedImages !== attachedImages)
-            attachedImages = attachedImages.concat(this.initialState.attachedImages)
-
-        //subscribers = editedBy + Admin + Tags added
+        //2. Set project
+        //subscribers = currentUser + collaborators (tags)
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
-        subscribers.push(currentUser)
+        const currentSubscriber = { ...currentUser }
+        currentSubscriber.email = this.currentUser.email
 
-        //2. ADDING project DOCUMENT
+        const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
+        subscribers.push(currentSubscriber)
+
         let project = {
             client: client,
             name: name.value,
@@ -339,7 +337,6 @@ class CreateProject extends Component {
             address: address,
             editedAt: moment().format('lll'),
             editedBy: currentUser,
-            attachments: attachedImages,
             subscribers: subscribers,
             deleted: false,
         }
@@ -349,33 +346,27 @@ class CreateProject extends Component {
             project.createdBy = currentUser
         }
 
-        console.log('Ready to update ticket project...')
+        if (isConnected) {
+            project.attachments = attachedImages
+        }
 
-        db.collection('Projects').doc(ProjectId).set(project, { merge: true })
+        console.log('Ready to set project...')
+        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })  
         setTimeout(() => this.props.navigation.goBack(), 1000)
-
-        // db.collection('Projects').doc(ProjectId).set(project, { merge: true })
-        //     .then(() => this.props.navigation.goBack())
-        //     .catch((e) => handleFirestoreError(e))
     }
 
     showAlert() {
         const title = "Supprimer le projet"
         const message = 'Etes-vous sûr de vouloir supprimer ce projet ? Cette opération est irreversible.'
-        const handleConfirm = async () => await this.handleDeleteProject()
+        const handleConfirm = () => this.handleDeleteProject()
         this.myAlert(title, message, handleConfirm)
     }
 
-    async handleDeleteProject() {
+    //#OOS
+    handleDeleteProject() { 
         load(this, true)
-
         db.collection('Projects').doc(this.ProjectId).update({ deleted: true })
         setTimeout(() => this.props.navigation.goBack(), 1000)
-
-        // await db.collection('Projects').doc(this.ProjectId).update({ deleted: true })
-        //     .then(() => this.props.navigation.goBack())
-        //     .catch((e) => setToast(this, 'e', "Erreur lors de l'archivage du projet, veuillez réesayer."))
-        //     .finally(() => load(this, false))
     }
 
     //Delete URLs from FIRESTORE 
@@ -425,7 +416,7 @@ class CreateProject extends Component {
     }
 
     renderAttachments(attachments, type, isUpload) {
-        let { loading } = this.state
+        const { loading } = this.state
 
         return attachments.map((image, key) => {
 
@@ -441,7 +432,7 @@ class CreateProject extends Component {
                 <TouchableOpacity
                     onPress={() => {
                         if (!isUpload)
-                            this.props.navigation.navigate('UploadDocument', { isEdit: true, DocumentId: DocumentId })
+                            this.props.navigation.navigate('UploadDocument', { DocumentId: DocumentId })
                     }}
                     style={styles.attachment}>
 
@@ -511,7 +502,7 @@ class CreateProject extends Component {
     }
 
     render() {
-        let { ProjectId, client, clientError, name, description, note, address, addressError, state, step } = this.state
+        let { client, clientError, name, description, note, address, addressError, state, step } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
         let { error, loading, toastMessage, toastType } = this.state
@@ -519,7 +510,6 @@ class CreateProject extends Component {
 
         return (
             <View style={styles.container}>
-                {!isConnected && <OffLineBar />}
                 <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 <ScrollView style={styles.container}>
@@ -531,7 +521,7 @@ class CreateProject extends Component {
                                 <MyInput
                                     label="Numéro du projet"
                                     returnKeyType="done"
-                                    value={ProjectId}
+                                    value={this.ProjectId}
                                     editable={false}
                                     disabled />
 

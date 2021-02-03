@@ -183,10 +183,9 @@ class CreateProduct extends Component {
         this.myAlert(title, message, handleConfirm)
     }
 
-    async handleDelete() {
-        await db.collection('Products').doc(this.ProductId).update({ deleted: true })
-            .then(async () => this.props.navigation.goBack())
-            .catch((e) => console.error(e))
+    handleDelete() {
+        db.collection('Products').doc(this.ProductId).update({ deleted: true })
+        this.props.navigation.goBack()
     }
 
     //Handle inputs & Submit
@@ -249,15 +248,8 @@ class CreateProduct extends Component {
         console.log('Ready to add product...')
 
         db.collection('Products').doc(ProductId).set(product, { merge: true })
-            .then(() => {
-                load(this, false)
-                this.props.navigation.state.params.onGoBack(product)
-                this.props.navigation.goBack()
-            })
-            .catch(e => {
-                load(this, false)
-                handleFirestoreError(e)
-            })
+        this.props.navigation.state.params.onGoBack(product)
+        this.props.navigation.goBack()
     }
 
     //Logo brand
@@ -265,7 +257,6 @@ class CreateProduct extends Component {
         let { newBrand } = this.state
         const attachments = await pickImage([])
         newBrand.attachment = attachments[0]
-
         this.setState({ newBrand })
     }
 
@@ -355,11 +346,8 @@ class CreateProduct extends Component {
 
     async addNewCategory() {
         const { newCategory } = this.state
-
-        await db.collection('ProductCategories').doc().set({ name: newCategory })
-            .then(() => this.setState({ category: { value: newCategory, error: '' }, newCategory: '' }))
-            .catch((e) => handleFirestoreError(e))
-            .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
+        db.collection('ProductCategories').doc().set({ name: newCategory })
+        setTimeout(() => this.setState({ category: { value: newCategory, error: '' }, newCategory: '', loadingDialog: false, showDialog: false }), 1000)
     }
 
     async addNewBrand() {
@@ -373,10 +361,8 @@ class CreateProduct extends Component {
 
         tagsSelected.push(newBrand)
 
-        await db.collection('Brands').doc().set({ name, logo })
-            .then(() => this.setState({ tagsSelected, newBrand: { name: '', attachment: {} } }))
-            .catch((e) => handleFirestoreError(e))
-            .finally(() => this.setState({ loadingDialog: false, showDialog: false }))
+        db.collection('Brands').doc().set({ name, logo })
+        setTimeout(() => this.setState({ tagsSelected, newBrand: { name: '', attachment: {} }, loadingDialog: false, showDialog: false }), 1000)
     }
 
     //Renderers

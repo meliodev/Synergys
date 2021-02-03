@@ -4,14 +4,13 @@ import LinearGradient from 'react-native-linear-gradient'
 import RNFS from 'react-native-fs'
 import firebase from '@react-native-firebase/app'
 import notifee, { EventType } from '@notifee/react-native'
-import NetInfo from "@react-native-community/netinfo"
 import { connect } from 'react-redux'
 
 import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
-import { setRole, setUser, setNetwork } from '../../core/redux'
+import { setRole, setUser } from '../../core/redux'
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
 const db = firebase.firestore()
@@ -33,27 +32,13 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
-    //1. Network listener
-    this.networkListener()
-
-    //2. Notification action listeners
+    //1. Notification action listeners
     await this.bootstrapNotifications()
     this.forgroundNotificationListener()
     this.backgroundNotificationListener()
 
-    //3. Auth listener & Navigation rooter
+    //2. Auth listener & Navigation rooter
     this.unsububscribe = this.navigationRooterAuthListener()
-  }
-
-  //Network listener
-  networkListener() {
-    this.unsubscribeNetwork = NetInfo.addEventListener(state => {
-      const { type, isConnected } = state
-      const network = { type, isConnected }
-      if (!isConnected && !this.alertDisplayed) Alert.alert('Mode Hors-Ligne', "L'application risque de ne pas fonctionner de façon optimale en mode hors-ligne. Veuillez rétablir votre connection réseau.")
-      this.alertDisplayed = true
-      setNetwork(this, network)
-    })
   }
 
   //User action on a notification has caused app to open
@@ -141,7 +126,7 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("DocumentsStack")
+          this.props.navigation.navigate("OrdersStack")
       }
 
       else {
@@ -239,8 +224,6 @@ const mapStateToProps = (state) => {
   return {
     role: state.roles.role,
     user: state.user.user,
-    network: state.network,
-    documents: state.documents,
     //fcmToken: state.fcmtoken
   }
 }

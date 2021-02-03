@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, FlatList, Keyboard } from 'react-native';
 import { List, Card } from 'react-native-paper';
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
@@ -123,7 +122,6 @@ class ListProjects extends Component {
 
         return (
             <View style={styles.container}>
-                {!isConnected && <OffLineBar />}
                 <SearchBar
                     close={!this.isRoot}
                     main={this}

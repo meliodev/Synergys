@@ -76,7 +76,7 @@ class ListMessages extends Component {
                         renderItem={(item) => this.renderMessage(item)}
                     />
                     :
-                    <EmptyList iconName='email' header='Notifications' description="Vous n'avez aucune notification pour le moment." offLine={this.props.offLine} />
+                    <EmptyList iconName='email' header='Messages' description="Vous n'avez aucun message pour le moment." offLine={this.props.offLine} />
                 }
                 <MyFAB icon='pencil' onPress={() => this.props.navigation.navigate('NewMessage')} />
             </View >

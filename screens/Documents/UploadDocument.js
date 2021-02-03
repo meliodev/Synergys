@@ -16,7 +16,6 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
@@ -27,7 +26,7 @@ import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load } from "../../core/utils";
+import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -209,39 +208,8 @@ class UploadDocument extends Component {
     }
 
     async pickDoc() {
-        try {
-            const res = await DocumentPicker.pick({
-                type: [DocumentPicker.types.pdf],
-            })
-
-            //Android only
-            if (res.uri.startsWith('content://')) {
-
-                const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-                const destFolder = `${Dir}/Synergys/Documents`
-                await RNFS.mkdir(destFolder)
-                this.cachePath = `${destFolder}/${'temporaryDoc'}${Date.now()}`
-                //this.cachePath = `${destFolder}/test.pdf`
-                await RNFS.moveFile(res.uri, this.cachePath)
-                    .then(() => {
-                        const attachment = {
-                            path: this.cachePath,
-                            type: 'application/pdf',
-                            name: `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`,
-                            size: res.size,
-                            progress: 0
-                        }
-
-                        this.setState({ attachment })
-                    })
-                    .catch((e) => Alert.alert(e))
-            }
-        }
-
-        catch (err) {
-            if (DocumentPicker.isCancel(err)) return
-            else Alert.alert(err)
-        }
+        const attachment = await pickDoc(true, [DocumentPicker.types.pdf])
+        this.setState({ attachment })
     }
 
     //Submit handler
@@ -523,7 +491,6 @@ class UploadDocument extends Component {
 
         return (
             <View style={styles.container}>
-                {!isConnected && <OffLineBar />}
                 <Appbar back close title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?

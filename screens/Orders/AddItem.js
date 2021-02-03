@@ -121,6 +121,8 @@ export default class AddItem extends Component {
         const { item, description, suggestions, tagsSelected, quantity, price, taxe, loading } = this.state
         const noItemSelected = tagsSelected.length === 0
 
+        const { isConnected } = this.props.network
+
         return (
             <View style={styles.container}>
                 <Appbar back={!loading} title titleText='Ligne de commande' check={!loading} handleSubmit={this.handleSubmit} />

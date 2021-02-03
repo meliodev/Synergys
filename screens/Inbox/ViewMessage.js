@@ -102,7 +102,7 @@ export default class ViewMessage extends Component {
                     })}
                 </View>
 
-                {this.renderAttachments(selectedMessage.attachments)}
+                {selectedMessage.attachments && this.renderAttachments(selectedMessage.attachments)}
 
                 {/* {selectedMessage.sender.id !== this.currentUser.uid && */}
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginTop: 10 }}>

@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import { ThemeColors } from 'react-navigation'
 import * as theme from '../../core/theme'
 import { Title } from 'react-native-paper'
+import { connect } from 'react-redux'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -11,8 +12,7 @@ moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
 
-
-export default class MyDatePicker extends Component {
+class MyDatePicker extends Component {
     constructor(props) {
         super(props)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -74,3 +74,11 @@ export default class MyDatePicker extends Component {
     }
 
 }
+
+const mapStateToProps = (state) => {
+    return {
+        network: state.network,
+    }
+}
+
+export default connect(mapStateToProps)(MyDatePicker)

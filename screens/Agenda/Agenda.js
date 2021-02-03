@@ -243,7 +243,7 @@ class Agenda2 extends Component {
         )
 
         return (
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, isEdit: true, title: 'Modifier la tâche', DateId: item.date, TaskId: item.id })} style={styles.item}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, DateId: item.date, TaskId: item.id })} style={styles.item}>
                 <View style={{ flex: 0.8, justifyContent: 'space-between', height: constants.ScreenHeight * 0.1, marginVertical: 10 }}>
                     <Text numberOfLines={1} style={theme.customFontMSbold.body}>{item.name}</Text>
                     <Text style={[theme.customFontMSsemibold.caption, { color: 'gray', marginTop: 5 }]}>{item.type} {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption, { fontWeight: 'normal' }]}>(jour {item.dayProgress})</Text>}</Text>
@@ -345,12 +345,9 @@ class Agenda2 extends Component {
         const roleId = this.props.role.id
         let { isCalendar, displayType, items, filteredItems, type, status, priority, assignedTo, project, filterOpened } = this.state //items and filter fields
         const filterActivated = !_.isEqual(items, filteredItems)
-        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
-
-                {!isConnected && <OffLineBar />}
 
                 { (roleId === 'admin' || roleId === 'dircom' || roleId === 'tech') ?
                     <PickerBar

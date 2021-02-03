@@ -15,7 +15,7 @@ moment.locale('fr')
 
 import { withNavigation } from 'react-navigation'
 import firebase from '@react-native-firebase/app'
-const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg";
+
 const db = firebase.firestore()
 
 const MessageItem = ({ message, navigation, options, functions, ...props }) => {

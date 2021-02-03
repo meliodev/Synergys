@@ -6,7 +6,6 @@ import { FAB } from 'react-native-paper'
 import Animated from 'react-native-reanimated';
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import SearchBar from '../../components/SearchBar'
 import TabView from '../../components/TabView'
@@ -45,8 +44,6 @@ class RequestsManagement extends React.Component {
 
         return (
             <View style={{ flex: 1 }}>
-                {!isConnected && <OffLineBar />}
-
                 <SearchBar
                     main={this}
                     title={!showInput}

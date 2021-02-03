@@ -7,12 +7,22 @@ import '@react-native-firebase/functions'
 
 import { Alert, Platform } from 'react-native'
 import ImagePicker from 'react-native-image-picker'
+import DocumentPicker from 'react-native-document-picker';
+import RNFS from 'react-native-fs'
 import RNFetchBlob from 'rn-fetch-blob'
 import FileViewer from 'react-native-file-viewer'
 import { decode as atob, encode as btoa } from "base-64"
 import SearchInput, { createFilter } from 'react-native-search-filter'
+import ShortUniqueId from 'short-unique-id'
+import UUIDGenerator from 'react-native-uuid-generator'
+
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import * as theme from './theme'
 
+//##VALIDATORS
 export const emailValidator = email => {
   const re = /\S+@\S+\.\S+/;
 
@@ -58,8 +68,7 @@ export const phoneValidator = phone => {
 }
 
 
-//Miscelaneous
-
+//##HELPERS
 export const checkPlural = (arrayLength, string) => {
   let str = ''
   if (arrayLength === 0)
@@ -127,9 +136,6 @@ export const setAttachmentIcon = (type) => {
 //   })
 // }
 
-import ShortUniqueId from 'short-unique-id'
-import UUIDGenerator from 'react-native-uuid-generator';
-
 export const generatetId = (suffix) => {
   const options = { length: 4 }
   const uid = new ShortUniqueId(options)
@@ -163,7 +169,6 @@ export const myAlert = function myAlert(title, message, handleConfirm, handleCan
 export const downloadFile = async (main, fileName, url) => { //#task configure for ios
 
   //if file already exists in this device read it..
-  console.log('fileName', fileName)
 
   try {
     const { config, fs } = RNFetchBlob
@@ -264,16 +269,17 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
-//Image picker
-const imagePickerOptions = {
-  title: 'Selectionner une image',
-  takePhotoButtonTitle: 'Prendre une photo',
-  chooseFromLibraryButtonTitle: 'Choisir de la librairie',
-  cancelButtonTitle: 'Annuler',
-  noData: true,
-}
-
+//##IMAGE PICKER
 export const pickImage = async (previousAttachments) => {
+
+  const imagePickerOptions = {
+    title: 'Selectionner une image',
+    takePhotoButtonTitle: 'Prendre une photo',
+    chooseFromLibraryButtonTitle: 'Choisir de la librairie',
+    cancelButtonTitle: 'Annuler',
+    noData: true,
+  }
+
   return new Promise(((resolve, reject) => {
 
     ImagePicker.showImagePicker(imagePickerOptions, response => {
@@ -298,23 +304,103 @@ export const pickImage = async (previousAttachments) => {
         if (Platform.OS === 'android') {
           path = 'file://' + path
           image.path = path
-          console.log('path', image.path)
-
         }
 
-
-        else image.uri = uri //ios
+        else image.uri = uri
 
         attachments.push(image)
         resolve(attachments)
       }
-      
+
     })
 
   }))
 }
 
-//FILTERS
+//##FILE PICKER
+export const pickDocs = async (attachments, type = [DocumentPicker.types.allFiles]) => {
+
+  try {
+    const results = await DocumentPicker.pickMultiple({ type })
+
+    for (const res of results) {
+      var fileMoved = false
+      var i = 0
+
+      if (res.uri.startsWith('content://')) {
+
+        const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+        const destFolder = `${Dir}/Synergys/Documents`
+        await RNFS.mkdir(destFolder) //create directory if it doesn't exist
+        const destPath = `${destFolder}/${res.name}` //#diff
+
+        fileMoved = await RNFS.moveFile(res.uri, destPath)
+          .then(() => { return true })
+
+        if (!fileMoved) throw 'Erreur lors de la séléction du fichier. Veuillez réessayer.'
+
+        const attachment = {
+          path: destPath,
+          type: res.type,
+          name: res.name,
+          size: res.size,
+          progress: 0
+        }
+
+        attachments.push(attachment)
+      }
+
+      fileMoved = false
+      i = i + 1
+    }
+
+    return attachments
+  }
+
+  catch (error) {
+    if (DocumentPicker.isCancel(error)) return
+    return { error }
+  }
+}
+
+export const pickDoc = async (genName = false, type = [DocumentPicker.types.allFiles]) => {
+
+  try {
+    const res = await DocumentPicker.pick({ type })
+
+    //Android only
+    if (res.uri.startsWith('content://')) {
+
+      const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+      const destFolder = `${Dir}/Synergys/Documents`
+      await RNFS.mkdir(destFolder)
+      const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
+      const destPath = `${destFolder}/${attachmentName}`
+
+      const fileMoved = await RNFS.moveFile(res.uri, destPath)
+        .then(() => { return true })
+
+      if (!fileMoved) throw 'Erreur lors de la séléction du fichier. Veuillez réessayer.'
+
+      const attachment = {
+        path: destPath,
+        type: res.type,
+        name: attachmentName, //#diff
+        size: res.size,
+        progress: 0
+      }
+
+      return attachment
+    }
+  }
+
+  catch (error) {
+    if (DocumentPicker.isCancel(error)) return
+    return { error }
+  }
+}
+
+//##FILTERS
 export const setFilter = (main, field, value) => {
   const update = {}
   update[field] = value
@@ -336,7 +422,6 @@ export const handleFilter = (inputList, outputList, fields, searchInput, KEYS_TO
   return outputList
 }
 
-
 export const handleFilterAgenda = (inputList, outputList, fields, KEYS_TO_FILTERS) => {
   outputList = JSON.parse(JSON.stringify(inputList))
 
@@ -352,7 +437,6 @@ export const handleFilterAgenda = (inputList, outputList, fields, KEYS_TO_FILTER
 
   return outputList
 }
-
 
 export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 
@@ -380,3 +464,55 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 
 
 
+
+
+
+// //File Picker
+// export const pickDocs = async (attachments, type = [DocumentPicker.types.allFiles]) => {
+
+//   try {
+//     const results = await DocumentPicker.pickMultiple({ type: type })
+
+//     for (const res of results) {
+//       var fileMoved = false
+//       var i = 0
+
+//       if (res.uri.startsWith('content://')) {
+
+//         const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+//         const destFolder = `${Dir}/Synergys/Documents`
+//         await RNFS.mkdir(destFolder) //create directory if it doesn't exist
+//         const destPath = `${destFolder}/${res.name}` //#diff
+
+//         fileMoved = await RNFS.moveFile(res.uri, destPath)
+//           .then(() => { return true })
+
+//         if (!fileMoved) throw 'Erreur lors de la séléction du fichier. Veuillez réessayer.'
+
+//         const attachment = {
+//           path: destPath,
+//           type: res.type,
+//           name: res.name,
+//           size: res.size,
+//           progress: 0
+//         }
+
+//         attachments.push(attachment)
+//       }
+
+//       fileMoved = false
+//       i = i + 1
+//     }
+
+//     return attachments
+//   }
+
+//   catch (err) {
+//     console.error(err)
+//     return { error: err }
+//     if (DocumentPicker.isCancel(err))
+//       console.log('User has canceled picker')
+//     else
+//       Alert.alert('Erreur lors de la séléction de fichier(s)')
+//   }
+// }

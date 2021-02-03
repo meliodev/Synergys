@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
-import { Button, Dimensions, Alert } from 'react-native'
+import { Button, Dimensions, Alert, Text } from 'react-native'
 import notifee, { EventType, AndroidImportance } from '@notifee/react-native'
-import NetInfo from "@react-native-community/netinfo"
 import { connect } from 'react-redux'
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/es/integration/react'
@@ -12,6 +11,8 @@ import '@react-native-firebase/firestore'
 import '@react-native-firebase/storage'
 import '@react-native-firebase/functions'
 import '@react-native-firebase/messaging'
+
+import OffLineBar from './components/OffLineBar'
 
 const settings = {
   cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
@@ -24,7 +25,8 @@ import { MenuProvider } from 'react-native-popup-menu';
 import Store from './Store/configureStore'
 
 import RootController from './Navigation/DrawerNavigator'
-import CustomClaims from './api/CustomClaims'
+// import CustomClaims from './api/CustomClaims'
+import Wrapper from './Wrapper'
 
 const db = firebase.firestore()
 
@@ -43,9 +45,6 @@ class App extends Component {
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
   }
 
-  componentWillUnmount() {
-    this.unsubscribe()
-  }
 
   //Forground: messages listener
   async onForegroundMessageReceived(message) {
@@ -58,13 +57,15 @@ class App extends Component {
 
   render() {
     let persistor = persistStore(Store)
-   // persistor.purge()
+    // persistor.purge()
 
     return (
       <Provider store={Store}>
         <PersistGate persistor={persistor}>
           <MenuProvider>
-            <RootController />
+            <Wrapper>
+              <RootController />
+            </Wrapper>
           </MenuProvider>
         </PersistGate>
       </Provider>

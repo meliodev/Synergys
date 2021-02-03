@@ -8,6 +8,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
@@ -65,13 +66,12 @@ class CreateTask extends Component {
 
         this.DateId = this.props.navigation.getParam('DateId', '')
         this.TaskId = this.props.navigation.getParam('TaskId', '')
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
-        this.title = this.props.navigation.getParam('title', 'Créer une tâche')
+        this.isEdit = this.DateId ? true : false
+        this.TaskId = this.isEdit ? this.TaskId : generatetId('GS-TC-')
+
+        this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 
         this.state = {
-            //AUTO-GENERATED
-            TaskId: '', //Not editable
-
             //TEXTINPUTS
             name: { value: "Task 1", error: '' },
             description: { value: "", error: '' },
@@ -104,10 +104,7 @@ class CreateTask extends Component {
             await this.fetchTask()
         }
 
-        else {
-            const TaskId = generatetId('GS-TC-')
-            this.setState({ TaskId }, () => this.initialState = this.state)
-        }
+        else this.initialState = this.state
     }
 
     componentWillUnmount() {
@@ -117,14 +114,13 @@ class CreateTask extends Component {
 
     fetchTask() {
         this.unsubscribe = db.collection('Agenda').doc(this.DateId).collection('Tasks').doc(this.TaskId).onSnapshot((doc) => {
-            let { TaskId, name, assignedTo, description, project, type, priority, status, address, startDate, dueDate } = this.state
+            let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             const task = doc.data()
 
             if (!task) return
 
             // //General info
-            TaskId = this.TaskId
             name.value = task.name
             assignedTo = task.assignedTo
             description.value = task.description
@@ -143,7 +139,7 @@ class CreateTask extends Component {
             editedBy = task.editedBy
 
             this.setState({ createdAt, createdBy, editedAt, editedBy })
-            this.setState({ TaskId, name, assignedTo, description, project, type, priority, status, address, startDate, dueDate }, () => {
+            this.setState({ name, assignedTo, description, project, type, priority, status, address, startDate, dueDate }, () => {
                 if (this.isInit)
                     this.initialState = this.state
 
@@ -205,17 +201,18 @@ class CreateTask extends Component {
     //Submit
     async handleSubmit() {
         let { error, loading } = this.state
-        let { TaskId, name, assignedTo, description, project, type, priority, status, address, startDate, dueDate } = this.state
+        let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate } = this.state
 
         if (loading || this.state === this.initialState) return
+        load(this, true)
 
         //1. Validate inputs
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        load(this, true)
-
         // 2. ADDING task DOCUMENT
+        const currentUser = { userId: this.currentUser.uid, userName: this.currentUser.displayName }
+
         let task = {
             name: name.value,
             assignedTo: { id: assignedTo.id, fullName: assignedTo.fullName },
@@ -227,33 +224,37 @@ class CreateTask extends Component {
             address: { description: address.description, place_id: address.place_id },
             startDate: startDate,
             dueDate: dueDate,
-            editedAt: moment().format('lll'),
-            editedBy: { userId: this.currentUser.uid, userName: this.currentUser.displayName },
-            subscribers: [{ id: this.currentUser.uid }, { id: adminId }] //add others (DC, CMX)
+            editedAt: moment().format(),
+            editedBy: currentUser,
+            subscribers: [{ id: this.currentUser.uid }] //add others (DC, CMX)
         }
 
         if (!this.isEdit) {
-            task.createdAt = moment().format('lll')
-            task.createdBy = { userId: this.currentUser.uid, userName: this.currentUser.displayName }
+            task.createdAt = moment().format()
+            task.createdBy = currentUser
         }
 
         console.log('Ready to add task...')
+
+        const batch = db.batch()
         const agendaId = moment(startDate).format('YYYY-MM-DD')
         const agendaRef = db.collection('Agenda').doc(agendaId)
+        const tasksRef = agendaRef.collection('Tasks').doc(this.TaskId)
 
-        try {
-            await agendaRef.set({ date: agendaId }, { merge: true })
-            await agendaRef.collection('Tasks').doc(TaskId).set(task, { merge: true })
-            if (this.isEdit)
-                this.props.navigation.state.params.onGoBack(false) //Don't refresh tasks in agenda
-            this.props.navigation.goBack()
-        }
+        batch.set(agendaRef, { date: agendaId }, { merge: true })
+        batch.set(tasksRef, task, { merge: true })
+        batch.commit()
 
-        catch (error) {
-            this.setState({ error })
-        }
+        if (this.isEdit)
+            this.props.navigation.state.params.onGoBack(false) //Don't refresh tasks in agenda
 
-        load(this, false)
+        this.props.navigation.goBack()
+
+        // await agendaRef.set({ date: agendaId }, { merge: true })
+        // await agendaRef.collection('Tasks').doc(this.TaskId).set(task, { merge: true })
+        // if (this.isEdit)
+        //     this.props.navigation.state.params.onGoBack(false) //Don't refresh tasks in agenda
+        // this.props.navigation.goBack()
     }
 
 
@@ -264,17 +265,18 @@ class CreateTask extends Component {
         this.myAlert(title, message, handleConfirm)
     }
 
-    async handleDelete() {
+    //#OOS
+    handleDelete() {
         this.title = 'Suppression de la tâche...'
         load(this, true)
-        await db.collection('Agenda').doc(this.DateId).collection('Tasks').doc(this.TaskId).delete()
+        db.collection('Agenda').doc(this.DateId).collection('Tasks').doc(this.TaskId).delete()
         load(this, false)
         this.props.navigation.state.params.onGoBack(true) //Refresh manually tasks in agenda because onSnapshot doesn't listen to delete operations.
         this.props.navigation.goBack()
     }
 
     render() {
-        let { TaskId, name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address } = this.state
+        let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
 
         return (
@@ -292,7 +294,7 @@ class CreateTask extends Component {
                                 <MyInput
                                     label="Numéro de la tâche"
                                     returnKeyType="done"
-                                    value={TaskId}
+                                    value={this.TaskId}
                                     editable={false}
                                     style={{ marginBottom: 15 }}
                                     disabled
@@ -438,6 +440,7 @@ class CreateTask extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network,
         //fcmToken: state.fcmtoken
     }
 }

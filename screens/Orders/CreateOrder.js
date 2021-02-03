@@ -163,10 +163,8 @@ class CreateOrder extends Component {
     async handleDelete() {
         load(this, true)
         this.title = 'Suppression de la commande...'
-        await db.collection('Orders').doc(this.OrderId).update({ deleted: true })
-            .then(() => this.props.navigation.goBack())
-            .catch((e) => console.error(e))
-            .finally(() => load(this, false))
+        db.collection('Orders').doc(this.OrderId).update({ deleted: true })
+        this.props.navigation.goBack()
     }
 
     //inputs validation & submit
@@ -230,14 +228,7 @@ class CreateOrder extends Component {
 
         console.log('Ready to add order...')
         db.collection('Orders').doc(OrderId).set(order, { merge: true })
-            .then(() => {
-                load(this, false)
-                this.props.navigation.goBack()
-            })
-            .catch(e => {
-                load(this, false)
-                handleFirestoreError(e)
-            })
+        this.props.navigation.goBack()
     }
 
     //refresh inputs
@@ -477,6 +468,8 @@ class CreateOrder extends Component {
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
 
+        const { isConnected } = this.props.network
+
         return (
             <View style={styles.container}>
                 <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
@@ -627,6 +620,7 @@ class CreateOrder extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network
         //fcmToken: state.fcmtoken
     }
 }

@@ -2,18 +2,18 @@ import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Image, TouchableOpacity, Keyboard } from 'react-native';
 import { Card, Title, FAB, ProgressBar, List } from 'react-native-paper'
 
-import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import * as theme from '../../../core/theme';
+import { constants } from '../../../core/constants';
 
-import Appbar from '../../components/Appbar'
-import AutoCompleteProducts from '../../components/AutoCompleteProducts'
-import MyInput from '../../components/TextInput'
-import Picker from "../../components/Picker"
-import Loading from "../../components/Loading"
+import Appbar from '../../../components/Appbar'
+import AutoCompleteProducts from '../../../components/AutoCompleteProducts'
+import MyInput from '../../../components/TextInput'
+import Picker from "../../../components/Picker"
+import Loading from "../../../components/Loading"
 
-import { updateField, nameValidator, setToast, load } from "../../core/utils";
+import { updateField, nameValidator, setToast, load } from "../../../core/utils";
 import firebase from '@react-native-firebase/app';
-import { handleFirestoreError } from '../../core/exceptions';
+import { handleFirestoreError } from '../../../core/exceptions';
 
 const db = firebase.firestore()
 

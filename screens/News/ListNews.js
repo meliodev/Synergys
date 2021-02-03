@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { StyleSheet, SafeAreaView, FlatList, View } from 'react-native'
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import NewsItem from '../../components/NewsItem'
 import Loading from '../../components/Loading'
@@ -75,7 +74,6 @@ class ListNews extends Component {
         return (
 
             <SafeAreaView style={styles.container}>
-                {!isConnected && <OffLineBar />}
                 <Appbar menu title titleText='Actualités' />
 
                 {loading ?

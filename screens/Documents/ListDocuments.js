@@ -5,7 +5,6 @@ import firebase from '@react-native-firebase/app'
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
 import DocumentItem from '../../components/DocumentItem'
@@ -118,7 +117,6 @@ class ListDocuments extends Component {
 
         return (
             <View style={styles.container}>
-                {!isConnected && <OffLineBar />}
 
                 <SearchBar
                     main={this}

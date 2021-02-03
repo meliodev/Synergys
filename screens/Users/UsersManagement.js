@@ -4,7 +4,6 @@ import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import TwoTabs from '../../components/TwoTabs'
 import SearchBar from '../../components/SearchBar'
 import TabView from '../../components/TabView'
@@ -49,7 +48,6 @@ class UsersManagement extends React.Component {
 
         return (
             <View style={{ flex: 1 }}>
-                {!isConnected && <OffLineBar />}
                 <SearchBar
                     main={this}
                     title={!this.state.showInput}

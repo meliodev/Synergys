@@ -1,6 +1,6 @@
 import { omit } from 'lodash'
 
-const initialState = { newAttachments: {} } //add 
+const initialState = { newAttachments: {} }
 
 function handleUploadProgress(state = initialState, action) {
     let nextState
@@ -14,7 +14,6 @@ function handleUploadProgress(state = initialState, action) {
                     [action.value.DocumentId]: {
                         ...state.newAttachments[action.value.DocumentId],
                         name: action.value.name,
-                        // originalPath: action.value.originalPath,
                         path: action.value.path,
                         size: action.value.size,
                         type: action.value.type,

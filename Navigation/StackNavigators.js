@@ -51,7 +51,6 @@ import ListOrders from '../screens/Orders/ListOrders'
 import AddItem from '../screens/Orders/AddItem'
 import CreateProduct from '../screens/Orders/CreateProduct'
 import CreateOrder from '../screens/Orders/CreateOrder'
-import CreateTaxe from '../screens/Orders/CreateTaxe'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -234,10 +233,6 @@ const OrdersStack = createStackNavigator({
     },
     CreateOrder: {
         screen: CreateOrder,
-        navigationOptions: hideHeader
-    },
-    CreateTaxe: {
-        screen: CreateTaxe,
         navigationOptions: hideHeader
     },
     ListProjects: {

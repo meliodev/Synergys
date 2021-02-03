@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { List } from 'react-native-paper';
 import { connect } from 'react-redux'
 
-import OffLineBar from '../../components/OffLineBar'
 import SearchBar from '../../components/SearchBar'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
@@ -114,7 +113,6 @@ class ListOrders extends Component {
 
         return (
             <View style={styles.container}>
-                {!isConnected && <OffLineBar />}
 
                 <SearchBar
                     close={!this.isRoot}
