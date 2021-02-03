@@ -68,7 +68,6 @@ class Profile extends Component {
     }
 
     componentDidMount() {
-
         load(this, true)
         this.setPermissions()
         this.fetchData()
@@ -348,21 +347,22 @@ class Profile extends Component {
                                     disabled
                                 />
 
-                                <TouchableOpacity onPress={() => {
+                                {/* <TouchableOpacity onPress={() => {
                                     if (isOwner)
                                         this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
-                                }}>
+                                }}> */}
                                     <MyInput
                                         label="Email"
                                         returnKeyType="done"
                                         value={email.value}
                                         autoCapitalize="none"
                                         editable={false}
-                                        right={isOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                            this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
-                                        } />}
+                                        disabled
+                                        // right={isOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                        //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
+                                        // } />}
                                     />
-                                </TouchableOpacity>
+                                {/* </TouchableOpacity> */}
 
                                 {isOwner &&
                                     <Button
