@@ -7,6 +7,7 @@ import firebase from '@react-native-firebase/app'
 import Appbar from '../../components/Appbar'
 import AvatarText from '../../components/AvatarText'
 import MyInput from '../../components/TextInput'
+import AddressInput from '../../components/AddressInput'
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
@@ -171,26 +172,39 @@ class Profile extends Component {
 
         load(this, true)
 
+        //Validation
         const isValid = this.validateInputs()
         if (!isValid) return
 
+        //Format data
         let userData = []
-        let { isPro, nom, prenom, denom } = this.state
+        let { isPro, nom, prenom, denom, phone } = this.state
+        const { isConnected } = this.props.network
 
-        Object.entries(this.state).forEach(([key, value]) => {
-            if (fields.indexOf(key) !== -1)
-                userData.push([key, value.value])
-        })
+        let user = {
+            phone: phone.value
+        }
 
-        userData = Object.fromEntries(userData)
+        if (isConnected) {
+            if (isPro) {
+                user.denom = denom.value
+                user.siret = siret.value
+                user.fullName = denom.value
+            }
 
-        if (isPro)
-            userData.fullName = `${denom.value}`
-        else
-            userData.fullName = `${prenom.value} ${nom.value}`
+            else if (!isPro) {
+                user.nom = nom.value
+                user.prenom = prenom.value
+                user.fullName = `${prenom.value} ${nom.value}`
+            }
+        }
 
-        await db.collection('Users').doc(this.userId).set(userData, { merge: true })
+        //Persist data
+        await db.collection('Users').doc(this.userId).set(user, { merge: true })
             .then(() => {
+
+                if (!isConnected) return
+
                 const nomChanged = nom !== this.initialState.nom
                 const prenomChanged = prenom !== this.initialState.prenom
                 const denomChanged = denom !== this.initialState.denom
@@ -270,9 +284,8 @@ class Profile extends Component {
     }
 
     render() {
-        let { id, isPro, denom, siret, nom, prenom, email, phone, address, addressError, newPass, currentPass, role,
-            canEdit, isOwner, isAdmin,
-            toastMessage, error, loading, loadingSignOut } = this.state
+        let { id, isPro, denom, siret, nom, prenom, email, phone, address, addressError, newPass, currentPass, role, canEdit, isOwner, isAdmin, toastMessage, error, loading, loadingSignOut } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
@@ -305,7 +318,8 @@ class Profile extends Component {
                                             onChangeText={text => updateField(this, prenom, text)}
                                             error={!!prenom.error}
                                             errorText={prenom.error}
-                                            editable={canEdit}
+                                            editable={canEdit && isConnected}
+                                            disabled={!isConnected}
                                         />
                                     }
 
@@ -327,7 +341,8 @@ class Profile extends Component {
                                             onChangeText={text => updateField(this, nom, text)}
                                             error={!!nom.error}
                                             errorText={nom.error}
-                                            editable={canEdit}
+                                            editable={canEdit && isConnected}
+                                            disabled={!isConnected}
                                         />
                                     }
 
@@ -351,17 +366,17 @@ class Profile extends Component {
                                     if (isOwner)
                                         this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
                                 }}> */}
-                                    <MyInput
-                                        label="Email"
-                                        returnKeyType="done"
-                                        value={email.value}
-                                        autoCapitalize="none"
-                                        editable={false}
-                                        disabled
-                                        // right={isOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                        //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
-                                        // } />}
-                                    />
+                                <MyInput
+                                    label="Email"
+                                    returnKeyType="done"
+                                    value={email.value}
+                                    autoCapitalize="none"
+                                    editable={false}
+                                    disabled
+                                // right={isOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
+                                // } />}
+                                />
                                 {/* </TouchableOpacity> */}
 
                                 {isOwner &&
@@ -371,9 +386,6 @@ class Profile extends Component {
                                         onPress={() => {
                                             this.setState({ loadingSignOut: true })
                                             firebase.auth().signOut()
-                                                .then(() => this.navigateToScreen('LoginScreen'))
-                                                .catch((e) => console.error(e))
-                                                .finally(() => this.setState({ loadingSignOut: false }))
                                         }}
                                         backgroundColor='#ff5153'
                                         style={{ width: constants.ScreenWidth * 0.85, alignSelf: 'center' }}>
@@ -383,6 +395,7 @@ class Profile extends Component {
 
                                 {isAdmin &&
                                     <TouchableOpacity onPress={() => {
+                                        if (!isConnected) return
                                         if (isAdmin)
                                             this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
                                     }}>
@@ -392,7 +405,7 @@ class Profile extends Component {
                                             value={role}
                                             autoCapitalize="none"
                                             editable={false}
-                                            right={isAdmin && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                            right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
                                                 this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
                                             } />} />
                                     </TouchableOpacity>
@@ -417,26 +430,18 @@ class Profile extends Component {
                                         />
                                     } />
 
-
-
-                                <TouchableOpacity onPress={() => {
-                                    if (canEdit)
-                                        this.props.navigation.navigate('Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
-                                }}>
-                                    <MyInput
-                                        label="Adresse"
-                                        value={address.description}
-                                        error={!!addressError}
-                                        errorText={addressError}
-                                        autoCapitalize="none"
-                                        editable={false}
-                                        multiline={true}
-
-                                        right={canEdit && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                <AddressInput
+                                    offLine={!isConnected}
+                                    address={address}
+                                    addressError={addressError}
+                                    onPress={() => {
+                                        if (canEdit)
                                             this.props.navigation.navigate('Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
-                                        } />}
-                                    />
-                                </TouchableOpacity>
+                                    }}
+                                    rightIcon={canEdit && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                        this.props.navigation.navigate('Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
+                                    } />}
+                                />
 
                                 {isOwner &&
                                     <View>
@@ -508,7 +513,8 @@ const mapStateToProps = (state) => {
 
     return {
         role: state.roles.role,
-        user: state.user.user
+        user: state.user.user,
+        network: state.network
         //fcmToken: state.fcmtoken
     }
 }

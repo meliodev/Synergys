@@ -178,6 +178,8 @@ class CreateUser extends Component {
     let { role, isPro, error, loading } = this.state
     let { userId, nom, prenom, address, phone, email, password } = this.state
     let { denom, siret } = this.state
+    
+    const { isConnected } = this.props.network
 
     //1. Validate inputs
     const isValid = await this.validateInputs()
@@ -222,6 +224,8 @@ class CreateUser extends Component {
       user.isClient = true
     else
       user.isClient = false
+
+    if (!isConnected) this.props.navigation.navigate(this.prevScreen)
 
     console.log('Ready to add user...')
     await db.collection('newUsers').doc(userId).set(user).catch(e => handleFirestoreError(e))
@@ -386,6 +390,7 @@ const mapStateToProps = (state) => {
 
   return {
     role: state.roles.role,
+    network: state.network
     //fcmToken: state.fcmtoken
   }
 }

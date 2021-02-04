@@ -68,7 +68,7 @@ export default class CreateTeam extends Component {
 
     validateInputs() {
         let { name } = this.state
-        
+
         let nameError = nameValidator(name.value, `Nom de l'équipe`)
 
         if (nameError) {
@@ -81,8 +81,8 @@ export default class CreateTeam extends Component {
         return true
     }
 
-    handleSubmit = async () => {
-        if (this.state === this.initialState) return
+    handleSubmit() {
+        if (this.state.loading || this.state === this.initialState) return
 
         load(this, true)
 
@@ -112,15 +112,12 @@ export default class CreateTeam extends Component {
         }
 
         console.log('Ready to set team...')
-        await db.collection('Teams').doc(teamId).set(team, { merge: true })
-            .then(() => {
-                if (this.isEdit)
-                    this.props.navigation.navigate('ViewTeam', { teamId: this.teamId, prevScreen: 'CreateTeam' })
-                else
-                    this.props.navigation.navigate('AddMembers', { teamId: teamId, isCreation: true })
-            })
-            .catch((e) => handleFirestoreError(e))
-            .finally(() => load(this, false))
+        db.collection('Teams').doc(teamId).set(team, { merge: true })
+
+        if (this.isEdit)
+            this.props.navigation.navigate('ViewTeam', { teamId: this.teamId, prevScreen: 'CreateTeam' })
+        else
+            this.props.navigation.navigate('AddMembers', { teamId: teamId, isCreation: true })
     }
 
 

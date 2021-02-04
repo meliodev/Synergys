@@ -11,6 +11,7 @@ moment.locale('fr')
 import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
+import AddressInput from '../../components/AddressInput'
 import Picker from "../../components/Picker"
 import Loading from "../../components/Loading"
 
@@ -73,7 +74,7 @@ class CreateTask extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "Task 1", error: '' },
+            name: { value: "", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
@@ -82,9 +83,9 @@ class CreateTask extends Component {
             status: 'En cours',
 
             //Screens
-            assignedTo: { id: 'GS-US-xQ6s', fullName: 'Salim Salim', error: '' },
-            project: { id: 'GS-PR-m5Ip', name: 'Projet A', error: '' },
-            address: { description: '40 Quai Vallière, 11100 Narbonne, France', place_id: 'qehsfgnhousfgnf', error: '' },
+            assignedTo: { id: '', fullName: '', error: '' },
+            project: { id: '', name: '', error: '' },
+            address: { description: '', place_id: '', error: '' },
             startDate: moment().format(),
             dueDate: moment().add(1, 'h').format(),
 
@@ -176,22 +177,22 @@ class CreateTask extends Component {
 
     //Inputs validation
     validateInputs() {
-        let { name, assignedTo, project, address, startDate, dueDate } = this.state
+        let { name, assignedTo, project, startDate, dueDate } = this.state
 
         let nameError = nameValidator(name.value, '"Nom de la tâche"')
         let assignedToError = nameValidator(assignedTo.id, '"Attribué à"')
         let projectError = nameValidator(project.id, '"Projet"')
-        let addressError = nameValidator(address.description, '"Adresse postale"')
+        //let addressError = nameValidator(address.description, '"Adresse postale"')
         //#inputVerify dueDate > startDate
 
-        if (nameError || assignedToError || projectError || addressError) {
+        if (nameError || assignedToError || projectError) {
             name.error = nameError
             assignedTo.error = assignedToError
             project.error = projectError
-            address.error = addressError
+            // address.error = addressError
 
             Keyboard.dismiss()
-            this.setState({ name, assignedTo, project, address, startDate, dueDate, loading: false })
+            this.setState({ name, assignedTo, project, startDate, dueDate, loading: false })
             return false
         }
 
@@ -278,6 +279,7 @@ class CreateTask extends Component {
     render() {
         let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
@@ -372,13 +374,12 @@ class CreateTask extends Component {
                                     elements={priorities}
                                 />
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}>
-                                    <MyInput
-                                        label="Adresse postale"
-                                        value={address.description}
-                                        editable={false}
-                                    />
-                                </TouchableOpacity>
+                                <AddressInput
+                                    label='Adresse postale'
+                                    offLine={!isConnected}
+                                    onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                    address={address}
+                                    addressError={address.error} />
 
                                 <TouchableOpacity onPress={() => this.props.navigation.navigate('DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}>
                                     <MyInput

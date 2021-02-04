@@ -162,15 +162,7 @@ export default class AddMembers extends Component {
 
         // Commit the batch
         batch.commit()
-            .then(() => {
-                load(this, false)
-                console.log("Batch succeeded !")
-                this.dismiss()
-            })
-            .catch(e => {
-                load(this, false)
-                handleFirestoreError(e)
-            })
+        this.dismiss()
     }
 
     dismiss() {

@@ -131,7 +131,10 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
-        
+        const array = [{ id: '1' }, '2', '3']
+        const contains = array.some(({ id }) => id === '1')
+        console.log('contains', contains)
+
         if (this.isEdit) {
             await this.fetchProject()
             this.fetchDocuments()
@@ -159,6 +162,8 @@ class CreateProject extends Component {
                 let { client, name, description, note, address, state, step, tagsSelected } = this.state
                 let { createdAt, createdBy, editedAt, editedBy, attachedImages } = this.state
                 let { error, loading } = this.state
+                var imagesView = []
+                var imagesCarousel = []
 
                 //General info
                 const project = doc.data()
@@ -177,7 +182,12 @@ class CreateProject extends Component {
 
                 //Images
                 attachedImages = project.attachments
-                attachedImages = attachedImages.filter((image) => !image.deleted)
+
+                if (attachedImages) {
+                    attachedImages = attachedImages.filter((image) => !image.deleted)
+                    imagesView = attachedImages.map((image) => { return ({ source: { uri: image.downloadURL } }) })
+                    imagesCarousel = attachedImages.map((image) => image.downloadURL)
+                }
 
                 //State
                 state = project.state
@@ -185,12 +195,6 @@ class CreateProject extends Component {
 
                 //Address
                 address = project.address
-
-                const imagesView = attachedImages.map((image) => {
-                    return ({ source: { uri: image.downloadURL } })
-                })
-
-                const imagesCarousel = attachedImages.map((image) => image.downloadURL)
 
                 this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected }, () => {
                     if (this.isInit)
@@ -228,7 +232,7 @@ class CreateProject extends Component {
                 const date = dateDoc.id
                 const query = dateDoc.ref.collection('Tasks').where('project.id', '==', this.ProjectId)
                 this.unsubscribeTasks = query.onSnapshot((tasksSnapshot) => {
-                    if (tasksSnapshot.empty) return
+                    if (!tasksSnapshot) return
 
                     tasksSnapshot.forEach((doc) => {
                         const task = doc.data()
@@ -283,7 +287,7 @@ class CreateProject extends Component {
         if (clientError || nameError) {
             name.error = nameError
             Keyboard.dismiss()
-            this.setState({ clientError, name, addressError, loading: false })
+            this.setState({ clientError, name, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -304,28 +308,29 @@ class CreateProject extends Component {
         let { client, name, description, note, address, state, step, tagsSelected } = this.state
 
         //1. UPLOADING FILES (ONLINE ONLY)
-        const { isConnected } = this.props.documentsList
+        const { isConnected } = this.props.network
 
         if (isConnected) {
             if (attachments.length > 0) {
                 this.title = 'Exportation des images...'
-                const reference = firebase.storage().ref('/Projects/' + this.ProjectId + '/Images/')
-                await this.uploadImages(attachments, reference, this.state.attachedImages)
+                const storageRefPath = `/Projects/${this.ProjectId}/Images/`
+                const uploadedImages = await this.uploadImages(attachments, storageRefPath)
+                if (uploadedImages) {
+                    const previousAttachedImages = this.initialState.attachedImages
+                    var attachedImages = previousAttachedImages.concat(uploadedImages)
+                    this.setState({ attachedImages })
+                }
             }
-
-            let { attachedImages } = this.state
-            if (this.isEdit && this.initialState.attachedImages !== attachedImages)
-                attachedImages = attachedImages.concat(this.initialState.attachedImages)
         }
 
         //2. Set project
         //subscribers = currentUser + collaborators (tags)
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const currentSubscriber = { ...currentUser }
-        currentSubscriber.email = this.currentUser.email
+        const currentSubscriber = { id: this.currentUser.uid, fullName: this.currentUser.displayName, email: this.currentUser.email }
 
-        const subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
+        var subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
         subscribers.push(currentSubscriber)
+        subscribers = [...new Set(subscribers)] //case of duplicates
 
         let project = {
             client: client,
@@ -351,7 +356,7 @@ class CreateProject extends Component {
         }
 
         console.log('Ready to set project...')
-        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })  
+        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
         setTimeout(() => this.props.navigation.goBack(), 1000)
     }
 
@@ -363,7 +368,7 @@ class CreateProject extends Component {
     }
 
     //#OOS
-    handleDeleteProject() { 
+    handleDeleteProject() {
         load(this, true)
         db.collection('Projects').doc(this.ProjectId).update({ deleted: true })
         setTimeout(() => this.props.navigation.goBack(), 1000)
@@ -510,7 +515,7 @@ class CreateProject extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 
                 <ScrollView style={styles.container}>
 
@@ -553,8 +558,8 @@ class CreateProject extends Component {
                                 </TouchableOpacity>
 
                                 <AddressInput
-                                    offLine
-                                    refreshAddress={this.refreshClient}
+                                    offLine={!isConnected}
+                                    onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, currentAddress: address })}
                                     address={address}
                                     addressError={addressError} />
 

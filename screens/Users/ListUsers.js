@@ -1,7 +1,7 @@
 
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Alert } from 'react-native'
 import { List } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
 
@@ -120,7 +120,10 @@ class ListUsers extends Component {
           functions={[
             () => this.props.navigation.navigate('Profile', { userId: item.id }),
             () => this.props.navigation.navigate('Profile', { userId: item.id }),
-            () => this.alertDeleteUser(item),
+            () => {
+              if (this.props.offLine) Alert.alert('', 'Impossible de supprimer un utilisateur en mode hors-ligne')
+              else this.alertDeleteUser(item)
+            },
           ]}
         />
       </TouchableOpacity>
@@ -164,7 +167,7 @@ class ListUsers extends Component {
               <EmptyList iconName='account' header={this.props.emptyListHeader} description={this.props.emptyListDesc} offLine={this.props.offLine} />
             }
 
-            {this.props.showButton &&
+            {this.props.showButton && !this.props.offLine &&
               <MyFAB icon='account-plus' onPress={() => this.props.navigation.navigate('CreateUser', { prevScreen: this.props.prevScreen })} />
             }
 

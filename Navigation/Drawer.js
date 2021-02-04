@@ -144,7 +144,7 @@ class DrawerMenu extends React.Component {
                     </View>
 
                     <View style={[styles.footerContainer, { bottom: 5 }]}>
-                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.0</Text>
+                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.1</Text>
                     </View>
 
                 </SafeAreaView>
@@ -209,8 +209,9 @@ class DrawerMenu extends React.Component {
                     if (item.icon === 'logout')
                         return (
                             <TouchableOpacity onPress={() => firebase.auth().signOut()
-                                .then(() => this.navigateToScreen('LoginScreen'))
-                                .catch((e) => console.error(e))}
+                                // .then(() => this.navigateToScreen('LoginScreen'))
+                                // .catch((e) => console.error(e))
+                            }
                             //   style={{backgroundColor: this.props.navigation.state.routeName === ''}}
                             >
                                 <View style={{ height: screenHeight * 0.077, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>

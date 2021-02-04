@@ -126,7 +126,7 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("RequestsManagementStack")
+          this.props.navigation.navigate("ProjectsStack")
       }
 
       else {

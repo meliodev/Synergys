@@ -303,13 +303,14 @@ class NewMessage extends Component {
         // setToast(this, 'i', 'Message envoyé !')
     }
 
+
     render() {
         let { tagsSelected, subject, message, suggestions, accordionExpanded, oldMessages, loading, toastType, toastMessage } = this.state
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} />
+                <Appbar back close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} loading={loading} />
                 <ScrollView style={styles.form}>
 
                     <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>

@@ -98,7 +98,8 @@ class Agenda2 extends Component {
     }
 
     componentWillUnmount() {
-        this.unsubscribe()
+        this.unsubscribeAgenda && this.unsubscribeAgenda()
+        //this.allTasksListeners.length > 0 && this.allTasksListeners.forEach((tasksListener) => tasksListener())
     }
 
     refreshItems(refresh) {
@@ -134,15 +135,20 @@ class Agenda2 extends Component {
 
     loadItems(day) {
         setTimeout(async () => {
+           // this.allTasksListeners = []
 
-            this.unsubscribe = db.collection('Agenda').onSnapshot((querysnapshot) => {
-                querysnapshot.forEach(async (dateDoc) => {
+            this.unsubscribeAgenda = db.collection('Agenda').onSnapshot((agendaSnapshot) => {
+                agendaSnapshot.forEach(async (dateDoc) => {
                     const date = dateDoc.id //exp: 2021-01-07
 
                     //if (!this.state.items[date]) {
                     const query = this.setTasksQuery(dateDoc.ref)
-                    query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
+                    const unsubscribeTasks = query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
                         this.state.items[date] = []
+
+                        if (tasksSnapshot === null) return
+
+                        console.log('tasksSnapshot', tasksSnapshot)
 
                         tasksSnapshot.forEach((taskDoc) => {
 
@@ -204,8 +210,10 @@ class Agenda2 extends Component {
                             })
                         })
                     })
-                    // }
 
+                   // this.allTasksListeners.push(unsubscribeTasks)
+
+                    // }
                 })
             })
 

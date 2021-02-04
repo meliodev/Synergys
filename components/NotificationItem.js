@@ -44,7 +44,7 @@ const NotificationItem = ({ notification, ...props }) => {
 
             <View style={styles.content}>
 
-                <View style={{ flex: 0.85 }}>
+                <View style={{ flex: 1 }}>
                     <View style={styles.text}>
                         <Text style={[theme.customFontMSsemibold.body]} numberOfLines={1}>{notification.title}</Text>
                         <Text style={[theme.customFontMSmedium.caption]} numberOfLines={3}>{notification.body}</Text>
@@ -53,9 +53,9 @@ const NotificationItem = ({ notification, ...props }) => {
                 </View>
 
                 {/* #task:  use the menu component */}
-                <View style={{ flex: 0.15, justifyContent: 'flex-start', alignItems: 'center' }}>
+                {/* <View style={{ flex: 0.15, justifyContent: 'flex-start', alignItems: 'center' }}>
                     <Menu options={options} functions={functions} />
-                </View>
+                </View> */}
 
             </View>
 
