@@ -21,7 +21,7 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
     const setStateColor = (state) => {
         switch (state) {
             case 'En cours':
-                return theme.colors.graySilver
+                return theme.colors.placeholder
                 break
 
             case 'Terminé':

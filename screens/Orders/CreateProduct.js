@@ -1,7 +1,7 @@
 
 //Category: name : Picker + Dialog (add new cat)
 //Taxe: value : TextInput (numeric)
-//Marque: {id, name, attachment} : AutoCompleteTag (like articles)
+//Marque: {id, name, logo} : AutoCompleteTag (like articles)
 
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Image, ImageBackground, Platform, ActivityIndicator } from 'react-native';
@@ -52,6 +52,7 @@ class CreateProduct extends Component {
         this.uploadFile = uploadFile.bind(this)
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
+        this.renderBrand = this.renderBrand.bind(this)
 
         this.initialState = {}
         this.isInit = true
@@ -82,7 +83,7 @@ class CreateProduct extends Component {
             suggestions: [], //Brands suggestions
             tagsSelected: [], //Selected brand
             brandError: '',
-            newBrand: { name: '', attachment: { path: '' } }, //New brand
+            newBrand: { name: '', logo: { path: '' } }, //New brand
 
             //logs
             createdBy: { id: '', fullName: '' },
@@ -256,7 +257,7 @@ class CreateProduct extends Component {
     async pickNewBrandLogo() {
         let { newBrand } = this.state
         const attachments = await pickImage([])
-        newBrand.attachment = attachments[0]
+        newBrand.logo = attachments[0]
         this.setState({ newBrand })
     }
 
@@ -266,7 +267,7 @@ class CreateProduct extends Component {
     }
 
     renderDialog(type) { //Category & Brand
-        const { showDialog, newCategory, newBrand, attachment, loadingDialog } = this.state
+        const { showDialog, newCategory, newBrand, logo, loadingDialog } = this.state
         const isCategory = type === 'category'
         const label = isCategory ? 'catégorie' : 'marque'
 
@@ -284,9 +285,9 @@ class CreateProduct extends Component {
             < View style={styles.dialogContainer} >
                 <Dialog.Container visible={showDialog}>
                     {!isCategory ?
-                        newBrand.attachment.path ?
+                        newBrand.logo.path ?
                             <TouchableOpacity style={{ marginBottom: 20 }} onPress={this.pickNewBrandLogo}>
-                                <Image source={{ uri: newBrand.attachment.path }} style={{ width: 90, height: 90 }} />
+                                <Image source={{ uri: newBrand.logo.path }} style={{ width: 90, height: 90 }} />
                             </TouchableOpacity>
                             :
                             <TouchableOpacity style={styles.imagesBox} onPress={this.pickNewBrandLogo}>
@@ -303,6 +304,7 @@ class CreateProduct extends Component {
                         onChangeText={text => {
                             if (isCategory)
                                 this.setState({ newCategory: text })
+
                             else {
                                 newBrand.name = text
                                 this.setState({ newBrand })
@@ -321,13 +323,13 @@ class CreateProduct extends Component {
                         }
 
                         else {
-                            const { name, attachment } = this.state.newBrand
+                            const { name, logo } = this.state.newBrand
                             if (!name) return
                             this.setState({ loadingDialog: true })
 
                             //upload logo
                             const storageRef = firebase.storage().ref(`/Brands/${name}`)
-                            const response = await this.uploadFile(attachment, storageRef)
+                            const response = await this.uploadFile(logo, storageRef)
 
                             if (response === 'failure') {
                                 this.setState({ loadingDialog: false })
@@ -353,7 +355,7 @@ class CreateProduct extends Component {
     async addNewBrand() {
         const { newBrand, tagsSelected } = this.state
 
-        let logo = newBrand.attachment
+        let logo = newBrand.logo
         delete logo.progress
         delete logo.local
 
@@ -361,8 +363,11 @@ class CreateProduct extends Component {
 
         tagsSelected.push(newBrand)
 
+        console.log('tagsSelected', tagsSelected)
+        console.log('logo', logo)
+
         db.collection('Brands').doc().set({ name, logo })
-        setTimeout(() => this.setState({ tagsSelected, newBrand: { name: '', attachment: {} }, loadingDialog: false, showDialog: false }), 1000)
+        setTimeout(() => this.setState({ tagsSelected, newBrand: { name: '', logo: {} }, loadingDialog: false, showDialog: false }), 1000)
     }
 
     //Renderers
@@ -370,6 +375,8 @@ class CreateProduct extends Component {
         const { checked, tagsSelected } = this.state
         const isLogoSelected = tagsSelected.length > 0 && tagsSelected[0].logo.downloadURL
         const logoUrl = isLogoSelected ? tagsSelected[0].logo.downloadURL : ''
+        if (isLogoSelected)
+            console.log('logoURL', tagsSelected[0].logo.downloadURL)
 
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -411,7 +418,7 @@ class CreateProduct extends Component {
                     errorText={category.error} />
 
                 <TouchableOpacity onPress={() => this.toggleDialog('category')}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+  Ajouter une catégorie</Text>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+  Nouvelle catégorie</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -420,6 +427,7 @@ class CreateProduct extends Component {
     renderBrand() {
         const { suggestions, tagsSelected, brandError } = this.state
         const noItemSelected = tagsSelected.length === 0
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ marginBottom: 5 }}>
@@ -440,6 +448,7 @@ class CreateProduct extends Component {
                     </View>
 
                     {noItemSelected ?
+                        isConnected &&
                         <TouchableOpacity style={styles.plusIcon} onPress={() => this.toggleDialog('brand')}>
                             <MaterialCommunityIcons name='plus' color={theme.colors.primary} size={21} />
                         </TouchableOpacity>
@@ -546,6 +555,7 @@ class CreateProduct extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network
         //fcmToken: state.fcmtoken
     }
 }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Image, TouchableOpacity, Keyboard } from 'react-native';
 import { Card, Title, FAB, ProgressBar, List } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { connect } from 'react-redux'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
@@ -17,7 +18,7 @@ import firebase from '@react-native-firebase/app';
 
 const db = firebase.firestore()
 
-export default class AddItem extends Component {
+class AddItem extends Component {
     constructor(props) {
         super(props)
         this.fetchDocs = fetchDocs.bind(this)
@@ -214,6 +215,16 @@ export default class AddItem extends Component {
         )
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(AddItem)
 
 const styles = StyleSheet.create({
     container: {

@@ -7,9 +7,11 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import MyInput from '../../components/TextInput'
+
 import Appbar from '../../components/Appbar'
 import Picker from "../../components/Picker";
+import AddressInput from '../../components/AddressInput'
+import MyInput from '../../components/TextInput'
 import RequestState from "../../components/RequestState";
 import Toast from "../../components/Toast";
 import MyFAB from "../../components/MyFAB";
@@ -57,7 +59,7 @@ class CreateRequest extends Component {
             client: { id: '', fullName: '' },
 
             department: 'Incident', //ticket
-            address: { description: '40 Quai Vallière, 11100 Narbonne, France', place_id: 'qehsfgnhousfgnf' }, //project
+            address: { description: '', place_id: '' }, //project
 
             subject: { value: "", error: '' },
             description: { value: "", error: '' },
@@ -136,16 +138,16 @@ class CreateRequest extends Component {
     }
 
     validateInputs() {
-        let { client, subject, address } = this.state
+        let { client, subject } = this.state
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let subjectError = nameValidator(subject.value, '"Sujet"')
-        let addressError = nameValidator(address.description, '"Adresse postale"')
+        //let addressError = nameValidator(address.description, '"Adresse postale"')
 
-        if (clientError || subjectError || addressError) {
+        if (clientError || subjectError) {
             subject.error = subjectError
             Keyboard.dismiss()
-            this.setState({ clientError, subject, addressError, loading: false })
+            this.setState({ clientError, subject, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -184,12 +186,12 @@ class CreateRequest extends Component {
         batch.set(chatRef, chat)
         batch.set(messagesRef, systemMessage)
 
-        await batch.commit().catch((e) => {
-            setToast(this, 'e', 'Erreur lors de la création de la demande, veuillez réessayer.')
-            load(this, false)
-        })
+        batch.commit()
 
-        load(this, false)
+        // .catch((e) => {
+        //     setToast(this, 'e', 'Erreur lors de la création de la demande, veuillez réessayer.')
+        //     load(this, false)
+        // })
     }
 
     async handleSubmit() {
@@ -211,7 +213,7 @@ class CreateRequest extends Component {
             subject: subject.value,
             description: description.value,
             state: state,
-            editedAt: moment().format('lll'),
+            editedAt: moment().format(),
             editedBy: currentUser
         }
 
@@ -233,10 +235,10 @@ class CreateRequest extends Component {
         console.log('Ready to add request...')
 
         if (this.isEdit)
-            await db.collection('Requests').doc(RequestId).set(request, { merge: true })
+            db.collection('Requests').doc(RequestId).set(request, { merge: true })
 
         else
-            await this.AddRequestAndChatRoom(RequestId, request)
+            this.AddRequestAndChatRoom(RequestId, request)
 
         load(this, false)
         this.props.navigation.goBack()
@@ -261,7 +263,7 @@ class CreateRequest extends Component {
         db.collection('Requests').doc(this.RequestId).update({ state: nextState })
             .then(() => {
                 this.setState({ state: nextState })
-               // this.fetchRequest()
+                // this.fetchRequest()
             })
             .catch((e) => setToast(this, 'e', "Erreur lors de la mise à jour de l'état de la demande"))
     }
@@ -270,6 +272,7 @@ class CreateRequest extends Component {
         const { RequestId, client, department, subject, state, description, address } = this.state
         const { createdAt, createdBy, editedAt, editedBy, loading, toastMessage, toastType, clientError, addressError } = this.state
         const { requestType } = this.props
+        const { isConnected } = this.props.network
 
         const title = ' Demande de ' + requestType
         const prevScreen = requestType === 'ticket' ? 'CreateTicketReq' : 'CreateProjectReq'
@@ -320,15 +323,12 @@ class CreateRequest extends Component {
                                         elements={departments}
                                     />
                                     :
-                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}>
-                                        <MyInput
-                                            label="Adresse postale"
-                                            value={address.description}
-                                            error={!!addressError}
-                                            errorText={addressError}
-                                            editable={false}
-                                        />
-                                    </TouchableOpacity>
+                                    <AddressInput
+                                        label='Adresse postale'
+                                        offLine={!isConnected}
+                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                        address={address}
+                                        addressError={addressError} />
                                 }
 
                                 <MyInput
@@ -409,6 +409,7 @@ class CreateRequest extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        network: state.network,
         //fcmToken: state.fcmtoken
     }
 }

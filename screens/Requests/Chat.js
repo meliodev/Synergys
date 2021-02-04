@@ -17,6 +17,7 @@ moment.locale('fr')
 // import ThumbnailLocal from 'react-native-thumbnail'
 
 import firebase from '@react-native-firebase/app'
+import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
 import UploadProgress from '../../components/UploadProgress'
@@ -31,7 +32,7 @@ import { uploadFiles } from '../../api/storage-api'
 
 const db = firebase.firestore()
 
-export default class Chat extends Component {
+class Chat extends Component {
 
     constructor(props) {
         super(props)
@@ -157,8 +158,10 @@ export default class Chat extends Component {
         );
     }
 
-    renderActions(props) {
-        return (
+    renderActions(props, isConnected) {
+        if (!isConnected) return null
+
+        else return (
             <Actions
                 {...props}
                 // options={{
@@ -440,6 +443,8 @@ export default class Chat extends Component {
             height: constants.ScreenHeight * 0.8,
         }]
 
+        const { isConnected } = this.props.network
+
         if (isImageViewVisible)
             return (
                 <ImageView
@@ -480,7 +485,9 @@ export default class Chat extends Component {
                     renderBubble={this.renderBubble}
                     renderLoading={this.renderLoading}
                     renderSend={this.renderSend}
-                    renderActions={(props) => this.renderActions()}
+                    renderActions={(props) => this.renderActions(props, isConnected)}
+                    // if (!isConnected) return null
+                    // else this.renderActions(props)
                     renderMessageVideo={(props) => this.renderMessageVideo(props, this.props.navigation)}
                     renderMessageImage={this.renderMessageImage}
                     scrollToBottomComponent={this.scrollToBottomComponent}
@@ -497,6 +504,16 @@ export default class Chat extends Component {
     }
 
 }
+
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(Chat)
 
 const styles = StyleSheet.create({
     loadingContainer: {

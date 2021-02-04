@@ -17,10 +17,10 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, arrayValidator } from "../../core/utils";
-import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
-import { handleFirestoreError } from '../../core/exceptions';
+import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, arrayValidator } from "../../core/utils"
+import * as theme from "../../core/theme"
+import { constants } from "../../core/constants"
+import { handleFirestoreError } from '../../core/exceptions'
 
 const db = firebase.firestore()
 
@@ -626,8 +626,6 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps)(CreateOrder)
-
-
 
 const styles = StyleSheet.create({
     container: {
