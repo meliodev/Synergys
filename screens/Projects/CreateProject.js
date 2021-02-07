@@ -69,7 +69,7 @@ class CreateProject extends Component {
         //this.deleteAttachments = this.deleteAttachments.bind(this)
 
         this.myAlert = myAlert.bind(this)
-        this.uploadImages = uploadFiles.bind(this)
+        this.uploadFiles = uploadFiles.bind(this)
         this.showAlert = this.showAlert.bind(this)
         this.pickImage = this.pickImage.bind(this)
 
@@ -314,7 +314,7 @@ class CreateProject extends Component {
             if (attachments.length > 0) {
                 this.title = 'Exportation des images...'
                 const storageRefPath = `/Projects/${this.ProjectId}/Images/`
-                const uploadedImages = await this.uploadImages(attachments, storageRefPath)
+                const uploadedImages = await this.uploadFiles(attachments, storageRefPath)
                 if (uploadedImages) {
                     const previousAttachedImages = this.initialState.attachedImages
                     var attachedImages = previousAttachedImages.concat(uploadedImages)
@@ -418,7 +418,7 @@ class CreateProject extends Component {
         let { attachments } = this.state
         attachments = await pickImage(attachments)
         this.setState({ attachments })
-    }
+    } 
 
     renderAttachments(attachments, type, isUpload) {
         const { loading } = this.state

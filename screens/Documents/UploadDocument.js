@@ -54,37 +54,33 @@ const types = [
 class UploadDocument extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocument = this.fetchDocument.bind(this)
 
+        //Submit
+        this.refreshProject = this.refreshProject.bind(this)
+        this.pickDoc = this.pickDoc.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.submitOffline = this.submitOffline.bind(this)
-        this.submitOnline = this.submitOnline.bind(this)
-
+        this.persistDocument = this.persistDocument.bind(this)
+        this.uploadFile = this.uploadFile.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
-        this.uploadOffline = this.uploadOffline.bind(this)
-        this.uploadOnline = this.uploadOnline.bind(this)
-
-        this.persistDocumentOffline = this.persistDocumentOffline.bind(this)
-        this.persistDocumentOnline = this.persistDocumentOnline.bind(this)
-
         this.onPressUploadPending = this.onPressUploadPending.bind(this)
 
-        this.pickDoc = this.pickDoc.bind(this)
+        //Delete
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
-        this.refreshProject = this.refreshProject.bind(this)
         this.deleteFile = this.deleteFile.bind(this)
 
+        //Init
+        this.fetchDocument = this.fetchDocument.bind(this)
         this.initialState = {}
         this.isInit = true
         this.currentUser = firebase.auth().currentUser
 
+        //Params
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.isEdit = this.DocumentId ? true : false
         this.DocumentId = this.isEdit ? this.DocumentId : generatetId('GS-DOC-')
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
         this.project = this.props.navigation.getParam('project', '')
-        this.cachePath = ''
 
         this.state = {
             //TEXTINPUTS
@@ -216,11 +212,24 @@ class UploadDocument extends Component {
     handleSubmit() {
         const { isConnected } = this.props.network
 
-        if (isConnected)
-            this.submitOnline()
+        if (!isConnected && this.isEdit) { //&& !isConnected
+            Alert.alert('', 'Les mises à jours sont indisponibles en mode hors-ligne')
+            return
+        }
 
-        else
-            this.submitOffline()
+        //0. Handle isLoading or No edit done
+        if (this.state.loading || this.state === this.initialState) return
+        load(this, true)
+
+        //1. Validate inputs
+        const isValid = this.validateInputs()
+        if (!isValid) return
+
+        //2. SetDocument
+        this.persistDocument()
+
+        //3. Handle upload offline
+        this.uploadFile()
     }
 
     validateInputs() {
@@ -239,29 +248,7 @@ class UploadDocument extends Component {
         return true
     }
 
-    //Offline submit
-    async submitOffline() {
-        if (this.isEdit) {
-            Alert.alert('', 'Les mises à jours sont indisponibles en mode hors-ligne')
-            return
-        }
-
-        //0. Handle isLoading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
-        load(this, true)
-
-        //1. Validate inputs
-        const isValid = this.validateInputs()
-        if (!isValid) return
-
-        //2. SetDocument
-        this.persistDocumentOffline()
-
-        //3. UploadFile Offline
-        this.uploadOffline()
-    }
-
-    persistDocumentOffline() {
+    persistDocument() {
         //1. ADDING document to firestore
         const { project, name, description, type, state, attachment } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
@@ -290,101 +277,22 @@ class UploadDocument extends Component {
         const attachmentsRef = db.collection('Documents').doc(this.DocumentId).collection('Attachments').doc()
         batch.set(documentRef, document, { merge: true })
         batch.set(attachmentsRef, attachment)
-        batch.commit() //commit locally
+        batch.commit()
+        //.catch(e => handleFirestoreError(e))  //Online Only
+
         this.props.navigation.goBack()
     }
 
-    uploadOffline() {
+    async uploadFile() {
         var { project, type, attachment } = this.state
-        const referencePath = `Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`
-        this.uploadFileNew(attachment, referencePath, this.DocumentId, false)
-    }
+        const storageRefPath = `Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`
+        //this.uploadFileNew(attachment, referencePath, this.DocumentId, false)
 
-    //Online submit
-    async submitOnline() {
-        //0. Handle isLoading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
-        load(this, true)
+        const result = await this.uploadFileNew(attachment, storageRefPath, this.DocumentId, false) //resolves only when online
+        console.log('result', '.........................', result)
 
-        //1. Validate inputs
-        const isValid = this.validateInputs()
-        if (!isValid) return
-
-        //2. Upload attachment
-        const newAttachment = this.state.attachment
-        const intialAttachment = this.initialState.attachment
-
-        //3. SetDocument
-        await this.persistDocumentOnline()
-
-        if (newAttachment && (this.isEdit && newAttachment !== intialAttachment || !this.isEdit)) {  //Overwrite or Create new attachment
-            const uploadResult = await this.uploadOnline()
-            if (uploadResult === 'failure') return
-        }
-    }
-
-    async uploadOnline() {
-        //1. Upload file
-        const promise = new Promise(async (resolve, reject) => {
-
-            var { project, name, description, type, state, attachment } = this.state
-
-            const storageRefPath = `Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`
-            const result = await this.uploadFileNew(attachment, storageRefPath, this.DocumentId, false)
-
-            if (result === 'failure') {
-                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
-                reject('failure')
-            }
-
-            //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading duplicate file)
-            const fromPath = attachment.path
-            const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-            const destFolder = `${Dir}/Synergys/Documents/`
-            await RNFS.mkdir(destFolder)
-            const destPath = `${destFolder}/${attachment.name}`
-            await RNFS.moveFile(fromPath, destPath)
-
-            resolve('success')
-        })
-
-        return promise
-    }
-
-    async persistDocumentOnline() {
-        // 2. ADDING document to firestore
-        const { project, name, description, type, state, attachment } = this.state
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        attachment.pending = true
-
-        let document = {
-            project: project,
-            name: name.value,
-            description: description.value,
-            type: type,
-            state: state,
-            attachment: attachment, //To Keep track of last attached file
-            editedAt: moment().format('lll'),
-            editedBy: currentUser,
-            deleted: false,
-        }
-
-        if (!this.isEdit) {
-            document.createdAt = moment().format('lll')
-            document.createdBy = currentUser
-        }
-
-        console.log('Ready to add document & attachment...')
-        const batch = db.batch()
-        const documentRef = db.collection('Documents').doc(this.DocumentId)
-        const attachmentsRef = db.collection('Documents').doc(this.DocumentId).collection('Attachments').doc()
-        batch.set(documentRef, document, { merge: true })
-        batch.set(attachmentsRef, attachment)
-
-        batch.commit()
-            .then(() => this.props.navigation.goBack())
-            .catch(e => handleFirestoreError(e))
-            .finally(() => this.setState({ loading: false }))
+        if (result === 'failure')
+            setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
     }
 
     //Delete document
@@ -413,7 +321,7 @@ class UploadDocument extends Component {
         this.setState({ project, projectError: '' })
     }
 
-    onPressUploadPending() {
+    onPressUploadPending(uploadNotRunning) {
         if (firebase.auth().currentUser.uid === this.state.editedBy.id) {
             if (!uploadNotRunning) return //upload is running...
             Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
@@ -463,7 +371,7 @@ class UploadDocument extends Component {
             return (
                 <TouchableOpacity style={{ marginTop: 15 }}>
                     <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>Pièce jointe</Text>
-                    <UploadProgress attachment={attachment} showProgress={reduxAttachment} pending={uploadNotRunning} onPress={this.onPressUploadPending} />
+                    <UploadProgress attachment={attachment} showProgress={reduxAttachment} pending={uploadNotRunning} onPress={() => this.onPressUploadPending(uploadNotRunning)} />
                 </TouchableOpacity>
             )
         }

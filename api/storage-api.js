@@ -6,40 +6,33 @@ import RNFS from 'react-native-fs'
 
 const db = firebase.firestore()
 
-export async function uploadFile(attachment, storageRef, showProgress) {
+//Used by CreateProduct.js
+export async function uploadFile(attachment, storageRefPath, showProgress) {
 
     const promise = new Promise((resolve, reject) => {
 
+        const storageRef = firebase.storage().ref(storageRefPath)
         this.uploadTask = storageRef.putFile(attachment.path)
 
-        this.uploadTask.on('state_changed', async function (tasksnapshot) {
-            var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
-            console.log('Upload attachment ' + progress + '% done')
+        this.uploadTask
+            .on('state_changed', async function (tasksnapshot) {
+                var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
+                console.log('Upload attachment ' + progress + '% done')
 
-            if (showProgress) {
-                attachment.progress = progress / 100
-                this.setState({ attachment })
-            }
+                if (showProgress) {
+                    attachment.progress = progress / 100
+                    this.setState({ attachment })
+                }
 
-            // switch (tasksnapshot.state) {
-            //     case firebase.storage.TaskState.PAUSED: // or 'paused'
-            //         console.log('Upload is paused')
-            //         break
-            //     case firebase.storage.TaskState.RUNNING: // or 'running'
-            //         console.log('Upload is running')
-            //         break
-            // }
+            }.bind(this))
 
-        }.bind(this))
-
-        //#task: can be canceled
-
-        this.uploadTask.then(async (res) => {
-            attachment.downloadURL = await storageRef.getDownloadURL()
-            attachment.generation = 'upload'
-            delete attachment.progress
-            this.setState({ attachment }, () => resolve(attachment))
-        })
+        this.uploadTask
+            .then(async (res) => {
+                attachment.downloadURL = await storageRef.getDownloadURL()
+                attachment.generation = 'upload'
+                delete attachment.progress
+                this.setState({ attachment }, () => resolve(attachment))
+            })
             .catch(err => {
                 attachment.progress = 0
                 this.setState({ attachment })
@@ -51,7 +44,7 @@ export async function uploadFile(attachment, storageRef, showProgress) {
 }
 
 
-async function uploadFile1(main, files, attachment, urls, storageRefPath, isChat, chatId) {
+async function uploadFileJob(main, files, attachment, urls, storageRefPath, isChat, chatId) {
 
     const promise = new Promise((resolve, reject) => {
 
@@ -95,14 +88,14 @@ async function uploadFile1(main, files, attachment, urls, storageRefPath, isChat
     return promise
 }
 
-
 //Chat upload support 
+//Used by: NewMessage.js, CreateProject.js, Chat.js
 export async function uploadFiles(files, storageRefPath, isChat, chatId) {
     const promises = []
     let urls = [] //in case of failure
 
     for (let i = 0; i < files.length; i++) {
-        const promise = uploadFile1(this, files, files[i], urls, storageRefPath, isChat, chatId)
+        const promise = uploadFileJob(this, files, files[i], urls, storageRefPath, isChat, chatId)
         promises.push(promise)
     }
 
@@ -121,6 +114,9 @@ export async function uploadFiles(files, storageRefPath, isChat, chatId) {
         })
 }
 
+
+//Offline support + Progress handled by app state
+//Used by: CreateDocument.js
 export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehydrated) { //#task: add showProgress as param
 
     console.log('3. uploadOfflineBeta')

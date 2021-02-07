@@ -32,6 +32,14 @@ import { uploadFiles } from '../../api/storage-api'
 
 const db = firebase.firestore()
 
+const mp4 = 'video/mp4'
+const jpeg = 'image/jpeg'
+const png = 'image/png'
+const pdf = 'application/pdf'
+const doc = 'application/msword'
+const docx = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+const type = ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+
 class Chat extends Component {
 
     constructor(props) {
@@ -42,7 +50,8 @@ class Chat extends Component {
 
         this.fetchMessages = this.fetchMessages.bind(this)
         this.handleSend = this.handleSend.bind(this)
-        this.pickAndUploadFiles = this.pickAndUploadFiles.bind(this)
+        this.pickFilesAndSendMessage = this.pickFilesAndSendMessage.bind(this)
+        this.handleUpload = this.handleUpload.bind(this)
         this.uploadFiles = uploadFiles.bind(this)
         this.renderMessageVideo = this.renderMessageVideo.bind(this)
         this.renderMessageImage = this.renderMessageImage.bind(this)
@@ -83,6 +92,164 @@ class Chat extends Component {
                 const messages = querySnapshot.docs.map(doc => { return doc.data() })
                 this.setState({ messages })
             })
+    }
+
+    async pickFilesAndSendMessage() {
+        let attachments = []
+
+        try {
+            const results = await DocumentPicker.pickMultiple({ type })
+
+            for (const res of results) {
+                var fileCopied = false
+                let i = 0
+
+                //android only
+                if (res.uri.startsWith('content://')) { //#taskm remove this condition (useless..)
+
+                    //1. Copy file to Cach to get its relative path (Documentpicker provides only absolute path which can not be used to upload file to firebase)
+                    const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
+
+                    fileCopied = await RNFS.copyFile(res.uri, destPath)
+                        .then(() => { return true })
+                        .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
+
+                    if (!fileCopied) return
+
+                    const document = {
+                        path: destPath,
+                        type: res.type,
+                        name: res.name, //#task: not used for video/image
+                        size: res.size, //#task: not used for video/image
+                        progress: 0
+                    }
+
+                    const { path, type, name, size } = document
+
+                    if (type === mp4)
+                        this.setState({ videoSource: path })
+
+                    else if (type === png || type === jpeg)
+                        this.setState({ imageSource: path })
+
+
+                    else if (type === pdf || type === doc || type === docx)
+                        this.setState({ file: { source: path, type, name, size } })
+
+                    const messageId = await uuidGenerator()
+                    document.messageId = messageId
+
+                    await this.handleSend([{ text: '' }], messageId) //#task: get text using chat ref //#task2: add intermediary screen to crop/and adjust images
+
+                    attachments.push(document)
+                }
+
+                fileCopied = false
+                i = i + 1
+            }
+
+            return (attachments)
+        }
+
+        catch (err) {
+            console.error(err)
+            if (DocumentPicker.isCancel(err)) console.log('User has canceled picker')
+            else Alert.alert("Erreur lors de l'exportation du fichier")
+        }
+    }
+
+    async handleUpload() {
+        //  let attachments = []
+        const attachments = await this.pickFilesAndSendMessage()
+
+        //UPLOAD FILES 
+        const storageRefPath = `/Chat/${this.chatId}/`
+        const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath, true, this.chatId)
+        if (!uploadedAttachments) return
+
+        for (const attachedFile of uploadedAttachments) { //attachedFile contains uploadTask: It can be used to cancel/pause/resume the upload
+            const { downloadURL, name, size, type, messageId } = attachedFile
+            const payload = { pending: false, sent: true, received: true }
+
+            if (type === jpeg || type === png)
+                payload.image = downloadURL
+
+            else if (type === mp4)
+                payload.video = downloadURL
+
+            else if (type === pdf || type === doc || type === docx)
+                payload.file = { source: downloadURL, name, size, type: type }
+
+            await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).update(payload)
+        }
+    }
+
+    async handleSend(messages, messageId) {
+
+        const text = messages[0].text
+
+        const { imageSource, videoSource, file } = this.state
+
+        if (!messageId)
+            var messageId = await uuidGenerator()
+
+        const msg = {
+            _id: messageId,
+            text,
+            createdAt: new Date().getTime(),
+            user: {
+                _id: this.currentUser.uid,
+                email: this.currentUser.email
+            },
+            sent: true,
+            received: true,
+            pending: false,
+        }
+
+        console.log('msg', msg)
+
+        // Handle attachments
+        if (imageSource || videoSource || file && file.source) {
+            console.log('file', file)
+
+            msg.sent = false
+            msg.received = false
+            msg.pending = true //Only local user can see this file
+
+            if (imageSource) {
+                msg.image = imageSource
+                msg.messageType = 'image/jpeg'
+            }
+
+            else if (videoSource) {
+                msg.video = videoSource
+                msg.messageType = 'video/mp4'
+            }
+
+            if (file) {
+                const { source, name, size, type } = file
+                msg.file = { source, name, size, type }
+            }
+        }
+
+        const latestMsg = {
+            latestMessage: {
+                text,
+                createdAt: new Date().getTime()
+            }
+        }
+
+        const batch = db.batch()
+        const chatsRef = db.collection('Chats').doc(this.chatId)
+        const messagesRef = db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId)
+
+        batch.set(chatsRef, latestMsg, { merge: true })
+        batch.set(messagesRef, msg)
+        batch.commit()
+
+        // await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).set(msg)
+        // await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
+        this.setState({ imageSource: '', videoSource: '', file: {} })
     }
 
     renderDay(props) {
@@ -170,7 +337,7 @@ class Chat extends Component {
                 icon={() => (
                     <MaterialCommunityIcons name={'attachment'} size={28} color={theme.colors.primary} />
                 )}
-                onPressActionButton={this.pickAndUploadFiles}
+                onPressActionButton={this.handleUpload}
             />
         )
     }
@@ -182,161 +349,6 @@ class Chat extends Component {
                 createdAt: new Date().getTime(),
                 system: true
             })
-    }
-
-    async pickAndUploadFiles() {
-        let attachments = []
-        const mp4 = 'video/mp4'
-        const jpeg = 'image/jpeg'
-        const png = 'image/png'
-        const pdf = 'application/pdf'
-        const doc = 'application/msword'
-        const docx = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-
-        try {
-            const results = await DocumentPicker.pickMultiple({ type: ['image/*', 'video/*', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'] })
-
-            for (const res of results) {
-                let i = 0
-
-                //android only
-                if (res.uri.startsWith('content://')) {
-
-                    //1. Copy file to Cach to get its relative path (Documentpicker provides only absolute path which can not be used to upload file to firebase)
-                    const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
-
-                    var fileCopied = await RNFS.copyFile(res.uri, destPath)
-                        .then(() => { return true })
-                        .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
-
-                    if (!fileCopied) return
-
-                    const document = {
-                        path: destPath,
-                        type: res.type,
-                        name: res.name, //#task: not used for video/image
-                        size: res.size, //#task: not used for video/image
-                        progress: 0
-                    }
-
-                    const { path, type, name, size } = document
-
-                    if (type === mp4)
-                        this.setState({ videoSource: path })
-
-                    else if (type === png || type === jpeg)
-                        this.setState({ imageSource: path })
-
-
-                    else if (type === pdf || type === doc || type === docx)
-                        this.setState({ file: { source: path, type, name, size } })
-
-                    const messageId = await uuidGenerator()
-                    await this.handleSend([{ text: '' }], messageId) //#task: get text using chat ref //#task2: add intermediary screen to crop/and adjust images
-
-                    document.messageId = messageId
-                    attachments.push(document)
-                }
-
-                fileCopied = false
-                i = i + 1
-            }
-
-            //UPLOAD FILES 
-            const storageRefPath = `/Chat/${this.chatId}/`
-            const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath, true, this.chatId)
-            if (!uploadedAttachments) return
-
-            for (const attachedFile of uploadedAttachments) { //attachedFile contains uploadTask which can be used to cancel/pause/resume the upload
-                const { downloadURL, name, size, type, messageId } = attachedFile
-                const payload = { pending: false, sent: true, received: true }
-
-                if (type === jpeg || type === png)
-                    payload.image = downloadURL
-
-                else if (type === mp4)
-                    payload.video = downloadURL
-
-                else if (type === pdf || type === doc || type === docx)
-                    payload.file = { source: downloadURL, name, size, type: type }
-
-                await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).update(payload)
-            }
-        }
-
-        catch (err) {
-            console.error(err)
-            if (DocumentPicker.isCancel(err)) console.log('User has canceled picker')
-            else Alert.alert("Erreur lors de l'exportation du fichier")
-        }
-    }
-
-    async handleSend(messages, messageId) {
-
-        const text = messages[0].text
-
-        const { imageSource, videoSource, file } = this.state
-
-        if (!messageId)
-            var messageId = await uuidGenerator()
-
-        const msg = {
-            _id: messageId,
-            text,
-            createdAt: new Date().getTime(),
-            user: {
-                _id: this.currentUser.uid,
-                email: this.currentUser.email
-            },
-            sent: true,
-            received: true,
-            pending: false,
-        }
-
-        console.log('msg', msg)
-
-        // Handle attachments
-        if (imageSource || videoSource || file && file.source) {
-            console.log('file', file)
-
-            msg.sent = false
-            msg.received = false
-            msg.pending = true //Only local user can see this file
-
-            if (imageSource) {
-                msg.image = imageSource
-                msg.messageType = 'image/jpeg'
-            }
-
-            else if (videoSource) {
-                msg.video = videoSource
-                msg.messageType = 'video/mp4'
-            }
-
-            if (file) {
-                const { source, name, size, type } = file
-                msg.file = { source, name, size, type }
-            }
-        }
-
-        const latestMsg = {
-            latestMessage: {
-                text,
-                createdAt: new Date().getTime()
-            }
-        }
-
-        const batch = db.batch()
-        const chatsRef = db.collection('Chats').doc(this.chatId)
-        const messagesRef = db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId)
-
-        batch.set(chatsRef, latestMsg, { merge: true })
-        batch.set(messagesRef, msg)
-        batch.commit()
-
-        // await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).set(msg)
-        // await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
-        this.setState({ imageSource: '', videoSource: '', file: {} })
     }
 
     //Files (pdf, docs...)

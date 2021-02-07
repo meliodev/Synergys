@@ -128,7 +128,7 @@ class NewMessage extends Component {
         var { attachments } = this.state
         const newAttachments = await pickDocs(attachments)
         this.setState({ attachments: newAttachments })
-    }
+    } 
 
     renderAttachments() {
         let { attachments, loading } = this.state

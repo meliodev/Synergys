@@ -164,7 +164,9 @@ class CreateRequest extends Component {
             }
         }
 
+        const messageId = await uuidGenerator()
         const systemMessage = {
+            _id: messageId,
             text: `La demande de projet a été initiée.`,
             createdAt: new Date().getTime(),
             system: true
@@ -174,7 +176,6 @@ class CreateRequest extends Component {
         const batch = db.batch()
 
         const chatId = await uuidGenerator()
-        const messageId = await uuidGenerator()
 
         const requestsRef = db.collection('Requests').doc(RequestId)
         const chatRef = db.collection('Chats').doc(chatId)

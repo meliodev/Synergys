@@ -328,8 +328,8 @@ class CreateProduct extends Component {
                             this.setState({ loadingDialog: true })
 
                             //upload logo
-                            const storageRef = firebase.storage().ref(`/Brands/${name}`)
-                            const response = await this.uploadFile(logo, storageRef)
+                            const storageRefPath = `/Brands/${name}/logo`
+                            const response = await this.uploadFile(logo, storageRefPath, false)
 
                             if (response === 'failure') {
                                 this.setState({ loadingDialog: false })

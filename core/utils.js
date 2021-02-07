@@ -369,7 +369,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
     const res = await DocumentPicker.pick({ type })
 
     //Android only
-    if (res.uri.startsWith('content://')) {
+    if (res.uri.startsWith('content://')) { //#task: remove this condition (useless..)
 
       const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
       const destFolder = `${Dir}/Synergys/Documents`
@@ -385,7 +385,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
       const attachment = {
         path: destPath,
         type: res.type,
-        name: attachmentName, //#diff
+        name: attachmentName,
         size: res.size,
         progress: 0
       }
