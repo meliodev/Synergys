@@ -12,9 +12,9 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 export default class CustomClaims extends React.Component {
     constructor(props) {
         super(props);
-        // this.addAdminRole = this.addAdminRole.bind(this);
+        this.addAdminRole = this.addAdminRole.bind(this);
         // this.setCustomUid = this.setCustomUid.bind(this);
-        this.setAdminClaims = this.setAdminClaims.bind(this);
+        //this.setAdminClaims = this.setAdminClaims.bind(this);
 
         this.state = {
             email: '',
@@ -59,21 +59,16 @@ export default class CustomClaims extends React.Component {
     //     }).catch(err => console.error(err))
     // }
 
-    setAdminClaims() {
-        console.log('Setting custom uid')
-        const setAdminClaims = functions.httpsCallable('setAdminClaims')
-        setAdminClaims({ synuid: this.state.synuid, email: 'salimlyoussi1@gmail.com' }).then(result => {
-            console.log(result)
-            firebase.auth().currentUser.getIdToken(true)
-                .then(() => firebase.auth().currentUser.getIdTokenResult().then((IdToken) => {
-                    console.log('admin: ' + IdToken.claims.admin)
-                    console.log('synuid: ' + IdToken.claims.synuid)
-                }))
-        }).catch(err => console.error(err))
+    addAdminRole() {
+        console.log('Setting admin role...')
+        const addAdminRole = functions.httpsCallable('addAdminRole')
+        addAdminRole({ email: 'salimlyoussi1@gmail.com' })
+            .then(result => { console.log(result) })
+            .catch(err => console.error(err))
     }
 
     render() {
-        console.log(this.state)
+
         return (
             <View style={{ flex: 1 }}>
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -87,8 +82,8 @@ export default class CustomClaims extends React.Component {
                         <Text style={styles.buttonText}> Add Custom UID </Text>
                     </TouchableHighlight> */}
                     <TouchableHighlight
-                        onPress={this.setAdminClaims}>
-                        <Text style={styles.buttonText}> Add Admin role and Custom UID </Text>
+                        onPress={this.addAdminRole}>
+                        <Text style={styles.buttonText}>Add Admin role</Text>
                     </TouchableHighlight>
                 </View>
             </View>

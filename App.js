@@ -25,8 +25,8 @@ import { MenuProvider } from 'react-native-popup-menu';
 import Store from './Store/configureStore'
 
 import RootController from './Navigation/DrawerNavigator'
-// import CustomClaims from './api/CustomClaims'
 import Wrapper from './Wrapper'
+// import CustomClaims from './api/CustomClaims'
 
 const db = firebase.firestore()
 

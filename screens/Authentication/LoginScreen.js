@@ -80,7 +80,7 @@ class LoginScreen extends Component {
           <Icon name="arrow-left" size={24} color='#fff' />
         </TouchableOpacity>
 
-        <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
+        <Text style={[theme.customFontMSregular.h1, styles.btv]}>BTV PISCINE</Text>
 
         <TextInput
           style={{ marginVertical: 0 }}
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     paddingRight: constants.ScreenWidth * 0.07,
     alignItems: 'center'
   },
-  synergys: {
+  btv: {
     textAlign: 'center',
     color: '#fff',
     marginVertical: 15,

@@ -42,7 +42,7 @@ const MainSwitch = createSwitchNavigator(
 
 const App = createAppContainer(MainSwitch)
 
-const prefix = /https:\/\/synergys.page.link\/|synergys:\/\//
+const prefix = /https:\/\/btvpiscine.page.link\/|btvpiscine:\/\//
 
 const MainApp = () => <App uriPrefix={prefix} />
 

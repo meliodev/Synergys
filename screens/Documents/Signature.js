@@ -49,9 +49,9 @@ class Signature extends Component {
 
         this.fileName = this.props.navigation.getParam('fileName', '')
         this.sourceUrl = this.props.navigation.getParam('url', '')
-        this.originalFilePath = `${Dir}/Synergys/Documents/${this.fileName}`
+        this.originalFilePath = `${Dir}/BTV/Documents/${this.fileName}`
 
-        this.termsPath = `${Dir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
+        this.termsPath = `${Dir}/BTV/Documents/Termes-et-conditions-générales-de-signature.pdf`
         this.termsURL = 'https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/CONDITIONS%20G%C3%89N%C3%89RALES%20DE%20VENTE%20ET%20DE%20TRAVAUX.pdf?alt=media&token=3bf07ac2-6d9e-439a-91d8-f9908003488f'
 
         this.tick = this.tick.bind(this)
@@ -394,7 +394,7 @@ class Signature extends Component {
                     //     height: firstPage.getHeight() * 0.1,
                     // })
 
-                    firstPage.drawText(`APPROUVÉ LE ${moment().format()} \n Signé electroniquement par: Synergys`, {
+                    firstPage.drawText(`APPROUVÉ LE ${moment().format()} \n Signé electroniquement par: BTV`, {
                         x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
                         y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 16 * 2,
                         size: 12,
@@ -406,7 +406,7 @@ class Signature extends Component {
                 this.setState({ loadingMessage: 'Génération du document signé...' })
                 const pdfBytes = await pdfDoc.save()
                 const pdfBase64 = uint8ToBase64(pdfBytes);
-                const path = `${Dir}/Synergys/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
+                const path = `${Dir}/BTV/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
 
                 this.setState({ loadingMessage: 'Enregistrement du document signé...' })
                 RNFS.writeFile(path, pdfBase64, "base64")
@@ -743,9 +743,9 @@ const styles = StyleSheet.create({
     //     const currentUser = firebase.auth().currentUser
 
     //     const text = `<div>
-    //     <h4>Veuillez confirmer votre identité en saisissant le code suivant dans l'application Synergys afin de continuer la procédure de signature.</h4>
+    //     <h4>Veuillez confirmer votre identité en saisissant le code suivant dans l'application BTV afin de continuer la procédure de signature.</h4>
     //     <h2>${code}</h2>
-    //     <h4>Si vous ce n'est pas vous, ou bien vous n'avez fourni à nulle personne tierce la permission de signer en votre nom, prière de signaler ce message auprès d'un responsable du Groupe Synergys.</h4>
+    //     <h4>Si vous ce n'est pas vous, ou bien vous n'avez fourni à nulle personne tierce la permission de signer en votre nom, prière de signaler ce message auprès d'un responsable de BTV.</h4>
     //     </div>`
 
     //     const sendMail = functions.httpsCallable('sendMail')

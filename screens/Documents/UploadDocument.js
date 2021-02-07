@@ -337,10 +337,10 @@ class UploadDocument extends Component {
                 reject('failure')
             }
 
-            //Optional: Move document to Synergys/Documents (to open & sign later.. without downloading duplicate file)
+            //Optional: Move document to BTV/Documents (to open & sign later.. without downloading duplicate file)
             const fromPath = attachment.path
             const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-            const destFolder = `${Dir}/Synergys/Documents/`
+            const destFolder = `${Dir}/BTV/Documents/`
             await RNFS.mkdir(destFolder)
             const destPath = `${destFolder}/${attachment.name}`
             await RNFS.moveFile(fromPath, destPath)
@@ -728,7 +728,7 @@ const styles = StyleSheet.create({
 //             // this.cachePath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}`
 
 //             const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-//             const destFolder = `${Dir}/Synergys/Documents`
+//             const destFolder = `${Dir}/BTV/Documents`
 //             await RNFS.mkdir(destFolder)
 //             //this.cachePath = `${destFolder}/${'temporaryDoc'}${Date.now()}`
 //             this.cachePath = `${destFolder}/test.pdf`

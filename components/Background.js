@@ -2,8 +2,10 @@ import React, { memo } from "react";
 import { ImageBackground, StyleSheet, KeyboardAvoidingView } from "react-native";
 import LinearGradient from 'react-native-linear-gradient'
 import { constants } from '../core/constants'
+import * as theme from '../core/theme'
+
 const Background = ({ children }) => (
-  <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={{ flex: 1 }}>
+  <LinearGradient colors={theme.colors.linearGradientBackground} style={{ flex: 1 }}>
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       {children}
     </KeyboardAvoidingView>
@@ -20,7 +22,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     paddingTop: 50,
-    paddingHorizontal: constants.ScreenWidth*0.12,
+    paddingHorizontal: constants.ScreenWidth * 0.12,
     width: "100%",
     //maxWidth: 340,
     alignSelf: "center",

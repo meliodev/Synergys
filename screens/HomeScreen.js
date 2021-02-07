@@ -13,16 +13,13 @@ class HomeScreen extends Component {
 
   render() {
     return (
-
       <View style={styles.background}>
         <Logo />
-
         <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => this.props.navigation.navigate("LoginScreen")}>
-          <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#09a500', '#69b300', '#9fbc00']} style={styles.linearGradient}>
+          <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={theme.colors.linearGradientButton} style={styles.linearGradient}>
             <Text style={[theme.customFontMSbold.header, { color: '#fff' }]}>CONNECTION</Text>
           </LinearGradient>
         </TouchableOpacity>
-
       </View>
     )
   }

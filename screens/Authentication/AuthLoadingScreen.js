@@ -10,6 +10,7 @@ import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
+import { constants } from "../../core/constants"
 import { setRole, setUser } from '../../core/redux'
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
@@ -110,6 +111,7 @@ class AuthLoadingScreen extends Component {
         setUser(this, currentUser.displayName, true)
 
         const idTokenResult = await currentUser.getIdTokenResult()
+        console.log('idTokenResult', idTokenResult)
 
         if (idTokenResult)
           roles.forEach((role) => {
@@ -212,8 +214,8 @@ class AuthLoadingScreen extends Component {
 
   render() {
     return (
-      <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={styles.logo}>
-        <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
+      <LinearGradient colors={theme.colors.linearGradientBackground} style={styles.logo}>
+        <Text style={[theme.customFontMSregular.body, styles.btv]}>BTV PISCINE</Text>
       </LinearGradient>
     )
   }
@@ -229,12 +231,12 @@ const mapStateToProps = (state) => {
 }
 
 const styles = StyleSheet.create({
-  synergys: {
+  btv: {
     textAlign: 'center',
     color: '#fff',
     marginVertical: 15,
     letterSpacing: 2,
-    fontSize: 45
+    fontSize: constants.ScreenWidth * 0.105
   },
   logo: {
     flex: 1,

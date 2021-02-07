@@ -2,11 +2,11 @@
 import { DefaultTheme } from 'react-native-paper'
 
 const colors = {
-  statusbar: "#013220",
+  statusbar: "#152238",
   background: '#eeeeee',
-  primary: "#046307",
-  secondary: "#4CAF50",
-  //tertiary: "#4CAF50",
+  primary: "#27415a",
+  secondary: "#04bcf2",
+  tertiary: "#d7de50",
   // tertiary: "#7ab600",
   surface: DefaultTheme.colors.surface,
   error: DefaultTheme.colors.error,
@@ -32,6 +32,8 @@ const colors = {
   chatBackground: '#305585',
   agenda: '#555CC4',
   agendaLight: '#829BF8',
+  linearGradientButton: ["#27415a", "#0772b0", "#04bcf2"],
+  linearGradientBackground: ["#27415a", "#0772b0", "#04bcf2"],
 };
 
 const sizes = {

@@ -102,27 +102,27 @@ class Profile extends Component {
             let prenom = ''
 
             if (user.isPro) {
-                denom = { value: user.denom, error: "" }
-                siret = { value: user.siret, error: "" }
+                denom = { value: user.denom, error: "" } || this.state.denom
+                siret = { value: user.siret, error: "" } || this.state.siret
             }
 
             else {
-                nom = { value: user.nom, error: '' }
-                prenom = { value: user.prenom, error: '' }
+                nom = { value: user.nom, error: '' } || this.state.nom
+                prenom = { value: user.prenom, error: '' } || this.state.prenom
             }
 
-            let email = { value: user.email, error: '' }
-            let phone = { value: user.phone, error: '' }
-            let role = user.role
-            let address = user.address
-            let isPro = user.isPro
+            const email = { value: user.email, error: '' }
+            const phone = { value: user.phone, error: '' } || this.state.phone
+            const role = user.role
+            const address = user.address || this.state.address
+            const isPro = user.isPro
 
             this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address }, () => {
                 this.initialState = this.state //keep the initial state to compare changes
             })
         })
     }
-
+s
     validateInputs() {
         let denomError = ''
         let nomError = ''

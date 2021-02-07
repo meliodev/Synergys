@@ -55,7 +55,7 @@ class CreateUser extends Component {
 
   async componentDidMount() {
     //Generate user id (should handle unicity in case of multiple admins / multiple users added same time)
-    await generatetId(this, this.state.userId, 'users', 'users', 'Synergys-utilisateur-')
+    await generatetId(this, this.state.userId, 'users', 'users', 'BTV-utilisateur-')
   }
 
   componentWillUnmount() {

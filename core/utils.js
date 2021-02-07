@@ -173,7 +173,7 @@ export const downloadFile = async (main, fileName, url) => { //#task configure f
   try {
     const { config, fs } = RNFetchBlob
     const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
-    const path = `${Dir}/Synergys/Documents/${fileName}`
+    const path = `${Dir}/BTV/Documents/${fileName}`
 
     let fileExist = await RNFetchBlob.fs.exists(path)
 
@@ -330,7 +330,7 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
       if (res.uri.startsWith('content://')) {
 
         const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-        const destFolder = `${Dir}/Synergys/Documents`
+        const destFolder = `${Dir}/BTV/Documents`
         await RNFS.mkdir(destFolder) //create directory if it doesn't exist
         const destPath = `${destFolder}/${res.name}` //#diff
 
@@ -372,7 +372,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
     if (res.uri.startsWith('content://')) {
 
       const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-      const destFolder = `${Dir}/Synergys/Documents`
+      const destFolder = `${Dir}/BTV/Documents`
       await RNFS.mkdir(destFolder)
       const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
       const destPath = `${destFolder}/${attachmentName}`
@@ -480,7 +480,7 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 //       if (res.uri.startsWith('content://')) {
 
 //         const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-//         const destFolder = `${Dir}/Synergys/Documents`
+//         const destFolder = `${Dir}/BTV/Documents`
 //         await RNFS.mkdir(destFolder) //create directory if it doesn't exist
 //         const destPath = `${destFolder}/${res.name}` //#diff
 

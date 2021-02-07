@@ -3,14 +3,14 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '10.0'
 
-target 'AsanaWorld' do
+target 'BTV' do
   config = use_native_modules!
 
   use_react_native!(:path => config["reactNativePath"])
 
   pod 'rn-fetch-blob', :path => '../node_modules/rn-fetch-blob'
 
-  target 'AsanaWorldTests' do
+  target 'BTVTests' do
     inherit! :complete
     # Pods for testing
   end
@@ -25,10 +25,10 @@ target 'AsanaWorld' do
   end
 end
 
-target 'AsanaWorld-tvOS' do
-  # Pods for AsanaWorld-tvOS
+target 'BTV-tvOS' do
+  # Pods for BTV-tvOS
 
-  target 'AsanaWorld-tvOSTests' do
+  target 'BTV-tvOSTests' do
     inherit! :search_paths
     # Pods for testing
   end

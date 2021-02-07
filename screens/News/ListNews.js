@@ -30,7 +30,7 @@ class ListNews extends Component {
     }
 
     fetchWordpressPosts = async () => {
-        const response = await (await fetch("https://groupe-synergys.fr/wp-json/wp/v2/posts?_embed"))
+        const response = await (await fetch("https://btv-piscine.com/wp-json/wp/v2/posts?_embed"))
         const json = await response.json().catch((e) => console.error('wp error:', e))
 
         this.setState({ news: json, loading: false })

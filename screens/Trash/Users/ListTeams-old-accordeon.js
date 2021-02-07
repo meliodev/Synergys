@@ -143,7 +143,7 @@ export default class ListTeams extends Component {
 
     render() {
         let { teamsCount } = this.state
-        const arr = [{ id: 'team1', name: 'team1', members: ['Synergys-utilisateur-2'], createdAt: '20 Oct 2020' }]
+        const arr = [{ id: 'team1', name: 'team1', members: ['BTV-utilisateur-2'], createdAt: '20 Oct 2020' }]
 
         let text = ''
         if (teamsCount === 1)
