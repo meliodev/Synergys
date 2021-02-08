@@ -10,7 +10,7 @@ import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
-import { setRole, setUser } from '../../core/redux'
+import { setRole, setPermissions, setUser } from '../../core/redux'
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
 const db = firebase.firestore()
@@ -106,17 +106,26 @@ class AuthLoadingScreen extends Component {
   navigationRooterAuthListener() {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
+        //1. Set user
         const currentUser = firebase.auth().currentUser
         setUser(this, currentUser.displayName, true)
 
+        //2. Set role
         const idTokenResult = await currentUser.getIdTokenResult()
 
-        if (idTokenResult)
-          roles.forEach((role) => {
+        if (idTokenResult) {
+          for (const role of roles) {
             if (idTokenResult.claims[role.id])
               setRole(this, role)
-          })
+          }
+        }
 
+        //3. Set permissions
+        //Configuration should be preferably fetched from server
+        const permissions = this.configPermissions(this.props.role.value)
+        setPermissions(this, permissions)
+
+        //4. Set fcm token
         await this.requestUserPermission() //iOS only (notifications)
         await this.configureFcmToken()
 
@@ -131,10 +140,94 @@ class AuthLoadingScreen extends Component {
 
       else {
         setRole(this, '')
+        setPermissions(this, {})
         setUser(this, '', false)
         this.props.navigation.navigate("HomeScreen")
       }
     })
+  }
+
+  //#external
+  configPermissions(role) {
+    switch (role) {
+      case 'Admin':
+        return {
+          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          orders: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          users: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          teams: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: true },
+          requests: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          profile: { canCreate: true, canRead: true, canUpdate: true, canDelete: true }, //Actions on other users profiles
+        }
+        break
+
+      case 'Directeur commercial':
+        return {
+          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: false },
+          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
+          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
+        }
+        break
+
+      case 'Commercial':
+        return {
+          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: false },
+          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
+          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
+        }
+        break
+
+      case 'Responsable technique':
+        return {
+          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: false },
+          orders: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
+          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
+          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
+        }
+        break
+
+      case 'Poseur':
+        return {
+          projects: { canCreate: false, canRead: true, canUpdate: true, canDelete: false },
+          documents: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
+          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false }, //SAV access only (no Projects)
+          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
+        }
+        break
+
+      case 'Client':
+        return {
+          projects: { canCreate: false, canRead: true, canUpdate: true, canDelete: false },
+          documents: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
+          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
+          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
+          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
+        }
+        break
+    }
   }
 
   //FCM token configuration
@@ -224,6 +317,7 @@ const mapStateToProps = (state) => {
   return {
     role: state.roles.role,
     user: state.user.user,
+    permissions: state.permissions
     //fcmToken: state.fcmtoken
   }
 }

@@ -86,6 +86,7 @@ class ListUsers extends Component {
   }
 
   renderUser = (item) => {
+    const { canDelete } = this.props.permissions
 
     return (
       <TouchableOpacity onPress={() => {
@@ -122,6 +123,7 @@ class ListUsers extends Component {
             () => this.props.navigation.navigate('Profile', { userId: item.id }),
             () => {
               if (this.props.offLine) Alert.alert('', 'Impossible de supprimer un utilisateur en mode hors-ligne')
+              else if (!canDelete) Alert.alert('Action non autorisée', 'Seul un administrateur peut supprimer un utilisateur.')
               else this.alertDeleteUser(item)
             },
           ]}
@@ -144,6 +146,7 @@ class ListUsers extends Component {
     let label = this.renderCountLabel(usersCount)
 
     const filteredUsers = usersList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
+    const { canCreate } = this.props.permissions
 
     return (
       <View style={styles.container}>
@@ -167,7 +170,7 @@ class ListUsers extends Component {
               <EmptyList iconName='account' header={this.props.emptyListHeader} description={this.props.emptyListDesc} offLine={this.props.offLine} />
             }
 
-            {this.props.showButton && !this.props.offLine &&
+            {canCreate && this.props.showButton && !this.props.offLine &&
               <MyFAB icon='account-plus' onPress={() => this.props.navigation.navigate('CreateUser', { prevScreen: this.props.prevScreen })} />
             }
 

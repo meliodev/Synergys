@@ -26,7 +26,7 @@ import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc } from "../../core/utils";
+import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -355,10 +355,8 @@ class UploadDocument extends Component {
         })
     }
 
-    //task: handle kill app
-    renderAttachment() {
+    renderAttachment(canUpdate) {
         const { attachment } = this.state
-        const { isConnected } = this.props
 
         //upload task is running -> show progress for local user
         if (attachment) {
@@ -378,7 +376,11 @@ class UploadDocument extends Component {
 
         else if ((attachment && !attachment.pending) || !attachment) {
             return (
-                <TouchableOpacity onPress={this.pickDoc}>
+                <TouchableOpacity
+                    onPress={() => {
+                        if (!canUpdate) return
+                        this.pickDoc
+                    }}>
                     <MyInput
                         label="Pièce jointe"
                         value={attachment && attachment.name}
@@ -390,16 +392,43 @@ class UploadDocument extends Component {
         }
     }
 
+    navigateToSignature(isConnected, b ,signMode) {
+        if (!isConnected) {
+            Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
+            return
+        }
+
+        const { canUpdate } = this.props.permissions.documents
+        const { project, type, attachment } = this.initialState
+
+        var params = {
+            onGoBack: this.fetchDocument,
+            ProjectId: project.id,
+            DocumentId: this.DocumentId,
+            DocumentType: type,
+            fileName: attachment.name,
+            url: attachment.downloadURL
+        }
+
+        if (signMode)
+            params.initMode = 'sign'
+
+        navigateToScreen(this, canUpdate, 'Signature', params)
+    }
+
     render() {
         let { project, name, description, type, state, attachment } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage, projectError } = this.state
 
+        var { canUpdate, canDelete } = this.props.permissions.documents
+        canUpdate = (canUpdate || !this.isEdit)
+
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back close title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back close title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -407,11 +436,8 @@ class UploadDocument extends Component {
                     </View>
                     :
                     <View style={{ flex: 1 }}>
-                        {this.isEdit && attachment && !attachment.pending && isConnected &&
-                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => {
-                                const { project, type, attachment } = this.initialState
-                                this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: attachment.name, url: attachment.downloadURL })
-                            }}>
+                        {this.isEdit && attachment && !attachment.pending &&
+                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, canUpdate, false)}>
                                 <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
                             </Button>
                         }
@@ -431,7 +457,7 @@ class UploadDocument extends Component {
                                     />
 
 
-                                    {this.renderAttachment()}
+                                    {this.renderAttachment(canUpdate)}
 
                                     <MyInput
                                         label="Nom du document"
@@ -441,9 +467,10 @@ class UploadDocument extends Component {
                                         error={!!name.error}
                                         errorText={name.error}
                                         multiline={true}
+                                        editable={canUpdate}
                                     />
 
-                                    <TouchableOpacity onPress={() => this.props.navigation.push('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'UploadDocument', isRoot: false, titleText: 'Choix du projet', showFAB: false })}>
+                                    <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}>
                                         <MyInput
                                             label="Choisir un projet"
                                             value={project.name}
@@ -460,6 +487,7 @@ class UploadDocument extends Component {
                                         error={!!description.error}
                                         errorText={description.error}
                                         multiline={true}
+                                        editable={canUpdate}
                                     />
 
                                     <Picker
@@ -471,6 +499,7 @@ class UploadDocument extends Component {
                                         onValueChange={(type) => this.setState({ type })}
                                         title="Type"
                                         elements={types}
+                                        enabled={canUpdate}
                                     />
 
                                     <Picker
@@ -482,6 +511,7 @@ class UploadDocument extends Component {
                                         onValueChange={(state) => this.setState({ state })}
                                         title="Etat"
                                         elements={states}
+                                        enabled={canUpdate}
                                     />
                                 </Card.Content>
                             </Card>
@@ -537,17 +567,7 @@ class UploadDocument extends Component {
                             <Button
                                 mode={this.isEdit ? "contained" : "outlined"}
                                 style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
-                                onPress={() => {
-                                    const { project, type, attachment } = this.initialState
-                                    if (!isConnected) {
-                                        Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
-                                        return
-                                    }
-
-                                    if (this.isEdit && attachment && !attachment.pending) {
-                                        this.props.navigation.navigate('Signature', { onGoBack: this.fetchDocument, ProjectId: project.id, DocumentId: this.DocumentId, DocumentType: type, fileName: attachment.name, url: attachment.downloadURL, initMode: 'sign' })
-                                    }
-                                }}>
+                                onPress={() => this.navigateToSignature(isConnected, canUpdate, true)}>
                                 <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>signer</Text>
                             </Button>
                         </View>
@@ -567,6 +587,7 @@ class UploadDocument extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         documents: state.documents
         //fcmToken: state.fcmtoken

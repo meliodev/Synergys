@@ -576,6 +576,8 @@ class Signature extends Component {
 
     render() {
         let { fileDownloaded, filePath, pdfEditMode, newPdfSaved, showDialog, showTerms, uploading, loading, loadingMessage, toastType, toastMessage } = this.state
+        var { canUpdate } = this.props.permissions.documents
+        const { isConnected } = this.props.network
 
         if (uploading) {
             return (
@@ -625,7 +627,7 @@ class Signature extends Component {
                                 </TouchableOpacity>
                             </View>}
 
-                        {!newPdfSaved && fileDownloaded &&
+                        {!newPdfSaved && fileDownloaded && isConnected && canUpdate &&
                             <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
                                 <FontAwesome5 name='signature' size={17} color='#fff' style={{ marginRight: 7 }} />
                                 <Text style={[theme.customFontMSsemibold.header, { color: '#fff', marginLeft: 7, letterSpacing: 1 }]}>SIGNER</Text>
@@ -662,6 +664,8 @@ class Signature extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
+        network: state.network,
         user: state.user.user,
         //fcmToken: state.fcmtoken
     }

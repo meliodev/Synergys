@@ -4,12 +4,12 @@ import { Picker } from '@react-native-community/picker'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const MyPicker = ({ containerStyle, style, elements, title, errorText, ...props }) => (
+const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled = true, ...props }) => (
     <View style={[styles.container, { marginBottom: errorText ? 15 : 5 }]}>
 
         <View style={[styles.pickerContainer, containerStyle]}>
             <Text style={styles.header}>{title}</Text>
-            <Picker style={[styles.input, style]} {...props}>
+            <Picker style={[styles.input, style]} enabled= {false} {...props}>
                 {elements.map((item) => {
                     return (<Picker.Item label={item.label} value={item.value} />)
                 })}

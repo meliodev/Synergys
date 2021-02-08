@@ -68,6 +68,12 @@ export const phoneValidator = phone => {
 }
 
 
+//##NAVIGATION
+export const navigateToScreen = (main, canUpdate, screen, params) => {
+  if (!canUpdate) return
+  main.props.navigation.navigate(screen, params)
+}
+
 //##HELPERS
 export const checkPlural = (arrayLength, string) => {
   let str = ''

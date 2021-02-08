@@ -40,16 +40,14 @@ export default class ViewMessage extends Component {
             showOldMessages: false,
 
             toastMessage: '',
-            toastType: ''
+            toastType: '',
+            loading: true
         }
     }
 
     componentDidMount() {
-        load(this, true)
-        let currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const query = db.collection('Messages').doc(this.message.id).collection('AllMessages')
-            .where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
-        //.where('subscribers', 'array-contains', currentUser.uid )
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const query = db.collection('Messages').doc(this.message.id).collection('AllMessages').where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
         this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })
     }
 

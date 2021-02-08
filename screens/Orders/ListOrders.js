@@ -102,6 +102,7 @@ class ListOrders extends Component {
         let { ordersCount, ordersList, loading } = this.state
         let { state, project, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+        const { canCreate } = this.props.permissions.orders
         const { isConnected } = this.props.network
 
         const fields = [{ label: 'state', value: state }, { label: 'client.id', value: client.id }, { label: 'project.id', value: project.id }]
@@ -164,7 +165,7 @@ class ListOrders extends Component {
                             <EmptyList iconName='file-document-edit-outline' header='Liste des commandes' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={!isConnected} />
                         }
 
-                        {this.showFAB && this.isRoot &&
+                        {canCreate && this.showFAB && this.isRoot &&
                             <MyFAB onPress={() => this.props.navigation.navigate('CreateOrder')} />
                         }
                     </View>}
@@ -182,6 +183,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }

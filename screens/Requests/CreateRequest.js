@@ -19,7 +19,7 @@ import Loading from "../../components/Loading";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generatetId, myAlert, updateField, nameValidator, uuidGenerator, setToast, load } from "../../core/utils";
+import { generatetId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -245,13 +245,14 @@ class CreateRequest extends Component {
         this.props.navigation.goBack()
     }
 
-    renderStateToggle(currentState) {
+    renderStateToggle(currentState, canUpdate) {
+        console.log('canUpdate', canUpdate)
         const label = this.isTicket ? 'ticket' : 'projet'
-        return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, label)} />
+        return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, label, canUpdate)} />
     }
 
-    alertUpdateRequestState(nextState, label) {
-        if (nextState === this.state.state) return
+    alertUpdateRequestState(nextState, label, canUpdate) {
+        if (nextState === this.state.state || !canUpdate) return
 
         const title = "Mettre à jour le " + label
         const message = "Etes-vous sûr de vouloir changer l'état de ce " + label + ' ?'
@@ -273,6 +274,8 @@ class CreateRequest extends Component {
         const { RequestId, client, department, subject, state, description, address } = this.state
         const { createdAt, createdBy, editedAt, editedBy, loading, toastMessage, toastType, clientError, addressError } = this.state
         const { requestType } = this.props
+        let { canUpdate, canDelete } = this.props.permissions.requests
+        canUpdate = (canUpdate || !this.isEdit)
         const { isConnected } = this.props.network
 
         const title = ' Demande de ' + requestType
@@ -301,7 +304,7 @@ class CreateRequest extends Component {
                                     editable={false}
                                 />
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListClients', { onGoBack: this.refreshClient, prevScreen: prevScreen, titleText: 'Clients' })}>
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: prevScreen, titleText: 'Clients' })}>
                                     <MyInput
                                         label="Client"
                                         value={client.fullName}
@@ -322,12 +325,13 @@ class CreateRequest extends Component {
                                         onValueChange={(department) => this.setState({ department })}
                                         title="Département"
                                         elements={departments}
+                                        enabled={canUpdate}
                                     />
                                     :
                                     <AddressInput
                                         label='Adresse postale'
                                         offLine={!isConnected}
-                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                        onPress={() => navigateToScreen(this, canUpdate, 'Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={addressError} />
                                 }
@@ -339,6 +343,7 @@ class CreateRequest extends Component {
                                     onChangeText={text => updateField(this, subject, text)}
                                     error={!!subject.error}
                                     errorText={subject.error}
+                                    editable={canUpdate}
                                 />
 
                                 <MyInput
@@ -348,6 +353,7 @@ class CreateRequest extends Component {
                                     onChangeText={text => updateField(this, description, text)}
                                     error={!!description.error}
                                     errorText={description.error}
+                                    editable={canUpdate}
                                 />
 
                             </Card.Content>
@@ -400,7 +406,7 @@ class CreateRequest extends Component {
                             onPress={() => this.props.navigation.navigate('Chat', { chatId: this.chatId })}
                             icon='chat-processing'
                             style={styles.fab} />
-                        {this.renderStateToggle(state)}
+                        {this.renderStateToggle(state, canUpdate)}
                     </View>}
             </View>
         );
@@ -410,6 +416,7 @@ class CreateRequest extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }

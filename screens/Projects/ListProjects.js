@@ -97,6 +97,7 @@ class ListProjects extends Component {
         let { projectsCount, projectsList, loading } = this.state
         let { step, state, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+        const { canCreate } = this.props.permissions.projects
         const { isConnected } = this.props.network
 
         const fields = [{ label: 'step', value: step }, { label: 'state', value: state }, { label: 'client.id', value: client.id }]
@@ -160,7 +161,7 @@ class ListProjects extends Component {
                             <EmptyList iconName='alpha-p-box' header='Liste des projets' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
                         }
 
-                        {this.showFAB && this.isRoot &&
+                        {canCreate && this.showFAB && this.isRoot &&
                             <MyFAB onPress={() => this.props.navigation.navigate('CreateProject')} />
                         }
                     </View>}
@@ -178,6 +179,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }

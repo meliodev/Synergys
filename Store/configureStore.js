@@ -5,6 +5,7 @@ import { persistCombineReducers } from 'redux-persist'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import rolesReducer from './Reducers/rolesReducer'
+import permissionsReducer from './Reducers/permissionsReducer'
 import fcmtokenReducer from './Reducers/fcmtokenReducer'
 import userReducer from './Reducers/userReducer'
 import networkReducer from './Reducers/networkReducer'
@@ -15,7 +16,7 @@ const rootPersistConfig = {
     storage: AsyncStorage
 }
 
-const rootReducer = persistCombineReducers(rootPersistConfig, { roles: rolesReducer, fcmtoken: fcmtokenReducer, user: userReducer, network: networkReducer, documents: documentsReducer })
+const rootReducer = persistCombineReducers(rootPersistConfig, { roles: rolesReducer, permissions: permissionsReducer, fcmtoken: fcmtokenReducer, user: userReducer, network: networkReducer, documents: documentsReducer })
 //const rootReducer = combineReducers({ roles: rolesReducer, fcmtoken: fcmtokenReducer, user: userReducer, network: networkReducer, documents: documentsReducer })
 
 export default createStore(rootReducer)

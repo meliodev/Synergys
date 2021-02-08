@@ -25,7 +25,7 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generatetId, myAlert, updateField, nameValidator, setToast, load, pickImage } from "../../core/utils";
+import { generatetId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs } from "../../api/firestore-api";
@@ -418,7 +418,7 @@ class CreateProject extends Component {
         let { attachments } = this.state
         attachments = await pickImage(attachments)
         this.setState({ attachments })
-    } 
+    }
 
     renderAttachments(attachments, type, isUpload) {
         const { loading } = this.state
@@ -511,11 +511,15 @@ class CreateProject extends Component {
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
         let { error, loading, toastMessage, toastType } = this.state
+        let { canUpdate, canDelete } = this.props.permissions.projects
+        canUpdate = (canUpdate || !this.isEdit)
+        const canCreateDocument = this.props.permissions.documents.canCreate
+
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
+                <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 
                 <ScrollView style={styles.container}>
 
@@ -537,7 +541,8 @@ class CreateProject extends Component {
                                     onChangeText={text => updateField(this, name, text)}
                                     error={!!name.error}
                                     errorText={name.error}
-                                    multiline={true} />
+                                    multiline={true}
+                                    editable={canUpdate} />
 
                                 <MyInput
                                     label="Description"
@@ -546,9 +551,10 @@ class CreateProject extends Component {
                                     onChangeText={text => updateField(this, description, text)}
                                     error={!!description.error}
                                     errorText={description.error}
-                                    multiline={true} />
+                                    multiline={true}
+                                    editable={canUpdate} />
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', titleText: 'Clients' })}>
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', titleText: 'Clients' })}>
                                     <MyInput
                                         label="Client"
                                         value={client.fullName}
@@ -559,7 +565,7 @@ class CreateProject extends Component {
 
                                 <AddressInput
                                     offLine={!isConnected}
-                                    onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                    onPress={() => navigateToScreen(this, canUpdate, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
                                     address={address}
                                     addressError={addressError} />
 
@@ -571,7 +577,8 @@ class CreateProject extends Component {
                                     selectedValue={step}
                                     onValueChange={(step) => this.setState({ step })}
                                     title="Étape"
-                                    elements={steps} />
+                                    elements={steps}
+                                    enabled={canUpdate} />
 
                                 <Picker
                                     returnKeyType="next"
@@ -581,7 +588,8 @@ class CreateProject extends Component {
                                     selectedValue={state}
                                     onValueChange={(state) => this.setState({ state })}
                                     title="État"
-                                    elements={states} />
+                                    elements={states}
+                                    enabled={canUpdate} />
 
                                 <View style={{ marginTop: 10 }}>
                                     <Text style={[{ fontSize: 12, color: theme.colors.placeholder }]}>Collaborateurs</Text>
@@ -592,8 +600,8 @@ class CreateProject extends Component {
                                         placeholder="Ajouter un utilisateur"
                                         autoFocus={false}
                                         showInput={true}
-                                        editable={true}
                                         suggestionsBellow={false}
+                                        editable={canUpdate}
                                     />
                                 </View>
 
@@ -614,7 +622,8 @@ class CreateProject extends Component {
                                     onChangeText={text => updateField(this, note, text)}
                                     value={note.value}
                                     style={styles.note}
-                                    autoCapitalize='sentences' />
+                                    autoCapitalize='sentences'
+                                    editable={canUpdate} />
                             </Card.Content>
                         </Card>
                     }
@@ -624,7 +633,9 @@ class CreateProject extends Component {
                             <Card.Content>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Title>Tâches</Title>
-                                    <Text onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })} style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Planning du projet</Text>
+                                    <Text
+                                        onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
+                                        style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Planning du projet</Text>
                                 </View>
 
                                 <List.AccordionGroup
@@ -655,7 +666,7 @@ class CreateProject extends Component {
                             <Card.Content>
                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <Title>Documents</Title>
-                                    <Text onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })} style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Ajouter un document</Text>
+                                    {canCreateDocument && <Text onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })} style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Ajouter un document</Text>}
                                 </View>
 
                                 <List.AccordionGroup
@@ -749,19 +760,17 @@ class CreateProject extends Component {
 
                             {this.renderAttachments(attachments, 'image', true)}
 
-                            {!loading ?
+                            {canUpdate && !loading &&
                                 <TouchableOpacity onPress={this.pickImage} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 15, marginTop: 15 }}>
                                     <Entypo name='camera' color={theme.colors.primary} size={19} />
                                     <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary, textAlign: 'center', marginLeft: 10 }]}>Ajouter une photo</Text>
                                 </TouchableOpacity>
-                                :
-                                <Loading size='small' style={{ marginTop: 15 }} />
                             }
 
                         </Card>
                     }
 
-                    {this.isEdit && !loading &&
+                    {!loading && this.isEdit &&
                         <Card style={{ margin: 5 }}>
                             <Card.Content>
                                 <Title>Activité</Title>
@@ -818,6 +827,7 @@ class CreateProject extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }

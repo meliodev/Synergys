@@ -25,7 +25,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import Store from './Store/configureStore'
 
 import RootController from './Navigation/DrawerNavigator'
-// import CustomClaims from './api/CustomClaims'
+// import Agenda from './Agenda'
 import Wrapper from './Wrapper'
 
 const db = firebase.firestore()
@@ -64,6 +64,7 @@ class App extends Component {
         <PersistGate persistor={persistor}>
           <MenuProvider>
             <Wrapper>
+              {/* <Agenda /> */}
               <RootController />
             </Wrapper>
           </MenuProvider>

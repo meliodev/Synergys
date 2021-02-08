@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native'
 import { List } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
 
@@ -26,7 +26,7 @@ class ListTeams extends Component {
     constructor(props) {
         super(props);
         this.myAlert = myAlert.bind(this)
-        this.showAlert = this.showAlert.bind(this)
+        this.alertDeleteTeam = this.alertDeleteTeam.bind(this)
         this.renderTeam = this.renderTeam.bind(this)
         this.fetchDocs = fetchDocs.bind(this)
 
@@ -49,7 +49,7 @@ class ListTeams extends Component {
         this.props.navigation.navigate('ViewTeam', { teamId: team.id })
     }
 
-    showAlert(team) {
+    alertDeleteTeam(team) {
         const title = "Supprimer l'équipe"
         const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
         const handleConfirm = async () => await deleteTeam(team).then(() => console.log('Batch succeeded !!!'))
@@ -57,7 +57,7 @@ class ListTeams extends Component {
     }
 
     renderTeam(team) {
-
+        const { canDelete } = this.props.permissions
         let description = checkPlural(team.members.length, ' membre')
 
         return (
@@ -76,7 +76,10 @@ class ListTeams extends Component {
 
                     functions={[
                         () => this.viewTeam(team),
-                        () => this.showAlert(team),
+                        () => {
+                            if (!canDelete) Alert.alert('Action non autorisée', 'Seul un administrateur peut supprimer une équipe.')
+                            else this.alertDeleteTeam(team)
+                        },
                     ]}
                 />
             </TouchableOpacity>
@@ -86,11 +89,10 @@ class ListTeams extends Component {
     render() {
         let { teamsCount, teamsList, loading } = this.state
 
-        let s = ''
-        if (teamsCount > 1)
-            s = 's'
+        const s = teamsCount > 1 ? 's' : ''
 
         const filteredTeams = teamsList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
+        const { canCreate } = this.props.permissions
 
         return (
             <View style={styles.container}>
@@ -114,7 +116,7 @@ class ListTeams extends Component {
                             <EmptyList iconName='account-multiple-outline' header='Liste des équipes' description='Gérez les équipes. Appuyez sur le boutton "+" pour en créer un nouvelle.' offLine={this.props.offLine} />
                         }
 
-                        <MyFAB onPress={() => this.props.navigation.navigate('CreateTeam')} />
+                        {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('CreateTeam')} />}
 
                     </View>}
             </View>

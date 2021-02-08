@@ -17,7 +17,7 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { generatetId, myAlert, updateField, downloadFile, nameValidator, setToast, load, arrayValidator } from "../../core/utils"
+import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { handleFirestoreError } from '../../core/exceptions'
@@ -205,16 +205,17 @@ class CreateOrder extends Component {
         if (!isValid) return
 
         // 1. ADDING document to firestore
-        const { OrderId, project, state, orderLines, subTotal, discount, total } = this.state
+        const { OrderId, project, state, orderLines, subTotal, taxes, discount, total } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
         let order = {
-            project: project,
-            state: state,
-            orderLines: orderLines,
-            subTotal: subTotal,
+            project,
+            state,
+            orderLines,
+            subTotal,
+            taxes,
             discount: { type: discount.type, value: discount.value },
-            total: total,
+            total,
 
             editedAt: moment().format('lll'),
             editedBy: currentUser,
@@ -346,7 +347,7 @@ class CreateOrder extends Component {
     }
 
     //renderers
-    renderOrderLines() {
+    renderOrderLines(canUpdate) {
         const { orderLines } = this.state
 
         return (
@@ -355,12 +356,15 @@ class CreateOrder extends Component {
                     const totalAmount = Number(orderLine.quantity) * Number(orderLine.price)
 
                     return (
-                        <TouchableOpacity style={styles.orderLine} onPress={() => this.props.navigation.navigate('AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })}>
-                            <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start' }} onPress={() => this.removeOrderLine(key)}>
-                                <MaterialCommunityIcons name='close-circle-outline' color={theme.colors.error} size={20} />
-                            </TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })} style={styles.orderLine}>
 
-                            <View style={{ flex: 0.65 }}>
+                            {canUpdate &&
+                                <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start' }} onPress={() => this.removeOrderLine(key)}>
+                                    <MaterialCommunityIcons name='close-circle-outline' color={theme.colors.error} size={20} />
+                                </TouchableOpacity>
+                            }
+
+                            <View style={{ flex: canUpdate ? 0.65 : 0.75 }}>
                                 <Text style={theme.customFontMSsemibold.body}>{orderLine.product.name}</Text>
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{orderLine.quantity} x {orderLine.price} (+ {orderLine.taxe.name}% TVA)</Text>
                             </View>
@@ -371,8 +375,9 @@ class CreateOrder extends Component {
 
                         </TouchableOpacity>
                     )
-                })}
-            </View>
+                })
+                }
+            </View >
         )
     }
 
@@ -468,11 +473,14 @@ class CreateOrder extends Component {
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
 
+        var { canUpdate, canDelete } = this.props.permissions.documents
+        canUpdate = (canUpdate || !this.isEdit)
+
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -495,14 +503,14 @@ class CreateOrder extends Component {
                                         disabled
                                     />
 
-                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateOrder', isRoot: false, title: 'Choix du projet', showFAB: false })}>
+                                    <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', title: 'Choix du projet', showFAB: false })}>
                                         <MyInput
                                             label="Projet concerné"
                                             value={project.name}
                                             error={!!project.error}
                                             errorText={project.error}
                                             editable={false}
-                                            right={project.name !== '' && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
+                                            right={project.name !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
                                     </TouchableOpacity>
 
                                     {client.fullName !== '' &&
@@ -511,7 +519,7 @@ class CreateOrder extends Component {
                                                 label="Client concerné"
                                                 value={client.fullName}
                                                 editable={false}
-                                                right={client.fullName !== '' && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
+                                                right={client.fullName !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
                                         </TouchableOpacity>
                                     }
 
@@ -524,6 +532,7 @@ class CreateOrder extends Component {
                                         onValueChange={(state) => this.setState({ state })}
                                         title="Etat"
                                         elements={states}
+                                        enabled= {canUpdate}
                                     />
                                 </Card.Content>
                             </Card>
@@ -531,7 +540,9 @@ class CreateOrder extends Component {
                             {orderLines.length > 0 ?
                                 <Card style={{ margin: 5, paddingBottom: 10 }}>
                                     <Card.Content>
-                                        <Button icon="plus-circle" loading={loading} mode="outlined" onPress={() => this.props.navigation.navigate('AddItem', { onGoBack: this.refreshOrderLine })} style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
+                                        <Button icon="plus-circle" loading={loading} mode="outlined"
+                                            onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { onGoBack: this.refreshOrderLine })}
+                                            style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
                                             <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
                                         </Button>
 
@@ -540,19 +551,20 @@ class CreateOrder extends Component {
                                             <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
                                         </View>
 
-                                        {this.renderOrderLines()}
+                                        {this.renderOrderLines(canUpdate)}
                                         {this.renderSubTotal()}
                                         {/* {this.renderDiscount()} */}
                                         {taxes.length > 0 && this.renderTaxes()}
                                         {this.renderTotal()}
 
                                     </Card.Content>
-
                                 </Card>
                                 :
                                 <Card style={{ margin: 5, paddingBottom: 10, paddingHorizontal: 5 }}>
                                     <Card.Content>
-                                        <Button icon="plus-circle" loading={loading} mode="outlined" onPress={() => this.props.navigation.navigate('AddItem', { onGoBack: this.refreshOrderLine })} style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
+                                        <Button icon="plus-circle" loading={loading} mode="outlined"
+                                            onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { onGoBack: this.refreshOrderLine })}
+                                            style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
                                             <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
                                         </Button>
                                     </Card.Content>
@@ -620,6 +632,7 @@ class CreateOrder extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network
         //fcmToken: state.fcmtoken
     }

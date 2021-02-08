@@ -1,5 +1,12 @@
+//Role
 export const setRole = (main, role) => {
     const action = { type: "ROLE", value: role }
+    main.props.dispatch(action)
+}
+
+//Permissions
+export const setPermissions = (main, permissions) => {
+    const action = { type: "SET_PERMISSIONS", value: permissions }
     main.props.dispatch(action)
 }
 

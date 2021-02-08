@@ -44,6 +44,7 @@ class ListRequests extends Component {
         let { requestsCount, requestsList } = this.state
         const s = requestsCount > 1 ? 's' : ''
         const filteredRequests = requestsList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
+        const { canCreate } = this.props.permissions
 
         return (
             <View style={{ flex: 1 }}>
@@ -60,9 +61,9 @@ class ListRequests extends Component {
                     <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
                 }
 
-                <MyFAB onPress={() => this.props.navigation.navigate(this.props.creationScreen)} />
+                {canCreate && <MyFAB onPress={() => this.props.navigation.navigate(this.props.creationScreen)} />}
             </View>
-        );
+        )
     }
 }
 
@@ -70,6 +71,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-});
+})
 
 export default withNavigation(ListRequests)

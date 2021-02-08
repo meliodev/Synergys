@@ -40,12 +40,13 @@ class RequestsManagement extends React.Component {
         ]
 
         const { index, showInput, searchInput } = this.state
+        const permissionsRequests = this.props.permissions.requests
         const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
-                    main={this}
+                    main={this} 
                     title={!showInput}
                     titleText='Demandes'
                     placeholder='Rechercher une demande'
@@ -59,8 +60,8 @@ class RequestsManagement extends React.Component {
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} />}
-                    Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} />} />
+                    Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests}/>}
+                    Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests}/>} />
             </View>
         )
     }
@@ -69,6 +70,7 @@ class RequestsManagement extends React.Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }

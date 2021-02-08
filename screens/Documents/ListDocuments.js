@@ -107,6 +107,7 @@ class ListDocuments extends Component {
         let { documentsCount, documentsList, loading } = this.state
         let { type, state, project, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+        const { canCreate } = this.props.permissions.documents
         const { isConnected } = this.props.network
 
         const fields = [{ label: 'type', value: type }, { label: 'state', value: state }, { label: 'project.id', value: project.id }]
@@ -166,7 +167,7 @@ class ListDocuments extends Component {
                             :
                             <EmptyList iconName='file-document' header='Liste des documents' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
                         }
-                        <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument')} />
+                        {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument')} />}
                     </View>}
             </View>
 
@@ -189,6 +190,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         documents: state.documents
         //fcmToken: state.fcmtoken

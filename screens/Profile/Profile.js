@@ -14,7 +14,7 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast } from "../../core/utils"
+import { navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast } from "../../core/utils"
 import { setUser } from "../../core/redux"
 import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
@@ -56,40 +56,21 @@ class Profile extends Component {
             currentPass: { value: '', error: '', show: false },
             newPass: { value: '', error: '', show: false },
 
-            loading: false,
+            loading: true,
             loadingSignOut: false,
             error: '',
             toastMessage: '', //password change
             toastType: '',
-
-            //Permissions
-            canEdit: false,
-            isOwner: false
         }
     }
 
     componentDidMount() {
-        load(this, true)
-        this.setPermissions()
         this.fetchData()
         load(this, false)
     }
 
     componentWillUnmount() {
         this.unsubscribe()
-    }
-
-    setPermissions() {
-        if (this.role === 'admin')
-            this.setState({ isAdmin: true })
-
-        const isOwner = this.userId === this.state.currentUser.uid
-
-        if (isOwner)
-            this.setState({ isOwner: true })
-
-        if (this.role === 'admin' || isOwner) //Only admin & profile owner can edit fields
-            this.setState({ canEdit: true })
     }
 
     fetchData() {
@@ -225,7 +206,6 @@ class Profile extends Component {
                 load(this, false)
                 handleFirestoreError(e)
             })
-
     }
 
     passwordValidation() {
@@ -284,19 +264,25 @@ class Profile extends Component {
     }
 
     render() {
-        let { id, isPro, denom, siret, nom, prenom, email, phone, address, addressError, newPass, currentPass, role, canEdit, isOwner, isAdmin, toastMessage, error, loading, loadingSignOut } = this.state
+        let { id, isPro, denom, siret, nom, prenom, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingSignOut } = this.state
         const { isConnected } = this.props.network
+        const { displayName, uid } = firebase.auth().currentUser
+        const isProfileOwner = this.userId === uid
+        const isAdmin = this.role === 'admin'
+        
+        let { canUpdate } = this.props.permissions.profile
+        canUpdate = (canUpdate || isProfileOwner)
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar back={!loading} title titleText='Profil' check={canEdit} handleSubmit={this.handleSubmit} />
+                <Appbar back={!loading} title titleText='Profil' check={canUpdate} handleSubmit={this.handleSubmit} />
                 <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 20 }}>
 
                     {!loading ?
                         <View style={{ paddingHorizontal: constants.ScreenWidth * 0.075 }}>
                             <View style={{ height: constants.ScreenHeight * 0.27, flexDirection: 'row' }}>
                                 <View style={{ flex: 0.3, justifyContent: 'center', alignItems: 'flex-start' }} >
-                                    {this.state.currentUser.displayName && <AvatarText label={this.state.currentUser.displayName.charAt(0)} size={60} />}
+                                    {displayName && <AvatarText label={displayName.charAt(0)} size={60} />}
                                 </View>
                                 <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }} >
 
@@ -308,7 +294,7 @@ class Profile extends Component {
                                             onChangeText={text => updateField(this, denom, text)}
                                             error={!!denom.error}
                                             errorText={denom.error}
-                                            editable={canEdit}
+                                            editable={canUpdate}
                                         />
                                         :
                                         <MyInput
@@ -318,7 +304,7 @@ class Profile extends Component {
                                             onChangeText={text => updateField(this, prenom, text)}
                                             error={!!prenom.error}
                                             errorText={prenom.error}
-                                            editable={canEdit && isConnected}
+                                            editable={canUpdate && isConnected}
                                             disabled={!isConnected}
                                         />
                                     }
@@ -341,7 +327,7 @@ class Profile extends Component {
                                             onChangeText={text => updateField(this, nom, text)}
                                             error={!!nom.error}
                                             errorText={nom.error}
-                                            editable={canEdit && isConnected}
+                                            editable={canUpdate && isConnected}
                                             disabled={!isConnected}
                                         />
                                     }
@@ -363,7 +349,7 @@ class Profile extends Component {
                                 />
 
                                 {/* <TouchableOpacity onPress={() => {
-                                    if (isOwner)
+                                    if (isProfileOwner)
                                         this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
                                 }}> */}
                                 <MyInput
@@ -373,13 +359,13 @@ class Profile extends Component {
                                     autoCapitalize="none"
                                     editable={false}
                                     disabled
-                                // right={isOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                // right={isProfileOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
                                 //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
                                 // } />}
                                 />
                                 {/* </TouchableOpacity> */}
 
-                                {isOwner &&
+                                {isProfileOwner &&
                                     <Button
                                         loading={loadingSignOut}
                                         mode="contained"
@@ -396,8 +382,7 @@ class Profile extends Component {
                                 {isAdmin &&
                                     <TouchableOpacity onPress={() => {
                                         if (!isConnected) return
-                                        if (isAdmin)
-                                            this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
+                                        navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
                                     }}>
                                         <MyInput
                                             label="Role"
@@ -406,7 +391,7 @@ class Profile extends Component {
                                             autoCapitalize="none"
                                             editable={false}
                                             right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                                this.props.navigation.navigate('EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
+                                                navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
                                             } />} />
                                     </TouchableOpacity>
                                 }
@@ -422,7 +407,7 @@ class Profile extends Component {
                                     textContentType='telephoneNumber'
                                     keyboardType='phone-pad'
                                     dataDetectorTypes='phoneNumber'
-                                    editable={canEdit}
+                                    editable={canUpdate}
                                     render={props =>
                                         <TextInputMask
                                             {...props}
@@ -434,16 +419,13 @@ class Profile extends Component {
                                     offLine={!isConnected}
                                     address={address}
                                     addressError={addressError}
-                                    onPress={() => {
-                                        if (canEdit)
-                                            this.props.navigation.navigate('Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
-                                    }}
-                                    rightIcon={canEdit && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                        this.props.navigation.navigate('Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
+                                    onPress={() => navigateToScreen(this, canUpdate, 'Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })}
+                                    rightIcon={canUpdate && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                        navigateToScreen(this, canUpdate, 'Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
                                     } />}
                                 />
 
-                                {isOwner &&
+                                {isProfileOwner &&
                                     <View>
                                         <View style={{ paddingTop: 30, paddingBottom: 3 }}>
                                             <Text style={[theme.customFontMSsemibold.body, { marginBottom: 5 }]}>MODIFICATION DU MOT DE PASSE</Text>
@@ -482,7 +464,7 @@ class Profile extends Component {
                                     </View>
                                 }
 
-                                {isOwner &&
+                                {isProfileOwner &&
                                     <Button
                                         loading={loading}
                                         mode="contained"
@@ -513,6 +495,7 @@ const mapStateToProps = (state) => {
 
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         user: state.user.user,
         network: state.network
         //fcmToken: state.fcmtoken
