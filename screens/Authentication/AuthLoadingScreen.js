@@ -5,12 +5,13 @@ import RNFS from 'react-native-fs'
 import firebase from '@react-native-firebase/app'
 import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
+import _ from 'lodash'
 
 import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
-import { setRole, setPermissions, setUser } from '../../core/redux'
+import { setRole, setPermissions, userLoggedOut, resetState } from '../../core/redux'
 
 const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
 const db = firebase.firestore()
@@ -106,29 +107,30 @@ class AuthLoadingScreen extends Component {
   navigationRooterAuthListener() {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        //1. Set user
-        const currentUser = firebase.auth().currentUser
-        setUser(this, currentUser.displayName, true)
 
-        //2. Set role
-        const idTokenResult = await currentUser.getIdTokenResult()
+        const { currentUser } = firebase.auth()
+        const { isConnected } = this.props.network
 
-        if (idTokenResult) {
-          for (const role of roles) {
-            if (idTokenResult.claims[role.id])
-              setRole(this, role)
+        if (isConnected) {
+          //1. Set role
+          const idTokenResult = await currentUser.getIdTokenResult()
+
+          if (idTokenResult) {
+            for (const role of roles) {
+              if (idTokenResult.claims[role.id])
+                setRole(this, role)
+            }
           }
+
+          //2. Set privilleges
+          await this.configurePrivilleges()
+
+          //3. Set fcm token
+          await this.requestUserPermission() //iOS only (notifications)
+          await this.configureFcmToken()
         }
 
-        //3. Set permissions
-        //Configuration should be preferably fetched from server
-        const permissions = this.configPermissions(this.props.role.value)
-        setPermissions(this, permissions)
-
-        //4. Set fcm token
-        await this.requestUserPermission() //iOS only (notifications)
-        await this.configureFcmToken()
-
+        //4. Navigation
         const { initialNotification, screen, params } = this.state
 
         if (initialNotification)
@@ -139,116 +141,39 @@ class AuthLoadingScreen extends Component {
       }
 
       else {
-        setRole(this, '')
-        setPermissions(this, {})
-        setUser(this, '', false)
+        console.log('state........', this.props.state)
         this.props.navigation.navigate("HomeScreen")
       }
     })
   }
 
-  //#external
-  configPermissions(role) {
-    switch (role) {
-      case 'Admin':
-        return {
-          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          orders: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          users: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          teams: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: true },
-          requests: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          profile: { canCreate: true, canRead: true, canUpdate: true, canDelete: true }, //Actions on other users profiles
-        }
-        break
-
-      case 'Directeur commercial':
-        return {
-          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: false },
-          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
-          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
-        }
-        break
-
-      case 'Commercial':
-        return {
-          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: false },
-          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
-          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
-        }
-        break
-
-      case 'Responsable technique':
-        return {
-          projects: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          documents: { canCreate: true, canRead: true, canUpdate: true, canDelete: false },
-          orders: { canCreate: true, canRead: true, canUpdate: true, canDelete: true },
-          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
-          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
-        }
-        break
-
-      case 'Poseur':
-        return {
-          projects: { canCreate: false, canRead: true, canUpdate: true, canDelete: false },
-          documents: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
-          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false }, //SAV access only (no Projects)
-          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
-        }
-        break
-
-      case 'Client':
-        return {
-          projects: { canCreate: false, canRead: true, canUpdate: true, canDelete: false },
-          documents: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          orders: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          users: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access (profile read only)
-          teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false }, //No access
-          messages: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          requests: { canCreate: true, canRead: true, canUpdate: false, canDelete: false },
-          profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
-        }
-        break
-    }
+  async configurePrivilleges() {
+    //A. Compare & Update permissions config
+    //A.1. Get permissions config from server
+    // const remotePermissions = (await this.fetchPermissionsConfig()).data
+    const remotePermissions = (await db.collection('Permissions').doc(this.props.role.value).get()).data
+    const localPermissions = this.props.permissions
+    //A.2. Compare local permissions config & server permissions config
+    const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(remotePermissions)
+    //A.3 Update local config if different from server config
+    if (permissionsChanged)
+      setPermissions(this, remotePermissions)
   }
 
   //FCM token configuration
   async requestUserPermission() {
     const authStatus = await firebase.messaging().requestPermission();
     const enabled = authStatus === firebase.messaging.AuthorizationStatus.AUTHORIZED || authStatus === firebase.messaging.AuthorizationStatus.PROVISIONAL
-
-    if (enabled) {
-      console.log('Authorization status:', authStatus);
-    }
   }
 
   async configureFcmToken() {
-    // Register the device with FCM (iOS only)
+    //Register the device with FCM (iOS only)
     await firebase.messaging().registerDeviceForRemoteMessages()
 
-    // Get the token
+    //Get the token
     const token = await firebase.messaging().getToken()
-    // console.log(`Token ${token} fetched`)
 
-    // Save the token
+    //Save the token
     const currentUserId = firebase.auth().currentUser.uid //user B
     const fcmTokensRef = db.collection('FcmTokens')
 
@@ -287,10 +212,10 @@ class AuthLoadingScreen extends Component {
 
   async addTokenToCurrentUser(token) {
     const fcmTokensRef = db.collection('FcmTokens')
-    const currentUserId = firebase.auth().currentUser.uid
-    let tokens = []
+    const { uid } = firebase.auth().currentUser
+    var tokens = []
 
-    const userDoc = await fcmTokensRef.doc(currentUserId).get()
+    const userDoc = await fcmTokensRef.doc(uid).get()
     if (userDoc.exists) {
       tokens = userDoc.data().tokens
       // console.log(`Current user tokens fetched`)
@@ -299,7 +224,7 @@ class AuthLoadingScreen extends Component {
     tokens.push(token)
     // console.log(`Current user tokens ${tokens} ready to be posted`)
 
-    await fcmTokensRef.doc(currentUserId).set({ tokens }, { merge: true })
+    await fcmTokensRef.doc(uid).set({ tokens }, { merge: true })
     // console.log(`Current user tokens posted !`)
   }
 
@@ -316,8 +241,9 @@ const mapStateToProps = (state) => {
 
   return {
     role: state.roles.role,
-    user: state.user.user,
-    permissions: state.permissions
+    permissions: state.permissions,
+    network: state.network,
+    state: state,
     //fcmToken: state.fcmtoken
   }
 }
@@ -338,3 +264,14 @@ const styles = StyleSheet.create({
 })
 
 export default connect(mapStateToProps)(AuthLoadingScreen)
+
+
+
+
+  //OLD
+  // async fetchPermissionsConfig() {
+  //   console.log('fetching permissions config...')
+  //   const fetchPermissionsConfig = firebase.functions().httpsCallable('fetchPermissionsConfig')
+  //   const permissions = await fetchPermissionsConfig({})
+  //   return permissions
+  // }

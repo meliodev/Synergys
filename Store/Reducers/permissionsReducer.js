@@ -7,7 +7,6 @@ const initialState = {
     teams: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
     messages: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
     requests: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
-    profile: { canCreate: false, canRead: false, canUpdate: false, canDelete: false },
 }
 
 function setPermissions(state = initialState, action) {
@@ -64,13 +63,6 @@ function setPermissions(state = initialState, action) {
                     canRead: action.value.requests.canRead,
                     canUpdate: action.value.requests.canUpdate,
                     canDelete: action.value.requests.canDelete,
-                },
-                profile: {
-                    ...state.profile,
-                    canCreate: action.value.profile.canCreate,
-                    canRead: action.value.profile.canRead,
-                    canUpdate: action.value.profile.canUpdate,
-                    canDelete: action.value.profile.canDelete,
                 },
             }
 

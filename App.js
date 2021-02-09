@@ -57,7 +57,7 @@ class App extends Component {
 
   render() {
     let persistor = persistStore(Store)
-    // persistor.purge()
+   // persistor.purge()
 
     return (
       <Provider store={Store}>

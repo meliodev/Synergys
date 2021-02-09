@@ -362,7 +362,7 @@ class Signature extends Component {
                 //const signatureImage = await pdfDoc.embedPng(this.state.signatureArrayBuffer)
 
                 //constants
-                const signee = this.props.user.displayName
+                const signee = firebase.auth().currentUser.displayName
                 const ref = await uuidGenerator()
                 const motif = 'Acceptation des conditions'
                 const signedAt = moment().format('Do/MM/YYYY, HH:mm')
@@ -666,7 +666,6 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
-        user: state.user.user,
         //fcmToken: state.fcmtoken
     }
 }

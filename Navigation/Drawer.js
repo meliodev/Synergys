@@ -5,86 +5,41 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
+import NetInfo from "@react-native-community/netinfo"
 
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
-
-const screenWidth = Dimensions.get('window').width
-const screenHeight = Dimensions.get('window').height
-
-//Admin menu
-const arrMenuAdmin = [
-    { 'id': 0, name: 'Accueil', 'icon': 'home', 'color': 'green', 'navScreen': 'ProjectsStack' },
-    { 'id': 1, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'color': '#EF6C00', 'navScreen': 'InboxStack' },
-    { 'id': 2, name: 'Projets', 'icon': 'alpha-p-box', 'color': '#3F51B5', 'navScreen': 'ProjectsStack' }, //Create
-    { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'AgendaStack' },
-    { 'id': 4, name: 'Utilisateurs', 'icon': 'account-multiple-outline', 'color': '#3b5998', 'navScreen': 'UsersManagementStack' },
-    { 'id': 5, name: 'Gestion des demandes', 'icon': 'arrow-left-bold', 'color': '#AD1457', 'navScreen': 'RequestsManagementStack' },//Create
-    { 'id': 6, name: 'Gestion des commandes', 'icon': 'file-document-edit-outline', 'navScreen': 'OrdersStack' }, //Create
-    { 'id': 7, name: 'Documents', 'icon': 'file-document', 'color': '#6D4C41', 'navScreen': 'DocumentsStack' }, //Create
-    { 'id': 8, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'NewsStack' },//Create
-    { 'id': 9, name: 'Se déconnecter', 'icon': 'logout', 'color': '#000000', 'navScreen': 'LoginScreen' },
-]
-
-const arrMenuDirCom = [
-    { 'id': 0, name: 'Accueil', 'icon': 'home-outline', 'navScreen': 'Dashboard' },
-    { 'id': 1, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'navScreen': 'Inbox' },
-    { 'id': 2, name: 'Mes Projets', 'icon': 'alpha-p-box', 'navScreen': 'ListProjects' }, //Create
-    { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
-    { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
-    { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
-    { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
-]
-
-const arrMenuCom = [
-    { 'id': 0, name: 'Accueil', 'icon': 'home-outline', 'navScreen': 'Dashboard' },
-    { 'id': 1, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'navScreen': 'Inbox' },
-    { 'id': 2, name: 'Mes Projets', 'icon': 'alpha-p-box', 'navScreen': 'ListProjects' }, //Create
-    { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
-    { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
-    { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
-    { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
-]
-
-const arrMenuPoseur = [
-    { 'id': 0, name: 'Tableau de bord', 'icon': 'home-outline', 'navScreen': 'Dashboard' },
-    { 'id': 1, name: 'Agenda Poseur', 'icon': 'calendar', 'navScreen': 'Agenda2' },
-    { 'id': 2, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'navScreen': 'P' },
-    // { 'id': 3, name: 'Utilisateurs', 'icon': 'face-profile', 'navScreen': 'MyWaletScreen' },
-    { 'id': 3, name: 'Projets', 'icon': 'clipboard-multiple', 'navScreen': 'HelpScreen' },
-    { 'id': 4, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
-]
-
-const arrMenuTech = [
-    { 'id': 0, name: 'Accueil', 'icon': 'home-outline', 'navScreen': 'Dashboard' },
-    { 'id': 1, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'navScreen': 'Inbox' },
-    { 'id': 2, name: 'Mes Projets', 'icon': 'alpha-p-box', 'navScreen': 'ListProjects' }, //Create
-    { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
-    { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
-    { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
-    { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
-]
-
-const arrMenuClient = [
-    { 'id': 0, name: 'Accueil', 'icon': 'home-outline', 'navScreen': 'Dashboard' },
-    { 'id': 1, name: 'Boite de réception', 'icon': 'comment-text-multiple', 'navScreen': 'Inbox' },
-    { 'id': 2, name: 'Mes Projets', 'icon': 'alpha-p-box', 'navScreen': 'ListProjects' }, //Create
-    { 'id': 3, name: 'Planning', 'icon': 'calendar', 'navScreen': 'Agenda' },
-    { 'id': 4, name: 'Mes Tickets', 'icon': 'arrow-left-bold-outline', 'navScreen': 'RequestsManagementStack' },//Create
-    { 'id': 5, name: 'Mes Documents', 'icon': 'file-document', 'navScreen': 'Upload' }, //Create
-    { 'id': 6, name: 'Actualités', 'icon': 'newspaper', 'navScreen': 'ListNews' },//Create
-    { 'id': 7, name: 'Se déconnecter', 'icon': 'logout', 'navScreen': 'LoginScreen' },
-]
+import { resetState, setNetwork } from '../core/redux'
 
 const db = firebase.firestore()
+
+const menuPrivilleges = {
+    admin: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
+    dircom: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout'],
+    com: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout'],
+    tech: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
+    proseur: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'news', 'logout'],
+    client: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout']
+}
+
+const menuItems = [
+    { id: 'home', name: 'Accueil', icon: 'home', color: 'green', navScreen: 'ProjectsStack' },
+    { id: 'inbox', name: 'Boite de réception', icon: 'comment-text-multiple', color: '#EF6C00', navScreen: 'InboxStack' },
+    { id: 'projects', name: 'Projets', icon: 'alpha-p-box', color: '#3F51B5', navScreen: 'ProjectsStack' }, //Create
+    { id: 'agenda', name: 'Planning', icon: 'calendar', navScreen: 'AgendaStack' },
+    { id: 'users', name: 'Utilisateurs', icon: 'account-multiple-outline', color: '#3b5998', navScreen: 'UsersManagementStack' },
+    { id: 'requests', name: 'Gestion des demandes', icon: 'arrow-left-bold', color: '#AD1457', navScreen: 'RequestsManagementStack' },//Create
+    { id: 'orders', name: 'Gestion des commandes', icon: 'file-document-edit-outline', navScreen: 'OrdersStack' }, //Create
+    { id: 'documents', name: 'Documents', icon: 'file-document', color: '#6D4C41', navScreen: 'DocumentsStack' }, //Create
+    { id: 'news', name: 'Actualités', icon: 'newspaper', navScreen: 'NewsStack' },//Create
+    { id: 'logout', name: 'Se déconnecter', icon: 'logout', color: '#000000', navScreen: 'LoginScreen' },
+]
 
 class DrawerMenu extends React.Component {
 
     constructor(props) {
         super(props)
+        this.renderMenuItem = this.renderMenuItem.bind(this)
         this.navigateToScreen = this.navigateToScreen.bind(this)
 
         this.state = {
@@ -93,7 +48,8 @@ class DrawerMenu extends React.Component {
     }
 
     componentDidMount() {
-        this.setNotificationBadge()
+        const { currentUser } = firebase.auth()
+        if (currentUser) this.setNotificationBadge(currentUser.uid)
     }
 
     componentWillUnmount() {
@@ -101,151 +57,120 @@ class DrawerMenu extends React.Component {
     }
 
     setNotificationBadge(uid) {
-        const { currentUser } = firebase.auth()
-
-        this.unsubscribenotifications = db.collection('Users').doc(currentUser.uid).collection('Notifications').where('deleted', '==', false).where('read', '==', false)
-            .onSnapshot((querysnapshot) => {
-                if (querysnapshot.empty) return
-                const notificationCount = querysnapshot.docs.length
-                this.setState({ notificationCount })
-            })
+        const query = db.collection('Users').doc(uid).collection('Notifications').where('deleted', '==', false).where('read', '==', false)
+        this.unsubscribenotifications = query.onSnapshot((querysnapshot) => {
+            if (querysnapshot.empty) return
+            const notificationCount = querysnapshot.docs.length
+            this.setState({ notificationCount })
+        })
     }
 
-    render() {
-        const { user, role } = this.props
+    setMenuItems(role) {
+        console.log('menuPrivilleges.................', menuPrivilleges[role])
+        var arrMenuPrivilleges = menuPrivilleges[role]
+        const menu = menuItems.filter(menuItem => arrMenuPrivilleges.includes(menuItem.id))
+        return menu
+    }
 
-        if (user.connected && role.value !== 'client')
-            return (
-                <SafeAreaView style={styles.container}>
-                    <StatusBar backgroundColor={theme.colors.statusbar} barStyle="light-content" />
+    renderHeader(currentUser, role) {
+        const { displayName } = currentUser
 
-                    <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
-                        <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                            <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
-                                {user.displayName && <AvatarText size={constants.ScreenWidth * 0.11} label={user.connected ? user.displayName.charAt(0) : ''} />}
-                            </View>
+        return (
+            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
+                <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
+                    {currentUser && <AvatarText size={constants.ScreenWidth * 0.11} label={displayName.charAt(0)} />}
+                </View>
 
-                            <View style={{ flex: 0.8 }}>
-                                <View style={{ flexDirection: 'row', marginBottom: 3 }}>
-                                    <View style={{ flex: 0.8 }}>
-                                        {user.displayName && <Text numberOfLines={1} style={[theme.customFontMSsemibold.header, { color: '#fff', paddingLeft: 15 }]}>{user.connected ? user.displayName : ''}</Text>}
-                                        <Text style={[theme.customFontMSmedium.body, { color: '#fff', paddingLeft: 15 }]}>{role.value}</Text>
-                                    </View>
-                                    <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
-                                        <FontAwesome name='gear' size={20} style={{ color: '#fff' }} />
-                                    </View>
-                                </View>
-                            </View>
-                        </View>
-                    </TouchableOpacity>
-
-                    <View style={styles.menuContainer}>
-                        {this.renderFlatList()}
+                <View style={{ flex: 0.8, flexDirection: 'row', marginBottom: 3 }}>
+                    <View style={{ flex: 0.8 }}>
+                        {currentUser && <Text numberOfLines={1} style={[theme.customFontMSsemibold.header, { color: '#fff', paddingLeft: 15 }]}>{displayName}</Text>}
+                        <Text style={[theme.customFontMSmedium.body, { color: '#fff', paddingLeft: 15 }]}>{role.value}</Text>
                     </View>
-
-                    <View style={[styles.footerContainer, { bottom: 5 }]}>
-                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.1</Text>
+                    <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
+                        <FontAwesome name='gear' size={20} style={{ color: '#fff' }} />
                     </View>
-
-                </SafeAreaView>
-            )
-
-        else return null
+                </View>
+            </TouchableOpacity>
+        )
     }
-
-    renderIcon() {
-        return <Icon name='menu' style={{ color: '#333' }} />
-    }
-
-    // setMenuItems() {
-    //     let arrMenu = []
-    //     switch (this.props.role.value) {
-    //         case 'admin':
-    //             arrMenu = arrMenuAdmin
-    //             break;
-
-    //         case 'dircom':
-    //             arrMenu = arrMenuDirCom
-    //             break;
-
-    //         case 'com':
-    //             arrMenu = arrMenuCom
-    //             break;
-
-    //         case 'poseur':
-    //             arrMenu = arrMenuPoseur
-    //             break;
-
-    //         case 'tech':
-    //             arrMenu = arrMenuTech
-    //             break;
-
-    //         case 'client':
-    //             arrMenu = arrMenuClient
-    //             break;
-
-    //         case '':
-    //             console.log(`User not logged in`);
-    //             break;
-
-    //         default:
-    //             console.log(`Error while setting drawer menu items`);
-    //     }
-    //     return arrMenu
-    // }
 
     renderFlatList() {
 
-        // let arrMenu = this.setMenuItems()
+        const arrMenu = this.setMenuItems(this.props.role.id)
         const { notificationCount } = this.state
 
         return (
             <FlatList
-                scrollEnabled={(screenHeight >= 667) ? false : true}
-                data={arrMenuAdmin}
+                scrollEnabled={(constants.ScreenHeight >= 667) ? false : true}
+                data={arrMenu}
                 keyExtractor={item => item.id.toString()}
                 style={{ marginTop: 15 }}
-                renderItem={({ item }) => {
-                    if (item.icon === 'logout')
-                        return (
-                            <TouchableOpacity onPress={() => firebase.auth().signOut()
-                                // .then(() => this.navigateToScreen('LoginScreen'))
-                                // .catch((e) => console.error(e))
-                            }
-                            //   style={{backgroundColor: this.props.navigation.state.routeName === ''}}
-                            >
-                                <View style={{ height: screenHeight * 0.077, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                    <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
-                                    <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
-                                </View>
-                            </TouchableOpacity>
-                        )
+                renderItem={({ item }) => this.renderMenuItem(item)} />)
+    }
 
-                    else return (
-                        <TouchableOpacity onPress={() => this.navigateToScreen(item.navScreen)}>
-                            <View style={{ height: screenHeight * 0.077, flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-                                <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
-                                {item.name === 'Boite de réception' ?
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
-                                        {notificationCount > 0 &&
-                                            <View style={{ backgroundColor: '#00ACC1', borderRadius: 10, justifyContent: 'center', alignItems: 'center', width: 20, height: 20 }}>
-                                                <Text style={[theme.customFontMSmedium.caption, { fontSize: 8, color: '#fff' }]}>{notificationCount}</Text>
-                                            </View>
-                                        }
-                                    </View>
-                                    :
-                                    <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
-                                }
+    renderMenuItem(item) {
+        const { notificationCount } = this.state
+
+        if (item.id === 'logout')
+            return (
+                <TouchableOpacity onPress={this.handleSignout.bind(this)} style={styles.menuItem}>
+                    <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
+                    <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
+                </TouchableOpacity>
+            )
+
+        else return (
+            <TouchableOpacity onPress={() => this.navigateToScreen(item.navScreen)} style={styles.menuItem}>
+                <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
+                {item.id === 'inbox' ?
+                    <View style={{ flexDirection: 'row' }}>
+                        <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
+                        {notificationCount > 0 &&
+                            <View style={styles.notificationBadge}>
+                                <Text style={{ fontSize: 8, color: '#fff' }}>{notificationCount}</Text>
                             </View>
-                        </TouchableOpacity>
-                    )
+                        }
+                    </View>
+                    :
+                    <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
                 }
-                } />)
+            </TouchableOpacity>
+        )
+    }
+
+    handleSignout() {
+        firebase.auth().signOut().then(async () => {
+            resetState(this)
+            const { type, isConnected } = await NetInfo.fetch()
+            const network = { type, isConnected }
+            setNetwork(this, network)
+        })
     }
 
     navigateToScreen(navScreen) {
         this.props.navigation.navigate(navScreen)
+    }
+
+    render() {
+        const { role } = this.props
+        const { currentUser } = firebase.auth()
+
+        return (
+            <SafeAreaView style={styles.container}>
+                <StatusBar backgroundColor={theme.colors.statusbar} barStyle="light-content" />
+
+                {currentUser && this.renderHeader(currentUser, role)}
+
+                <View style={styles.menuContainer}>
+                    {currentUser && this.renderFlatList()}
+                </View>
+
+                <View style={[styles.footerContainer, { bottom: 5 }]}>
+                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.1</Text>
+                </View>
+
+            </SafeAreaView>
+        )
     }
 
 }
@@ -254,7 +179,6 @@ const mapStateToProps = (state) => {
 
     return {
         role: state.roles.role,
-        user: state.user.user,
         //fcmToken: state.fcmtoken
     }
 }
@@ -267,7 +191,9 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         flex: 0.15,
-        justifyContent: 'center',
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
         backgroundColor: theme.colors.primary
     },
     menuContainer: {
@@ -275,28 +201,30 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         backgroundColor: '#fff'
     },
-    headerText: {
-        fontSize: 50,
-        color: '#333',
-        fontWeight: 'bold',
-        textAlign: 'center'
-    },
-    menuText: {
-        marginLeft: constants.ScreenWidth * 0.05,
-        marginRight: constants.ScreenWidth * 0.05,
-    },
     footerContainer: {
         flex: 1,
         justifyContent: 'center',
         height: 30,
         position: 'absolute',
         bottom: 10,
-        // left: 0,
         right: 10
     },
-    footerText: {
-        fontSize: 16,
-        textAlign: 'center',
-        marginBottom: 10
+    menuItem: {
+        flex: 1,
+        height: constants.ScreenHeight * 0.077,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-start'
+    },
+    notificationBadge: {
+        backgroundColor: '#00ACC1',
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 20,
+        height: 20
+    },
+    menuText: {
+        marginHorizontal: constants.ScreenWidth * 0.05,
     },
 })

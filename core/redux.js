@@ -10,11 +10,6 @@ export const setPermissions = (main, permissions) => {
     main.props.dispatch(action)
 }
 
-export const setUser = (main, displayName, connected) => {
-    const action = { type: "DISPLAYNAME", value: { displayName, connected } }
-    main.props.dispatch(action)
-}
-
 export const setNetwork = (main, network) => {
     const action = { type: "NET", value: network }
     main.props.dispatch(action)
@@ -33,5 +28,11 @@ export const onUploadProgressChange = (main, attachment) => {
 
 export const onUploadProgressEnd = (main, attachment) => {
     const action = { type: "UPLOAD_PROGRESS_FINISHED", value: attachment }
+    main.props.dispatch(action)
+}
+
+//Logout (Reset state and Purge asyncstorage)
+export const resetState = (main) => {
+    const action = { type: "USER_LOGOUT", value: '' }
     main.props.dispatch(action)
 }

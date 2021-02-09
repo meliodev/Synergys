@@ -3,6 +3,7 @@ import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard } from '
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import firebase from '@react-native-firebase/app'
+import NetInfo from "@react-native-community/netinfo"
 
 import Appbar from '../../components/Appbar'
 import AvatarText from '../../components/AvatarText'
@@ -14,8 +15,8 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
+import { resetState, setNetwork } from '../../core/redux'
 import { navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast } from "../../core/utils"
-import { setUser } from "../../core/redux"
 import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
 
@@ -196,7 +197,6 @@ class Profile extends Component {
                         await firebase.auth().currentUser.reload()
                         const currentUser = firebase.auth().currentUser
                         this.setState({ currentUser })
-                        setUser(this, currentUser.displayName, true)
                     }, 5000)
 
                 load(this, false)
@@ -263,14 +263,24 @@ class Profile extends Component {
         this.setState({ toastType, toastMessage })
     }
 
+    handleSignout() {
+        this.setState({ loadingSignOut: true })
+        firebase.auth().signOut().then(async () => {
+            resetState(this)
+            const { type, isConnected } = await NetInfo.fetch()
+            const network = { type, isConnected }
+            setNetwork(this, network)
+        })
+    }
+
     render() {
         let { id, isPro, denom, siret, nom, prenom, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingSignOut } = this.state
         const { isConnected } = this.props.network
         const { displayName, uid } = firebase.auth().currentUser
         const isProfileOwner = this.userId === uid
         const isAdmin = this.role === 'admin'
-        
-        let { canUpdate } = this.props.permissions.profile
+
+        let { canUpdate } = this.props.permissions.users
         canUpdate = (canUpdate || isProfileOwner)
 
         return (
@@ -369,10 +379,7 @@ class Profile extends Component {
                                     <Button
                                         loading={loadingSignOut}
                                         mode="contained"
-                                        onPress={() => {
-                                            this.setState({ loadingSignOut: true })
-                                            firebase.auth().signOut()
-                                        }}
+                                        onPress={this.handleSignout.bind(this)}
                                         backgroundColor='#ff5153'
                                         style={{ width: constants.ScreenWidth * 0.85, alignSelf: 'center' }}>
                                         Se déconnecter
@@ -496,7 +503,6 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         permissions: state.permissions,
-        user: state.user.user,
         network: state.network
         //fcmToken: state.fcmtoken
     }

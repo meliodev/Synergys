@@ -1,4 +1,3 @@
-
 import { PermissionsAndroid, Platform } from 'react-native'
 
 export const checkPermission = async () => {

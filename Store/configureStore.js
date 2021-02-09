@@ -7,16 +7,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import rolesReducer from './Reducers/rolesReducer'
 import permissionsReducer from './Reducers/permissionsReducer'
 import fcmtokenReducer from './Reducers/fcmtokenReducer'
-import userReducer from './Reducers/userReducer'
 import networkReducer from './Reducers/networkReducer'
 import documentsReducer from './Reducers/documentsReducer'
+import { resetState } from '../core/redux';
 
 const rootPersistConfig = {
     key: 'root',
     storage: AsyncStorage
 }
 
-const rootReducer = persistCombineReducers(rootPersistConfig, { roles: rolesReducer, permissions: permissionsReducer, fcmtoken: fcmtokenReducer, user: userReducer, network: networkReducer, documents: documentsReducer })
-//const rootReducer = combineReducers({ roles: rolesReducer, fcmtoken: fcmtokenReducer, user: userReducer, network: networkReducer, documents: documentsReducer })
+const appReducer = persistCombineReducers(rootPersistConfig, { roles: rolesReducer, permissions: permissionsReducer, fcmtoken: fcmtokenReducer, network: networkReducer, documents: documentsReducer })
+//const rootReducer = combineReducers({ roles: rolesReducer, fcmtoken: fcmtokenReducer, network: networkReducer, documents: documentsReducer })
+
+const rootReducer = (state, action) => {
+    if (action.type === 'USER_LOGOUT') {
+        // for all keys defined in persistConfig(s)
+        AsyncStorage.removeItem('persist:root')
+        //AsyncStorage.removeItem('persist:otherKey')
+        state = undefined
+    }
+    return appReducer(state, action)
+}
 
 export default createStore(rootReducer)
