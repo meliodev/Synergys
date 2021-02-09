@@ -107,12 +107,14 @@ class AuthLoadingScreen extends Component {
   navigationRooterAuthListener() {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
+        console.log('user', user)
 
         const { currentUser } = firebase.auth()
         const { isConnected } = this.props.network
 
         if (isConnected) {
           //1. Set role
+          console.log('Get token result...')
           const idTokenResult = await currentUser.getIdTokenResult()
 
           if (idTokenResult) {
@@ -123,6 +125,7 @@ class AuthLoadingScreen extends Component {
           }
 
           //2. Set privilleges
+          console.log('Configure privilleges...')
           await this.configurePrivilleges()
 
           //3. Set fcm token
@@ -140,10 +143,7 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate("ProjectsStack")
       }
 
-      else {
-        console.log('state........', this.props.state)
-        this.props.navigation.navigate("HomeScreen")
-      }
+      else this.props.navigation.navigate("HomeScreen")
     })
   }
 
@@ -151,13 +151,19 @@ class AuthLoadingScreen extends Component {
     //A. Compare & Update permissions config
     //A.1. Get permissions config from server
     // const remotePermissions = (await this.fetchPermissionsConfig()).data
-    const remotePermissions = (await db.collection('Permissions').doc(this.props.role.value).get()).data
+    const remotePermissions = await db.collection('Permissions').doc(this.props.role.value).get().then((doc) => {return doc.data()})
     const localPermissions = this.props.permissions
     //A.2. Compare local permissions config & server permissions config
-    const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(remotePermissions)
+    const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(localPermissions)
     //A.3 Update local config if different from server config
-    if (permissionsChanged)
+    if (permissionsChanged) {
+      console.log('permissions changed..')
+      console.log('remotePermissions', remotePermissions)
+      console.log('localPermissions', localPermissions)
       setPermissions(this, remotePermissions)
+    }
+
+    else console.log('no change..')
   }
 
   //FCM token configuration

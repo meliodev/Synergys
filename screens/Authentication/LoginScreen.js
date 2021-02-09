@@ -62,10 +62,10 @@ class LoginScreen extends Component {
 
     const response = await loginUser({ email: email.value, password: password.value })
 
-    load(this, false)
-
-    if (response.error)
+    if (response.error) {
+      load(this, false)
       this.setState({ error: response.error })
+    }
   }
 
   render() {
