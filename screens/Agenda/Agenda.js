@@ -116,26 +116,34 @@ class Agenda2 extends Component {
 
         let query = null
 
+        //AGENDA
         if (isAgenda) {
             query = agendaRef.collection('Tasks').where('assignedTo.id', '==', currentUser.id)
             return query
         }
 
-        if (roleId === 'admin')
-            query = agendaRef.collection('Tasks')
+        //PLANNING
+        //if (roleId === 'admin')
+        query = agendaRef.collection('Tasks')
 
-        else if (roleId === 'dircom')
-            query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'Directeur commercial')
+        // else if (roleId === 'dircom')
+        //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'com')
 
-        else if (roleId === 'tech')
-            query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'Responsable technique')
+        // else if (roleId === 'tech')
+        //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'poseur')
+
+        // else if (roleId === 'com')
+        //     query = agendaRef.collection('Tasks').where('assignedTo.id', '==', currentUser.id)
+
+        // else if (roleId === 'poseur')
+        //     query = agendaRef.collection('Tasks')
 
         return query
     }
 
     loadItems(day) {
         setTimeout(async () => {
-           // this.allTasksListeners = []
+            // this.allTasksListeners = []
 
             this.unsubscribeAgenda = db.collection('Agenda').onSnapshot((agendaSnapshot) => {
                 agendaSnapshot.forEach(async (dateDoc) => {
@@ -211,7 +219,7 @@ class Agenda2 extends Component {
                         })
                     })
 
-                   // this.allTasksListeners.push(unsubscribeTasks)
+                    // this.allTasksListeners.push(unsubscribeTasks)
 
                     // }
                 })

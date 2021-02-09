@@ -10,7 +10,6 @@ import { constants } from '../../core/constants'
 import { load, myAlert } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
 
-import UserItem from '../../components/UserItem'
 import ListItem from '../../components/ListItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
@@ -102,6 +101,9 @@ class ListUsers extends Component {
             if (item.role === 'Admin')
               return <List.Icon {...props} icon="account-cog" />
 
+            else if (item.role === 'Back office')
+              return <List.Icon {...props} icon="laptop-mac" />
+
             else if (item.isPro)
               return <List.Icon {...props} icon="briefcase" />
 
@@ -146,6 +148,7 @@ class ListUsers extends Component {
     let label = this.renderCountLabel(usersCount)
 
     const filteredUsers = usersList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
+    console.log('************', this.props.permissions)
     const { canCreate } = this.props.permissions
 
     return (

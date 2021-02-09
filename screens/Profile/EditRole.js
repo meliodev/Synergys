@@ -26,7 +26,8 @@ const roles = [
     { label: 'Commercial', value: 'Commercial' },
     { label: 'Responsable technique', value: 'Responsable technique' },
     { label: 'Poseur', value: 'Poseur' },
-    { label: 'Client', value: 'Client' }
+    { label: 'Client', value: 'Client' },
+    { label: 'Back office', value: 'Back office' },
 ]
 
 class EditRole extends Component {

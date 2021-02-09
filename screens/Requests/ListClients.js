@@ -5,6 +5,7 @@ import { StyleSheet, Text, View, TextInput, TouchableHighlight, FlatList, Scroll
 import { List, FAB } from 'react-native-paper'
 import { TouchableOpacity } from 'react-native'
 import firebase from '@react-native-firebase/app'
+import { connect } from 'react-redux'
 
 import SearchBar from '../../components/SearchBar'
 
@@ -43,7 +44,9 @@ class ListClients extends Component {
     }
 
     render() {
-        const queryClients = db.collection('Users').where('role', '==', 'Client').where('deleted', '==', false)
+        const queryClients = db.collection('Users').where('isClient', '==', true).where('deleted', '==', false)
+        const permissions = this.props.permissions.users
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
@@ -59,13 +62,32 @@ class ListClients extends Component {
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 
-                <ListUsers searchInput={this.state.searchInput} prevScreen={this.prevScreen} userType='client' query={queryClients} onPress={this.getClient} showButton={this.showButton} emptyListHeader='Liste des clients' emptyListDesc='Aucun client. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.' />
+                <ListUsers
+                    searchInput={this.state.searchInput}
+                    prevScreen={this.prevScreen}
+                    userType='client'
+                    offLine={!isConnected}
+                    permissions={permissions}
+                    query={queryClients}
+                    onPress={this.getClient}
+                    showButton={this.showButton}
+                    emptyListHeader='Liste des clients'
+                    emptyListDesc='Aucun client. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.' />
             </View>
         )
     }
 }
 
-export default ListClients
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        permissions: state.permissions,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(ListClients)
 
 const styles = StyleSheet.create({
 })

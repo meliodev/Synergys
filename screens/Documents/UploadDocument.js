@@ -88,7 +88,7 @@ class UploadDocument extends Component {
             description: { value: "aaa", error: '' },
 
             //Screens
-            project: { id: 'GS-PR-m5Ip', name: 'Projet A' },
+            project: { id: '', name: '' },
             projectError: '',
 
             //Pickers
@@ -209,7 +209,7 @@ class UploadDocument extends Component {
     }
 
     //Submit handler
-    handleSubmit() {
+    async handleSubmit() {
         const { isConnected } = this.props.network
 
         if (!isConnected && this.isEdit) { //&& !isConnected
@@ -226,7 +226,7 @@ class UploadDocument extends Component {
         if (!isValid) return
 
         //2. SetDocument
-        this.persistDocument()
+        await this.persistDocument()
 
         //3. Handle upload offline
         this.uploadFile()
@@ -248,7 +248,7 @@ class UploadDocument extends Component {
         return true
     }
 
-    persistDocument() {
+    async persistDocument() {
         //1. ADDING document to firestore
         const { project, name, description, type, state, attachment } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
@@ -263,6 +263,7 @@ class UploadDocument extends Component {
             attachment: attachment, //To Keep track of last attached file
             editedAt: moment().format('lll'),
             editedBy: currentUser,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
             deleted: false,
         }
 
@@ -379,7 +380,7 @@ class UploadDocument extends Component {
                 <TouchableOpacity
                     onPress={() => {
                         if (!canUpdate) return
-                        this.pickDoc
+                        this.pickDoc()
                     }}>
                     <MyInput
                         label="Pièce jointe"
@@ -392,7 +393,7 @@ class UploadDocument extends Component {
         }
     }
 
-    navigateToSignature(isConnected, b ,signMode) {
+    navigateToSignature(isConnected, b, signMode) {
         if (!isConnected) {
             Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
             return

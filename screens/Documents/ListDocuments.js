@@ -71,7 +71,16 @@ class ListDocuments extends Component {
         //Rehydrate killed upload tasks
         this.bootstrapUploads()
 
-        const query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
+        const role = this.props.role.id
+        const { currentUser } = firebase.auth()
+        const isClient = (role === 'client')
+
+        if (isClient)
+            var query = db.collection('Documents').where('project.client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'desc')
+
+        else
+            var query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
+
         this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
     }
 

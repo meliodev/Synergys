@@ -23,7 +23,8 @@ const roles_l1 = [ //level1: Admin
   { label: 'Commercial', value: 'Commercial' },
   { label: 'Responsable technique', value: 'Responsable technique' },
   { label: 'Poseur', value: 'Poseur' },
-  { label: 'Client', value: 'Client' }
+  { label: 'Client', value: 'Client' },
+  { label: 'Back office', value: 'Back office' },
 ]
 
 const roles_l2 = [ //level2: Directeur commercial & Responsable technique
@@ -104,7 +105,7 @@ class CreateUser extends Component {
 
   //#PERMISSIONS: config role picker items (depending on user's role)
   configRolesPicker() {
-    let { isAdmin, isDirCom, isCom, isTech, isPoseur } = this.state
+    let { isAdmin, isBackOffice, isDirCom, isCom, isTech, isPoseur } = this.state
     if (isAdmin)
       return roles_l1
 
@@ -250,6 +251,8 @@ class CreateUser extends Component {
 
     const showUserTypeRadio = (role === 'Poseur' || role === 'Client')
     const roles = this.configRolesPicker()
+
+    console.log('roles', roles)
 
     return (
       <View style={{ flex: 1 }}>

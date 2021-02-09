@@ -64,17 +64,25 @@ class ListProjects extends Component {
             client: { id: '', fullName: '' },
             filterOpened: false,
 
-            loading: false,
+            loading: true,
         }
     }
 
     componentDidMount() {
         Keyboard.dismiss()
-        load(this, true)
         requestWESPermission()
         requestRESPermission()
 
-        const query = db.collection('Projects').where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        const role = this.props.role.id
+        const { currentUser } = firebase.auth()
+        const isClient = (role === 'client')
+
+        if (isClient)
+            var query = db.collection('Projects').where('client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'DESC')
+
+        else
+            var query = db.collection('Projects').where('deleted', '==', false).orderBy('createdAt', 'DESC')
+
         this.fetchDocs(query, 'projectsList', 'projectsCount', () => load(this, false))
     }
 
@@ -87,7 +95,7 @@ class ListProjects extends Component {
             this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
 
         else {
-            this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name })
+            this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name, client: project.client })
             this.props.navigation.goBack()
         }
     }

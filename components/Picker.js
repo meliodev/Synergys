@@ -9,7 +9,7 @@ const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled =
 
         <View style={[styles.pickerContainer, containerStyle]}>
             <Text style={styles.header}>{title}</Text>
-            <Picker style={[styles.input, style]} enabled= {false} {...props}>
+            <Picker style={[styles.input, style]} enabled= {enabled} {...props}>
                 {elements.map((item) => {
                     return (<Picker.Item label={item.label} value={item.value} />)
                 })}

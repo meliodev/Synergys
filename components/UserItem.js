@@ -17,6 +17,7 @@ const UserItem = ({ main, onPress, item, controller, itemStyle, iconStyle, ...pr
                 {item.isPro && <List.Icon {...props} icon="briefcase" color= {theme.colors.placeholder}/>}
                 {!item.isPro && item.role !== 'Admin' && <List.Icon {...props} icon="account" color= {theme.colors.placeholder}/>}
                 {item.role === 'Admin' && <List.Icon {...props} icon="account-cog" color= {theme.colors.placeholder}/>}
+                {item.role === 'Back office' && <List.Icon {...props} icon="account-cog" color= {theme.colors.placeholder}/>}
             </View>
 
             <View style={[styles.primaryTextContainer]}>

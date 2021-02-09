@@ -9,11 +9,11 @@ export const constants = {
 }
 
 export const rolesRedux = [
-    { id: 'admin', value: 'admin', bool: 'isAdmin' },
-    { id: 'dircom', value: 'directeur commercial', bool: 'isDirCom' },
-    { id: 'com', value: 'commercial', bool: 'isCom' },
-    { id: 'tech', value: 'responsable technique', bool: 'isTech' },
-    { id: 'poseur', value: 'poseur', bool: 'isPoseur' }
+    { id: 'admin', value: 'Admin', bool: 'isAdmin' },
+    { id: 'backoffice', value: 'Back office', bool: 'isBackOffice' },
+    { id: 'dircom', value: 'Directeur commercial', bool: 'isDirCom' },
+    { id: 'com', value: 'Commercial', bool: 'isCom' },
+    { id: 'tech', value: 'Responsable technique', bool: 'isTech' },
+    { id: 'poseur', value: 'Poseur', bool: 'isPoseur' }
 ]
 
-export const adminId = "GS-US-xQ6s"

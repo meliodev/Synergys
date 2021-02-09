@@ -20,7 +20,7 @@ import TaskState from "../../components/RequestState"
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generatetId, load, myAlert, updateField, nameValidator } from "../../core/utils";
+import { generatetId, navigateToScreen, load, myAlert, updateField, nameValidator } from "../../core/utils";
 
 import { connect } from 'react-redux'
 
@@ -156,6 +156,7 @@ class CreateTask extends Component {
     }
 
     refreshAssignedTo(isPro, id, prenom, nom, role) {
+        console.log(isPro, id, prenom, nom, role)
         const assignedTo = { id, fullName: `${prenom} ${nom}`, role, error: '' }
         this.setState({ assignedTo })
     }
@@ -216,7 +217,7 @@ class CreateTask extends Component {
 
         let task = {
             name: name.value,
-            assignedTo: { id: assignedTo.id, fullName: assignedTo.fullName },
+            assignedTo: { id: assignedTo.id, fullName: assignedTo.fullName, role: assignedTo.role },
             description: description.value,
             project: { id: project.id, name: project.name },
             type: type,
@@ -279,11 +280,13 @@ class CreateTask extends Component {
     render() {
         let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
+        let { canUpdate, canDelete } = this.props.permissions.tasks
+        canUpdate = (canUpdate || !this.isEdit)
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
+                <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
 
                 {loading ?
                     <Loading size='large' />
@@ -309,9 +312,10 @@ class CreateTask extends Component {
                                     onChangeText={text => updateField(this, name, text)}
                                     error={!!name.error}
                                     errorText={name.error}
+                                    editable={canUpdate}
                                 />
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', titleText: 'Utilisateurs' })}>
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', titleText: 'Utilisateurs' })}>
                                     <MyInput
                                         label="Attribuée à"
                                         value={assignedTo.fullName}
@@ -327,9 +331,10 @@ class CreateTask extends Component {
                                     onChangeText={text => updateField(this, description, text)}
                                     error={!!description.error}
                                     errorText={description.error}
+                                    editable={canUpdate}
                                 />
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, title: 'Choix du projet', showFAB: false })}>
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, title: 'Choix du projet', showFAB: false })}>
                                     <MyInput
                                         label="Choisir un projet"
                                         value={project.name}
@@ -348,6 +353,7 @@ class CreateTask extends Component {
                                     onValueChange={(type) => this.setState({ type })}
                                     title="Type"
                                     elements={types}
+                                    enabled={canUpdate}
                                 />
 
                                 <Picker
@@ -360,6 +366,7 @@ class CreateTask extends Component {
                                     onValueChange={(status) => this.setState({ status })}
                                     title="État"
                                     elements={statuses}
+                                    enabled={canUpdate}
                                 />
 
                                 <Picker
@@ -372,6 +379,7 @@ class CreateTask extends Component {
                                     onValueChange={(priority) => this.setState({ priority })}
                                     title="Priorité"
                                     elements={priorities}
+                                    enabled={canUpdate}
                                 />
 
                                 <AddressInput
@@ -379,9 +387,10 @@ class CreateTask extends Component {
                                     offLine={!isConnected}
                                     onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
                                     address={address}
-                                    addressError={address.error} />
+                                    addressError={address.error}
+                                    editable={canUpdate} />
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}>
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}>
                                     <MyInput
                                         label="Date de début"
                                         value={moment(startDate).format('lll')}
@@ -389,7 +398,7 @@ class CreateTask extends Component {
                                     />
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}>
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}>
                                     <MyInput
                                         label="Date d'échéance"
                                         value={moment(dueDate).format('lll')}
@@ -441,6 +450,7 @@ class CreateTask extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }

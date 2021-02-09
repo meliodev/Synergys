@@ -60,8 +60,8 @@ class RequestsManagement extends React.Component {
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
 
-                    Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests}/>}
-                    Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests}/>} />
+                    Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role= {this.props.role}/>}
+                    Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role= {this.props.role}/>} />
             </View>
         )
     }

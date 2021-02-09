@@ -31,8 +31,16 @@ class ListRequests extends Component {
         }
     }
 
-    async componentDidMount() {
-        const query = db.collection('Requests').where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
+    componentDidMount() {
+        const role = this.props.role.id
+        const { currentUser } = firebase.auth()
+        const isClient = (role === 'client')
+
+        if (isClient)
+            var query = db.collection('Requests').where('client.id', '==', "GS-US-POqM").where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
+        else
+            var query = db.collection('Requests').where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
+
         this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
     }
 

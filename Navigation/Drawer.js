@@ -14,12 +14,13 @@ import { resetState, setNetwork } from '../core/redux'
 const db = firebase.firestore()
 
 const menuPrivilleges = {
+    backoffice: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
     admin: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
     dircom: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout'],
     com: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout'],
     tech: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
     proseur: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'news', 'logout'],
-    client: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout']
+    client: ['home', 'inbox', 'projects', 'requests', 'documents', 'news', 'logout']
 }
 
 const menuItems = [
@@ -66,7 +67,6 @@ class DrawerMenu extends React.Component {
     }
 
     setMenuItems(role) {
-        console.log('menuPrivilleges.................', menuPrivilleges[role])
         var arrMenuPrivilleges = menuPrivilleges[role]
         const menu = menuItems.filter(menuItem => arrMenuPrivilleges.includes(menuItem.id))
         return menu

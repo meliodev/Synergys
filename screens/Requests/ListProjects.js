@@ -10,7 +10,8 @@ class ListProjects extends Component {
                 requestType='projet'
                 creationScreen='CreateProjectReq'
                 offLine={this.props.offLine}
-                permissions={this.props.permissions} />
+                permissions={this.props.permissions} 
+                role= {this.props.role}/>
         )
     }
 }

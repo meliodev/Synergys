@@ -13,7 +13,7 @@ import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState } from '../../core/redux'
 
-const roles = [{ id: 'dircom', value: 'Directeur commercial' }, { id: 'admin', value: 'Admin' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
+const roles = [{ id: 'admin', value: 'Admin' }, { id: 'backoffice', value: 'Back office' }, { id: 'dircom', value: 'Directeur commercial' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
 const db = firebase.firestore()
 
 class AuthLoadingScreen extends Component {
@@ -107,14 +107,12 @@ class AuthLoadingScreen extends Component {
   navigationRooterAuthListener() {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-        console.log('user', user)
 
         const { currentUser } = firebase.auth()
         const { isConnected } = this.props.network
 
         if (isConnected) {
           //1. Set role
-          console.log('Get token result...')
           const idTokenResult = await currentUser.getIdTokenResult()
 
           if (idTokenResult) {
@@ -125,7 +123,6 @@ class AuthLoadingScreen extends Component {
           }
 
           //2. Set privilleges
-          console.log('Configure privilleges...')
           await this.configurePrivilleges()
 
           //3. Set fcm token
@@ -151,19 +148,13 @@ class AuthLoadingScreen extends Component {
     //A. Compare & Update permissions config
     //A.1. Get permissions config from server
     // const remotePermissions = (await this.fetchPermissionsConfig()).data
-    const remotePermissions = await db.collection('Permissions').doc(this.props.role.value).get().then((doc) => {return doc.data()})
+    const remotePermissions = await db.collection('Permissions').doc(this.props.role.value).get().then((doc) => { return doc.data() })
     const localPermissions = this.props.permissions
     //A.2. Compare local permissions config & server permissions config
     const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(localPermissions)
     //A.3 Update local config if different from server config
-    if (permissionsChanged) {
-      console.log('permissions changed..')
-      console.log('remotePermissions', remotePermissions)
-      console.log('localPermissions', localPermissions)
+    if (permissionsChanged)
       setPermissions(this, remotePermissions)
-    }
-
-    else console.log('no change..')
   }
 
   //FCM token configuration

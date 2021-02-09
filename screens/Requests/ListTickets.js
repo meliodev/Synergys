@@ -10,7 +10,8 @@ class ListTickets extends Component {
                 requestType='ticket'
                 creationScreen='CreateTicketReq'
                 offLine={this.props.offLine}
-                permissions={this.props.permissions} />
+                permissions={this.props.permissions} 
+                role= {this.props.role}/>
         )
     }
 }

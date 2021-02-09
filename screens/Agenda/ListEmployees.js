@@ -2,18 +2,18 @@
 
 import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { connect } from 'react-redux'
+import firebase from '@react-native-firebase/app'
+import { withNavigation } from 'react-navigation'
 
 import TwoTabs from '../../components/TwoTabs'
 import SearchBar from '../../components/SearchBar'
 import TabView from '../../components/TabView'
 
-import ListUsers from '../Users/ListUsers';
+import ListUsers from '../Users/ListUsers'
 
-import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
-
-import firebase from '@react-native-firebase/app';
-import { withNavigation } from 'react-navigation'
+import * as theme from "../../core/theme"
+import { constants } from "../../core/constants"
 
 const db = firebase.firestore()
 
@@ -37,6 +37,8 @@ class ListEmployees extends React.Component {
     render() {
         const queryUsers = db.collection('Users').where('isClient', '==', false).where('deleted', '==', false)
         const { searchInput, showInput } = this.state
+        const permissions = this.props.permissions.users
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
@@ -55,7 +57,9 @@ class ListEmployees extends React.Component {
                 <ListUsers
                     searchInput={searchInput}
                     prevScreen={this.props.prevScreen}
-                    userType='utilisateur'
+                    userType='utilisateur' 
+                    offLine={!isConnected}
+                    permissions={permissions}
                     query={queryUsers}
                     //showButton 
                     onPress={this.getEmployee}
@@ -66,7 +70,16 @@ class ListEmployees extends React.Component {
     }
 }
 
-export default withNavigation(ListEmployees)
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        permissions: state.permissions,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(ListEmployees)
 
 
 
