@@ -45,6 +45,7 @@ import CreateProject from '../screens/Projects/CreateProject'
 import ListDocuments from '../screens/Documents/ListDocuments'
 import UploadDocument from '../screens/Documents/UploadDocument'
 import Signature from '../screens/Documents/Signature'
+import PdfGeneration from '../screens/Documents/PdfGeneration'
 
 //Orders
 import ListOrders from '../screens/Orders/ListOrders'
@@ -212,8 +213,28 @@ const DocumentsStack = createStackNavigator({
         screen: Signature,
         navigationOptions: hideHeader
     },
+    PdfGeneration: {
+        screen: PdfGeneration,
+        navigationOptions: hideHeader
+    },
     ListProjects: {
         screen: ListProjects,
+        navigationOptions: hideHeader
+    },
+    ListOrders: {
+        screen: ListOrders,
+        navigationOptions: hideHeader
+    },
+    CreateOrder: {
+        screen: CreateOrder,
+        navigationOptions: hideHeader
+    },
+    AddItem: {
+        screen: AddItem,
+        navigationOptions: hideHeader
+    },
+    PdfGeneration: {
+        screen: PdfGeneration,
         navigationOptions: hideHeader
     },
 })

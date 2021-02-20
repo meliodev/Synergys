@@ -373,10 +373,8 @@ class CreateProduct extends Component {
     //Renderers
     renderTypeAndLogo() {
         const { checked, tagsSelected } = this.state
-        const isLogoSelected = tagsSelected.length > 0 && tagsSelected[0].logo.downloadURL
-        const logoUrl = isLogoSelected ? tagsSelected[0].logo.downloadURL : ''
-        if (isLogoSelected)
-            console.log('logoURL', tagsSelected[0].logo.downloadURL)
+        const isLogoSelected = tagsSelected.length > 0 && tagsSelected[0].logo && tagsSelected[0].logo.downloadURL
+        const logoUrl = isLogoSelected ? tagsSelected[0].logo && tagsSelected[0].logo.downloadURL : ''
 
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -471,7 +469,7 @@ class CreateProduct extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} title titleText={this.title} check={false} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back={!loading} title titleText={this.title} check={true} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <Loading />
@@ -515,7 +513,7 @@ class CreateProduct extends Component {
                                         multiline={true} />
 
                                     <MyInput
-                                        label="Prix de vente"
+                                        label="Prix de vente (€)"
                                         returnKeyType="done"
                                         keyboardType='numeric'
                                         value={price.value}

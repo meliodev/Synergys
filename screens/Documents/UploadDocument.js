@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform, BackHandler } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform, BackHandler, ActivityIndicator } from 'react-native';
 import { Card, Title, TextInput, ProgressBar } from 'react-native-paper'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import Modal from 'react-native-modal'
+import Dialog from "react-native-dialog"
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import firebase from '@react-native-firebase/app'
@@ -17,6 +18,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
+import RadioButton from '../../components/RadioButton'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
 import Button from "../../components/Button"
@@ -63,6 +65,11 @@ class UploadDocument extends Component {
         this.uploadFile = this.uploadFile.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
         this.onPressUploadPending = this.onPressUploadPending.bind(this)
+        this.renderPopUpMenu = this.renderPopUpMenu.bind(this)
+        this.togglePopUpMenu = this.togglePopUpMenu.bind(this)
+        this.toggleDialogGenPdf = this.toggleDialogGenPdf.bind(this)
+        this.togglePopUpMenuAndDialogGenPdf = this.togglePopUpMenuAndDialogGenPdf.bind(this)
+        this.startGenPdf = this.startGenPdf.bind(this)
 
         //Delete
         this.myAlert = myAlert.bind(this)
@@ -104,6 +111,10 @@ class UploadDocument extends Component {
             editedBy: { id: '', fullName: '' },
             editededAt: '',
             signatures: [],
+
+            showPopUpmenu: false,
+            showDialog: false,
+            checked: '',
 
             error: '',
             loading: false,
@@ -380,17 +391,103 @@ class UploadDocument extends Component {
                 <TouchableOpacity
                     onPress={() => {
                         if (!canUpdate) return
-                        this.pickDoc()
+                        this.togglePopUpMenu()
                     }}>
                     <MyInput
                         label="Pièce jointe"
                         value={attachment && attachment.name}
                         editable={false}
                         multiline
-                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.pickDoc} />} />
+                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.togglePopUpMenu} />} />
                 </TouchableOpacity>
             )
         }
+    }
+
+    togglePopUpMenu() {
+        this.setState({ showPopUpmenu: !this.state.showPopUpmenu })
+    }
+
+    toggleDialogGenPdf() {
+        this.setState({ showDialog: !this.state.showDialog })
+    }
+
+    togglePopUpMenuAndDialogGenPdf() {
+        this.toggleDialogGenPdf()
+        this.togglePopUpMenu()
+    }
+
+    startGenPdf() {
+        const { checked, type } = this.state
+        this.toggleDialogGenPdf()
+
+        if (checked === 'first') {
+            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', docType: type })
+        }
+        else if (checked === 'second') {
+            this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type })
+        }
+        else return
+    }
+
+    renderDialogGenPdf() {
+        const { type, checked } = this.state
+        const title = `Générer un ${type.toLowerCase()} à partir de:`
+
+        return (
+            <View style={styles.dialogContainer} >
+                <Dialog.Container visible={this.state.showDialog}>
+                    <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{title}</Dialog.Title>
+                    <RadioButton
+                        checked={checked}
+                        firstChoice={{ title: 'Une commande existante', value: 'oldOrder' }}
+                        secondChoice={{ title: 'Une nouvelle commande', value: 'newOrder' }}
+                        onPress1={() => this.setState({ checked: 'first' })}
+                        onPress2={() => this.setState({ checked: 'second' })}
+                        isRow={false}
+                        textRight={true} />
+
+                    <Dialog.Button label="Annuler" onPress={this.toggleDialogGenPdf} style={{ color: theme.colors.error }} />
+                    <Dialog.Button label="Confirmer" onPress={this.startGenPdf} />
+                </Dialog.Container>
+            </View >
+        )
+    }
+
+    renderPopUpMenu() {
+
+        const CircleButton = ({ iconName, title, onPress }) => {
+            const circleButtonSize = constants.ScreenWidth * 0.2
+            const circleButtonStyle = { justifyContent: 'center', alignItems: 'center', marginBottom: 15, width: circleButtonSize, height: circleButtonSize, borderRadius: circleButtonSize / 2, borderWidth: 1, borderColor: theme.colors.gray_light }
+            return (
+                <View style={modalStyles.column}>
+                    <TouchableOpacity style={circleButtonStyle} onPress={onPress}>
+                        <MaterialCommunityIcons name={iconName} color={theme.colors.black} size={constants.ScreenWidth * 0.07} />
+                    </TouchableOpacity>
+                    <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{title}</Text>
+                </View>
+            )
+        }
+
+        return (
+            <Modal
+                isVisible={this.state.showPopUpmenu}
+                onSwipeComplete={this.togglePopUpMenu}
+                swipeDirection="down"
+                animationIn="slideInUp"
+                animationOut="slideOutDown"
+                onBackdropPress={this.togglePopUpMenu}
+                style={modalStyles.modal} >
+
+                <View style={modalStyles.container}>
+                    <Text style={[theme.customFontMSmedium.header, { textAlign: 'center' }]}>Créer</Text>
+                    <View style={modalStyles.buttonsContainer}>
+                        <CircleButton iconName='upload' title='Importer' onPress={this.pickDoc} />
+                        <CircleButton iconName='creation' title='Générer' onPress={this.togglePopUpMenuAndDialogGenPdf} />
+                    </View>
+                </View>
+            </Modal>
+        )
     }
 
     navigateToSignature(isConnected, b, signMode) {
@@ -457,8 +554,21 @@ class UploadDocument extends Component {
                                         disabled
                                     />
 
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={type}
+                                        error={!!type.error}
+                                        errorText={type.error}
+                                        selectedValue={type}
+                                        onValueChange={(type) => this.setState({ type })}
+                                        title="Type"
+                                        elements={types}
+                                        enabled={canUpdate}
+                                    />
 
                                     {this.renderAttachment(canUpdate)}
+                                    {this.renderPopUpMenu()}
+                                    {this.renderDialogGenPdf()}
 
                                     <MyInput
                                         label="Nom du document"
@@ -470,6 +580,7 @@ class UploadDocument extends Component {
                                         multiline={true}
                                         editable={canUpdate}
                                     />
+
 
                                     <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}>
                                         <MyInput
@@ -489,18 +600,6 @@ class UploadDocument extends Component {
                                         errorText={description.error}
                                         multiline={true}
                                         editable={canUpdate}
-                                    />
-
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={type}
-                                        error={!!type.error}
-                                        errorText={type.error}
-                                        selectedValue={type}
-                                        onValueChange={(type) => this.setState({ type })}
-                                        title="Type"
-                                        elements={types}
-                                        enabled={canUpdate}
                                     />
 
                                     <Picker
@@ -597,8 +696,6 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps)(UploadDocument)
 
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -628,6 +725,34 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 15
+    }
+})
+
+const modalStyles = StyleSheet.create({
+    modal: {
+        width: constants.ScreenWidth,
+        marginTop: constants.ScreenHeight * 0.6,
+        marginHorizontal: 0,
+        marginBottom: 0,
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+    },
+    container: {
+        flex: 1,
+        paddingTop: constants.ScreenHeight * 0.02,
+        backgroundColor: '#fff',
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+    },
+    buttonsContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+    },
+    column: {
+        flex: 0.5,
+        justifyContent: 'center',
+        alignItems: 'center'
     }
 })
 

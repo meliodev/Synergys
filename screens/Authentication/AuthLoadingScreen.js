@@ -137,7 +137,7 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("ProjectsStack")
+          this.props.navigation.navigate("DocumentsStack")
       }
 
       else this.props.navigation.navigate("HomeScreen")

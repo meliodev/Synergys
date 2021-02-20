@@ -75,6 +75,12 @@ export const navigateToScreen = (main, canUpdate, screen, params) => {
 }
 
 //##HELPERS
+
+export const determinant_fr = (masculins, docType) => {
+  let det = masculins.includes(docType) ? 'du' : 'de la'
+  return det
+}
+
 export const checkPlural = (arrayLength, string) => {
   let str = ''
   if (arrayLength === 0)

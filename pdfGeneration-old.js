@@ -6,8 +6,14 @@ import Pdf from "react-native-pdf"
 import RNFS from 'react-native-fs'
 import RNFetchBlob from 'rn-fetch-blob'
 
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 // import { fetchAsset, writePdf } from './assets'
 import { uint8ToBase64, base64ToArrayBuffer, downloadFile } from './core/utils'
+import { sizes } from './core/theme'
+import { max } from "react-native-reanimated"
 
 //urls
 const urlForm = "https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/Templates%2Fdod_character.pdf?alt=media&token=b2c00766-4377-4d31-ad38-fad84eac5376"
@@ -19,6 +25,10 @@ const formPath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messager
 const marioImagePath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messagerie/small_mario`
 const emblemImagePath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messagerie/mario_emblem`
 
+
+const { base, font, radius, padding, h1, h2, h3, header, body } = sizes
+const caption = 10
+const lineHeight = 12
 
 export default class PdfGeneration extends Component {
 
@@ -39,6 +49,7 @@ export default class PdfGeneration extends Component {
         // this.fillForm()
     }
 
+
     //#Notice: no need to store image or pdf (small files): just fetch and convert to base64/arrayBuffer
     async downloadFile(fileName, url) {
         await downloadFile(this, fileName, url)
@@ -55,12 +66,71 @@ export default class PdfGeneration extends Component {
             .catch((e) => console.error(e))
     }
 
+    lineBreaker(dataArray, font, size, maxWidth) {
+        console.log('dataArray', dataArray)
+
+        let dataArrayFormated = []
+        const line_Height = font.heightAtSize(size)
+
+        for (var line of dataArray) {
+            const lineWidth = font.widthOfTextAtSize(line, size)
+
+            if (lineWidth > maxWidth) {
+
+                var lineLength = line.length
+                var lastCharIndex = maxWidth * lineLength / lineWidth
+
+                //Avoid spliting words
+                while (line.charAt(lastCharIndex) !== ' ') {
+                    lastCharIndex = lastCharIndex - 1
+                }
+
+                var slicedLine = line.slice(0, lastCharIndex)
+                dataArrayFormated.push(slicedLine)
+
+                var restOfLine = line.slice(lastCharIndex)
+                var restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
+
+                while (restOfLineWidth > maxWidth) {
+                    lineLength = restOfLine.length
+                    lastCharIndex = maxWidth * lineLength / restOfLineWidth
+
+                    //Avoid spliting words
+                    while (restOfLine.charAt(lastCharIndex) !== ' ') {
+                        lastCharIndex = lastCharIndex - 1
+                    }
+
+                    slicedLine = restOfLine.slice(0, lastCharIndex)
+                    dataArrayFormated.push(slicedLine)
+
+                    restOfLine = restOfLine.slice(lastCharIndex)
+                    restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
+                }
+
+                dataArrayFormated.push(restOfLine)
+            }
+
+            else dataArrayFormated.push(line)
+        }
+
+        console.log('dataArrayFormated length', dataArrayFormated.length)
+        console.log('font height', font.heightAtSize(size))
+        console.log('total height', dataArrayFormated.length * font.heightAtSize(size))
+        const totalHeight = dataArrayFormated.length * font.heightAtSize(size) + lineHeight
+        const dataString = dataArrayFormated.join('\n')
+        const result = { totalHeight, dataString }
+
+        return result
+    }
+
     async createNewPdf() {
         // Create a new PDFDocument
         const orderLines = [
-            { "description": "", "price": "200", "product": { "brand": "LG", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Machine à laver", "price": "200", "type": "product" }, "quantity": "1" },
-            { "description": "", "price": "500", "product": { "brand": "Samsung", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": 'Smart TV 70" 4k', "price": "500", "type": "product" }, "quantity": "1" },
-            { "description": "", "price": "300", "product": { "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Aspirateur solaire", "price": "300", "type": "product" }, "quantity": "1" }
+            { "description": "", "price": "200", "product": { "brand": "LG", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Fourniture d'une pompe à chaleur AIR / EAU Hitachi Yutaki S moyenne température taille 3. Module Hydraulique intérieur monophasé - Puissance nominale/max chauffage (-7°C ext / 35°c eau) : 5,8/7,5 kW - Puissance nominale/max chauffage (-7°C ext / 55°c eau) : 5,00/5,5 kW - Poids net : 37kg - Dimensions 712x450x275mm - Niveau de puissance sonore : 37dB. Groupe extérieur - Puissance absorbée nominale chauffage (7°C ext/35°C eau) : 1,60 kW - COP = 4,60 - ETAS : ns ( 55°C) en chauffage 127 % - Puissance acoustique mode chaud : 64 dB - Dimensions 629x799x300mm - Poids net : 44kg - Fluide frigorigène R32 - Compresseur ROTATIF. Référence Module Hydraulique RWM-3.0NRE - Référence Groupe Extérieur Premium RAS-3WHVRP. Matériel éligible CITE", "price": "200", "type": "product" }, "quantity": "1" },
+            { "description": "", "price": "500", "product": { "brand": "Samsung", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": 'Forfait matériel de mise en œuvre (pot à boue, disconnecteur, liaisons frigorifiques, liaisons hydrauliques...)', "price": "500", "type": "product" }, "quantity": "1" },
+            { "description": "", "price": "300", "product": { "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Forfait dépose chaudière Fioul hors condensation", "price": "300", "type": "product" }, "quantity": "1" },
+            { "description": "", "price": "300", "product": { "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Forfait dépose cuve à Fioul", "price": "300", "type": "product" }, "quantity": "1" },
+            { "description": "", "price": "300", "product": { "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Installation et mise en service d'une pompe à chaleur Air/Eau", "price": "300", "type": "product" }, "quantity": "1" },
         ]
 
         const subTotal = 1000
@@ -70,8 +140,10 @@ export default class PdfGeneration extends Component {
 
         const pdfDoc = await PDFDocument.create()
 
-        // Embed the Times Roman font
+        // Font config
         const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+        const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+        const primaryColor = rgb(0, 0, 0)
 
         // Add a blank page to the document
         const page = pdfDoc.addPage(PageSizes.A4)
@@ -79,79 +151,296 @@ export default class PdfGeneration extends Component {
         // Get the width and height of the page
         const { width, height } = page.getSize()
 
+        //Margin & Padding config
+        const marginLeft = 30
+        const marginRight = 30
+        var marginTop_R = 35 //Right column
+        var marginTop_L = 20 //Left column
+        const padding = 10
+        const cste = 10
+        const headerRigth_x_start = width - width * 0.5
+
         //fetch, format & embed logo image
         const logoUrl = "https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/Templates%2FAssets%2Flogo.png?alt=media&token=d4cf3a5c-b669-402f-8f67-845dcd57e021"
         const urlbase64 = await this.fetchBase64File(logoUrl)
         const logoImage = await pdfDoc.embedPng(urlbase64)
-        const logoDims = logoImage.scale(0.25)
+        const logoDims = logoImage.scale(0.2)
 
-        // Draw a string of text toward the top left of the page
-        const fontSize = 10
+        //Params
+        const ProposalId = 'D-210490'
+        const createdAt = moment().format('DD/MM/YYYY')
 
-        //Header address
-        page.drawText(
-            `6 Rue Henri Becquerel . 11200 Lézignan-Corbières \n` +
-            `Humpty Dumpty sat on a wall \n` +
-            `Humpty Dumpty had a great fall; \n` +
-            `All the king's horses and all the king's men \n` +
-            `Couldn't put Humpty together again. \n`,
-            {
-                // x: 50,
-                // y: height - 4 * fontSize,
-                x: 30,
-                y: height - height * 0.05,
-                size: fontSize,
-                font: timesRomanFont,
-                color: rgb(0, 0, 0),
-            })
+        var marginTop_L = marginTop_L + logoDims.height
 
-        //Header logo
+        //1. HeaderLeft: Logo
         page.drawImage(logoImage, {
-            x: width - width * 0.43,
-            y: height - height * 0.15,
+            x: marginLeft,
+            y: height - marginTop_L,
             width: logoDims.width,
             height: logoDims.height,
-            //rotate: degrees(30),
-            //opacity: 0.75,
         })
 
+        var marginTop_L = marginTop_L + cste * 1.5
+
+        //2. HeaderLeft: Synergys contact
+        const synergysContact = `SYNERGYS\n` +
+            `270 B RUE DE LA COMBE DU MEUNIER\n` +
+            `ZAC DU CASTELLAS\n` +
+            `11100 MONTREDON DES CORBIERES\n` +
+            `Email : contact@groupe-synergys.fr\n` +
+            `Tél : (33) 09 70 15 57 16\n` +
+            `RGE : QualiPAC/58669 - QualiPV/58669\n`
+
+        page.drawText(synergysContact,
+            {
+                x: marginLeft,
+                y: height - marginTop_L,
+                size: caption,
+                font: timesRomanFont,
+                lineHeight,
+                color: primaryColor,
+            })
+
+        //3. HeaderRight: Pdf Title
+        const title = `Devis n° ${ProposalId} du ${createdAt}`
+        const titleWidth = timesRomanBoldFont.widthOfTextAtSize(title, body)
+        const titleHeight = timesRomanBoldFont.heightAtSize(body)
+
+        page.drawText(title,
+            {
+                x: headerRigth_x_start, //#task: 150 is selected manually as the size paper is fxed to A4
+                y: height - marginTop_R,
+                size: body,
+                font: timesRomanBoldFont,
+                lineHeight,
+                color: primaryColor,
+            })
+
+        marginTop_R = marginTop_R + titleHeight + cste
+
+        //4. HeaderRight: Client contact
+        const clientContactArray = [
+            'Chantier : CALLEJON DANIEL',
+            '19 ROUTE DE CERET 66110 AMELIE LES BAINS PALALDA',
+            'Tél. :',
+            'Mobile : (33) 07 68 77 80 72',
+            'Email : callejondaniel@hotmail.fr',
+            'Tél : (33) 09 70 15 57 16',
+            'Travaux : PAC AIR/EAU + CET'
+        ]
+
+        //Linebreaker
+        let maxWidth = width * 0.5 - marginRight
+        const clientContactObject = this.lineBreaker(clientContactArray, timesRomanFont, caption, maxWidth)
+        const { dataString: clientContact, totalHeight: clientContactHeight } = clientContactObject
+
+        page.drawText(clientContact,
+            {
+                x: headerRigth_x_start,
+                y: height - marginTop_R,
+                size: caption,
+                font: timesRomanFont,
+                lineHeight,
+                color: primaryColor,
+            })
+
+        marginTop_R = marginTop_R
+            + clientContactHeight
+            + cste * 2 //small margin
+
+        //5. Responsable contact
+        const responsableContact =
+            `Votre chargé d'affaires : VEILLET ANTONIN\n` +
+            `Tél.: (33) 06 62 57 24 36\n` +
+            `Email : antonin.veillet@groupe-synergys.fr\n`
+
+        page.drawText(responsableContact,
+            {
+                x: headerRigth_x_start + padding, //#task: 150 is selected manually as the size paper is fixed to A4
+                y: height - marginTop_R - padding,
+                size: caption,
+                font: timesRomanFont,
+                lineHeight,
+                color: primaryColor,
+            })
+
+        const synergysContactBoxHeight = 55
+
+        marginTop_R = marginTop_R
+            + synergysContactBoxHeight //Rectangle size
+            - cste
 
         page.drawRectangle({
-            x: 30,
-            y: 500,
-            width: width * 0.9,
-            height: 35,
-            //rotate: degrees(-15),
-            // borderWidth: 5,
-            // borderColor: grayscale(0.5),
-            color: rgb(0.58, 0.75, 0.11),
+            x: headerRigth_x_start,
+            y: height - marginTop_R,
+            width: width * 0.5 - marginRight,
+            height: synergysContactBoxHeight,
+            color: rgb(0.1333, 0.1333, 0.1333),
+            opacity: 0.1,
+        })
+
+        //6. Client summary
+        //6.1 Client name
+        marginTop_R = marginTop_R + cste * 3
+        let marginTop_ClientSummaryFrame = marginTop_R - padding
+
+        const clientName = 'CALLEJON DANIEL'
+        const clientNameHeight = timesRomanBoldFont.heightAtSize(body)
+
+        page.drawText(clientName,
+            {
+                x: headerRigth_x_start + padding, //#task: 150 is selected manually as the size paper is fixed to A4
+                y: height - marginTop_R - padding,
+                size: caption,
+                font: timesRomanBoldFont,
+                lineHeight,
+                color: primaryColor,
+            })
+
+        marginTop_R = marginTop_R + clientNameHeight + cste
+
+        //6.2 Client address
+        const clientAddressArray = [
+            '19 ROUTE DE CERET 66110 AMELIE LES BAINS PALALDA'
+        ]
+
+        maxWidth = width * 0.5 - marginRight - padding * 2 //paddingLeft & paddingRigth
+        const clientAddressObject = this.lineBreaker(clientAddressArray, timesRomanFont, caption, maxWidth)
+        const { dataString: clientAddress, totalHeight: clientAddressHeight } = clientAddressObject
+        const clientSummaryBoxHeight = padding * 2 + clientNameHeight + clientAddressHeight
+        marginTop_ClientSummaryFrame = marginTop_ClientSummaryFrame + clientSummaryBoxHeight
+
+        page.drawText(clientAddress,
+            {
+                x: headerRigth_x_start + padding,
+                y: height - marginTop_R - padding,
+                size: caption,
+                font: timesRomanFont,
+                lineHeight,
+                color: primaryColor,
+            })
+
+        //6.3 Frame
+        page.drawRectangle({
+            x: headerRigth_x_start,
+            y: height - marginTop_ClientSummaryFrame,
+            width: width * 0.5 - marginRight,
+            height: clientSummaryBoxHeight,
+            borderColor: rgb(0.1333, 0.1333, 0.1333),
+            borderWidth: 1,
+            opacity: 0.1,
+        })
+
+        marginTop_R = marginTop_R + clientSummaryBoxHeight + cste * 2
+
+        let marginTop = Math.max(marginTop_R, marginTop_L)
+        const topBarHeight = 35
+
+        //7. Proposal
+        //7.1 Table
+        page.drawRectangle({
+            x: marginLeft,
+            y: height - marginTop,
+            width: width - marginLeft * 2,
+            height: topBarHeight,
+            color: rgb(0.576, 0.768, 0.486),
             opacity: 0.5,
             borderOpacity: 0.75,
         })
 
-        page.drawText(
-            `Produit`,
+        marginTop = marginTop - topBarHeight
+
+        const firstVerticalLine_x = marginLeft
+        const secondVerticalLine_x = width * 0.1
+        const thirdVerticalLine_x = width * 0.6
+        const fourthVerticalLine_x = width * 0.65
+        const fifthVerticalLine_x = width * 0.7
+        const sixtVerticalLine_x = width * 0.8
+        const seventhVerticalLine_x = width - marginRight
+        const line_x_positions = [firstVerticalLine_x, secondVerticalLine_x, thirdVerticalLine_x, fourthVerticalLine_x, fifthVerticalLine_x, sixtVerticalLine_x, seventhVerticalLine_x]
+
+        for (const x of line_x_positions) {
+            page.drawLine({
+                start: { x, y: height - marginTop },
+                end: { x, y: height * 0.11 },
+                thickness: 1,
+                color: rgb(0.1333, 0.1333, 0.1333)
+            })
+        }
+
+        const firstHorizontalLine_y = height - marginTop
+        const secondHorizontalLine_y = height - (marginTop + topBarHeight)
+        const thirdHorizontalLine_y = height * 0.1
+
+        const line_y_positions = [firstHorizontalLine_y, secondHorizontalLine_y, thirdHorizontalLine_y]
+
+        for (const y of line_y_positions) {
+            page.drawLine({
+                start: { x: marginLeft, y },
+                end: { x: width - marginRight, y },
+                thickness: 1,
+                color: rgb(0.1333, 0.1333, 0.1333)
+            })
+        }
+
+        marginTop = marginTop + topBarHeight + cste
+
+        //7.2 Products table titles
+
+        //7.3 Products Details (list)
+        maxWidth = width * 0.5
+
+        //  for (const orderLine of orderLines) {
+        const productNameArray = [orderLines[0].product.name]
+        const productNameObject = this.lineBreaker(productNameArray, timesRomanFont, caption, maxWidth)
+        const { dataString: productName, totalHeight: productNameHeight } = productNameObject
+
+        page.drawText(productName,
             {
-                x: 200,
-                y: 500,
-                size: 16,
+                x: secondVerticalLine_x,
+                y: height - marginTop,
+                size: caption,
                 font: timesRomanFont,
-                color: rgb(1, 1, 1),
+                lineHeight,
+                color: rgb(0, 0, 0),
             })
 
-        let space = 0
-        for (let i = 0; i < orderLines.length; i++) {
-            page.drawText(
-                orderLines[i].product.name,
-                {
-                    x: 30,
-                    y: 480 - space,
-                    size: 14,
-                    font: timesRomanFont,
-                    color: rgb(0, 0, 0),
-                })
-            space = space + 15
-        }
+        marginTop = marginTop + productNameHeight + lineHeight * 2
+        //  }
+
+
+        const productNameArray1 = [orderLines[1].product.name]
+        const productNameObject1 = this.lineBreaker(productNameArray1, timesRomanFont, caption, maxWidth)
+        const { dataString: productName1, totalHeight: productNameHeight1 } = productNameObject1
+
+        page.drawText(productName1,
+            {
+                x: secondVerticalLine_x,
+                y: height - marginTop,
+                size: caption,
+                font: timesRomanFont,
+                lineHeight,
+                color: rgb(0, 0, 0),
+            })
+
+        marginTop = marginTop + productNameHeight1
+
+
+        const productNameArray2 = [orderLines[2].product.name]
+        const productNameObject2 = this.lineBreaker(productNameArray2, timesRomanFont, caption, maxWidth)
+        const { dataString: productName2, totalHeight: productNameHeight2 } = productNameObject2
+
+        page.drawText(productName2,
+            {
+                x: secondVerticalLine_x,
+                y: height - marginTop,
+                size: caption,
+                font: timesRomanFont,
+                lineHeight,
+                color: rgb(0, 0, 0),
+            })
+
+        marginTop = marginTop + productNameHeight2 + lineHeight * 2
 
         // Serialize the PDFDocument to bytes (a Uint8Array)
         const pdfBytes = await pdfDoc.save()
@@ -165,8 +454,6 @@ export default class PdfGeneration extends Component {
         const source = { uri: `data:application/pdf;base64,${pdfBase64}` }
         this.setState({ source })
     }
-
-
 
     render() {
         const { source } = this.state

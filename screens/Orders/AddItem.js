@@ -115,7 +115,7 @@ class AddItem extends Component {
     }
 
     refreshProduct(product) {
-        this.setState({ tagsSelected: [product], price: { value: product.price, error: '' }, quantity: { value: '1', error: '' } })
+        this.setState({ tagsSelected: [product], price: { value: product.price, error: '' }, quantity: { value: '1', error: '' }, taxe: { name: product.taxe, rate: Number(product.taxe), value: '' } })
     }
 
     render() {
@@ -135,7 +135,6 @@ class AddItem extends Component {
 
                             <View style={{ flex: 0.9 }}>
                                 <AutoCompleteProducts
-                                    // placeholder={noItemSelected ? 'Écrivez pour choisir un article' : ''}
                                     placeholder='Écrivez pour choisir un article'
                                     suggestions={suggestions}
                                     tagsSelected={tagsSelected}

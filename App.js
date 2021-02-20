@@ -25,7 +25,8 @@ import { MenuProvider } from 'react-native-popup-menu';
 import Store from './Store/configureStore'
 
 import RootController from './Navigation/DrawerNavigator'
-// import Agenda from './Agenda'
+import PdfGeneration from './screens/Documents/PdfGeneration'
+import Pdfgen from './Pdfgen'
 import Wrapper from './Wrapper'
 
 const db = firebase.firestore()
@@ -57,14 +58,15 @@ class App extends Component {
 
   render() {
     let persistor = persistStore(Store)
-   // persistor.purge()
+    // persistor.purge()
 
     return (
       <Provider store={Store}>
         <PersistGate persistor={persistor}>
           <MenuProvider>
             <Wrapper>
-              {/* <Agenda /> */}
+              {/* <Pdfgen /> */}
+              {/* <PdfGeneration /> */}
               <RootController />
             </Wrapper>
           </MenuProvider>

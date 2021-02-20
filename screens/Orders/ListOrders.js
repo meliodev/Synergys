@@ -37,6 +37,7 @@ class ListOrders extends Component {
         this.onPressOrder = this.onPressOrder.bind(this) //#edit
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
+        this.docType = this.props.navigation.getParam('docType', '') // For pdf generation
         this.titleText = this.props.navigation.getParam('titleText', 'Commandes')
         this.showFAB = this.props.navigation.getParam('showFAB', true)
         this.filteredOrders = []
@@ -89,13 +90,10 @@ class ListOrders extends Component {
     }
 
     onPressOrder(order) {//#edit
-        //if (this.isRoot)
-        this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
+        if (this.isRoot)
+            this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
 
-        // else {
-        //     this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name })
-        //     this.props.navigation.goBack()
-        // }
+        else this.props.navigation.navigate('PdfGeneration', { order, docType: this.docType })
     }
 
     render() {

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, TextInput } from 'react-native';
 import { Card, Title, TextInput as PaperInput } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import Dialog from "react-native-dialog"
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
@@ -17,7 +18,7 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load } from "../../core/utils"
+import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, determinant_fr } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { handleFirestoreError } from '../../core/exceptions'
@@ -38,6 +39,9 @@ class CreateOrder extends Component {
         this.refreshProject = this.refreshProject.bind(this)
         this.calculateSubTotal = this.calculateSubTotal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.generatePdf = this.generatePdf.bind(this)
+        this.handleGenPdf = this.handleGenPdf.bind(this)
+        this.toggleDialogGenPdf = this.toggleDialogGenPdf.bind(this)
 
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
@@ -46,9 +50,17 @@ class CreateOrder extends Component {
         this.isInit = true
         this.currentUser = firebase.auth().currentUser
 
+        //Generate pdf
+        this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false)
+        this.docType = this.props.navigation.getParam('docType', '')
+        this.titleText = this.props.navigation.getParam('titleText', '')
+
         this.OrderId = this.props.navigation.getParam('OrderId', '')
         this.isEdit = this.OrderId ? true : false
-        this.title = this.OrderId ? 'Modifier la commande' : 'Nouvelle commande'
+
+        const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
+        this.titleText = `Création ${determinant_fr(masculins, this.docType)} ${this.docType}`
+        this.title = this.OrderId ? 'Modifier la commande' : this.autoGenPdf ? this.titleText : 'Nouvelle commande'
 
         this.state = {
             //AUTO-GENERATED
@@ -82,7 +94,12 @@ class CreateOrder extends Component {
             error: '',
             loading: false,
             toastType: '',
-            toastMessage: ''
+            toastMessage: '',
+
+            showDialog: false,
+            order: null,
+            pdfType: '',
+            docType: this.docType,
         }
     }
 
@@ -106,7 +123,7 @@ class CreateOrder extends Component {
     //on Edit: fetch data
     async fetchOrder() {
         await db.collection('Orders').doc(this.OrderId).get().then((doc) => {
-            let { OrderId, project, state, orderLines, discount, taxe } = this.state
+            let { OrderId, project, state, orderLines, discount, taxes } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
@@ -116,12 +133,11 @@ class CreateOrder extends Component {
             project = order.project
             orderLines = order.orderLines
             discount = order.discount
-            taxe = order.taxe
+            taxes = order.taxes
 
-            let choice = 'first'
-            if (discount.type === 'money') choice = 'second'
+            const choice = discount.type === 'money' ? 'second' : 'first'
+
             this.setDiscountType(choice)
-
             this.fetchClient(project.id)
 
             //َActivity
@@ -133,7 +149,7 @@ class CreateOrder extends Component {
             //State
             state = order.state
 
-            this.setState({ OrderId, project, state, orderLines, discount, taxe, createdAt, createdBy, editedAt, editedBy }, () => {
+            this.setState({ OrderId, project, state, orderLines, discount, taxes, createdAt, createdBy, editedAt, editedBy, order }, () => {
                 if (this.isInit)
                     this.initialState = this.state
 
@@ -229,7 +245,53 @@ class CreateOrder extends Component {
 
         console.log('Ready to add order...')
         db.collection('Orders').doc(OrderId).set(order, { merge: true })
-        this.props.navigation.goBack()
+
+        if (!this.autoGenPdf)
+            this.props.navigation.goBack()
+
+        //Store order to be able to generate pdf in case user goes back from PdfGeneration
+        this.setState({ order, loading: false }, () => this.generatePdf())
+    }
+
+    //Handle Pdf generation flow
+    handleGenPdf(order) {
+        if (this.isEdit) this.toggleDialogGenPdf()
+        else this.generatePdf()
+    }
+
+    toggleDialogGenPdf() {
+        this.setState({ showDialog: !this.state.showDialog })
+    }
+
+    renderDialogGenPdf() {
+        const { type, pdfType } = this.state
+        const title = `Générer un document de type:`
+
+        return (
+            <View style={styles.dialogContainer} >
+                <Dialog.Container visible={this.state.showDialog}>
+                    <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{title}</Dialog.Title>
+                    <RadioButton
+                        checked={pdfType}
+                        firstChoice={{ title: 'Devis', value: 'proposal' }}
+                        secondChoice={{ title: 'Facture', value: 'bill' }}
+                        onPress1={() => this.setState({ pdfType: 'first', docType: 'Devis' })}
+                        onPress2={() => this.setState({ pdfType: 'second', docType: 'Facture' })}
+                        isRow={false}
+                        textRight={true} />
+
+                    <Dialog.Button label="Annuler" onPress={this.toggleDialogGenPdf} style={{ color: theme.colors.error }} />
+                    <Dialog.Button label="Confirmer" onPress={this.generatePdf} />
+                </Dialog.Container>
+            </View >
+        )
+    }
+
+    generatePdf() {
+        this.setState({ showDialog: false })
+        const { order, docType } = this.state
+        if (!order || !docType) return
+        this.props.navigation.navigate('PdfGeneration', { order, docType })
     }
 
     //refresh inputs
@@ -469,7 +531,7 @@ class CreateOrder extends Component {
 
     render() {
         let { OrderId, project, state, client } = this.state
-        let { orderLines, subTotal, discount, taxes, total } = this.state
+        let { orderLines, subTotal, discount, taxes, total, order, docType } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
 
@@ -477,6 +539,8 @@ class CreateOrder extends Component {
         canUpdate = (canUpdate || !this.isEdit)
 
         const { isConnected } = this.props.network
+
+        const pdfGenButtonLabel = this.isEdit ? 'Générer le devis / facture' : `Générer le ${docType}`
 
         return (
             <View style={styles.container}>
@@ -490,6 +554,8 @@ class CreateOrder extends Component {
                     <View style={{ flex: 1 }}>
 
                         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
+
+                            {this.renderDialogGenPdf()}
 
                             <Card style={{ margin: 5 }}>
                                 <Card.Content>
@@ -532,7 +598,7 @@ class CreateOrder extends Component {
                                         onValueChange={(state) => this.setState({ state })}
                                         title="Etat"
                                         elements={states}
-                                        enabled= {canUpdate}
+                                        enabled={canUpdate}
                                     />
                                 </Card.Content>
                             </Card>
@@ -615,6 +681,12 @@ class CreateOrder extends Component {
                             }
 
                         </ScrollView>
+
+                        {order &&
+                            <Button mode="contained" onPress={() => this.handleGenPdf(order)} style={{ width: constants.ScreenWidth, backgroundColor: theme.colors.secondary }} >
+                                {pdfGenButtonLabel}
+                            </Button>
+                        }
 
                         <Toast
                             message={toastMessage}
