@@ -18,7 +18,7 @@ moment.locale('fr')
 
 // import { fetchAsset, writePdf } from './assets'
 import { logoBase64 } from '../../assets/logoBase64'
-import { uint8ToBase64, base64ToArrayBuffer, downloadFile, determinant_fr } from '../../core/utils'
+import { uint8ToBase64, base64ToArrayBuffer, downloadFile, articles_fr, setToast } from '../../core/utils'
 import { sizes } from '../../core/theme'
 import * as theme from '../../core/theme'
 import { constants } from "../../core/constants"
@@ -44,14 +44,16 @@ export default class PdfGeneration extends Component {
         super(props)
         this.downloadFile = this.downloadFile.bind(this)
         this.readFile = this.readFile.bind(this)
+        this.savePdf = this.savePdf.bind(this)
         this.order = this.props.navigation.getParam('order', '')
         this.docType = this.props.navigation.getParam('docType', '') //Devis ou Facture (Proposal or Bill)
 
         const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
-        this.titleText = `Génération ${determinant_fr(masculins, this.docType)} ${this.docType}`
+        this.titleText = `Génération ${articles_fr('du', masculins, this.docType)} ${this.docType}`
 
         this.state = {
             source: '',
+            pdfBase64: '',
             loading: true
         }
     }
@@ -163,9 +165,9 @@ export default class PdfGeneration extends Component {
         //Dynamic data
         const ProposalId = this.order.id
         const createdAt = moment().format('DD/MM/YYYY')
-        const { orderLines, subTotal, taxes, project, createdBy } = this.order
+        const { orderLines, subTotal, taxes, project, editedBy } = this.order
         const client = await db.collection('Users').doc(project.client.id).get().then((doc) => { return doc.data() })
-        const responsable = await db.collection('Users').doc(createdBy.id).get().then((doc) => { return doc.data() })
+        const responsable = await db.collection('Users').doc(editedBy.id).get().then((doc) => { return doc.data() })
         // const orderLines = [ { "description": "", "price": "300", "product": { "category": "FOURNITURE ET POSE D'UNE POMPE A CHALEUR AIR/EAU", "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Installation et mise en service d'une pompe à chaleur Air/Eau", "price": "300", "type": "product" }, "quantity": "1" }, ]
         // const taxes = [ { name: '1', value: '5', value: 400 } ]
         orderLines.sort((a, b) => (a.product.category > b.product.category) ? 1 : -1) //Sort in alphabetical order
@@ -1089,13 +1091,28 @@ export default class PdfGeneration extends Component {
         // Serialize the PDFDocument to bytes (a Uint8Array)
         const pdfBytes = await pdfDoc.save()
         const pdfBase64 = uint8ToBase64(pdfBytes)
-
         const source = { uri: `data:application/pdf;base64,${pdfBase64}` }
-        this.setState({ source }, () => this.setState({ loading: false }))
+        this.setState({ source, pdfBase64 }, () => this.setState({ loading: false }))
     }
 
-    savePdf() {
-        
+    async savePdf() {
+        const { pdfBase64 } = this.state
+
+        const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+        const destFolder = `${Dir}/Synergys/Documents`
+        await RNFS.mkdir(destFolder) //create directory if it doesn't exist
+        const pdfName = `Scan ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
+        const destPath = `${destFolder}/${pdfName}`
+
+        RNFS.writeFile(destPath, pdfBase64, "base64")
+            .then(() => {
+                this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName })
+                this.props.navigation.navigate('UploadDocument')
+            })
+            .catch((err) => {
+                console.error(err)
+                setToast(this, 'e', 'Erreur inattendue, veuillez réessayer.')
+            })
     }
 
     render() {

@@ -37,6 +37,7 @@ class ListOrders extends Component {
         this.onPressOrder = this.onPressOrder.bind(this) //#edit
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
+        this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false) // For pdf generation
         this.docType = this.props.navigation.getParam('docType', '') // For pdf generation
         this.titleText = this.props.navigation.getParam('titleText', 'Commandes')
         this.showFAB = this.props.navigation.getParam('showFAB', true)
@@ -93,7 +94,7 @@ class ListOrders extends Component {
         if (this.isRoot)
             this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
 
-        else this.props.navigation.navigate('PdfGeneration', { order, docType: this.docType })
+        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
     render() {

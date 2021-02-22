@@ -76,9 +76,25 @@ export const navigateToScreen = (main, canUpdate, screen, params) => {
 
 //##HELPERS
 
-export const determinant_fr = (masculins, docType) => {
-  let det = masculins.includes(docType) ? 'du' : 'de la'
-  return det
+export const articles_fr = (masc, masculins, docType) => {
+  let resp
+  if (masc === 'du') {
+    resp = masculins.includes(docType) ? 'du' : 'de la'
+  }
+  else if (masc === 'un') {
+    console.log('....')
+    resp = masculins.includes(docType) ? "une" : "une"
+  }
+  else if (masc === "d'un") {
+    resp = masculins.includes(docType) ? "d'un" : "une"
+  }
+  else if (masc === 'le') {
+    resp = masculins.includes(docType) ? 'le' : 'la'
+  }
+
+  console.log('resp', resp)
+
+  return resp
 }
 
 export const checkPlural = (arrayLength, string) => {

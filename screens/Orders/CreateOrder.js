@@ -18,7 +18,7 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, determinant_fr } from "../../core/utils"
+import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { handleFirestoreError } from '../../core/exceptions'
@@ -31,6 +31,8 @@ const states = [
     { label: 'Annulé', value: 'Annulé' },
 ]
 
+const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
+
 class CreateOrder extends Component {
     constructor(props) {
         super(props)
@@ -40,8 +42,6 @@ class CreateOrder extends Component {
         this.calculateSubTotal = this.calculateSubTotal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.generatePdf = this.generatePdf.bind(this)
-        this.handleGenPdf = this.handleGenPdf.bind(this)
-        this.toggleDialogGenPdf = this.toggleDialogGenPdf.bind(this)
 
         this.myAlert = myAlert.bind(this)
         this.showAlert = this.showAlert.bind(this)
@@ -58,9 +58,8 @@ class CreateOrder extends Component {
         this.OrderId = this.props.navigation.getParam('OrderId', '')
         this.isEdit = this.OrderId ? true : false
 
-        const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
-        this.titleText = `Création ${determinant_fr(masculins, this.docType)} ${this.docType}`
-        this.title = this.OrderId ? 'Modifier la commande' : this.autoGenPdf ? this.titleText : 'Nouvelle commande'
+        this.titleText = `Création ${articles_fr('du', masculins, this.docType)} ${this.docType}`
+        this.title = this.autoGenPdf ? this.titleText : this.OrderId ? 'Modifier la commande' : 'Nouvelle commande'
 
         this.state = {
             //AUTO-GENERATED
@@ -185,8 +184,14 @@ class CreateOrder extends Component {
 
     //inputs validation & submit
     validateOrderLines() {
-        if (this.state.orderLines.length === 0)
-            Alert.alert('Erreur de saisie', 'Veuillez ajouter au moins une ligne de commande')
+        if (this.state.orderLines.length === 0) {
+            const errorTitle = 'Erreur de saisie'
+            const errorMessage = 'Veuillez ajouter au moins une ligne de commande'
+            Alert.alert(errorTitle, errorMessage)
+            return errorTitle
+        }
+
+        else return null
     }
 
     validateInputs() {
@@ -212,7 +217,7 @@ class CreateOrder extends Component {
 
     async handleSubmit() {
         //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+        if (this.state.loading || this.state === this.initialState && !this.autoGenPdf) return
 
         load(this, true)
 
@@ -250,48 +255,12 @@ class CreateOrder extends Component {
             this.props.navigation.goBack()
 
         //Store order to be able to generate pdf in case user goes back from PdfGeneration
-        this.setState({ order, loading: false }, () => this.generatePdf())
+        this.setState({ order, loading: false }, () => this.generatePdf(order, this.state.docType))
     }
 
     //Handle Pdf generation flow
-    handleGenPdf(order) {
-        if (this.isEdit) this.toggleDialogGenPdf()
-        else this.generatePdf()
-    }
-
-    toggleDialogGenPdf() {
-        this.setState({ showDialog: !this.state.showDialog })
-    }
-
-    renderDialogGenPdf() {
-        const { type, pdfType } = this.state
-        const title = `Générer un document de type:`
-
-        return (
-            <View style={styles.dialogContainer} >
-                <Dialog.Container visible={this.state.showDialog}>
-                    <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{title}</Dialog.Title>
-                    <RadioButton
-                        checked={pdfType}
-                        firstChoice={{ title: 'Devis', value: 'proposal' }}
-                        secondChoice={{ title: 'Facture', value: 'bill' }}
-                        onPress1={() => this.setState({ pdfType: 'first', docType: 'Devis' })}
-                        onPress2={() => this.setState({ pdfType: 'second', docType: 'Facture' })}
-                        isRow={false}
-                        textRight={true} />
-
-                    <Dialog.Button label="Annuler" onPress={this.toggleDialogGenPdf} style={{ color: theme.colors.error }} />
-                    <Dialog.Button label="Confirmer" onPress={this.generatePdf} />
-                </Dialog.Container>
-            </View >
-        )
-    }
-
-    generatePdf() {
-        this.setState({ showDialog: false })
-        const { order, docType } = this.state
-        if (!order || !docType) return
-        this.props.navigation.navigate('PdfGeneration', { order, docType })
+    generatePdf(order, docType) {
+        this.props.navigation.navigate('PdfGeneration', { order, docType, onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
     //refresh inputs
@@ -540,11 +509,11 @@ class CreateOrder extends Component {
 
         const { isConnected } = this.props.network
 
-        const pdfGenButtonLabel = this.isEdit ? 'Générer le devis / facture' : `Générer le ${docType}`
+        const pdfGenButtonLabel = `Générer ${articles_fr('le', masculins, docType)} ${docType}`
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back={!loading} close title titleText={this.title} check={this.autoGenPdf ? false : this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading && !this.autoGenPdf} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -554,8 +523,6 @@ class CreateOrder extends Component {
                     <View style={{ flex: 1 }}>
 
                         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
-
-                            {this.renderDialogGenPdf()}
 
                             <Card style={{ margin: 5 }}>
                                 <Card.Content>
@@ -637,7 +604,7 @@ class CreateOrder extends Component {
                                 </Card>
                             }
 
-                            {this.isEdit &&
+                            {this.isEdit && !this.autoGenPdf &&
                                 <Card style={{ margin: 5 }}>
                                     <Card.Content>
                                         <Title style={{ marginBottom: 15 }}>Activité</Title>
@@ -682,8 +649,8 @@ class CreateOrder extends Component {
 
                         </ScrollView>
 
-                        {order &&
-                            <Button mode="contained" onPress={() => this.handleGenPdf(order)} style={{ width: constants.ScreenWidth, backgroundColor: theme.colors.secondary }} >
+                        {this.autoGenPdf &&
+                            <Button mode="contained" onPress={this.handleSubmit} style={{ width: constants.ScreenWidth, backgroundColor: theme.colors.secondary }} >
                                 {pdfGenButtonLabel}
                             </Button>
                         }

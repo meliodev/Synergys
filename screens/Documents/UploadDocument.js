@@ -28,7 +28,7 @@ import Loading from "../../components/Loading"
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc } from "../../core/utils";
+import { generatetId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -44,13 +44,13 @@ const states = [
 ]
 
 const types = [
-    { label: 'Bon de commande', value: 'Bon de commande' },
-    { label: 'Devis', value: 'Devis' },
-    { label: 'Facture', value: 'Facture' },
-    { label: 'Dossier CEE', value: 'Dossier CEE' },
-    { label: 'Prime de rénovation', value: 'Prime de rénovation' },
-    { label: 'Aide et subvention', value: 'Aide et subvention' },
-    { label: 'Action logement', value: 'Action logement' },
+    { label: 'Bon de commande', value: 'Bon de commande', icon: 'format-list-numbered', selected: false },
+    { label: 'Devis', value: 'Devis', icon: 'alpha-d-box-outline', selected: false },
+    { label: 'Facture', value: 'Facture', icon: 'cash-usd-outline', selected: false },
+    { label: 'Dossier CEE', value: 'Dossier CEE', icon: 'certificate', selected: false },
+    { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: 'offer', selected: false },
+    { label: 'Aide et subvention', value: 'Aide et subvention', icon: 'handshake', selected: false },
+    { label: 'Action logement', value: 'Action logement', icon: 'home-floor-a', selected: false },
 ]
 
 class UploadDocument extends Component {
@@ -65,11 +65,15 @@ class UploadDocument extends Component {
         this.uploadFile = this.uploadFile.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
         this.onPressUploadPending = this.onPressUploadPending.bind(this)
-        this.renderPopUpMenu = this.renderPopUpMenu.bind(this)
-        this.togglePopUpMenu = this.togglePopUpMenu.bind(this)
-        this.toggleDialogGenPdf = this.toggleDialogGenPdf.bind(this)
-        this.togglePopUpMenuAndDialogGenPdf = this.togglePopUpMenuAndDialogGenPdf.bind(this)
-        this.startGenPdf = this.startGenPdf.bind(this)
+        this.renderPopUpMenuPdfSelection = this.renderPopUpMenuPdfSelection.bind(this)
+        this.renderModalPdfOptions = this.renderModalPdfOptions.bind(this)
+        this.togglePopUpMenu_pdfSelection = this.togglePopUpMenu_pdfSelection.bind(this)
+        this.toggleModal_pdfOptions = this.toggleModal_pdfOptions.bind(this)
+        this.togglePopUps = this.togglePopUps.bind(this)
+        this.handleConfirmGen = this.handleConfirmGen.bind(this)
+        this.handleCancelGen = this.handleCancelGen.bind(this)
+        this.startGenPdf = this.startGenPdf.bind(this) //Start Pdf gen flow
+        this.getGeneratedPdf = this.getGeneratedPdf.bind(this) //End Pdf gen flow
 
         //Delete
         this.myAlert = myAlert.bind(this)
@@ -112,8 +116,12 @@ class UploadDocument extends Component {
             editededAt: '',
             signatures: [],
 
-            showPopUpmenu: false,
+            showPopUpmenu_pdfSelection: false,
+            showModal_pdfOptions: false,
             showDialog: false,
+            modalContent: 'docType',
+            attachmentSource: '', //upload or generation
+            types: types,
             checked: '',
 
             error: '',
@@ -196,8 +204,8 @@ class UploadDocument extends Component {
         })
     }
 
-    // After user come back online... an upload task started previously is now running
-    // --> Detect when attachment is uploaded (pending = false)
+    //A user starts an upload task while offline.. After user comes back online... the upload task starts running.
+    // --> Listener to detect when the attachment is uploaded (pending = false)
     attachmentListener() {
         this.unsubscribeAttachmentListener = db.collection('Documents').doc(this.DocumentId).onSnapshot((doc) => {
             const prevAttachment = this.state.attachment
@@ -298,10 +306,8 @@ class UploadDocument extends Component {
     async uploadFile() {
         var { project, type, attachment } = this.state
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`
-        //this.uploadFileNew(attachment, referencePath, this.DocumentId, false)
 
         const result = await this.uploadFileNew(attachment, storageRefPath, this.DocumentId, false) //resolves only when online
-        console.log('result', '.........................', result)
 
         if (result === 'failure')
             setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
@@ -391,38 +397,72 @@ class UploadDocument extends Component {
                 <TouchableOpacity
                     onPress={() => {
                         if (!canUpdate) return
-                        this.togglePopUpMenu()
+                        this.togglePopUpMenu_pdfSelection()
                     }}>
                     <MyInput
                         label="Pièce jointe"
                         value={attachment && attachment.name}
                         editable={false}
                         multiline
-                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.togglePopUpMenu} />} />
+                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.togglePopUpMenu_pdfSelection} />} />
                 </TouchableOpacity>
             )
         }
     }
 
-    togglePopUpMenu() {
-        this.setState({ showPopUpmenu: !this.state.showPopUpmenu })
+    //Pdf generation flow
+    pdfSelectionOption(option) {
+        this.setState({ attachmentSource: option })
+        this.togglePopUps()
     }
 
-    toggleDialogGenPdf() {
-        this.setState({ showDialog: !this.state.showDialog })
+    togglePopUps() {
+        this.togglePopUpMenu_pdfSelection()
+        this.toggleModal_pdfOptions()
     }
 
-    togglePopUpMenuAndDialogGenPdf() {
-        this.toggleDialogGenPdf()
-        this.togglePopUpMenu()
+    togglePopUpMenu_pdfSelection() {
+        this.setState({ showPopUpmenu_pdfSelection: !this.state.showPopUpmenu_pdfSelection })
+    }
+
+    toggleModal_pdfOptions() {
+        this.setState({ showModal_pdfOptions: !this.state.showModal_pdfOptions, modalContent: 'docType' })
+    }
+
+    handleConfirmGen() {
+        const { modalContent, attachmentSource } = this.state
+
+        if (modalContent === 'docType') {
+            if (attachmentSource === 'generate') {
+                this.setState({ modalContent: 'genConfig' })
+            }
+
+            else if (attachmentSource === 'upload') {
+                this.toggleModal_pdfOptions()
+                this.pickDoc()
+            }
+        }
+
+        else if (modalContent === 'genConfig') {
+            this.startGenPdf()
+        }
+    }
+
+    handleCancelGen() {
+        const { modalContent } = this.state
+        if (modalContent === 'genConfig')
+            this.setState({ modalContent: 'docType' })
+
+        else if (modalContent === 'docType')
+            this.toggleModal_pdfOptions()
     }
 
     startGenPdf() {
         const { checked, type } = this.state
-        this.toggleDialogGenPdf()
+        this.toggleModal_pdfOptions()
 
         if (checked === 'first') {
-            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', docType: type })
+            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', autoGenPdf: true, docType: type, onGoBack: this.getGeneratedPdf })
         }
         else if (checked === 'second') {
             this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type })
@@ -430,37 +470,28 @@ class UploadDocument extends Component {
         else return
     }
 
-    renderDialogGenPdf() {
-        const { type, checked } = this.state
-        const title = `Générer un ${type.toLowerCase()} à partir de:`
+    getGeneratedPdf(genPdf) {
+        const path = genPdf.pdfBase64Path
+        const name = genPdf.pdfName
 
-        return (
-            <View style={styles.dialogContainer} >
-                <Dialog.Container visible={this.state.showDialog}>
-                    <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{title}</Dialog.Title>
-                    <RadioButton
-                        checked={checked}
-                        firstChoice={{ title: 'Une commande existante', value: 'oldOrder' }}
-                        secondChoice={{ title: 'Une nouvelle commande', value: 'newOrder' }}
-                        onPress1={() => this.setState({ checked: 'first' })}
-                        onPress2={() => this.setState({ checked: 'second' })}
-                        isRow={false}
-                        textRight={true} />
+        const attachment = {
+            path,
+            type: 'application/pdf',
+            name,
+            size: 100,
+            progress: 0
+        }
 
-                    <Dialog.Button label="Annuler" onPress={this.toggleDialogGenPdf} style={{ color: theme.colors.error }} />
-                    <Dialog.Button label="Confirmer" onPress={this.startGenPdf} />
-                </Dialog.Container>
-            </View >
-        )
+        this.setState({ attachment })
     }
 
-    renderPopUpMenu() {
+    renderPopUpMenuPdfSelection() {
 
         const CircleButton = ({ iconName, title, onPress }) => {
             const circleButtonSize = constants.ScreenWidth * 0.2
             const circleButtonStyle = { justifyContent: 'center', alignItems: 'center', marginBottom: 15, width: circleButtonSize, height: circleButtonSize, borderRadius: circleButtonSize / 2, borderWidth: 1, borderColor: theme.colors.gray_light }
             return (
-                <View style={modalStyles.column}>
+                <View style={modalStyles1.column}>
                     <TouchableOpacity style={circleButtonStyle} onPress={onPress}>
                         <MaterialCommunityIcons name={iconName} color={theme.colors.black} size={constants.ScreenWidth * 0.07} />
                     </TouchableOpacity>
@@ -471,26 +502,137 @@ class UploadDocument extends Component {
 
         return (
             <Modal
-                isVisible={this.state.showPopUpmenu}
-                onSwipeComplete={this.togglePopUpMenu}
+                isVisible={this.state.showPopUpmenu_pdfSelection}
+                onSwipeComplete={this.togglePopUpMenu_pdfSelection}
                 swipeDirection="down"
                 animationIn="slideInUp"
                 animationOut="slideOutDown"
-                onBackdropPress={this.togglePopUpMenu}
-                style={modalStyles.modal} >
+                onBackdropPress={this.togglePopUpMenu_pdfSelection}
+                style={modalStyles1.modal} >
 
-                <View style={modalStyles.container}>
+                <View style={modalStyles1.container}>
                     <Text style={[theme.customFontMSmedium.header, { textAlign: 'center' }]}>Créer</Text>
-                    <View style={modalStyles.buttonsContainer}>
-                        <CircleButton iconName='upload' title='Importer' onPress={this.pickDoc} />
-                        <CircleButton iconName='creation' title='Générer' onPress={this.togglePopUpMenuAndDialogGenPdf} />
+                    <View style={modalStyles1.buttonsContainer}>
+                        <CircleButton iconName='upload' title='Importer' onPress={() => this.pdfSelectionOption('upload')} />
+                        <CircleButton iconName='creation' title='Générer' onPress={() => this.pdfSelectionOption('generate')} />
                     </View>
                 </View>
             </Modal>
         )
     }
 
-    navigateToSignature(isConnected, b, signMode) {
+    renderModalPdfOptions() {
+        const { type, checked, modalContent } = this.state
+
+        const renderTitle = (modalContent, type) => {
+            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
+            if (modalContent === 'docType') return `Choisissez le type du document`
+            else if (modalContent === 'genConfig') return `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`
+        }
+
+        const Form = ({ modalContent }) => {
+            if (modalContent === 'docType') {
+                return this.renderDocTypeForm()
+            }
+
+            else if (modalContent === 'genConfig') {
+                return (
+                    <View style={{ paddingLeft: 15 }}>
+                        <RadioButton
+                            checked={checked}
+                            firstChoice={{ title: 'Une commande existante', value: 'oldOrder' }}
+                            secondChoice={{ title: 'Une nouvelle commande', value: 'newOrder' }}
+                            onPress1={() => this.setState({ checked: 'first' })}
+                            onPress2={() => this.setState({ checked: 'second' })}
+                            isRow={false}
+                            textRight={true} />
+                    </View>
+                )
+            }
+        }
+
+        return (
+            <Modal
+                isVisible={this.state.showModal_pdfOptions}
+                onSwipeComplete={this.toggleModal_pdfOptions}
+                swipeDirection="right"
+                animationIn="slideInRight"
+                animationOut="slideOutLeft"
+                onBackdropPress={this.toggleModal_pdfOptions}
+                style={modalStyles2.modal} >
+
+                <View style={modalStyles2.container}>
+                    <Title style={[theme.customFontMSsemibold.header, { marginBottom: 10, textAlign: 'center' }]}>{renderTitle(modalContent, type)}</Title>
+                    <Form modalContent={modalContent} />
+                    <View style={{ position: 'absolute', bottom: 10, alignSelf: 'center', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Button mode="outlined" onPress={this.handleCancelGen} style={{ width: '40%' }}>Retour</Button>
+                        <Button mode="contained" onPress={this.handleConfirmGen} style={{ width: '45%' }}>Confirmer</Button>
+                    </View>
+                </View>
+            </Modal>
+        )
+    }
+
+    renderDocTypeForm() {
+        const { types } = this.state
+        const elementSize = constants.ScreenWidth * 0.3
+
+        const elementStaticStyle = () => {
+            return {
+                borderRadius: 5,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: elementSize * 0.03,
+                width: elementSize,
+                height: elementSize,
+                elevation: 2,
+                backgroundColor: theme.colors.white
+            }
+        }
+
+        const elementDynamicStyle = (isSelected) => {
+            if (isSelected) return {
+                elevation: 0,
+                borderWidth: 1,
+                borderColor: theme.colors.primary
+            }
+            else return {}
+        }
+
+        const selectType = (index) => {
+            //Unselect all types
+            types.forEach((type, key) => types[key].selected = false)
+
+            //Select chosen type
+            types[index].selected = true
+            this.setState({ types, type: types[index].value })
+        }
+
+        const Element = ({ type, index }) => {
+            const color = type.selected ? theme.colors.primary : theme.colors.black
+
+            return (
+                <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(type.selected)]} onPress={() => selectType(index)}>
+                    <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
+                        <MaterialCommunityIcons name={type.icon} size={elementSize * 0.3} color={color} />
+                    </View>
+                    <View style={{ height: elementSize * 0.45 }}>
+                        <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color }]}>{type.label}</Text>
+                    </View>
+                </TouchableOpacity>
+            )
+        }
+
+        return (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'center', paddingLeft: elementSize * 0.08 }}>
+                {types.map((type, index) => {
+                    return (<Element type={type} index={index} />)
+                })}
+            </View>
+        )
+    }
+
+    navigateToSignature(isConnected, signMode) {
         if (!isConnected) {
             Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
             return
@@ -535,7 +677,7 @@ class UploadDocument extends Component {
                     :
                     <View style={{ flex: 1 }}>
                         {this.isEdit && attachment && !attachment.pending &&
-                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, canUpdate, false)}>
+                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, false)}>
                                 <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
                             </Button>
                         }
@@ -567,8 +709,8 @@ class UploadDocument extends Component {
                                     />
 
                                     {this.renderAttachment(canUpdate)}
-                                    {this.renderPopUpMenu()}
-                                    {this.renderDialogGenPdf()}
+                                    {this.renderPopUpMenuPdfSelection()}
+                                    {this.renderModalPdfOptions()}
 
                                     <MyInput
                                         label="Nom du document"
@@ -667,7 +809,7 @@ class UploadDocument extends Component {
                             <Button
                                 mode={this.isEdit ? "contained" : "outlined"}
                                 style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
-                                onPress={() => this.navigateToSignature(isConnected, canUpdate, true)}>
+                                onPress={() => this.navigateToSignature(isConnected, true)}>
                                 <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>signer</Text>
                             </Button>
                         </View>
@@ -728,10 +870,38 @@ const styles = StyleSheet.create({
     }
 })
 
-const modalStyles = StyleSheet.create({
+const modalStyles1 = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
         marginTop: constants.ScreenHeight * 0.6,
+        marginHorizontal: 0,
+        marginBottom: 0,
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+    },
+    container: {
+        flex: 1,
+        paddingTop: constants.ScreenHeight * 0.02,
+        backgroundColor: '#fff',
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+    },
+    buttonsContainer: {
+        flex: 1,
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+    },
+    column: {
+        flex: 0.5,
+        justifyContent: 'center',
+        alignItems: 'center'
+    }
+})
+
+const modalStyles2 = StyleSheet.create({
+    modal: {
+        width: constants.ScreenWidth,
+        marginTop: constants.ScreenHeight * 0.3,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
@@ -872,4 +1042,46 @@ const modalStyles = StyleSheet.create({
     //             this.setState({ attachment, attachmentError: '' })
     //         }
     //     })
+    // }
+
+
+
+       // renderDialogGenPdf() {
+    //     const { type, checked, dialogElement } = this.state
+    //     const title = `Générer un ${type.toLowerCase()} à partir de:`
+
+    //     const renderTitle = (dialogElement, type) => {
+    //         if (dialogElement === 'docType') return `Choisissez le type du document`
+    //         else if (dialogElement === 'genConfig') return `Générer un ${type.toLowerCase()} à partir de:`
+    //     }
+
+    //     const Form = ({ dialogElement }) => {
+    //         if (dialogElement === 'docType') {
+    //             return this.renderDocTypeForm()
+    //         }
+
+    //         else if (dialogElement === 'genConfig') {
+    //             return (
+    //                 <RadioButton
+    //                     checked={checked}
+    //                     firstChoice={{ title: 'Une commande existante', value: 'oldOrder' }}
+    //                     secondChoice={{ title: 'Une nouvelle commande', value: 'newOrder' }}
+    //                     onPress1={() => this.setState({ checked: 'first' })}
+    //                     onPress2={() => this.setState({ checked: 'second' })}
+    //                     isRow={false}
+    //                     textRight={true} />
+    //             )
+    //         }
+    //     }
+
+    //     return (
+    //         <View style={styles.dialogContainer} >
+    //             <Dialog.Container visible={this.state.showDialog}>
+    //                 <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{renderTitle(dialogElement, type)}</Dialog.Title>
+    //                 {/* <Form element={dialogElement} /> */}
+    //                 <Dialog.Button label="Annuler" onPress={this.toggleDialogGenPdf} style={{ color: theme.colors.error }} />
+    //                 <Dialog.Button label="Confirmer" onPress={this.handleDialogConfirm} />
+    //             </Dialog.Container>
+    //         </View >
+    //     )
     // }
