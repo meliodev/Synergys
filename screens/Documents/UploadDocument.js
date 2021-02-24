@@ -178,10 +178,9 @@ class UploadDocument extends Component {
             attachment = document.attachment
 
             this.setState({ project, name, description, state, type, attachment, createdAt, createdBy, editedAt, editedBy }, () => {
-                if (this.isInit)
+                // if (this.isInit)
                     this.initialState = this.state
-
-                this.isInit = false
+                // this.isInit = false
             })
         })
     }
@@ -807,7 +806,7 @@ class UploadDocument extends Component {
 
                         <View style={styles.footerContainer}>
                             <Button
-                                mode={this.isEdit ? "contained" : "outlined"}
+                                mode="contained"
                                 style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
                                 onPress={() => this.navigateToSignature(isConnected, true)}>
                                 <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>signer</Text>

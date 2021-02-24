@@ -321,7 +321,7 @@ class Signature extends Component {
 
     //4. Signature process
     startSignature() {
-        this.setState({ pdfEditMode: true, toastType: 'info', toastMessage: "Touchez à l'endroit où vous voulez placer la signature." })
+        this.setState({ showTerms: false, pdfEditMode: true, toastType: 'info', toastMessage: "Touchez à l'endroit où vous voulez placer la signature." })
     }
 
     async calculatePaddingTop() {
@@ -521,7 +521,7 @@ class Signature extends Component {
             phoneNumber: this.state.phoneNumber
         }
 
-        const reference = firebase.storage().ref(`Projects/${this.ProjectId}/Documents/${this.DocumentType}/${this.DocumentId}/${moment().format('ll')}/${stats.filename}`)
+        const reference = firebase.storage().ref(`Projects/${this.ProjectId}/Documents/${this.DocumentType}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
         const uploadTask = reference.putFile(attachment.path, { customMetadata: metadata })
 
         const promise = new Promise((resolve, reject) => {

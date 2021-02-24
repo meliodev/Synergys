@@ -23,8 +23,9 @@ import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as applyFilt
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 // const testIDs = require('../testIDs');
-import { withNavigation } from 'react-navigation'
+import { ThemeColors, withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
+import { ActivityIndicator } from 'react-native';
 
 LocaleConfig.locales['fr'] = {
     monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
@@ -97,10 +98,13 @@ class Agenda2 extends Component {
         }
     }
 
-    componentWillUnmount() {
-        this.unsubscribeAgenda && this.unsubscribeAgenda()
-        //this.allTasksListeners.length > 0 && this.allTasksListeners.forEach((tasksListener) => tasksListener())
-    }
+    // componentDidMount() {
+    //     this.focusListener = this.props.navigation.addListener('focus', () => this.loadItems())
+    // }
+
+    // componentWillUnmount() {
+    //     this.focusListener()
+    // }
 
     refreshItems(refresh) {
         if (refresh) {
@@ -143,32 +147,32 @@ class Agenda2 extends Component {
 
     loadItems(day) {
         setTimeout(async () => {
-            // this.allTasksListeners = []
 
-            this.unsubscribeAgenda = db.collection('Agenda').onSnapshot((agendaSnapshot) => {
-                agendaSnapshot.forEach(async (dateDoc) => {
-                    const date = dateDoc.id //exp: 2021-01-07
+            let items = {}
+
+            await db.collection('Agenda').get().then(async (agendaSnapshot) => {
+                for (const agendaDoc of agendaSnapshot.docs) {
+
+                    const date = agendaDoc.id //exp: 2021-01-07
+                    items[date] = []
 
                     //if (!this.state.items[date]) {
-                    const query = this.setTasksQuery(dateDoc.ref)
-                    const unsubscribeTasks = query.onSnapshot((tasksSnapshot) => { //#todo: unsubscribe all listeners
-                        this.state.items[date] = []
+                    const query = this.setTasksQuery(agendaDoc.ref)
+                    await query.get().then((tasksSnapshot) => {
 
                         if (tasksSnapshot === null) return
 
-                        console.log('tasksSnapshot', tasksSnapshot)
-
-                        tasksSnapshot.forEach((taskDoc) => {
-
+                        for (const taskDoc of tasksSnapshot.docs) {
+                            console.log('taskId', taskDoc.id)
                             const task = taskDoc.data()
-                            const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
                             const startDate = moment(task.startDate).format('YYYY-MM-DD')
+                            const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
                             const isPeriod = moment(startDate).isBefore(dueDate, 'day')
                             const duration = moment(dueDate).diff(startDate, 'day') + 1
                             let timeLine = 1
                             let dayProgress = `${timeLine}/${duration}`
 
-                            this.state.items[date].push({
+                            items[date].push({
                                 id: taskDoc.id,
                                 date: date,
                                 name: task.name,
@@ -208,35 +212,40 @@ class Agenda2 extends Component {
                                 }
                             }
 
-                            const newItems = {}
-                            Object.keys(this.state.items).forEach(key => {
-                                newItems[key] = this.state.items[key]
-                            })
-                            this.setState({ items: newItems }, () => {
-                                const taskItems = this.setTaskItems()
-                                this.setState({ taskItems }, () => this.handleFilter(false))
-                            })
-                        })
+
+                        }
                     })
+                }
+            })
 
-                    // this.allTasksListeners.push(unsubscribeTasks)
+            //Empty dates (No task)
+            if (!items[day.dateString]) items[day.dateString] = []
 
-                    // }
-                })
+            this.setState({ items }, () => {
+                const taskItems = this.setTaskItems()
+                this.setState({ taskItems }, () => this.handleFilter(false))
             })
 
         }, 1000)
     }
 
-    renderTaskStatusController(date, taskId, status) {
+    renderTaskStatusController(item) {
+        const { id, date, status } = item
+
         switch (status) {
             case 'En cours':
                 return <MaterialCommunityIcons name='check-circle-outline' size={30} color='#BDBDBD'
-                    onPress={() => db.collection('Agenda').doc(date).collection('Tasks').doc(taskId).update({ status: 'Terminé' })} />
+                    onPress={() => {
+                        db.collection('Agenda').doc(date).collection('Tasks').doc(id).update({ status: 'Terminé' })
+                        this.refreshItems(true)
+                    }} />
 
             case 'Terminé':
                 return <MaterialCommunityIcons name='check-circle' size={30} color={theme.colors.primary}
-                    onPress={() => db.collection('Agenda').doc(date).collection('Tasks').doc(taskId).update({ status: 'En cours' })} />
+                    onPress={() => {
+                        db.collection('Agenda').doc(date).collection('Tasks').doc(id).update({ status: 'En cours' })
+                        this.refreshItems(true)
+                    }} />
 
             case 'Annulé':
                 return <MaterialCommunityIcons name='close-circle-outline' size={30} color={theme.colors.error} />
@@ -267,7 +276,7 @@ class Agenda2 extends Component {
 
                 <View style={{ flex: 0.2, justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5 }}>
                     {label}
-                    {this.renderTaskStatusController(item.date, item.id, item.status)}
+                    {this.renderTaskStatusController(item)}
                 </View>
             </TouchableOpacity>
         )
@@ -275,7 +284,8 @@ class Agenda2 extends Component {
 
     renderEmptyData() {
         const { isConnected } = this.props.network
-        return (<EmptyList iconName='format-list-bulleted' header='Liste des tâches' description='Aucune tâche planifiée pour ce jour-ci.' offLine={!isConnected} />)
+        return (<ActivityIndicator size='large' color={theme.colors.primary} style={{ marginTop: constants.ScreenHeight * 0.3 }} />)
+        //  return (<EmptyList iconName='format-list-bulleted' header='Liste des tâches' description='Aucune tâche planifiée pour ce jour-ci.' offLine={!isConnected} />)
     }
 
     renderEmptyDate() {
@@ -404,10 +414,13 @@ class Agenda2 extends Component {
                             renderEmptyData={this.renderEmptyData.bind(this)}
                             items={this.state.filteredItems}
                             loadItemsForMonth={this.loadItems}
+                            onVisibleMonthsChange={this.loadItems}
                             selected={moment().format('YYYY-MM-DD')}
                             renderItem={this.renderItem.bind(this)}
                             renderEmptyDate={this.renderEmptyDate.bind(this)}
-                            rowHasChanged={(r1, r2) => { return true }}
+                            rowHasChanged={this.rowHasChanged.bind(this)}
+                            displayLoadingIndicator={true}
+                            onRefresh={() => this.refreshItems(true)}
                             theme={{
                                 dotColor: theme.colors.agendaLight,
                                 todayTextColor: theme.colors.primary,
@@ -427,6 +440,10 @@ class Agenda2 extends Component {
                 <MyFAB onPress={() => this.props.navigation.navigate('CreateTask')} />
             </View>
         )
+    }
+
+    rowHasChanged(r1, r2) {
+        return r1.status !== r2.status
     }
 }
 

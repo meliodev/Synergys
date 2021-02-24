@@ -98,6 +98,7 @@ export default class AutoCompleteInput extends React.Component {
                 style={{ backgroundColor: '#fff', marginLeft: -constants.ScreenWidth * 0.025, paddingBottom: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.gray }}
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
+                createTagOnSpace = {false}
             />
         )
     }

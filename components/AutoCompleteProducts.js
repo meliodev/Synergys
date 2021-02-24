@@ -132,6 +132,7 @@ class AutoCompleteProducts extends React.Component {
                 showInput={this.props.showInput}
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
+                createTagOnSpace = {false}
             />
         )
     }
