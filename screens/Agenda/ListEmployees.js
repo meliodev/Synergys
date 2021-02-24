@@ -22,6 +22,7 @@ class ListEmployees extends React.Component {
     constructor(props) {
         super(props)
         this.getEmployee = this.getEmployee.bind(this)
+        this.titleText = this.props.navigation.getParam('titleText', '')
 
         this.state = {
             showInput: false,

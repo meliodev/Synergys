@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, RefreshControl } from 'react-native';
 import { Agenda, LocaleConfig } from 'react-native-calendars';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
@@ -18,6 +18,7 @@ import TasksTab from '../../components/TasksTab'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
+import Loading from '../../components/Loading'
 
 import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as applyFilterAgenda, handleFilterTasks as applyFilterTasks } from '../../core/utils'
 import * as theme from '../../core/theme'
@@ -95,25 +96,21 @@ class Agenda2 extends Component {
             assignedTo: { id: '', fullName: '' },
             project: this.projectFilter,
             filterOpened: false,
+
+            selectedDay: moment().format('YYYY-MM-DD'),
+            refreshing: false,
         }
     }
-
-    // componentDidMount() {
-    //     this.focusListener = this.props.navigation.addListener('focus', () => this.loadItems())
-    // }
-
-    // componentWillUnmount() {
-    //     this.focusListener()
-    // }
 
     refreshItems(refresh) {
         if (refresh) {
-            this.setState({ items: {}, filteredItems: {} })
-            this.loadItems()
+            this.setState({ refreshing: true })
+            const { selectedDay } = this.state
+            this.setState({ items: {}, filteredItems: {}, taskItems: [], filteredTaskItems: [] }, () => this.loadItems(selectedDay))
         }
     }
 
-    setTasksQuery(agendaRef) {
+    setTasksQuery() {
         const roleId = this.props.role.id
         const { isAgenda } = this.state
         const { currentUser } = firebase.auth()
@@ -122,13 +119,13 @@ class Agenda2 extends Component {
 
         //AGENDA
         if (isAgenda) {
-            query = agendaRef.collection('Tasks').where('assignedTo.id', '==', currentUser.id)
+            query = db.collection('Agenda').where('assignedTo.id', '==', currentUser.uid).orderBy('dateKey', 'asc')
             return query
         }
 
         //PLANNING
         //if (roleId === 'admin')
-        query = agendaRef.collection('Tasks')
+        else query = db.collection('Agenda').orderBy('dateKey', 'asc')
 
         // else if (roleId === 'dircom')
         //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'com')
@@ -150,81 +147,80 @@ class Agenda2 extends Component {
 
             let items = {}
 
-            await db.collection('Agenda').get().then(async (agendaSnapshot) => {
-                for (const agendaDoc of agendaSnapshot.docs) {
+            if (!items[day.dateString]) {
 
-                    const date = agendaDoc.id //exp: 2021-01-07
-                    items[date] = []
+                items[day.dateString] = []
 
-                    //if (!this.state.items[date]) {
-                    const query = this.setTasksQuery(agendaDoc.ref)
-                    await query.get().then((tasksSnapshot) => {
+                const query = this.setTasksQuery()
+                await query.get().then((tasksSnapshot) => {
 
-                        if (tasksSnapshot === null) return
+                    if (tasksSnapshot === null) return
 
-                        for (const taskDoc of tasksSnapshot.docs) {
-                            console.log('taskId', taskDoc.id)
-                            const task = taskDoc.data()
-                            const startDate = moment(task.startDate).format('YYYY-MM-DD')
-                            const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
-                            const isPeriod = moment(startDate).isBefore(dueDate, 'day')
-                            const duration = moment(dueDate).diff(startDate, 'day') + 1
-                            let timeLine = 1
-                            let dayProgress = `${timeLine}/${duration}`
+                    for (const taskDoc of tasksSnapshot.docs) { //#task: Initialize with empty array
 
-                            items[date].push({
-                                id: taskDoc.id,
-                                date: date,
-                                name: task.name,
-                                type: task.type,
-                                status: task.status,
-                                priority: task.priority.toLowerCase(),
-                                project: task.project,
-                                assignedTo: task.assignedTo,
-                                dayProgress: dayProgress
-                            })
+                        const task = taskDoc.data()
+                        const date = task.dateKey //exp: 2021-01-07
 
-                            //Tasks lasting for 2days or more...
-                            if (isPeriod) {
-                                timeLine = 2
-                                var dateIterator = moment(startDate).add(1, 'day').format('YYYY-MM-DD')
-                                let predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
+                        if (!items[date])
+                            items[date] = []
 
-                                while (predicate) {
-                                    dayProgress = `${timeLine}/${duration}`
-                                    this.state.items[dateIterator] = []
-                                    this.state.items[dateIterator].push({
-                                        id: taskDoc.id,
-                                        date: dateIterator,
-                                        name: task.name,
-                                        type: task.type,
-                                        status: task.status,
-                                        priority: task.priority.toLowerCase(),
-                                        project: task.project,
-                                        assignedTo: task.assignedTo,
-                                        dayProgress: dayProgress,
-                                        // labels: [task.priority.toLowerCase()],
-                                    })
+                        const startDate = moment(task.startDate).format('YYYY-MM-DD')
+                        const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
+                        const isPeriod = moment(startDate).isBefore(dueDate, 'day')
+                        const duration = moment(dueDate).diff(startDate, 'day') + 1
+                        let timeLine = 1
+                        let dayProgress = `${timeLine}/${duration}`
 
-                                    timeLine += 1
-                                    dateIterator = moment(dateIterator).add(1, 'day').format('YYYY-MM-DD')
-                                    predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
-                                }
+                        items[date].push({
+                            id: taskDoc.id,
+                            date: date,
+                            name: task.name,
+                            type: task.type,
+                            status: task.status,
+                            priority: task.priority.toLowerCase(),
+                            project: task.project,
+                            assignedTo: task.assignedTo,
+                            dayProgress: dayProgress
+                        })
+
+                        //Tasks lasting for 2days or more...
+                        if (isPeriod) {
+                            console.log('isPeriod', isPeriod)
+
+                            timeLine = 2
+                            var dateIterator = moment(startDate).add(1, 'day').format('YYYY-MM-DD')
+                            let predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
+
+                            while (predicate) {
+                                dayProgress = `${timeLine}/${duration}`
+                                items[dateIterator] = []
+                                items[dateIterator].push({
+                                    id: taskDoc.id,
+                                    date: dateIterator,
+                                    name: task.name,
+                                    type: task.type,
+                                    status: task.status,
+                                    priority: task.priority.toLowerCase(),
+                                    project: task.project,
+                                    assignedTo: task.assignedTo,
+                                    dayProgress: dayProgress,
+                                    // labels: [task.priority.toLowerCase()],
+                                })
+
+                                timeLine += 1
+                                dateIterator = moment(dateIterator).add(1, 'day').format('YYYY-MM-DD')
+                                predicate = (moment(dateIterator).isBefore(dueDate, 'day') || moment(dateIterator).isSame(dueDate, 'day'))
                             }
-
-
                         }
-                    })
-                }
-            })
+                    }
+                })
 
-            //Empty dates (No task)
-            if (!items[day.dateString]) items[day.dateString] = []
+                this.setState({ items }, () => {
+                    const taskItems = this.setTaskItems()
+                    this.setState({ taskItems, refreshing: false }, () => this.handleFilter(false))
+                })
 
-            this.setState({ items }, () => {
-                const taskItems = this.setTaskItems()
-                this.setState({ taskItems }, () => this.handleFilter(false))
-            })
+            }
 
         }, 1000)
     }
@@ -236,14 +232,14 @@ class Agenda2 extends Component {
             case 'En cours':
                 return <MaterialCommunityIcons name='check-circle-outline' size={30} color='#BDBDBD'
                     onPress={() => {
-                        db.collection('Agenda').doc(date).collection('Tasks').doc(id).update({ status: 'Terminé' })
+                        db.collection('Agenda').doc(id).update({ status: 'Terminé' })
                         this.refreshItems(true)
                     }} />
 
             case 'Terminé':
                 return <MaterialCommunityIcons name='check-circle' size={30} color={theme.colors.primary}
                     onPress={() => {
-                        db.collection('Agenda').doc(date).collection('Tasks').doc(id).update({ status: 'En cours' })
+                        db.collection('Agenda').doc(id).update({ status: 'En cours' })
                         this.refreshItems(true)
                     }} />
 
@@ -268,7 +264,7 @@ class Agenda2 extends Component {
         )
 
         return (
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, DateId: item.date, TaskId: item.id })} style={styles.item}>
+            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, TaskId: item.id })} style={styles.item}>
                 <View style={{ flex: 0.8, justifyContent: 'space-between', height: constants.ScreenHeight * 0.1, marginVertical: 10 }}>
                     <Text numberOfLines={1} style={theme.customFontMSbold.body}>{item.name}</Text>
                     <Text style={[theme.customFontMSsemibold.caption, { color: 'gray', marginTop: 5 }]}>{item.type} {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption, { fontWeight: 'normal' }]}>(jour {item.dayProgress})</Text>}</Text>
@@ -350,6 +346,7 @@ class Agenda2 extends Component {
 
     renderTaskItems() {
         const { filteredTaskItems } = this.state
+
         return filteredTaskItems.map((item, key) => {
             return (
                 <View style={{ padding: 15 }}>
@@ -360,17 +357,31 @@ class Agenda2 extends Component {
                 </View>
             )
         })
+
     }
 
-    toggleTasksTab(bool) {
-        this.setState({ isCalendar: bool }, () => this.handleFilter(false))
+    toggleTasksTab(isCalendar) {
+        this.setState({ isCalendar }, () => this.handleFilter(false))
+    }
+
+    onDayPress(selectedDay) {
+        this.setState({ selectedDay })
+    }
+
+    renderActiveFilterBar() {
+        return (
+            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 5, backgroundColor: theme.colors.secondary, }}>
+                <Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text>
+            </View>
+        )
     }
 
     render() {
 
         const roleId = this.props.role.id
-        let { isCalendar, displayType, items, filteredItems, type, status, priority, assignedTo, project, filterOpened } = this.state //items and filter fields
-        const filterActivated = !_.isEqual(items, filteredItems)
+        let { isCalendar, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
+        const filterCalendarActivated = !_.isEqual(items, filteredItems)
+        const filterListActivated = !_.isEqual(taskItems, filteredTaskItems)
 
         return (
             <View style={{ flex: 1 }}>
@@ -400,10 +411,10 @@ class Agenda2 extends Component {
 
                 <TasksTab isCalendar={isCalendar} onPress1={() => this.toggleTasksTab(false)} onPress2={() => this.toggleTasksTab(true)} />
 
-                {filterActivated &&
-                    <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 5, backgroundColor: theme.colors.secondary, }}>
-                        <Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text>
-                    </View>
+                {isCalendar ?
+                    filterCalendarActivated && this.renderActiveFilterBar()
+                    :
+                    filterListActivated && this.renderActiveFilterBar()
                 }
 
                 <View style={{ flex: 1 }} >
@@ -414,13 +425,14 @@ class Agenda2 extends Component {
                             renderEmptyData={this.renderEmptyData.bind(this)}
                             items={this.state.filteredItems}
                             loadItemsForMonth={this.loadItems}
-                            onVisibleMonthsChange={this.loadItems}
                             selected={moment().format('YYYY-MM-DD')}
+                            onDayPress={this.onDayPress.bind(this)}
                             renderItem={this.renderItem.bind(this)}
                             renderEmptyDate={this.renderEmptyDate.bind(this)}
                             rowHasChanged={this.rowHasChanged.bind(this)}
                             displayLoadingIndicator={true}
                             onRefresh={() => this.refreshItems(true)}
+                            style={{ paddingBottom: constants.ScreenHeight * 0.1 }}
                             theme={{
                                 dotColor: theme.colors.agendaLight,
                                 todayTextColor: theme.colors.primary,
@@ -432,12 +444,12 @@ class Agenda2 extends Component {
                             }}
                         />
                         :
-                        <ScrollView contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}>
-                            {this.renderTaskItems()}
+                        <ScrollView contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => this.refreshItems(true)} />}>
+                            {!refreshing ? this.renderTaskItems() : this.renderEmptyData()}
                         </ScrollView>
                     }
                 </View>
-                <MyFAB onPress={() => this.props.navigation.navigate('CreateTask')} />
+                <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems })} />
             </View>
         )
     }

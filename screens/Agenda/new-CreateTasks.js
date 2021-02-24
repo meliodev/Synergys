@@ -20,7 +20,7 @@ import TaskState from "../../components/RequestState"
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generatetId, navigateToScreen, load, myAlert, updateField, nameValidator } from "../../core/utils";
+import { generatetId, load, myAlert, updateField, nameValidator } from "../../core/utils";
 
 import { connect } from 'react-redux'
 
@@ -65,8 +65,9 @@ class CreateTask extends Component {
         this.isInit = true
         this.currentUser = firebase.auth().currentUser
 
+        this.DateId = this.props.navigation.getParam('DateId', '')
         this.TaskId = this.props.navigation.getParam('TaskId', '')
-        this.isEdit = this.TaskId ? true : false
+        this.isEdit = this.DateId ? true : false
         this.TaskId = this.isEdit ? this.TaskId : generatetId('GS-TC-')
 
         this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
@@ -107,9 +108,13 @@ class CreateTask extends Component {
         else this.initialState = this.state
     }
 
+    componentWillUnmount() {
+        if (this.isEdit)
+            this.unsubscribe()
+    }
 
     fetchTask() {
-        db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
+        this.unsubscribe = db.collection('Agenda').doc(this.DateId).collection('Tasks').doc(this.TaskId).onSnapshot((doc) => {
             let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             const task = doc.data()
@@ -136,10 +141,10 @@ class CreateTask extends Component {
 
             this.setState({ createdAt, createdBy, editedAt, editedBy })
             this.setState({ name, assignedTo, description, project, type, priority, status, address, startDate, dueDate }, () => {
-                // if (this.isInit)
-                this.initialState = this.state
+                if (this.isInit)
+                    this.initialState = this.state
 
-                // this.isInit = false
+                this.isInit = false
             })
         })
     }
@@ -151,7 +156,6 @@ class CreateTask extends Component {
     }
 
     refreshAssignedTo(isPro, id, prenom, nom, role) {
-        console.log(isPro, id, prenom, nom, role)
         const assignedTo = { id, fullName: `${prenom} ${nom}`, role, error: '' }
         this.setState({ assignedTo })
     }
@@ -166,6 +170,7 @@ class CreateTask extends Component {
     }
 
     refreshProject(project) {
+        console.log(project)
         project.error = ''
         this.setState({ project })
     }
@@ -236,15 +241,27 @@ class CreateTask extends Component {
 
         console.log('Ready to add task...')
 
-        db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
+        // const batch = db.batch()
+        // const agendaId = moment(startDate).format('YYYY-MM-DD')
+        // const agendaRef = db.collection('Agenda').doc(agendaId)
+        // const tasksRef = agendaRef.collection('Tasks').doc(this.TaskId)
+
+        // batch.set(agendaRef, { date: agendaId }, { merge: true })
+        // batch.set(tasksRef, task, { merge: true })
+        // batch.commit()
+
+        db.collection('Agenda').doc().set(task, { merge: true })
 
         if (this.isEdit)
-            this.props.navigation.state.params.onGoBack(true) //Don't refresh tasks in agenda
-
-        else
-            this.props.navigation.state.params.onGoBack(true) //Refresh tasks in agenda
+            this.props.navigation.state.params.onGoBack(false) //Don't refresh tasks in agenda
 
         this.props.navigation.goBack()
+
+        // await agendaRef.set({ date: agendaId }, { merge: true })
+        // await agendaRef.collection('Tasks').doc(this.TaskId).set(task, { merge: true })
+        // if (this.isEdit)
+        //     this.props.navigation.state.params.onGoBack(false) //Don't refresh tasks in agenda
+        // this.props.navigation.goBack()
     }
 
 
@@ -259,7 +276,7 @@ class CreateTask extends Component {
     handleDelete() {
         this.title = 'Suppression de la tâche...'
         load(this, true)
-        db.collection('Agenda').doc(this.TaskId).delete()
+        db.collection('Agenda').doc(this.DateId).collection('Tasks').doc(this.TaskId).delete()
         load(this, false)
         this.props.navigation.state.params.onGoBack(true) //Refresh manually tasks in agenda because onSnapshot doesn't listen to delete operations.
         this.props.navigation.goBack()
@@ -268,13 +285,11 @@ class CreateTask extends Component {
     render() {
         let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
-        let { canUpdate, canDelete } = this.props.permissions.tasks
-        canUpdate = (canUpdate || !this.isEdit)
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
+                <Appbar back={!loading} close title titleText={this.title} check handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
 
                 {loading ?
                     <Loading size='large' />
@@ -300,10 +315,9 @@ class CreateTask extends Component {
                                     onChangeText={text => updateField(this, name, text)}
                                     error={!!name.error}
                                     errorText={name.error}
-                                    editable={canUpdate}
                                 />
 
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', titleText: 'Attribuer la tâche à' })}>
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', titleText: 'Utilisateurs' })}>
                                     <MyInput
                                         label="Attribuée à"
                                         value={assignedTo.fullName}
@@ -319,10 +333,9 @@ class CreateTask extends Component {
                                     onChangeText={text => updateField(this, description, text)}
                                     error={!!description.error}
                                     errorText={description.error}
-                                    editable={canUpdate}
                                 />
 
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, title: 'Choix du projet', showFAB: false })}>
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, title: 'Choix du projet', showFAB: false })}>
                                     <MyInput
                                         label="Choisir un projet"
                                         value={project.name}
@@ -341,7 +354,6 @@ class CreateTask extends Component {
                                     onValueChange={(type) => this.setState({ type })}
                                     title="Type"
                                     elements={types}
-                                    enabled={canUpdate}
                                 />
 
                                 <Picker
@@ -354,7 +366,6 @@ class CreateTask extends Component {
                                     onValueChange={(status) => this.setState({ status })}
                                     title="État"
                                     elements={statuses}
-                                    enabled={canUpdate}
                                 />
 
                                 <Picker
@@ -367,7 +378,6 @@ class CreateTask extends Component {
                                     onValueChange={(priority) => this.setState({ priority })}
                                     title="Priorité"
                                     elements={priorities}
-                                    enabled={canUpdate}
                                 />
 
                                 <AddressInput
@@ -375,10 +385,9 @@ class CreateTask extends Component {
                                     offLine={!isConnected}
                                     onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
                                     address={address}
-                                    addressError={address.error}
-                                    editable={canUpdate} />
+                                    addressError={address.error} />
 
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}>
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}>
                                     <MyInput
                                         label="Date de début"
                                         value={moment(startDate).format('lll')}
@@ -386,7 +395,7 @@ class CreateTask extends Component {
                                     />
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}>
+                                <TouchableOpacity onPress={() => this.props.navigation.navigate('DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}>
                                     <MyInput
                                         label="Date d'échéance"
                                         value={moment(dueDate).format('lll')}
@@ -438,7 +447,6 @@ class CreateTask extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
-        permissions: state.permissions,
         network: state.network,
         //fcmToken: state.fcmtoken
     }
@@ -463,3 +471,4 @@ const styles = StyleSheet.create({
         borderRadius: 100,
     }
 })
+
