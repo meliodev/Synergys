@@ -466,7 +466,7 @@ class Signature extends Component {
             attachment: this.state.newAttachment,
             createdAt: moment().format('lll'),
             createdBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
-            generation: 'sign',
+            attachmentSource: 'signature',
             //Data of proofs
             sign_proofs_data: {
                 //Code sent
@@ -491,7 +491,7 @@ class Signature extends Component {
             }
         }
 
-        await db.collection('Documents').doc(this.DocumentId).update(newAttachment)
+        await db.collection('Documents').doc(this.DocumentId).update({ attachment: newAttachment.attachment })
         await db.collection('Documents').doc(this.DocumentId).collection('Attachments').add(newAttachment)
             .finally(() => {
                 this.setState({ uploading: false, showDialog: false })

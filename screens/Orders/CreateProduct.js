@@ -31,7 +31,7 @@ import Loading from "../../components/Loading"
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
-import { generatetId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load } from "../../core/utils";
+import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -106,7 +106,7 @@ class CreateProduct extends Component {
         }
 
         else {
-            const ProductId = generatetId('GS-AR-')
+            const ProductId = generateId('GS-AR-')
             this.setState({ ProductId }, () => this.initialState = this.state)
         }
 

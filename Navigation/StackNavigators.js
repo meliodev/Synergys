@@ -18,6 +18,10 @@ import CreateTeam from '../screens/Users/CreateTeam';
 import AddMembers from '../screens/Users/AddMembers';
 import ViewTeam from '../screens/Users/ViewTeam';
 
+//Prospects management
+import ListProspects from '../screens/Prospects/ListProspects';
+import CreateProspect from '../screens/Prospects/CreateProspect';
+
 //Requests Management
 import RequestsManagement from '../screens/Requests/RequestsManagement';
 import CreateProjectReq from '../screens/Requests/CreateProject';
@@ -93,6 +97,17 @@ const UsersManagementStack = createStackNavigator({
     },
     ViewTeam: {
         screen: ViewTeam,
+        navigationOptions: hideHeader
+    },
+})
+
+const ProspectsManagementStack = createStackNavigator({
+    ListProspects: {
+        screen: ListProspects,
+        navigationOptions: hideHeader
+    },
+    CreateProspect: {
+        screen: CreateProspect,
         navigationOptions: hideHeader
     },
 })
@@ -343,6 +358,10 @@ export const AppStack = createStackNavigator({
     //STACKS
     UsersManagementStack: {
         screen: UsersManagementStack,
+        navigationOptions: hideHeader
+    },
+    ProspectsManagementStack: {
+        screen: ProspectsManagementStack,
         navigationOptions: hideHeader
     },
     RequestsManagementStack: {

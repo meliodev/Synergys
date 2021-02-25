@@ -14,7 +14,7 @@ import Toast from "../../components/Toast"
 
 import * as theme from "../../core/theme";
 import { constants, rolesRedux } from "../../core/constants";
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, generatetId, updateField, setToast, load } from "../../core/utils"
+import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
 const roles_l1 = [ //level1: Admin
@@ -84,7 +84,7 @@ class CreateUser extends Component {
 
   async componentDidMount() {
     this.setRoleBasedPermissions()
-    const userId = generatetId('GS-US-')
+    const userId = generateId('GS-US-')
     this.setState({ userId })
   }
 
@@ -236,8 +236,6 @@ class CreateUser extends Component {
       this.props.navigation.navigate(this.prevScreen)
     }
       , 6000) //We can reduce this timeout later on...
-
-
   }
 
   refreshAddress(address) {

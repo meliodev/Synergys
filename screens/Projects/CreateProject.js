@@ -25,7 +25,7 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generatetId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs } from "../../api/firestore-api";
@@ -79,7 +79,7 @@ class CreateProject extends Component {
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
         this.isEdit = this.ProjectId ? true : false
-        this.ProjectId = this.isEdit ? this.ProjectId : generatetId('GS-DOC-')
+        this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-DOC-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
 
         this.state = {
@@ -131,10 +131,7 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
-        const array = [{ id: '1' }, '2', '3']
-        const contains = array.some(({ id }) => id === '1')
-        console.log('contains', contains)
-
+        
         if (this.isEdit) {
             await this.fetchProject()
             this.fetchDocuments()

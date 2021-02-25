@@ -11,7 +11,7 @@ import Toast from "../../components/Toast";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generatetId, updateField } from "../../core/utils";
+import { generateId, updateField } from "../../core/utils";
 import { emailValidator, passwordValidator, nameValidator } from "../../core/utils";
 import { signInUser, createUserDocument } from "../../api/auth-api";
 
@@ -55,7 +55,7 @@ class CreateUser extends Component {
 
   async componentDidMount() {
     //Generate user id (should handle unicity in case of multiple admins / multiple users added same time)
-    await generatetId(this, this.state.userId, 'users', 'users', 'Synergys-utilisateur-')
+    await generateId(this, this.state.userId, 'users', 'users', 'Synergys-utilisateur-')
   }
 
   componentWillUnmount() {

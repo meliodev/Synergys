@@ -47,6 +47,8 @@ export default class PdfGeneration extends Component {
         this.savePdf = this.savePdf.bind(this)
         this.order = this.props.navigation.getParam('order', '')
         this.docType = this.props.navigation.getParam('docType', '') //Devis ou Facture (Proposal or Bill)
+        this.isConversion = this.props.navigation.getParam('isConversion', false) //Conversion from Devis to Facture
+        console.log('isConversion', this.isConversion)
 
         const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
         this.titleText = `Génération ${articles_fr('du', masculins, this.docType)} ${this.docType}`
@@ -1106,7 +1108,7 @@ export default class PdfGeneration extends Component {
 
         RNFS.writeFile(destPath, pdfBase64, "base64")
             .then(() => {
-                this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName })
+                this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName, order: this.order, isConversion: this.isConversion })
                 this.props.navigation.navigate('UploadDocument')
             })
             .catch((err) => {

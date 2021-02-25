@@ -16,7 +16,7 @@ import Loading from '../../components/Loading'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { nameValidator, updateField, generatetId, setToast, load } from "../../core/utils"
+import { nameValidator, updateField, generateId, setToast, load } from "../../core/utils"
 import { handleFirestoreError } from '../../core/exceptions'
 
 const db = firebase.firestore()
@@ -50,7 +50,7 @@ export default class CreateTeam extends Component {
 
     async componentDidMount() {
         if (!this.isEdit) {
-            const teamId = generatetId('GS-EQ-')
+            const teamId = generateId('GS-EQ-')
             this.setState({ teamId })
         }
 

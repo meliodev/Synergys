@@ -20,7 +20,7 @@ import TaskState from "../../components/RequestState"
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generatetId, navigateToScreen, load, myAlert, updateField, nameValidator } from "../../core/utils";
+import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator } from "../../core/utils";
 
 import { connect } from 'react-redux'
 
@@ -67,7 +67,7 @@ class CreateTask extends Component {
 
         this.TaskId = this.props.navigation.getParam('TaskId', '')
         this.isEdit = this.TaskId ? true : false
-        this.TaskId = this.isEdit ? this.TaskId : generatetId('GS-TC-')
+        this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
 
         this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 

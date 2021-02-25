@@ -148,7 +148,6 @@ class ListUsers extends Component {
     let label = this.renderCountLabel(usersCount)
 
     const filteredUsers = usersList.filter(createFilter(this.props.searchInput, KEYS_TO_FILTERS))
-    console.log('************', this.props.permissions)
     const { canCreate } = this.props.permissions
 
     return (

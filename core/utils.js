@@ -147,7 +147,7 @@ export const setAttachmentIcon = (type) => {
 }
 
 
-// export const generatetId = async (main, projectRequestId, docId, field, suffix) => {
+// export const generateId = async (main, projectRequestId, docId, field, suffix) => {
 //   main.unsubscribe = await firebase.firestore().collection('IdCounter').doc(docId).onSnapshot((doc) => {
 //     let increment = 0
 
@@ -164,7 +164,7 @@ export const setAttachmentIcon = (type) => {
 //   })
 // }
 
-export const generatetId = (suffix) => {
+export const generateId = (suffix) => {
   const options = { length: 4 }
   const uid = new ShortUniqueId(options)
   const customId = suffix + uid()
@@ -182,13 +182,14 @@ export const updateField = (main, field, text) => {
   main.setState({ field })
 }
 
-export const myAlert = function myAlert(title, message, handleConfirm, handleCancel) {
+export const myAlert = function myAlert(title, message, handleConfirm, handleCancel, confirmText = 'Confirmer', cancelText = 'Annuler', extraButton) {
   Alert.alert(
     title,
     message,
     [
-      { text: 'Annuler', onPress: handleCancel, style: 'cancel' },
-      { text: 'Confirmer', onPress: handleConfirm }
+      extraButton,
+      { text: cancelText, onPress: handleCancel, style: 'cancel' },
+      { text: confirmText, onPress: handleConfirm },
     ],
     { cancelable: false }
   )

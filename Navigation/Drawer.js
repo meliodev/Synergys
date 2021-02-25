@@ -14,12 +14,12 @@ import { resetState, setNetwork } from '../core/redux'
 const db = firebase.firestore()
 
 const menuPrivilleges = {
-    backoffice: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
-    admin: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
-    dircom: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout'],
-    com: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'documents', 'news', 'logout'],
-    tech: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'orders', 'documents', 'news', 'logout'],
-    proseur: ['home', 'inbox', 'projects', 'agenda', 'users', 'requests', 'news', 'logout'],
+    backoffice: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'orders', 'documents', 'news', 'logout'],
+    admin: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'orders', 'documents', 'news', 'logout'],
+    dircom: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'documents', 'news', 'logout'],
+    com: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'documents', 'news', 'logout'],
+    tech: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'orders', 'documents', 'news', 'logout'],
+    poseur: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'news', 'logout'],
     client: ['home', 'inbox', 'projects', 'requests', 'documents', 'news', 'logout']
 }
 
@@ -29,6 +29,7 @@ const menuItems = [
     { id: 'projects', name: 'Projets', icon: 'alpha-p-box', color: '#3F51B5', navScreen: 'ProjectsStack' }, //Create
     { id: 'agenda', name: 'Planning', icon: 'calendar', navScreen: 'AgendaStack' },
     { id: 'users', name: 'Utilisateurs', icon: 'account-multiple-outline', color: '#3b5998', navScreen: 'UsersManagementStack' },
+    { id: 'prospects', name: 'Prospects', icon: 'badge-account-horizontal', color: '#632568', navScreen: 'ProspectsManagementStack' },
     { id: 'requests', name: 'Gestion des demandes', icon: 'arrow-left-bold', color: '#AD1457', navScreen: 'RequestsManagementStack' },//Create
     { id: 'orders', name: 'Gestion des commandes', icon: 'file-document-edit-outline', navScreen: 'OrdersStack' }, //Create
     { id: 'documents', name: 'Documents', icon: 'file-document', color: '#6D4C41', navScreen: 'DocumentsStack' }, //Create

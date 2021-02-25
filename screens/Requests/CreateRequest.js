@@ -19,7 +19,7 @@ import Loading from "../../components/Loading";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generatetId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -84,7 +84,7 @@ class CreateRequest extends Component {
 
         //Creation
         else {
-            const RequestId = this.isTicket ? generatetId('GS-DTC-') : generatetId('GS-DPR-')
+            const RequestId = this.isTicket ? generateId('GS-DTC-') : generateId('GS-DPR-')
             this.setState({ RequestId }, () => this.initialState = this.state)
         }
     }

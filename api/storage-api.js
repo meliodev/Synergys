@@ -151,6 +151,8 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
 
         uploadTask
             .then(async (res) => {
+                console.log('UPLOAD COMPLETED !')
+                
                 attachment.downloadURL = await storageRef.getDownloadURL()
                 attachment.generation = 'upload'
                 attachment.pending = false
