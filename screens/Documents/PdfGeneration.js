@@ -156,9 +156,9 @@ export default class PdfGeneration extends Component {
         const reducer = (a, b) => Number(a) + Number(b)
         const totalTaxe = taxeValues.reduce(reducer)
         const totalTTC = subTotal + totalTaxe
-        const primeCee = 100 //#task: add input
-        const primeRenov = 50 //#task: add input
-        const totalNet = totalTTC - primeCee - primeRenov
+        const primeCEE = this.order.primeCEE //#task: add input
+        const primeRenov = this.order.primeRenov //#task: add input
+        const totalNet = totalTTC - primeCEE - primeRenov
 
         //1. HeaderLeft: Logo
         //Embed logo image
@@ -581,7 +581,7 @@ export default class PdfGeneration extends Component {
             { label: 'Total H.T', value: subTotal.toString() },
             { label: 'TVA', value: totalTaxe.toString() },
             { label: 'Total T.T.C', value: totalTTC.toString() },
-            { label: 'PRIME CEE COUP DE POUCE', value: `-${primeCee.toString()}` },
+            { label: 'PRIME CEE COUP DE POUCE', value: `-${primeCEE.toString()}` },
             { label: 'PRIME RENOV', value: `-${primeRenov.toString()}` },
             { label: 'Net à payer', value: totalNet.toString() },
         ]
@@ -1027,7 +1027,7 @@ export default class PdfGeneration extends Component {
                     color: colors.black,
                 })
         }
-        
+
         //Footer
         pages.forEach((page, pageIndex) => {
             let footer_MarginBottom = page.getHeight() * 0.075

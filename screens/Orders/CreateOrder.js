@@ -79,10 +79,11 @@ class CreateOrder extends Component {
             //orderLines: [],
             checked: 'first',
             subTotal: 900,
-            discount: { type: 'percentage', value: '', error: '' },
             taxe: 0,
             taxes: [],
             total: 900,
+            primeCEE: 0,
+            primeRenov: 0,
 
             //logs
             createdBy: { id: '', fullName: '' },
@@ -122,7 +123,7 @@ class CreateOrder extends Component {
     //on Edit: fetch data
     async fetchOrder() {
         await db.collection('Orders').doc(this.OrderId).get().then((doc) => {
-            let { OrderId, project, state, orderLines, discount, taxes } = this.state
+            let { OrderId, project, state, orderLines, taxes, primeCEE, primeRenov } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
@@ -131,12 +132,10 @@ class CreateOrder extends Component {
             OrderId = this.OrderId
             project = order.project
             orderLines = order.orderLines
-            discount = order.discount
             taxes = order.taxes
+            primeCEE = order.primeCEE
+            primeRenov = order.primeRenov
 
-            const choice = discount.type === 'money' ? 'second' : 'first'
-
-            this.setDiscountType(choice)
             this.fetchClient(project.id)
 
             //َActivity
@@ -148,7 +147,7 @@ class CreateOrder extends Component {
             //State
             state = order.state
 
-            this.setState({ OrderId, project, state, orderLines, discount, taxes, createdAt, createdBy, editedAt, editedBy, order }, () => {
+            this.setState({ OrderId, project, state, orderLines, taxes, primeCEE, primeRenov, createdAt, createdBy, editedAt, editedBy, order }, () => {
                 if (this.isInit)
                     this.initialState = this.state
 
@@ -226,7 +225,7 @@ class CreateOrder extends Component {
         if (!isValid) return
 
         // 1. ADDING document to firestore
-        const { OrderId, project, state, orderLines, subTotal, taxes, discount, total } = this.state
+        const { OrderId, project, state, orderLines, subTotal, taxes, primeCEE, primeRenov, total } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
         let order = {
@@ -235,8 +234,9 @@ class CreateOrder extends Component {
             orderLines,
             subTotal,
             taxes,
-            discount: { type: discount.type, value: discount.value },
             total,
+            primeCEE,
+            primeRenov,
 
             editedAt: moment().format('lll'),
             editedBy: currentUser,
@@ -254,8 +254,8 @@ class CreateOrder extends Component {
         if (!this.autoGenPdf)
             this.props.navigation.goBack()
 
-        //Store order to be able to generate pdf in case user goes back from PdfGeneration
-        this.setState({ order, loading: false }, () => this.generatePdf(order, this.state.docType))
+        //#task: Store order to be able to generate pdf in case user goes back from PdfGeneration
+        else this.setState({ order, loading: false }, () => this.generatePdf(order, this.state.docType))
     }
 
     //Handle Pdf generation flow
@@ -341,32 +341,10 @@ class CreateOrder extends Component {
         return subTotal
     }
 
-    setDiscountType(checked) { //set total as well
-        let { subTotal, discount, total } = this.state
-        if (checked === 'first') {
-            discount.type = 'percentage'
-            total = subTotal - subTotal * (discount.value / 100)
-        }
-        else if (checked === 'second') {
-            discount.type = 'money'
-            total = subTotal - discount.value
-        }
-
-        this.setState({ checked, discount, total })
-    }
-
     calculateTotal() {
-        let { subTotal, discount, taxes, total } = this.state
+        let { subTotal, taxes, total } = this.state
 
         total = subTotal
-
-        if (discount.value) {
-            if (discount.type === 'percentage')
-                total = total - subTotal * (discount.value / 100)
-
-            else if (discount.type === 'money')
-                total = subTotal - discount.value
-        }
 
         if (taxes.length > 0) {
             var taxeValues = taxes.map(taxe => taxe.value)
@@ -390,7 +368,7 @@ class CreateOrder extends Component {
                         <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })} style={styles.orderLine}>
 
                             {canUpdate &&
-                                <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start' }} onPress={() => this.removeOrderLine(key)}>
+                                <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start', justifyContent: 'center' }} onPress={() => this.removeOrderLine(key)}>
                                     <MaterialCommunityIcons name='close-circle-outline' color={theme.colors.error} size={20} />
                                 </TouchableOpacity>
                             }
@@ -418,49 +396,13 @@ class CreateOrder extends Component {
         return (
             < View style={{ flex: 1, flexDirection: 'row', marginTop: 30 }}>
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.body}>Sous-total</Text>
+                    <Text style={theme.customFontMSregular.body}>Total H.T</Text>
                 </View>
 
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.body}>€{subTotal}</Text>
+                    <Text style={theme.customFontMSregular.body}>€{subTotal}</Text>
                 </View>
             </View >
-        )
-    }
-
-    renderDiscount() {
-        const { discount, checked } = this.state
-
-        return (
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-end', marginTop: 30 }}>
-                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSregular.body}>Remise</Text>
-                    <RadioButton
-                        checked={checked}
-                        firstChoice={{ title: '%', value: 'percentage' }}
-                        secondChoice={{ title: '€', value: 'money' }}
-                        onPress1={() => this.setDiscountType('first')} //Sets total as well
-                        onPress2={() => this.setDiscountType('second')} //Sets total as well
-                        textRight={true} />
-                </View>
-
-                <View style={{ flex: 0.5, alignItems: 'flex-end', marginBottom: 7 }}>
-                    <TextInput
-                        label=""
-                        returnKeyType="done"
-                        keyboardType='numeric'
-                        value={discount.value}
-                        onChangeText={text => {
-                            let { discount } = this.state
-                            discount.value = text
-                            this.setState({ discount }, () => this.calculateTotal())
-                        }}
-                        style={{ width: constants.ScreenWidth * 0.33, alignSelf: 'flex-end', textAlign: 'right', borderBottomWidth: 1, borderBottomColor: '#E0E0E0' }}
-                        editable
-                        maxLength={40}
-                    />
-                </View>
-            </View>
         )
     }
 
@@ -486,9 +428,9 @@ class CreateOrder extends Component {
         const { total } = this.state
 
         return (
-            <View style={{ flex: 1, flexDirection: 'row', marginTop: 30 }}>
+            <View style={{ flex: 1, flexDirection: 'row', marginTop: 15 }}>
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.body}>Total</Text>
+                    <Text style={theme.customFontMSbold.body}>Total T.T.C</Text>
                 </View>
 
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
@@ -498,9 +440,58 @@ class CreateOrder extends Component {
         )
     }
 
+    renderPrimeCee() {
+        const { primeCEE } = this.state
+
+        return (
+            <View style={{ flex: 1, flexDirection: 'row', marginTop: 15 }}>
+                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                    <Text style={theme.customFontMSregular.body}>Prime Cee</Text>
+                </View>
+
+                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                    <Text style={theme.customFontMSregular.body}>- €{primeCEE}</Text>
+                </View>
+            </View>
+        )
+    }
+
+    renderPrimeRenov() {
+        const { primeRenov } = this.state
+
+        return (
+            <View style={{ flex: 1, flexDirection: 'row', marginTop: 15 }}>
+                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                    <Text style={theme.customFontMSregular.body}>Prime Renov</Text>
+                </View>
+
+                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                    <Text style={theme.customFontMSregular.body}>- €{primeRenov}</Text>
+                </View>
+            </View>
+        )
+    }
+
+    renderTotalNet() {
+        const { total, primeCEE, primeRenov } = this.state
+        const totalNet = total - primeCEE - primeRenov
+
+        return (
+            <View style={{ flex: 1, flexDirection: 'row', marginTop: 15 }}>
+                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                    <Text style={theme.customFontMSbold.header}>Net à payer</Text>
+                </View>
+
+                <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
+                    <Text style={theme.customFontMSbold.header}>€{totalNet}</Text>
+                </View>
+            </View>
+        )
+    }
+
     render() {
         let { OrderId, project, state, client } = this.state
-        let { orderLines, subTotal, discount, taxes, total, order, docType } = this.state
+        let { orderLines, subTotal, taxes, total, primeCEE, primeRenov, order, docType } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
 
@@ -567,6 +558,22 @@ class CreateOrder extends Component {
                                         elements={states}
                                         enabled={canUpdate}
                                     />
+
+                                    <MyInput
+                                        label="Prime CEE (€)"
+                                        returnKeyType="done"
+                                        keyboardType='numeric'
+                                        value={primeCEE}
+                                        onChangeText={primeCEE => this.setState({ primeCEE })}
+                                    />
+
+                                    <MyInput
+                                        label="Prime Renov (€)"
+                                        returnKeyType="done"
+                                        keyboardType='numeric'
+                                        value={primeRenov}
+                                        onChangeText={primeRenov => this.setState({ primeRenov })}
+                                    />
                                 </Card.Content>
                             </Card>
 
@@ -586,9 +593,11 @@ class CreateOrder extends Component {
 
                                         {this.renderOrderLines(canUpdate)}
                                         {this.renderSubTotal()}
-                                        {/* {this.renderDiscount()} */}
                                         {taxes.length > 0 && this.renderTaxes()}
                                         {this.renderTotal()}
+                                        {primeCEE > 0 && this.renderPrimeCee()}
+                                        {primeRenov > 0 && this.renderPrimeRenov()}
+                                        {this.renderTotalNet()}
 
                                     </Card.Content>
                                 </Card>

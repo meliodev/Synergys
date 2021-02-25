@@ -459,11 +459,11 @@ class UploadDocument extends Component {
     }
 
     handleConfirmGen() {
-        const { modalContent, attachmentSource } = this.state
+        const { modalContent, attachmentSource, type } = this.state
 
         if (modalContent === 'docType') {
-            console.log(attachmentSource)
             if (attachmentSource === 'generation') {
+                if (type === '') return
                 this.setState({ modalContent: 'genConfig' })
             }
 
@@ -474,7 +474,9 @@ class UploadDocument extends Component {
         }
 
         else if (modalContent === 'genConfig') {
-            this.startGenPdf()
+            const index = genOptions.findIndex((option) => option.selected)
+            if(index === -1) return
+            this.startGenPdf(index)
         }
     }
 
@@ -487,11 +489,9 @@ class UploadDocument extends Component {
             this.toggleModal_pdfOptions()
     }
 
-    startGenPdf() {
+    startGenPdf(index) {
         const { genOptions, type } = this.state
         this.toggleModal_pdfOptions()
-
-        const index = genOptions.findIndex((option) => option.selected)
 
         //Existing order
         if (index === 0) {
