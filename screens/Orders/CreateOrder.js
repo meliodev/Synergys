@@ -195,17 +195,17 @@ class CreateOrder extends Component {
     }
 
     validateInputs() {
-        let { project, orderLines } = this.state
+        let { orderLines } = this.state
 
-        let projectError = nameValidator(project.id, '"Projet"')
+        //let projectError = nameValidator(project.id, '"Projet"')
         let orderLinesError = this.validateOrderLines()
 
-        if (projectError) {
-            Keyboard.dismiss()
-            project.error = projectError
-            this.setState({ project, loading: false })
-            return false
-        }
+        // if (projectError) {
+        //     Keyboard.dismiss()
+        //     project.error = projectError
+        //     this.setState({ project, loading: false })
+        //     return false
+        // }
 
         if (orderLinesError) {
             this.setState({ loading: false })
@@ -260,7 +260,7 @@ class CreateOrder extends Component {
 
     //Handle Pdf generation flow
     generatePdf(order, docType) {
-        this.props.navigation.navigate('PdfGeneration', { order, docType, onGoBack: this.props.navigation.getParam('onGoBack', null) })
+        this.props.navigation.navigate('PdfGeneration', { order, docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
     //refresh inputs

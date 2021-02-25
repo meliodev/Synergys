@@ -119,11 +119,11 @@ export async function uploadFiles(files, storageRefPath, isChat, chatId) {
 //Used by: CreateDocument.js
 export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehydrated) { //#task: add showProgress as param
 
-    console.log('3. uploadOfflineBeta')
-    console.log('3.1 attachment', attachment)
-    console.log('3.2 storageRefPath', storageRefPath)
-    console.log('3.3 DocumentId', DocumentId)
-    console.log('3.4 rehydrated', rehydrated)
+    // console.log('3. uploadOfflineBeta')
+    // console.log('3.1 attachment', attachment)
+    // console.log('3.2 storageRefPath', storageRefPath)
+    // console.log('3.3 DocumentId', DocumentId)
+    // console.log('3.4 rehydrated', rehydrated)
 
     const promise = new Promise(async (resolve, reject) => {
 
@@ -160,6 +160,7 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
 
                 db.collection('Documents').doc(DocumentId).update({ attachment })
                 onUploadProgressEnd(this, payload)
+                resolve(true)
             })
             .catch((e) => {
                 console.error('upload error', e)
@@ -167,6 +168,7 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
 
                 db.collection('Documents').doc(DocumentId).update({ attachment: null })
                 onUploadProgressEnd(this, payload)
+                reject(false)
             })
     })
 

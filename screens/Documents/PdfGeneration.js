@@ -18,7 +18,8 @@ moment.locale('fr')
 
 // import { fetchAsset, writePdf } from './assets'
 import { logoBase64 } from '../../assets/logoBase64'
-import { uint8ToBase64, base64ToArrayBuffer, downloadFile, articles_fr, setToast } from '../../core/utils'
+import { termsBase64 } from '../../assets/termsAndConditionsBase64'
+import { uint8ToBase64, base64ToArrayBuffer, articles_fr, setToast } from '../../core/utils'
 import { sizes } from '../../core/theme'
 import * as theme from '../../core/theme'
 import { constants } from "../../core/constants"
@@ -42,13 +43,11 @@ export default class PdfGeneration extends Component {
 
     constructor(props) {
         super(props)
-        this.downloadFile = this.downloadFile.bind(this)
-        this.readFile = this.readFile.bind(this)
         this.savePdf = this.savePdf.bind(this)
         this.order = this.props.navigation.getParam('order', '')
         this.docType = this.props.navigation.getParam('docType', '') //Devis ou Facture (Proposal or Bill)
+        this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.isConversion = this.props.navigation.getParam('isConversion', false) //Conversion from Devis to Facture
-        console.log('isConversion', this.isConversion)
 
         const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
         this.titleText = `Génération ${articles_fr('du', masculins, this.docType)} ${this.docType}`
@@ -60,31 +59,12 @@ export default class PdfGeneration extends Component {
         }
     }
 
-    async componentDidMount() {
-        // this.fetchFile()
-        console.log('new pdf generation')
-        console.log(this.order)
-        console.log(this.docType)
-        this.generateProposal()
-        // this.createForm()
-        // this.fillForm()
-    }
+    componentDidMount() {
+        const purchasDocs = ['Bon de commande', 'Devis', 'Facture']
 
-
-    //#Notice: no need to store image or pdf (small files): just fetch and convert to base64/arrayBuffer
-    async downloadFile(fileName, url) {
-        await downloadFile(this, fileName, url)
-    }
-
-    async fetchBase64File(url) {
-        const base64 = await RNFetchBlob.fetch('GET', url).then((res) => res.base64())
-        return base64
-    }
-
-    readFile(filePath) {
-        RNFetchBlob.fs.readFile(filePath, 'base64')
-            .then((data) => console.log('file:', data))
-            .catch((e) => console.error(e))
+        if (purchasDocs.includes(this.docType)) {
+            this.generatePurchaseDoc()
+        }
     }
 
     lineBreaker(dataArray, font, size, maxWidth) {
@@ -137,7 +117,7 @@ export default class PdfGeneration extends Component {
         return dataArrayFormated
     }
 
-    async generateProposal() {
+    async generatePurchaseDoc() {
 
         // Create a new PDFDocument
         const pdfDoc = await PDFDocument.create()
@@ -165,7 +145,6 @@ export default class PdfGeneration extends Component {
         const headerRigth_x_start = width * 0.5
 
         //Dynamic data
-        const ProposalId = this.order.id
         const createdAt = moment().format('DD/MM/YYYY')
         const { orderLines, subTotal, taxes, project, editedBy } = this.order
         const client = await db.collection('Users').doc(project.client.id).get().then((doc) => { return doc.data() })
@@ -219,7 +198,7 @@ export default class PdfGeneration extends Component {
 
         //#dynamic #LL
         //3. HeaderRight: Pdf Title
-        const title = `Devis n° ${ProposalId} du ${createdAt}`
+        const title = `${this.docType} n° ${this.DocumentId} du ${createdAt}`
         const titleHeight = timesRomanBoldFont.heightAtSize(body)
 
         pages[pageIndex].drawText(title,
@@ -723,329 +702,332 @@ export default class PdfGeneration extends Component {
             marginTop = 35
         }
 
-        //Draw Proposal expiry date
-        const proposalExpiryDate = moment().add(6, 'months').format('DD/MM/YYYY')
-        pages[pageIndex].drawText(`Validité du devis:     ${proposalExpiryDate}`,
-            {
-                x: marginLeft,
+        if (this.docType === 'Devis') {
+
+            //Draw Proposal expiry date
+            const proposalExpiryDate = moment().add(6, 'months').format('DD/MM/YYYY')
+            pages[pageIndex].drawText(`Validité du devis:     ${proposalExpiryDate}`,
+                {
+                    x: marginLeft,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += cste
+
+            const p2 = padding, p3 = padding * 2, p5 = cste * 3, p6 = padding / 2
+
+            const paymentModeBoxHeight = 4 * p2 + 5 * p3 + 2 * p6 + p5 + timesRomanBoldFont.heightAtSize(body) + 2 * timesRomanBoldFont.heightAtSize(caption) + 6 * timesRomanFont.heightAtSize(caption)
+
+            //Check marginTop -> Turn page
+            if (marginTop >= height * 0.9 - paymentModeBoxHeight) {
+                pageIndex = pageIndex + 1
+                pages[pageIndex] = pdfDoc.addPage(PageSizes.A4)
+                marginTop = 35
+            }
+
+            //4. Draw Payment Mode
+            //4.1 Draw frame
+            pages[pageIndex].drawRectangle({
+                x: marginRight,
+                y: height - marginTop - paymentModeBoxHeight,
+                width: width - marginRight - marginLeft,
+                height: paymentModeBoxHeight,
+                borderColor: colors.gray,
+                borderWidth: 1,
+            })
+
+            marginTop += p2 + timesRomanBoldFont.heightAtSize(body)
+
+            //4.2 Draw title
+            pages[pageIndex].drawText('MODE DE PAIEMENT',
+                {
+                    x: marginLeft + p2,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += p3 + timesRomanBoldFont.heightAtSize(caption)
+
+            //4.2 Draw 1st clause
+            const checkBoxSize = 5
+            pages[pageIndex].drawRectangle({
+                x: marginRight + p2,
                 y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
+                width: checkBoxSize,
+                height: checkBoxSize,
+                borderColor: colors.gray,
+                borderWidth: 1,
             })
 
-        marginTop += cste
+            pages[pageIndex].drawText('  Paiement Comptant / Paiement via organisme bancaire du client :',
+                {
+                    x: marginLeft + p2 + checkBoxSize,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
 
-        const p2 = padding, p3 = padding * 2, p5 = cste * 3, p6 = padding / 2
+            marginTop += p2 + timesRomanFont.heightAtSize(caption)
 
-        const paymentModeBoxHeight = 4 * p2 + 5 * p3 + 2 * p6 + p5 + timesRomanBoldFont.heightAtSize(body) + 2 * timesRomanBoldFont.heightAtSize(caption) + 6 * timesRomanFont.heightAtSize(caption)
+            pages[pageIndex].drawText('Conditions de règlement :',
+                {
+                    x: marginLeft + p2,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanFont,
+                    lineHeight,
+                    color: colors.black,
+                })
 
-        //Check marginTop -> Turn page
-        if (marginTop >= height * 0.9 - paymentModeBoxHeight) {
-            pageIndex = pageIndex + 1
-            pages[pageIndex] = pdfDoc.addPage(PageSizes.A4)
-            marginTop = 35
-        }
+            marginTop += p3 + timesRomanFont.heightAtSize(caption)
 
-        //4. Draw Payment Mode
-        //4.1 Draw frame
-        pages[pageIndex].drawRectangle({
-            x: marginRight,
-            y: height - marginTop - paymentModeBoxHeight,
-            width: width - marginRight - marginLeft,
-            height: paymentModeBoxHeight,
-            borderColor: colors.gray,
-            borderWidth: 1,
-        })
+            pages[pageIndex].drawText('30 % soit ................................. € TTC à la visite technique',
+                {
+                    x: marginLeft + p2 + p5,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanFont,
+                    lineHeight,
+                    color: colors.black,
+                })
 
-        marginTop += p2 + timesRomanBoldFont.heightAtSize(body)
+            marginTop += p2 + timesRomanFont.heightAtSize(caption)
 
-        //4.2 Draw title
-        pages[pageIndex].drawText('MODE DE PAIEMENT',
-            {
-                x: marginLeft + p2,
+            pages[pageIndex].drawText('et 70 % soit ................................. € TTC au PV de réception de chantier',
+                {
+                    x: marginLeft + p2 + p5,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += p3 + timesRomanBoldFont.heightAtSize(caption)
+
+            //4.3 Draw 2nd clause
+            pages[pageIndex].drawRectangle({
+                x: marginRight + p2,
                 y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
+                width: checkBoxSize,
+                height: checkBoxSize,
+                borderColor: colors.gray,
+                borderWidth: 1,
             })
 
-        marginTop += p3 + timesRomanBoldFont.heightAtSize(caption)
+            pages[pageIndex].drawText('  Paiement via l’organisme de financement partenaire Synergys : ......................................',
+                {
+                    x: marginLeft + p2 + checkBoxSize,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
 
-        //4.2 Draw 1st clause
-        const checkBoxSize = 5
-        pages[pageIndex].drawRectangle({
-            x: marginRight + p2,
-            y: height - marginTop,
-            width: checkBoxSize,
-            height: checkBoxSize,
-            borderColor: colors.gray,
-            borderWidth: 1,
-        })
+            marginTop += p3 + timesRomanFont.heightAtSize(caption)
 
-        pages[pageIndex].drawText('  Paiement Comptant / Paiement via organisme bancaire du client :',
-            {
-                x: marginLeft + p2 + checkBoxSize,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
+            pages[pageIndex].drawText('Partie financée : ..................................... €       Et       Partie au comptant : ............................................... €',
+                {
+                    x: marginLeft + p2 + p5,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += p3
+
+            //Draw Payment Table
+            const boxWidth = cste * 6.5
+            for (let i = 0; i < 9; i++) {
+                pages[pageIndex].drawLine({
+                    start: { x: marginLeft + p2 + i * boxWidth, y: height - marginTop },
+                    end: { x: marginLeft + p2 + i * boxWidth, y: height - marginTop - (p6 * 2 + 2 * timesRomanFont.heightAtSize(caption) + cste * 3) },
+                    thickness: 1,
+                    color: colors.gray
+                })
+            }
+
+            let pt_marginTop = marginTop
+
+            for (let j = 0; j < 3; j++) {
+
+                pages[pageIndex].drawLine({
+                    start: { x: marginLeft + p2, y: height - pt_marginTop },
+                    end: { x: marginLeft + p2 + 8 * boxWidth, y: height - pt_marginTop },
+                    thickness: 1,
+                    color: colors.gray
+                })
+
+                if (j === 0)
+                    pt_marginTop += p6 * 2 + 2 * timesRomanFont.heightAtSize(caption)
+                if (j === 1)
+                    pt_marginTop += cste * 3
+            }
+
+
+            //PT: Draw headers
+            const pt_headers = [["Durée du", "financement"], ["Nombre de", "mensualités"], ["Mensualité hors", "assurance"], ["Mensualité avec", "assurance"], ["Taux débiteur", "fixe"], ["Taux débiteur", "effectif global"], ["Coût total du", "financement"], ["Report"]]
+
+            let x = marginLeft + p2
+
+            pt_headers.forEach((headerArray, key) => {
+
+                const initMarginTop = marginTop
+                marginTop += p6
+
+                headerArray.forEach(header => {
+                    marginTop += timesRomanFont.heightAtSize(caption)
+
+                    pages[pageIndex].drawText(header,
+                        {
+                            x: x + key * boxWidth + (boxWidth - timesRomanFont.widthOfTextAtSize(header, 9)) / 2,
+                            y: height - marginTop,
+                            size: 9,
+                            font: timesRomanFont,
+                            lineHeight,
+                            color: colors.black,
+                        })
+                })
+
+                marginTop = initMarginTop
             })
 
-        marginTop += p2 + timesRomanFont.heightAtSize(caption)
+            //PT: Draw units
+            marginTop += p6 * 2 + 2 * timesRomanFont.heightAtSize(caption) + cste * 3
 
-        pages[pageIndex].drawText('Conditions de règlement :',
-            {
-                x: marginLeft + p2,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanFont,
-                lineHeight,
-                color: colors.black,
-            })
+            const units = ['', '', '€', '€', '%', '%', '€', '']
 
-        marginTop += p3 + timesRomanFont.heightAtSize(caption)
-
-        pages[pageIndex].drawText('30 % soit ................................. € TTC à la visite technique',
-            {
-                x: marginLeft + p2 + p5,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += p2 + timesRomanFont.heightAtSize(caption)
-
-        pages[pageIndex].drawText('et 70 % soit ................................. € TTC au PV de réception de chantier',
-            {
-                x: marginLeft + p2 + p5,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += p3 + timesRomanBoldFont.heightAtSize(caption)
-
-        //4.3 Draw 2nd clause
-        pages[pageIndex].drawRectangle({
-            x: marginRight + p2,
-            y: height - marginTop,
-            width: checkBoxSize,
-            height: checkBoxSize,
-            borderColor: colors.gray,
-            borderWidth: 1,
-        })
-
-        pages[pageIndex].drawText('  Paiement via l’organisme de financement partenaire Synergys : ......................................',
-            {
-                x: marginLeft + p2 + checkBoxSize,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += p3 + timesRomanFont.heightAtSize(caption)
-
-        pages[pageIndex].drawText('Partie financée : ..................................... €       Et       Partie au comptant : ............................................... €',
-            {
-                x: marginLeft + p2 + p5,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += p3
-
-        //Draw Payment Table
-        const boxWidth = cste * 6.5
-        for (let i = 0; i < 9; i++) {
-            pages[pageIndex].drawLine({
-                start: { x: marginLeft + p2 + i * boxWidth, y: height - marginTop },
-                end: { x: marginLeft + p2 + i * boxWidth, y: height - marginTop - (p6 * 2 + 2 * timesRomanFont.heightAtSize(caption) + cste * 3) },
-                thickness: 1,
-                color: colors.gray
-            })
-        }
-
-        let pt_marginTop = marginTop
-
-        for (let j = 0; j < 3; j++) {
-
-            pages[pageIndex].drawLine({
-                start: { x: marginLeft + p2, y: height - pt_marginTop },
-                end: { x: marginLeft + p2 + 8 * boxWidth, y: height - pt_marginTop },
-                thickness: 1,
-                color: colors.gray
-            })
-
-            if (j === 0)
-                pt_marginTop += p6 * 2 + 2 * timesRomanFont.heightAtSize(caption)
-            if (j === 1)
-                pt_marginTop += cste * 3
-        }
-
-
-        //PT: Draw headers
-        const pt_headers = [["Durée du", "financement"], ["Nombre de", "mensualités"], ["Mensualité hors", "assurance"], ["Mensualité avec", "assurance"], ["Taux débiteur", "fixe"], ["Taux débiteur", "effectif global"], ["Coût total du", "financement"], ["Report"]]
-
-        let x = marginLeft + p2
-
-        pt_headers.forEach((headerArray, key) => {
-
-            const initMarginTop = marginTop
-            marginTop += p6
-
-            headerArray.forEach(header => {
-                marginTop += timesRomanFont.heightAtSize(caption)
-
-                pages[pageIndex].drawText(header,
+            units.forEach((unit, key) => {
+                pages[pageIndex].drawText(unit,
                     {
-                        x: x + key * boxWidth + (boxWidth - timesRomanFont.widthOfTextAtSize(header, 9)) / 2,
-                        y: height - marginTop,
-                        size: 9,
+                        x: marginLeft + (key + 1) * boxWidth,
+                        y: height - marginTop + p6,
+                        size: caption,
                         font: timesRomanFont,
                         lineHeight,
                         color: colors.black,
                     })
             })
 
-            marginTop = initMarginTop
-        })
+            marginTop += padding * 3
 
-        //PT: Draw units
-        marginTop += p6 * 2 + 2 * timesRomanFont.heightAtSize(caption) + cste * 3
+            //Check marginTop -> turn page
+            if (marginTop >= height * 0.9 - 2 * timesRomanFont.heightAtSize(caption) - padding) {
+                pageIndex = pageIndex + 1
+                pages[pageIndex] = pdfDoc.addPage(PageSizes.A4)
+                marginTop = 35
+            }
 
-        const units = ['', '', '€', '€', '%', '%', '€', '']
-
-        units.forEach((unit, key) => {
-            pages[pageIndex].drawText(unit,
+            //3rd clause
+            const str = "Si le produit commandé est indisponible :"
+            pages[pageIndex].drawText(str,
                 {
-                    x: marginLeft + (key + 1) * boxWidth,
-                    y: height - marginTop + p6,
+                    x: marginLeft + p2,
+                    y: height - marginTop,
                     size: caption,
                     font: timesRomanFont,
                     lineHeight,
                     color: colors.black,
                 })
-        })
 
-        marginTop += padding * 3
+            pages[pageIndex].drawLine({
+                start: { x: marginLeft + p2, y: height - marginTop },
+                end: { x: marginLeft + p2 + timesRomanFont.widthOfTextAtSize(str, caption), y: height - marginTop },
+                thickness: 1,
+                color: colors.gray
+            })
 
-        //Check marginTop -> turn page
-        if (marginTop >= height * 0.9 - 2 * timesRomanFont.heightAtSize(caption) - padding) {
-            pageIndex = pageIndex + 1
-            pages[pageIndex] = pdfDoc.addPage(PageSizes.A4)
-            marginTop = 35
+            pages[pageIndex].drawText(str,
+                {
+                    x: marginLeft + p2,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += padding
+
+            //Equivalent product
+            pages[pageIndex].drawRectangle({
+                x: marginRight + p2,
+                y: height - marginTop,
+                width: checkBoxSize,
+                height: checkBoxSize,
+                borderColor: colors.gray,
+                borderWidth: 1,
+            })
+
+            pages[pageIndex].drawText("  Vous nous autorisez d'installer un produit d'une qualité et d'un prix équivalent (voir Article 4 des CGV)",
+                {
+                    x: marginLeft + p2 + checkBoxSize,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += padding * 2
+
+            //Signature
+            const signatureBoxHeight = cste * 10
+            const signatureBoxWidth = width * 0.6
+
+            //Check marginTop -> turn page
+            if (marginTop >= height * 0.9 - signatureBoxHeight) {
+                pageIndex = pageIndex + 1
+                pages[pageIndex] = pdfDoc.addPage(PageSizes.A4)
+                marginTop = 35
+            }
+
+            pages[pageIndex].drawRectangle({
+                x: marginRight + p2,
+                y: height - marginTop - signatureBoxHeight,
+                width: signatureBoxWidth,
+                height: signatureBoxHeight,
+                borderColor: colors.gray,
+                borderWidth: 1,
+            })
+
+            marginTop += padding * 1.5
+
+            pages[pageIndex].drawText(`Devis n° ${this.DocumentId}`,
+                {
+                    x: marginRight + p2 * 2,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
+
+            marginTop += p2
+
+            pages[pageIndex].drawText('Signature précédée de la mention "devis accepté le".',
+                {
+                    x: marginRight + p2 * 2,
+                    y: height - marginTop,
+                    size: caption,
+                    font: timesRomanBoldFont,
+                    lineHeight,
+                    color: colors.black,
+                })
         }
-
-        //3rd clause
-        const str = "Si le produit commandé est indisponible :"
-        pages[pageIndex].drawText(str,
-            {
-                x: marginLeft + p2,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        pages[pageIndex].drawLine({
-            start: { x: marginLeft + p2, y: height - marginTop },
-            end: { x: marginLeft + p2 + timesRomanFont.widthOfTextAtSize(str, caption), y: height - marginTop },
-            thickness: 1,
-            color: colors.gray
-        })
-
-        pages[pageIndex].drawText(str,
-            {
-                x: marginLeft + p2,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += padding
-
-        //Equivalent product
-        pages[pageIndex].drawRectangle({
-            x: marginRight + p2,
-            y: height - marginTop,
-            width: checkBoxSize,
-            height: checkBoxSize,
-            borderColor: colors.gray,
-            borderWidth: 1,
-        })
-
-        pages[pageIndex].drawText("  Vous nous autorisez d'installer un produit d'une qualité et d'un prix équivalent (voir Article 4 des CGV)",
-            {
-                x: marginLeft + p2 + checkBoxSize,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += padding * 2
-
-        //Signature
-        const signatureBoxHeight = cste * 10
-        const signatureBoxWidth = width * 0.6
-
-        //Check marginTop -> turn page
-        if (marginTop >= height * 0.9 - signatureBoxHeight) {
-            pageIndex = pageIndex + 1
-            pages[pageIndex] = pdfDoc.addPage(PageSizes.A4)
-            marginTop = 35
-        }
-
-        pages[pageIndex].drawRectangle({
-            x: marginRight + p2,
-            y: height - marginTop - signatureBoxHeight,
-            width: signatureBoxWidth,
-            height: signatureBoxHeight,
-            borderColor: colors.gray,
-            borderWidth: 1,
-        })
-
-        marginTop += padding * 1.5
-
-        pages[pageIndex].drawText(`Devis n° ${ProposalId}`,
-            {
-                x: marginRight + p2 * 2,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
-            })
-
-        marginTop += p2
-
-        pages[pageIndex].drawText('Signature précédée de la mention "devis accepté le".',
-            {
-                x: marginRight + p2 * 2,
-                y: height - marginTop,
-                size: caption,
-                font: timesRomanBoldFont,
-                lineHeight,
-                color: colors.black,
-            })
-
+        
         //Footer
         pages.forEach((page, pageIndex) => {
             let footer_MarginBottom = page.getHeight() * 0.075
@@ -1090,8 +1072,25 @@ export default class PdfGeneration extends Component {
                 })
         })
 
-        // Serialize the PDFDocument to bytes (a Uint8Array)
-        const pdfBytes = await pdfDoc.save()
+        let pdfBytes
+
+        //Merge "Devis" with "Conditions générales"
+        if (this.docType === 'Devis') {
+            const mergedPdf = await PDFDocument.create()
+
+            const termsPdf = await PDFDocument.load(termsBase64)
+
+            const copiedPagesA = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())
+            copiedPagesA.forEach((page) => mergedPdf.addPage(page))
+
+            const copiedPagesB = await mergedPdf.copyPages(termsPdf, termsPdf.getPageIndices())
+            copiedPagesB.forEach((page) => mergedPdf.addPage(page))
+
+            pdfBytes = await mergedPdf.save()
+        }
+
+        else pdfBytes = await pdfDoc.save()
+
         const pdfBase64 = uint8ToBase64(pdfBytes)
         const source = { uri: `data:application/pdf;base64,${pdfBase64}` }
         this.setState({ source, pdfBase64 }, () => this.setState({ loading: false }))
@@ -1108,7 +1107,7 @@ export default class PdfGeneration extends Component {
 
         RNFS.writeFile(destPath, pdfBase64, "base64")
             .then(() => {
-                this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName, order: this.order, isConversion: this.isConversion })
+                this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName, order: this.order, isConversion: this.isConversion, DocumentId: this.DocumentId })
                 this.props.navigation.navigate('UploadDocument')
             })
             .catch((err) => {

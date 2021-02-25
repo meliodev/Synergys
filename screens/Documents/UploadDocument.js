@@ -20,6 +20,7 @@ import Button from "../../components/Button"
 import UploadProgress from "../../components/UploadProgress"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
+import LoadDialog from "../../components/LoadDialog"
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
@@ -97,7 +98,7 @@ class UploadDocument extends Component {
             description: { value: "aaa", error: '' },
 
             //Screens
-            project: { id: '', name: '' },
+            project: { id: 'GS-PR-D2uu', name: 'Projet Addd' },
             projectError: '',
 
             //Pickers
@@ -127,6 +128,7 @@ class UploadDocument extends Component {
 
             error: '',
             loading: false,
+            loadingConversion: false,
             toastType: '',
             toastMessage: ''
         }
@@ -134,9 +136,9 @@ class UploadDocument extends Component {
 
     async componentDidMount() {
         if (this.isEdit) {
-            await this.fetchDocument()
+            await this.fetchDocument(this.DocumentId)
             await this.fetchSignees()
-            this.attachmentListener()
+            this.attachmentListener(this.DocumentId)
         }
 
         else {
@@ -152,11 +154,11 @@ class UploadDocument extends Component {
     }
 
     //on Edit
-    async fetchDocument() {
-        await db.collection('Documents').doc(this.DocumentId).get().then((doc) => {
+    async fetchDocument(DocumentId) {
+        await db.collection('Documents').doc(DocumentId).get().then((doc) => {
 
             let { project, name, description, type, state, attachment, order } = this.state
-            let { createdAt, createdBy, editedAt, editedBy } = this.state
+            let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
 
             //General info
             const document = doc.data()
@@ -170,6 +172,7 @@ class UploadDocument extends Component {
             createdBy = document.createdBy
             editedAt = document.editedAt
             editedBy = document.editedBy
+            loading = document.attachment.pending ? true : false
 
             //State & Type
             state = document.state
@@ -206,18 +209,27 @@ class UploadDocument extends Component {
 
     //A user starts an upload task while offline.. After user comes back online... the upload task starts running.
     // --> Listener to detect when the attachment is uploaded (pending = false)
-    attachmentListener() {
-        this.unsubscribeAttachmentListener = db.collection('Documents').doc(this.DocumentId).onSnapshot((doc) => {
+    attachmentListener(DocumentId) {
+        this.unsubscribeAttachmentListener = db.collection('Documents').doc(DocumentId).onSnapshot((doc) => {
+
             const prevAttachment = this.state.attachment
             if (!prevAttachment) return
 
+            console.log('DATA....', doc.data())
             const nextAttachment = doc.data().attachment
 
             const prevStatus = prevAttachment.pending
             const nextStatus = nextAttachment.pending
 
+            if (!nextStatus) { //#IMPORTANT Switch to Edit Mode after upload completes
+                this.isEdit = true
+                this.setState({ loading: false, loadingConversion: false })
+                this.fetchDocument(DocumentId)
+            }
+
             if (prevStatus && !nextStatus) {
                 this.setState({ attachment: nextAttachment })
+                setToast(this, 's', 'Le document a été exporté avec succès.')
             }
         })
     }
@@ -240,6 +252,10 @@ class UploadDocument extends Component {
         if (this.state.loading || this.state === this.initialState) return
         load(this, true)
 
+        if (isConversion) {
+            this.setState({ loadingConversion: true })
+        }
+
         //1. Validate inputs
         const isValid = this.validateInputs()
         if (!isValid) return
@@ -248,7 +264,8 @@ class UploadDocument extends Component {
         this.persistDocument(isConversion, DocumentId)
 
         //3. Handle upload offline
-        this.uploadFile(DocumentId)
+        this.attachmentListener(DocumentId)
+        this.uploadFile(isConversion, DocumentId)
     }
 
     validateInputs() {
@@ -260,7 +277,7 @@ class UploadDocument extends Component {
         if (projectError || nameError) {
             name.error = nameError
             Keyboard.dismiss()
-            this.setState({ projectError, name, loading: false })
+            this.setState({ projectError, name, loading: false, loadingConversion: false })
             return false
         }
 
@@ -293,6 +310,7 @@ class UploadDocument extends Component {
         }
 
         if (isConversion) {
+            document.name = `${document.name} (Facture générée)`
             document.type = 'Facture'
             document.attachmentSource = 'conversion'
             document.conversionSource = this.DocumentId //Id of the current "Devis"
@@ -306,20 +324,22 @@ class UploadDocument extends Component {
         batch.set(attachmentsRef, attachment)
         batch.commit()
         //.catch(e => handleFirestoreError(e))  //Online Only
-
         // setTimeout(() => this.props.navigation.goBack(), 2000) //#task: stay here
-        
     }
 
-    async uploadFile(DocumentId) {
+    async uploadFile(isConversion, DocumentId) {
         var { project, type, attachment } = this.state
-        if (attachment && attachment.pending) return
+
+        if (this.isEdit && !isConversion && attachment && attachment.pending) return //User tries to update Document data while an attachment is still pending..
 
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
-        const result = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false) //resolves only when online
+        const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
 
-        if (result === 'failure')
+        if (!fileUploaded) {
             setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
+        }
+
+        else return fileUploaded
     }
 
     //Delete document
@@ -442,7 +462,8 @@ class UploadDocument extends Component {
         const { modalContent, attachmentSource } = this.state
 
         if (modalContent === 'docType') {
-            if (attachmentSource === 'generate') {
+            console.log(attachmentSource)
+            if (attachmentSource === 'generation') {
                 this.setState({ modalContent: 'genConfig' })
             }
 
@@ -474,12 +495,12 @@ class UploadDocument extends Component {
 
         //Existing order
         if (index === 0) {
-            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', autoGenPdf: true, docType: type, onGoBack: this.getGeneratedPdf })
+            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', autoGenPdf: true, docType: type, DocumentId: this.DocumentId, onGoBack: this.getGeneratedPdf })
         }
 
         //New order
         else if (index === 1) {
-            this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type, onGoBack: this.getGeneratedPdf })
+            this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type, DocumentId: this.DocumentId, onGoBack: this.getGeneratedPdf })
         }
 
         else return
@@ -500,7 +521,7 @@ class UploadDocument extends Component {
 
         this.setState({ attachment, order }, () => {
             if (isConversion) {
-                var DocumentId = generateId('GS-DOC-')
+                var DocumentId = genPdf.DocumentId
                 this.handleSubmit(true, DocumentId)
             }
 
@@ -509,8 +530,9 @@ class UploadDocument extends Component {
     }
 
     convertProposalToBill() {
+        if (!this.isEdit) return
         const { order } = this.state
-        this.props.navigation.navigate('PdfGeneration', { order, docType: 'Facture', isConversion: true, onGoBack: this.getGeneratedPdf })
+        this.props.navigation.navigate('PdfGeneration', { order, docType: 'Facture', DocumentId: generateId('GS-DOC-'), isConversion: true, onGoBack: this.getGeneratedPdf })
     }
 
     renderPopUpMenuPdfSelection() {
@@ -656,6 +678,8 @@ class UploadDocument extends Component {
     }
 
     navigateToSignature(isConnected, signMode) {
+        if (!this.isEdit) return
+
         if (!isConnected) {
             Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
             return
@@ -665,7 +689,7 @@ class UploadDocument extends Component {
         const { project, type, attachment } = this.initialState
 
         var params = {
-            onGoBack: this.fetchDocument,
+            onGoBack: () => this.fetchDocument(this.DocumentId),
             ProjectId: project.id,
             DocumentId: this.DocumentId,
             DocumentType: type,
@@ -682,53 +706,62 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment, order } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { error, loading, toastType, toastMessage, projectError } = this.state
+        let { error, loading, loadingConversion, toastType, toastMessage, projectError } = this.state
 
         var { canUpdate, canDelete } = this.props.permissions.documents
         canUpdate = (canUpdate || !this.isEdit)
 
         const { isConnected } = this.props.network
 
-        return (
+        if (loadingConversion) return (
             <View style={styles.container}>
-                <Appbar back close title titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={() => this.handleSubmit(false, this.DocumentId)} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar back close title titleText='Exportation du document...' />
+                <LoadDialog loading={loadingConversion} loadingConversion message="Conversion du document en cours. Veuillez patienter..." />
+            </View>
+        )
 
-                {loading ?
-                    <View style={{ flex: 1 }}>
-                        <Loading size='small' style={{ justifyContent: 'flex-start', marginTop: 15 }} />
-                    </View>
-                    :
-                    <View style={{ flex: 1 }}>
-                        {this.isEdit && attachment && !attachment.pending &&
-                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, false)}>
-                                <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
-                            </Button>
-                        }
+        else return (
+            <View style={styles.container}>
+                <Appbar
+                    back close title
+                    titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'}
+                    loading={loading}
+                    check={this.isEdit ? canUpdate && !loading : !loading}
+                    handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
+                    del={canDelete && this.isEdit && !loading}
+                    handleDelete={this.showAlert} />
 
-                        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
+                <View style={{ flex: 1 }}>
+                    {this.isEdit && attachment && !attachment.pending &&
+                        <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, false)}>
+                            <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
+                        </Button>
+                    }
 
-                            <Card style={{ margin: 5 }}>
-                                <Card.Content>
-                                    <Title>Informations générales</Title>
+                    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
 
-                                    <MyInput
-                                        label="Numéro du document"
-                                        returnKeyType="done"
-                                        value={this.DocumentId}
-                                        editable={false}
-                                        disabled
-                                    />
+                        <Card style={{ margin: 5 }}>
+                            <Card.Content>
+                                <Title>Informations générales</Title>
+
+                                <MyInput
+                                    label="Numéro du document"
+                                    returnKeyType="done"
+                                    value={this.DocumentId}
+                                    editable={false}
+                                    disabled
+                                />
 
 
-                                    {type !== '' && <MyInput
-                                        label="Type"
-                                        returnKeyType="done"
-                                        value={type}
-                                        editable={false}
-                                        disabled
-                                    />}
+                                {type !== '' && <MyInput
+                                    label="Type"
+                                    returnKeyType="done"
+                                    value={type}
+                                    editable={false}
+                                    disabled
+                                />}
 
-                                    {/* <Picker
+                                {/* <Picker
                                         returnKeyType="next"
                                         value={type}
                                         error={!!type.error}
@@ -740,129 +773,127 @@ class UploadDocument extends Component {
                                         enabled={canUpdate}
                                     /> */}
 
-                                    {this.renderAttachment(canUpdate)}
-                                    {this.renderPopUpMenuPdfSelection()}
-                                    {this.renderModalPdfOptions()}
+                                {this.renderAttachment(canUpdate)}
+                                {this.renderPopUpMenuPdfSelection()}
+                                {this.renderModalPdfOptions()}
+
+                                <MyInput
+                                    label="Nom du document"
+                                    returnKeyType="done"
+                                    value={name.value}
+                                    onChangeText={text => updateField(this, name, text)}
+                                    error={!!name.error}
+                                    errorText={name.error}
+                                    multiline={true}
+                                    editable={canUpdate}
+                                />
+
+                                <MyInput
+                                    label="Description"
+                                    returnKeyType="done"
+                                    value={description.value}
+                                    onChangeText={text => updateField(this, description, text)}
+                                    error={!!description.error}
+                                    errorText={description.error}
+                                    multiline={true}
+                                    editable={canUpdate}
+                                />
+
+                                <Picker
+                                    returnKeyType="next"
+                                    value={state}
+                                    error={!!state.error}
+                                    errorText={state.error}
+                                    selectedValue={state}
+                                    onValueChange={(state) => this.setState({ state })}
+                                    title="Etat"
+                                    elements={states}
+                                    enabled={canUpdate}
+                                />
+
+                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}>
+                                    <MyInput
+                                        label="Projet concerné"
+                                        value={project.name}
+                                        error={!!projectError}
+                                        errorText={projectError}
+                                        editable={false} />
+                                </TouchableOpacity>
+                            </Card.Content>
+                        </Card>
+
+                        {this.isEdit &&
+                            <Card style={{ margin: 5 }}>
+                                <Card.Content>
+                                    <Title style={{ marginBottom: 15 }}>Activité</Title>
+
+                                    {signatures !== [] && this.renderSignees()}
 
                                     <MyInput
-                                        label="Nom du document"
+                                        label="Date de création"
                                         returnKeyType="done"
-                                        value={name.value}
-                                        onChangeText={text => updateField(this, name, text)}
-                                        error={!!name.error}
-                                        errorText={name.error}
-                                        multiline={true}
-                                        editable={canUpdate}
+                                        value={createdAt}
+                                        editable={false}
                                     />
 
-
-                                    <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}>
+                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
                                         <MyInput
-                                            label="Choisir un projet"
-                                            value={project.name}
-                                            error={!!projectError}
-                                            errorText={projectError}
-                                            editable={false} />
+                                            label="Crée par"
+                                            returnKeyType="done"
+                                            value={createdBy.fullName}
+                                            editable={false}
+                                            link
+                                        />
                                     </TouchableOpacity>
 
                                     <MyInput
-                                        label="Description"
+                                        label="Dernière mise à jour"
                                         returnKeyType="done"
-                                        value={description.value}
-                                        onChangeText={text => updateField(this, description, text)}
-                                        error={!!description.error}
-                                        errorText={description.error}
-                                        multiline={true}
-                                        editable={canUpdate}
+                                        value={editedAt}
+                                        editable={false}
                                     />
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={state}
-                                        error={!!state.error}
-                                        errorText={state.error}
-                                        selectedValue={state}
-                                        onValueChange={(state) => this.setState({ state })}
-                                        title="Etat"
-                                        elements={states}
-                                        enabled={canUpdate}
-                                    />
+                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
+                                        <MyInput
+                                            label="Dernier intervenant"
+                                            returnKeyType="done"
+                                            value={editedBy.fullName}
+                                            editable={false}
+                                            link
+                                        />
+                                    </TouchableOpacity>
+
                                 </Card.Content>
                             </Card>
+                        }
 
-                            {this.isEdit &&
-                                <Card style={{ margin: 5 }}>
-                                    <Card.Content>
-                                        <Title style={{ marginBottom: 15 }}>Activité</Title>
+                    </ScrollView>
 
-                                        {signatures !== [] && this.renderSignees()}
-
-                                        <MyInput
-                                            label="Date de création"
-                                            returnKeyType="done"
-                                            value={createdAt}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
-                                            <MyInput
-                                                label="Crée par"
-                                                returnKeyType="done"
-                                                value={createdBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                        <MyInput
-                                            label="Dernière mise à jour"
-                                            returnKeyType="done"
-                                            value={editedAt}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
-                                            <MyInput
-                                                label="Dernier intervenant"
-                                                returnKeyType="done"
-                                                value={editedBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                    </Card.Content>
-                                </Card>
-                            }
-
-                        </ScrollView>
-
-                        <View style={styles.footerContainer}>
-                            {type === 'Devis' && order ? //Document type is "Devis" & Devis was generated from an order form
-                                <Button
-                                    mode="contained"
-                                    style={[styles.signButton, { width: constants.ScreenWidth * 0.55, backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
-                                    onPress={() => this.convertProposalToBill(isConnected, true)}>
-                                    <Text style={[theme.customFontMSmedium.caption, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>Convertir en facture</Text>
-                                </Button>
-                                :
-                                <View />
-                            }
-
+                    <View style={styles.footerContainer}>
+                        {type === 'Devis' && order ? //Document type is "Devis" & Devis was generated from an order form
                             <Button
                                 mode="contained"
-                                style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
-                                onPress={() => this.navigateToSignature(isConnected, true)}>
-                                <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>Signer</Text>
+                                style={[styles.signButton, { width: constants.ScreenWidth * 0.55, backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
+                                onPress={() => this.convertProposalToBill(isConnected, true)}>
+                                <Text style={[theme.customFontMSmedium.caption, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>Convertir en facture</Text>
                             </Button>
-                        </View>
+                            :
+                            <View />
+                        }
 
-                        <Toast
-                            message={toastMessage}
-                            type={toastType}
-                            onDismiss={() => this.setState({ toastMessage: '' })} />
+                        <Button
+                            mode="contained"
+                            style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
+                            onPress={() => this.navigateToSignature(isConnected, true)}>
+                            <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>Signer</Text>
+                        </Button>
                     </View>
-                }
+
+                    <Toast
+                        message={toastMessage}
+                        type={toastType}
+                        onDismiss={() => this.setState({ toastMessage: '' })} />
+                </View>
 
             </View>
         )

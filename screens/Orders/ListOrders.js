@@ -94,7 +94,7 @@ class ListOrders extends Component {
         if (this.isRoot)
             this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
 
-        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, onGoBack: this.props.navigation.getParam('onGoBack', null) })
+        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
     render() {

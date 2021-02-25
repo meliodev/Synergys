@@ -377,10 +377,11 @@ class Signature extends Component {
                     //     height: firstPage.getWidth() * 0.25 * 0.56,
                     // })
 
-                    firstPage.drawText(`Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`, {
+                    firstPage.drawText(` Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`, {
                         x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
                         y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight * 0.005,
-                        size: 12,
+                        size: 10,
+                        lineHeight: 10,
                         //font: helveticaFont,
                         color: rgb(0, 0, 0),
                     })
