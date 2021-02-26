@@ -3,10 +3,14 @@ import { View, StyleSheet, Text, TouchableOpacity } from "react-native"
 import { Appbar as appbar } from 'react-native-paper'
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Searchbar } from "react-native-paper";
 import * as theme from "../core/theme";
 import { constants } from '../core/constants'
 import { withNavigation } from 'react-navigation'
+
+import FontAwesome, { SolidIcons, RegularIcons, BrandIcons } from 'react-native-fontawesome';
 
 const SearchBar = ({
     close,
@@ -22,11 +26,10 @@ const SearchBar = ({
 
     const renderLeftIcon = () => {
 
-
         if (showBar)
             return (
                 <TouchableOpacity onPress={handleSearch} style={{ marginHorizontal: 10 }} >
-                    <MaterialCommunityIcons name="arrow-left" size={24} color='#fff' />
+                    <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.secondary} />
                 </TouchableOpacity>
             )
 
@@ -34,26 +37,25 @@ const SearchBar = ({
             if (close)
                 return (
                     <TouchableOpacity onPress={navBack} style={{ marginHorizontal: 10 }} >
-                        <MaterialCommunityIcons name="close" size={24} color='#fff' />
+                        <MaterialCommunityIcons name="close" size={24} color={theme.colors.secondary} />
                     </TouchableOpacity>
                 )
 
             else return (
                 <TouchableOpacity onPress={showMenu} style={{ marginHorizontal: 10 }} >
-                    <MaterialCommunityIcons name="menu" size={24} color='#fff' />
+                    <FontAwesome icon={SolidIcons.smile} />
+                    {/* <SimpleLineIcons name="menu" size={24} color={theme.colors.secondary} /> */}
                 </TouchableOpacity>
             )
         }
-
-
     }
 
     return (
-        <appbar.Header style={[{ backgroundColor: theme.colors.primary, elevation: 0 }, style]}>
+        <appbar.Header style={[{ backgroundColor: theme.colors.appBar, elevation: 0 }, style]}>
 
             {renderLeftIcon()}
 
-            {title && <appbar.Content title={titleText} titleStyle={theme.customFontMSmedium.title} />}
+            {title && <appbar.Content title={titleText} titleStyle={theme.robotoLight.h3} />}
 
             {check && !showBar && <appbar.Action icon="check" onPress={handleSubmit} />}
             {showBar &&
@@ -71,7 +73,7 @@ const SearchBar = ({
                 />
             }
             {!showBar &&
-                <appbar.Action icon="magnify" onPress={handleSearch} style={[{ position: 'absolute', right: 0 }, magnifyStyle]} />
+                <AntDesign name="search1" size={20} onPress={handleSearch} style={[{ position: 'absolute', right: 15 }, magnifyStyle]} />
             }
 
         </appbar.Header>

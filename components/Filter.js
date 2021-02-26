@@ -44,16 +44,16 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
     return (
         <PopupMenu renderer={SlideInMenu} opened={opened} onBackdropPress={toggleFilter} style={menuStyle}>
-            <MenuTrigger style={{ paddingHorizontal: constants.ScreenWidth * 0.033 }} onPress={toggleFilter}>
+            <MenuTrigger style={{ padding: constants.ScreenWidth * 0.033, paddingRight: 0  }} onPress={toggleFilter}>
                 <MaterialCommunityIcons
                     name='filter'
-                    size={24}
-                    color={iconColor || theme.colors.secondary}
+                    size={26}
+                    color={iconColor || theme.colors.primary}
                 />
             </MenuTrigger>
 
             <MenuOptions optionsContainerStyle={{ borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, elevation: 10 }}>
-                <View style={{ backgroundColor: theme.colors.secondary, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 10 }}>
+                <View style={{ backgroundColor: theme.colors.primary, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 10 }}>
                     <Text style={[theme.customFontMSsemibold.body, { color: '#fff' }]}>Filtrer par</Text>
                 </View>
 
@@ -96,10 +96,10 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     }
 
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Button mode="outlined" onPress={resetFilter} style={{ width: constants.ScreenWidth * 0.45 }} outlinedColor={theme.colors.secondary}>
+                        <Button mode="outlined" onPress={resetFilter} style={{ width: constants.ScreenWidth * 0.45 }} outlinedColor={theme.colors.primary}>
                             Réinitialiser
                         </Button>
-                        <Button mode="contained" onPress={toggleFilter} style={{ width: constants.ScreenWidth * 0.4, backgroundColor: theme.colors.secondary }} >
+                        <Button mode="contained" onPress={toggleFilter} style={{ width: constants.ScreenWidth * 0.4, backgroundColor: theme.colors.primary }} >
                             Confirmer
                         </Button>
                     </View>

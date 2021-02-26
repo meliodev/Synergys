@@ -8,6 +8,7 @@ const MyFAB = ({ style, onPress, icon, ...props }) => (
     <FAB
         style={[styles.fab, style]}
         icon={icon || "plus"}
+        color= {theme.colors.white}
         iconSize = {constants.ScreenWidth*0.06}
         onPress={onPress} />
 )
@@ -15,16 +16,16 @@ const MyFAB = ({ style, onPress, icon, ...props }) => (
 const styles = StyleSheet.create({
     fab: {
         flex: 1,
-        backgroundColor: '#007f00',
+        backgroundColor: theme.colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
         position: 'absolute',
-        margin: 16,
+        margin: 15,
         right: 0,
         bottom: 0,
         width: constants.ScreenWidth*0.15,
         height: constants.ScreenWidth*0.15,
-        borderRadius: 100,
+        borderRadius: constants.ScreenWidth*0.15/2,
     }
 });
 

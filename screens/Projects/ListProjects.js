@@ -139,22 +139,23 @@ class ListProjects extends Component {
                     :
                     <View style={styles.container}>
                         {projectsCount > 0 &&
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.gray50 }}>
+                            <View style={styles.header}>
 
-                                <List.Subheader>{filterCount} projet{s}</List.Subheader>
+                                <Text style={theme.robotoRegular.h2}>{filterCount} projet{s}</Text>
 
-                                {this.isRoot && <Filter
-                                    main={this}
-                                    opened={filterOpened}
-                                    toggleFilter={() => toggleFilter(this)}
-                                    setFilter={(field, value) => setFilter(this, field, value)}
-                                    resetFilter={() => this.setState({ step: '', state: '', client: { id: '', fullName: '' } })}
-                                    options={[
-                                        { id: 0, type: 'picker', title: "Étape", values: steps, value: step, field: 'step' },
-                                        { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                                        { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
-                                    ]}
-                                />}
+                                {this.isRoot &&
+                                    <Filter
+                                        main={this}
+                                        opened={filterOpened}
+                                        toggleFilter={() => toggleFilter(this)}
+                                        setFilter={(field, value) => setFilter(this, field, value)}
+                                        resetFilter={() => this.setState({ step: '', state: '', client: { id: '', fullName: '' } })}
+                                        options={[
+                                            { id: 0, type: 'picker', title: "Étape", values: steps, value: step, field: 'step' },
+                                            { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
+                                            { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
+                                        ]}
+                                    />}
                             </View>
                         }
 
@@ -164,7 +165,7 @@ class ListProjects extends Component {
                                 data={this.filteredProjects}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderProject(item)}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: constants.ScreenWidth * 0.06 }} />
                             :
                             <EmptyList iconName='alpha-p-box' header='Liste des projets' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
                         }
@@ -181,7 +182,17 @@ class ListProjects extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.background
     },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: constants.ScreenHeight * 0.01,
+        paddingHorizontal: constants.ScreenWidth * 0.06,
+        marginBottom: constants.ScreenWidth * 0.03,
+        backgroundColor: theme.colors.gray_light
+    }
 })
 
 const mapStateToProps = (state) => {

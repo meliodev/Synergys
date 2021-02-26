@@ -3,11 +3,13 @@ import { DefaultTheme } from 'react-native-paper'
 
 const colors = {
   statusbar: "#013220",
-  background: '#eeeeee',
-  primary: "#046307",
-  secondary: "#4CAF50",
+  background: '#ffffff', //new
+  primary: "#25D366", //new
+  secondary: "#1B2331",
+  surface: '#F5F5F5',
+  appBar: '#F8F8F9',
   //tertiary: "#4CAF50",
-  // tertiary: "#7ab600",
+  //tertiary: "#7ab600",
   surface: DefaultTheme.colors.surface,
   error: DefaultTheme.colors.error,
   disabled: DefaultTheme.colors.disabled,
@@ -17,10 +19,13 @@ const colors = {
   success: "#00B386",
   accent: "#F3534A",
   black: "#323643",
-  white: "#FFFFFF",
+  white: "#FFFFFF", //new
+  gray_light: "#EBEBEB", //new
+  gray_medium: "#BCBCBC", //new
+  gray_dark: "#8D8D8D", //new
   gray: "#BDBDBD",
   graySilver: '#C0C0C0',
-  gray_light: '#eaeaec',
+  // gray_light: '#eaeaec',
   gray50: '#ECEFF1',
   gray100: '#CFD8DC',
   gray2: "#B0BEC5",
@@ -88,8 +93,9 @@ const fonts = {
     fontSize: sizes.caption,
     fontWeight: 'bold',
   },
-};
+}
 
+//MontSerrat
 const customFontMSbold = {
   h1: {
     fontSize: sizes.h1,
@@ -119,7 +125,7 @@ const customFontMSbold = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-Bold',
   },
-};
+}
 
 const customFontMSsemibold = {
   h1: {
@@ -150,7 +156,7 @@ const customFontMSsemibold = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-SemiBold',
   },
-};
+}
 
 const customFontMSmedium = {
   h1: {
@@ -181,7 +187,7 @@ const customFontMSmedium = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-Medium',
   },
-};
+}
 
 const customFontMSregular = {
   h1: {
@@ -212,9 +218,200 @@ const customFontMSregular = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-Regular',
   },
-};
+}
 
-export { colors, sizes, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold };
+//Roboto
+const robotoBold = {
+  h1: {
+    color: colors.secondary,
+    fontSize: sizes.h1,
+    fontFamily: 'Montserrat-Bold',
+  },
+  h2: {
+    color: colors.secondary,
+    fontSize: sizes.h2,
+    fontFamily: 'Montserrat-Bold',
+  },
+  h3: {
+    color: colors.secondary,
+    fontSize: sizes.h3,
+    fontFamily: 'Montserrat-Bold',
+  },
+  header: {
+    color: colors.secondary,
+    fontSize: sizes.header,
+    fontFamily: 'Montserrat-Bold',
+  },
+  title: {
+    color: colors.secondary,
+    fontSize: sizes.title,
+    fontFamily: 'Montserrat-Bold',
+  },
+  body: {
+    color: colors.secondary,
+    fontSize: sizes.body,
+    fontFamily: 'Montserrat-Bold',
+  },
+  caption: {
+    color: colors.secondary,
+    fontSize: sizes.caption,
+    fontFamily: 'Montserrat-Bold',
+  },
+}
+
+const robotoSemibold = {
+  h1: {
+    color: colors.secondary,
+    fontSize: sizes.h1,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  h2: {
+    color: colors.secondary,
+    fontSize: sizes.h2,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  h3: {
+    color: colors.secondary,
+    fontSize: sizes.h3,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  header: {
+    color: colors.secondary,
+    fontSize: sizes.header,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  title: {
+    color: colors.secondary,
+    fontSize: sizes.title,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  body: {
+    color: colors.secondary,
+    fontSize: sizes.body,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+  caption: {
+    color: colors.secondary,
+    fontSize: sizes.caption,
+    fontFamily: 'Montserrat-SemiBold',
+  },
+}
+
+const robotoMedium = {
+  h1: {
+    color: colors.secondary,
+    fontSize: sizes.h1,
+    fontFamily: 'Montserrat-Medium',
+  },
+  h2: {
+    color: colors.secondary,
+    fontSize: sizes.h2,
+    fontFamily: 'Montserrat-Medium',
+  },
+  h3: {
+    color: colors.secondary,
+    fontSize: sizes.h3,
+    fontFamily: 'Montserrat-Medium',
+  },
+  header: {
+    color: colors.secondary,
+    fontSize: sizes.header,
+    fontFamily: 'Montserrat-Medium',
+  },
+  title: {
+    color: colors.secondary,
+    fontSize: sizes.title,
+    fontFamily: 'Montserrat-Medium',
+  },
+  body: {
+    color: colors.secondary,
+    fontSize: sizes.body,
+    fontFamily: 'Montserrat-Medium',
+  },
+  caption: {
+    color: colors.secondary,
+    fontSize: sizes.caption,
+    fontFamily: 'Montserrat-Medium',
+  },
+}
+
+const robotoRegular = {
+  h1: {
+    color: colors.secondary,
+    fontSize: sizes.h1,
+    fontFamily: 'Montserrat-Regular',
+  },
+  h2: {
+    color: colors.secondary,
+    fontSize: sizes.h2,
+    fontFamily: 'Montserrat-Regular',
+  },
+  h3: {
+    color: colors.secondary,
+    fontSize: sizes.h3,
+    fontFamily: 'Montserrat-Regular',
+  },
+  header: {
+    color: colors.secondary,
+    fontSize: sizes.header,
+    fontFamily: 'Montserrat-Regular',
+  },
+  title: {
+    color: colors.secondary,
+    fontSize: sizes.title,
+    fontFamily: 'Montserrat-Regular',
+  },
+  body: {
+    color: colors.secondary,
+    fontSize: sizes.body,
+    fontFamily: 'Montserrat-Regular',
+  },
+  caption: {
+    color: colors.secondary,
+    fontSize: sizes.caption,
+    fontFamily: 'Montserrat-Regular',
+  },
+}
+
+const robotoLight = {
+  h1: {
+    color: colors.secondary,
+    fontSize: sizes.h1,
+    fontFamily: 'Roboto-Light',
+  },
+  h2: {
+    color: colors.secondary,
+    fontSize: sizes.h2,
+    fontFamily: 'Roboto-Light',
+  },
+  h3: {
+    color: colors.secondary,
+    fontSize: sizes.h3,
+    fontFamily: 'Roboto-Light',
+  },
+  header: {
+    color: colors.secondary,
+    fontSize: sizes.header,
+    fontFamily: 'Roboto-Light',
+  },
+  title: {
+    color: colors.secondary,
+    fontSize: sizes.title,
+    fontFamily: 'Roboto-Light',
+  },
+  body: {
+    color: colors.secondary,
+    fontSize: sizes.body,
+    fontFamily: 'Roboto-Light',
+  },
+  caption: {
+    color: colors.secondary,
+    fontSize: sizes.caption,
+    fontFamily: 'Roboto-Light',
+  },
+}
+
+export { colors, sizes, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, robotoBold, robotoSemibold, robotoMedium, robotoRegular, robotoLight }
 
 
 

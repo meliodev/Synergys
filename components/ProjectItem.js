@@ -60,18 +60,18 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     }
 
     return (
-        <Card style={{ margin: 10, borderRadius: 15 }} onPress={onPress}>
+        <Card style={{ marginVertical: constants.ScreenWidth * 0.03, borderRadius: 15 }} onPress={onPress}>
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(project.step)} style={[styles.linearGradient, styles.stepContainer]}>
-                <Text style={[theme.customFontMSsemibold.header, { color: '#fff' }]}>{project.step}</Text>
+                <Text style={[theme.robotoRegular.body, { color: theme.colors.white }]}>{project.step}</Text>
             </LinearGradient>
 
             <Card.Content style={{ flex: 1, flexDirection: 'row', paddingTop: 10 }}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
-                    <Title style={[theme.customFontMSbold.body]} numberOfLines={1}>{project.name}</Title>
-                    <Paragraph style={[theme.customFontMSmedium.caption, { marginBottom: 20 }]} numberOfLines={1}>{project.description}</Paragraph>
+                    <Title style={[theme.robotoRegular.header]} numberOfLines={1}>{project.name}</Title>
+                    <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark, marginBottom: 20 }]} numberOfLines={1}>{project.description}</Paragraph>
 
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                        <Paragraph numberOfLines={1} style={theme.customFontMSmedium.caption}>à <Paragraph style={[theme.customFontMSsemibold.caption]}>{project.address.description}</Paragraph></Paragraph>
+                        <Paragraph numberOfLines={2} style={theme.robotoRegular.body}>à <Paragraph style={[theme.customFontMSsemibold.caption]}>{project.address.description}</Paragraph></Paragraph>
                         <Paragraph numberOfLines={1} style={theme.customFontMSmedium.caption}>chez <Paragraph style={[theme.customFontMSsemibold.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id })}>{project.client.fullName}</Paragraph></Paragraph>
                     </View>
 
