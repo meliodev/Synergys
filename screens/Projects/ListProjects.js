@@ -4,6 +4,7 @@ import { List, Card } from 'react-native-paper';
 import { connect } from 'react-redux'
 
 import SearchBar from '../../components/SearchBar'
+import Header from '../../components/Header'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
 import ProjectItem from '../../components/ProjectItem'
@@ -139,8 +140,7 @@ class ListProjects extends Component {
                     :
                     <View style={styles.container}>
                         {projectsCount > 0 &&
-                            <View style={styles.header}>
-
+                            <Header>
                                 <Text style={theme.robotoRegular.h2}>{filterCount} projet{s}</Text>
 
                                 {this.isRoot &&
@@ -156,7 +156,7 @@ class ListProjects extends Component {
                                             { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
                                         ]}
                                     />}
-                            </View>
+                            </Header>
                         }
 
                         {projectsCount > 0 ?
@@ -184,15 +184,6 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.background
     },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: constants.ScreenHeight * 0.01,
-        paddingHorizontal: constants.ScreenWidth * 0.06,
-        marginBottom: constants.ScreenWidth * 0.03,
-        backgroundColor: theme.colors.gray_light
-    }
 })
 
 const mapStateToProps = (state) => {

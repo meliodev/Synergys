@@ -5,17 +5,17 @@ import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
 const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled = true, ...props }) => (
-    <View style={[styles.container, { marginBottom: errorText ? 15 : 5 }]}>
+    <View style={[styles.container, containerStyle]}>
 
-        <View style={[styles.pickerContainer, containerStyle]}>
-            <Text style={styles.header}>{title}</Text>
+        <View style={[styles.pickerContainer]}>
+            <Text style={theme.robotoRegular.caption}>{title}</Text>
             <Picker style={[styles.input, style]} enabled= {enabled} {...props}>
                 {elements.map((item) => {
-                    return (<Picker.Item label={item.label} value={item.value} />)
+                    return <Picker.Item label={item.label} value={item.value} />
                 })}
             </Picker>
         </View>
-        {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
+        {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{'errorText'}</Text> : null}
 
     </View>
 
@@ -25,25 +25,24 @@ const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled =
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        marginTop: 5
+        marginVertical: 15,
     },
     pickerContainer: {
-        marginTop: 15,
-        marginBottom: 10,
-        borderBottomWidth: 0.25,
-        borderBottomColor: '#C7C7CD',
+        borderBottomWidth: StyleSheet.hairlineWidth*2,
+        borderBottomColor: theme.colors.gray_extraLight,
     },
-    header: {
+    label: {
         fontSize: 12,
         color: '#757575',
     },
     input: {
         marginLeft: -7,
         color: '#333',
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
     },
     error: {
         paddingHorizontal: 4,
+        paddingVertical: 10,
         color: theme.colors.error
     }
 });

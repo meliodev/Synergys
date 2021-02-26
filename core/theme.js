@@ -1,5 +1,6 @@
 
 import { DefaultTheme } from 'react-native-paper'
+import { constants } from './constants'
 
 const colors = {
   statusbar: "#013220",
@@ -20,6 +21,7 @@ const colors = {
   accent: "#F3534A",
   black: "#323643",
   white: "#FFFFFF", //new
+  gray_extraLight: "#F1F1F1", //new
   gray_light: "#EBEBEB", //new
   gray_medium: "#BCBCBC", //new
   gray_dark: "#8D8D8D", //new
@@ -94,6 +96,8 @@ const fonts = {
     fontWeight: 'bold',
   },
 }
+
+const padding = constants.ScreenWidth*0.06
 
 //MontSerrat
 const customFontMSbold = {
@@ -225,37 +229,37 @@ const robotoBold = {
   h1: {
     color: colors.secondary,
     fontSize: sizes.h1,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
   h2: {
     color: colors.secondary,
     fontSize: sizes.h2,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
   h3: {
     color: colors.secondary,
     fontSize: sizes.h3,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
   header: {
     color: colors.secondary,
     fontSize: sizes.header,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
   title: {
     color: colors.secondary,
     fontSize: sizes.title,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
   body: {
     color: colors.secondary,
     fontSize: sizes.body,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
   caption: {
     color: colors.secondary,
     fontSize: sizes.caption,
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Roboto-Bold',
   },
 }
 
@@ -263,37 +267,37 @@ const robotoSemibold = {
   h1: {
     color: colors.secondary,
     fontSize: sizes.h1,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
   h2: {
     color: colors.secondary,
     fontSize: sizes.h2,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
   h3: {
     color: colors.secondary,
     fontSize: sizes.h3,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
   header: {
     color: colors.secondary,
     fontSize: sizes.header,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
   title: {
     color: colors.secondary,
     fontSize: sizes.title,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
   body: {
     color: colors.secondary,
     fontSize: sizes.body,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
   caption: {
     color: colors.secondary,
     fontSize: sizes.caption,
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Roboto-SemiBold',
   },
 }
 
@@ -301,37 +305,37 @@ const robotoMedium = {
   h1: {
     color: colors.secondary,
     fontSize: sizes.h1,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
   h2: {
     color: colors.secondary,
     fontSize: sizes.h2,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
   h3: {
     color: colors.secondary,
     fontSize: sizes.h3,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
   header: {
     color: colors.secondary,
     fontSize: sizes.header,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
   title: {
     color: colors.secondary,
     fontSize: sizes.title,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
   body: {
     color: colors.secondary,
     fontSize: sizes.body,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
   caption: {
     color: colors.secondary,
     fontSize: sizes.caption,
-    fontFamily: 'Montserrat-Medium',
+    fontFamily: 'Roboto-Medium',
   },
 }
 
@@ -339,37 +343,37 @@ const robotoRegular = {
   h1: {
     color: colors.secondary,
     fontSize: sizes.h1,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
   h2: {
     color: colors.secondary,
     fontSize: sizes.h2,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
   h3: {
     color: colors.secondary,
     fontSize: sizes.h3,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
   header: {
     color: colors.secondary,
     fontSize: sizes.header,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
   title: {
     color: colors.secondary,
     fontSize: sizes.title,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
   body: {
     color: colors.secondary,
     fontSize: sizes.body,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
   caption: {
     color: colors.secondary,
     fontSize: sizes.caption,
-    fontFamily: 'Montserrat-Regular',
+    fontFamily: 'Roboto-Regular',
   },
 }
 
@@ -411,7 +415,7 @@ const robotoLight = {
   },
 }
 
-export { colors, sizes, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, robotoBold, robotoSemibold, robotoMedium, robotoRegular, robotoLight }
+export { colors, sizes, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, robotoBold, robotoSemibold, robotoMedium, robotoRegular, robotoLight }
 
 
 

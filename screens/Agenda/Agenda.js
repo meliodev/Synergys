@@ -75,6 +75,7 @@ class Agenda2 extends Component {
         this.handleFilter = this.handleFilter.bind(this)
         this.toggleTasksTab = this.toggleTasksTab.bind(this)
         this.projectFilter = this.props.navigation.getParam('projectFilter', { id: '', name: '' })
+        console.log('project filter', this.projectFilter)
 
         this.state = {
             //Settings

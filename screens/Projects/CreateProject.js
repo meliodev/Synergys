@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard } from 'react-native';
 import { TextInput } from 'react-native';
-import { Card, Title, FAB, ProgressBar, List } from 'react-native-paper'
+import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Entypo from 'react-native-vector-icons/Entypo'
@@ -10,12 +10,16 @@ import firebase from '@react-native-firebase/app'
 import ImagePicker from 'react-native-image-picker'
 import ImageView from 'react-native-image-view'
 import { SliderBox } from "react-native-image-slider-box"
+import { SolidIcons } from 'react-native-fontawesome'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
+import Header from '../../components/Header'
+import FormSection from '../../components/FormSection'
+import CustomIcon from '../../components/CustomIcon'
 import MyInput from '../../components/TextInput'
 import AddressInput from '../../components/AddressInput'
 import Picker from "../../components/Picker"
@@ -131,7 +135,7 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
-        
+
         if (this.isEdit) {
             await this.fetchProject()
             this.fetchDocuments()
@@ -144,13 +148,6 @@ class CreateProject extends Component {
         load(this, false)
     }
 
-    componentWillUnmount() {
-        if (this.isEdit) {
-            this.unsubscribeDocs && this.unsubscribeDocs()
-            this.unsubscribeAgenda && this.unsubscribeAgenda()
-            this.unsubscribeTasks && this.unsubscribeTasks()
-        }
-    }
 
     //FETCHES: #edit
     async fetchProject() {
@@ -204,7 +201,7 @@ class CreateProject extends Component {
     }
 
     fetchDocuments() {
-        this.unsubscribeDocs = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
+        db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').get().then((querysnapshot) => {
             if (querysnapshot.empty) return
 
             let documentsList = []
@@ -220,28 +217,21 @@ class CreateProject extends Component {
     }
 
     fetchTasks() {
-        this.unsubscribeAgenda = db.collection('Agenda').onSnapshot((querysnapshot) => {
-            if (querysnapshot.empty) return
+        db.collection('Agenda').where('project.id', '==', this.ProjectId).get().then((agendaSnapshot) => {
+            if (agendaSnapshot.empty) return
 
             let tasksList = []
             let taskTypes = []
-            querysnapshot.forEach(async (dateDoc) => {
-                const date = dateDoc.id
-                const query = dateDoc.ref.collection('Tasks').where('project.id', '==', this.ProjectId)
-                this.unsubscribeTasks = query.onSnapshot((tasksSnapshot) => {
-                    if (!tasksSnapshot) return
 
-                    tasksSnapshot.forEach((doc) => {
-                        const task = doc.data()
-                        task.id = doc.id
-                        task.date = dateDoc.id
-                        tasksList.push(task)
-                        taskTypes.push(task.type)
-                    })
+            agendaSnapshot.forEach(async (taskDoc) => {
+                const task = taskDoc.data()
+                task.id = taskDoc.id
+                task.date = taskDoc.dateKey
+                tasksList.push(task)
+                taskTypes.push(task.type)
 
-                    taskTypes = [...new Set(taskTypes)]
-                    this.setState({ tasksList, taskTypes })
-                })
+                taskTypes = [...new Set(taskTypes)]
+                this.setState({ tasksList, taskTypes })
             })
         })
     }
@@ -515,298 +505,301 @@ class CreateProject extends Component {
         const { isConnected } = this.props.network
 
         return (
-            <View style={styles.container}>
+            <View style={styles.mainContainer}>
                 <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 
-                <ScrollView style={styles.container}>
+                <ScrollView style={styles.dataContainer}>
 
                     {!loading &&
-                        <Card style={{ margin: 5 }}>
-                            <Card.Content>
-                                <Title>Informations générales</Title>
-                                <MyInput
-                                    label="Numéro du projet"
-                                    returnKeyType="done"
-                                    value={this.ProjectId}
-                                    editable={false}
-                                    disabled />
-
-                                <MyInput
-                                    label="Nom du projet"
-                                    returnKeyType="done"
-                                    value={name.value}
-                                    onChangeText={text => updateField(this, name, text)}
-                                    error={!!name.error}
-                                    errorText={name.error}
-                                    multiline={true}
-                                    editable={canUpdate} />
-
-                                <MyInput
-                                    label="Description"
-                                    returnKeyType="done"
-                                    value={description.value}
-                                    onChangeText={text => updateField(this, description, text)}
-                                    error={!!description.error}
-                                    errorText={description.error}
-                                    multiline={true}
-                                    editable={canUpdate} />
-
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', titleText: 'Clients' })}>
+                        <FormSection
+                            headerText='Informations générales'
+                            headerIcon={<CustomIcon icon={SolidIcons.infoCircle} />}
+                            form={
+                                <View style={{ flex: 1 }}>
                                     <MyInput
-                                        label="Client"
-                                        value={client.fullName}
-                                        error={!!clientError}
-                                        errorText={clientError}
-                                        editable={false} />
-                                </TouchableOpacity>
+                                        label="Numéro du projet"
+                                        returnKeyType="done"
+                                        value={this.ProjectId}
+                                        editable={false}
+                                        disabled />
 
-                                <AddressInput
-                                    offLine={!isConnected}
-                                    onPress={() => navigateToScreen(this, canUpdate, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
-                                    address={address}
-                                    addressError={addressError} />
+                                    <MyInput
+                                        label="Nom du projet"
+                                        returnKeyType="done"
+                                        value={name.value}
+                                        onChangeText={text => updateField(this, name, text)}
+                                        error={!!name.error}
+                                        errorText={name.error}
+                                        multiline={true}
+                                        editable={canUpdate} />
 
-                                <Picker
-                                    returnKeyType="next"
-                                    value={step}
-                                    error={!!step.error}
-                                    errorText={step.error}
-                                    selectedValue={step}
-                                    onValueChange={(step) => this.setState({ step })}
-                                    title="Étape"
-                                    elements={steps}
-                                    enabled={canUpdate} />
-
-                                <Picker
-                                    returnKeyType="next"
-                                    value={state}
-                                    error={!!state.error}
-                                    errorText={state.error}
-                                    selectedValue={state}
-                                    onValueChange={(state) => this.setState({ state })}
-                                    title="État"
-                                    elements={states}
-                                    enabled={canUpdate} />
-
-                                <View style={{ marginTop: 10 }}>
-                                    <Text style={[{ fontSize: 12, color: theme.colors.placeholder }]}>Collaborateurs</Text>
-                                    <AutoCompleteUsers
-                                        suggestions={suggestions}
-                                        tagsSelected={tagsSelected}
-                                        main={this}
-                                        placeholder="Ajouter un utilisateur"
-                                        autoFocus={false}
-                                        showInput={true}
-                                        suggestionsBellow={false}
+                                    <MyInput
+                                        label="Description"
+                                        returnKeyType="done"
+                                        value={description.value}
+                                        onChangeText={text => updateField(this, description, text)}
+                                        error={!!description.error}
+                                        errorText={description.error}
+                                        multiline={true}
                                         editable={canUpdate}
                                     />
-                                </View>
 
-                            </Card.Content>
-                        </Card>
+                                    <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', titleText: 'Clients' })}>
+                                        <MyInput
+                                            label="Client"
+                                            value={client.fullName}
+                                            error={!!clientError}
+                                            errorText={clientError}
+                                            editable={false} />
+                                    </TouchableOpacity>
+
+                                    <AddressInput
+                                        offLine={!isConnected}
+                                        onPress={() => navigateToScreen(this, canUpdate, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                        address={address}
+                                        addressError={addressError} />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={step}
+                                        error={!!step.error}
+                                        errorText={step.error}
+                                        selectedValue={step}
+                                        onValueChange={(step) => this.setState({ step })}
+                                        title="Étape"
+                                        elements={steps}
+                                        enabled={canUpdate} />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={state}
+                                        // error={!!state.error}
+                                        // errorText={state.error}
+                                        selectedValue={state}
+                                        onValueChange={(state) => this.setState({ state })}
+                                        title="État"
+                                        elements={states}
+                                        enabled={canUpdate} />
+
+                                    <View style={{ marginTop: 10 }}>
+                                        <Text style={theme.robotoRegular.caption}>Collaborateurs</Text>
+                                        <AutoCompleteUsers
+                                            suggestions={suggestions}
+                                            tagsSelected={tagsSelected}
+                                            main={this}
+                                            placeholder="Ajouter un utilisateur"
+                                            autoFocus={false}
+                                            showInput={true}
+                                            suggestionsBellow={false}
+                                            editable={canUpdate}
+                                        />
+                                    </View>
+                                </View>
+                            } />
                     }
 
                     {!loading &&
-                        <Card style={{ margin: 5 }}>
-                            <Card.Content>
-                                <Title style={{ marginBottom: 15 }}>Bloc Notes</Title>
-                                <TextInput
-                                    underlineColorAndroid="transparent"
-                                    placeholder="Rapportez des notes utiles..."
-                                    placeholderTextColor="grey"
-                                    numberOfLines={7}
-                                    multiline={true}
-                                    onChangeText={text => updateField(this, note, text)}
-                                    value={note.value}
-                                    style={styles.note}
-                                    autoCapitalize='sentences'
-                                    editable={canUpdate} />
-                            </Card.Content>
-                        </Card>
+                        <FormSection
+                            headerText='Bloc Notes'
+                            headerIcon={<CustomIcon icon={SolidIcons.bookOpen} />}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    <TextInput
+                                        underlineColorAndroid="transparent"
+                                        placeholder="Rapportez des notes utiles..."
+                                        placeholderTextColor="grey"
+                                        numberOfLines={7}
+                                        multiline={true}
+                                        onChangeText={text => updateField(this, note, text)}
+                                        value={note.value}
+                                        style={styles.note}
+                                        autoCapitalize='sentences'
+                                        editable={canUpdate} />
+                                </View>
+                            } />
                     }
 
                     {!loading && this.isEdit &&
-                        <Card style={{ margin: 5 }}>
-                            <Card.Content>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Title>Tâches</Title>
+                        <FormSection
+                            headerText='Tâches'
+                            headerIcon={<CustomIcon icon={SolidIcons.tasks} />}
+                            form={
+                                <View style={{ flex: 1 }}>
                                     <Text
                                         onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
-                                        style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Planning du projet</Text>
+                                        style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Voire le planning du projet</Text>
+
+                                    <List.AccordionGroup
+                                        expandedId={expandedTaskId}
+                                        onAccordionPress={(expandedId) => {
+                                            if (expandedTaskId === expandedId)
+                                                this.setState({ expandedTaskId: '' })
+                                            else
+                                                this.setState({ expandedTaskId: expandedId })
+                                        }}>
+                                        {taskTypes.map((type) => {
+                                            let filteredTasks = tasksList.filter((task) => task.type === type)
+
+                                            return (
+                                                <List.Accordion showArrow title={type} id={type}>
+                                                    {this.renderTasks(filteredTasks)}
+                                                </List.Accordion>
+                                            )
+                                        })}
+                                    </List.AccordionGroup>
                                 </View>
-
-                                <List.AccordionGroup
-                                    expandedId={expandedTaskId}
-                                    onAccordionPress={(expandedId) => {
-                                        if (expandedTaskId === expandedId)
-                                            this.setState({ expandedTaskId: '' })
-                                        else
-                                            this.setState({ expandedTaskId: expandedId })
-                                    }}>
-                                    {taskTypes.map((type) => {
-                                        let filteredTasks = tasksList.filter((task) => task.type === type)
-
-                                        return (
-                                            <List.Accordion showArrow title={type} id={type}>
-                                                {this.renderTasks(filteredTasks)}
-                                            </List.Accordion>
-                                        )
-                                    })}
-                                </List.AccordionGroup>
-
-                            </Card.Content>
-                        </Card>
+                            } />
                     }
 
                     {!loading && this.isEdit &&
-                        <Card style={{ margin: 5 }}>
-                            <Card.Content>
-                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <Title>Documents</Title>
+                        <FormSection
+                            headerText='Documents'
+                            headerIcon={<CustomIcon icon={SolidIcons.folder} />}
+                            form={
+                                <View style={{ flex: 1 }}>
                                     {canCreateDocument && <Text onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })} style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Ajouter un document</Text>}
+
+                                    <List.AccordionGroup
+                                        expandedId={this.state.expandedId}
+                                        onAccordionPress={(expandedId) => {
+                                            if (this.state.expandedId === expandedId)
+                                                this.setState({ expandedId: '' })
+                                            else
+                                                this.setState({ expandedId })
+                                        }}>
+                                        {documentTypes.map((type) => {
+                                            let filteredDocuments = documentsList.filter((doc) => doc.type === type)
+
+                                            return (
+                                                <List.Accordion showArrow title={type} id={type}>
+                                                    {this.renderAttachments(filteredDocuments, 'pdf', false)}
+                                                </List.Accordion>
+                                            )
+                                        })}
+                                    </List.AccordionGroup>
                                 </View>
-
-                                <List.AccordionGroup
-                                    expandedId={this.state.expandedId}
-                                    onAccordionPress={(expandedId) => {
-                                        if (this.state.expandedId === expandedId)
-                                            this.setState({ expandedId: '' })
-                                        else
-                                            this.setState({ expandedId })
-                                    }}>
-                                    {documentTypes.map((type) => {
-                                        let filteredDocuments = documentsList.filter((doc) => doc.type === type)
-
-                                        return (
-                                            <List.Accordion showArrow title={type} id={type}>
-                                                {this.renderAttachments(filteredDocuments, 'pdf', false)}
-                                            </List.Accordion>
-                                        )
-                                    })}
-                                </List.AccordionGroup>
-
-                            </Card.Content>
-                        </Card>
+                            } />
                     }
 
                     {isConnected &&
-                        <Card style={{ paddingBottom: 20, margin: 5 }}>
-                            <Card.Content>
-                                {!loading &&
-                                    <View>
-                                        <Title style={{ marginBottom: 15 }}>Photos et plan du lieu</Title>
-                                    </View>
-                                }
-                                {imagesView.length > 0 &&
-                                    <ImageView
-                                        images={imagesView}
-                                        imageIndex={0}
-                                        onImageChange={(imageIndex) => this.setState({ imageIndex: imageIndex })}
-                                        isVisible={this.state.isImageViewVisible}
-                                        onClose={() => this.setState({ isImageViewVisible: false })}
-                                        renderFooter={(currentImage) => (
-                                            <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
-                                                <TouchableOpacity
-                                                    style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }}
-                                                    onPress={() => this.handleDeleteImage(false, this.state.imageIndex)}>
-                                                    <MaterialCommunityIcons name='delete' size={24} color='#fff' />
-                                                </TouchableOpacity>
-                                            </View>)}
-                                    />
-                                }
-                            </Card.Content>
+                        <FormSection
+                            headerText='Photos et plan du lieu'
+                            headerIcon={<CustomIcon icon={SolidIcons.image} />}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    {imagesView.length > 0 &&
+                                        <ImageView
+                                            images={imagesView}
+                                            imageIndex={0}
+                                            onImageChange={(imageIndex) => this.setState({ imageIndex: imageIndex })}
+                                            isVisible={this.state.isImageViewVisible}
+                                            onClose={() => this.setState({ isImageViewVisible: false })}
+                                            renderFooter={(currentImage) => (
+                                                <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
+                                                    <TouchableOpacity
+                                                        style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }}
+                                                        onPress={() => this.handleDeleteImage(false, this.state.imageIndex)}>
+                                                        <MaterialCommunityIcons name='delete' size={24} color='#fff' />
+                                                    </TouchableOpacity>
+                                                </View>)}
+                                        />
+                                    }
 
-                            {!loading &&
-                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                                    {imagesCarousel.length > 0 &&
-                                        <SliderBox
-                                            images={imagesCarousel}
-                                            sliderBoxHeight={200}
-                                            onCurrentImagePressed={index => this.setState({ imageIndex: index, isImageViewVisible: true })}
-                                            dotColor={theme.colors.secondary}
-                                            inactiveDotColor="gray"
-                                            paginationBoxVerticalPadding={20}
-                                            //autoplay
-                                            circleLoop
-                                            resizeMethod={'resize'}
-                                            resizeMode={'cover'}
-                                            paginationBoxStyle={{
-                                                position: "absolute",
-                                                bottom: 0,
-                                                padding: 0,
-                                                alignItems: "center",
-                                                alignSelf: "center",
-                                                justifyContent: "center",
-                                                paddingVertical: 10
-                                            }}
-                                            dotStyle={{
-                                                width: 10,
-                                                height: 10,
-                                                borderRadius: 5,
-                                                marginHorizontal: 0,
-                                                padding: 0,
-                                                margin: 0,
-                                                backgroundColor: "rgba(128, 128, 128, 0.92)"
-                                            }}
-                                            ImageComponentStyle={{ borderRadius: 10, width: '95%', marginTop: 5 }}
-                                            imageLoadingColor="#2196F3"
-                                        //onPressDelete={(currentImage) => this.handleDeleteImage(false, currentImage)}
-                                        />}
+                                    {!loading &&
+                                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                                            {imagesCarousel.length > 0 &&
+                                                <SliderBox
+                                                    images={imagesCarousel}
+                                                    sliderBoxHeight={200}
+                                                    onCurrentImagePressed={index => this.setState({ imageIndex: index, isImageViewVisible: true })}
+                                                    dotColor={theme.colors.secondary}
+                                                    inactiveDotColor="gray"
+                                                    paginationBoxVerticalPadding={20}
+                                                    //autoplay
+                                                    circleLoop
+                                                    resizeMethod={'resize'}
+                                                    resizeMode={'cover'}
+                                                    paginationBoxStyle={{
+                                                        position: "absolute",
+                                                        bottom: 0,
+                                                        padding: 0,
+                                                        alignItems: "center",
+                                                        alignSelf: "center",
+                                                        justifyContent: "center",
+                                                        paddingVertical: 10
+                                                    }}
+                                                    dotStyle={{
+                                                        width: 10,
+                                                        height: 10,
+                                                        borderRadius: 5,
+                                                        marginHorizontal: 0,
+                                                        padding: 0,
+                                                        margin: 0,
+                                                        backgroundColor: "rgba(128, 128, 128, 0.92)"
+                                                    }}
+                                                    ImageComponentStyle={{ borderRadius: 10, width: '95%', marginTop: 5 }}
+                                                    imageLoadingColor="#2196F3"
+                                                //onPressDelete={(currentImage) => this.handleDeleteImage(false, currentImage)}
+                                                />}
+                                        </View>
+                                    }
+
+
+                                    {this.renderAttachments(attachments, 'image', true)}
+
+                                    {canUpdate && !loading &&
+                                        <Text
+                                            onPress={this.pickImage}
+                                            style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Ajouter une photo</Text>
+                                    }
+
                                 </View>
-                            }
-
-                            {this.renderAttachments(attachments, 'image', true)}
-
-                            {canUpdate && !loading &&
-                                <TouchableOpacity onPress={this.pickImage} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 15, marginTop: 15 }}>
-                                    <Entypo name='camera' color={theme.colors.primary} size={19} />
-                                    <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary, textAlign: 'center', marginLeft: 10 }]}>Ajouter une photo</Text>
-                                </TouchableOpacity>
-                            }
-
-                        </Card>
+                            } />
                     }
 
                     {!loading && this.isEdit &&
-                        <Card style={{ margin: 5 }}>
-                            <Card.Content>
-                                <Title>Activité</Title>
-                                <MyInput
-                                    label="Date de création"
-                                    returnKeyType="done"
-                                    value={createdAt}
-                                    editable={false}
-                                />
-
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
+                        <FormSection
+                            headerText='Activité'
+                            headerIcon={<CustomIcon icon={SolidIcons.image} />}
+                            form={
+                                <View style={{ flex: 1 }}>
                                     <MyInput
-                                        label="Crée par"
+                                        label="Date de création"
                                         returnKeyType="done"
-                                        value={createdBy.fullName}
+                                        value={createdAt}
                                         editable={false}
-                                        link
                                     />
-                                </TouchableOpacity>
 
-                                <MyInput
-                                    label="Dernière mise à jour"
-                                    returnKeyType="done"
-                                    value={editedAt}
-                                    editable={false}
-                                />
+                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
+                                        <MyInput
+                                            label="Crée par"
+                                            returnKeyType="done"
+                                            value={createdBy.fullName}
+                                            editable={false}
+                                            link
+                                        />
+                                    </TouchableOpacity>
 
-                                <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
                                     <MyInput
-                                        label="Dernier intervenant"
+                                        label="Dernière mise à jour"
                                         returnKeyType="done"
-                                        value={editedBy.fullName}
+                                        value={editedAt}
                                         editable={false}
-                                        link
                                     />
-                                </TouchableOpacity>
 
-                            </Card.Content>
-                        </Card>
+                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
+                                        <MyInput
+                                            label="Dernier intervenant"
+                                            returnKeyType="done"
+                                            value={editedBy.fullName}
+                                            editable={false}
+                                            link
+                                        />
+                                    </TouchableOpacity>
+
+                                </View>
+                            }
+                        />
                     }
                 </ScrollView>
 
@@ -835,8 +828,13 @@ export default connect(mapStateToProps)(CreateProject)
 
 
 const styles = StyleSheet.create({
-    container: {
+    mainContainer: {
         flex: 1,
+        backgroundColor: theme.colors.background
+    },
+    dataContainer: {
+        flex: 1,
+        //paddingHorizontal: theme.padding
     },
     fab: {
         //flex: 1,

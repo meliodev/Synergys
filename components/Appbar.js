@@ -3,14 +3,12 @@ import { TouchableOpacity } from 'react-native'
 import { Appbar as appbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { withNavigation } from 'react-navigation'
-import { Send } from 'react-native-gifted-chat';
+import { SolidIcons } from 'react-native-fontawesome'
 
+import CustomIcon from "./CustomIcon"
 import Loading from './Loading'
 
 import * as theme from '../core/theme'
-
-import Menu from '../assets/icons/menu.svg'
-// import Search from '../assets/icons/search.svg'
 
 const Appbar = ({
     white,
@@ -24,37 +22,30 @@ const Appbar = ({
     const showMenu = () => navigation.openDrawer()
     let backColor = close ? '#fff' : '#ffffff'
 
+    //White background
     if (white) {
         return (
             <appbar.Header style={[{ backgroundColor: '#ffffff', elevation: 0 }, style]}>
-                <TouchableOpacity onPress={navBack} style={{ marginHorizontal: 5 }} >
-                    <Icon name="arrow-left" size={21} color='#333' />
-                </TouchableOpacity>
-                {title && <appbar.Content title={titleText} titleStyle={theme.customFontMSmedium.title} />}
+                <CustomIcon icon={SolidIcons.arrowLeft} />
+                {title && <appbar.Content title={titleText} titleStyle={theme.robotoRegular.h3} />}
             </appbar.Header>
         )
     }
 
     else return (
         <appbar.Header style={[{ backgroundColor: theme.colors.appBar, elevation: 0 }, style]}>
-            {back && <appbar.BackAction onPress={customBackHandler || navBack} color={backColor} style={{ marginHorizontal: 5 }} />}
-            {menu &&
-                <TouchableOpacity onPress={showMenu} style={{ marginHorizontal: 10 }} >
-                    {/* <Icon name="menu" size={24} color='#fff' /> */}
-                    <Menu />
-                </TouchableOpacity>
-            }
+            {back && <CustomIcon icon={SolidIcons.arrowLeft} onPress={customBackHandler || navBack} headerLeft />}
+            {menu && <CustomIcon icon={SolidIcons.bars} onPress={showMenu} headerLeft />}
             {searchBar}
-            {title && <appbar.Content title={titleText} titleStyle={theme.customFontMSmedium.title} />}
-            {refresh && <appbar.Action icon="refresh" onPress={handleRefresh} />}
-            {/* {search && <Search />} */}
-            {attach && <appbar.Action icon="attachment" onPress={handleAttachement} />}
-            {dots && <appbar.Action icon="dots-vertical" onPress={handleMore} />}
-            {del && <appbar.Action icon="delete" onPress={handleDelete} />}
+            {title && <appbar.Content title={titleText} titleStyle={theme.robotoLight.h3} />}
+            {refresh && <CustomIcon icon={SolidIcons.redo} onPress={handleRefresh} headerRight />}
+            {attach && <CustomIcon icon={SolidIcons.paperclip} onPress={handleAttachement} headerRight />}
+            {dots && <CustomIcon icon={SolidIcons.ellipsisVv} onPress={handleMore} headerRight />}
+            {del && <CustomIcon icon={SolidIcons.trash} onPress={handleDelete} headerRight />}
             {loading && <Loading size='small' color='#fff' style={{ position: 'absolute', right: 15 }} />}
-            {check && <appbar.Action icon="check" onPress={handleSubmit} />}
-            {send && <appbar.Action icon="send" onPress={handleSend} />}
-            {edit && <appbar.Action icon="pencil" onPress={handleEdit} />}
+            {check && <CustomIcon icon={SolidIcons.check} onPress={handleSubmit} headerRight />}
+            {send && <CustomIcon icon={SolidIcons.paperPlane} onPress={handleSend} headerRight />}
+            {edit && <CustomIcon icon={SolidIcons.pen} onPress={handleEdit} headerRight />}
             {controller && <appbar.Action icon={controllerIcon} onPress={handleAction} />}
         </appbar.Header>
     )

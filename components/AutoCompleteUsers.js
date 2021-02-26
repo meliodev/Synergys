@@ -1,6 +1,6 @@
 
 import React from "react"
-import { StyleSheet, Text, View, TextInput, TouchableHighlight } from "react-native"
+import { StyleSheet, Text, View, TextInput, TouchableHighlight, Dimensions } from "react-native"
 import { Avatar } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import AutoTags from "react-native-tag-autocomplete"
@@ -78,12 +78,11 @@ export default class AutoCompleteUsers extends React.Component {
 
     onCustomTagCreated = userInput => {
         //user pressed enter, create a new tag from their input
-        console.log('tag selected: ', userInput)
         const contact = {
             email: userInput,
             fullName: null
         }
-        this.handleAddition(contact);
+        this.handleAddition(contact)
     }
 
     render() {
@@ -101,12 +100,13 @@ export default class AutoCompleteUsers extends React.Component {
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
                 createTagOnSpace
-                style={{ backgroundColor: '#fff' }}
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
                 editable={this.props.editable}
-                suggestionsBellow = {this.props.suggestionsBellow}
-                createTagOnSpace = {false}
+                suggestionsBellow={this.props.suggestionsBellow}
+                createTagOnSpace={false}
+                inputContainerStyle={styles.inputContainerStyle}
+                containerStyle= {styles.containerStyle}
             />
         )
     }
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     },
     customTag: {
         flexDirection: 'row',
-        backgroundColor: theme.colors.secondary,
+        backgroundColor: theme.colors.primary,
         justifyContent: "center",
         alignItems: "center",
         height: 30,
@@ -135,4 +135,13 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
     },
+    inputContainerStyle: {
+        marginLeft: -5,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_extraLight
+    },
+    containerStyle: {
+        minWidth: 200,
+        maxWidth: constants.ScreenWidth - theme.padding
+    }
 })

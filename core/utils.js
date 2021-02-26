@@ -458,6 +458,7 @@ export const handleFilterAgenda = (inputList, outputList, fields, KEYS_TO_FILTER
     let items = outputList[key]
 
     for (const field of fields) {
+      console.log('field', field)
       items = items.filter(createFilter(field.value, field.label))
     }
 

@@ -8,8 +8,11 @@ import { constants } from '../core/constants';
 import Picker from '../components/Picker'
 import TextInput from '../components/TextInput'
 import Button from '../components/Button'
+import CustomIcon from '../components/CustomIcon'
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SolidIcons } from 'react-native-fontawesome';
+
 import { Menu as PopupMenu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu';
 import { withNavigation } from 'react-navigation'
 
@@ -44,12 +47,8 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
     return (
         <PopupMenu renderer={SlideInMenu} opened={opened} onBackdropPress={toggleFilter} style={menuStyle}>
-            <MenuTrigger style={{ padding: constants.ScreenWidth * 0.033, paddingRight: 0  }} onPress={toggleFilter}>
-                <MaterialCommunityIcons
-                    name='filter'
-                    size={26}
-                    color={iconColor || theme.colors.primary}
-                />
+            <MenuTrigger style={{ padding: constants.ScreenWidth * 0.033, paddingRight: 0 }} onPress={toggleFilter}>
+                <CustomIcon icon={SolidIcons.filter} />
             </MenuTrigger>
 
             <MenuOptions optionsContainerStyle={{ borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, elevation: 10 }}>

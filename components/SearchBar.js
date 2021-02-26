@@ -10,7 +10,8 @@ import * as theme from "../core/theme";
 import { constants } from '../core/constants'
 import { withNavigation } from 'react-navigation'
 
-import FontAwesome, { SolidIcons, RegularIcons, BrandIcons } from 'react-native-fontawesome';
+import { SolidIcons } from 'react-native-fontawesome'
+import CustomIcon from "./CustomIcon"
 
 const SearchBar = ({
     close,
@@ -25,28 +26,12 @@ const SearchBar = ({
     const navBack = () => navigation.pop()
 
     const renderLeftIcon = () => {
-
         if (showBar)
-            return (
-                <TouchableOpacity onPress={handleSearch} style={{ marginHorizontal: 10 }} >
-                    <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.secondary} />
-                </TouchableOpacity>
-            )
+            return <CustomIcon icon={SolidIcons.arrowLeft} headerLeft onPress={handleSearch} />
 
         else {
-            if (close)
-                return (
-                    <TouchableOpacity onPress={navBack} style={{ marginHorizontal: 10 }} >
-                        <MaterialCommunityIcons name="close" size={24} color={theme.colors.secondary} />
-                    </TouchableOpacity>
-                )
-
-            else return (
-                <TouchableOpacity onPress={showMenu} style={{ marginHorizontal: 10 }} >
-                    <FontAwesome icon={SolidIcons.smile} />
-                    {/* <SimpleLineIcons name="menu" size={24} color={theme.colors.secondary} /> */}
-                </TouchableOpacity>
-            )
+            if (close) return <CustomIcon icon={SolidIcons.cross} headerLeft />
+            else return <CustomIcon icon={SolidIcons.bars} headerLeft onPress={showMenu} />
         }
     }
 
@@ -56,8 +41,8 @@ const SearchBar = ({
             {renderLeftIcon()}
 
             {title && <appbar.Content title={titleText} titleStyle={theme.robotoLight.h3} />}
-
             {check && !showBar && <appbar.Action icon="check" onPress={handleSubmit} />}
+
             {showBar &&
                 <Searchbar
                     placeholder={placeholder}
@@ -72,8 +57,9 @@ const SearchBar = ({
                     selectionColor='#fff'
                 />
             }
+
             {!showBar &&
-                <AntDesign name="search1" size={20} onPress={handleSearch} style={[{ position: 'absolute', right: 15 }, magnifyStyle]} />
+                <CustomIcon icon={SolidIcons.search} onPress={handleSearch} headerRight />
             }
 
         </appbar.Header>
