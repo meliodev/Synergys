@@ -1,16 +1,17 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { FAB } from "react-native-paper";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { faPlus } from '@fortawesome/pro-light-svg-icons'
+
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const MyFAB = ({ style, onPress, icon, ...props }) => (
-    <FAB
-        style={[styles.fab, style]}
-        icon={icon || "plus"}
-        color= {theme.colors.white}
-        iconSize = {constants.ScreenWidth*0.06}
-        onPress={onPress} />
+import CustomIcon from "./CustomIcon";
+import { color } from "react-native-reanimated";
+
+const MyFAB = ({ color = theme.colors.white, style, onPress, icon, ...props }) => (
+    <TouchableOpacity style={styles.fab} onPress={onPress}>
+        <CustomIcon icon={icon || faPlus} color={color} />
+    </TouchableOpacity>
 )
 
 const styles = StyleSheet.create({
@@ -23,9 +24,10 @@ const styles = StyleSheet.create({
         margin: 15,
         right: 0,
         bottom: 0,
-        width: constants.ScreenWidth*0.15,
-        height: constants.ScreenWidth*0.15,
-        borderRadius: constants.ScreenWidth*0.15/2,
+        width: constants.ScreenWidth * 0.15,
+        height: constants.ScreenWidth * 0.15,
+        borderRadius: constants.ScreenWidth * 0.15 / 2,
+        elevation: 5
     }
 });
 

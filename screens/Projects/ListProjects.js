@@ -2,14 +2,11 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, FlatList, Keyboard } from 'react-native';
 import { List, Card } from 'react-native-paper';
 import { connect } from 'react-redux'
+import { faParkingCircle } from '@fortawesome/pro-light-svg-icons'
 
-import SearchBar from '../../components/SearchBar'
-import Header from '../../components/Header'
-import Filter from '../../components/Filter'
-import MyFAB from '../../components/MyFAB'
-import ProjectItem from '../../components/ProjectItem'
-import EmptyList from '../../components/EmptyList'
-import Loading from '../../components/Loading'
+import { ActiveFilter, SearchBar, Header, Filter, MyFAB, ProjectItem, EmptyList, Loading } from '../../components'
+
+import Background from '../../components/NewBackground'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
@@ -101,6 +98,24 @@ class ListProjects extends Component {
         }
     }
 
+    renderSearchBar() {
+        const { searchInput, showInput } = this.state
+
+        return (
+            <SearchBar
+                close={!this.isRoot}
+                main={this}
+                title={!showInput}
+                titleText={this.titleText}
+                placeholder='Rechercher un projet'
+                showBar={showInput}
+                handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                searchInput={searchInput}
+                searchUpdated={(searchInput) => this.setState({ searchInput })}
+            />
+        )
+    }
+
     render() {
 
         let { projectsCount, projectsList, loading } = this.state
@@ -118,27 +133,18 @@ class ListProjects extends Component {
         const s = filterCount > 1 ? 's' : ''
 
         return (
-            <View style={styles.container}>
-                <SearchBar
-                    close={!this.isRoot}
-                    main={this}
-                    title={!showInput}
-                    titleText={this.titleText}
-                    placeholder='Rechercher un projet'
-                    showBar={showInput}
-                    handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
-                    searchInput={searchInput}
-                    searchUpdated={(searchInput) => this.setState({ searchInput })}
-                />
-
-                {filterActivated && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
+            <View style={{ flex: 1 }}>
 
                 {loading ?
-                    <View style={styles.container}>
+                    <Background>
+                        {this.renderSearchBar()}
                         <Loading size='large' />
-                    </View>
+                    </Background>
                     :
-                    <View style={styles.container}>
+                    <Background>
+                        {this.renderSearchBar()}
+                        {filterActivated && <ActiveFilter />}
+
                         {projectsCount > 0 &&
                             <Header>
                                 <Text style={theme.robotoRegular.h2}>{filterCount} projet{s}</Text>
@@ -165,15 +171,16 @@ class ListProjects extends Component {
                                 data={this.filteredProjects}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderProject(item)}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: constants.ScreenWidth * 0.06 }} />
+                                style={{ zIndex: 1 }}
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
                             :
-                            <EmptyList iconName='alpha-p-box' header='Liste des projets' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
+                            <EmptyList icon= {faParkingCircle} header='Liste des projets' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
                         }
 
                         {canCreate && this.showFAB && this.isRoot &&
                             <MyFAB onPress={() => this.props.navigation.navigate('CreateProject')} />
                         }
-                    </View>}
+                    </Background>}
             </View>
         )
     }

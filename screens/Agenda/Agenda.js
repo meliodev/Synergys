@@ -3,14 +3,19 @@ import React, { Component } from 'react';
 import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, RefreshControl } from 'react-native';
 import { Agenda, LocaleConfig } from 'react-native-calendars';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
+import { faCaretDown, faCheckCircle, faTimesCircle, faPauseCircle } from '@fortawesome/pro-solid-svg-icons'
+import XDate from 'xdate'
+import dateutils from '../../node_modules/react-native-calendars/src/dateutils'
+
 import _ from 'lodash'
 import firebase from '@react-native-firebase/app'
 
-import moment from 'moment';
+import moment from 'moment'
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import ActiveFilter from '../../components/ActiveFilter'
+import CustomIcon from '../../components/CustomIcon'
 import OffLineBar from '../../components/OffLineBar'
 import PickerBar from '../../components/PickerBar'
 import Appbar from '../../components/Appbar'
@@ -23,8 +28,6 @@ import Loading from '../../components/Loading'
 import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as applyFilterAgenda, handleFilterTasks as applyFilterTasks } from '../../core/utils'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-// const testIDs = require('../testIDs');
-import { ThemeColors, withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
 import { ActivityIndicator } from 'react-native';
 
@@ -75,7 +78,6 @@ class Agenda2 extends Component {
         this.handleFilter = this.handleFilter.bind(this)
         this.toggleTasksTab = this.toggleTasksTab.bind(this)
         this.projectFilter = this.props.navigation.getParam('projectFilter', { id: '', name: '' })
-        console.log('project filter', this.projectFilter)
 
         this.state = {
             //Settings
@@ -229,52 +231,96 @@ class Agenda2 extends Component {
     renderTaskStatusController(item) {
         const { id, date, status } = item
 
+        const changeStatus = (status) => {
+            db.collection('Agenda').doc(id).update({ status })
+            this.refreshItems(true)
+        }
+
+        let iconObject = null
+
         switch (status) {
             case 'En cours':
-                return <MaterialCommunityIcons name='check-circle-outline' size={30} color='#BDBDBD'
-                    onPress={() => {
-                        db.collection('Agenda').doc(id).update({ status: 'Terminé' })
-                        this.refreshItems(true)
-                    }} />
+                iconObject = { icon: faCheckCircle, color: theme.colors.gray_dark }
+                break;
 
             case 'Terminé':
-                return <MaterialCommunityIcons name='check-circle' size={30} color={theme.colors.primary}
-                    onPress={() => {
-                        db.collection('Agenda').doc(id).update({ status: 'En cours' })
-                        this.refreshItems(true)
-                    }} />
+                iconObject = { icon: faCheckCircle, color: theme.colors.valid }
+                break;
 
             case 'Annulé':
-                return <MaterialCommunityIcons name='close-circle-outline' size={30} color={theme.colors.error} />
+                iconObject = { icon: faTimesCircle, color: theme.colors.canceled }
+                break;
 
             case 'En attente':
-                return <MaterialCommunityIcons name='dots-horizontal-circle-outline' size={30} color={theme.colors.placeholder} />
+                iconObject = { icon: faPauseCircle, color: theme.colors.pending }
+                break;
 
             default:
                 return null
         }
+
+        return (
+            <CustomIcon
+                icon={iconObject.icon}
+                color={iconObject.color}
+                size={26}
+                onPress={() => changeStatus(status)}
+            />
+        )
     }
 
     renderItem(item) {
 
         const priority = item.priority
-        const label = (
-            <View style={{ padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: priority === 'urgente' ? '#f5276d' : priority === 'faible' ? '#f2d004' : theme.colors.agenda, borderRadius: 3 }}>
-                <Text style={{ color: 'white', fontSize: 8 }}>{priority}</Text>
+        const priorityColorDark = priority === 'urgente' ? theme.colors.high_priority : priority === 'faible' ? theme.colors.low_priority : theme.colors.moderate_priority
+        const priorityColorLight = priority === 'urgente' ? theme.colors.high_priority_light : priority === 'faible' ? theme.colors.low_priority_light : theme.colors.moderate_priority_light
+
+        const priorityTag = (
+            <View style={{ paddingVertical: 5, paddingHorizontal: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: priorityColorDark, borderRadius: 3 }}>
+                <Text style={[theme.robotoRegular.caption, { color: theme.colors.white }]}>{priority}</Text>
             </View >
         )
 
-        return (
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, TaskId: item.id })} style={styles.item}>
-                <View style={{ flex: 0.8, justifyContent: 'space-between', height: constants.ScreenHeight * 0.1, marginVertical: 10 }}>
-                    <Text numberOfLines={1} style={theme.customFontMSbold.body}>{item.name}</Text>
-                    <Text style={[theme.customFontMSsemibold.caption, { color: 'gray', marginTop: 5 }]}>{item.type} {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption, { fontWeight: 'normal' }]}>(jour {item.dayProgress})</Text>}</Text>
-                </View>
+        const renderDate = () => {
+            const dayNumber = moment(item.date, 'YYYY-MM-DD').format('DD')
+            const dayName = moment(item.date, 'YYYY-MM-DD').format('ddd')
+            const dayNameCapitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1)
 
-                <View style={{ flex: 0.2, justifyContent: 'space-between', alignItems: 'center', paddingVertical: 5 }}>
-                    {label}
-                    {this.renderTaskStatusController(item)}
+            return (
+                <View style={{ flex: 0.3, justifyContent: 'flex-start', alignItems: 'flex-start', }}>
+                    <View style={{ backgroundColor: theme.colors.white, paddingLeft: 15, paddingRight: 15, paddingBottom: 5, borderBottomRightRadius: 10, borderBottomLeftRadius: 10 }}>
+                        <Text style={[theme.robotoRegular.big, { color: priorityColorDark }]}>{dayNumber}</Text>
+                        <Text style={[theme.robotoRegular.header, { color: theme.colors.gray_dark, textAlign: 'center', marginTop: -5 }]}>{dayNameCapitalized}</Text>
+                    </View>
                 </View>
+            )
+        }
+
+        const renderDetails = () => (
+            <View style={{ flex: 0.45, justifyContent: 'space-between', paddingBottom: 5, paddingTop: 15, }}>
+                <Text numberOfLines={1} style={[theme.robotoRegular.h2, { color: priorityColorDark }]}>{item.name}</Text>
+                <Text style={[theme.robotoRegular.header, { color: theme.colors.gray_dark, marginTop: 5 }]}>{item.type}</Text>
+                {/* {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption]}>(jour {item.dayProgress})</Text>} */}
+            </View>
+        )
+
+        const renderPriority = () => (
+            <View style={{ flex: 0.25, justifyContent: 'space-between', alignItems: 'center', paddingBottom: 5, paddingTop: 15 }}>
+                {priorityTag}
+                {this.renderTaskStatusController(item)}
+            </View>
+        )
+
+        const day = moment(item.date, 'YYYY-MM-DD').format('DD')
+
+        return (
+            <TouchableOpacity
+                style={[styles.item, { backgroundColor: priorityColorLight }]}
+                onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, TaskId: item.id })} >
+
+                {renderDate()}
+                {renderDetails()}
+                {renderPriority()}
             </TouchableOpacity>
         )
     }
@@ -288,7 +334,7 @@ class Agenda2 extends Component {
     renderEmptyDate() {
         return (
             <View style={styles.emptyDate}>
-                <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>Aucune tâche</Text>
+                <Text style={[theme.robotoRegular.body, { color: theme.colors.gray_dark }]}>Aucune tâche</Text>
             </View>
         )
     }
@@ -317,8 +363,8 @@ class Agenda2 extends Component {
         const roleId = this.props.role.id
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={[theme.customFontMSmedium.title, { color: '#fff', marginHorizontal: 10 }]}>{isAgenda ? 'Mon agenda' : 'Planning'}</Text>
-                <MaterialIcons name='arrow-drop-down' color='#fff' size={33} />
+                <Text style={[theme.robotoRegular.title, { color: theme.colors.secondary, marginHorizontal: 10 }]}>{isAgenda ? 'Mon agenda' : 'Planning'}</Text>
+                <CustomIcon icon={faCaretDown} color={theme.colors.gray_dark} />
             </View>
         )
     }
@@ -369,12 +415,29 @@ class Agenda2 extends Component {
         this.setState({ selectedDay })
     }
 
-    renderActiveFilterBar() {
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 5, backgroundColor: theme.colors.secondary, }}>
-                <Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text>
-            </View>
-        )
+
+    renderDay(date, item) {
+
+        const todayStyle = { color: theme.colors.gray_dark }
+        const today = dateutils.sameDate(date, XDate()) ? todayStyle : undefined
+        if (date) {
+            return (
+                <View style={this.styles.day}>
+                    <Text allowFontScaling={false} style={[todayStyle]}>{date.dateString}</Text>
+                    <Text allowFontScaling={false} style={[todayStyle]}>{XDate.locales[XDate.defaultLocale].dayNamesShort[date.getDay()]}</Text>
+                </View>
+                //     <View style={{ flex: 1, flexDirection: 'row' }}>
+                //     <Text style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>{date}</Text>
+                //     <View style={{ flex: 1, borderBottomWidth: 1, borderBottomColor: theme.colors.gray_light }} />
+                // </View>
+            )
+        }
+
+        // else {
+        //     return (
+        //         <View style={this.styles.day} />
+        //     );
+        // }
     }
 
     render() {
@@ -389,6 +452,7 @@ class Agenda2 extends Component {
 
                 { (roleId === 'admin' || roleId === 'dircom' || roleId === 'tech') ?
                     <PickerBar
+                        main={this}
                         options={[
                             { id: 0, title: "Mon agenda" },
                             { id: 1, title: "Planning" },
@@ -399,7 +463,9 @@ class Agenda2 extends Component {
                             () => this.setCalendarType(false),
                         ]}
                         menuTrigger={this.renderAppBarPicker()}
-                        main={this}
+                        filter
+                        refresh
+                        onRefresh={() => this.refreshItems(true)}
                         filterOpened={filterOpened}
                         type={type}
                         status={status}
@@ -412,11 +478,11 @@ class Agenda2 extends Component {
 
                 <TasksTab isCalendar={isCalendar} onPress1={() => this.toggleTasksTab(false)} onPress2={() => this.toggleTasksTab(true)} />
 
-                {isCalendar ?
-                    filterCalendarActivated && this.renderActiveFilterBar()
+                {/* {isCalendar ?
+                    filterCalendarActivated && <ActiveFilter />
                     :
                     filterListActivated && this.renderActiveFilterBar()
-                }
+                } */}
 
                 <View style={{ flex: 1 }} >
                     {isCalendar ?
@@ -426,14 +492,14 @@ class Agenda2 extends Component {
                             renderEmptyData={this.renderEmptyData.bind(this)}
                             items={this.state.filteredItems}
                             loadItemsForMonth={this.loadItems}
-                            selected={moment().format('YYYY-MM-DD')}
+                            selected={'2021-02-24'}
+                            // selected={moment().format('YYYY-MM-DD')}
                             onDayPress={this.onDayPress.bind(this)}
                             renderItem={this.renderItem.bind(this)}
                             renderEmptyDate={this.renderEmptyDate.bind(this)}
                             rowHasChanged={this.rowHasChanged.bind(this)}
                             displayLoadingIndicator={true}
-                            onRefresh={() => this.refreshItems(true)}
-                            style={{ paddingBottom: constants.ScreenHeight * 0.1 }}
+                            //onRefresh={() => this.refreshItems(true)} <-- #bug: this line disables zIndex which is used to put background below flatlist items (issue is followed up on react-native github repository)
                             theme={{
                                 dotColor: theme.colors.agendaLight,
                                 todayTextColor: theme.colors.primary,
@@ -442,7 +508,13 @@ class Agenda2 extends Component {
                                 agendaDayNumColor: theme.colors.agendaLight,
                                 agendaTodayColor: theme.colors.primary,
                                 backgroundColor: '#F1F1F8',
+                                'stylesheet.agenda.list': {
+                                    container: {
+                                        flexDirection: 'column'
+                                    }
+                                },
                             }}
+                          //  renderDay={this.renderDay}
                         />
                         :
                         <ScrollView contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => this.refreshItems(true)} />}>
@@ -478,12 +550,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     item: {
+        flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        backgroundColor: 'white',
-        borderRadius: 5,
+        borderRadius: 15,
         paddingRight: 5,
         paddingLeft: 15,
+        paddingBottom: 15,
         marginRight: 10,
         marginTop: 10,
     },

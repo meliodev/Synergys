@@ -22,18 +22,18 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     const setStateColor = (state) => {
         switch (state) {
             case 'En attente':
-                return theme.colors.gray400
+                return theme.colors.pending
 
             case 'En cours':
-                return theme.colors.primary
+                return theme.colors.inProgress
                 break
 
             case 'Terminé':
-                return '#0288D1'
+                return theme.colors.valid
                 break
 
             case 'Annulé':
-                return theme.colors.error
+                return theme.colors.canceled
                 break
 
             default:
@@ -42,21 +42,22 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     }
 
     const setStepColor = (step) => {
-        switch (step) {
-            case 'Prospect':
-                return [theme.colors.gray400, theme.colors.gray400, theme.colors.gray400]
+        // switch (step) {
+        //     case 'Prospect':
+        //         return [theme.colors.gray400, theme.colors.gray400, theme.colors.gray400]
 
-            case 'Chantier':
-                return ['#09a500', '#69b300', '#9fbc00']
-                break
+        //     case 'Chantier':
+        //         return ['#09a500', '#69b300', '#9fbc00']
+        //         break
 
-            case 'SAV':
-                return ['#0288D1', '#03A9F4', '#4FC3F7']
-                break
+        //     case 'SAV':
+        //         return ['#0288D1', '#03A9F4', '#4FC3F7']
+        //         break
 
-            default:
-                return '#333'
-        }
+        //     default:
+        //         return '#333'
+        // }
+        return [theme.colors.valid, theme.colors.valid, theme.colors.valid]
     }
 
     return (
@@ -79,8 +80,8 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
                     <View style={styles.footer}>
                         <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]} >{moment(project.editedAt, 'lll').format('ll')} - {moment(project.editedAt, 'lll').format('HH:mm')}</Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2 }}>
-                            <Paragraph style={[theme.robotoRegular.caption, { color: '#fff', textAlign: 'center' }]}>{project.state}</Paragraph>
+                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2 , elevation: 2}}>
+                            <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{project.state}</Paragraph>
                         </View>
                     </View>
                 </View>
@@ -94,7 +95,7 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 const styles = StyleSheet.create({
     container: {
         marginVertical: theme.padding / 2,
-        borderRadius: 15
+        borderRadius: 15,
     },
     linearGradient: {
         flex: 1,

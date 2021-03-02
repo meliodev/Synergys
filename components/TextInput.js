@@ -28,14 +28,14 @@ const TextInput = ({ errorText, style, disabled, whiteTheme, link, ...props }) =
         }}
 
       {...props} />
-    {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
+    {errorText ? <Text style={[theme.robotoRegular.caption, styles.error]}>{errorText}</Text> : null}
   </View>
 )
 
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginVertical: 10
+    marginVertical: 5
   },
   input: {
     width: "100%",

@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Alert } from 'react-native'
 import { List } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
+import { faUserPlus } from '@fortawesome/pro-light-svg-icons'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
@@ -173,7 +174,7 @@ class ListUsers extends Component {
             }
 
             {canCreate && this.props.showButton && !this.props.offLine &&
-              <MyFAB icon='account-plus' onPress={() => this.props.navigation.navigate('CreateUser', { prevScreen: this.props.prevScreen })} />
+              <MyFAB icon={faUserPlus} onPress={() => this.props.navigation.navigate('CreateUser', { prevScreen: this.props.prevScreen })} />
             }
 
           </View>}

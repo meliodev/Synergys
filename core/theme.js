@@ -12,8 +12,24 @@ const colors = {
   //tertiary: "#4CAF50",
   //tertiary: "#7ab600",
   surface: DefaultTheme.colors.surface,
-  error: DefaultTheme.colors.error,
+  error: '#EC133A',
   disabled: DefaultTheme.colors.disabled,
+  //Statuses (5)
+  inProgress: '#9cf8ff',
+  blocked: '#ff9cad',
+  pending: '#fffc9c',
+  valid: "#25D366", //primary
+  canceled: '#f5f5f5',
+
+  //Priorities
+  high_priority: '#fd577d',
+  moderate_priority: '#ff7311',
+  low_priority: '#f3a700',
+
+  high_priority_light: '#ffe0e7',
+  moderate_priority_light: '#ffdfc9',
+  low_priority_light: '#e8e1d3',
+
   placeholder: '#606467',
   offline: '#0A1172',
   icon: '#757575',
@@ -24,6 +40,7 @@ const colors = {
   gray_extraLight: "#F1F1F1", //new
   gray_light: "#EBEBEB", //new
   gray_medium: "#BCBCBC", //new
+  gray_bold: "#B4B4B4", //new
   gray_dark: "#8D8D8D", //new
   gray: "#BDBDBD",
   graySilver: '#C0C0C0',
@@ -97,7 +114,7 @@ const fonts = {
   },
 }
 
-const padding = constants.ScreenWidth*0.06
+const padding = constants.ScreenWidth * 0.04
 
 //MontSerrat
 const customFontMSbold = {
@@ -340,6 +357,11 @@ const robotoMedium = {
 }
 
 const robotoRegular = {
+  big: {
+    color: colors.secondary,
+    fontSize: 40,
+    fontFamily: 'Roboto-Regular',
+  },
   h1: {
     color: colors.secondary,
     fontSize: sizes.h1,
@@ -373,6 +395,11 @@ const robotoRegular = {
   caption: {
     color: colors.secondary,
     fontSize: sizes.caption,
+    fontFamily: 'Roboto-Regular',
+  },
+  small: {
+    color: colors.secondary,
+    fontSize: 8,
     fontFamily: 'Roboto-Regular',
   },
 }

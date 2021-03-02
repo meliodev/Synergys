@@ -158,7 +158,7 @@ class DrawerMenu extends React.Component {
 
         return (
             <SafeAreaView style={styles.container}>
-                <StatusBar backgroundColor={theme.colors.statusbar} barStyle="light-content" />
+                <StatusBar backgroundColor={theme.colors.appBar} barStyle="dark-content" />
 
                 {currentUser && this.renderHeader(currentUser, role)}
 
@@ -173,7 +173,6 @@ class DrawerMenu extends React.Component {
             </SafeAreaView>
         )
     }
-
 }
 
 const mapStateToProps = (state) => {

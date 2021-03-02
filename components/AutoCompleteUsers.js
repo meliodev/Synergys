@@ -77,6 +77,7 @@ export default class AutoCompleteUsers extends React.Component {
     }
 
     onCustomTagCreated = userInput => {
+        console.log('userInput', userInput)
         //user pressed enter, create a new tag from their input
         const contact = {
             email: userInput,
@@ -106,7 +107,8 @@ export default class AutoCompleteUsers extends React.Component {
                 suggestionsBellow={this.props.suggestionsBellow}
                 createTagOnSpace={false}
                 inputContainerStyle={styles.inputContainerStyle}
-                containerStyle= {styles.containerStyle}
+                containerStyle={styles.containerStyle}
+               // renderTextInput={() => <TextInput style={[theme.robotoRegular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }

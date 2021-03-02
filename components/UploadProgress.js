@@ -4,7 +4,7 @@ import { TextInput as Input, ProgressBar } from "react-native-paper";
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { setAttachmentIcon } from '../core/utils'
-import * as theme from "../core/theme"
+import * as theme from "../core/theme" 
 
 const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon, showProgress = true, pending = false, containerStyle, ...props }) => {
 

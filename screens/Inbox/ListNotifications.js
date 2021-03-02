@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native'
 import { List } from 'react-native-paper';
+import { faBell } from '@fortawesome/pro-light-svg-icons'
 
 import firebase from '@react-native-firebase/app'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 
+import Header from '../../components/Header'
 import NotificationItem from '../../components/NotificationItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
@@ -70,7 +72,10 @@ class ListNotifications extends Component {
 
         return (
             <View style={styles.container}>
-                <List.Subheader>{notificationsCount} notification{s}</List.Subheader>
+                <Header style={{ paddingVertical: 15 }}>
+                    <Text style={theme.robotoRegular.body}>{notificationsCount} notification{s}</Text>
+                </Header>
+
                 {notificationsCount > 0 ?
                     <FlatList
                         style={styles.root}
@@ -81,7 +86,7 @@ class ListNotifications extends Component {
                         renderItem={(item) => this.renderNotification(item.item)}
                     />
                     :
-                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
+                    <EmptyList icon={faBell} header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
                 }
             </View >
         )

@@ -127,6 +127,7 @@ class AutoCompleteBrands extends React.Component {
                     suggestionsBellow={this.props.suggestionsBellow}
                     editable={this.props.editable}
                     createTagOnSpace = {false}
+                    renderTextInput={() => <TextInput style={[theme.robotoRegular.body, { color: theme.colors.gray_light }]} {...this.props} />}
                 />
                 {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{this.props.errorText}</Text>}
             </View>

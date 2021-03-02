@@ -1,9 +1,14 @@
 import React, { memo } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { withNavigation } from 'react-navigation'
+import { faMapMarkerAlt } from '@fortawesome/pro-solid-svg-icons'
+
 import MyInput from './TextInput'
+import CustomIcon from './CustomIcon'
+
+import { TextInput } from 'react-native-paper'
 import * as theme from "../core/theme";
 import { notAvailableOffline } from '../core/exceptions';
-import { withNavigation } from 'react-navigation'
 
 const AddressInput = ({ offLine, onPress, rightIcon, address, addressError, label, ...props }) => (
     <TouchableOpacity onPress={() => {
@@ -21,7 +26,8 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, addressError, labe
             errorText={addressError}
             editable={false}
             multiline={true}
-            right={rightIcon ? rightIcon : null} />
+            right={<TextInput.Icon name={<CustomIcon icon={faMapMarkerAlt} style={{ color: theme.colors.gray_bold }} />} color={theme.colors.gray_dark} onPress={onPress} />}
+        />
     </TouchableOpacity>
 )
 

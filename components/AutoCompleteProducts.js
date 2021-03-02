@@ -133,6 +133,7 @@ class AutoCompleteProducts extends React.Component {
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
                 createTagOnSpace = {false}
+                renderTextInput={() => <TextInput style={[theme.robotoRegular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }

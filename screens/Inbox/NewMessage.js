@@ -8,6 +8,7 @@ import RNFS from 'react-native-fs'
 import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
+import CustomIcon from '../../components/CustomIcon'
 import TextInput from '../../components/TextInput'
 import { TextInput as MessageInput } from 'react-native'
 import AutoCompleteUsers from '../../components/AutoCompleteUsers'
@@ -26,6 +27,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import DocumentPicker from 'react-native-document-picker';
+import { faTimes } from '@fortawesome/pro-light-svg-icons';
 
 const db = firebase.firestore()
 
@@ -128,29 +130,30 @@ class NewMessage extends Component {
         var { attachments } = this.state
         const newAttachments = await pickDocs(attachments)
         this.setState({ attachments: newAttachments })
-    } 
+    }
 
     renderAttachments() {
         let { attachments, loading } = this.state
 
+        const onPressRightIcon = (key) => {
+            attachments.splice(key, 1)
+            this.setState({ attachments })
+        }
+
+        const rightIconStyle = { flex: 0.15, justifyContent: 'center', alignItems: 'center' }
+
         return attachments.map((document, key) => {
-            return <UploadProgress
-                attachment={document}
-                showRightIcon
-                rightIcon={
-                    <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
-                        {!loading && <MaterialCommunityIcons
-                            name='close'
-                            size={21}
-                            color={theme.colors.placeholder}
-                            style={{ paddingVertical: 19, paddingHorizontal: 5 }}
-                            onPress={() => {
-                                attachments.splice(key, 1)
-                                this.setState({ attachments })
-                            }}
-                        />}
-                    </View>}
-            />
+            return (
+                <UploadProgress
+                    attachment={document}
+                    showRightIcon
+                    rightIcon={
+                        <TouchableOpacity style={rightIconStyle} onPress={() => onPressRightIcon(key)}>
+                            {!loading && <CustomIcon icon={faTimes} color={theme.colors.gray_dark} />}
+                        </TouchableOpacity>
+                    }
+                />
+            )
         })
     }
 
@@ -321,7 +324,8 @@ class NewMessage extends Component {
                     </View>
 
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ marginTop: 10 }}>À         </Text>
+                        <Text style={{ marginTop: 10 }}>À           </Text>
+
                         <AutoCompleteUsers
                             suggestions={suggestions}
                             tagsSelected={tagsSelected}
@@ -329,6 +333,7 @@ class NewMessage extends Component {
                             placeholder="Ajouter un destinataire"
                             autoFocus={false}
                             showInput={true}
+                            suggestionsBellow={true}
                             editable={!loading}
                         />
 

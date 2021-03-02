@@ -75,6 +75,9 @@
 		760D4E1759BE45198C3B6DD0 /* fa-brands-400.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 48E6E931D5AE423280BFC770 /* fa-brands-400.ttf */; };
 		648850424BB94EA795ECF4F9 /* fa-regular-400.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EBBC7258E17C4388BE934F40 /* fa-regular-400.ttf */; };
 		BBE27FEE2CD24540A8073EE7 /* fa-solid-900.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F16B9C3E0E5A4518B50674C2 /* fa-solid-900.ttf */; };
+		5E9F4FD0B7104A129FAB895D /* fa-duotone-900.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 634E83C7B4534FC1AA4525FC /* fa-duotone-900.ttf */; };
+		8879106F814943B4BC74EE42 /* fa-light-300.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 82C2A2937B1B4787901940FD /* fa-light-300.ttf */; };
+		687D3D08258C40B0BDD0B23C /* fa-thin-100.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 444664B5BBC74693BFDA6B8E /* fa-thin-100.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -169,6 +172,9 @@
 		48E6E931D5AE423280BFC770 /* fa-brands-400.ttf */ = {isa = PBXFileReference; name = "fa-brands-400.ttf"; path = "../assets/fonts/fa-brands-400.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		EBBC7258E17C4388BE934F40 /* fa-regular-400.ttf */ = {isa = PBXFileReference; name = "fa-regular-400.ttf"; path = "../assets/fonts/fa-regular-400.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		F16B9C3E0E5A4518B50674C2 /* fa-solid-900.ttf */ = {isa = PBXFileReference; name = "fa-solid-900.ttf"; path = "../assets/fonts/fa-solid-900.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		634E83C7B4534FC1AA4525FC /* fa-duotone-900.ttf */ = {isa = PBXFileReference; name = "fa-duotone-900.ttf"; path = "../assets/fonts/fa-duotone-900.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		82C2A2937B1B4787901940FD /* fa-light-300.ttf */ = {isa = PBXFileReference; name = "fa-light-300.ttf"; path = "../assets/fonts/fa-light-300.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		444664B5BBC74693BFDA6B8E /* fa-thin-100.ttf */ = {isa = PBXFileReference; name = "fa-thin-100.ttf"; path = "../assets/fonts/fa-thin-100.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -338,6 +344,9 @@
 				48E6E931D5AE423280BFC770 /* fa-brands-400.ttf */,
 				EBBC7258E17C4388BE934F40 /* fa-regular-400.ttf */,
 				F16B9C3E0E5A4518B50674C2 /* fa-solid-900.ttf */,
+				634E83C7B4534FC1AA4525FC /* fa-duotone-900.ttf */,
+				82C2A2937B1B4787901940FD /* fa-light-300.ttf */,
+				444664B5BBC74693BFDA6B8E /* fa-thin-100.ttf */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -540,6 +549,9 @@
 				760D4E1759BE45198C3B6DD0 /* fa-brands-400.ttf in Resources */,
 				648850424BB94EA795ECF4F9 /* fa-regular-400.ttf in Resources */,
 				BBE27FEE2CD24540A8073EE7 /* fa-solid-900.ttf in Resources */,
+				5E9F4FD0B7104A129FAB895D /* fa-duotone-900.ttf in Resources */,
+				8879106F814943B4BC74EE42 /* fa-light-300.ttf in Resources */,
+				687D3D08258C40B0BDD0B23C /* fa-thin-100.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

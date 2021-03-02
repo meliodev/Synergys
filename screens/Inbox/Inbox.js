@@ -3,6 +3,7 @@
 import React from "react"
 import { View } from 'react-native'
 import { connect } from 'react-redux'
+import { faBell, faEnvelope } from '@fortawesome/pro-light-svg-icons'
 
 import TabView from '../../components/TabView'
 import Appbar from '../../components/Appbar'
@@ -39,7 +40,8 @@ class Inbox extends React.Component {
                 <TabView
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
-
+                    icon1={faBell}
+                    icon2={faEnvelope}
                     Tab1={<ListNotifications offLine={!isConnected} />}
                     Tab2={<ListMessages offLine={!isConnected} />} />
             </View>

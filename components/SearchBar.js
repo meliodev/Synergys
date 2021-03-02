@@ -2,16 +2,14 @@ import React, { memo } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native"
 import { Appbar as appbar } from 'react-native-paper'
 
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import { faBars, faTimes, faSearch, faArrowLeft, faCheck } from '@fortawesome/pro-light-svg-icons'
 import { Searchbar } from "react-native-paper";
 import * as theme from "../core/theme";
 import { constants } from '../core/constants'
 import { withNavigation } from 'react-navigation'
 
-import { SolidIcons } from 'react-native-fontawesome'
-import CustomIcon from "./CustomIcon"
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faFilter } from '@fortawesome/pro-light-svg-icons'
 
 const SearchBar = ({
     close,
@@ -25,14 +23,15 @@ const SearchBar = ({
     const showMenu = () => navigation.openDrawer()
     const navBack = () => navigation.pop()
 
-    const renderLeftIcon = () => {
-        if (showBar)
-            return <CustomIcon icon={SolidIcons.arrowLeft} headerLeft onPress={handleSearch} />
+    const AppBarIcon = ({ icon, onPress, style }) => {
+        const faIcon = <FontAwesomeIcon icon={icon} size={24} />
+        return <appbar.Action icon={faIcon} onPress={onPress} />
+    }
 
-        else {
-            if (close) return <CustomIcon icon={SolidIcons.cross} headerLeft />
-            else return <CustomIcon icon={SolidIcons.bars} headerLeft onPress={showMenu} />
-        }
+    const renderLeftIcon = () => {
+        const icon = showBar ? faArrowLeft : faBars
+        const handleAction = showBar ? handleSearch : showMenu
+        return <AppBarIcon icon={icon} onPress={handleAction} />
     }
 
     return (
@@ -40,27 +39,24 @@ const SearchBar = ({
 
             {renderLeftIcon()}
 
-            {title && <appbar.Content title={titleText} titleStyle={theme.robotoLight.h3} />}
-            {check && !showBar && <appbar.Action icon="check" onPress={handleSubmit} />}
+            {title && <appbar.Content title={titleText} titleStyle={[theme.robotoLight.h3, { marginLeft: '-5%' }]} />}
 
             {showBar &&
                 <Searchbar
                     placeholder={placeholder}
-                    placeholderTextColor={theme.colors.gray100}
+                    placeholderTextColor={theme.colors.gray_dark}
                     onChangeText={(searchInput) => searchUpdated(searchInput)}
                     value={searchInput}
-                    inputStyle={{ color: '#fff' }}
-                    style={{ backgroundColor: theme.colors.primary, elevation: 0, }}
-                    theme={{ colors: { placeholder: '#fff', text: '#fff' } }}
+                    inputStyle={[theme.robotoRegular.h3, { color: theme.colors.secondary }]}
+                    style={{ backgroundColor: theme.colors.appBar, elevation: 0, }}
+                    theme={{ colors: { placeholder: '#fff', text: '#fff' }, }}
                     icon={() => null}
                     autoFocus
-                    selectionColor='#fff'
+                    selectionColor={theme.colors.secondary}
                 />
             }
 
-            {!showBar &&
-                <CustomIcon icon={SolidIcons.search} onPress={handleSearch} headerRight />
-            }
+            {!showBar && <AppBarIcon icon={faSearch} onPress={handleSearch} />} 
 
         </appbar.Header>
     )

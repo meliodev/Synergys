@@ -4,6 +4,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import firebase from '@react-native-firebase/app'
 
 import Menu from './Menu'
+import CustomIcon from './CustomIcon'
+import { faParkingCircle } from '@fortawesome/pro-light-svg-icons'
 
 import * as theme from '../core/theme'
 import { constants } from '../core/constants'
@@ -21,7 +23,7 @@ const NotificationItem = ({ notification, ...props }) => {
             case 'projects':
                 return (
                     <View style={styles.leftIcon}>
-                        <MaterialCommunityIcons name='alpha-p-box' size={25} />
+                        <CustomIcon icon={faParkingCircle} />
                     </View>
                 )
         }
@@ -38,18 +40,16 @@ const NotificationItem = ({ notification, ...props }) => {
     ]
 
     return (
-        <View style={[styles.container, { backgroundColor: notification.read ? '#fff' : '#DCEDC8' }]}>
+        <View style={[styles.container, { backgroundColor: notification.read ? theme.colors.white : '#DCEDC8' }]}>
 
             {setLeftIcon(notification.topic)}
 
             <View style={styles.content}>
 
                 <View style={{ flex: 1 }}>
-                    <View style={styles.text}>
-                        <Text style={[theme.customFontMSsemibold.body]} numberOfLines={1}>{notification.title}</Text>
-                        <Text style={[theme.customFontMSmedium.caption]} numberOfLines={3}>{notification.body}</Text>
-                    </View>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{moment(notification.sentAt).format('LLL')}</Text>
+                    <Text style={[theme.robotoMedium.body]} numberOfLines={1}>{notification.title}</Text>
+                    <Text style={[theme.robotoRegular.caption]} numberOfLines={3}>{notification.body}</Text>
+                    <Text style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>{moment(notification.sentAt).format('LLL')}</Text>
                 </View>
 
                 {/* #task:  use the menu component */}
@@ -66,28 +66,27 @@ const NotificationItem = ({ notification, ...props }) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
+        padding: 10,
         flexDirection: 'row',
         alignItems: 'flex-start',
-    },
-    content: {
-        flex: 1,
-        flexDirection: 'row',
-        marginLeft: 10,
-        marginRight: 0
+        backgroundColor: 'pink'
     },
     leftIcon: {
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.gray_light,
+        borderWidth: StyleSheet.hairlineWidth,
         width: 50,
         height: 50,
         borderRadius: 25,
         elevation: 1
     },
-    text: {
-        marginBottom: 5,
+    content: {
+        flex: 1,
         flexDirection: 'row',
-        flexWrap: 'wrap'
+        marginLeft: 10,
+        marginRight: 0,
     },
 })
 

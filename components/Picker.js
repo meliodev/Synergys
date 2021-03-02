@@ -9,17 +9,15 @@ const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled =
 
         <View style={[styles.pickerContainer]}>
             <Text style={theme.robotoRegular.caption}>{title}</Text>
-            <Picker style={[styles.input, style]} enabled= {enabled} {...props}>
+            <Picker style={[styles.input, style]} enabled={enabled}  {...props} >
                 {elements.map((item) => {
                     return <Picker.Item label={item.label} value={item.value} />
                 })}
             </Picker>
         </View>
-        {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{'errorText'}</Text> : null}
+        {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
 
     </View>
-
-
 )
 
 const styles = StyleSheet.create({
@@ -28,7 +26,7 @@ const styles = StyleSheet.create({
         marginVertical: 15,
     },
     pickerContainer: {
-        borderBottomWidth: StyleSheet.hairlineWidth*2,
+        borderBottomWidth: StyleSheet.hairlineWidth * 2,
         borderBottomColor: theme.colors.gray_extraLight,
     },
     label: {
@@ -37,7 +35,7 @@ const styles = StyleSheet.create({
     },
     input: {
         marginLeft: -7,
-        color: '#333',
+        color: theme.colors.gray_dark,
         alignItems: 'flex-start',
     },
     error: {

@@ -41,15 +41,15 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
         <List.Item
             title={
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{message.sender.fullName}</Text>
+                    <Text style={theme.robotoMedium.body}>{message.sender.fullName}</Text>
                 </View>
             }
             description={() => (
                 <View style={{ paddingRight: 7 }}>
-                    <Text numberOfLines={1} style={theme.customFontMSbold.caption}>
+                    <Text numberOfLines={1} style={theme.robotoRegular.caption}>
                         {message.mainSubject}
                     </Text>
-                    <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>
+                    <Text numberOfLines={1} style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>
                         {showMessageDescription ? message.message : ' '}
                     </Text>
                 </View>
@@ -57,13 +57,13 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
 
             left={props =>
                 <View style={{ justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 }}>
-                    <AvatarText label={message.sender.fullName.charAt(0)} size={42} />
+                    <AvatarText label={message.sender.fullName.charAt(0)} size={40} />
                 </View>
             }
 
             right={props =>
                 <View style={{ alignItems: 'center', paddingTop: 9, marginRight: 5 }}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{moment(message.sentAt).format("Do MMM")}</Text>
+                    <Text style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>{moment(message.sentAt).format("Do MMM")}</Text>
                     {/* <Menu
                         options={[
                             { id: 0, title: 'Voir le message' },

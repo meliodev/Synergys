@@ -8,7 +8,7 @@ const FormSection = ({ headerText, headerIcon, form }) => {
     return (
         <View style={styles.container}>
             <Header>
-                <Text style= {theme.robotoRegular.h2}>{headerText}</Text>
+                <Text style= {theme.robotoRegular.h3}>{headerText}</Text>
                 {headerIcon}
             </Header>
 
@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         flex: 1,
-        paddingHorizontal: theme.padding
+        paddingHorizontal: theme.padding,
+        paddingVertical: theme.padding/2
     }
 })

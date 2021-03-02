@@ -1,0 +1,63 @@
+25/02/2021:
+
++ Global:
+- Color picker
+- Other View for ListProjects (3 elements per row like Asana -> see screenshot sent by Adam on Whatsapp)
+- Notifications + Emails
+- Activer Twilio Verify
+- Fetch all collections on app start (offline support)
+- remove react-native-fontawesome
+
+Done:
++ UploadDocument:
+- Add 'attachmentSource' property (conversion + conversionSource: 'Devis id')
+- Rester sur Document après création (pas de retour en arrière)
+- Ajouter (Facture générée) au nom d'une facture générée à partir d'un devis
+
++ Signature:
+- Rétrecir police et rétrecir saut ligne 
+
++ CreateTask:
+- CreateTask: Remove Project from mendatory fields
+
++ PdfGeneration:
+- Merger Devis avec conditions
+- Adjust Facture content
+
++ CreateOrder:
+- La remise: 2 champs textes CEE + Renov pour commande
+
+Ideas:
++ Maintainance & Troubleshooting:
+- Add id of each item on List overview -> User can communicate easily to us the element having an issue.
+- Add pull to refresh/refresh icon on forms (instead of onSnapshot).. because user has to refresh it voluntarely
+
+
+
+
+#9cf8ff: En cours
+#ff9cad: Bloqué
+#fffc9c: en attente
+primary: validé/terminé
+#f5f5f5: annulé
+
+
+Notice:
+- Add hour to task overview
+- Roboto is the default fontfamily of react native
+
+
+
+//Libraries modifications:
+1- react-native-calendars: 
++ Add Synergys Background
+Steps: 
+1. Path: C:\Users\lyous\OneDrive\Desktop\Github\Groupe-Synergys\node_modules\react-native-calendars\src\agenda\index.js
+2. Wrap renderReservations() inside <Background>
+3. Add style= {{zIndex: 1}} to <ReservationsList /> inside renderReservations()
+4. Remove onRefresh from Agenda props as it disables zIndex
+
+2- react-native-paper: style & render
+3- react-native-autocomplete-input: style & render
+4- react-native-tags-autocomplete: style & render
+5- react-navigation: Deep links support/parse firebase dynamic links

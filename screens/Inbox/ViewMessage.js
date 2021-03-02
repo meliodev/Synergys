@@ -1,9 +1,9 @@
 
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, ScrollView, Image } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity } from 'react-native'
 import { List, Headline } from 'react-native-paper'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { faArrowAltToBottom } from '@fortawesome/pro-solid-svg-icons'
 import Entypo from 'react-native-vector-icons/Entypo'
 
 import * as theme from '../../core/theme'
@@ -18,6 +18,7 @@ moment.locale('fr')
 import Appbar from '../../components/Appbar'
 import Button from '../../components/Button'
 import UploadProgress from '../../components/UploadProgress'
+import CustomIcon from '../../components/CustomIcon'
 import Toast from '../../components/Toast'
 
 import firebase from '@react-native-firebase/app'
@@ -75,7 +76,7 @@ export default class ViewMessage extends Component {
         const showHideText = showOldMessages ? 'Masquer le texte des messages précédents' : 'Afficher le texte des messages précédents'
 
         return (
-            <View style={{ marginBottom: 15, marginLeft: constants.ScreenWidth * 0.045 }}>
+            <View style={{ marginBottom: 15, marginHorizontal: constants.ScreenWidth * 0.045 }}>
 
                 <View>
                     {messagesRendered.map((msg, key) => {
@@ -87,13 +88,13 @@ export default class ViewMessage extends Component {
                             <View>
                                 {key === 0 &&
                                     <View>
-                                        <Text style={[theme.customFontMSregular.body, { marginBottom: 20 }]}>{msg.message}</Text>
-                                        {messagesRendered.length > 1 && <Text style={[theme.customFontMSsemibold.caption, { marginBottom: 5, color: theme.colors.primary }]} onPress={showOldMessages => this.setState({ showOldMessages: !this.state.showOldMessages })}>{showHideText}</Text>}
+                                        <Text style={[theme.robotoRegular.body, { marginBottom: 20 }]}>{msg.message}</Text>
+                                        {messagesRendered.length > 1 && <Text style={[theme.robotoMedium.caption, { marginBottom: 5, color: theme.colors.primary }]} onPress={showOldMessages => this.setState({ showOldMessages: !this.state.showOldMessages })}>{showHideText}</Text>}
                                     </View>}
                                 {key > 0 && showOldMessages &&
                                     <View>
-                                        <Text style={theme.customFontMSregular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }}>Le <Text style={theme.customFontMSsemibold.body}>{sentAtDate}</Text> à <Text style={theme.customFontMSsemibold.body}>{sentAtTime}</Text>, <Text style={theme.customFontMSsemibold.body}>{msg.sender.fullName}</Text> a écrit:</Text>
-                                        <Text style={[theme.customFontMSregular.body, { marginBottom: 15 }]}>{msg.message}</Text>
+                                        <Text style={theme.robotoRegular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }}>Le <Text style={theme.robotoMedium.body}>{sentAtDate}</Text> à <Text style={theme.robotoMedium.body}>{sentAtTime}</Text>, <Text style={theme.robotoMedium.body}>{msg.sender.fullName}</Text> a écrit:</Text>
+                                        <Text style={[theme.robotoRegular.body, { marginBottom: 15 }]}>{msg.message}</Text>
                                     </View>}
                             </View>
                         )
@@ -103,15 +104,15 @@ export default class ViewMessage extends Component {
                 {selectedMessage.attachments && this.renderAttachments(selectedMessage.attachments)}
 
                 {/* {selectedMessage.sender.id !== this.currentUser.uid && */}
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', marginTop: 10 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                     <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage.sender, messagesRendered)}
                         style={{ width: '39%', alignSelf: 'center' }}>
-                        <Text style={theme.customFontMSsemibold.body}>Répondre</Text>
+                        <Text style={[theme.robotoLight.body, { color: theme.colors.primary }]}>Répondre</Text>
                     </Button>
 
                     <Button loading={false} mode="contained" onPress={() => this.goToReplyAll(selectedMessage.speakers, messagesRendered)}
                         style={{ width: '55%', alignSelf: 'center', marginLeft: 5 }}>
-                        <Text style={theme.customFontMSsemibold.body}>Répondre à tous</Text>
+                        <Text style={[theme.robotoLight.body, { color: theme.colors.white }]}>Répondre à tous</Text>
                     </Button>
                 </View>
                 {/* } */}
@@ -122,19 +123,17 @@ export default class ViewMessage extends Component {
 
     renderAttachments(attachments) {
         return attachments.map((document, key) => {
+            const rightIconStyle = { flex: 0.15, justifyContent: 'center', alignItems: 'center' }
+
             return <UploadProgress
                 attachment={document}
                 showRightIcon
                 showProgress={false}
                 rightIcon={
-                    <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}>
-                        <MaterialCommunityIcons
-                            name={'download'}
-                            size={21}
-                            color={theme.colors.placeholder}
-                            style={{ paddingVertical: 19, paddingHorizontal: 5 }}
-                            onPress={() => downloadFile(this, document.name, document.downloadURL)} />
-                    </View>}
+                    <TouchableOpacity style={rightIconStyle} onPress={() => downloadFile(this, document.name, document.downloadURL)}>
+                        <CustomIcon icon={faArrowAltToBottom} color= {theme.colors.gray_dark} size= {20}/>
+                    </TouchableOpacity>
+                }
             />
         })
     }
@@ -182,15 +181,15 @@ export default class ViewMessage extends Component {
                             style={{ paddingVertical: constants.ScreenHeight * 0.015, borderBottomWidth: !isExpanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.grey_300 }}
                             titleComponent={
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text numberOfLines={1} style={[theme.customFontMSsemibold.header, { marginRight: isExpanded ? 3 : 5 }]}>{message.sender.fullName}</Text>
-                                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, marginHorizontal: 5, marginTop: 3 }]}>{moment(message.sentAt).format('lll')}</Text>
+                                    <Text numberOfLines={1} style={[theme.robotoMedium.header, { marginRight: isExpanded ? 3 : 5 }]}>{message.sender.fullName}</Text>
+                                    <Text style={[theme.robotoMedium.caption, { color: theme.colors.placeholder, marginHorizontal: 5, marginTop: 3 }]}>{moment(message.sentAt).format('lll')}</Text>
                                     {<Entypo name={arrowStyle.arrowName} size={17} color={arrowStyle.arrowColor} style={{ marginTop: 3, marginLeft: 5 }} />}
                                 </View>
                             }
                             description={!isExpanded ? message.message : 'à ' + receivers}
                             theme={{ colors: { primary: '#333' } }}
-                            titleStyle={theme.customFontMSsemibold.header}
-                            descriptionStyle={theme.customFontMSmedium.caption}>
+                            titleStyle={theme.robotoMedium.header}
+                            descriptionStyle={theme.robotoMedium.caption}>
 
                             {this.renderMessage(message)}
 

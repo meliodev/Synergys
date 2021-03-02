@@ -1,9 +1,11 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, TouchableOpacity, FlatList } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, FlatList, Text } from 'react-native'
 import { List } from 'react-native-paper';
 import { withNavigation } from 'react-navigation'
 import firebase from '@react-native-firebase/app'
+import { faPen, faEnvelope } from '@fortawesome/pro-light-svg-icons'
 
+import Header from '../../components/Header'
 import MessageItem from '../../components/MessageItem'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
@@ -65,7 +67,10 @@ class ListMessages extends Component {
 
         return (
             <View style={styles.container}>
-                <List.Subheader>{messagesCount} message{s}</List.Subheader>
+                <Header style={{ paddingVertical: 15 }}>
+                    <Text style={theme.robotoRegular.body}>{messagesCount} message{s}</Text>
+                </Header>
+
                 {messagesCount > 0 ?
                     < FlatList
                         style={styles.root}
@@ -76,9 +81,9 @@ class ListMessages extends Component {
                         renderItem={(item) => this.renderMessage(item)}
                     />
                     :
-                    <EmptyList iconName='email' header='Messages' description="Vous n'avez aucun message pour le moment." offLine={this.props.offLine} />
+                    <EmptyList icon={faEnvelope} header='Messages' description="Vous n'avez aucun message pour le moment." offLine={this.props.offLine} />
                 }
-                <MyFAB icon='pencil' onPress={() => this.props.navigation.navigate('NewMessage')} />
+                <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />
             </View >
         )
 
