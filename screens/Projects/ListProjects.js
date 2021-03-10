@@ -71,7 +71,8 @@ class ListProjects extends Component {
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+
         Keyboard.dismiss()
         requestWESPermission()
         requestRESPermission()
@@ -88,6 +89,7 @@ class ListProjects extends Component {
 
         this.fetchDocs(query, 'projectsList', 'projectsCount', () => load(this, false))
     }
+
 
     renderProject(project) {
         const { view } = this.state
@@ -147,7 +149,6 @@ class ListProjects extends Component {
             />
         )
     }
-
 
     toggleViewMode() {
         const { view } = this.state
@@ -246,3 +247,20 @@ const mapStateToProps = (state) => {
 }
 
 export default connect(mapStateToProps)(ListProjects)
+
+
+
+
+
+   // const collection = formatedActions[documentId][0]['collection'] //PROJECTS: all array items have same collection
+
+            // for (let action of formatedActions[documentId]) { // NOM & PRENOM: actions targeting same collection / same document
+
+            //     const { properties } = action
+
+            //     const isValid = await this.verifyDataExist(collection, documentId, properties)
+
+            //     if (isValid) {
+            //         action.status = 'done'
+            //     }
+            // }

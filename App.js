@@ -303,7 +303,7 @@ export default App
     //   screenParams: { userId: '', isClient: true },
     //   type: 'auto',
     //   responsable: '',
-    // },
+    // }, ##PROJECT.CLIENT
     // 'address': {
     //   id: 'address',
     //   title: 'Adresse postale',
@@ -312,7 +312,7 @@ export default App
     //   screenParams: { userId: '', isClient: true },
     //   type: 'auto',
     //   responsable: '',
-    // },
+    // }, ##PROJECT.CLIENT
     // 'phone': {
     //   id: 'phone',
     //   title: 'Numéro de téléphone',
@@ -321,7 +321,7 @@ export default App
     //   screenParams: { userId: '', isClient: true },
     //   type: 'auto',
     //   responsable: '',
-    // },
+    // }, ##PROJECT.CLIENT
     // 'comment': {
     //   id: 'comment',
     //   title: 'Commentaire',
@@ -330,4 +330,4 @@ export default App
     //   screenParams: { userId: '', isClient: true },
     //   type: 'auto',
     //   responsable: '',
-    // },
+    // }, ##PROJECT.NOTE

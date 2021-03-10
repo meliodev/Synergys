@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard, 
 import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import firebase from '@react-native-firebase/app'
@@ -25,6 +25,7 @@ import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
+import { projectProcessInit, getPhaseId } from '../../core/process'
 
 import { connect } from 'react-redux'
 
@@ -82,19 +83,19 @@ class CreateProject extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "", error: '' },
+            name: { value: "Project G", error: '' },
             description: { value: "", error: '' },
             note: { value: "", error: '' },
 
             //Screens
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            client: { id: '', fullName: '' },
+            client: { id: 'GS-CL-9o1z', fullName: 'Client 1' },
             clientError: '',
 
             //Pickers
             state: 'En attente',
-            step: 'Prospect',
+            step: 'Rendez-vous 1',
 
             //Tag Autocomplete
             suggestions: [],
@@ -126,6 +127,9 @@ class CreateProject extends Component {
             taskTypes: [],
             expandedTaskId: '',
 
+            //Process
+            process: null,
+
             error: '',
             loading: false
         }
@@ -152,7 +156,7 @@ class CreateProject extends Component {
         await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
             if (doc.exists) {
                 let { client, name, description, note, address, state, step, tagsSelected, color } = this.state
-                let { createdAt, createdBy, editedAt, editedBy, attachedImages } = this.state
+                let { createdAt, createdBy, editedAt, editedBy, attachedImages, process } = this.state
                 let { error, loading } = this.state
                 var imagesView = []
                 var imagesCarousel = []
@@ -173,6 +177,8 @@ class CreateProject extends Component {
                 editedAt = project.editedAt
                 editedBy = project.editedBy
 
+                process = project.process
+
                 //Images
                 attachedImages = project.attachments || []
 
@@ -189,7 +195,7 @@ class CreateProject extends Component {
                 //Address
                 address = project.address
 
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color }, () => {
+                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process }, () => {
                     //if (this.isInit)
                     this.initialState = this.state
 
@@ -350,9 +356,24 @@ class CreateProject extends Component {
         }
 
         console.log('Ready to set project...')
-        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        if (isConnected)
+            await db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        else
+            db.collection('Projects').doc(this.ProjectId).set(project, { merge: true }) //Nothing to wait for -> data persisted to local cache
 
-        setTimeout(() => this.props.navigation.goBack(), 1000)
+        //After project is created we can verify fields (actions) during processInit
+        setTimeout(async () => {
+            //Get phase id
+            const currentPhaseId = getPhaseId(step)
+            const clientId = client.id
+            const projectProcess = await projectProcessInit(this.ProjectId, clientId, currentPhaseId)
+            project.process = projectProcess
+
+            db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+            setTimeout(() => this.props.navigation.goBack(), 1000)
+
+        }, 2000)
+
     }
 
     showAlert() {
@@ -490,11 +511,26 @@ class CreateProject extends Component {
         })
     }
 
+    renderProcessCurrentAction(process) {
+        const { title, status } = process.init.steps.prospectCreation.actions[0]
+
+        return (
+            <FormSection
+                sectionTitle='Prochaine tâche'
+                form={
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <Text style={[theme.customFontMSregular]}>{title}</Text>
+                        <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.primary : theme.colors.gray_dark} />
+                    </View>
+                }
+            />
+        )
+    }
 
     render() {
         let { client, clientError, name, description, note, address, addressError, state, step, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
-        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
+        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected, process } = this.state
         let { error, loading, toastMessage, toastType } = this.state
         let { canUpdate, canDelete } = this.props.permissions.projects
         canUpdate = (canUpdate || !this.isEdit)
@@ -507,6 +543,8 @@ class CreateProject extends Component {
                 <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 
                 <ScrollView style={styles.dataContainer}>
+
+                    {!loading && process && this.renderProcessCurrentAction(process)}
 
                     {!loading &&
                         <FormSection
@@ -566,7 +604,10 @@ class CreateProject extends Component {
                                         error={!!step.error}
                                         errorText={step.error}
                                         selectedValue={step}
-                                        onValueChange={(step) => this.setState({ step })}
+                                        onValueChange={(step) => {
+                                            console.log(step)
+                                            this.setState({ step })
+                                        }}
                                         title="Phase *"
                                         elements={steps}
                                         enabled={canUpdate}
