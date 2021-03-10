@@ -3,6 +3,7 @@
 import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { connect } from 'react-redux'
+import { faUser, faUsers } from '@fortawesome/pro-light-svg-icons'
 
 import TwoTabs from '../../components/TwoTabs'
 import SearchBar from '../../components/SearchBar'
@@ -48,9 +49,6 @@ class UsersManagement extends React.Component {
         const permissionsTeams = this.props.permissions.teams
         const { isConnected } = this.props.network
 
-        console.log('permissionsUsers', permissionsUsers)
-        console.log('permissionsTeams', permissionsTeams)
-
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
@@ -66,7 +64,8 @@ class UsersManagement extends React.Component {
                 <TabView
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
-
+                    icon1={faUser}
+                    icon2={faUsers}
                     Tab1={
                         <ListUsers
                             searchInput={searchInput}
@@ -78,7 +77,7 @@ class UsersManagement extends React.Component {
                             query={queryUsers}
                             showButton
                             onPress={this.viewProfile.bind(this)}
-                            emptyListHeader='Liste des utilisateurs'
+                            emptyListHeader='Aucun utilisateur'
                             emptyListDesc='Gérez les utilisateurs. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.'
                         />}
 

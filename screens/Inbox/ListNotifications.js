@@ -7,7 +7,8 @@ import firebase from '@react-native-firebase/app'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 
-import Header from '../../components/Header'
+import Background from '../../components/NewBackground'
+import ListSubHeader from '../../components/ListSubHeader'
 import NotificationItem from '../../components/NotificationItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
@@ -35,8 +36,8 @@ class ListNotifications extends Component {
 
     async componentDidMount() {
         let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications')
-        //.where('deleted', '==', false)
-        //.orderBy('sentAt', 'asc')
+            .where('deleted', '==', false)
+            .orderBy('sentAt', 'desc')
         this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { })
     }
 
@@ -71,10 +72,8 @@ class ListNotifications extends Component {
         const s = notificationsCount > 1 ? 's' : ''
 
         return (
-            <View style={styles.container}>
-                <Header style={{ paddingVertical: 15 }}>
-                    <Text style={theme.robotoRegular.body}>{notificationsCount} notification{s}</Text>
-                </Header>
+            <Background style={styles.container}>
+                <ListSubHeader style={{ marginBottom: 10 }}>{notificationsCount} notification{s}</ListSubHeader>
 
                 {notificationsCount > 0 ?
                     <FlatList
@@ -86,9 +85,9 @@ class ListNotifications extends Component {
                         renderItem={(item) => this.renderNotification(item.item)}
                     />
                     :
-                    <EmptyList icon={faBell} header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
+                    <EmptyList icon={faBell} iconColor={theme.colors.miInbox} header='Notifications' description='Aucune notification pour le moment.' offLine={this.props.offLine} />
                 }
-            </View >
+            </Background >
         )
 
     }
@@ -97,10 +96,13 @@ class ListNotifications extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#ffffff",
     },
     root: {
-        backgroundColor: "#fff",
+        //  marginTop: 10,
+        zIndex: 1,
+        paddingHorizontal: theme.padding,
+        backgroundColor: "#ffffff",
     }
 })
 

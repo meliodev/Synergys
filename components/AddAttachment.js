@@ -9,7 +9,7 @@ import CustomIcon from "./CustomIcon";
 
 const AddAttachment = ({ style, onPress, icon, ...props }) => (
     <TouchableOpacity style={[styles.imagesBox, style]} onPress={onPress}>
-        <CustomIcon icon={faPlus} style={{ color: theme.colors.gray_dark }} />
+        <CustomIcon icon={faPlus}  color= {theme.colors.gray_dark} />
     </TouchableOpacity>
 )
 

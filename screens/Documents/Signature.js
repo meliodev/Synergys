@@ -194,8 +194,7 @@ class Signature extends Component {
     async verifyUser() {
         this.setState({ showTerms: false, showDialog: true })
 
-        if (this.state.timeLeft > 0 && this.state.timeLeft < 60)
-            return
+        if (this.state.timeLeft > 0 && this.state.timeLeft < 60) return
 
         this.setState({ timeLeft: 60, status: true, statusMessage: "Génération d'un code secure..." })
         const codeSent = await this.sendCode()
@@ -203,7 +202,6 @@ class Signature extends Component {
         this.setState({ status: false, statusMessage: "" })
 
         if (codeSent) {
-            console.log('code sent..')
             this.setState({ codeSent })
             this.tick()
         }
@@ -222,7 +220,7 @@ class Signature extends Component {
         const sendCode = functions.httpsCallable('sendCode')
         return await sendCode({ phoneNumber: phoneNumber })
             .then((resp) => {
-                //console.log(resp)
+                console.log(resp)
                 if (resp.data.status === 'pending')
                     return true
             })
@@ -641,8 +639,8 @@ class Signature extends Component {
                     <TermsConditions
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
-                        //acceptTerms={this.verifyUser}
-                        acceptTerms={this.startSignature}
+                        acceptTerms={this.verifyUser}
+                        //acceptTerms={this.startSignature}
                         dowloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
                             this.downloadFile(this.termsPath, this.termsURL)

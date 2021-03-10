@@ -22,6 +22,7 @@ class ListEmployees extends React.Component {
     constructor(props) {
         super(props)
         this.getEmployee = this.getEmployee.bind(this)
+        this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.titleText = this.props.navigation.getParam('titleText', '')
 
         this.state = {
@@ -36,7 +37,7 @@ class ListEmployees extends React.Component {
     }
 
     render() {
-        const queryUsers = db.collection('Users').where('isClient', '==', false).where('deleted', '==', false)
+        const queryUsers = db.collection('Users').where('deleted', '==', false)
         const { searchInput, showInput } = this.state
         const permissions = this.props.permissions.users
         const { isConnected } = this.props.network
@@ -44,7 +45,7 @@ class ListEmployees extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
-                    close={true}
+                    menu={this.isRoot}
                     main={this}
                     title={!showInput}
                     titleText={this.titleText}

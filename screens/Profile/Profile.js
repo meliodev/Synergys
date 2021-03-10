@@ -1,24 +1,30 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard, FlatList } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import firebase from '@react-native-firebase/app'
 import NetInfo from "@react-native-community/netinfo"
+import { faUser } from '@fortawesome/pro-solid-svg-icons'
 
 import Appbar from '../../components/Appbar'
+import CustomIcon from '../../components/CustomIcon'
+import FormSection from '../../components/FormSection'
 import AvatarText from '../../components/AvatarText'
 import MyInput from '../../components/TextInput'
 import AddressInput from '../../components/AddressInput'
 import Button from "../../components/Button"
+import ProjectItem2 from "../../components/ProjectItem2"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
 import { resetState, setNetwork } from '../../core/redux'
-import { navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast } from "../../core/utils"
+import { fetchDocs } from '../../api/firestore-api'
+import { navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast,formatRow } from "../../core/utils"
 import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
+import { faConstruction } from '@fortawesome/pro-light-svg-icons'
 
 const db = firebase.firestore()
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
@@ -32,9 +38,13 @@ class Profile extends Component {
         this.passwordValidation = this.passwordValidation.bind(this)
         this.refreshToast = this.refreshToast.bind(this)
         this.handleReauthenticateError = this.handleReauthenticateError.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
 
         this.userId = this.props.navigation.getParam('userId', firebase.auth().currentUser.uid)
         this.role = this.props.role.id
+        this.isClient = this.props.navigation.getParam('isClient', false)
+        this.isClient = this.isClient || this.role === 'client'
+        this.dataCollection = this.isClient ? 'Clients' : 'Users'
         this.initialState = {}
 
         this.state = {
@@ -57,6 +67,8 @@ class Profile extends Component {
             currentPass: { value: '', error: '', show: false },
             newPass: { value: '', error: '', show: false },
 
+            clientProjectsList: [],
+
             loading: true,
             loadingSignOut: false,
             error: '',
@@ -67,6 +79,7 @@ class Profile extends Component {
 
     componentDidMount() {
         this.fetchData()
+        if (this.isClient) this.fetchClientProjects()
         load(this, false)
     }
 
@@ -75,7 +88,7 @@ class Profile extends Component {
     }
 
     fetchData() {
-        this.unsubscribe = db.collection('Users').doc(this.userId).onSnapshot((doc) => {
+        this.unsubscribe = db.collection(this.dataCollection).doc(this.userId).onSnapshot((doc) => {
             const user = doc.data()
 
             let denom = ''
@@ -182,7 +195,7 @@ class Profile extends Component {
         }
 
         //Persist data
-        await db.collection('Users').doc(this.userId).set(user, { merge: true })
+        await db.collection(this.dataCollection).doc(this.userId).set(user, { merge: true })
             .then(() => {
 
                 if (!isConnected) return
@@ -273,8 +286,111 @@ class Profile extends Component {
         })
     }
 
+    //Renderers
+    renderAvatar() {
+        return (
+            <View style={styles.avatar} >
+                <CustomIcon icon={faUser} color={theme.colors.primary} size={30} />
+            </View>
+        )
+    }
+
+    renderMetadata() {
+        const { isPro, nom, prenom, denom, siret } = this.state
+        const { uid } = firebase.auth().currentUser
+        const { isConnected } = this.props.network
+        const isProfileOwner = this.userId === uid
+        let { canUpdate } = this.props.permissions.users
+        canUpdate = (canUpdate || isProfileOwner)
+
+        return (
+            <View style={styles.metadataContainer} >
+                {isPro ?
+                    < MyInput
+                        label="Dénomination sociale"
+                        returnKeyType="done"
+                        value={denom.value}
+                        onChangeText={text => updateField(this, denom, text)}
+                        error={!!denom.error}
+                        errorText={denom.error}
+                        editable={canUpdate}
+                    />
+                    :
+                    <MyInput
+                        label="Prénom"
+                        returnKeyType="done"
+                        value={prenom.value}
+                        onChangeText={text => updateField(this, prenom, text)}
+                        error={!!prenom.error}
+                        errorText={prenom.error}
+                        editable={canUpdate && isConnected}
+                        disabled={!isConnected}
+                    />
+                }
+
+                {isPro ?
+                    < MyInput
+                        label="Siret"
+                        returnKeyType="done"
+                        value={siret.value}
+                        onChangeText={text => updateField(this, siret, text)}
+                        error={!!siret.error}
+                        errorText={siret.error}
+                        editable={false}
+                    />
+                    :
+                    < MyInput
+                        label="Nom"
+                        returnKeyType="done"
+                        value={nom.value}
+                        onChangeText={text => updateField(this, nom, text)}
+                        error={!!nom.error}
+                        errorText={nom.error}
+                        editable={canUpdate && isConnected}
+                        disabled={!isConnected}
+                    />
+                }
+
+            </View>
+
+        )
+    }
+
+
+    fetchClientProjects() {
+        var query = db.collection('Projects').where('client.id', '==', this.userId).where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => load(this, false))
+    }
+
+    renderProject(project) {
+        if (project.empty) {
+            return <View style={styles.invisibleItem} />
+        }
+
+        else return <ProjectItem2 project={project} onPress={() => this.onPressProject(project)} />
+    }
+
+    renderClientProjects() {
+        const { clientProjectsList } = this.state
+        const isProfileOwner = this.userId === firebase.auth().currentUser.uid
+        const mes = isProfileOwner ? 'Mes ' : ''
+
+        return (
+            <View style={{ flex: 1 }}>
+                <FormSection sectionTitle={`${mes}Projets`} sectionIcon={faConstruction} form={null} containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center' }} />
+                <FlatList
+                    data={formatRow(clientProjectsList, 3)}
+                    keyExtractor={item => item.id.toString()}
+                    renderItem={({ item }) => this.renderProject(item)}
+                    style={{ zIndex: 1 }}
+                    numColumns={3}
+                    columnWrapperStyle={{ justifyContent: 'space-between' }} />
+            </View>
+        )
+    }
+
     render() {
-        let { id, isPro, denom, siret, nom, prenom, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingSignOut } = this.state
+        let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingSignOut, clientProjectsList } = this.state
         const { isConnected } = this.props.network
         const { displayName, uid } = firebase.auth().currentUser
         const isProfileOwner = this.userId === uid
@@ -289,63 +405,13 @@ class Profile extends Component {
                 <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 20 }}>
 
                     {!loading ?
-                        <View style={{ paddingHorizontal: constants.ScreenWidth * 0.075 }}>
-                            <View style={{ height: constants.ScreenHeight * 0.27, flexDirection: 'row' }}>
-                                <View style={{ flex: 0.3, justifyContent: 'center', alignItems: 'flex-start' }} >
-                                    {displayName && <AvatarText label={displayName.charAt(0)} size={60} />}
-                                </View>
-                                <View style={{ flex: 0.7, justifyContent: 'center', alignItems: 'center' }} >
-
-                                    {isPro ?
-                                        < MyInput
-                                            label="Dénomination sociale"
-                                            returnKeyType="done"
-                                            value={denom.value}
-                                            onChangeText={text => updateField(this, denom, text)}
-                                            error={!!denom.error}
-                                            errorText={denom.error}
-                                            editable={canUpdate}
-                                        />
-                                        :
-                                        <MyInput
-                                            label="Prénom"
-                                            returnKeyType="done"
-                                            value={prenom.value}
-                                            onChangeText={text => updateField(this, prenom, text)}
-                                            error={!!prenom.error}
-                                            errorText={prenom.error}
-                                            editable={canUpdate && isConnected}
-                                            disabled={!isConnected}
-                                        />
-                                    }
-
-                                    {isPro ?
-                                        < MyInput
-                                            label="Siret"
-                                            returnKeyType="done"
-                                            value={siret.value}
-                                            onChangeText={text => updateField(this, siret, text)}
-                                            error={!!siret.error}
-                                            errorText={siret.error}
-                                            editable={false}
-                                        />
-                                        :
-                                        < MyInput
-                                            label="Nom"
-                                            returnKeyType="done"
-                                            value={nom.value}
-                                            onChangeText={text => updateField(this, nom, text)}
-                                            error={!!nom.error}
-                                            errorText={nom.error}
-                                            editable={canUpdate && isConnected}
-                                            disabled={!isConnected}
-                                        />
-                                    }
-
-                                </View>
+                        <View style={{ paddingHorizontal: theme.padding }}>
+                            <View style={{ height: 130, flexDirection: 'row', alignItems: 'center', marginVertical: 30 }}>
+                                {this.renderAvatar()}
+                                {this.renderMetadata()}
                             </View>
 
-                            <View style={{ flex: 1 }}>
+                            <View style={{ flex: 1, marginBottom: 30 }}>
                                 <MyInput
                                     label="Numéro utilisateur"
                                     returnKeyType="done"
@@ -381,7 +447,7 @@ class Profile extends Component {
                                         mode="contained"
                                         onPress={this.handleSignout.bind(this)}
                                         backgroundColor='#ff5153'
-                                        style={{ width: constants.ScreenWidth * 0.85, alignSelf: 'center' }}>
+                                        style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
                                         Se déconnecter
                                     </Button>
                                 }
@@ -389,7 +455,7 @@ class Profile extends Component {
                                 {isAdmin &&
                                     <TouchableOpacity onPress={() => {
                                         if (!isConnected) return
-                                        navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
+                                        navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
                                     }}>
                                         <MyInput
                                             label="Role"
@@ -397,8 +463,8 @@ class Profile extends Component {
                                             value={role}
                                             autoCapitalize="none"
                                             editable={false}
-                                            right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                                navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role })
+                                            right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
+                                                navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
                                             } />} />
                                     </TouchableOpacity>
                                 }
@@ -476,12 +542,14 @@ class Profile extends Component {
                                         loading={loading}
                                         mode="contained"
                                         onPress={this.changePassword}
-                                        style={{ width: constants.ScreenWidth * 0.85, alignSelf: 'center' }}>
+                                        style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }}>
                                         Modifier le mot de passe
                                 </Button>
                                 }
 
                             </View>
+
+                            {this.isClient && clientProjectsList.length > 0 && this.renderClientProjects()}
                         </View>
                         :
                         <Loading style={{ marginTop: constants.ScreenHeight * 0.4 }} size='large' />
@@ -513,7 +581,21 @@ export default connect(mapStateToProps)(Profile)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: theme.colors.background,
+    },
+    avatar: {
+        width: 130,
+        height: 130,
+        marginTop: 10,
+        borderRadius: 10,
+        backgroundColor: theme.colors.gray_light,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    metadataContainer: {
+        flex: 0.7,
+        alignItems: 'center',
+        paddingLeft: 25
     },
     error: {
         fontSize: 14,
@@ -525,6 +607,14 @@ const styles = StyleSheet.create({
         width: constants.ScreenWidth * 0.17,
         height: constants.ScreenWidth * 0.17,
     },
-
-});
+    invisibleItem: { //Same shape of ProjectItem2
+        width: constants.ScreenWidth * 0.24,
+        height: constants.ScreenWidth * 0.24,
+        borderRadius: constants.ScreenWidth * 0.05,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+        backgroundColor: 'transparent'
+    }
+})
 

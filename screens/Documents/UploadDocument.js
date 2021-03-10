@@ -14,8 +14,10 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
+import AddAttachment from '../../components/AddAttachment'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
+import ItemPicker from "../../components/ItemPicker"
 import Button from "../../components/Button"
 import UploadProgress from "../../components/UploadProgress"
 import Toast from "../../components/Toast"
@@ -94,11 +96,11 @@ class UploadDocument extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "Doc 1", error: '' },
-            description: { value: "aaa", error: '' },
+            name: { value: "", error: '' },
+            description: { value: "", error: '' },
 
             //Screens
-            project: { id: 'GS-PR-D2uu', name: 'Projet Addd' },
+            project: { id: '', name: '' },
             projectError: '',
 
             //Pickers
@@ -421,7 +423,7 @@ class UploadDocument extends Component {
             )
         }
 
-        else if ((attachment && !attachment.pending) || !attachment) {
+        else if (attachment && !attachment.pending) {
             return (
                 <TouchableOpacity
                     onPress={() => {
@@ -435,6 +437,21 @@ class UploadDocument extends Component {
                         multiline
                         right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.togglePopUpMenu_pdfSelection} />} />
                 </TouchableOpacity>
+            )
+        }
+
+        else if (!attachment) {
+            return (
+                <View style={{ marginVertical: 10, marginTop: 15 }}>
+                    <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>
+                    <AddAttachment
+                        style={{ marginTop: 5 }}
+                        onPress={() => {
+                            if (!canUpdate) return
+                            this.togglePopUpMenu_pdfSelection()
+                        }}
+                    />
+                </View>
             )
         }
     }
@@ -475,7 +492,7 @@ class UploadDocument extends Component {
 
         else if (modalContent === 'genConfig') {
             const index = genOptions.findIndex((option) => option.selected)
-            if(index === -1) return
+            if (index === -1) return
             this.startGenPdf(index)
         }
     }
@@ -715,7 +732,7 @@ class UploadDocument extends Component {
 
         if (loadingConversion) return (
             <View style={styles.container}>
-                <Appbar back close title titleText='Exportation du document...' />
+                <Appbar close title titleText='Exportation du document...' />
                 <LoadDialog loading={loadingConversion} loadingConversion message="Conversion du document en cours. Veuillez patienter..." />
             </View>
         )
@@ -723,7 +740,7 @@ class UploadDocument extends Component {
         else return (
             <View style={styles.container}>
                 <Appbar
-                    back close title
+                    close title
                     titleText={loading ? 'Exportation du document...' : this.isEdit ? name.value : 'Nouveau document'}
                     loading={loading}
                     check={this.isEdit ? canUpdate && !loading : !loading}
@@ -754,7 +771,7 @@ class UploadDocument extends Component {
 
 
                                 {type !== '' && <MyInput
-                                    label="Type"
+                                    label="Type *"
                                     returnKeyType="done"
                                     value={type}
                                     editable={false}
@@ -778,7 +795,7 @@ class UploadDocument extends Component {
                                 {this.renderModalPdfOptions()}
 
                                 <MyInput
-                                    label="Nom du document"
+                                    label="Nom du document *"
                                     returnKeyType="done"
                                     value={name.value}
                                     onChangeText={text => updateField(this, name, text)}
@@ -809,16 +826,19 @@ class UploadDocument extends Component {
                                     title="Etat"
                                     elements={states}
                                     enabled={canUpdate}
+                                    containerStyle={{ marginBottom: 0 }}
                                 />
 
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}>
-                                    <MyInput
-                                        label="Projet concerné"
-                                        value={project.name}
-                                        error={!!projectError}
-                                        errorText={projectError}
-                                        editable={false} />
-                                </TouchableOpacity>
+                                <ItemPicker
+                                    onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}
+                                    label="Projet concerné *"
+                                    value={project.name}
+                                    error={!!projectError}
+                                    errorText={projectError}
+                                    editable={false}
+                                    showAvatarText={false}
+                                />
+
                             </Card.Content>
                         </Card>
 

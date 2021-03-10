@@ -408,7 +408,7 @@ class CreateProduct extends Component {
         return (
             <View style={{ marginBottom: 30 }}>
                 <Picker
-                    title="Catégorie"
+                    title="Catégorie *"
                     returnKeyType="next"
                     selectedValue={category.value}
                     onValueChange={(text) => updateField(this, category, text)}
@@ -416,7 +416,7 @@ class CreateProduct extends Component {
                     errorText={category.error} />
 
                 <TouchableOpacity onPress={() => this.toggleDialog('category')}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+  Nouvelle catégorie</Text>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+ Nouvelle catégorie</Text>
                 </TouchableOpacity>
             </View>
         )
@@ -429,7 +429,7 @@ class CreateProduct extends Component {
 
         return (
             <View style={{ marginBottom: 5 }}>
-                <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, marginBottom: 5 }]} >Marque</Text>
+                <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, marginBottom: 5 }]} >Marque *</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
 
                     <View style={{ flex: 0.9 }}>
@@ -469,7 +469,7 @@ class CreateProduct extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} title titleText={this.title} check={true} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
+                <Appbar close={!loading} title titleText={this.title} check={true} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />
 
                 {loading ?
                     <Loading />
@@ -495,7 +495,7 @@ class CreateProduct extends Component {
                                     {this.renderBrand()}
 
                                     <MyInput
-                                        label="Désignation"
+                                        label="Désignation *"
                                         returnKeyType="done"
                                         value={name.value}
                                         onChangeText={text => updateField(this, name, text)}
@@ -513,7 +513,7 @@ class CreateProduct extends Component {
                                         multiline={true} />
 
                                     <MyInput
-                                        label="Prix de vente (€)"
+                                        label="Prix de vente (€) *"
                                         returnKeyType="done"
                                         keyboardType='numeric'
                                         value={price.value}

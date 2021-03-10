@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard, TextInput } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard, TextInput, ActivityIndicator } from 'react-native';
 import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt } from '@fortawesome/pro-light-svg-icons'
+import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import firebase from '@react-native-firebase/app'
 
@@ -15,7 +16,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { Appbar, AutoCompleteUsers, UploadProgress, Header, FormSection, CustomIcon, TextInput as MyInput, AddressInput, Picker, AddAttachment, Toast, Loading } from '../../components'
+import { Appbar, AutoCompleteUsers, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ColorPicker, AddAttachment, Toast, Loading } from '../../components'
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
@@ -37,9 +38,12 @@ const states = [
 ]
 
 const steps = [
-    { label: 'Prospect', value: 'Prospect' },
-    { label: 'Chantier', value: 'Chantier' },
-    { label: 'SAV', value: 'SAV' },
+    { label: 'Initialisation', value: 'Initialisation' },
+    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' },
+    { label: 'Rendez-vous N', value: 'Rendez-vous N' },
+    { label: 'Visite technique', value: 'Visite technique' },
+    { label: 'Installation', value: 'Installation' },
+    { label: 'Maintenance', value: 'Maintenance' },
 ]
 
 const imagePickerOptions = {
@@ -73,7 +77,7 @@ class CreateProject extends Component {
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
         this.isEdit = this.ProjectId ? true : false
-        this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-DOC-')
+        this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-PR-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
 
         this.state = {
@@ -86,6 +90,7 @@ class CreateProject extends Component {
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
             client: { id: '', fullName: '' },
+            clientError: '',
 
             //Pickers
             state: 'En attente',
@@ -94,6 +99,8 @@ class CreateProject extends Component {
             //Tag Autocomplete
             suggestions: [],
             tagsSelected: [],
+
+            color: theme.colors.primary,
 
             //logs (Auto-Gen)
             createdAt: '',
@@ -144,7 +151,7 @@ class CreateProject extends Component {
     async fetchProject() {
         await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
             if (doc.exists) {
-                let { client, name, description, note, address, state, step, tagsSelected } = this.state
+                let { client, name, description, note, address, state, step, tagsSelected, color } = this.state
                 let { createdAt, createdBy, editedAt, editedBy, attachedImages } = this.state
                 let { error, loading } = this.state
                 var imagesView = []
@@ -157,6 +164,7 @@ class CreateProject extends Component {
                 description.value = project.description
                 note.value = project.note
                 tagsSelected = project.subscribers
+                color = project.color
 
                 //َActivity
                 createdAt = project.createdAt
@@ -166,7 +174,7 @@ class CreateProject extends Component {
                 editedBy = project.editedBy
 
                 //Images
-                attachedImages = project.attachments
+                attachedImages = project.attachments || []
 
                 if (attachedImages) {
                     attachedImages = attachedImages.filter((image) => !image.deleted)
@@ -181,9 +189,9 @@ class CreateProject extends Component {
                 //Address
                 address = project.address
 
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected }, () => {
+                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color }, () => {
                     //if (this.isInit)
-                    // this.initialState = this.state
+                    this.initialState = this.state
 
                     //this.isInit = false
                 })
@@ -277,72 +285,74 @@ class CreateProject extends Component {
     async handleSubmit() {
         //Handle Loading or No edit done
         let { loading, attachments } = this.state
-        if (loading || this.state === this.initialState) {
-            console.log('000')
+        if (loading || this.state === this.initialState) return
+
+        load(this, true)
+
+        const isValid = this.validateInputs()
+        if (!isValid) return
+
+        let { client, name, description, note, address, state, step, tagsSelected, color } = this.state
+
+        //1. UPLOADING FILES (ONLINE ONLY)
+        const { isConnected } = this.props.network
+
+        if (isConnected) {
+            if (attachments.length > 0) {
+                this.title = 'Exportation des images...'
+                const storageRefPath = `/Projects/${this.ProjectId}/Images/`
+                const uploadedImages = await this.uploadFiles(attachments, storageRefPath)
+                if (uploadedImages) {
+                    const previousAttachedImages = this.initialState.attachedImages
+                    var attachedImages = previousAttachedImages.concat(uploadedImages)
+                    this.setState({ attachedImages })
+                }
+            }
         }
 
-        console.log('state', this.state)
-        console.log('initialState', this.initialState)
+        //2. Set project
+        //subscribers = currentUser + collaborators (tags)
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const currentSubscriber = { id: this.currentUser.uid, fullName: this.currentUser.displayName, email: this.currentUser.email }
 
+        var subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
+        subscribers.push(currentSubscriber)
 
-        // load(this, true)
+        subscribers = subscribers.reduce((unique, o) => {
+            if (!unique.some(obj => obj.id === o.id && obj.email === o.email && obj.fullName === o.fullName)) {
+                unique.push(o)
+            }
+            return unique
+        }, [])
 
-        // const isValid = this.validateInputs()
-        // if (!isValid) return
+        let project = {
+            client: client,
+            name: name.value,
+            description: description.value,
+            note: note.value,
+            state: state,
+            step: step,
+            address: address,
+            editedAt: moment().format('lll'),
+            editedBy: currentUser,
+            subscribers: subscribers,
+            color: color,
+            deleted: false,
+        }
 
-        // let { client, name, description, note, address, state, step, tagsSelected } = this.state
+        if (!this.isEdit) {
+            project.createdAt = moment().format('lll')
+            project.createdBy = currentUser
+        }
 
-        // //1. UPLOADING FILES (ONLINE ONLY)
-        // const { isConnected } = this.props.network
+        if (isConnected) {
+            project.attachments = attachedImages
+        }
 
-        // if (isConnected) {
-        //     if (attachments.length > 0) {
-        //         this.title = 'Exportation des images...'
-        //         const storageRefPath = `/Projects/${this.ProjectId}/Images/`
-        //         const uploadedImages = await this.uploadFiles(attachments, storageRefPath)
-        //         if (uploadedImages) {
-        //             const previousAttachedImages = this.initialState.attachedImages
-        //             var attachedImages = previousAttachedImages.concat(uploadedImages)
-        //             this.setState({ attachedImages })
-        //         }
-        //     }
-        // }
+        console.log('Ready to set project...')
+        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
 
-        // //2. Set project
-        // //subscribers = currentUser + collaborators (tags)
-        // const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        // const currentSubscriber = { id: this.currentUser.uid, fullName: this.currentUser.displayName, email: this.currentUser.email }
-
-        // var subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
-        // subscribers.push(currentSubscriber)
-        // subscribers = [...new Set(subscribers)] //case of duplicates
-
-        // let project = {
-        //     client: client,
-        //     name: name.value,
-        //     description: description.value,
-        //     note: note.value,
-        //     state: state,
-        //     step: step,
-        //     address: address,
-        //     editedAt: moment().format('lll'),
-        //     editedBy: currentUser,
-        //     subscribers: subscribers,
-        //     deleted: false,
-        // }
-
-        // if (!this.isEdit) {
-        //     project.createdAt = moment().format('lll')
-        //     project.createdBy = currentUser
-        // }
-
-        // if (isConnected) {
-        //     project.attachments = attachedImages
-        // }
-
-        // console.log('Ready to set project...')
-        // db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        // setTimeout(() => this.props.navigation.goBack(), 1000)
+        setTimeout(() => this.props.navigation.goBack(), 1000)
     }
 
     showAlert() {
@@ -422,7 +432,6 @@ class CreateProject extends Component {
                         <CustomIcon
                             icon={rightIconName}
                             style={{ color: theme.colors.gray_dark }}
-                        //size={10}
                         />}
                 </TouchableOpacity>
             )
@@ -435,25 +444,30 @@ class CreateProject extends Component {
             }
         }
 
-        return attachments.map((image, key) => {
-            if (!isUpload) {
-                var DocumentId = image.DocumentId
-                image = image.attachment
-            }
+        return (
+            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                {attachments.map((image, key) => {
+                    if (!isUpload) {
+                        var DocumentId = image.DocumentId
+                        image = image.attachment
+                    }
 
-            const rightIcon = setRightIcon(key)
+                    const rightIcon = setRightIcon(key)
 
-            return (
-                <UploadProgress
-                    attachment={image}
-                    showRightIcon
-                    rightIcon={rightIcon}
-                    onPress={() => onPressAttachment(isUpload, DocumentId)}
-                    showProgress={isUpload}
-                />
-            )
-        })
-        return null
+                    return (
+                        <UploadProgress
+                            attachment={image}
+                            showRightIcon
+                            rightIcon={rightIcon}
+                            onPress={() => onPressAttachment(isUpload, DocumentId)}
+                            showProgress={isUpload}
+                        />
+                    )
+                })}
+                {isUpload && loading && <Loading />}
+            </View>
+        )
+
     }
 
 
@@ -478,7 +492,7 @@ class CreateProject extends Component {
 
 
     render() {
-        let { client, clientError, name, description, note, address, addressError, state, step } = this.state
+        let { client, clientError, name, description, note, address, addressError, state, step, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
         let { error, loading, toastMessage, toastType } = this.state
@@ -490,14 +504,14 @@ class CreateProject extends Component {
 
         return (
             <View style={styles.mainContainer}>
-                <Appbar back={!loading} close title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
+                <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 
                 <ScrollView style={styles.dataContainer}>
 
                     {!loading &&
                         <FormSection
-                            headerText='Informations générales'
-                            headerIcon={<CustomIcon icon={faInfoCircle} />}
+                            sectionTitle='Informations générales'
+                            sectionIcon={faInfoCircle}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <MyInput
@@ -505,17 +519,19 @@ class CreateProject extends Component {
                                         returnKeyType="done"
                                         value={this.ProjectId}
                                         editable={false}
-                                        disabled />
+                                        disabled
+                                    />
 
                                     <MyInput
-                                        label="Nom du projet"
+                                        label="Nom du projet *"
                                         returnKeyType="done"
                                         value={name.value}
                                         onChangeText={text => updateField(this, name, text)}
-                                        error={!!name.error}
+                                        error={name.error}
                                         errorText={name.error}
                                         multiline={true}
-                                        editable={canUpdate} />
+                                        editable={canUpdate}
+                                    />
 
                                     <MyInput
                                         label="Description"
@@ -528,16 +544,14 @@ class CreateProject extends Component {
                                         editable={canUpdate}
                                     />
 
+                                    <ColorPicker selectedColor={color} updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
 
-                                    <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', titleText: 'Clients' })}>
-                                        <MyInput
-                                            label="Client"
-                                            value={client.fullName}
-                                            error={!!clientError}
-                                            errorText={clientError}
-                                            editable={false}
-                                            right={<TextInputPaper.Icon name='plus-circle' color={theme.colors.gray_bold} onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', titleText: 'Clients' })} />} />
-                                    </TouchableOpacity>
+                                    <ItemPicker
+                                        onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: 'CreateProject', isRoot: false, titleText: 'Clients' })}
+                                        label='Client concerné *'
+                                        value={client.fullName}
+                                        errorText={clientError}
+                                    />
 
                                     <AddressInput
                                         offLine={!isConnected}
@@ -553,18 +567,17 @@ class CreateProject extends Component {
                                         errorText={step.error}
                                         selectedValue={step}
                                         onValueChange={(step) => this.setState({ step })}
-                                        title="Étape"
+                                        title="Phase *"
                                         elements={steps}
-                                        enabled={canUpdate} />
+                                        enabled={canUpdate}
+                                        containerStyle={{ marginBottom: 5 }} />
 
                                     <Picker
                                         returnKeyType="next"
                                         value={state}
-                                        // error={!!state.error}
-                                        // errorText={state.error}
                                         selectedValue={state}
                                         onValueChange={(state) => this.setState({ state })}
-                                        title="État"
+                                        title="État *"
                                         elements={states}
                                         enabled={canUpdate} />
 
@@ -579,7 +592,6 @@ class CreateProject extends Component {
                                             showInput={true}
                                             suggestionsBellow={false}
                                             editable={canUpdate}
-
                                         />
                                     </View>
                                 </View>
@@ -588,14 +600,14 @@ class CreateProject extends Component {
 
                     {!loading &&
                         <FormSection
-                            headerText='Bloc Notes'
-                            headerIcon={<CustomIcon icon={faQuoteRight} />}
+                            sectionTitle='Bloc Notes'
+                            sectionIcon={faQuoteRight}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <TextInput
                                         underlineColorAndroid="transparent"
                                         placeholder="Rapportez des notes utiles..."
-                                        placeholderTextColor="grey"
+                                        placeholderTextColor={theme.colors.gray_dark}
                                         numberOfLines={7}
                                         multiline={true}
                                         onChangeText={text => updateField(this, note, text)}
@@ -609,13 +621,13 @@ class CreateProject extends Component {
 
                     {!loading && this.isEdit &&
                         <FormSection
-                            headerText='Tâches'
-                            headerIcon={<CustomIcon icon={faTasks} />}
+                            sectionTitle='Tâches'
+                            sectionIcon={faTasks}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <Text
                                         onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
-                                        style={[theme.customFontMSregular.caption, { color: theme.colors.primary }]}>Voire le planning du projet</Text>
+                                        style={[theme.customFontMSregular.caption, { color: theme.colors.primary }]}>Voir le planning du projet</Text>
 
                                     <List.AccordionGroup
                                         expandedId={expandedTaskId}
@@ -641,8 +653,8 @@ class CreateProject extends Component {
 
                     {!loading && this.isEdit &&
                         <FormSection
-                            headerText='Documents'
-                            headerIcon={<CustomIcon icon={faFolder} />}
+                            sectionTitle='Documents'
+                            sectionIcon={faFolder}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {canCreateDocument && <Text onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })} style={[theme.customFontMSregular.caption, { color: theme.colors.primary }]}>Ajouter un document</Text>}
@@ -671,8 +683,8 @@ class CreateProject extends Component {
 
                     {isConnected &&
                         <FormSection
-                            headerText='Photos et plan du lieu'
-                            headerIcon={<CustomIcon icon={faImage} />}
+                            sectionTitle='Photos et plan du lieu'
+                            sectionIcon={faImage}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {imagesView.length > 0 &&
@@ -741,8 +753,8 @@ class CreateProject extends Component {
 
                     {!loading && this.isEdit &&
                         <FormSection
-                            headerText='Activité'
-                            headerIcon={<CustomIcon icon={faFileAlt} />}
+                            sectionTitle='Activité'
+                            sectionIcon={faFileAlt}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <MyInput

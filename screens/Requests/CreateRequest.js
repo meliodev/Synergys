@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
 import { Card, Title } from 'react-native-paper'
 import firebase from '@react-native-firebase/app';
+import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -11,6 +12,7 @@ moment.locale('fr')
 import Appbar from '../../components/Appbar'
 import Picker from "../../components/Picker";
 import AddressInput from '../../components/AddressInput'
+import ItemPicker from '../../components/ItemPicker'
 import MyInput from '../../components/TextInput'
 import RequestState from "../../components/RequestState";
 import Toast from "../../components/Toast";
@@ -246,7 +248,6 @@ class CreateRequest extends Component {
     }
 
     renderStateToggle(currentState, canUpdate) {
-        console.log('canUpdate', canUpdate)
         const label = this.isTicket ? 'ticket' : 'projet'
         return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, label, canUpdate)} />
     }
@@ -283,7 +284,7 @@ class CreateRequest extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back close title titleText={title} check handleSubmit={this.handleSubmit} />
+                <Appbar close title titleText={title} check handleSubmit={this.handleSubmit} />
 
                 {loading ?
                     <Loading size='large' />
@@ -304,19 +305,18 @@ class CreateRequest extends Component {
                                     editable={false}
                                 />
 
-                                <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, prevScreen: prevScreen, titleText: 'Clients' })}>
-                                    <MyInput
-                                        label="Client"
-                                        value={client.fullName}
-                                        error={!!clientError}
-                                        errorText={clientError}
-                                        editable={false}
-                                    />
-                                </TouchableOpacity>
+                                <ItemPicker
+                                    onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: prevScreen, isRoot: false, titleText: 'Choisir un client' })}
+                                    label="Client *"
+                                    value={client.fullName}
+                                    error={!!clientError}
+                                    errorText={clientError}
+                                    editable={false}
+                                />
 
                                 {this.isTicket ?
                                     <Picker
-                                        label="Département"
+                                        label="Département *"
                                         returnKeyType="next"
                                         value={department}
                                         error={!!department.error}
@@ -337,7 +337,7 @@ class CreateRequest extends Component {
                                 }
 
                                 <MyInput
-                                    label="Sujet"
+                                    label="Sujet *"
                                     returnKeyType="done"
                                     value={subject.value}
                                     onChangeText={text => updateField(this, subject, text)}
@@ -391,7 +391,6 @@ class CreateRequest extends Component {
                             </Card>
                         }
                     </ScrollView>
-
                 }
 
                 <Toast
@@ -401,10 +400,10 @@ class CreateRequest extends Component {
                     onDismiss={() => this.setState({ toastMessage: '' })} />
 
                 {this.isEdit &&
-                    <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingRight: 15, backgroundColor: '#eee', elevation: 3 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingRight: 15, backgroundColor: theme.colors.surface, elevation: 5 }}>
                         <MyFAB
                             onPress={() => this.props.navigation.navigate('Chat', { chatId: this.chatId })}
-                            icon='chat-processing'
+                            icon={faCommentDots}
                             style={styles.fab} />
                         {this.renderStateToggle(state, canUpdate)}
                     </View>}
@@ -430,15 +429,8 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.background
     },
     fab: {
-        //flex: 1,
-        backgroundColor: theme.colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'flex-end',
-        marginBottom: 10,
-        width: constants.ScreenWidth * 0.13,
-        height: constants.ScreenWidth * 0.13,
-        borderRadius: 100,
+        width: constants.ScreenWidth * 0.14,
+        height: constants.ScreenWidth * 0.14,
     }
 });
 

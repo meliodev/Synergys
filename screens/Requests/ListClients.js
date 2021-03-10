@@ -23,9 +23,9 @@ class ListClients extends Component {
         this.getClient = this.getClient.bind(this)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
+        this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.titleText = this.props.navigation.getParam('titleText', '')
         this.showButton = this.props.navigation.getParam('showButton', true)
-        console.log('showButton: ' + this.showButton)
 
         this.state = {
             index: 0,
@@ -44,14 +44,14 @@ class ListClients extends Component {
     }
 
     render() {
-        const queryClients = db.collection('Users').where('isClient', '==', true).where('deleted', '==', false)
+        const queryClients = db.collection('Clients').where('deleted', '==', false) //Client + Prospects
         const permissions = this.props.permissions.users
         const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
-                    close={true}
+                    menu={this.isRoot}
                     main={this}
                     title={!this.state.showInput}
                     titleText={this.titleText}
@@ -71,8 +71,8 @@ class ListClients extends Component {
                     query={queryClients}
                     onPress={this.getClient}
                     showButton={this.showButton}
-                    emptyListHeader='Liste des clients'
-                    emptyListDesc='Aucun client. Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.' />
+                    emptyListHeader='Aucun client'
+                    emptyListDesc='Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.' />
             </View>
         )
     }

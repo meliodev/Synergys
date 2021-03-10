@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native'
+import { List } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import firebase from '@react-native-firebase/app'
 
 import Menu from './Menu'
 import CustomIcon from './CustomIcon'
-import { faParkingCircle } from '@fortawesome/pro-light-svg-icons'
+import { faBell, faBellExclamation } from '@fortawesome/pro-solid-svg-icons'
 
 import * as theme from '../core/theme'
 import { constants } from '../core/constants'
@@ -16,14 +17,18 @@ moment.locale('fr')
 
 const db = firebase.firestore()
 
-const NotificationItem = ({ notification, ...props }) => {
+const NotificationItem = ({ notification, actions, ...props }) => {
 
     const setLeftIcon = (topic) => {
+        const icon = notification.read ? faBell : faBellExclamation
+        const iconColor = notification.read ? theme.colors.white : theme.colors.white
+        const backgroundColor = notification.read ? theme.colors.gray_medium : theme.colors.primary
+
         switch (topic) {
             case 'projects':
                 return (
-                    <View style={styles.leftIcon}>
-                        <CustomIcon icon={faParkingCircle} />
+                    <View style={[styles.leftIcon, { backgroundColor: backgroundColor }]}>
+                        <CustomIcon icon={icon} color={iconColor} />
                     </View>
                 )
         }
@@ -34,27 +39,22 @@ const NotificationItem = ({ notification, ...props }) => {
         { id: 0, title: 'Archiver' },
     ]
 
-    const functions = [
-        () => db.collection('Users').doc(firebase.auth().currentUser.uid)
-            .collection('Notifications').doc(notification.id).update({ deleted: true }),
-    ]
-
     return (
-        <View style={[styles.container, { backgroundColor: notification.read ? theme.colors.white : '#DCEDC8' }]}>
+        <View style={styles.container}>
 
             {setLeftIcon(notification.topic)}
 
             <View style={styles.content}>
 
                 <View style={{ flex: 1 }}>
-                    <Text style={[theme.robotoMedium.body]} numberOfLines={1}>{notification.title}</Text>
-                    <Text style={[theme.robotoRegular.caption]} numberOfLines={3}>{notification.body}</Text>
-                    <Text style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>{moment(notification.sentAt).format('LLL')}</Text>
+                    <Text style={[theme.customFontMSmedium.body, { color: theme.colors.secondary }]} numberOfLines={1}>{notification.title}</Text>
+                    <Text style={[theme.customFontMSregular.caption, { color: theme.colors.secondary }]} numberOfLines={3}>{notification.body}</Text>
+                    <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(notification.sentAt).format('LLL')}</Text>
                 </View>
 
                 {/* #task:  use the menu component */}
                 {/* <View style={{ flex: 0.15, justifyContent: 'flex-start', alignItems: 'center' }}>
-                    <Menu options={options} functions={functions} />
+                    <Menu options={options} functions={actions} />
                 </View> */}
 
             </View>
@@ -66,27 +66,29 @@ const NotificationItem = ({ notification, ...props }) => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+        //padding: 10,
         flexDirection: 'row',
         alignItems: 'flex-start',
-        backgroundColor: 'pink'
+        marginVertical: 5,
+        // backgroundColor: 'pink'
     },
     leftIcon: {
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: theme.colors.surface,
-        borderColor: theme.colors.gray_light,
-        borderWidth: StyleSheet.hairlineWidth,
-        width: 50,
-        height: 50,
+        width: 45,
+        height: 45,
         borderRadius: 25,
-        elevation: 1
+        elevation: 1,
+        marginTop: 3
     },
     content: {
         flex: 1,
         flexDirection: 'row',
-        marginLeft: 10,
+        marginLeft: 15,
         marginRight: 0,
+        paddingBottom: 9,
+        borderBottomWidth: StyleSheet.hairlineWidth * 2,
+        borderBottomColor: theme.colors.gray_light
     },
 })
 

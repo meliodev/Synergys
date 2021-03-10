@@ -63,25 +63,25 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     return (
         <Card style={styles.container} onPress={onPress}>
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(project.step)} style={[styles.linearGradient, styles.stepContainer]}>
-                <Text style={[theme.robotoRegular.body, { color: theme.colors.white }]}>{project.step}</Text>
+                <Text style={[theme.customFontMSregular.body, { color: theme.colors.white }]}>{project.step}</Text>
             </LinearGradient>
 
             <Card.Content style={styles.content}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
-                    <Title style={[theme.robotoRegular.header]} numberOfLines={1}>{project.name}</Title>
-                    <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark, marginBottom: 20 }]} numberOfLines={1}>{project.description}</Paragraph>
+                    <Title style={[theme.customFontMSregular.header]} numberOfLines={1}>{project.name}</Title>
+                    <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{project.description}</Paragraph>
 
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                        <Paragraph numberOfLines={2} style={theme.robotoRegular.header}>à {project.address.description}</Paragraph>
-                        <Paragraph numberOfLines={1} style={theme.robotoRegular.header}>chez <Paragraph style={[theme.robotoRegular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id })}>{project.client.fullName}</Paragraph></Paragraph>
+                        <Paragraph numberOfLines={2} style={theme.customFontMSregular.header}>à {project.address.description}</Paragraph>
+                        <Paragraph numberOfLines={1} style={theme.customFontMSregular.header}>chez <Paragraph style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id })}>{project.client.fullName}</Paragraph></Paragraph>
                     </View>
 
-                    <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.robotoRegular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.editedBy.id })}>{project.editedBy.fullName}</Text></Paragraph>
+                    <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.editedBy.id })}>{project.editedBy.fullName}</Text></Paragraph>
 
                     <View style={styles.footer}>
-                        <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]} >{moment(project.editedAt, 'lll').format('ll')} - {moment(project.editedAt, 'lll').format('HH:mm')}</Paragraph>
+                        <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]} >{moment(project.editedAt, 'lll').format('ll')} - {moment(project.editedAt, 'lll').format('HH:mm')}</Paragraph>
                         <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2 , elevation: 2}}>
-                            <Paragraph style={[theme.robotoRegular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{project.state}</Paragraph>
+                            <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{project.state}</Paragraph>
                         </View>
                     </View>
                 </View>

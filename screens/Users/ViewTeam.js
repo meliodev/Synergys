@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, Alert, FlatList, ScrollView } from 'react-native';
 import { List, Card, Title, Paragraph, IconButton } from 'react-native-paper';
 import firebase from '@react-native-firebase/app';
+import { faPen, faUserPlus } from '@fortawesome/pro-light-svg-icons'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
@@ -16,6 +17,8 @@ import ListItem from '../../components/ListItem';
 import EmptyList from '../../components/EmptyList';
 import Loading from '../../components/Loading';
 import Toast from '../../components/Toast';
+import CustomIcon from '../../components/CustomIcon';
+import MyFAB from '../../components/MyFAB';
 
 const db = firebase.firestore()
 
@@ -74,7 +77,7 @@ export default class ViewTeam extends Component {
     renderTeam() {
         const { expanded, loading } = this.state
         return (
-            <Card style={{ margin: 5, elevation: 2 }}>
+            <Card style={{ margin: 5, elevation: 2, marginBottom: 80 }}>
                 <List.Accordion
                     id={this.teamId}
                     titleComponent={<Text style={theme.customFontMSbold.header}>Membres</Text>}
@@ -84,6 +87,7 @@ export default class ViewTeam extends Component {
                     titleStyle={theme.customFontMSsemibold.title}>
 
                     {loading ? <Loading style={{ margin: constants.ScreenWidth * 0.1 }} /> : this.renderMembers()}
+
                 </List.Accordion>
             </Card>
         )
@@ -184,26 +188,21 @@ export default class ViewTeam extends Component {
     //     const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
     //     const handleConfirm = async () => await deleteTeam(team).then(() => console.log('Batch succeeded !!!'))
     //     this.myAlert(title, message, handleConfirm)
-    // }
+    // } 
 
     render() {
         let { toastMessage, toastType } = this.state
 
         return (
-            <View style={{ flex: 1, backgroundColor: '#fff' }}>
-                <Appbar back title titleText={this.state.team.name}
-                    // del
-                    // handleDelete={() => this.showAlert(this.state.team)}
-                    controller
-                    controllerIcon='account-plus'
-                    handleAction={this.addMembers} />
+            <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+                <Appbar back title titleText={this.state.team.name} handleAction={this.addMembers} />
 
                 <ScrollView style={styles.container} >
                     <Card style={{ margin: 5, elevation: 2 }} onPress={this.editDetails}>
                         <Card.Content>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                 <Title style={theme.customFontMSbold.header}>Informations générales</Title>
-                                <IconButton icon="pencil" onPress={this.editDetails} size={25} color={theme.colors.primary} />
+                                <CustomIcon icon={faPen} color={theme.colors.primary} />
                             </View>
                             <Paragraph style={theme.customFontMSsemibold.body}>{this.state.team.name}</Paragraph>
                             <Paragraph style={theme.customFontMSregular.body}>{this.state.team.description}</Paragraph>
@@ -218,8 +217,10 @@ export default class ViewTeam extends Component {
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })} />
 
+                <MyFAB icon={faUserPlus} onPress={this.addMembers} />
+
             </View>
-        );
+        )
     }
 }
 

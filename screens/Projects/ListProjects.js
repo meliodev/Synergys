@@ -2,15 +2,17 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, FlatList, Keyboard } from 'react-native';
 import { List, Card } from 'react-native-paper';
 import { connect } from 'react-redux'
-import { faParkingCircle } from '@fortawesome/pro-light-svg-icons'
+import { faConstruction } from '@fortawesome/pro-light-svg-icons'
+import { faThLarge, faList } from '@fortawesome/pro-solid-svg-icons'
 
-import { ActiveFilter, SearchBar, Header, Filter, MyFAB, ProjectItem, EmptyList, Loading } from '../../components'
+import { ActiveFilter, SearchBar, ListSubHeader, Filter, MyFAB, ProjectItem, ProjectItem2, EmptyList, Loading } from '../../components'
 
 import Background from '../../components/NewBackground'
+import CustomIcon from '../../components/CustomIcon'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { load, toggleFilter, setFilter, handleFilter, formatRow } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { fetchDocs } from '../../api/firestore-api';
 
@@ -62,6 +64,9 @@ class ListProjects extends Component {
             client: { id: '', fullName: '' },
             filterOpened: false,
 
+            view: 'grid',
+            columnCount: 3,
+
             loading: true,
         }
     }
@@ -85,7 +90,18 @@ class ListProjects extends Component {
     }
 
     renderProject(project) {
-        return <ProjectItem project={project} onPress={() => this.onPressProject(project)} />
+        const { view } = this.state
+
+        if (view === 'list')
+            return <ProjectItem project={project} onPress={() => this.onPressProject(project)} />
+
+        else if (view === 'grid') {
+            if (project.empty) {
+                return <View style={styles.invisibleItem} />
+            }
+
+            else return <ProjectItem2 project={project} onPress={() => this.onPressProject(project)} />
+        }
     }
 
     onPressProject(project) {
@@ -100,10 +116,11 @@ class ListProjects extends Component {
 
     renderSearchBar() {
         const { searchInput, showInput } = this.state
+        let { step, state, client, filterOpened } = this.state
 
         return (
             <SearchBar
-                close={!this.isRoot}
+                menu={this.isRoot}
                 main={this}
                 title={!showInput}
                 titleText={this.titleText}
@@ -112,13 +129,38 @@ class ListProjects extends Component {
                 handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
                 searchInput={searchInput}
                 searchUpdated={(searchInput) => this.setState({ searchInput })}
+                filterComponent={
+                    <Filter
+                        isAppBar={true}
+                        main={this}
+                        opened={filterOpened}
+                        toggleFilter={() => toggleFilter(this)}
+                        setFilter={(field, value) => setFilter(this, field, value)}
+                        resetFilter={() => this.setState({ step: '', state: '', client: { id: '', fullName: '' } })}
+                        options={[
+                            { id: 0, type: 'picker', title: "Étape", values: steps, value: step, field: 'step' },
+                            { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
+                            { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
+                        ]}
+                    />
+                }
             />
         )
     }
 
+
+    toggleViewMode() {
+        const { view } = this.state
+
+        if (view === 'list')
+            this.setState({ view: 'grid', columnCount: 3 })
+        else if (view === 'grid')
+            this.setState({ view: 'list', columnCount: 1 })
+    }
+
     render() {
 
-        let { projectsCount, projectsList, loading } = this.state
+        let { projectsCount, projectsList, view, columnCount, loading } = this.state
         let { step, state, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
         const { canCreate } = this.props.permissions.projects
@@ -131,6 +173,7 @@ class ListProjects extends Component {
         const filterActivated = filterCount < projectsCount
 
         const s = filterCount > 1 ? 's' : ''
+        const isList = view === 'list'
 
         return (
             <View style={{ flex: 1 }}>
@@ -146,35 +189,23 @@ class ListProjects extends Component {
                         {filterActivated && <ActiveFilter />}
 
                         {projectsCount > 0 &&
-                            <Header>
-                                <Text style={theme.robotoRegular.h2}>{filterCount} projet{s}</Text>
-
-                                {this.isRoot &&
-                                    <Filter
-                                        main={this}
-                                        opened={filterOpened}
-                                        toggleFilter={() => toggleFilter(this)}
-                                        setFilter={(field, value) => setFilter(this, field, value)}
-                                        resetFilter={() => this.setState({ step: '', state: '', client: { id: '', fullName: '' } })}
-                                        options={[
-                                            { id: 0, type: 'picker', title: "Étape", values: steps, value: step, field: 'step' },
-                                            { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                                            { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
-                                        ]}
-                                    />}
-                            </Header>
+                            <ListSubHeader right={<CustomIcon icon={isList ? faThLarge : faList} size={18} onPress={this.toggleViewMode.bind(this)} />}>{filterCount} projet{s}</ListSubHeader>
                         }
 
                         {projectsCount > 0 ?
+
                             <FlatList
                                 enableEmptySections={true}
-                                data={this.filteredProjects}
+                                data={formatRow(this.filteredProjects, columnCount)}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderProject(item)}
                                 style={{ zIndex: 1 }}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
+                                numColumns={columnCount}
+                                key={columnCount}
+                                columnWrapperStyle={columnCount > 1 && styles.columnWrapperStyle}
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding, paddingTop: 10 }} />
                             :
-                            <EmptyList icon= {faParkingCircle} header='Liste des projets' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
+                            <EmptyList icon={faConstruction} header='Aucun projet' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
                         }
 
                         {canCreate && this.showFAB && this.isRoot &&
@@ -191,6 +222,18 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.background
     },
+    columnWrapperStyle: {
+        justifyContent: 'space-between'
+    },
+    invisibleItem: { //Same shape of ProjectItem2
+        width: constants.ScreenWidth * 0.24,
+        height: constants.ScreenWidth * 0.24,
+        borderRadius: constants.ScreenWidth * 0.05,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10,
+        backgroundColor: 'transparent'
+    }
 })
 
 const mapStateToProps = (state) => {

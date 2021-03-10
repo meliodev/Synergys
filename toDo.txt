@@ -1,12 +1,67 @@
 25/02/2021:
 
 + Global:
-- Color picker
-- Other View for ListProjects (3 elements per row like Asana -> see screenshot sent by Adam on Whatsapp)
 - Notifications + Emails
-- Activer Twilio Verify
 - Fetch all collections on app start (offline support)
-- remove react-native-fontawesome
+
+Design done:
+- Calendar like google calendars
+- Change emptylist icon color to gray
+- Change connection color button (first screen)
+- Change login screen style
+- add + to add team member instead of user icon
+- Filter: add close icon + Button put bottom
+- notificationitem police
+- not read: bell bg green/white bell
+- Change button color to primary (prospect form...)
+- BUG: notifications showed many times 
+- BE: add collaborators to email receivers projects events
+- SETTINGS: activate double authentication verify Twilio
+- Replace attachment pickers by Squares
+
+Design:
+- Check phone screenshots
+
+TO DO:
+- CREATETASK: Add property 'toute la journée' to task: when we give heure début et fin: 
+- DESIGN: ListDocuments XD design
+- DESIGN: favicon
+- DESIGN: splashscreen (design pending..)
+- VALIDATE DESIGN: AGENDA: align "assigned to" to right (check in case of long names)
+- DASHBOARD: notifications récentes non lu (7) + voir toutes les notifications / Aucune notification récente if nothing
+- DASHBOARD: From today to next days: red tasks, green for others
+
+- NOTIFICATION: Change Notification collection (decompose body: intervenant, action, entity) + Filter
+- EMAIL: "Entité" "Nom de l'entité" action (email title)
+- USERS: remove user account (on delete user)& keep db document to be able to restore later on
+
+- OPTIMIZE: Change filter from menu to modal
+- (Not anymore: Add tasks timeslots verification on check submit show popup with tasks conflicts)
+- BUG: address description first line is hidden somtimes when there is 2lines
+
+DONE: (09/03/2021)
+- Add initialisation & maintenance (projects phases)
+- project title decrease size + 2number of lines (like Asana)
+- AGENDA: Task item on calendar: 50% task name & 50% assignee name
+- USERS: Merge client with prospects: Separate clients/prospects from users (create new collection Clients having prospect: true/false)
+- PROFILE: Add section to client 'Projects'
+- Make on screen containing both clients and prospects: LISTCLIENTS (project/request client selection)
+
+
+DONE: (08/03/2021)
+- Change picker library & change selected value style to match textinput style
+- Loading Create project no loading displayed..
+- CREATETASK: Color picker
+- PROJECTS: Color picker
+- PROJECTS: Other View for ListProjects (3 elements per row like Asana -> see screenshot sent by Adam on Whatsapp)
+- Change notification icon to bell-exclamation secondary color
+- replace icons envoyé reçu on messages by share and mail fontawesome
+- remove projects from mendatory fields  CreateTask
+- IMPORTANT: Add searchbar to Address Map 
+- TEXTINPUT: add * to mendatory fields
+- Change input fontfamily
+- Add motifs background to each list screen (users, teams, requests, ordersy)
+
 
 Done:
 + UploadDocument:
@@ -32,9 +87,6 @@ Ideas:
 - Add id of each item on List overview -> User can communicate easily to us the element having an issue.
 - Add pull to refresh/refresh icon on forms (instead of onSnapshot).. because user has to refresh it voluntarely
 
-
-
-
 #9cf8ff: En cours
 #ff9cad: Bloqué
 #fffc9c: en attente
@@ -42,13 +94,7 @@ primary: validé/terminé
 #f5f5f5: annulé
 
 
-Notice:
-- Add hour to task overview
-- Roboto is the default fontfamily of react native
-
-
-
-//Libraries modifications:
+//Libraries modifications done:
 1- react-native-calendars: 
 + Add Synergys Background
 Steps: 

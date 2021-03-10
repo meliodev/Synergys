@@ -24,6 +24,7 @@ import { load } from "../../core/utils"
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { handleFirestoreError } from '../../core/exceptions'
+import { faUsers, faUser } from '@fortawesome/pro-light-svg-icons'
 
 const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom']
 const db = firebase.firestore()
@@ -70,7 +71,7 @@ export default class AddMembers extends Component {
     getFreeUsers() {
         console.log('Getting free users...')
         const query = db.collection('Users').where('hasTeam', '==', false).where('deleted', '==', false)
-        this.unsubscribe = query.onSnapshot((querysnapshot) => { //where('isClient', '==', false)
+        this.unsubscribe = query.onSnapshot((querysnapshot) => {
             let members = []
             let membersCount = 0
 
@@ -103,13 +104,15 @@ export default class AddMembers extends Component {
         return (
             <UserItem
                 item={member}
-                itemStyle={{ paddingLeft: constants.ScreenWidth * 0.1 }}
                 onPress={check.bind(this, key)}
-                controller={< Checkbox
-                    style={{ flex: 0.1 }}
-                    status={members[key].checked ? 'checked' : 'unchecked'}
-                    onPress={check.bind(this, key)}
-                />} />
+                controller={
+                    <Checkbox
+                        status={members[key].checked ? 'checked' : 'unchecked'}
+                        onPress={check.bind(this, key)}
+                        color= {theme.colors.primary}
+                    />
+                }
+            />
         )
     }
 
@@ -191,7 +194,7 @@ export default class AddMembers extends Component {
 
                 {membersCount > 0 ?
                     <SearchBar
-                        close
+                        menu= {false}
                         main={this}
                         title={!this.state.showInput}
                         titleText={title}
@@ -205,14 +208,14 @@ export default class AddMembers extends Component {
                         handleSubmit={this.addMembers}
                     />
                     :
-                    <Appbar title titleText={title} check handleSubmit={this.dismiss} />
+                    <Appbar back title titleText={title} check handleSubmit={this.dismiss} />
                 }
 
                 {
                     this.isCreation &&
                     <View style={{ paddingTop: 15, marginBottom: 15, paddingHorizontal: 15 }}>
-                        <Text style={theme.customFontMSbold.h3}>Votre équipe a été crée</Text>
-                        <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder, marginTop: 5, }]}>Rassemblez les personnes qui vont contribuer ensemble dans la réalisation de projets.</Text>
+                        <Text style={theme.customFontMSregular.body}>Votre équipe a été crée</Text>
+                        <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginTop: 10 }]}>Rassemblez les personnes qui vont contribuer ensemble dans la réalisation de projets.</Text>
                     </View>
                 }
 
@@ -222,9 +225,10 @@ export default class AddMembers extends Component {
                         data={filteredMembers}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item, index }) => this.renderMember(item, index)}
+                        style={{ paddingHorizontal: theme.padding, paddingTop: theme.padding }}
                         contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                     :
-                    <EmptyList iconName='account' header='Aucun membre disponible' description='Veuillez libérer des membres de leurs équipes, ou ajoutez de nouveaux utilisateurs.' />
+                    <EmptyList icon={faUser} header='Aucun membre disponible' description='Veuillez libérer des membres de leurs équipes, ou ajoutez de nouveaux utilisateurs.' />
                 }
                 <Toast message={error} onDismiss={() => this.setState({ error: '' })} containerStyle={{ bottom: constants.ScreenHeight * 0.05 }} />
 
@@ -244,7 +248,7 @@ export default class AddMembers extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        // backgroundColor: theme.colors.background
+        backgroundColor: theme.colors.background
     },
     fab: {
         flex: 1,

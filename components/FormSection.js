@@ -1,20 +1,19 @@
 
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
-import Header from './Header'
+import Section from './Section'
 import * as theme from '../core/theme'
 
-const FormSection = ({ headerText, headerIcon, form }) => {
+const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle }) => {
     return (
-        <View style={styles.container}>
-            <Header>
-                <Text style= {theme.robotoRegular.h3}>{headerText}</Text>
-                {headerIcon}
-            </Header>
+        <View style={[styles.container, containerStyle]}>
+            <Section text={sectionTitle} icon={sectionIcon} />
 
-            <View style={styles.formContainer}>
-                {form}
-            </View>
+            {form &&
+                <View style={styles.formContainer}>
+                    {form}
+                </View>
+            }
         </View>
     )
 }
@@ -24,11 +23,11 @@ export default FormSection
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: theme.padding
+        paddingBottom: theme.padding,
     },
     formContainer: {
         flex: 1,
         paddingHorizontal: theme.padding,
-        paddingVertical: theme.padding/2
+        paddingVertical: theme.padding / 2
     }
 })

@@ -9,106 +9,65 @@ import Appbar from "../../components/Appbar"
 import Loading from "../../components/Loading"
 import RadioButton from "../../components/RadioButton"
 import MyInput from "../../components/TextInput"
+import AddressInput from "../../components/AddressInput"
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
 
 import _ from 'lodash'
 
 import * as theme from "../../core/theme";
-import { constants, rolesRedux } from "../../core/constants";
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert } from "../../core/utils"
+import { constants } from "../../core/constants";
+import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
 const db = firebase.firestore()
 
-class CreateProspect extends Component {
+class CreateClient extends Component {
     constructor(props) {
         super(props)
-        // this.isProspectArchived = this.isProspectArchived.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.handleConversion = this.handleConversion.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
         this.myAlert = myAlert.bind(this)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
-        this.ProspectId = this.props.navigation.getParam('ProspectId', '')
-        this.isEdit = this.ProspectId ? true : false
-        this.ProspectId = this.isEdit ? this.ProspectId : generateId('GS-US-')
-        this.titleText = this.isEdit ? 'Détails du prospect' : 'Nouveau prospect'
-        this.role = this.props.role.id
+        this.ClientId = generateId('GS-CL-')
+
+        this.isProspect = this.props.navigation.getParam('isProspect', false)
+        this.userType = this.isProspect ? 'prospect' : 'client'
+        this.titleText = `Nouveau ${this.userType}`
 
         this.state = {
             checked: 'first', //professional/Particular
             isPro: false,
-            nom: { value: '', error: '' },
-            prenom: { value: '', error: '' },
+            nom: { value: '2', error: '' },
+            prenom: { value: 'Client', error: '' },
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
 
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            email: { value: "", error: "" },
-            phone: { value: "", error: '' },
+            email: { value: "client2@eqx-software.com", error: "" },
+            phone: { value: "+33111111111", error: '' },
 
-            password: { value: '', error: '', show: false },
+            password: { value: 'Aaaa111', error: '', show: false },
 
             loading: true,
             error: "",
         }
     }
 
-    async componentDidMount() {
-        if (this.isEdit)
-            await this.fetchProspect()
-
-        else this.initialState = this.state
-
+    componentDidMount() {
+        this.initialState = this.state
         load(this, false)
-    }
-
-    async fetchProspect() {
-        await db.collection('Prospects').doc(this.ProspectId).get().then((doc) => {
-            if (doc.exists) {
-                let { checked, isPro, nom, prenom, denom, siret, address, email, password, phone } = this.state
-                let { createdAt, createdBy, editedAt, editedBy } = this.state
-
-                //General info
-                const prospect = doc.data()
-                checked = prospect.isPro ? 'second' : 'first'
-                isPro = prospect.isPro
-                nom.value = prospect.nom
-                prenom.value = prospect.prenom
-                denom.value = prospect.denom
-                siret.value = prospect.siret
-                address = prospect.address
-                email.value = prospect.email
-                password.value = prospect.password
-                phone.value = prospect.phone
-
-                //َActivity
-                createdAt = prospect.createdAt
-                createdBy = prospect.createdBy
-                editedAt = prospect.editedAt
-                editedBy = prospect.editedBy
-
-                this.setState({ checked, isPro, nom, prenom, denom, siret, address, email, password, phone, createdAt, createdBy, editedAt, editedBy }, () => {
-                    //if (this.isInit)
-                    this.initialState = this.state
-
-                    //this.isInit = false
-                })
-            }
-        })
     }
 
     validateInputs() {
         let denomError = ''
         let siretError = ''
-
         let nomError = ''
         let prenomError = ''
 
-        let { isPro, denom, siret, nom, prenom, phone, address, email, password } = this.state
+        let { isPro, denom, siret, nom, prenom, phone, email, password } = this.state
 
         if (isPro) {
             denomError = nameValidator(denom.value, '"Dénomination sociale"')
@@ -121,11 +80,11 @@ class CreateProspect extends Component {
         }
 
         const phoneError = nameValidator(phone.value, '"Téléphone"')
-        const addressError = nameValidator(address.description, '"Adresse"')
+        // const addressError = nameValidator(address.description, '"Adresse"')
         const emailError = emailValidator(email.value)
         const passwordError = passwordValidator(password.value)
 
-        if (denomError || siretError || nomError || prenomError || phoneError || addressError || emailError || passwordError) {
+        if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError) {
 
             phone.error = phoneError
             email.error = emailError
@@ -134,13 +93,13 @@ class CreateProspect extends Component {
             if (isPro) {
                 denom.error = denomError
                 siret.error = siretError
-                this.setState({ denom, siret, phone, addressError, email, password, loading: false })
+                this.setState({ denom, siret, phone, email, password, loading: false })
             }
 
             else {
                 nom.error = nomError
                 prenom.error = prenomError
-                this.setState({ nom, prenom, phone, addressError, email, password, loading: false })
+                this.setState({ nom, prenom, phone, email, password, loading: false })
             }
 
             Keyboard.dismiss()
@@ -153,8 +112,14 @@ class CreateProspect extends Component {
         return true
     }
 
+    async checkEmailExistance(email) {
+        const methods = await firebase.auth().fetchSignInMethodsForEmail(email)
+        const emailExist = methods.length > 0 ? true : false
+        return emailExist
+    }
+
     handleSubmit = async (persist, convert) => {
-        let { role, isPro, error, loading } = this.state
+        let { isPro, error, loading } = this.state
         let { nom, prenom, address, phone, email, password } = this.state
         let { denom, siret } = this.state
 
@@ -165,45 +130,61 @@ class CreateProspect extends Component {
         if (!isValid) return
 
         load(this, true)
-        this.titleText = convert ? "Création du client" : "Création du prospect..."
+        this.titleText = convert ? "Création du client" : `Création du ${this.userType}`
 
         //2. ADDING USER DOCUMENT
-        let prospect = {
-            address: address,
+        let client = {
+            address,
             phone: phone.value,
             email: email.value.toLowerCase(),
-            role: role,
-            hasTeam: false,
+            isProspect: this.isProspect,
             password: password.value,
+            userType: 'client',
             deleted: false
         }
 
         if (isPro) {
-            prospect.denom = denom.value
-            prospect.siret = siret.value
-            prospect.isPro = true
-            prospect.fullName = denom.value
+            client.denom = denom.value
+            client.siret = siret.value
+            client.isPro = true
+            client.fullName = denom.value
         }
 
         else if (!isPro) {
-            prospect.nom = nom.value
-            prospect.prenom = prenom.value
-            prospect.isPro = false
-            prospect.fullName = prenom.value + ' ' + nom.value
+            client.nom = nom.value
+            client.prenom = prenom.value
+            client.isPro = false
+            client.fullName = `${prenom.value} ${nom.value}`
         }
 
-        prospect.isClient = role === 'Client' ? true : false
+        if (this.isProspect)
+            db.collection('Clients').doc(this.ClientId).set(client)
 
-        if (persist) {
-            db.collection('Prospects').doc(this.ProspectId).set(prospect).catch(e => handleFirestoreError(e))
-        }
+        else {
+            if (!isConnected) {
+                Alert.alert('Pas de connection internet', "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur.")
+                return
+            }
 
-        if (convert) {
-            await this.convertProspectToClient(prospect)
+            //Validate if email address already exist
+            const emailExist = await this.checkEmailExistance(email.value)
+            if (emailExist) {
+                email.error = "Cette adresse email est déjà associé à un compte."
+                this.setState({ email, loading: false })
+                return
+            }
+
+            client.role = 'Client'
+            await db.collection('newUsers').doc(this.ClientId).set(client)
+            setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
+                load(this, false)
+                this.title = "Créer un utilisateur"
+                this.props.navigation.navigate(this.prevScreen)
+            }, 6000) //We can reduce this timeout later on...
         }
 
         load(this, false)
-        this.titleText = "Créer un prospect"
+        this.titleText = `Créer un ${this.userType}`
         this.props.navigation.goBack()
     }
 
@@ -211,73 +192,23 @@ class CreateProspect extends Component {
         this.setState({ address, addressError: '' })
     }
 
-    handleConversion() {
-        const { isConnected } = this.props.network
-
-        if (!isConnected) {
-            Alert.alert("", "La conversion d'un propect en client nécessite une connection à internet. Veuillez rétablir votre connection réseau.")
-            return
-        }
-
-        const initialState = _.cloneDeep(this.initialState)
-        const state = _.cloneDeep(this.state)
-        delete initialState.loading
-        delete state.loading
-
-        if (!_.isEqual(initialState, state)) {
-            const title = "Sauvegarder les modifications"
-            const message = "Vous venez d'éffectuer de nouvelles modifications. Voulez-vous les appliquer avant de créer un nouveau client ?"
-            const confirmText = 'OK'
-            const cancelText = 'Ne pas appliquer'
-            const handleSubmitOption1 = () => this.handleSubmit(true, true)
-            const handleSubmitOption2 = () => this.handleSubmit(false, true)
-            const extraButton = { text: 'Annuler', onPress: () => console.log('cancel'), style: 'cancel' }
-            this.myAlert(title, message, handleSubmitOption1, handleSubmitOption2, confirmText, cancelText, extraButton)
-        }
-
-        else this.handleSubmit(false, true)
-    }
-
-    async convertProspectToClient(prospect) {
-        prospect.role = 'Client'
-        prospect.isClient = true
-
-        const batch = db.batch()
-        const prospectsRef = db.collection('Prospects').doc(this.ProspectId)
-        const newusersRef = db.collection('newUsers').doc(this.ProspectId)
-
-        batch.delete(prospectsRef)
-        batch.set(newusersRef, prospect)
-        batch.commit()
-
-        const promise = new Promise((resolve, reject) => {
-            setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-                load(this, false)
-                this.titleText = this.isEdit ? 'Nouveau prospect' : 'Détails du prospect'
-                this.props.navigation.navigate('UsersManagement')
-                resolve(true)
-            }, 6000) //We can reduce this timeout later on...X
-        })
-
-        return promise
-    }
-
     render() {
-        let { role, isPro, error, loading } = this.state
+        let { isPro, error, loading } = this.state
         let { nom, prenom, address, addressError, phone, email, password } = this.state
         let { denom, siret } = this.state
+        const { isConnected } = this.props.network
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar back={!loading} close title titleText={this.titleText} check={!loading} handleSubmit={() => this.handleSubmit(true, false)} />
+                <Appbar close={!loading} title titleText={this.titleText} check={!loading} handleSubmit={() => this.handleSubmit(true, false)} />
 
                 {loading ?
                     <Loading size='large' />
                     :
                     <ScrollView style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
                         <MyInput
-                            label="Identifiant prospect"
-                            value={this.ProspectId}
+                            label="Identifiant client"
+                            value={this.ClientId}
                             editable={false}
                             style={{ marginBottom: 15 }}
                             disabled
@@ -292,7 +223,7 @@ class CreateProspect extends Component {
 
                         {!isPro &&
                             <MyInput
-                                label="Prénom"
+                                label="Prénom *"
                                 returnKeyType="done"
                                 value={prenom.value}
                                 onChangeText={text => updateField(this, prenom, text)}
@@ -301,7 +232,7 @@ class CreateProspect extends Component {
                             />}
 
                         <MyInput
-                            label={isPro ? 'Dénomination sociale' : 'Nom'}
+                            label={isPro ? 'Dénomination sociale *' : 'Nom *'}
                             returnKeyType="next"
                             value={isPro ? denom.value : nom.value}
                             onChangeText={text => {
@@ -316,7 +247,7 @@ class CreateProspect extends Component {
 
                         {isPro &&
                             <MyInput
-                                label='Numéro siret'
+                                label='Numéro siret *'
                                 returnKeyType="next"
                                 value={siret.value}
                                 onChangeText={text => updateField(this, siret, text)}
@@ -325,21 +256,15 @@ class CreateProspect extends Component {
                                 render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
                             />}
 
-                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, title: "Adresse de l'utilisateur", currentAddress: this.state.address })}>
-                            <MyInput
-                                label="Adresse"
-                                returnKeyType="done"
-                                value={address.description}
-                                autoCapitalize="none"
-                                multiline={true}
-                                editable={false}
-                                error={!!addressError}
-                                errorText={addressError}
-                            />
-                        </TouchableOpacity>
+                        <AddressInput
+                            offLine={!isConnected}
+                            onPress={() => navigateToScreen(this, true, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                            address={address}
+                            addressError={addressError}
+                        />
 
                         <MyInput
-                            label="Téléphone"
+                            label="Téléphone *"
                             returnKeyType="done"
                             value={phone.value}
                             onChangeText={text => updateField(this, phone, text)}
@@ -351,7 +276,7 @@ class CreateProspect extends Component {
                             render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
 
                         <MyInput
-                            label="Email"
+                            label="Email *"
                             returnKeyType="next"
                             value={email.value}
                             onChangeText={text => updateField(this, email, text)}
@@ -365,23 +290,21 @@ class CreateProspect extends Component {
                         />
 
                         <MyInput
+                            style={{ marginVertical: 0, zIndex: 1, backgroundColor: theme.colors.background }}
                             label="Mot de passe"
                             returnKeyType="done"
                             value={password.value}
                             onChangeText={text => updateField(this, password, text)}
                             error={!!password.error}
                             errorText={password.error}
-                            autoCapitalize="none"
                             secureTextEntry={!password.show}
-                            right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
+                            autoCapitalize="none"
+
+                            right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
                                 password.show = !password.show
                                 this.setState({ password })
                             }} />}
                         />
-
-                        <Button mode="contained" onPress={this.handleConversion} style={{ width: constants.ScreenWidth * 0.7, alignSelf: 'center', marginTop: 30, backgroundColor: theme.colors.secondary }} >
-                            Convertir en client
-                        </Button>
 
                         <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
 
@@ -401,7 +324,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(CreateProspect)
+export default connect(mapStateToProps)(CreateClient)
 
 const styles = StyleSheet.create({
 })

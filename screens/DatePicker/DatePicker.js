@@ -44,7 +44,7 @@ class MyDatePicker extends Component {
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar back close title titleText={`Date ${this.label}`} check handleSubmit={this.handleSubmit} />
+                <Appbar close title titleText={`Date ${this.label}`} check handleSubmit={this.handleSubmit} />
                 <View style={{ flex: 1, alignItems: 'center' }}>
                     <View style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', borderBottomColor: theme.colors.gray, borderBottomWidth: StyleSheet.hairlineWidth * 2 }}>
                         <Title style={{ marginBottom: 15 }}>Date {this.label}</Title>

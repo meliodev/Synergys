@@ -13,7 +13,7 @@ const Logo = ({ style, ...props }) => (
 
 const styles = StyleSheet.create({
   image: {
-    marginBottom: 12,
+    alignSelf: 'center',
     width: width,
     height: height
   },

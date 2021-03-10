@@ -21,15 +21,15 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
     const setStateColor = (state) => {
         switch (state) {
             case 'En cours':
-                return theme.colors.placeholder
+                return theme.colors.inProgress
                 break
 
             case 'Terminé':
-                return theme.colors.primary
+                return theme.colors.valid
                 break
 
             case 'Annulé':
-                return theme.colors.error
+                return theme.colors.canceled
                 break
 
             default:
@@ -38,22 +38,23 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
     }
 
     return (
-        <TouchableOpacity onPress={onPress} style={{ flex: 1, paddingHorizontal: 15, paddingVertical: 5, borderBottomWidth: 2, borderBottomColor: '#E0E0E0' }}>
+        <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 }}>
-                <Text numberOfLines={1} style={theme.customFontMSbold.body}>{order.project.name}</Text>
-                <Text style={theme.customFontMSbold.header}>€{order.total}</Text>
+                <Text numberOfLines={1} style={theme.customFontMSmedium.body}>{order.project.name}</Text>
+                <Text style={theme.customFontMSmedium.header}>€ {order.total}</Text>
             </View>
 
             <View>
-                {order.client && <Text><Text style={theme.customFontMSregular.body}>chez</Text> <Text style={theme.customFontMSbold.body}>{order.client.fullName}</Text></Text>}
-                <Text style={[theme.customFontMSmedium.body, { paddingTop: 10 }]}>{order.id}</Text>
+                {order.client && <Text><Text style={theme.customFontMSregular.body}>chez</Text> <Text style={theme.customFontMSmedium.body}>{order.client.fullName}</Text></Text>}
+                <Text style={[theme.customFontMSregular.caption, { paddingTop: 10 }]}>{order.id}</Text>
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 }}>
-                <Text style={[theme.customFontMSmedium.body]}>{moment(order.editedAt, 'lll').format('ll')}</Text>
+                <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{moment(order.editedAt, 'lll').format('ll')}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: setStateColor(order.state), marginRight: 5 }} />
-                    <Text style={[theme.customFontMSmedium.caption, { color: setStateColor(order.state) }]}>{order.state.toUpperCase()}</Text>
+                    <View style={{ width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 50, backgroundColor: setStateColor(order.state), padding: 2, elevation: 2 }}>
+                        <Text style={theme.customFontMSregular.caption}>{order.state}</Text>
+                    </View>
                 </View>
             </View>
         </TouchableOpacity>
@@ -61,6 +62,15 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
+        backgroundColor: theme.colors.background,
+        elevation: 3,
+        borderRadius: 10,
+        marginVertical: 5
+    },
     linearGradient: {
         flex: 1,
         paddingLeft: 15,

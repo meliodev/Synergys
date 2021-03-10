@@ -12,30 +12,27 @@ const Button = ({ mode, style, children, outlinedColor = theme.colors.primary, .
       style
     ]}
     labelStyle={[
-      styles.text,
-      mode === "outlined" && { color: outlinedColor },
-      mode === "contained" && { color: theme.colors.surface },
-     // theme.customFontMSsemibold.body
+      //styles.text,
+      mode === "outlined" && { color: outlinedColor, fontFamily: 'Montserrat-Medium' },
+      mode === "contained" && { color: theme.colors.surface, fontFamily: 'Montserrat-Medium' },
     ]}
-    theme={{ colors: { primary: theme.colors.secondary } }}
-
     mode={mode}
     {...props}
   >
     {children}
   </PaperButton>
-);
+)
 
 const styles = StyleSheet.create({
   button: {
     width: "100%",
     marginVertical: 10
   },
-  text: {
-    fontWeight: "bold",
-    fontSize: 15,
-    lineHeight: 26
-  }
+  // text: {
+  //   fontWeight: "bold",
+  //   fontSize: 15,
+  //   lineHeight: 26
+  // }
 });
 
 export default memo(Button);

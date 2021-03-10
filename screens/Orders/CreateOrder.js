@@ -13,6 +13,7 @@ moment.locale('fr')
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
+import ItemPicker from "../../components/ItemPicker"
 import Button from "../../components/Button"
 import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
@@ -504,7 +505,7 @@ class CreateOrder extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={this.autoGenPdf ? false : this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading && !this.autoGenPdf} handleDelete={this.showAlert} />
+                <Appbar close={!loading} title titleText={this.title} check={this.autoGenPdf ? false : this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading && !this.autoGenPdf} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -527,20 +528,20 @@ class CreateOrder extends Component {
                                         disabled
                                     />
 
-                                    <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', title: 'Choix du projet', showFAB: false })}>
-                                        <MyInput
-                                            label="Projet concerné"
-                                            value={project.name}
-                                            error={!!project.error}
-                                            errorText={project.error}
-                                            editable={false}
-                                            right={project.name !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
-                                    </TouchableOpacity>
+                                    <ItemPicker
+                                        onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })}
+                                        label="Projet concerné *"
+                                        value={project.name}
+                                        error={!!project.error}
+                                        errorText={project.error}
+                                        editable={false}
+                                        showAvatarText={false}
+                                    />
 
                                     {client.fullName !== '' &&
                                         <TouchableOpacity >
                                             <MyInput
-                                                label="Client concerné"
+                                                label="Client concerné *"
                                                 value={client.fullName}
                                                 editable={false}
                                                 right={client.fullName !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
@@ -554,7 +555,7 @@ class CreateOrder extends Component {
                                         errorText={state.error}
                                         selectedValue={state}
                                         onValueChange={(state) => this.setState({ state })}
-                                        title="Etat"
+                                        title="Etat *"
                                         elements={states}
                                         enabled={canUpdate}
                                     />

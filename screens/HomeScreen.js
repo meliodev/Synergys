@@ -2,19 +2,19 @@ import React, { Component, memo } from "react";
 import { View, Text, TouchableOpacity, KeyboardAvoidingView, StyleSheet } from 'react-native'
 import Background from "../components/Background";
 import Logo from "../components/Logo";
-import Header from "../components/Header";
 import Button from "../components/Button";
 import Paragraph from "../components/Paragraph";
 import LinearGradient from 'react-native-linear-gradient'
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 
-class HomeScreen extends Component {
+class HomeScreen extends Component { 
 
   render() {
     return (
 
       <View style={styles.background}>
+        
         <Logo />
 
         <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center' }} onPress={() => this.props.navigation.navigate("LoginScreen")}>

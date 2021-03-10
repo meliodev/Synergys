@@ -4,8 +4,9 @@ import { Alert, StyleSheet, Text, View, TouchableOpacity, ScrollView, FlatList, 
 import { Agenda, LocaleConfig } from 'react-native-calendars';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { faCaretDown, faCheckCircle, faTimesCircle, faPauseCircle } from '@fortawesome/pro-solid-svg-icons'
-import XDate from 'xdate'
-import dateutils from '../../node_modules/react-native-calendars/src/dateutils'
+const XDate = require('xdate')
+
+import dateutils from 'react-native-calendars/src/dateutils'
 
 import _ from 'lodash'
 import firebase from '@react-native-firebase/app'
@@ -19,7 +20,7 @@ import CustomIcon from '../../components/CustomIcon'
 import OffLineBar from '../../components/OffLineBar'
 import PickerBar from '../../components/PickerBar'
 import Appbar from '../../components/Appbar'
-import TasksTab from '../../components/TasksTab'
+import PlanningTabs from '../../components/PlanningTabs'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
@@ -76,13 +77,12 @@ class Agenda2 extends Component {
         this.loadItems = this.loadItems.bind(this)
         this.refreshItems = this.refreshItems.bind(this)
         this.handleFilter = this.handleFilter.bind(this)
-        this.toggleTasksTab = this.toggleTasksTab.bind(this)
+        this.togglePlanningTabs = this.togglePlanningTabs.bind(this)
         this.projectFilter = this.props.navigation.getParam('projectFilter', { id: '', name: '' })
 
         this.state = {
             //Settings
             isAgenda: this.isAgenda,
-            isCalendar: true,
 
             //Calendar mode
             items: {},
@@ -183,6 +183,7 @@ class Agenda2 extends Component {
                             priority: task.priority.toLowerCase(),
                             project: task.project,
                             assignedTo: task.assignedTo,
+                            color: task.color,
                             dayProgress: dayProgress
                         })
 
@@ -269,93 +270,15 @@ class Agenda2 extends Component {
         )
     }
 
-    renderItem(item) {
-
-        const priority = item.priority
-        const priorityColorDark = priority === 'urgente' ? theme.colors.high_priority : priority === 'faible' ? theme.colors.low_priority : theme.colors.moderate_priority
-        const priorityColorLight = priority === 'urgente' ? theme.colors.high_priority_light : priority === 'faible' ? theme.colors.low_priority_light : theme.colors.moderate_priority_light
-
-        const priorityTag = (
-            <View style={{ paddingVertical: 5, paddingHorizontal: 10, justifyContent: 'center', alignItems: 'center', backgroundColor: priorityColorDark, borderRadius: 3 }}>
-                <Text style={[theme.robotoRegular.caption, { color: theme.colors.white }]}>{priority}</Text>
-            </View >
-        )
-
-        const renderDate = () => {
-            const dayNumber = moment(item.date, 'YYYY-MM-DD').format('DD')
-            const dayName = moment(item.date, 'YYYY-MM-DD').format('ddd')
-            const dayNameCapitalized = dayName.charAt(0).toUpperCase() + dayName.slice(1)
-
-            return (
-                <View style={{ flex: 0.3, justifyContent: 'flex-start', alignItems: 'flex-start', }}>
-                    <View style={{ backgroundColor: theme.colors.white, paddingLeft: 15, paddingRight: 15, paddingBottom: 5, borderBottomRightRadius: 10, borderBottomLeftRadius: 10 }}>
-                        <Text style={[theme.robotoRegular.big, { color: priorityColorDark }]}>{dayNumber}</Text>
-                        <Text style={[theme.robotoRegular.header, { color: theme.colors.gray_dark, textAlign: 'center', marginTop: -5 }]}>{dayNameCapitalized}</Text>
-                    </View>
-                </View>
-            )
-        }
-
-        const renderDetails = () => (
-            <View style={{ flex: 0.45, justifyContent: 'space-between', paddingBottom: 5, paddingTop: 15, }}>
-                <Text numberOfLines={1} style={[theme.robotoRegular.h2, { color: priorityColorDark }]}>{item.name}</Text>
-                <Text style={[theme.robotoRegular.header, { color: theme.colors.gray_dark, marginTop: 5 }]}>{item.type}</Text>
-                {/* {item.dayProgress !== '1/1' && <Text style={[theme.customFontMSregular.caption]}>(jour {item.dayProgress})</Text>} */}
-            </View>
-        )
-
-        const renderPriority = () => (
-            <View style={{ flex: 0.25, justifyContent: 'space-between', alignItems: 'center', paddingBottom: 5, paddingTop: 15 }}>
-                {priorityTag}
-                {this.renderTaskStatusController(item)}
-            </View>
-        )
-
-        const day = moment(item.date, 'YYYY-MM-DD').format('DD')
-
-        return (
-            <TouchableOpacity
-                style={[styles.item, { backgroundColor: priorityColorLight }]}
-                onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, TaskId: item.id })} >
-
-                {renderDate()}
-                {renderDetails()}
-                {renderPriority()}
-            </TouchableOpacity>
-        )
-    }
-
-    renderEmptyData() {
-        const { isConnected } = this.props.network
-        return (<ActivityIndicator size='large' color={theme.colors.primary} style={{ marginTop: constants.ScreenHeight * 0.3 }} />)
-        //  return (<EmptyList iconName='format-list-bulleted' header='Liste des tâches' description='Aucune tâche planifiée pour ce jour-ci.' offLine={!isConnected} />)
-    }
-
-    renderEmptyDate() {
-        return (
-            <View style={styles.emptyDate}>
-                <Text style={[theme.robotoRegular.body, { color: theme.colors.gray_dark }]}>Aucune tâche</Text>
-            </View>
-        )
-    }
-
     handleFilter(toggle) {
         if (toggle) toggleFilter(this)
 
-        const { isCalendar, items, taskItems, type, status, priority, assignedTo, project, filterOpened } = this.state
+        const { items, taskItems, type, status, priority, assignedTo, project, filterOpened } = this.state
         const fields = [{ label: 'type', value: type }, { label: 'status', value: status }, { label: 'priority', value: priority }, { label: 'project.id', value: project.id }, { label: 'assignedTo.id', value: assignedTo.id }]
 
-        if (isCalendar) { //Calendar mode
-            let filteredItems = {}
-            filteredItems = applyFilterAgenda(items, filteredItems, fields, KEYS_TO_FILTERS)
-            this.setState({ filteredItems })
-        }
-
-        else { //List mode
-            let filteredTaskItems = []
-            filteredTaskItems = applyFilterTasks(taskItems, fields, KEYS_TO_FILTERS)
-            this.setState({ filteredTaskItems })
-        }
+        let filteredItems = {}
+        filteredItems = applyFilterAgenda(items, filteredItems, fields, KEYS_TO_FILTERS)
+        this.setState({ filteredItems })
     }
 
     renderAppBarPicker() {
@@ -363,7 +286,7 @@ class Agenda2 extends Component {
         const roleId = this.props.role.id
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                <Text style={[theme.robotoRegular.title, { color: theme.colors.secondary, marginHorizontal: 10 }]}>{isAgenda ? 'Mon agenda' : 'Planning'}</Text>
+                <Text style={[theme.customFontMSregular.title, { color: theme.colors.secondary, marginHorizontal: 10 }]}>{isAgenda ? 'Mon agenda' : 'Planning'}</Text>
                 <CustomIcon icon={faCaretDown} color={theme.colors.gray_dark} />
             </View>
         )
@@ -404,11 +327,10 @@ class Agenda2 extends Component {
                 </View>
             )
         })
-
     }
 
-    toggleTasksTab(isCalendar) {
-        this.setState({ isCalendar }, () => this.handleFilter(false))
+    togglePlanningTabs(isAgenda) {
+        this.setState({ isAgenda }, () => this.refreshItems(true))
     }
 
     onDayPress(selectedDay) {
@@ -416,36 +338,75 @@ class Agenda2 extends Component {
     }
 
 
-    renderDay(date, item) {
+    renderDay(dateObject, item) {
 
-        const todayStyle = { color: theme.colors.gray_dark }
-        const today = dateutils.sameDate(date, XDate()) ? todayStyle : undefined
-        if (date) {
+        if (dateObject) {
+            const date = moment(dateObject.dateString, 'YYYY-MM-DD').format()
+            const dayNum = moment(date).format('D')
+            let dayName = moment(date).format('ddd').toUpperCase()
+            dayName = dayName.slice(0, -1)
+
+            const today = moment(date).isSame(moment().format()) ? { color: theme.colors.primary } : undefined;
+
             return (
-                <View style={this.styles.day}>
-                    <Text allowFontScaling={false} style={[todayStyle]}>{date.dateString}</Text>
-                    <Text allowFontScaling={false} style={[todayStyle]}>{XDate.locales[XDate.defaultLocale].dayNamesShort[date.getDay()]}</Text>
+                <View style={styles.day}>
+                    <Text allowFontScaling={false} style={[styles.dayNum, today]}>{dayNum}</Text>
+                    <Text allowFontScaling={false} style={[styles.dayText, today]}>{dayName}</Text>
                 </View>
-                //     <View style={{ flex: 1, flexDirection: 'row' }}>
-                //     <Text style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>{date}</Text>
-                //     <View style={{ flex: 1, borderBottomWidth: 1, borderBottomColor: theme.colors.gray_light }} />
-                // </View>
             )
         }
 
-        // else {
-        //     return (
-        //         <View style={this.styles.day} />
-        //     );
-        // }
+        else {
+            return (
+                <View style={styles.day}>
+                    <Text allowFontScaling={false} style={[styles.dayNum, { color: '#fff' }]}></Text>
+                    <Text allowFontScaling={false} style={[styles.dayText, { color: '#fff' }]}></Text>
+                </View>
+            )
+        }
+    }
+
+    renderItem(item) {
+        console.log(item)
+        const itemColor = item.color
+        const TaskId = item.id
+
+        const onPressItem = () => {
+            this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems, TaskId })
+        }
+
+        const progress = item.dayProgress !== '1/1' ? ` (jour ${item.dayProgress})` : ''
+
+        return (
+            <TouchableOpacity style={[styles.item, { backgroundColor: itemColor }]} onPress={onPressItem} >
+                <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
+                    <Text style={[theme.customFontMSregular.body, { color: '#fff' }]} numberOfLines={1}>{item.name}{progress}</Text>
+                </View>
+                <View style={{ flex: 0.5, alignItems: 'flex-end', justifyContent: 'center', paddingLeft: 5 }}>
+                    <Text style={[theme.customFontMSregular.caption, { color: '#fff' }]} numberOfLines={1}>{item.assignedTo.fullName}</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
+
+    renderEmptyData() {
+        const { isConnected } = this.props.network
+        return (<ActivityIndicator size='large' color={theme.colors.primary} style={{ marginTop: constants.ScreenHeight * 0.3 }} />)
+    }
+
+    renderEmptyDate() {
+        return (
+            <View style={styles.item}>
+                <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>Aucune tâche</Text>
+            </View>
+        )
     }
 
     render() {
 
         const roleId = this.props.role.id
-        let { isCalendar, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
-        const filterCalendarActivated = !_.isEqual(items, filteredItems)
-        const filterListActivated = !_.isEqual(taskItems, filteredTaskItems)
+        let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
+        const filterActivated = !_.isEqual(items, filteredItems)
 
         return (
             <View style={{ flex: 1 }}>
@@ -453,19 +414,11 @@ class Agenda2 extends Component {
                 { (roleId === 'admin' || roleId === 'dircom' || roleId === 'tech') ?
                     <PickerBar
                         main={this}
-                        options={[
-                            { id: 0, title: "Mon agenda" },
-                            { id: 1, title: "Planning" },
-                        ]}
-
-                        functions={[
-                            () => this.setCalendarType(true),
-                            () => this.setCalendarType(false),
-                        ]}
-                        menuTrigger={this.renderAppBarPicker()}
-                        filter
+                        //Refresh
                         refresh
                         onRefresh={() => this.refreshItems(true)}
+                        //Filter
+                        filter
                         filterOpened={filterOpened}
                         type={type}
                         status={status}
@@ -476,51 +429,53 @@ class Agenda2 extends Component {
                     <Appbar menu title titleText='Mon agenda' />
                 }
 
-                <TasksTab isCalendar={isCalendar} onPress1={() => this.toggleTasksTab(false)} onPress2={() => this.toggleTasksTab(true)} />
+                <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />
 
-                {/* {isCalendar ?
-                    filterCalendarActivated && <ActiveFilter />
-                    :
-                    filterListActivated && this.renderActiveFilterBar()
-                } */}
+                {filterActivated && <ActiveFilter />}
 
                 <View style={{ flex: 1 }} >
-                    {isCalendar ?
-                        <Agenda
-                            LocaleConfig
-                            //displayLoadingIndicator
-                            renderEmptyData={this.renderEmptyData.bind(this)}
-                            items={this.state.filteredItems}
-                            loadItemsForMonth={this.loadItems}
-                            selected={'2021-02-24'}
-                            // selected={moment().format('YYYY-MM-DD')}
-                            onDayPress={this.onDayPress.bind(this)}
-                            renderItem={this.renderItem.bind(this)}
-                            renderEmptyDate={this.renderEmptyDate.bind(this)}
-                            rowHasChanged={this.rowHasChanged.bind(this)}
-                            displayLoadingIndicator={true}
-                            //onRefresh={() => this.refreshItems(true)} <-- #bug: this line disables zIndex which is used to put background below flatlist items (issue is followed up on react-native github repository)
-                            theme={{
-                                dotColor: theme.colors.agendaLight,
-                                todayTextColor: theme.colors.primary,
-                                selectedDayBackgroundColor: theme.colors.primary,
-                                agendaDayTextColor: theme.colors.agendaLight,
-                                agendaDayNumColor: theme.colors.agendaLight,
-                                agendaTodayColor: theme.colors.primary,
-                                backgroundColor: '#F1F1F8',
-                                'stylesheet.agenda.list': {
-                                    container: {
-                                        flexDirection: 'column'
-                                    }
+                    <Agenda
+                        LocaleConfig
+                        //displayLoadingIndicator
+                        renderEmptyData={this.renderEmptyData.bind(this)}
+                        items={this.state.filteredItems}
+                        loadItemsForMonth={this.loadItems}
+                        selected={moment().format('YYYY-MM-DD')}
+                        onDayPress={this.onDayPress.bind(this)}
+                        renderItem={this.renderItem.bind(this)}
+                        renderEmptyDate={this.renderEmptyDate.bind(this)}
+                        rowHasChanged={this.rowHasChanged.bind(this)}
+                        displayLoadingIndicator={true}
+                        //onRefresh={() => this.refreshItems(true)} <-- #bug: this line disables zIndex which is used to put background below flatlist items (issue is followed up on react-native github repository)
+                        theme={{
+                            dotColor: theme.colors.agendaLight,
+                            todayTextColor: theme.colors.primary,
+                            selectedDayBackgroundColor: theme.colors.primary,
+                            agendaDayTextColor: theme.colors.agendaLight,
+                            agendaDayNumColor: theme.colors.agendaLight,
+                            agendaTodayColor: theme.colors.primary,
+                            textDayFontFamily: '-Regular',
+                            backgroundColor: '#F1F1F8',
+                            'stylesheet.agenda.list': {
+                                container: {
+                                    flexDirection: 'row',
+                                    alignItems: 'flex-start',
+                                    justifyContent: 'flex-start',
                                 },
-                            }}
-                          //  renderDay={this.renderDay}
-                        />
-                        :
-                        <ScrollView contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => this.refreshItems(true)} />}>
-                            {!refreshing ? this.renderTaskItems() : this.renderEmptyData()}
-                        </ScrollView>
-                    }
+                                // day: {
+                                //     width: 63,
+                                //     alignItems: 'center',
+                                //     justifyContent: 'flex-start',
+                                //     marginTop: 0,
+                                //     backgroundColor: 'brown'
+                                // },
+                                dayNum: styles.dayNum,
+                                dayText: styles.dayText,
+                                day: styles.day,
+                            },
+                        }}
+                        renderDay={this.renderDay}
+                    />
                 </View>
                 <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems })} />
             </View>
@@ -550,14 +505,15 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     item: {
-        flex: 1,
+        //flex: 1,
         flexDirection: 'row',
-        borderRadius: 15,
-        paddingRight: 5,
-        paddingLeft: 15,
-        paddingBottom: 15,
-        marginRight: 10,
-        marginTop: 10,
+        justifyContent: 'center',
+        borderRadius: 5,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        marginRight: 15,
+        marginBottom: 10,
+        //marginTop: 10,
     },
     emptyDate: {
         justifyContent: 'center',
@@ -566,6 +522,27 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 30,
     },
+
+    //Agenda theme
+    day: {
+        width: 63,
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        // marginTop: 32,
+    },
+    dayNum: {
+        fontFamily: 'Lato-Regular',
+        fontSize: 18,
+        color: theme.colors.secondary,
+        //fontSize: 28,
+        marginTop: -3
+    },
+    dayText: {
+        fontFamily: '-Medium',
+        fontSize: 12,
+        letterSpacing: 1,
+        color: theme.colors.gray_googleAgenda
+    }
 })
 
 

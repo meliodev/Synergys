@@ -126,7 +126,7 @@ export default class CreateTeam extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} />
+                <Appbar close={!loading} title titleText={this.title} check={!loading} handleSubmit={this.handleSubmit} />
                 {loading ?
                     <Loading size='large' />
                     :
@@ -140,7 +140,7 @@ export default class CreateTeam extends Component {
                         />
 
                         <MyInput
-                            label="Nom de l'équipe"
+                            label="Nom de l'équipe *"
                             returnKeyType="done"
                             value={name.value}
                             onChangeText={text => updateField(this, name, text)}
@@ -173,10 +173,9 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.background
     },
     formContainer: {
-        elevation: 2,
-        paddingHorizontal: constants.ScreenWidth * 0.1,
+        paddingHorizontal: theme.padding*1.2,
         paddingBottom: constants.ScreenWidth * 0.10,
-        paddingTop: constants.ScreenWidth * 0.10,
+        paddingTop: 25,
         marginBottom: constants.ScreenHeight * 0.025,
         backgroundColor: theme.colors.surface
     },

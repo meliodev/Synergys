@@ -40,6 +40,7 @@ class EditRole extends Component {
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.userId = this.props.navigation.getParam('userId', '')
         this.currentRole = this.props.navigation.getParam('currentRole', '')
+        this.dataCollection = this.props.navigation.getParam('dataCollection', 'Users')
 
         this.state = {
             role: '',
@@ -64,7 +65,7 @@ class EditRole extends Component {
         setCustomClaim({ role: this.state.role, userId: this.userId })
             .then(async result => {
 
-                await db.collection('Users').doc(this.userId).update({ role: this.state.role })
+                await db.collection(this.dataCollection).doc(this.userId).update({ role: this.state.role })
 
                 if (this.userId === firebase.auth().currentUser.uid) {
                     firebase.auth().currentUser.getIdToken(true)

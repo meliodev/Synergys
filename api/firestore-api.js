@@ -11,7 +11,6 @@ const db = firebase.firestore()
 //USERS: GET
 
 export function fetchDocs(query, MyList, MyCount, MyCallBack) {
-
   this.unsubscribe = query.onSnapshot((querysnapshot) => {
     var List = []
     var Count = 0

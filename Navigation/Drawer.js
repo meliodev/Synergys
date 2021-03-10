@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
 import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
-import AvatarText from '../components/AvatarText'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog } from '@fortawesome/pro-light-svg-icons'
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import NetInfo from "@react-native-community/netinfo"
+
+import AvatarText from '../components/AvatarText'
+import CustomIcon from '../components/CustomIcon'
 
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
@@ -14,27 +17,27 @@ import { resetState, setNetwork } from '../core/redux'
 const db = firebase.firestore()
 
 const menuPrivilleges = {
-    backoffice: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'orders', 'documents', 'news', 'logout'],
-    admin: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'orders', 'documents', 'news', 'logout'],
-    dircom: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'documents', 'news', 'logout'],
-    com: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'documents', 'news', 'logout'],
-    tech: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'orders', 'documents', 'news', 'logout'],
-    poseur: ['home', 'inbox', 'projects', 'agenda', 'users', 'prospects', 'requests', 'news', 'logout'],
+    backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
+    admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
+    dircom: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'news', 'logout'],
+    com: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'news', 'logout'],
+    tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
+    poseur: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'news', 'logout'],
     client: ['home', 'inbox', 'projects', 'requests', 'documents', 'news', 'logout']
 }
 
 const menuItems = [
-    { id: 'home', name: 'Accueil', icon: 'home', color: 'green', navScreen: 'ProjectsStack' },
-    { id: 'inbox', name: 'Boite de réception', icon: 'comment-text-multiple', color: '#EF6C00', navScreen: 'InboxStack' },
-    { id: 'projects', name: 'Projets', icon: 'alpha-p-box', color: '#3F51B5', navScreen: 'ProjectsStack' }, //Create
-    { id: 'agenda', name: 'Planning', icon: 'calendar', navScreen: 'AgendaStack' },
-    { id: 'users', name: 'Utilisateurs', icon: 'account-multiple-outline', color: '#3b5998', navScreen: 'UsersManagementStack' },
-    { id: 'prospects', name: 'Prospects', icon: 'badge-account-horizontal', color: '#632568', navScreen: 'ProspectsManagementStack' },
-    { id: 'requests', name: 'Gestion des demandes', icon: 'arrow-left-bold', color: '#AD1457', navScreen: 'RequestsManagementStack' },//Create
-    { id: 'orders', name: 'Gestion des commandes', icon: 'file-document-edit-outline', navScreen: 'OrdersStack' }, //Create
-    { id: 'documents', name: 'Documents', icon: 'file-document', color: '#6D4C41', navScreen: 'DocumentsStack' }, //Create
-    { id: 'news', name: 'Actualités', icon: 'newspaper', navScreen: 'NewsStack' },//Create
-    { id: 'logout', name: 'Se déconnecter', icon: 'logout', color: '#000000', navScreen: 'LoginScreen' },
+    { id: 'home', name: 'Accueil', icon: faHomeLgAlt, color: theme.colors.miHome, navScreen: 'ProjectsStack' },
+    { id: 'inbox', name: 'Boite de réception', icon: faInbox, color: '#EF6C00', navScreen: 'InboxStack' },
+    { id: 'projects', name: 'Projets', icon: faConstruction, color: '#3F51B5', navScreen: 'ProjectsStack' }, //Create
+    { id: 'planning', name: 'Planning', icon: faCalendarAlt, color: theme.colors.miPlanning, navScreen: 'AgendaStack' },
+    { id: 'users', name: 'Utilisateurs', icon: faUserFriends, color: theme.colors.miUsers, navScreen: 'UsersManagementStack' },
+    { id: 'clients', name: 'Clients', icon: faAddressCard, color: theme.colors.miClients, navScreen: 'ClientsManagementStack' },
+    { id: 'requests', name: 'Gestion des demandes', icon: faTicketAlt, color: theme.colors.miRequests, navScreen: 'RequestsManagementStack' },//Create
+    { id: 'orders', name: 'Gestion des commandes', icon: faFileInvoice, color: theme.colors.miOrders, navScreen: 'OrdersStack' }, //Create
+    { id: 'documents', name: 'Documents', icon: faFolder, color: theme.colors.miDocuments, navScreen: 'DocumentsStack' }, //Create
+    { id: 'news', name: 'Actualités', icon: faNewspaper, color: theme.colors.miNews, navScreen: 'NewsStack' },//Create
+    { id: 'logout', name: 'Se déconnecter', icon: faSignOutAlt, color: theme.colors.miLogout, navScreen: 'LoginScreen' },
 ]
 
 class DrawerMenu extends React.Component {
@@ -78,17 +81,17 @@ class DrawerMenu extends React.Component {
 
         return (
             <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
-                <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
-                    {currentUser && <AvatarText size={constants.ScreenWidth * 0.11} label={displayName.charAt(0)} />}
+                <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
+                    {currentUser && <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />}
                 </View>
 
-                <View style={{ flex: 0.8, flexDirection: 'row', marginBottom: 3 }}>
+                <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
                     <View style={{ flex: 0.8 }}>
-                        {currentUser && <Text numberOfLines={1} style={[theme.customFontMSsemibold.header, { color: '#fff', paddingLeft: 15 }]}>{displayName}</Text>}
-                        <Text style={[theme.customFontMSmedium.body, { color: '#fff', paddingLeft: 15 }]}>{role.value}</Text>
+                        {currentUser && <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{displayName}</Text>}
+                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role.value}</Text>
                     </View>
                     <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
-                        <FontAwesome name='gear' size={20} style={{ color: '#fff' }} />
+                        <CustomIcon icon={faCog} color={theme.colors.gray_dark} />
                     </View>
                 </View>
             </TouchableOpacity>
@@ -105,7 +108,7 @@ class DrawerMenu extends React.Component {
                 scrollEnabled={(constants.ScreenHeight >= 667) ? false : true}
                 data={arrMenu}
                 keyExtractor={item => item.id.toString()}
-                style={{ marginTop: 15 }}
+                style={{ paddingTop: theme.padding, paddingLeft: theme.padding }}
                 renderItem={({ item }) => this.renderMenuItem(item)} />)
     }
 
@@ -115,17 +118,17 @@ class DrawerMenu extends React.Component {
         if (item.id === 'logout')
             return (
                 <TouchableOpacity onPress={this.handleSignout.bind(this)} style={styles.menuItem}>
-                    <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
-                    <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
+                    <CustomIcon icon={item.icon} color={item.color} />
+                    <Text style={[styles.menuText, theme.customFontMSregular.body]}>{item.name}</Text>
                 </TouchableOpacity>
             )
 
         else return (
             <TouchableOpacity onPress={() => this.navigateToScreen(item.navScreen)} style={styles.menuItem}>
-                <MaterialCommunityIcons name={item.icon} size={20} color={item.color} style={{ paddingLeft: 20 }} />
+                <CustomIcon icon={item.icon} color={item.color} />
                 {item.id === 'inbox' ?
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
+                        <Text style={[styles.menuText, theme.customFontMSregular.body]}>{item.name}</Text>
                         {notificationCount > 0 &&
                             <View style={styles.notificationBadge}>
                                 <Text style={{ fontSize: 8, color: '#fff' }}>{notificationCount}</Text>
@@ -133,7 +136,7 @@ class DrawerMenu extends React.Component {
                         }
                     </View>
                     :
-                    <Text style={[styles.menuText, theme.customFontMSsemibold.body]}>{item.name}</Text>
+                    <Text style={[styles.menuText, theme.customFontMSregular.body]}>{item.name}</Text>
                 }
             </TouchableOpacity>
         )
@@ -158,7 +161,7 @@ class DrawerMenu extends React.Component {
 
         return (
             <SafeAreaView style={styles.container}>
-                <StatusBar backgroundColor={theme.colors.appBar} barStyle="dark-content" />
+                <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
 
                 {currentUser && this.renderHeader(currentUser, role)}
 
@@ -190,14 +193,16 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     headerContainer: {
-        flex: 0.15,
+        flex: 0.13,
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: theme.colors.primary
+        backgroundColor: theme.colors.background,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.gray_light
     },
     menuContainer: {
-        flex: 0.85,
+        flex: 0.87,
         justifyContent: 'center',
         backgroundColor: '#fff'
     },
@@ -218,11 +223,11 @@ const styles = StyleSheet.create({
     },
     notificationBadge: {
         backgroundColor: '#00ACC1',
-        borderRadius: 10,
+        borderRadius: 11,
         justifyContent: 'center',
         alignItems: 'center',
-        width: 20,
-        height: 20
+        width: 22,
+        height: 22
     },
     menuText: {
         marginHorizontal: constants.ScreenWidth * 0.05,

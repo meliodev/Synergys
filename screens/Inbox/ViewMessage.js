@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity } from 'react-native'
 import { List, Headline } from 'react-native-paper'
-import { faArrowAltToBottom } from '@fortawesome/pro-solid-svg-icons'
+import { faArrowAltToBottom, faReply, faShare } from '@fortawesome/pro-solid-svg-icons'
 import Entypo from 'react-native-vector-icons/Entypo'
 
 import * as theme from '../../core/theme'
@@ -88,13 +88,13 @@ export default class ViewMessage extends Component {
                             <View>
                                 {key === 0 &&
                                     <View>
-                                        <Text style={[theme.robotoRegular.body, { marginBottom: 20 }]}>{msg.message}</Text>
-                                        {messagesRendered.length > 1 && <Text style={[theme.robotoMedium.caption, { marginBottom: 5, color: theme.colors.primary }]} onPress={showOldMessages => this.setState({ showOldMessages: !this.state.showOldMessages })}>{showHideText}</Text>}
+                                        <Text style={[theme.customFontMSregular.body, { marginBottom: 20 }]}>{msg.message}</Text>
+                                        {messagesRendered.length > 1 && <Text style={[theme.customFontMSregular.caption, { marginBottom: 5, color: theme.colors.primary }]} onPress={showOldMessages => this.setState({ showOldMessages: !this.state.showOldMessages })}>{showHideText}</Text>}
                                     </View>}
                                 {key > 0 && showOldMessages &&
                                     <View>
-                                        <Text style={theme.robotoRegular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }}>Le <Text style={theme.robotoMedium.body}>{sentAtDate}</Text> à <Text style={theme.robotoMedium.body}>{sentAtTime}</Text>, <Text style={theme.robotoMedium.body}>{msg.sender.fullName}</Text> a écrit:</Text>
-                                        <Text style={[theme.robotoRegular.body, { marginBottom: 15 }]}>{msg.message}</Text>
+                                        <Text style={theme.customFontMSregular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }}>Le <Text style={theme.customFontMSregular.body}>{sentAtDate}</Text> à <Text style={theme.customFontMSregular.body}>{sentAtTime}</Text>, <Text style={theme.customFontMSregular.body}>{msg.sender.fullName}</Text> a écrit:</Text>
+                                        <Text style={[theme.customFontMSregular.body, { marginBottom: 15 }]}>{msg.message}</Text>
                                     </View>}
                             </View>
                         )
@@ -107,12 +107,12 @@ export default class ViewMessage extends Component {
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
                     <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage.sender, messagesRendered)}
                         style={{ width: '39%', alignSelf: 'center' }}>
-                        <Text style={[theme.robotoLight.body, { color: theme.colors.primary }]}>Répondre</Text>
+                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>Répondre</Text>
                     </Button>
 
                     <Button loading={false} mode="contained" onPress={() => this.goToReplyAll(selectedMessage.speakers, messagesRendered)}
                         style={{ width: '55%', alignSelf: 'center', marginLeft: 5 }}>
-                        <Text style={[theme.robotoLight.body, { color: theme.colors.white }]}>Répondre à tous</Text>
+                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.white }]}>Répondre à tous</Text>
                     </Button>
                 </View>
                 {/* } */}
@@ -131,7 +131,7 @@ export default class ViewMessage extends Component {
                 showProgress={false}
                 rightIcon={
                     <TouchableOpacity style={rightIconStyle} onPress={() => downloadFile(this, document.name, document.downloadURL)}>
-                        <CustomIcon icon={faArrowAltToBottom} color= {theme.colors.gray_dark} size= {20}/>
+                        <CustomIcon icon={faArrowAltToBottom} color={theme.colors.gray_dark} size={20} />
                     </TouchableOpacity>
                 }
             />
@@ -142,13 +142,13 @@ export default class ViewMessage extends Component {
         let arrowStyle = {}
 
         if (message.sender.id === this.currentUser.uid) {
-            arrowStyle.arrowName = 'arrow-bold-right'
-            arrowStyle.arrowColor = 'blue'
+            arrowStyle.icon = faReply
+            arrowStyle.color = theme.colors.primary
         }
 
         else {
-            arrowStyle.arrowName = 'arrow-bold-left'
-            arrowStyle.arrowColor = theme.colors.primary
+            arrowStyle.icon = faShare
+            arrowStyle.color = 'blue'
         }
 
         return arrowStyle
@@ -181,15 +181,15 @@ export default class ViewMessage extends Component {
                             style={{ paddingVertical: constants.ScreenHeight * 0.015, borderBottomWidth: !isExpanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.grey_300 }}
                             titleComponent={
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text numberOfLines={1} style={[theme.robotoMedium.header, { marginRight: isExpanded ? 3 : 5 }]}>{message.sender.fullName}</Text>
-                                    <Text style={[theme.robotoMedium.caption, { color: theme.colors.placeholder, marginHorizontal: 5, marginTop: 3 }]}>{moment(message.sentAt).format('lll')}</Text>
-                                    {<Entypo name={arrowStyle.arrowName} size={17} color={arrowStyle.arrowColor} style={{ marginTop: 3, marginLeft: 5 }} />}
+                                    <Text numberOfLines={1} style={[theme.customFontMSregular.header, { marginRight: isExpanded ? 3 : 5 }]}>{message.sender.fullName}</Text>
+                                    <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, marginHorizontal: 5, marginTop: 3 }]}>{moment(message.sentAt).format('lll')}</Text>
+                                    <CustomIcon icon={arrowStyle.icon} color={arrowStyle.color} size={15} style={{ marginTop: 1, marginLeft: 5 }} />
                                 </View>
                             }
                             description={!isExpanded ? message.message : 'à ' + receivers}
                             theme={{ colors: { primary: '#333' } }}
-                            titleStyle={theme.robotoMedium.header}
-                            descriptionStyle={theme.robotoMedium.caption}>
+                            titleStyle={theme.customFontMSregular.header}
+                            descriptionStyle={theme.customFontMSregular.caption}>
 
                             {this.renderMessage(message)}
 
@@ -209,7 +209,7 @@ export default class ViewMessage extends Component {
             <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
                 <Appbar back title titleText='File des messages' />
                 <View style={{ flex: 1, padding: 5, paddingTop: 20 }}>
-                    <Headline style={[theme.customFontMSbold.h3, { paddingLeft: constants.ScreenWidth * 0.038, marginBottom: 5 }]}>{this.message.mainSubject}</Headline>
+                    <Headline style={[theme.customFontMSmedium.h3, { paddingLeft: constants.ScreenWidth * 0.038, marginBottom: 5 }]}>{this.message.mainSubject}</Headline>
                     <ScrollView style={styles.container} >
                         {this.renderMessages()}
                     </ScrollView >

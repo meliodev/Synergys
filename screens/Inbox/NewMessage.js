@@ -313,7 +313,7 @@ class NewMessage extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar back close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} loading={loading} />
+                <Appbar close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} loading={loading} />
                 <ScrollView style={styles.form}>
 
                     <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>
@@ -324,7 +324,7 @@ class NewMessage extends Component {
                     </View>
 
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={{ marginTop: 10 }}>À           </Text>
+                        <Text style={{ marginTop: 13 }}>À           </Text>
 
                         <AutoCompleteUsers
                             suggestions={suggestions}
@@ -440,6 +440,7 @@ const styles = StyleSheet.create({
         //alignSelf: 'center',
         backgroundColor: 'transparent',
         //textAlign: 'center',
+        marginTop: 10,
         paddingVertical: 0,
     },
 });

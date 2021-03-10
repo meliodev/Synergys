@@ -4,8 +4,12 @@ import { List } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { connect } from 'react-redux'
+import { faFolder } from '@fortawesome/pro-light-svg-icons'
 
+import Background from '../../components/NewBackground'
 import SearchBar from '../../components/SearchBar'
+import ActiveFilter from '../../components/ActiveFilter'
+import ListSubHeader from '../../components/ListSubHeader'
 import Filter from '../../components/Filter'
 import DocumentItem from '../../components/DocumentItem'
 import MyFAB from '../../components/MyFAB'
@@ -112,6 +116,39 @@ class ListDocuments extends Component {
         this.unsubscribe && this.unsubscribe()
     }
 
+    renderSearchBar() {
+        let { type, state, project, filterOpened } = this.state
+        let { searchInput, showInput } = this.state
+
+        return (
+            <SearchBar
+                main={this}
+                title={!showInput}
+                titleText='Documents'
+                placeholder='Rechercher un document'
+                showBar={showInput}
+                handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                searchInput={searchInput}
+                searchUpdated={(searchInput) => this.setState({ searchInput })}
+                filterComponent={
+                    <Filter
+                        isAppBar
+                        main={this}
+                        opened={filterOpened}
+                        toggleFilter={() => toggleFilter(this)}
+                        setFilter={(field, value) => setFilter(this, field, value)}
+                        resetFilter={() => this.setState({ type: '', state: '', project: { id: '', name: '' } })}
+                        options={[
+                            { id: 0, type: 'picker', title: "Type", values: types, value: type, field: 'type' },
+                            { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
+                            { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
+                        ]}
+                    />
+                }
+            />
+        )
+    }
+
     render() {
         let { documentsCount, documentsList, loading } = this.state
         let { type, state, project, filterOpened } = this.state
@@ -128,43 +165,16 @@ class ListDocuments extends Component {
         return (
             <View style={styles.container}>
 
-                <SearchBar
-                    main={this}
-                    title={!showInput}
-                    titleText='Documents'
-                    placeholder='Rechercher un document'
-                    showBar={showInput}
-                    handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
-                    searchInput={searchInput}
-                    searchUpdated={(searchInput) => this.setState({ searchInput })}
-                />
-
-                {filterActivated && <View style={styles.filterActive}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
-
                 { loading ?
-                    <View style={styles.container}>
+                    <Background style={styles.container}>
+                        {this.renderSearchBar()}
                         <Loading size='large' />
-                    </View>
+                    </Background>
                     :
-                    <View style={styles.container}>
-                        {documentsCount > 0 &&
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.gray50 }}>
-                                <List.Subheader>{filterCount} document{s}</List.Subheader>
-
-                                <Filter
-                                    main={this}
-                                    opened={filterOpened}
-                                    toggleFilter={() => toggleFilter(this)}
-                                    setFilter={(field, value) => setFilter(this, field, value)}
-                                    resetFilter={() => this.setState({ type: '', state: '', project: { id: '', name: '' } })}
-                                    options={[
-                                        { id: 0, type: 'picker', title: "Type", values: types, value: type, field: 'type' },
-                                        { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                                        { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
-                                    ]}
-                                />
-                            </View>
-                        }
+                    <Background style={styles.container}>
+                        {this.renderSearchBar()}
+                        {filterActivated && <ActiveFilter />}
+                        {documentsCount > 0 && <ListSubHeader>{filterCount} document{s}</ListSubHeader>}
 
                         {documentsCount > 0 ?
                             <FlatList
@@ -172,12 +182,13 @@ class ListDocuments extends Component {
                                 data={this.filteredDocuments}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderDocument(item)}
+                                style={{ zIndex: 1 }}
                                 contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                             :
-                            <EmptyList iconName='file-document' header='Liste des documents' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
+                            <EmptyList icon={faFolder} header='Aucun document' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
                         }
                         {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument')} />}
-                    </View>}
+                    </Background>}
             </View>
 
         )

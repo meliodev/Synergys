@@ -47,7 +47,7 @@ const PickerBar = ({
     const showMenu = () => navigation.openDrawer()
 
     const AppBarIcon = ({ icon, onPress, style }) => {
-        const faIcon = <FontAwesomeIcon icon={icon} size={24} />
+        const faIcon = <FontAwesomeIcon icon={icon} size={24} color={theme.colors.appBarIcon} />
         return <appbar.Action icon={faIcon} onPress={onPress} />
     }
 
@@ -55,20 +55,18 @@ const PickerBar = ({
         return <AppBarIcon icon={faBars} onPress={showMenu} />
     }
 
-    let menuTriggerRef
-
     return (
         <appbar.Header style={[{ backgroundColor: theme.colors.appBar, elevation: 0 }, style]}>
             {renderLeftIcon()}
-            <Menu
+            {/* <Menu
                 options={options}
                 functions={functions}
-                menuTrigger={menuTrigger} />
+                menuTrigger={menuTrigger} /> */}
 
             {<appbar.Content title='' />}
 
             <Filter
-                menuTriggerRef={ref => menuTriggerRef = ref}
+                isAppBar={true}
                 main={main}
                 opened={filterOpened}
                 toggleFilter={() => main.handleFilter(true)}
@@ -85,7 +83,7 @@ const PickerBar = ({
                     { id: 3, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
                     { id: 4, type: 'screen', title: "Affecté à", value: assignedTo.fullName, field: 'assignedTo', screen: 'ListEmployees', titleText: 'Filtre par utilisateur' },
                 ]}
-                iconColor='#fff' />
+            />
 
             {refresh && <AppBarIcon icon={faRedo} onPress={onRefresh} />}
         </appbar.Header>

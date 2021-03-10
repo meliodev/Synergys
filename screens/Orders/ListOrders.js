@@ -2,8 +2,12 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { List } from 'react-native-paper';
 import { connect } from 'react-redux'
+import { faFileInvoice } from '@fortawesome/pro-light-svg-icons'
 
+import Background from '../../components/NewBackground'
+import ActiveFilter from '../../components/ActiveFilter'
 import SearchBar from '../../components/SearchBar'
+import ListSubHeader from '../../components/ListSubHeader'
 import Filter from '../../components/Filter'
 import MyFAB from '../../components/MyFAB'
 import OrderItem from '../../components/OrderItem' //#add
@@ -97,6 +101,39 @@ class ListOrders extends Component {
         else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
+    renderSearchBar() {
+        let { state, project, client, filterOpened } = this.state
+        let { searchInput, showInput } = this.state
+        return (
+            <SearchBar
+                close={!this.isRoot}
+                main={this}
+                title={!this.state.showInput}
+                titleText={this.titleText}
+                placeholder='Rechercher une commande'
+                showBar={showInput}
+                handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                searchInput={searchInput}
+                searchUpdated={(searchInput) => this.setState({ searchInput })}
+                filterComponent={
+                    <Filter
+                        isAppBar
+                        main={this}
+                        opened={filterOpened}
+                        toggleFilter={() => toggleFilter(this)}
+                        setFilter={(field, value) => setFilter(this, field, value)}
+                        resetFilter={() => this.setState({ state: '', client: { id: '', fullName: '' }, project: { id: '', name: '' } })}
+                        options={[
+                            { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
+                            { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
+                            { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
+                        ]}
+                    />
+                }
+            />
+        )
+    }
+
     render() {
         let { ordersCount, ordersList, loading } = this.state
         let { state, project, client, filterOpened } = this.state
@@ -114,44 +151,17 @@ class ListOrders extends Component {
         return (
             <View style={styles.container}>
 
-                <SearchBar
-                    close={!this.isRoot}
-                    main={this}
-                    title={!this.state.showInput}
-                    titleText={this.titleText}
-                    placeholder='Rechercher une commande'
-                    showBar={showInput}
-                    handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
-                    searchInput={searchInput}
-                    searchUpdated={(searchInput) => this.setState({ searchInput })}
-                />
-
-                {filterActivated && <View style={{ backgroundColor: theme.colors.secondary, justifyContent: 'center', alignItems: 'center', paddingVertical: 5 }}><Text style={[theme.customFontMSsemibold.caption, { color: '#fff' }]}>Filtre activé</Text></View>}
-
                 {loading ?
-                    <View style={styles.container}>
+                    <Background style={styles.container}>
+                        {this.renderSearchBar()}
                         <Loading size='large' />
-                    </View>
+                    </Background>
                     :
-                    <View style={styles.container}>
-                        {ordersCount > 0 &&
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: theme.colors.gray50 }}>
-                                <List.Subheader>{filterCount} commande{s}</List.Subheader>
+                    <Background style={styles.container}>
 
-                                {this.isRoot && <Filter
-                                    main={this}
-                                    opened={filterOpened}
-                                    toggleFilter={() => toggleFilter(this)}
-                                    setFilter={(field, value) => setFilter(this, field, value)}
-                                    resetFilter={() => this.setState({ state: '', client: { id: '', fullName: '' }, project: { id: '', name: '' } })}
-                                    options={[
-                                        { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                                        { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
-                                        { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
-                                    ]}
-                                />}
-                            </View>
-                        }
+                        {this.renderSearchBar()}
+                        {filterActivated && <ActiveFilter />}
+                        {ordersCount > 0 && <ListSubHeader>{filterCount} commande{s}</ListSubHeader>}
 
                         {ordersCount > 0 ?
                             <FlatList
@@ -159,15 +169,16 @@ class ListOrders extends Component {
                                 data={this.filteredOrders}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderOrder(item)}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
+                                style={{ zIndex: 1 }}
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
                             :
-                            <EmptyList iconName='file-document-edit-outline' header='Liste des commandes' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={!isConnected} />
+                            <EmptyList icon={faFileInvoice} header='Aucune commande' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={!isConnected} />
                         }
 
                         {canCreate && this.showFAB && this.isRoot &&
                             <MyFAB onPress={() => this.props.navigation.navigate('CreateOrder')} />
                         }
-                    </View>}
+                    </Background>}
             </View>
         )
     }
@@ -176,6 +187,7 @@ class ListOrders extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.background
     },
 });
 

@@ -6,6 +6,7 @@ import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
 
 import Appbar from "../../components/Appbar"
+import AddressInput from "../../components/AddressInput"
 import Loading from "../../components/Loading"
 import Picker from "../../components/Picker"
 import RadioButton from "../../components/RadioButton"
@@ -179,7 +180,7 @@ class CreateUser extends Component {
     let { role, isPro, error, loading } = this.state
     let { userId, nom, prenom, address, phone, email, password } = this.state
     let { denom, siret } = this.state
-    
+
     const { isConnected } = this.props.network
 
     //1. Validate inputs
@@ -198,13 +199,12 @@ class CreateUser extends Component {
     this.title = "Création de l'utilisateur"
     //2. ADDING USER DOCUMENT
     let user = {
-      address: address,
+      address,
       phone: phone.value,
       email: email.value.toLowerCase(),
-      role: role,
-      hasTeam: false,
+      role,
       password: password.value,
-      deleted: false
+      userType: 'utilisateur'
     }
 
     if (isPro) {
@@ -221,14 +221,11 @@ class CreateUser extends Component {
       user.fullName = prenom.value + ' ' + nom.value
     }
 
-    if (role === 'Client')
-      user.isClient = true
-    else
-      user.isClient = false
+    if (!isConnected) {
+      Alert.alert('Pas de connection internet', "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur.")
+      return
+    }
 
-    if (!isConnected) this.props.navigation.navigate(this.prevScreen)
-
-    console.log('Ready to add user...')
     await db.collection('newUsers').doc(userId).set(user).catch(e => handleFirestoreError(e))
     setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
       load(this, false)
@@ -246,15 +243,14 @@ class CreateUser extends Component {
     let { role, isPro, error, loading } = this.state
     let { userId, nom, prenom, address, addressError, phone, email, password } = this.state
     let { denom, siret } = this.state
+    const { isConnected } = this.props.network
 
     const showUserTypeRadio = (role === 'Poseur' || role === 'Client')
     const roles = this.configRolesPicker()
 
-    console.log('roles', roles)
-
     return (
       <View style={{ flex: 1 }}>
-        <Appbar back={!loading} close title titleText={this.title} check={!loading} handleSubmit={this.addUser} />
+        <Appbar close={!loading} title titleText={this.title} check={!loading} handleSubmit={this.addUser} />
 
         {loading ?
           <Loading size='large' />
@@ -270,14 +266,14 @@ class CreateUser extends Component {
 
             {roles &&
               <Picker
-                label="Rôle"
+                label="Rôle *"
                 returnKeyType="next"
                 value={this.state.role}
                 error={!!role.error}
                 errorText={role.error}
                 selectedValue={this.state.role}
                 onValueChange={(role) => this.setState({ role })}
-                title="Type d'utilisateur"
+                title="Type d'utilisateur *"
                 elements={roles}
               />
             }
@@ -291,7 +287,7 @@ class CreateUser extends Component {
 
             {!isPro &&
               <MyInput
-                label="Prénom"
+                label="Prénom *"
                 returnKeyType="done"
                 value={prenom.value}
                 onChangeText={text => updateField(this, prenom, text)}
@@ -300,7 +296,7 @@ class CreateUser extends Component {
               />}
 
             <MyInput
-              label={isPro ? 'Dénomination sociale' : 'Nom'}
+              label={isPro ? 'Dénomination sociale *' : 'Nom *'}
               returnKeyType="next"
               value={isPro ? denom.value : nom.value}
               onChangeText={text => {
@@ -315,7 +311,7 @@ class CreateUser extends Component {
 
             {isPro &&
               <MyInput
-                label='Numéro siret'
+                label='Numéro siret *'
                 returnKeyType="next"
                 value={siret.value}
                 onChangeText={text => updateField(this, siret, text)}
@@ -324,21 +320,16 @@ class CreateUser extends Component {
                 render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
               />}
 
-            <TouchableOpacity onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress, title: "Adresse de l'utilisateur", currentAddress: this.state.address })}>
-              <MyInput
-                label="Adresse"
-                returnKeyType="done"
-                value={address.description}
-                autoCapitalize="none"
-                multiline={true}
-                editable={false}
-                error={!!addressError}
-                errorText={addressError}
-              />
-            </TouchableOpacity>
+            <AddressInput
+              label='Adresse postale'
+              offLine={!isConnected}
+              onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+              address={address}
+              addressError={addressError}
+            />
 
             <MyInput
-              label="Téléphone"
+              label="Téléphone *"
               returnKeyType="done"
               value={phone.value}
               onChangeText={text => updateField(this, phone, text)}
@@ -350,7 +341,7 @@ class CreateUser extends Component {
               render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
 
             <MyInput
-              label="Email"
+              label="Email *"
               returnKeyType="next"
               value={email.value}
               onChangeText={text => updateField(this, email, text)}
@@ -364,7 +355,7 @@ class CreateUser extends Component {
             />
 
             <MyInput
-              label="Mot de passe"
+              label="Mot de passe *"
               returnKeyType="done"
               value={password.value}
               onChangeText={text => updateField(this, password, text)}

@@ -5,7 +5,8 @@ import { withNavigation } from 'react-navigation'
 import firebase from '@react-native-firebase/app'
 import { faPen, faEnvelope } from '@fortawesome/pro-light-svg-icons'
 
-import Header from '../../components/Header'
+import Background from '../../components/NewBackground'
+import ListSubHeader from '../../components/ListSubHeader'
 import MessageItem from '../../components/MessageItem'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
@@ -66,10 +67,8 @@ class ListMessages extends Component {
         const s = messagesCount > 1 ? 's' : ''
 
         return (
-            <View style={styles.container}>
-                <Header style={{ paddingVertical: 15 }}>
-                    <Text style={theme.robotoRegular.body}>{messagesCount} message{s}</Text>
-                </Header>
+            <Background style={styles.container}>
+                <ListSubHeader>{messagesCount} message{s}</ListSubHeader>
 
                 {messagesCount > 0 ?
                     < FlatList
@@ -81,11 +80,11 @@ class ListMessages extends Component {
                         renderItem={(item) => this.renderMessage(item)}
                     />
                     :
-                    <EmptyList icon={faEnvelope} header='Messages' description="Vous n'avez aucun message pour le moment." offLine={this.props.offLine} />
+                    <EmptyList icon={faEnvelope} iconColor={theme.colors.miInbox} header='Messages' description="Aucun message pour le moment." offLine={this.props.offLine} />
                 }
                 <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />
-            </View >
-        )
+            </Background >
+        ) 
 
     }
 }
@@ -96,6 +95,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
     },
     root: {
+        zIndex: 1,
         backgroundColor: "#fff",
     }
 })

@@ -18,9 +18,9 @@ import CreateTeam from '../screens/Users/CreateTeam';
 import AddMembers from '../screens/Users/AddMembers';
 import ViewTeam from '../screens/Users/ViewTeam';
 
-//Prospects management
-import ListProspects from '../screens/Prospects/ListProspects';
-import CreateProspect from '../screens/Prospects/CreateProspect';
+//Clients management
+import ClientsManagement from '../screens/Clients/ClientsManagement';
+import CreateClient from '../screens/Clients/CreateClient';
 
 //Requests Management
 import RequestsManagement from '../screens/Requests/RequestsManagement';
@@ -101,13 +101,13 @@ const UsersManagementStack = createStackNavigator({
     },
 })
 
-const ProspectsManagementStack = createStackNavigator({
-    ListProspects: {
-        screen: ListProspects,
+const ClientsManagementStack = createStackNavigator({
+    ClientsManagement: {
+        screen: ClientsManagement,
         navigationOptions: hideHeader
     },
-    CreateProspect: {
-        screen: CreateProspect,
+    CreateClient: {
+        screen: CreateClient,
         navigationOptions: hideHeader
     },
 })
@@ -295,18 +295,10 @@ const NewsStack = createStackNavigator({
 //3. USER MAIN STACKS (APP & AUTH)
 //Authentification navigation
 export const AuthStack = createStackNavigator({
-    HomeScreen: {
-        screen: HomeScreen,
-        navigationOptions: hideHeader
-    },
     LoginScreen: {
         screen: LoginScreen,
         navigationOptions: hideHeader
     },
-    // RegisterScreen: {
-    //     screen: RegisterScreen,
-    //     navigationOptions: hideHeader
-    // },
     ForgotPasswordScreen: {
         screen: ForgotPasswordScreen,
         navigationOptions: hideHeader
@@ -315,10 +307,6 @@ export const AuthStack = createStackNavigator({
         screen: AuthLoadingScreen,
         navigationOptions: hideHeader
     },
-    // Dashboard: {
-    //     screen: Dashboard,
-    //     navigationOptions: hideHeader
-    // }
 },
     {
         initialRouteName: 'AuthLoadingScreen',
@@ -360,8 +348,8 @@ export const AppStack = createStackNavigator({
         screen: UsersManagementStack,
         navigationOptions: hideHeader
     },
-    ProspectsManagementStack: {
-        screen: ProspectsManagementStack,
+    ClientsManagementStack: {
+        screen: ClientsManagementStack,
         navigationOptions: hideHeader
     },
     RequestsManagementStack: {

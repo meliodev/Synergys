@@ -79,7 +79,7 @@ const DocumentItem = ({ document, options, functions, navigation, ...props }) =>
     // }
 
     return (
-        <Card style={{ marginVertical: 3, marginHorizontal: 5, elevation: 2 }} onPress={() => navigation.navigate('UploadDocument', { isEdit: true, title: '', DocumentId: document.id })}>
+        <Card style={{ marginVertical: 3, marginHorizontal: 5, elevation: 2, backgroundColor: theme.colors.white }} onPress={() => navigation.navigate('UploadDocument', { isEdit: true, title: '', DocumentId: document.id })}>
 
             <Card.Content style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'flex-start' }}>

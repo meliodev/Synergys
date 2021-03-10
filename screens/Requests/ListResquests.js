@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { List, Card, Paragraph, Title } from 'react-native-paper';
+import { faTicketAlt } from '@fortawesome/pro-light-svg-icons'
 
+import ListSubHeader from '../../components/ListSubHeader'
 import MyFAB from '../../components/MyFAB'
 import RequestItem from '../../components/RequestItem'
 import EmptyList from '../../components/EmptyList'
@@ -55,8 +57,8 @@ class ListRequests extends Component {
         const { canCreate } = this.props.permissions
 
         return (
-            <View style={{ flex: 1 }}>
-                {requestsCount > 0 && <List.Subheader>{requestsCount} nouvelle{s} demande{s}</List.Subheader>}
+            <View style={styles.container}>
+                {requestsCount > 0 && <ListSubHeader>{requestsCount} nouvelle{s} demande{s}</ListSubHeader>}
 
                 {requestsCount > 0 ?
                     <FlatList
@@ -66,7 +68,7 @@ class ListRequests extends Component {
                         renderItem={({ item }) => this.renderTicketRequest(item)}
                         contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
                     :
-                    <EmptyList iconName='arrow-left-bold' header='Liste des demandes' description='Aucune nouvelle demande. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
+                    <EmptyList icon={faTicketAlt} iconColor={theme.colors.miRequests} header='Aucune demande' description='Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={this.props.offLine} />
                 }
 
                 {canCreate && <MyFAB onPress={() => this.props.navigation.navigate(this.props.creationScreen)} />}
@@ -78,6 +80,7 @@ class ListRequests extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.background
     },
 })
 

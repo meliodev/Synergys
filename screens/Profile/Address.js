@@ -140,7 +140,7 @@ class MarkerTypes extends React.Component {
                         showInput={showInput}
                         hideInput={() => this.setState({ showInput: false })} />
                     :
-                    <Appbar back={!loading} close title titleText="Modifier l'adresse" check={!loading} handleSubmit={this.handleSubmit} search={!showInput && !loading} handleSearch={() => this.setState({ showInput: true })} />
+                    <Appbar close={!loading} title titleText="Modifier l'adresse" check={!loading} handleSubmit={this.handleSubmit} search={!showInput && !loading} handleSearch={() => this.setState({ showInput: true })} />
                 }
 
                 {!loading  ?

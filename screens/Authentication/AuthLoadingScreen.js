@@ -1,5 +1,5 @@
 import React, { memo, Component } from "react"
-import { Alert, Text, StyleSheet } from "react-native"
+import { View, Alert, Text, StyleSheet } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
 import RNFS from 'react-native-fs'
 import firebase from '@react-native-firebase/app'
@@ -7,6 +7,7 @@ import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 
+import Background from "../../components/NewBackground"
 import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
@@ -137,10 +138,10 @@ class AuthLoadingScreen extends Component {
           this.props.navigation.navigate(screen, params)
 
         else
-          this.props.navigation.navigate("AgendaStack")
+          this.props.navigation.navigate("ProjectsStack")
       }
 
-      else this.props.navigation.navigate("HomeScreen")
+      else this.props.navigation.navigate("LoginScreen")
     })
   }
 
@@ -227,9 +228,13 @@ class AuthLoadingScreen extends Component {
 
   render() {
     return (
-      <LinearGradient colors={['#09a500', '#69b300', '#9fbc00']} style={styles.logo}>
-        <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
-      </LinearGradient>
+      <Background>
+        <Background style={{ transform: [{ scaleY: -1 }] }}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', transform: [{ scaleY: -1 }] }}>
+            <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
+          </View>
+        </Background>
+      </Background>
     )
   }
 }
@@ -248,7 +253,7 @@ const mapStateToProps = (state) => {
 const styles = StyleSheet.create({
   synergys: {
     textAlign: 'center',
-    color: '#fff',
+    color: theme.colors.primary,
     marginVertical: 15,
     letterSpacing: 2,
     fontSize: 45
@@ -256,7 +261,8 @@ const styles = StyleSheet.create({
   logo: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    backgroundColor: theme.colors.white
   }
 })
 

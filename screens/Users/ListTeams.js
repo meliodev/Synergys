@@ -3,17 +3,18 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native'
 import { List } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
+import { faUsers } from '@fortawesome/pro-light-svg-icons'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { myAlert, checkPlural, load } from '../../core/utils'
 import { fetchDocs, deleteTeam } from '../../api/firestore-api'
 
-import ListItem from '../../components/ListItem'
+import ListSubHeader from '../../components/ListSubHeader'
+import UserItem from '../../components/UserItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
 import Loading from '../../components/Loading'
-
 
 import { withNavigation } from 'react-navigation'
 import SearchInput, { createFilter } from 'react-native-search-filter'
@@ -58,31 +59,25 @@ class ListTeams extends Component {
 
     renderTeam(team) {
         const { canDelete } = this.props.permissions
-        let description = checkPlural(team.members.length, ' membre')
 
         return (
-            <TouchableOpacity onPress={() => this.viewTeam(team)}>
-                <ListItem
-                    title={team.name}
-                    description={description}
-                    iconRightName='dots-horizontal'
-                    left={props => <List.Icon {...props} icon="account-group" />}
+            <UserItem
+                isTeam
+                item={team}
+                onPress={() => this.viewTeam(team)}
+                options={[
+                    { id: 0, title: "Voir l'équipe" },
+                    { id: 1, title: "Supprimer l'équipe" },
+                ]}
 
-                    menu
-                    options={[
-                        { id: 0, title: "Voir l'équipe" },
-                        { id: 1, title: "Supprimer l'équipe" },
-                    ]}
-
-                    functions={[
-                        () => this.viewTeam(team),
-                        () => {
-                            if (!canDelete) Alert.alert('Action non autorisée', 'Seul un administrateur peut supprimer une équipe.')
-                            else this.alertDeleteTeam(team)
-                        },
-                    ]}
-                />
-            </TouchableOpacity>
+                functions={[
+                    () => this.viewTeam(team),
+                    () => {
+                        if (!canDelete) Alert.alert('Action non autorisée', 'Seul un administrateur peut supprimer une équipe.')
+                        else this.alertDeleteTeam(team)
+                    },
+                ]}
+            />
         )
     }
 
@@ -103,7 +98,7 @@ class ListTeams extends Component {
                     :
                     <View style={[styles.container, { paddingHorizontal: constants.ScreenWidth * 0.015 }]}>
 
-                        {teamsCount > 0 && <List.Subheader>{teamsCount} équipe{s}</List.Subheader>}
+                        {teamsCount > 0 && <ListSubHeader>{teamsCount} équipe{s}</ListSubHeader>}
                         {teamsCount > 0 ?
                             <FlatList
                                 enableEmptySections={true}
@@ -113,7 +108,7 @@ class ListTeams extends Component {
                                 style={{ paddingHorizontal: 15 }}
                                 contentContainerStyle={{ paddingBottom: 75 }} />
                             :
-                            <EmptyList iconName='account-multiple-outline' header='Liste des équipes' description='Gérez les équipes. Appuyez sur le boutton "+" pour en créer un nouvelle.' offLine={this.props.offLine} />
+                            <EmptyList icon={faUsers} iconColor={theme.colors.miUsers} header='Aucune équipe' description='Gérez les équipes. Appuyez sur le boutton "+" pour en créer un nouvelle.' offLine={this.props.offLine} />
                         }
 
                         {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('CreateTeam')} />}
@@ -129,7 +124,8 @@ export default withNavigation(ListTeams)
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: theme.colors.background
     },
     box: {
         padding: 20,

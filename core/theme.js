@@ -9,6 +9,7 @@ const colors = {
   secondary: "#1B2331",
   surface: '#F5F5F5',
   appBar: '#F8F8F9',
+  appBarIcon: "#1B2331",
   //tertiary: "#4CAF50",
   //tertiary: "#7ab600",
   surface: DefaultTheme.colors.surface,
@@ -26,6 +27,8 @@ const colors = {
   moderate_priority: '#ff7311',
   low_priority: '#f3a700',
 
+  project: ["#25D366", "#cbd4db", "#0064fa", "#ffd101", "#ff7512", "#ff4ba6", "#6357f9", "#fb5779", "#47dafc", "#5a7795", "#abe60e", "#ffa800", "#ff78ff", "#a046e4", "#ff92af", "#00d4c8"],
+
   high_priority_light: '#ffe0e7',
   moderate_priority_light: '#ffdfc9',
   low_priority_light: '#e8e1d3',
@@ -40,8 +43,9 @@ const colors = {
   gray_extraLight: "#F1F1F1", //new
   gray_light: "#EBEBEB", //new
   gray_medium: "#BCBCBC", //new
-  gray_bold: "#B4B4B4", //new
+  inpuIcon: "#B4B4B4", //new
   gray_dark: "#8D8D8D", //new
+  gray_googleAgenda: '#616266',
   gray: "#BDBDBD",
   graySilver: '#C0C0C0',
   // gray_light: '#eaeaec',
@@ -54,10 +58,23 @@ const colors = {
   transparent: "rgba(255,255,255,0)",
   white_transparent_6: "rgba(255,255,255,0.6)",
   gallery_background: "#EEE",
-  chatBackground: '#305585',
+  chatBackground: '#fff',
   agenda: '#555CC4',
   agendaLight: '#829BF8',
-};
+
+  //menu icons
+  miHome: "#25D366",
+  miInbox: '#EF6C00',
+  miProjects: '#3F51B5',
+  miPlanning: '#000',
+  miUsers: '#3b5998',
+  miClients: '#632568',
+  miRequests: '#AD1457',
+  miOrders: '#000',
+  miDocuments: '#6D4C41',
+  miNews: '#000',
+  miLogout: '#000',
+}
 
 const sizes = {
 
@@ -239,210 +256,13 @@ const customFontMSregular = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-Regular',
   },
-}
-
-//Roboto
-const robotoBold = {
-  h1: {
-    color: colors.secondary,
-    fontSize: sizes.h1,
-    fontFamily: 'Roboto-Bold',
-  },
-  h2: {
-    color: colors.secondary,
-    fontSize: sizes.h2,
-    fontFamily: 'Roboto-Bold',
-  },
-  h3: {
-    color: colors.secondary,
-    fontSize: sizes.h3,
-    fontFamily: 'Roboto-Bold',
-  },
-  header: {
-    color: colors.secondary,
-    fontSize: sizes.header,
-    fontFamily: 'Roboto-Bold',
-  },
-  title: {
-    color: colors.secondary,
-    fontSize: sizes.title,
-    fontFamily: 'Roboto-Bold',
-  },
-  body: {
-    color: colors.secondary,
-    fontSize: sizes.body,
-    fontFamily: 'Roboto-Bold',
-  },
-  caption: {
-    color: colors.secondary,
-    fontSize: sizes.caption,
-    fontFamily: 'Roboto-Bold',
-  },
-}
-
-const robotoSemibold = {
-  h1: {
-    color: colors.secondary,
-    fontSize: sizes.h1,
-    fontFamily: 'Roboto-SemiBold',
-  },
-  h2: {
-    color: colors.secondary,
-    fontSize: sizes.h2,
-    fontFamily: 'Roboto-SemiBold',
-  },
-  h3: {
-    color: colors.secondary,
-    fontSize: sizes.h3,
-    fontFamily: 'Roboto-SemiBold',
-  },
-  header: {
-    color: colors.secondary,
-    fontSize: sizes.header,
-    fontFamily: 'Roboto-SemiBold',
-  },
-  title: {
-    color: colors.secondary,
-    fontSize: sizes.title,
-    fontFamily: 'Roboto-SemiBold',
-  },
-  body: {
-    color: colors.secondary,
-    fontSize: sizes.body,
-    fontFamily: 'Roboto-SemiBold',
-  },
-  caption: {
-    color: colors.secondary,
-    fontSize: sizes.caption,
-    fontFamily: 'Roboto-SemiBold',
-  },
-}
-
-const robotoMedium = {
-  h1: {
-    color: colors.secondary,
-    fontSize: sizes.h1,
-    fontFamily: 'Roboto-Medium',
-  },
-  h2: {
-    color: colors.secondary,
-    fontSize: sizes.h2,
-    fontFamily: 'Roboto-Medium',
-  },
-  h3: {
-    color: colors.secondary,
-    fontSize: sizes.h3,
-    fontFamily: 'Roboto-Medium',
-  },
-  header: {
-    color: colors.secondary,
-    fontSize: sizes.header,
-    fontFamily: 'Roboto-Medium',
-  },
-  title: {
-    color: colors.secondary,
-    fontSize: sizes.title,
-    fontFamily: 'Roboto-Medium',
-  },
-  body: {
-    color: colors.secondary,
-    fontSize: sizes.body,
-    fontFamily: 'Roboto-Medium',
-  },
-  caption: {
-    color: colors.secondary,
-    fontSize: sizes.caption,
-    fontFamily: 'Roboto-Medium',
-  },
-}
-
-const robotoRegular = {
-  big: {
-    color: colors.secondary,
-    fontSize: 40,
-    fontFamily: 'Roboto-Regular',
-  },
-  h1: {
-    color: colors.secondary,
-    fontSize: sizes.h1,
-    fontFamily: 'Roboto-Regular',
-  },
-  h2: {
-    color: colors.secondary,
-    fontSize: sizes.h2,
-    fontFamily: 'Roboto-Regular',
-  },
-  h3: {
-    color: colors.secondary,
-    fontSize: sizes.h3,
-    fontFamily: 'Roboto-Regular',
-  },
-  header: {
-    color: colors.secondary,
-    fontSize: sizes.header,
-    fontFamily: 'Roboto-Regular',
-  },
-  title: {
-    color: colors.secondary,
-    fontSize: sizes.title,
-    fontFamily: 'Roboto-Regular',
-  },
-  body: {
-    color: colors.secondary,
-    fontSize: sizes.body,
-    fontFamily: 'Roboto-Regular',
-  },
-  caption: {
-    color: colors.secondary,
-    fontSize: sizes.caption,
-    fontFamily: 'Roboto-Regular',
-  },
   small: {
-    color: colors.secondary,
-    fontSize: 8,
-    fontFamily: 'Roboto-Regular',
+    fontSize: 10,
+    fontFamily: 'Montserrat-Regular',
   },
 }
 
-const robotoLight = {
-  h1: {
-    color: colors.secondary,
-    fontSize: sizes.h1,
-    fontFamily: 'Roboto-Light',
-  },
-  h2: {
-    color: colors.secondary,
-    fontSize: sizes.h2,
-    fontFamily: 'Roboto-Light',
-  },
-  h3: {
-    color: colors.secondary,
-    fontSize: sizes.h3,
-    fontFamily: 'Roboto-Light',
-  },
-  header: {
-    color: colors.secondary,
-    fontSize: sizes.header,
-    fontFamily: 'Roboto-Light',
-  },
-  title: {
-    color: colors.secondary,
-    fontSize: sizes.title,
-    fontFamily: 'Roboto-Light',
-  },
-  body: {
-    color: colors.secondary,
-    fontSize: sizes.body,
-    fontFamily: 'Roboto-Light',
-  },
-  caption: {
-    color: colors.secondary,
-    fontSize: sizes.caption,
-    fontFamily: 'Roboto-Light',
-  },
-}
-
-export { colors, sizes, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, robotoBold, robotoSemibold, robotoMedium, robotoRegular, robotoLight }
+export { colors, sizes, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold }
 
 
 

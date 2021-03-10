@@ -9,7 +9,7 @@ import CustomIcon from "./CustomIcon";
 import { color } from "react-native-reanimated";
 
 const MyFAB = ({ color = theme.colors.white, style, onPress, icon, ...props }) => (
-    <TouchableOpacity style={styles.fab} onPress={onPress}>
+    <TouchableOpacity style={[styles.fab, style]} onPress={onPress}>
         <CustomIcon icon={icon || faPlus} color={color} />
     </TouchableOpacity>
 )
@@ -21,13 +21,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         position: 'absolute',
-        margin: 15,
-        right: 0,
-        bottom: 0,
+        right: 10,
+        bottom: 10,
         width: constants.ScreenWidth * 0.15,
         height: constants.ScreenWidth * 0.15,
         borderRadius: constants.ScreenWidth * 0.15 / 2,
-        elevation: 5
+        elevation: 5,
+        zIndex: 2
     }
 });
 

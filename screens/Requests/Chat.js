@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { GiftedChat, Bubble, Send, SystemMessage, Day, Actions } from 'react-native-gifted-chat'
 import { TouchableOpacity, ActivityIndicator, View, StyleSheet, Text, Alert, ImageBackground } from 'react-native'
+import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
 import { IconButton } from 'react-native-paper'
@@ -14,12 +15,11 @@ import moment from 'moment'
 import 'moment/locale/fr'
 moment.locale('fr')
 
-// import ThumbnailLocal from 'react-native-thumbnail'
-
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
+import CustomIcon from '../../components/CustomIcon'
 import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 import Loading from '../../components/Loading'
@@ -29,6 +29,7 @@ import { uuidGenerator, setAttachmentIcon, downloadFile } from '../../core/utils
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { uploadFiles } from '../../api/storage-api'
+import EmptyList from '../../components/EmptyList';
 
 const db = firebase.firestore()
 
@@ -447,6 +448,14 @@ class Chat extends Component {
         this.setState({ isImageViewVisible: !this.state.isImageViewVisible })
     }
 
+    renderChatEmpty() {
+        return (
+            <View style={styles.chatEmpty}>
+                <EmptyList icon={faCommentDots} iconColor={theme.colors.miRequests} header='Aucun message' description='Commencez la discussion en envoyant un nouveau message' offLine={!this.props.network.isConnected} />
+            </View>
+        )
+    }
+
     render() {
         const { messages, attachments, showVideoPlayer, videoUrl, isImageViewVisible, imageUrl, toastMessage, toastType } = this.state
         const imagesView = [{
@@ -462,7 +471,6 @@ class Chat extends Component {
                 <ImageView
                     images={imagesView}
                     imageIndex={0}
-                    //onImageChange={(imageIndex) => this.setState({ imageIndex })}
                     isVisible={isImageViewVisible}
                     onClose={this.toggleImageView}
 
@@ -487,7 +495,6 @@ class Chat extends Component {
                     messagesContainerStyle={{ backgroundColor: theme.colors.chatBackground }}
                     messages={messages}
                     onSend={this.handleSend}
-                    // onSend={(mesages) => this.handleSend(messages, '')}
                     user={{ _id: this.currentUser.uid }}
                     placeholder='Tapez un message'
                     alwaysShowSend
@@ -498,13 +505,12 @@ class Chat extends Component {
                     renderLoading={this.renderLoading}
                     renderSend={this.renderSend}
                     renderActions={(props) => this.renderActions(props, isConnected)}
-                    // if (!isConnected) return null
-                    // else this.renderActions(props)
                     renderMessageVideo={(props) => this.renderMessageVideo(props, this.props.navigation)}
                     renderMessageImage={this.renderMessageImage}
                     scrollToBottomComponent={this.scrollToBottomComponent}
                     renderSystemMessage={this.renderSystemMessage}
                     renderDay={(props) => <Day {...props} dateFormat={'D MMM YYYY'} textStyle={[{ color: '#fafafa' }]} />}
+                    renderChatEmpty={this.renderChatEmpty.bind(this)}
                 />
                 <Toast
                     containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
@@ -557,6 +563,12 @@ const styles = StyleSheet.create({
     },
     messageVideo: {
         width: 200, height: 200, justifyContent: 'center', alignItems: 'center'
+    },
+    chatEmpty: {
+        flex: 1,
+        alignSelf: 'center',
+        justifyContent: 'center',
+        transform: [{ scaleY: -1 }]
     }
 })
 

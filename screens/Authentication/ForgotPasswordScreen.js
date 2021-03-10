@@ -1,5 +1,8 @@
 import React, { memo, Component } from "react";
-import { Text, StyleSheet, View } from "react-native";
+import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator } from "react-native";
+import LinearGradient from 'react-native-linear-gradient'
+
+import NewBackground from "../../components/NewBackground";
 import Appbar from "../../components/Appbar";
 import Logo from "../../components/Logo"
 import TextInput from "../../components/TextInput"
@@ -52,13 +55,14 @@ class ForgotPasswordScreen extends Component {
     let { loading, email, toastType, toastMessage } = this.state
 
     return (
-      <View style={{ flex: 1 }}>
+      <NewBackground>
         <Appbar back title titleText='Mot de passe oublié' />
 
         <View style={styles.container}>
-          <Logo style={{ alignSelf: 'center' }} />
+          <Logo />
 
           <TextInput
+            style={{ zIndex: 1, backgroundColor: theme.colors.background }}
             label="Adresse email"
             returnKeyType="done"
             value={email.value}
@@ -71,23 +75,22 @@ class ForgotPasswordScreen extends Component {
             keyboardType="email-address"
           />
 
-          <Button
-            loading={loading}
-            mode="contained"
-            onPress={this.handleSendEmail}
-            style={styles.button}
-          >
-            Envoyer un email
-          </Button>
+          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 30, zIndex: 1 }} onPress={this.handleSendEmail}>
+            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
+              {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
+              <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginLeft: 10 }]}>Envoyer un email</Text>
+            </LinearGradient>
+          </TouchableOpacity>
 
           <Toast
             type={toastType}
             message={toastMessage}
             onDismiss={() => this.setState({ toastType: '', toastMessage: '' })}
           />
+          
         </View>
 
-      </View>
+      </NewBackground>
     )
   }
 
@@ -96,13 +99,21 @@ class ForgotPasswordScreen extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: constants.ScreenHeight * 0.1,
-    paddingHorizontal: constants.ScreenWidth * 0.1
+    padding: constants.ScreenWidth * 0.1,
+    zIndex: 2,
+
   },
   button: {
     marginTop: 12
   },
-});
+  linearGradient: {
+    flexDirection: 'row',
+    width: constants.ScreenWidth * 0.8,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5,
+  },
+})
 
 export default memo(ForgotPasswordScreen);

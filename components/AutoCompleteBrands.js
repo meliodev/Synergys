@@ -127,7 +127,7 @@ class AutoCompleteBrands extends React.Component {
                     suggestionsBellow={this.props.suggestionsBellow}
                     editable={this.props.editable}
                     createTagOnSpace = {false}
-                    renderTextInput={() => <TextInput style={[theme.robotoRegular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+                    renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
                 />
                 {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{this.props.errorText}</Text>}
             </View>
@@ -143,6 +143,8 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         alignItems: "flex-start",
         alignItems: 'center',
+        paddingTop: 10,
+        marginLeft: -5,
         width: 300
     },
     customTag: {

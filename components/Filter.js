@@ -1,9 +1,9 @@
 
 import * as React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { List } from 'react-native-paper';
-import { faFilter } from '@fortawesome/pro-light-svg-icons'
-import { Menu as PopupMenu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu';
+import { List, Appbar } from 'react-native-paper';
+import { faFilter, faTimes } from '@fortawesome/pro-light-svg-icons'
+import { MenuProvider, Menu as PopupMenu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu';
 import { withNavigation } from 'react-navigation'
 
 import * as theme from '../core/theme';
@@ -16,7 +16,7 @@ import CustomIcon from '../components/CustomIcon'
 
 const { SlideInMenu } = renderers
 
-const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, functions, menuStyle, iconColor, ...props }) => {
+const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, functions, menuStyle, isAppBar = false, ...props }) => {
 
     //Screen filters: refresh selected value
     const refreshClient = (isPro, id, nom, prenom) => {
@@ -43,15 +43,24 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
         main.setState({ assignedTo })
     }
 
+    const renderFilterIcon = () => {
+        if (isAppBar) return <Appbar.Action icon={<CustomIcon icon={faFilter} color={theme.colors.appBarIcon} />} />
+        else return <CustomIcon icon={faFilter} />
+    }
+
     return (
         <PopupMenu renderer={SlideInMenu} opened={opened} onBackdropPress={toggleFilter} style={menuStyle}>
-            <MenuTrigger style={{ padding: constants.ScreenWidth * 0.033, paddingRight: 0 }} onPress={toggleFilter}>
-                <CustomIcon icon={faFilter} />
+            <MenuTrigger onPress={toggleFilter}>
+                {renderFilterIcon()}
             </MenuTrigger>
 
-            <MenuOptions optionsContainerStyle={{ borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, elevation: 10 }}>
-                <View style={{ backgroundColor: theme.colors.primary, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 10 }}>
-                    <Text style={[theme.customFontMSsemibold.body, { color: '#fff' }]}>Filtrer par</Text>
+            <MenuOptions optionsContainerStyle={{ height: constants.ScreenHeight * 0.95, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, elevation: 50 }}>
+                <View style={{ flexDirection: 'row', backgroundColor: theme.colors.primary, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 10 }}>
+                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                        <CustomIcon icon={faFilter} color={theme.colors.white} size={15} />
+                        <Text style={[theme.customFontMSregular.header, { color: '#fff', textAlign: 'center', marginLeft: 5 }]}>Filtrer par</Text>
+                    </View>
+                    <CustomIcon onPress={toggleFilter} icon={faTimes} color={theme.colors.white} style={{ position: 'absolute', right: theme.padding, top: 10 }} />
                 </View>
 
                 <View style={{ paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 5, }}>
@@ -72,16 +81,21 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                                     toggleFilter()
 
                                     let refresh
-                                    if (option.screen === 'ListClients')
+                                    let userType = ''
+                                    if (option.screen === 'ListClients') {
                                         refresh = refreshClient
+                                        userType = 'client'
+                                    }
 
                                     else if (option.screen === 'ListProjects')
                                         refresh = refreshProject
 
-                                    else if (option.screen === 'ListEmployees')
+                                    else if (option.screen === 'ListEmployees') {
                                         refresh = refreshEmployee
+                                        userType = 'utilisateur'
+                                    }
 
-                                    props.navigation.navigate(option.screen, { onGoBack: refresh, titleText: option.titleText, showButton: false, isRoot: false })
+                                    props.navigation.navigate(option.screen, { onGoBack: refresh, userType: userType, titleText: option.titleText, showButton: false, isRoot: false })
                                 }}>
                                     <TextInput
                                         label={option.title}

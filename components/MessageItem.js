@@ -20,7 +20,7 @@ const db = firebase.firestore()
 
 const MessageItem = ({ message, navigation, options, functions, ...props }) => {
     const currentUser = firebase.auth().currentUser
-    let haveRead = message.haveRead.find((id) => id === currentUser.uid)
+    let haveRead = message.haveRead.includes(currentUser.uid)
     const isCurrentuserSender = message.sender.id === currentUser.uid
     const isCurrentUserReceiver = message.receivers.find((receiver) => receiver.id === currentUser.uid)
     const showMessageDescription = isCurrentuserSender || isCurrentUserReceiver  //currentUser is speaker ?
@@ -37,33 +37,36 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
         navigation.navigate('ViewMessage', { message: message })
     }
 
+    const atColor = haveRead ? theme.colors.white : theme.colors.white
+    const atBackgroundColor = haveRead ? theme.colors.gray_medium : theme.colors.error
+
     return (
         <List.Item
             title={
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={theme.robotoMedium.body}>{message.sender.fullName}</Text>
+                    <Text style={theme.customFontMSmedium.body}>{message.sender.fullName}</Text>
                 </View>
             }
             description={() => (
                 <View style={{ paddingRight: 7 }}>
-                    <Text numberOfLines={1} style={theme.robotoRegular.caption}>
+                    <Text numberOfLines={1} style={theme.customFontMSregular.caption}>
                         {message.mainSubject}
                     </Text>
-                    <Text numberOfLines={1} style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>
+                    <Text numberOfLines={1} style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>
                         {showMessageDescription ? message.message : ' '}
                     </Text>
                 </View>
             )}
 
             left={props =>
-                <View style={{ justifyContent: 'center', alignItems: 'center', marginHorizontal: 10 }}>
-                    <AvatarText label={message.sender.fullName.charAt(0)} size={40} />
+                <View style={{ justifyContent: 'center', alignItems: 'center', marginHorizontal: theme.padding/2 }}>
+                    <AvatarText label={message.sender.fullName.charAt(0)} size={40} labelStyle={{ color: atColor }} style= {{backgroundColor: atBackgroundColor, elevation: 1}} />
                 </View>
             }
 
             right={props =>
-                <View style={{ alignItems: 'center', paddingTop: 9, marginRight: 5 }}>
-                    <Text style={[theme.robotoRegular.caption, { color: theme.colors.gray_dark }]}>{moment(message.sentAt).format("Do MMM")}</Text>
+                <View style={{ alignItems: 'center', paddingTop: 9, marginRight: theme.padding/2 }}>
+                    <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(message.sentAt).format("Do MMM")}</Text>
                     {/* <Menu
                         options={[
                             { id: 0, title: 'Voir le message' },
@@ -77,8 +80,6 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
                     /> */}
                 </View>
             }
-            
-            style={{ backgroundColor: haveRead ? '#fff' : '#DCEDC8' }}
         />
     )
 }

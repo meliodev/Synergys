@@ -69,8 +69,8 @@
 		<string>MaterialCommunityIcons.ttf</string>
 		<string>MaterialIcons.ttf</string>
 		<string>Octicons.ttf</string>
-		<string>Roboto_medium.ttf</string>
-		<string>Roboto.ttf</string>
+		<string>_medium.ttf</string>
+		<string>.ttf</string>
 		<string>rubicon-icon-font.ttf</string>
 		<string>SimpleLineIcons.ttf</string>
 		<string>Zocial.ttf</string>
@@ -83,24 +83,25 @@
 		<string>Montserrat-Regular.ttf</string>
 		<string>Montserrat-SemiBold.ttf</string>
 		<string>Montserrat-Thin.ttf</string>
-		<string>Roboto-Black.ttf</string>
-		<string>Roboto-BlackItalic.ttf</string>
-		<string>Roboto-Bold.ttf</string>
-		<string>Roboto-BoldItalic.ttf</string>
-		<string>Roboto-Italic.ttf</string>
-		<string>Roboto-Light.ttf</string>
-		<string>Roboto-LightItalic.ttf</string>
-		<string>Roboto-Medium.ttf</string>
-		<string>Roboto-MediumItalic.ttf</string>
-		<string>Roboto-Regular.ttf</string>
-		<string>Roboto-Thin.ttf</string>
-		<string>Roboto-ThinItalic.ttf</string>
+		<string>-Black.ttf</string>
+		<string>-BlackItalic.ttf</string>
+		<string>-Bold.ttf</string>
+		<string>-BoldItalic.ttf</string>
+		<string>-Italic.ttf</string>
+		<string>-Light.ttf</string>
+		<string>-LightItalic.ttf</string>
+		<string>-Medium.ttf</string>
+		<string>-MediumItalic.ttf</string>
+		<string>-Regular.ttf</string>
+		<string>-Thin.ttf</string>
+		<string>-ThinItalic.ttf</string>
 		<string>fa-brands-400.ttf</string>
 		<string>fa-regular-400.ttf</string>
 		<string>fa-solid-900.ttf</string>
 		<string>fa-duotone-900.ttf</string>
 		<string>fa-light-300.ttf</string>
 		<string>fa-thin-100.ttf</string>
+		<string>Lato-Regular.ttf</string>
 	</array>
 </dict>
 </plist>

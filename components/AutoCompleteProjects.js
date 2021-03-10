@@ -99,7 +99,7 @@ export default class AutoCompleteInput extends React.Component {
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
                 createTagOnSpace = {false}
-                renderTextInput={() => <TextInput style={[theme.robotoRegular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+                renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }
@@ -111,6 +111,8 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         alignItems: "flex-start",
         backgroundColor: "#fff",
+        paddingTop: 10,
+        marginLeft: -5,
         width: 300
     },
     customTag: {

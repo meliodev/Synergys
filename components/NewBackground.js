@@ -17,12 +17,11 @@ const NewBackground = ({ children, style, motifStyle }) => {
         <ellipse id="Ellipse_4" data-name="Ellipse 4" cx="42" cy="42" rx="42" ry="42" transform="translate(13 67)" fill="#bbe3d1" opacity="0.3" style="mix-blend-mode: multiply;isolation: isolate"/>
       </g>
     </g>
-  </svg>
-  
-   `;
+    </svg>
+   `
 
     return (
-        <View style={[style, styles.background]}>
+        <View style={[styles.background, style]}>
             <KeyboardAvoidingView style={styles.container} behavior="padding">
                 {children}
                 <SvgXml xml={motif} style={[styles.motifStyle, motifStyle]} />

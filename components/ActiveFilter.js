@@ -5,7 +5,7 @@ import { View, Text, StyleSheet } from 'react-native'
 import * as theme from '../core/theme';
 
 const ActiveFilter = () => (
-    <View style={styles.container}><Text style={[theme.robotoRegular.caption, { color: theme.colors.white }]}>Filtre activé</Text></View>
+    <View style={styles.container}><Text style={[theme.customFontMSregular.caption, { color: theme.colors.white }]}>Filtre activé</Text></View>
 )
 
 const styles = StyleSheet.create({

@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { List, Card, Paragraph, Title, Avatar } from 'react-native-paper';
 import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
+import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
+
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import CustomIcon from './CustomIcon'
 import Button from './Button'
 
 import * as theme from '../core/theme';
@@ -34,14 +37,14 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
     const setStateColor = (state) => {
         switch (state) {
             case 'En attente':
-                return theme.colors.error
+                return theme.colors.pending
 
             case 'En cours':
-                return 'orange'
+                return theme.colors.inProgress
                 break
 
             case 'Terminé':
-                return theme.colors.primary
+                return theme.colors.valid
                 break
 
             case 'Résolu':
@@ -59,9 +62,11 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
             <Card.Content style={{ flex: 1, flexDirection: 'row' }}>
                 <View style={{ flex: 1 }}>
 
-                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 19 }}>
-                        <Title style={[theme.customFontMSsemibold.header, { flex: 0.85, paddingRight: constants.ScreenWidth * 0.15 }]} numberOfLines={1}>{request.subject}</Title>
-                        <Ionicons style={{ flex: 0.15, alignSelf: 'center' }} name='chatbubble-ellipses-outline' size={30} onPress={() => navigation.navigate('Chat', { chatId: chatId })} />
+                    <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Title style={[theme.customFontMSsemibold.header, { flex: 0.85 }]} numberOfLines={1}>{request.subject}</Title>
+                        <TouchableOpacity hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }} onPress={() => navigation.navigate('Chat', { chatId: chatId })}>
+                            <CustomIcon icon={faCommentDots} />
+                        </TouchableOpacity>
                     </View>
 
                     <Paragraph style={[theme.customFontMSmedium.body]} numberOfLines={1}>{request.description}</Paragraph>
@@ -69,10 +74,11 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
                         <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >Par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: request.editedBy.userId })}>{request.editedBy.userName}</Text></Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2 }}>
-                            <Paragraph style={[theme.customFontMSmedium.caption, { color: '#fff', textAlign: 'center' }]}>{request.state}</Paragraph>
+                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2, elevation: 2 }}>
+                            <Paragraph style={[theme.customFontMSmedium.caption, { textAlign: 'center' }]}>{request.state}</Paragraph>
                         </View>
                     </View>
+
                 </View>
             </Card.Content>
 

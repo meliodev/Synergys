@@ -108,7 +108,7 @@ export default class AutoCompleteUsers extends React.Component {
                 createTagOnSpace={false}
                 inputContainerStyle={styles.inputContainerStyle}
                 containerStyle={styles.containerStyle}
-               // renderTextInput={() => <TextInput style={[theme.robotoRegular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+               // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }
@@ -120,6 +120,8 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         alignItems: "flex-start",
         backgroundColor: "#fff",
+       //paddingTop: 10,
+        marginLeft: -5,
         width: 300
     },
     customTag: {

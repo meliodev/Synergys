@@ -76,6 +76,17 @@ export const navigateToScreen = (main, canUpdate, screen, params) => {
 
 //##HELPERS
 
+export const formatRow = (data, numColumns) => { //Format rows to display 3 columns grid
+  const numberOfFullRows = Math.floor(data.length / numColumns)
+  let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns)
+  while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
+    data.push({ id: `blank-${numberOfElementsLastRow}`, empty: true })
+    numberOfElementsLastRow++
+  }
+
+  return data
+}
+
 export const articles_fr = (masc, masculins, docType) => {
   let resp
   if (masc === 'du') {

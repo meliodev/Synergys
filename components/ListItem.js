@@ -10,8 +10,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { withNavigation } from 'react-navigation'
 
 
-const ListItem = ({ navigation, options, functions, menu,
-                    remove, onPressRightIcon, ...props }) => {
+const ListItem = ({ navigation, options, functions, menu, remove, onPressRightIcon, ...props }) => {
 
     return (
         <List.Item
@@ -19,9 +18,7 @@ const ListItem = ({ navigation, options, functions, menu,
             descriptionStyle={theme.customFontMSmedium.caption}
             right={props => {
                 if (menu)
-                    return (
-                        <Menu options={options} functions={functions}/>
-                    )
+                    return <Menu options={options} functions={functions} />
             }}
             {...props}
         />
