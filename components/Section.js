@@ -12,7 +12,7 @@ const Section = ({ style, text, icon }) => {
   return (
     <View style={[styles.section, style]}>
       <Text style={theme.customFontMSregular.header}>{text}</Text>
-      <FontAwesomeIcon icon={icon} size={21} color={theme.colors.gray_dark} />
+     {icon && <FontAwesomeIcon icon={icon} size={21} color={theme.colors.gray_dark} />}
     </View>
   )
 }

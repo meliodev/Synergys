@@ -35,7 +35,7 @@ const ModalContent = ({ hideModal, updateParentColor, pickedColor }) => {
                 icon={faTimes}
                 color={theme.colors.gray_dark}
                 style={{ position: 'absolute', top: theme.padding, right: theme.padding }}
-                onPress= {hideModal}
+                onPress={hideModal}
             />
             <Text style={[theme.customFontMSregular.body, { paddingLeft: theme.padding * 1.5 }]}>Couleur du projet</Text>
             <View style={{ flexDirection: 'row', marginTop: 25, flexWrap: 'wrap' }}>
@@ -81,6 +81,7 @@ const ColorPicker = ({ updateParentColor, label, selectedColor, setColor, ...pro
 
     return (
         <TouchableOpacity onPress={() => setIsModalVisible(true)} style={[styles.container, { marginBottom: 0, marginTop: 20 }]}>
+            <Text style={[theme.customFontMSregular.caption, { marginBottom: 8 }]}>{label}</Text>
             <SelectedColor />
             <ColorsModal />
         </TouchableOpacity>

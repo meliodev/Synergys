@@ -25,7 +25,7 @@ import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
-import { projectProcessInit, getPhaseId } from '../../core/process'
+import { projectProcessInit, projectProcessHandler, getPhaseId, getCurrentStep, getCurrentAction, getNextStep, projectNextStepInit, projectNextPhaseInit } from '../../core/process'
 
 import { connect } from 'react-redux'
 
@@ -195,9 +195,20 @@ class CreateProject extends Component {
                 //Address
                 address = project.address
 
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process }, () => {
+                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process }, async () => {
                     //if (this.isInit)
                     this.initialState = this.state
+
+                    if (this.isEdit) {
+                        const { process } = this.state
+                        const { client } = this.initialState
+                        console.log(process)
+                        const updatedProjectProcess = await projectProcessHandler(process, client.id, this.ProjectId)
+                        console.log("updatedProjectProcess", updatedProjectProcess)
+                        // db.collection('Projects').doc(this.ProjectId).update({ process: updatedProjectProcess })
+                        // .then(() => console.log('PROJECT PROCESS UPDATED !'))
+                        // this.setState({ process: updatedProjectProcess }, () => console.log('UPDATED PROCESS: ', this.state.process))
+                    }
 
                     //this.isInit = false
                 })
@@ -349,30 +360,30 @@ class CreateProject extends Component {
         if (!this.isEdit) {
             project.createdAt = moment().format('lll')
             project.createdBy = currentUser
+            project.process = {}
         }
 
         if (isConnected) {
             project.attachments = attachedImages
         }
 
-        console.log('Ready to set project...')
-        if (isConnected)
-            await db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        else
-            db.collection('Projects').doc(this.ProjectId).set(project, { merge: true }) //Nothing to wait for -> data persisted to local cache
+        // if (isConnected)
+        //     await db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        // else
+        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true }) //Nothing to wait for -> data persisted to local cache
 
-        //After project is created we can verify fields (actions) during processInit
-        setTimeout(async () => {
-            //Get phase id
-            const currentPhaseId = getPhaseId(step)
-            const clientId = client.id
-            const projectProcess = await projectProcessInit(this.ProjectId, clientId, currentPhaseId)
-            project.process = projectProcess
+        // //After project is created we can verify fields (actions) during processInit
+        // setTimeout(async () => {
+        //     //Get phase id
+        //     const currentPhaseId = getPhaseId(step)
+        //     const clientId = client.id
+        //     const projectProcess = await projectProcessInit(clientId, currentPhaseId)
+        //     project.process = projectProcess
 
-            db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-            setTimeout(() => this.props.navigation.goBack(), 1000)
+        //     db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        //     setTimeout(() => this.props.navigation.goBack(), 1000)
 
-        }, 2000)
+        // }, 2000)
 
     }
 
@@ -512,19 +523,22 @@ class CreateProject extends Component {
     }
 
     renderProcessCurrentAction(process) {
-        const { title, status } = process.init.steps.prospectCreation.actions[0]
+        return null
+        // const currentAction = getCurrentAction(process)
+        // const { title, status, screenName, screenParams } = currentAction
 
-        return (
-            <FormSection
-                sectionTitle='Prochaine tâche'
-                form={
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <Text style={[theme.customFontMSregular]}>{title}</Text>
-                        <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.primary : theme.colors.gray_dark} />
-                    </View>
-                }
-            />
-        )
+        // return (
+        //     <FormSection
+        //         sectionTitle='Prochaine tâche'
+        //         sectionIcon={null}
+        //         form={
+        //             <TouchableOpacity onPress={() => this.props.navigation.navigate(screenName, screenParams)} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        //                 <Text style={[theme.customFontMSregular]}>{title}</Text>
+        //                 <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
+        //             </TouchableOpacity>
+        //         }
+        //     />
+        // )
     }
 
     render() {
@@ -582,7 +596,10 @@ class CreateProject extends Component {
                                         editable={canUpdate}
                                     />
 
-                                    <ColorPicker selectedColor={color} updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
+                                    <ColorPicker
+                                        label='Couleur du projet'
+                                        selectedColor={color}
+                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
 
                                     <ItemPicker
                                         onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: 'CreateProject', isRoot: false, titleText: 'Clients' })}

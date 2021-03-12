@@ -35,6 +35,7 @@ const db = firebase.firestore()
 const types = [
     { label: 'Normale', value: 'Normale' },
     { label: 'Rendez-vous', value: 'Rendez-vous' },
+    { label: 'Visite technique préalable', value: 'Visite technique préalable' },
     { label: 'Visite technique', value: 'Visite technique' },
     { label: 'Installation', value: 'Installation' },
     { label: 'Rattrapage', value: 'Rattrapage' },
@@ -354,7 +355,7 @@ class CreateTask extends Component {
                                         showAvatarText={false}
                                     />
 
-                                    <ColorPicker selectedColor={color} updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
+                                    <ColorPicker label='Couleur de la tâche' selectedColor={color} updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
 
                                     <Picker
                                         label="Type *"
