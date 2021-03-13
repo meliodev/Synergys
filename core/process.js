@@ -2,7 +2,7 @@ import firebase from '@react-native-firebase/app'
 import _ from 'lodash'
 const db = firebase.firestore()
 
-//##PROCESS MODEL
+//#PROCESS MODEL
 const processModel = {
     'init': {
         title: 'Initialisation',
@@ -14,7 +14,7 @@ const processModel = {
                 instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
                 stepOrder: 1,
                 nextStep: '',//#test
-                nextPhase: 'rd1', //#rules: nextStep & nextPhase are exclusive
+                nextPhase: '', //#rules: First phase of the processModel has nextPhase set dynamiclly depending on which phase the project has started on
                 actions: [
                     {
                         id: 'nom',
@@ -79,11 +79,10 @@ const processModel = {
                         title: 'Créer une visite technique préalable',
                         instructions: 'Lorem ipsum dolor',
                         collection: 'Agenda', // In case of subcollection: Projects/SubCollection
-                        projectId: '', // for verificationType: doc-creation -> we use projectId to check over all tasks if a task {type: "Visite technique préalable", projectId} exists 
                         documentId: '',
                         properties: [''],
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Visite technique préalable' },
+                        screenParams: { taskType: 'Visite technique préalable', project: null },
                         type: 'auto',
                         responsable: '',
                         status: 'pending',
@@ -141,13 +140,117 @@ const processModel = {
     },
     'rdn': {
         title: 'Rendez-vous N',
-        status: 'pending',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 3,
-        nextPhase: 'technicalVisitManagement',
-        progress: 0,
-        isCurrent: false,
-        steps: {}
+        steps: {
+            'rd2Creation': { //creation action + multiple choice action
+                title: 'Créer un rendez-vous 2',
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 1,
+                nextStep: '',
+                nextPhase: '',
+                actions: [
+                    {
+                        id: 'rd2Creation',
+                        title: 'Créer un rendez-vous 2',
+                        instructions: 'Lorem ipsum dolor',
+                        collection: 'Agenda',
+                        documentId: '',
+                        properties: [''],
+                        screenName: 'CreateTask', //creation
+                        screenParams: { taskType: 'Visite technique préalable', project: null },
+                        type: 'auto',
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation'
+                    },
+                    {
+                        id: 'rd2Choice',
+                        title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
+                        instructions: 'Lorem ipsum dolor',
+                        collection: '', //Because manual
+                        documentId: '', //Because manual
+                        properties: [], //Because manual
+                        screenName: '', //Because manual
+                        screenParams: null, //Because manual
+                        type: 'manual', //Check manually
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: ['Confirmer', 'Annuler', 'Reporter'] //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                    },
+                ]
+            },
+            'confirmRd2': {
+                title: 'Rendez-vous 2',
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 100,
+                nextStep: '',
+                actions: [
+                    {
+                        id: 'rd2Choice',
+                        title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
+                        instructions: 'Lorem ipsum dolor',
+                        collection: '', //Because manual
+                        documentId: '', //Because manual
+                        properties: [], //Because manual
+                        screenName: '', //Because manual
+                        screenParams: null, //Because manual
+                        type: 'manual', //Check manually
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: ['Confirmer', 'Annuler', 'Reporter']
+                    },
+                ]
+            },
+            'postponeRd2': {
+                title: 'Rendez-vous 2',
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 100,
+                nextStep: '',
+                actions: [
+                    {
+                        id: 'rd2Choice',
+                        title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
+                        instructions: 'Lorem ipsum dolor',
+                        collection: '', //Because manual
+                        documentId: '', //Because manual
+                        properties: [], //Because manual
+                        screenName: '', //Because manual
+                        screenParams: null, //Because manual
+                        type: 'manual', //Check manually
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: ['Confirmer', 'Annuler', 'Reporter']
+                    },
+                ]
+            },
+            'cancelRd2': {
+                title: 'Rendez-vous 2',
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 100,
+                nextStep: '',
+                actions: [
+                    {
+                        id: 'rd2Choice',
+                        title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
+                        instructions: 'Lorem ipsum dolor',
+                        collection: '', //Because manual
+                        documentId: '', //Because manual
+                        properties: [], //Because manual
+                        screenName: '', //Because manual
+                        screenParams: null, //Because manual
+                        type: 'manual', //Check manually
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: ['Confirmer', 'Annuler', 'Reporter']
+                    },
+                ]
+            },
+        }
     },
     'technicalVisitManagement': {
         title: 'Gestion visite technique',
@@ -184,79 +287,132 @@ const processModel = {
     }
 }
 
-//##PROCESS ALGORITHM/LOGIC
-export const projectProcessHandler = async (process, clientId, projectId) => {
+//#PROCESS MAIN
+export const processMain = async (process, projectSecondPhase, clientId, project) => {
 
-    //1'. Initialize process with 1st phase/1st step
-    if (_.isEmpty(process)) {
-        //console.log('Initializing project...')
-        var { currentPhaseId, currentStepId } = initProcess(process)
+    const attributes = { clientId, project }
+    const currentProcess = _.cloneDeep(process)
+    const updatedProjectProcess = await projectProcessHandler(currentProcess, projectSecondPhase, attributes)
+
+    console.log('old process:', process)
+    console.log("Updated process", updatedProjectProcess['init'].steps)
+
+    if (!_.isEqual(process, updatedProjectProcess)) {
+        await db.collection('Projects').doc(project.id).update({ process: updatedProjectProcess }).then(() => console.log('PROJECT PROCESS UPDATED !'))
     }
 
-    //1". Get current phase/step of the process
-    else {
-        var { currentPhaseId, currentStepId } = getCurrentStep(process)
-        //console.log('Current phase/step: ', currentPhaseId, currentStepId)
-    }
-
-    //2. Actions handler (Verifications & Status update)
-    const { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
-
-    if (actions.length > 0)
-        var allActionsValid = await verifyActions(actions)
-
-    //console.log('is All actions valid ? ', allActionsValid)
-
-    let updatedProjectProcess = process
-
-    //3'. All actions valid --> update project's process model
-    if (allActionsValid)
-        updatedProjectProcess = handleAllActionsValid(process)
-
-    //3". At least one action is not valid
-    else console.log('Not all actions are valid... We keep the same process state..')
-
-    return updatedProjectProcess
+    return updatedProjectProcess || {} //To avoid errors
 }
 
-//## PROCESS TASKS:
+//#PROCESS ALGORITHM/LOGIC
+export const projectProcessHandler = async (process, projectSecondPhase, attributes) => {
+
+    let loopHandler = true
+
+    while (loopHandler) {
+
+        //0. Initialize process with 1st phase/1st step
+        if (_.isEmpty(process)) {
+            process = initProcess(process, projectSecondPhase)
+        }
+
+        //1. Get current phase/step of the process
+        var { currentPhaseId, currentStepId } = getCurrentStep(process)
+
+        //2. Actions handler (Verifications & Status update)
+        const { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
+
+        //#task: LOOP ACTIONS VERIFICATION in case of phase/step transition 
+        if (actions.length > 0)
+            var allActionsValid = await verifyActions(actions, attributes)
+
+        //3'. All actions valid --> update project's process model
+        if (allActionsValid) {
+            process = handleTransition(process)
+            console.log('Transition done.. verify new step actions (loop)')
+        }
+
+        //3". At least one action is not valid
+        else {
+            console.log('Not all actions are valid... We keep the same process state..')
+            loopHandler = false
+        }
+    }
+
+    return process
+}
+
+//#PROCESS TASKS:
 //Task 1.
-const initProcess = (process) => {
+const initProcess = (process, projectSecondPhase) => {
     //Fetch first phase
-    var currentPhaseId = fetchFirstPhaseModel()
+    var currentPhaseId = getFirstPhaseIdFromModel()
 
     //Fetch first step (of first phase)
-    var currentStepId = fetchFirstStepModel(process, currentPhaseId)
+    var currentStepId = getFirstStepIdFromModel(process, currentPhaseId)
 
     process[currentPhaseId] = processModel[currentPhaseId]
     process[currentPhaseId].steps[currentStepId] = processModel[currentPhaseId].steps[currentStepId]
 
-    return { currentPhaseId, currentStepId }
+    //Set "nextPhase" dynamiclly (for all steps.. but only last one will use it)
+    Object.keys(process[currentPhaseId].steps).forEach((step) => {
+        process[currentPhaseId].steps[step].nextPhase = projectSecondPhase
+    })
+
+    return process
+}
+
+const getFirstPhaseIdFromModel = () => {
+    let currentPhaseId
+    Object.keys(processModel).forEach(phaseId => {
+        if (processModel[phaseId].phaseOrder === 1) currentPhaseId = phaseId
+    })
+    return currentPhaseId
+}
+
+const getFirstStepIdFromModel = () => {
+    const firstPhaseId = getFirstPhaseIdFromModel()
+    let currentStepId
+    Object.keys(processModel[firstPhaseId].steps).forEach(stepId => {
+        if (processModel[firstPhaseId].steps[stepId].stepOrder === 1) currentStepId = stepId
+    })
+    return currentStepId
 }
 
 //Task 2.
-const verifyActions = async (actions) => {
+const verifyActions = async (actions, attributes) => {
+    console.log('ATTRIBUTES......................................................', attributes)
 
     let allActionsValid = true
 
-    //Set verification params (#rules: verification is done no matter action is pending or done)
-    const clientId = 'GS-CL-9o1z'
-
+    //Complete actions params
     for (let action of actions) {
+
+        console.log('ACTION ::::::::::::::::::::', action)
+
+        //CRUD
         if (action.verificationType === 'data-fill') {
             if (action.collection === 'Clients') {
-                action.documentId = clientId
-            }
-
-            if (action.screenName === 'Profile') {
-                action.screenParams.userId = clientId
+                action.documentId = attributes.clientId
             }
         }
 
         else if (action.verificationType === 'doc-creation') {
             if (action.collection === 'Agenda') {
-                action.projectId = projectId
+                action.documentId = attributes.project.id
             }
+        }
+
+        //Navigation
+        if (action.screenName === 'Profile') {
+            action.screenParams.userId = attributes.clientId
+        }
+
+        else if (action.screenName === 'CreateTask') {
+            console.log('attributes.project..........................................', attributes.project)
+            action.screenParams.project = attributes.project
+            console.log('action.screenParams.project..........................................', action.screenParams.project)
+
         }
     }
 
@@ -266,129 +422,36 @@ const verifyActions = async (actions) => {
 
     //VERIFICATION TYPE 1: data-fill
     const actions_dataFill = actions_groupedByVerificationType['data-fill']
+    let allActionsValid_dataFill = true
 
     if (actions_dataFill) {
-        var { verifiedActions_dataFill, allActionsValid_dataFill } = await verifyActions_dataFill(actions_dataFill)
+        allActionsValid_dataFill = await verifyActions_dataFill(actions_dataFill)
         // console.log('VERIFY ACTIONS TYPE DATA FILL: ', verifiedActions_dataFill, allActionsValid_dataFill)
     }
 
     //VERIFICATION TYPE 2: doc-creation
     const actions_docCreation = actions_groupedByVerificationType['doc-creation']
+    let allActionsValid_docCreation = true
 
     if (actions_docCreation) {
-        var { verifiedActions_docCreation, allActionsValid_docCreation } = await verifyActions_docCreation(actions_docCreation)
+        allActionsValid_docCreation = await verifyActions_docCreation(actions_docCreation)
         // console.log('VERIFY ACTIONS TYPE DOC CREATION: ', verifiedActions_docCreation, allActionsValid_docCreation)
     }
 
-    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation
+    //VERIFICATION TYPE 3: multiple-choices
+    const actions_multipleChoices = actions_groupedByVerificationType['multiple-choices']
+    let allActionsValid_multipleChoices = true
+
+    if (actions_multipleChoices) {
+        allActionsValid_multipleChoices = await verifyActions_multipleChoices(actions_multipleChoices)
+        // console.log('VERIFY ACTIONS TYPE DOC CREATION: ', verifiedActions_multipleChoices, allActionsValid_multipleChoices)
+    }
+
+    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_multipleChoices
 
     return allActionsValid
 }
 
-//Task 3.
-const handleAllActionsValid = (process) => {
-
-    const nextStepId = getNextStep(process)
-
-    //Next step transition
-    if (nextStepId)
-        process = handleNextStepTransition(process)
-
-    else {
-        const nextPhaseId = getNextPhase(process)
-
-        //Next phase transition
-        if (nextPhaseId)
-            process = handleNextPhaseTransition(process)
-
-        //End process
-        else handleEndProcess(process)
-    }
-
-    return process
-}
-
-//Task 4'.
-const handleNextStepTransition = (process) => {
-    console.log('Transition to next step...')
-    process = projectNextStepInit(process)
-    return process
-}
-
-export const getNextStep = (ProjectProcess) => {
-    //1. Get current step
-    const { currentPhaseId, currentStepId } = getCurrentStep(ProjectProcess)
-
-    //2. Get Steps from process model
-    //Option1: Get next step based on "nextStep" property -> Drawbacks: in case of two steps choices nextstep will be two steps same time.
-    const nextStepId = processModel[currentPhaseId].steps[currentStepId].nextStep || null
-
-    //Option2: Get next step based on "stepOrder"
-    //...
-
-    return nextStepId
-}
-
-export const projectNextStepInit = (ProjectProcess) => {
-
-    const { currentPhaseId, currentStepId } = getCurrentStep(ProjectProcess)
-    const nextStepId = getNextStep(ProjectProcess)
-    const nextStepModel = processModel[currentPhaseId].steps[nextStepId]
-
-    // //3. Concat next step to ProjectProcess
-    ProjectProcess[currentPhaseId].steps[nextStepId] = nextStepModel
-
-    return ProjectProcess
-}
-
-//Task 4".
-const handleNextPhaseTransition = (process) => {
-    console.log('Transition to next phase...')
-    process = projectNextPhaseInit(process, null)
-    return process
-}
-
-export const getNextPhase = (ProjectProcess) => {
-    //1. Get current step
-    var { currentPhaseId, currentStepId } = getCurrentStep(ProjectProcess)
-
-    //2. Get nextPhaseId from process model
-    const projectNextPhase = processModel[currentPhaseId].steps[currentStepId].nextPhase || null //#rules: Only last step has "nextPhase" property
-
-    return projectNextPhase
-}
-
-export const projectNextPhaseInit = (ProjectProcess, projectNextPhase = null) => {
-    //0. Deduct next phase if not given as param
-    if (!projectNextPhase) {
-        projectNextPhase = getNextPhase(ProjectProcess)
-    }
-
-    //1. Get next Phase from process model
-    const nextPhaseModel = processModel[projectNextPhase]
-
-    //2. Keep only first step (stepOrder = 1)
-    const firstStep = getPhaseFirstStep(nextPhaseModel.steps)
-    nextPhaseModel.steps = firstStep
-
-    //3. Concat next phase to ProjectProcess
-    ProjectProcess[projectNextPhase] = nextPhaseModel
-
-    return ProjectProcess
-}
-
-const getPhaseFirstStep = (steps) => {
-    const firstStepArray = Object.entries(steps).filter(([key, value]) => value['stepOrder'] === 1)
-    const firstStep = Object.fromEntries(firstStepArray)
-    return firstStep
-}
-
-//Task 5.
-const handleEndProcess = (process) => {
-    console.log('Process finished !')
-}
-
-//##ACTIONS verification
 export const verifyActions_dataFill = async (actions) => {
 
     //Issue: cannot access same document same collection multiple times in a very short delay
@@ -396,20 +459,16 @@ export const verifyActions_dataFill = async (actions) => {
     const formatedActions = groupBy(actions, "documentId")
 
     //Verify actions for each document
-    let verifiedActions_dataFill = []
+    // let verifiedActions_dataFill = []
     let allActionsValid_dataFill = true
 
     for (const documentId in formatedActions) {
         const { verifiedActionsSameDoc, allActionsSameDocValid } = await verifyActionsSameDoc(formatedActions[documentId])
         allActionsValid_dataFill = allActionsValid_dataFill && allActionsSameDocValid
-        verifiedActions_dataFill = verifiedActions_dataFill.concat(verifiedActionsSameDoc)
+        // verifiedActions_dataFill = verifiedActions_dataFill.concat(verifiedActionsSameDoc)
     }
 
-    return { verifiedActions_dataFill, allActionsValid_dataFill }
-}
-
-export const verifyActions_docCreation = async (actions) => {
-    console.log("actions verification type 'doc creation'", actions)
+    return allActionsValid_dataFill
 }
 
 const verifyActionsSameDoc = async (actionsSameDoc) => {
@@ -444,7 +503,143 @@ const verifyActionsSameDoc = async (actionsSameDoc) => {
     return { verifiedActionsSameDoc, allActionsSameDocValid }
 }
 
-//##UI FUNCTIONS (PROCESS OVERVIEW)
+export const verifyActions_docCreation = async (actions) => {
+
+    //Verify actions for each document
+    let allActionsValid_docCreation = true
+
+    for (let action of actions) {
+        const collection = action.collection //Agenda
+        const projectId = action.documentId
+
+        await db.collection(collection).where('project.id', '==', projectId).get().then((querysnapshot) => {
+            if (querysnapshot.empty) {
+                action.status = 'pending'
+                allActionsValid_docCreation = false
+            }
+            else action.status = 'done'
+        })
+    }
+
+    return allActionsValid_docCreation
+}
+
+export const verifyActions_multipleChoices = async (actions) => {
+    let allActionsValid_multipleChoices = true
+
+    for (let action of actions) {
+        if (action.status === 'pending')
+            allActionsValid_multipleChoices = false
+    }
+
+    return allActionsValid_multipleChoices
+}
+
+//Task 3.
+const handleTransition = (process) => {
+
+    const nextStepId = getNextStepId(process)
+
+    //Next step transition
+    if (nextStepId)
+        process = handleNextStepTransition(process)
+
+    else {
+        const nextPhaseId = getNextPhaseId(process)
+
+        //Next phase transition
+        if (nextPhaseId)
+            process = handleNextPhaseTransition(process)
+
+        //End process
+        else handleEndProcess(process)
+    }
+
+    return process
+}
+
+//Task 4'.
+const handleNextStepTransition = (process) => {
+    console.log('Transition to next step...')
+    process = projectNextStepInit(process)
+    return process
+}
+
+export const getNextStepId = (ProjectProcess) => {
+    //1. Get current step
+    const { currentPhaseId, currentStepId } = getCurrentStep(ProjectProcess)
+
+    //2. Get Steps from process model
+    //Option1: Get next step based on "nextStep" property -> Drawbacks: in case of two steps choices nextstep will be two steps same time.
+    const nextStepId = processModel[currentPhaseId].steps[currentStepId].nextStep || null
+
+    //Option2: Get next step based on "stepOrder"
+    //...
+
+    return nextStepId
+}
+
+export const projectNextStepInit = (process) => {
+
+    const { currentPhaseId, currentStepId } = getCurrentStep(process)
+    const nextStepId = getNextStepId(process)
+    const nextStepModel = processModel[currentPhaseId].steps[nextStepId]
+
+    // //3. Concat next step to process
+    process[currentPhaseId].steps[nextStepId] = nextStepModel
+
+    return process
+}
+
+//Task 4".
+const handleNextPhaseTransition = (process) => {
+    //console.log('Transition to next phase...')
+    process = projectNextPhaseInit(process)
+    return process
+}
+
+export const getNextPhaseId = (process) => {
+    //1. Get current step
+    var { currentPhaseId, currentStepId } = getCurrentStep(process)
+
+    //2. Get nextPhaseId from process model
+    const projectNextPhaseId = processModel[currentPhaseId].steps[currentStepId].nextPhase || null //#rules: Only last step has "nextPhase" property
+
+    return projectNextPhaseId
+}
+
+export const projectNextPhaseInit = (process) => {
+
+    //0. Deduct next phase if not given as param
+    const projectNextPhase = getNextPhaseId(process)
+
+    //1. Get next Phase from process model
+    const nextPhaseModel = processModel[projectNextPhase]
+    console.log('projectNextPhase', projectNextPhase)
+
+    //2. Keep only first step (stepOrder = 1)
+    const firstStep = getPhaseFirstStep(nextPhaseModel.steps)
+    nextPhaseModel.steps = firstStep
+
+    //3. Concat next phase to process
+    process[projectNextPhase] = nextPhaseModel
+
+    return process
+}
+
+const getPhaseFirstStep = (steps) => {
+    const firstStepArray = Object.entries(steps).filter(([key, value]) => value['stepOrder'] === 1)
+    const firstStep = Object.fromEntries(firstStepArray)
+    return firstStep
+}
+
+//Task 5.
+const handleEndProcess = (process) => {
+    console.log('Process finished !')
+}
+
+
+//#UI FUNCTIONS (PROCESS OVERVIEW)
 // Process object at the instant t contains only the current state of the global process model --> So we are sure that the object with max order is the latest phase/step
 export const getCurrentPhase = (process) => {
 
@@ -482,27 +677,12 @@ export const getCurrentStep = (process) => {
     return { currentPhaseId, currentStepId } //you can then use process[currentPhaseId].steps[currentStepId]
 }
 
-const fetchFirstPhaseModel = () => {
-    let currentPhaseId
-    Object.keys(processModel).forEach(phaseId => {
-        if (processModel[phaseId].phaseOrder === 1) currentPhaseId = phaseId
-    })
-    return currentPhaseId
-}
-
-const fetchFirstStepModel = () => {
-    const firstPhaseId = fetchFirstPhaseModel()
-    let currentStepId
-    Object.keys(processModel[firstPhaseId].steps).forEach(stepId => {
-        if (processModel[firstPhaseId].steps[stepId].stepOrder === 1) currentStepId = stepId
-    })
-    return currentStepId
-}
-
 export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
 
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
+    console.log(currentPhaseId, currentStepId)
+
     const { actions } = process[currentPhaseId].steps[currentStepId]
 
     let currentAction = null
@@ -511,11 +691,12 @@ export const getCurrentAction = (process) => {
             currentAction = action
     }
 
+
     return currentAction
 }
 
 
-//##Helpers
+//#Helpers
 const phases = [
     { label: 'Initialisation', value: 'Initialisation', id: 'init' },
     { label: 'Rendez-vous 1', value: 'Rendez-vous 1', id: 'rd1' },
@@ -545,42 +726,3 @@ const groupBy = (arr, property) => {
 
 
 
-
-// //1. Project process: Initialization
-// export const projectProcessInit = async (clientId, projectNextPhase) => {
-
-//     //A. Process Initialization
-//     //1. Get current ProjectProcess object
-//     let ProjectProcess = {} //Init: process is empty
-
-//     //2. Phase: Get first phase model
-//     //  const { init } = processModel
-//     const { currentPhaseId, currentStepId } = getCurrentStep(ProjectProcess)
-
-//     //4. Actions: nom & prenom
-//     let { actions } = init.steps.prospectCreation
-
-//     //Set verification params
-//     for (let action of actions) {
-//         if (action.collection === 'Clients') {
-//             action.documentId = clientId
-//         }
-
-//         if (action.screenName === 'Profile') {
-//             action.screenParams.userId = clientId
-//         }
-//     }
-
-//     const { verifiedActions, allActionsValid } = await verifyActions(actions)
-
-//     init.steps.prospectCreation.actions = verifiedActions
-
-//     //5. Assign process to project
-//     ProjectProcess.init = init
-
-//     //B. Add Next Phase depending on project "step" attribute 
-//     if (allActionsValid)
-//         ProjectProcess = projectNextPhaseInit(ProjectProcess, projectNextPhase)
-
-//     return ProjectProcess
-// }

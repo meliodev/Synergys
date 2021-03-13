@@ -8,7 +8,7 @@ import CustomIcon from './CustomIcon'
 import * as theme from "../core/theme";
 
 
-const ItemPicker = ({ label, value, error, errorText, onPress, showAvatarText = true, icon = faPlusCircle, ...props }) => {
+const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, icon = faPlusCircle, ...props }) => {
 
     const AvatarText = ({ text }) => (
         <View style={styles.avatarText} >
@@ -16,8 +16,8 @@ const ItemPicker = ({ label, value, error, errorText, onPress, showAvatarText = 
         </View>
     )
 
-    const borderBottomColor = errorText !== '' ? theme.colors.error : theme.colors.gray_extraLight
-    const placeholderColor = errorText !== '' ? theme.colors.error : theme.colors.secondary
+    const borderBottomColor = errorText && errorText !== '' ? theme.colors.error : theme.colors.gray_extraLight
+    const placeholderColor = errorText && errorText !== '' ? theme.colors.error : theme.colors.secondary
 
     if (value) {
 

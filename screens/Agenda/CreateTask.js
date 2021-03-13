@@ -75,22 +75,25 @@ class CreateTask extends Component {
         this.TaskId = this.props.navigation.getParam('TaskId', '')
         this.isEdit = this.TaskId ? true : false
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
-
         this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 
+        //Params
+        this.taskType = this.props.navigation.getParam('taskType', undefined)
+        this.project = this.props.navigation.getParam('project', undefined)
+        
         this.state = {
             //TEXTINPUTS
             name: { value: "", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
-            type: 'Rendez-vous',
+            type: this.taskType || 'Rendez-vous',
             priority: 'Moyenne',
             status: 'En cours',
 
             //Screens
             assignedTo: { id: '', fullName: '', error: '' },
-            project: { id: '', name: '', error: '' },
+            project: this.project || { id: '', name: '', error: '' },
             address: { description: '', place_id: '', error: '' },
             startDate: moment().format(),
             dueDate: moment().add(1, 'h').format(),

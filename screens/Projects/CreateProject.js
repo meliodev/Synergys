@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard, TextInput, ActivityIndicator } from 'react-native';
 import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from 'react-native-paper'
+import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle } from '@fortawesome/pro-light-svg-icons'
@@ -25,7 +26,7 @@ import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
-import { projectProcessInit, projectProcessHandler, getPhaseId, getCurrentStep, getCurrentAction, getNextStep, projectNextStepInit, projectNextPhaseInit } from '../../core/process'
+import { processMain, getCurrentAction, getPhaseId } from '../../core/process'
 
 import { connect } from 'react-redux'
 
@@ -129,6 +130,7 @@ class CreateProject extends Component {
 
             //Process
             process: null,
+            processUpdated: false,
 
             error: '',
             loading: false
@@ -142,6 +144,19 @@ class CreateProject extends Component {
             await this.fetchDocuments()
             await this.fetchTasks()
             this.initialState = this.state
+
+            //processMain params
+            const { process } = this.state
+            const { client, name, step } = this.initialState
+            const clientId = client.id
+            const project = {
+                id: this.ProjectId,
+                name: name.value
+            }
+            const secondPhaseId = getPhaseId(step) //used only init process stage
+
+            const updatedProcess = await processMain(process, secondPhaseId, clientId, project) //Step <=> Phase
+            this.setState({ process: updatedProcess, processUpdated: true })
         }
 
         else this.initialState = this.state
@@ -173,7 +188,6 @@ class CreateProject extends Component {
                 //َActivity
                 createdAt = project.createdAt
                 createdBy = project.createdBy
-                console.log('createdBy', createdBy)
                 editedAt = project.editedAt
                 editedBy = project.editedBy
 
@@ -197,18 +211,8 @@ class CreateProject extends Component {
 
                 this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process }, async () => {
                     //if (this.isInit)
-                    this.initialState = this.state
 
-                    if (this.isEdit) {
-                        const { process } = this.state
-                        const { client } = this.initialState
-                        console.log(process)
-                        const updatedProjectProcess = await projectProcessHandler(process, client.id, this.ProjectId)
-                        console.log("updatedProjectProcess", updatedProjectProcess)
-                        // db.collection('Projects').doc(this.ProjectId).update({ process: updatedProjectProcess })
-                        // .then(() => console.log('PROJECT PROCESS UPDATED !'))
-                        // this.setState({ process: updatedProjectProcess }, () => console.log('UPDATED PROCESS: ', this.state.process))
-                    }
+                    this.initialState = this.state
 
                     //this.isInit = false
                 })
@@ -367,24 +371,8 @@ class CreateProject extends Component {
             project.attachments = attachedImages
         }
 
-        // if (isConnected)
-        //     await db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        // else
         db.collection('Projects').doc(this.ProjectId).set(project, { merge: true }) //Nothing to wait for -> data persisted to local cache
-
-        // //After project is created we can verify fields (actions) during processInit
-        // setTimeout(async () => {
-        //     //Get phase id
-        //     const currentPhaseId = getPhaseId(step)
-        //     const clientId = client.id
-        //     const projectProcess = await projectProcessInit(clientId, currentPhaseId)
-        //     project.process = projectProcess
-
-        //     db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        //     setTimeout(() => this.props.navigation.goBack(), 1000)
-
-        // }, 2000)
-
+        this.props.navigation.goBack()
     }
 
     showAlert() {
@@ -523,28 +511,33 @@ class CreateProject extends Component {
     }
 
     renderProcessCurrentAction(process) {
-        return null
-        // const currentAction = getCurrentAction(process)
-        // const { title, status, screenName, screenParams } = currentAction
+        const currentAction = getCurrentAction(process)
+        console.log('currentAction', currentAction)
 
-        // return (
-        //     <FormSection
-        //         sectionTitle='Prochaine tâche'
-        //         sectionIcon={null}
-        //         form={
-        //             <TouchableOpacity onPress={() => this.props.navigation.navigate(screenName, screenParams)} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        //                 <Text style={[theme.customFontMSregular]}>{title}</Text>
-        //                 <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
-        //             </TouchableOpacity>
-        //         }
-        //     />
-        // )
+        const { title, status, screenName, screenParams } = currentAction
+        //if verificationType = 'multipleChoice' --> User has to check manually the action
+        //This will change action status to done and will as well change "nextStep" property depending on the choice made by user
+
+    //     return null
+        return (
+            <FormSection
+                sectionTitle='Prochaine tâche'
+                sectionIcon={null}
+                form={
+                    <TouchableOpacity onPress={() => this.props.navigation.navigate(screenName, screenParams)} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={[theme.customFontMSregular]}>{title}</Text>
+                        <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
+                    </TouchableOpacity>
+                }
+            />
+        )
     }
 
     render() {
         let { client, clientError, name, description, note, address, addressError, state, step, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
-        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected, process } = this.state
+        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
+        const { process, processUpdated } = this.state
         let { error, loading, toastMessage, toastType } = this.state
         let { canUpdate, canDelete } = this.props.permissions.projects
         canUpdate = (canUpdate || !this.isEdit)
@@ -558,7 +551,7 @@ class CreateProject extends Component {
 
                 <ScrollView style={styles.dataContainer}>
 
-                    {!loading && process && this.renderProcessCurrentAction(process)}
+                    {!loading && process && processUpdated && this.renderProcessCurrentAction(process)}
 
                     {!loading &&
                         <FormSection
