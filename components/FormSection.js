@@ -23,7 +23,7 @@ export default FormSection
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: theme.padding,
+        paddingBottom: theme.padding/2,
     },
     formContainer: {
         flex: 1,

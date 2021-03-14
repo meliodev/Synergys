@@ -20,6 +20,7 @@ const processModel = {
                         id: 'nom',
                         title: 'Nom',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
                         collection: 'Clients', // In case of subcollection: Projects/SubCollection
                         documentId: '', // depending on the concerned project
                         properties: ['nom'],
@@ -34,6 +35,7 @@ const processModel = {
                         id: 'prenom',
                         title: 'Prénom',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 2,
                         collection: 'Clients', // In case of subcollection: Projects/SubCollection
                         documentId: '', // depending on the concerned project
                         properties: ['prenom'],
@@ -48,6 +50,7 @@ const processModel = {
                         id: 'address',
                         title: 'Adresse postale',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 3,
                         collection: 'Clients', // In case of subcollection: Projects/SubCollection
                         documentId: '', // depending on the concerned project
                         properties: ['address', 'description'],
@@ -78,29 +81,33 @@ const processModel = {
                         id: 'createPriorTechnicalVisit',
                         title: 'Créer une visite technique préalable',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
                         collection: 'Agenda', // In case of subcollection: Projects/SubCollection
                         documentId: '',
-                        properties: [''],
+                        properties: [],
                         screenName: 'CreateTask', //creation
                         screenParams: { taskType: 'Visite technique préalable', project: null },
                         type: 'auto',
                         responsable: '',
                         status: 'pending',
-                        verificationType: 'doc-creation'
+                        verificationType: 'doc-creation',
+                        docCreatedId: '' //Is filled automatically after creating the task
                     },
                     {
                         id: 'address',
                         title: 'Lieu du rendez-vous',
                         instructions: 'Lorem ipsum dolor',
-                        collection: 'CreateTask', // In case of subcollection: Projects/SubCollection
+                        actionOrder: 2,
+                        collection: 'Agenda', // In case of subcollection: Projects/SubCollection
                         documentId: '', // depending on the concerned project
                         properties: ['address', 'description'],
-                        screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenName: 'CreateTask',
+                        screenParams: { TaskId: '' },
                         type: 'auto',
                         responsable: '',
                         status: 'pending',
-                        verificationType: 'data-fill'
+                        verificationType: 'data-fill',
+                        creationPath: { phaseId: 'rd1', stepId: 'priorTechnicalVisit', actionId: 'createPriorTechnicalVisit' }  //where to find 'id' of the created document we want to update
                     },
                     //others actions... (rd1Place)
                 ]
@@ -119,6 +126,7 @@ const processModel = {
                         id: 'eebFile',
                         title: 'Fiche EEB',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
                         screenName: 'UploadDocument',
                         screenParams: { project: '', DocumentType: '' },
                         type: 'auto',
@@ -154,20 +162,23 @@ const processModel = {
                         id: 'rd2Creation',
                         title: 'Créer un rendez-vous 2',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
                         collection: 'Agenda',
                         documentId: '',
-                        properties: [''],
+                        properties: [],
                         screenName: 'CreateTask', //creation
                         screenParams: { taskType: 'Visite technique préalable', project: null },
                         type: 'auto',
                         responsable: '',
                         status: 'pending',
-                        verificationType: 'doc-creation'
+                        verificationType: 'doc-creation',
+                        docCreatedId: ''
                     },
                     {
                         id: 'rd2Choice',
                         title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 2,
                         collection: '', //Because manual
                         documentId: '', //Because manual
                         properties: [], //Because manual
@@ -177,66 +188,52 @@ const processModel = {
                         responsable: '',
                         status: 'pending',
                         verificationType: 'multiple-choices',
-                        choices: ['Confirmer', 'Annuler', 'Reporter'] //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                        choices: [{ label: 'Confirmer', nextStep: 'confirmRd2' }, { label: 'Annuler', nextStep: 'cancelRd2' }, { label: 'Reporter', nextStep: 'postponeRd2' }] //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                     },
                 ]
             },
             'confirmRd2': {
-                title: 'Rendez-vous 2',
+                title: 'Confirmation du rendez-vous',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 100,
-                nextStep: '',
-                actions: [
-                    {
-                        id: 'rd2Choice',
-                        title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
-                        instructions: 'Lorem ipsum dolor',
-                        collection: '', //Because manual
-                        documentId: '', //Because manual
-                        properties: [], //Because manual
-                        screenName: '', //Because manual
-                        screenParams: null, //Because manual
-                        type: 'manual', //Check manually
-                        responsable: '',
-                        status: 'pending',
-                        verificationType: 'multiple-choices',
-                        choices: ['Confirmer', 'Annuler', 'Reporter']
-                    },
-                ]
+                stepOrder: 2,
+                nextStep: 'signature',
+                actions: []
             },
             'postponeRd2': {
-                title: 'Rendez-vous 2',
+                title: 'Report du rendez-vous',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 100,
+                stepOrder: 2,
                 nextStep: '',
                 actions: [
                     {
-                        id: 'rd2Choice',
-                        title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
+                        id: 'rd2Postpone',
+                        title: 'Définir la nouvelle date du rendez-vous',
                         instructions: 'Lorem ipsum dolor',
-                        collection: '', //Because manual
-                        documentId: '', //Because manual
-                        properties: [], //Because manual
-                        screenName: '', //Because manual
-                        screenParams: null, //Because manual
-                        type: 'manual', //Check manually
+                        actionOrder: 1,
+                        collection: 'Agenda',
+                        documentId: '',
+                        properties: ['startDate'],
+                        screenName: 'CreateTask', //update
+                        screenParams: { TaskId: '' }, //Defined depending on the existing task (rendez-vous)
+                        type: 'auto',
                         responsable: '',
                         status: 'pending',
-                        verificationType: 'multiple-choices',
-                        choices: ['Confirmer', 'Annuler', 'Reporter']
+                        verificationType: 'doc-update',
+                        creationPath: { phaseId: 'rdn', stepId: 'rd2Creation', actionId: 'rd2Creation' }  //where to find 'id' of the created document we want to update
                     },
                 ]
             },
             'cancelRd2': {
-                title: 'Rendez-vous 2',
+                title: 'Annulation du rendez-vous',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 100,
+                stepOrder: 2,
                 nextStep: '',
                 actions: [
                     {
                         id: 'rd2Choice',
                         title: 'Est-ce que la date du rendez-vous 2 est toujours valide ?',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
                         collection: '', //Because manual
                         documentId: '', //Because manual
                         properties: [], //Because manual
@@ -250,6 +247,7 @@ const processModel = {
                     },
                 ]
             },
+            //signature
         }
     },
     'technicalVisitManagement': {
@@ -274,6 +272,7 @@ const processModel = {
                         id: 'tvDateValidation',
                         title: 'Valider la date de la visite technique',
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
                         // screenName: 'CreateTask',
                         // screenParams: { TaskId: '' },
                         type: 'manual',                                                                                                                    //##ask: is it manual or auto -> if manual.. does it require a defined responsable to handle it ?
@@ -301,7 +300,7 @@ export const processMain = async (process, projectSecondPhase, clientId, project
         await db.collection('Projects').doc(project.id).update({ process: updatedProjectProcess }).then(() => console.log('PROJECT PROCESS UPDATED !'))
     }
 
-    return updatedProjectProcess || {} //To avoid errors
+    return updatedProjectProcess//To avoid errors
 }
 
 //#PROCESS ALGORITHM/LOGIC
@@ -313,6 +312,7 @@ export const projectProcessHandler = async (process, projectSecondPhase, attribu
 
         //0. Initialize process with 1st phase/1st step
         if (_.isEmpty(process)) {
+            console.log('Initializing process...')
             process = initProcess(process, projectSecondPhase)
         }
 
@@ -320,21 +320,25 @@ export const projectProcessHandler = async (process, projectSecondPhase, attribu
         var { currentPhaseId, currentStepId } = getCurrentStep(process)
 
         //2. Actions handler (Verifications & Status update)
-        const { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
+        let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
 
-        //#task: LOOP ACTIONS VERIFICATION in case of phase/step transition 
-        if (actions.length > 0)
-            var allActionsValid = await verifyActions(actions, attributes)
+        if (actions.length > 0) {
+            var verification_res = await verifyActions(actions, attributes, process, currentPhaseId, currentStepId)
+            allActionsValid = verification_res.allActionsValid
+            actions = verification_res.verifiedActions
+            process[currentPhaseId].steps[currentStepId].actions = actions
+        }
 
         //3'. All actions valid --> update project's process model
         if (allActionsValid) {
             process = handleTransition(process)
-            console.log('Transition done.. verify new step actions (loop)')
+            console.log('Transition done --> Loop')
         }
 
         //3". At least one action is not valid
         else {
             console.log('Not all actions are valid... We keep the same process state..')
+            var { currentPhaseId, currentStepId } = getCurrentStep(process)
             loopHandler = false
         }
     }
@@ -380,39 +384,79 @@ const getFirstStepIdFromModel = () => {
 }
 
 //Task 2.
-const verifyActions = async (actions, attributes) => {
-    console.log('ATTRIBUTES......................................................', attributes)
+const verifyActions = async (actions, attributes, process, currentPhaseId, currentStepId) => {
 
     let allActionsValid = true
+    let verifiedActions = []
 
     //Complete actions params
     for (let action of actions) {
 
-        console.log('ACTION ::::::::::::::::::::', action)
-
-        //CRUD
-        if (action.verificationType === 'data-fill') {
-            if (action.collection === 'Clients') {
-                action.documentId = attributes.clientId
-            }
-        }
-
-        else if (action.verificationType === 'doc-creation') {
+        if (action.verificationType === 'doc-creation') {
+            //Verification & update
             if (action.collection === 'Agenda') {
                 action.documentId = attributes.project.id
             }
+
+            //Navigation
+            if (action.screenName === 'CreateTask') {
+                action.screenParams.project = attributes.project
+            }
         }
 
-        //Navigation
-        if (action.screenName === 'Profile') {
-            action.screenParams.userId = attributes.clientId
+        else if (action.verificationType === 'data-fill') {
+            //Verification & update
+            if (action.collection === 'Clients') {
+                action.documentId = attributes.clientId
+            }
+
+            else if (action.collection === 'Agenda') {
+
+                //1. Get TaskId from the action which created this document
+                const { phaseId, stepId, actionId } = action.creationPath //Path to find creation action
+                const creationStepAllActions = process[phaseId].steps[stepId].actions
+                const creationAction = creationStepAllActions.filter((action) => action.id === actionId) //<-- Action found
+
+                const TaskId = creationAction[0].docCreatedId
+                console.log('AGENDA................', TaskId)
+
+                action.documentId = TaskId
+            }
+
+            //Navigation
+            if (action.screenName === 'Profile') {
+                action.screenParams.userId = attributes.clientId
+            }
+
+            else if (action.screenName === 'CreateTask') {
+                //1. Get TaskId from the action which created this document
+                const { phaseId, stepId, actionId } = action.creationPath //Path to find creation action
+                const creationStepAllActions = process[phaseId].steps[stepId].actions
+                const creationAction = creationStepAllActions.filter((action) => action.id === actionId) //<-- Action found
+
+                const TaskId = creationAction[0].docCreatedId
+                console.log('AGENDA................', TaskId)
+
+                action.screenParams.TaskId = TaskId
+            }
         }
 
-        else if (action.screenName === 'CreateTask') {
-            console.log('attributes.project..........................................', attributes.project)
-            action.screenParams.project = attributes.project
-            console.log('action.screenParams.project..........................................', action.screenParams.project)
+        else if (action.verificationType === 'doc-update') {
+            //Verification & update
+            if (action.collection === 'Agenda') {
+                action.documentId = attributes.project.id
+            }
 
+            //Navigation
+            if (action.screenName === 'CreateTask') { //We need existing "TaskId"
+
+                //1. Get TaskId from the action which created this document
+                const { phaseId, stepId, actionId } = action.creationPath //Path to find creation action
+                const creationStepAllActions = processModel[phaseId].steps[stepId].actions
+                const creationAction = creationStepAllActions.filter((action) => action.id === actionId) //<-- Action found
+                const TaskId = creationAction.docCreatedId
+                action.documentId = TaskId
+            }
         }
     }
 
@@ -421,35 +465,50 @@ const verifyActions = async (actions, attributes) => {
     const actions_groupedByVerificationType = groupBy(actions, "verificationType") //Actions grouped by verificationType ("data-fill" & "doc-creation")
 
     //VERIFICATION TYPE 1: data-fill
-    const actions_dataFill = actions_groupedByVerificationType['data-fill']
+    let actions_dataFill = actions_groupedByVerificationType['data-fill'] || []
     let allActionsValid_dataFill = true
 
-    if (actions_dataFill) {
-        allActionsValid_dataFill = await verifyActions_dataFill(actions_dataFill)
-        // console.log('VERIFY ACTIONS TYPE DATA FILL: ', verifiedActions_dataFill, allActionsValid_dataFill)
+    if (actions_dataFill.length > 0) {
+        var res1 = await verifyActions_dataFill(actions_dataFill)
+        allActionsValid_dataFill = res1.allActionsValid_dataFill
+        actions_dataFill = res1.verifiedActions_dataFill
     }
 
     //VERIFICATION TYPE 2: doc-creation
-    const actions_docCreation = actions_groupedByVerificationType['doc-creation']
+    let actions_docCreation = actions_groupedByVerificationType['doc-creation'] || []
     let allActionsValid_docCreation = true
 
-    if (actions_docCreation) {
-        allActionsValid_docCreation = await verifyActions_docCreation(actions_docCreation)
-        // console.log('VERIFY ACTIONS TYPE DOC CREATION: ', verifiedActions_docCreation, allActionsValid_docCreation)
+    if (actions_docCreation.length > 0) {
+        var res2 = await verifyActions_docCreation(actions_docCreation)
+        allActionsValid_docCreation = res2.allActionsValid_docCreation
+        actions_docCreation = res2.verifiedActions_docCreation
     }
 
     //VERIFICATION TYPE 3: multiple-choices
-    const actions_multipleChoices = actions_groupedByVerificationType['multiple-choices']
+    let actions_multipleChoices = actions_groupedByVerificationType['multiple-choices'] || []
     let allActionsValid_multipleChoices = true
 
-    if (actions_multipleChoices) {
-        allActionsValid_multipleChoices = await verifyActions_multipleChoices(actions_multipleChoices)
-        // console.log('VERIFY ACTIONS TYPE DOC CREATION: ', verifiedActions_multipleChoices, allActionsValid_multipleChoices)
+    if (actions_multipleChoices.length > 0) {
+        var res3 = await verifyActions_multipleChoices(actions_multipleChoices)
+        allActionsValid_multipleChoices = res3.allActionsValid_multipleChoices
+        actions_multipleChoices = res3.verifiedActions_multipleChoices
     }
 
-    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_multipleChoices
+    //VERIFICATION TYPE 4: doc-update
+    let actions_docUpdate = actions_groupedByVerificationType['multiple-choices'] || []
+    let allActionsValid_docUpdate = true
 
-    return allActionsValid
+    if (actions_docUpdate.length > 0) {
+        var res3 = await verifyActions_docUpdate(actions_docUpdate)
+        allActionsValid_docUpdate = res3.allActionsValid_docUpdate
+        actions_docUpdate = res3.verifiedActions_docUpdate
+    }
+
+
+    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_multipleChoices
+    verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_multipleChoices)
+
+    return { allActionsValid, verifiedActions }
 }
 
 export const verifyActions_dataFill = async (actions) => {
@@ -459,19 +518,19 @@ export const verifyActions_dataFill = async (actions) => {
     const formatedActions = groupBy(actions, "documentId")
 
     //Verify actions for each document
-    // let verifiedActions_dataFill = []
     let allActionsValid_dataFill = true
+    let verifiedActions_dataFill = []
 
     for (const documentId in formatedActions) {
-        const { verifiedActionsSameDoc, allActionsSameDocValid } = await verifyActionsSameDoc(formatedActions[documentId])
+        const { verifiedActionsSameDoc, allActionsSameDocValid } = await verifyActions_dataFill_sameDoc(formatedActions[documentId])
         allActionsValid_dataFill = allActionsValid_dataFill && allActionsSameDocValid
-        // verifiedActions_dataFill = verifiedActions_dataFill.concat(verifiedActionsSameDoc)
+        verifiedActions_dataFill = verifiedActions_dataFill.concat(verifiedActionsSameDoc)
     }
 
-    return allActionsValid_dataFill
+    return { allActionsValid_dataFill, verifiedActions_dataFill }
 }
 
-const verifyActionsSameDoc = async (actionsSameDoc) => {
+const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     const collection = actionsSameDoc[0]['collection']
     const documentId = actionsSameDoc[0]['documentId']
     let allActionsSameDocValid = true
@@ -487,12 +546,21 @@ const verifyActionsSameDoc = async (actionsSameDoc) => {
             //action2: {"collection": "Projects", "documentId": "GS-PR-0W02", "id": "prenom", "instructions": "Lorem ipsum dolor", "properties": ["client", "fullName"], "responsable": "", "screenName": "Profile", "screenParams": {"isClient": true, "userId": ""}, "status": "pending", "title": "Prénom", "type": "auto"}
 
             //Action verification
-            const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
-            if (nestedVal && nestedVal !== '') action.status = 'done'
-            else {
+            if (!doc.exists) {
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }
+
+            else {
+                const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
+
+                if (nestedVal && nestedVal !== '') action.status = 'done'
+                else {
+                    action.status = 'pending'
+                    allActionsSameDocValid = false
+                }
+            }
+
         }
 
         return actionsSameDoc
@@ -517,11 +585,15 @@ export const verifyActions_docCreation = async (actions) => {
                 action.status = 'pending'
                 allActionsValid_docCreation = false
             }
-            else action.status = 'done'
+            else {
+                action.status = 'done'
+                action.docCreatedId = querysnapshot.docs[0].id //Id of the created document.. We can use it later on to update it
+            }
         })
     }
 
-    return allActionsValid_docCreation
+    const verifiedActions_docCreation = actions
+    return { allActionsValid_docCreation, verifiedActions_docCreation }
 }
 
 export const verifyActions_multipleChoices = async (actions) => {
@@ -532,8 +604,30 @@ export const verifyActions_multipleChoices = async (actions) => {
             allActionsValid_multipleChoices = false
     }
 
-    return allActionsValid_multipleChoices
+    const verifiedActions_multipleChoices = actions
+    return { allActionsValid_multipleChoices, verifiedActions_multipleChoices }
 }
+
+export const verifyActions_docUpdate = async (actions) => {
+    //Verify actions for each document
+    let allActionsValid_docCreation = true
+
+    for (let action of actions) {
+        const collection = action.collection //Agenda
+        const documentId = action.documentId
+
+        await db.collection(collection).doc(documentId).get().then((doc) => {
+            const data = doc.data()
+
+            const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
+            if (nestedVal) action.status = 'done' //Exp: nestedVal = startDate
+        })
+    }
+
+    const verifiedActions_docCreation = actions
+    return { allActionsValid_docCreation, verifiedActions_docCreation }
+}
+
 
 //Task 3.
 const handleTransition = (process) => {
@@ -582,10 +676,10 @@ export const getNextStepId = (ProjectProcess) => {
 export const projectNextStepInit = (process) => {
 
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
-    const nextStepId = getNextStepId(process)
+    const nextStepId = processModel[currentPhaseId].steps[currentStepId].nextStep
     const nextStepModel = processModel[currentPhaseId].steps[nextStepId]
 
-    // //3. Concat next step to process
+    //3. Concat next step to process
     process[currentPhaseId].steps[nextStepId] = nextStepModel
 
     return process
@@ -615,7 +709,6 @@ export const projectNextPhaseInit = (process) => {
 
     //1. Get next Phase from process model
     const nextPhaseModel = processModel[projectNextPhase]
-    console.log('projectNextPhase', projectNextPhase)
 
     //2. Keep only first step (stepOrder = 1)
     const firstStep = getPhaseFirstStep(nextPhaseModel.steps)
@@ -674,6 +767,8 @@ export const getCurrentStep = (process) => {
         }
     })
 
+
+
     return { currentPhaseId, currentStepId } //you can then use process[currentPhaseId].steps[currentStepId]
 }
 
@@ -681,16 +776,17 @@ export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
 
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
-    console.log(currentPhaseId, currentStepId)
 
-    const { actions } = process[currentPhaseId].steps[currentStepId]
+    let { actions } = process[currentPhaseId].steps[currentStepId]
+    actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
 
     let currentAction = null
+
     for (const action of actions) {
+        console.log('ACTION', action.id)
         if (!currentAction && action.status === 'pending')
             currentAction = action
     }
-
 
     return currentAction
 }

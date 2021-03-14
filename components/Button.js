@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 import { Button as PaperButton } from "react-native-paper";
 import * as theme from "../core/theme";
 
-const Button = ({ mode, style, children, outlinedColor = theme.colors.primary, ...props }) => (
+const Button = ({ mode, style, labelStyle, children, outlinedColor = theme.colors.primary, ...props }) => (
   <PaperButton
     style={[
       styles.button,
@@ -15,6 +15,7 @@ const Button = ({ mode, style, children, outlinedColor = theme.colors.primary, .
       //styles.text,
       mode === "outlined" && { color: outlinedColor, fontFamily: 'Montserrat-Medium' },
       mode === "contained" && { color: theme.colors.surface, fontFamily: 'Montserrat-Medium' },
+      labelStyle
     ]}
     mode={mode}
     {...props}

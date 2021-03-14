@@ -213,6 +213,10 @@ const ProjectsStack = createStackNavigator({
         screen: CreateTask,
         navigationOptions: hideHeader
     },
+    ListEmployees: {
+        screen: ListEmployees,
+        navigationOptions: hideHeader
+    },
 })
 
 const DocumentsStack = createStackNavigator({

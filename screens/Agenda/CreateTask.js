@@ -240,6 +240,7 @@ class CreateTask extends Component {
             editedBy: currentUser,
             subscribers: [{ id: this.currentUser.uid }], //add others (DC, CMX)
             color,
+           // postpones: 0,
             timestamp: timestamp
         }
 
@@ -250,17 +251,17 @@ class CreateTask extends Component {
 
         console.log('Ready to add task...')
 
-        if (isAllDay) {
+      //  if (isAllDay) {
             db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
-        }
+        // }
 
-        else {
-            const dateIterator = startDate
-            while (moment(dateIterator).isBefore(dueDate)) {
-                console.log(dateIterator)
-                dateIterator = moment(dateIterator).add(1, 'day')
-            }
-        }
+        // else {
+        //     const dateIterator = startDate
+        //     while (moment(dateIterator).isBefore(dueDate)) {
+        //         console.log(dateIterator)
+        //         dateIterator = moment(dateIterator).add(1, 'day')
+        //     }
+        // }
 
         // if (this.isEdit)
         //     this.props.navigation.state.params.onGoBack(true) //Don't refresh tasks in agenda
@@ -268,7 +269,7 @@ class CreateTask extends Component {
         // else
         //     this.props.navigation.state.params.onGoBack(true) //Refresh tasks in agenda
 
-        // this.props.navigation.goBack()
+         this.props.navigation.goBack()
     }
 
 
