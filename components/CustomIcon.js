@@ -5,10 +5,11 @@ import * as theme from '../core/theme'
 import { Appbar } from 'react-native-paper'
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 
 import PropTypes from 'prop-types'
 
-const CustomIcon = ({ icon, size = 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, ...props }) => {
+const CustomIcon = ({ icon = faCommentDots, size = 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, ...props }) => {
     return (
         <FontAwesomeIcon
             icon={icon}

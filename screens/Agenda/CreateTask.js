@@ -32,9 +32,10 @@ import { connect } from 'react-redux'
 
 const db = firebase.firestore()
 
-const types = [
+let types = [
     { label: 'Normale', value: 'Normale' },
-    { label: 'Rendez-vous', value: 'Rendez-vous' },
+    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' },
+    // { label: 'Rendez-vous N', value: 'Rendez-vous N' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
     { label: 'Visite technique préalable', value: 'Visite technique préalable' },
     { label: 'Visite technique', value: 'Visite technique' },
     { label: 'Installation', value: 'Installation' },
@@ -77,23 +78,27 @@ class CreateTask extends Component {
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
         this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 
-        //Params
-        this.taskType = this.props.navigation.getParam('taskType', undefined)
-        this.project = this.props.navigation.getParam('project', undefined)
-        
+        //Params (task properties)
+        this.enableRDN = this.props.navigation.getParam('enableRDN', false)
+        this.taskType = this.props.navigation.getParam('taskType', 'Rendez-vous')
+        this.project = this.props.navigation.getParam('project', { id: '', name: '', error: '' })
+        if (this.enableRDN) {
+            types.push({ label: 'Rendez-vous N', value: 'Rendez-vous N' })
+        }
+
         this.state = {
             //TEXTINPUTS
             name: { value: "", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
-            type: this.taskType || 'Rendez-vous',
+            type: this.taskType,
             priority: 'Moyenne',
             status: 'En cours',
 
             //Screens
             assignedTo: { id: '', fullName: '', error: '' },
-            project: this.project || { id: '', name: '', error: '' },
+            project: this.project,
             address: { description: '', place_id: '', error: '' },
             startDate: moment().format(),
             dueDate: moment().add(1, 'h').format(),
@@ -215,9 +220,9 @@ class CreateTask extends Component {
         if (loading || this.state === this.initialState) return
         load(this, true)
 
-        // //1. Validate inputs
-        // const isValid = this.validateInputs()
-        // if (!isValid) return
+        //1. Validate inputs
+        const isValid = this.validateInputs()
+        if (!isValid) return
 
         // 2. ADDING task DOCUMENT
         const currentUser = { userId: this.currentUser.uid, userName: this.currentUser.displayName }
@@ -240,7 +245,6 @@ class CreateTask extends Component {
             editedBy: currentUser,
             subscribers: [{ id: this.currentUser.uid }], //add others (DC, CMX)
             color,
-           // postpones: 0,
             timestamp: timestamp
         }
 
@@ -251,8 +255,8 @@ class CreateTask extends Component {
 
         console.log('Ready to add task...')
 
-      //  if (isAllDay) {
-            db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
+        //  if (isAllDay) {
+        db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
         // }
 
         // else {
@@ -269,7 +273,7 @@ class CreateTask extends Component {
         // else
         //     this.props.navigation.state.params.onGoBack(true) //Refresh tasks in agenda
 
-         this.props.navigation.goBack()
+        this.props.navigation.goBack()
     }
 
 

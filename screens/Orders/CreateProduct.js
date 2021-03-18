@@ -467,6 +467,7 @@ class CreateProduct extends Component {
         const { error, loading, toastType, toastMessage } = this.state
         const { isImageViewVisible } = this.state
 
+        console.log('SUG', suggestions)
         return (
             <View style={styles.container}>
                 <Appbar close={!loading} title titleText={this.title} check={true} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />

@@ -29,10 +29,9 @@ import RootController from './Navigation/DrawerNavigator'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
 import Wrapper from './Wrapper'
-import Test from './components/Test'
+//import Test from './components/Test'
 
 const db = firebase.firestore()
-
 
 const paperTheme = {
   ...DefaultTheme,
@@ -72,150 +71,6 @@ class App extends Component {
 
   componentWillUnmount() {
     this.foregroundMessages && this.foregroundMessages()
-  }
-
-  createProcessPhases() {
-
-    const process = {
-      'init': {
-        title: 'Initialisation',
-        status: 'pending',
-        instructions: 'Lorem ipsum dolor',
-        phaseOrder: 1,
-        previousPhase: '',
-        progress: 0,
-        isCurrent: false,
-        steps: { //One step
-          'prospect-creation': {
-            title: 'Création prospect',
-            status: 'pending',
-            instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
-            stepOrder: 1,
-            previousStep: '',
-            progress: 0,
-            isCurrent: false,
-            actions: {
-              'nom': {
-                title: 'Nom',
-                instructions: 'Lorem ipsum dolor',
-                screenName: 'Profile',
-                screenParams: { userId: '', isClient: true },
-                type: 'auto',
-                responsable: '',
-              },
-              //others...
-            }
-          }
-        }
-      },
-      'rd1': {
-        title: 'Rendez-vous 1',
-        status: 'pending',
-        instructions: 'Lorem ipsum dolor',
-        phaseOrder: 2,
-        previousPhase: 'init',
-        progress: 0,
-        isCurrent: false,
-        steps: {
-          'prior-technical-visit': { //STEP 1
-            title: 'Visite technique préalable',
-            status: 'pending',
-            instructions: 'Lorem ipsum dolor',
-            stepOrder: 1,
-            previousStep: '',
-            progress: 0,
-            isCurrent: false,
-            actions: {
-              'rd1-date': {
-                title: 'Date du rendez-vous',
-                instructions: 'Lorem ipsum dolor',
-                screenName: 'CreateTask',
-                screenParams: { TaskId: '' },
-                type: 'auto',
-                responsable: '',
-              },
-              //others...
-            }
-          },
-          'aid-file': { //STEP 2'
-            title: 'Dossier aidé',
-            status: 'pending',
-            instructions: 'Lorem ipsum dolor',
-            stepOrder: 2.1,
-            previousStep: 'prior-technical-visit',
-            progress: 0,
-            isCurrent: false,
-            actions: {}
-          },
-          'housing-action-file': { //STEP 2"
-            title: 'Dossier action logement',
-            status: 'pending',
-            instructions: 'Lorem ipsum dolor',
-            stepOrder: 2.2,
-            previousStep: 'prior-technical-visit',
-            progress: 0,
-            isCurrent: false,
-            actions: {
-              'eeb-file': {
-                title: 'Fiche EEB',
-                instructions: 'Lorem ipsum dolor',
-                screenName: 'UploadDocument',
-                screenParams: { project: '', DocumentType: '' },
-                type: 'auto',
-                responsable: '',
-              }
-            }
-          },
-
-        }
-      },
-      'rdn': {
-        id: 'rdn',
-        title: 'Rendez-vous N',
-        status: 'pending',
-        instructions: 'Lorem ipsum dolor',
-        phaseOrder: 3,
-        previousPhase: 'Rendez-vous 1',
-        progress: 0,
-        isCurrent: false,
-        steps: {}
-      },
-      'technical-visit-management': {
-        id: 'gestion-visite-technique',
-        title: 'Gestion visite technique',
-        status: 'pending',
-        instructions: 'Lorem ipsum dolor',
-        phaseOrder: 4,
-        previousPhase: 'Rendez-vous N',
-        progress: 0,
-        isCurrent: false,
-        steps: {
-          'site-creation': {
-            title: 'Création chantier',
-            status: 'pending',
-            instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
-            stepOrder: 1,
-            previousStep: '',
-            progress: 0,
-            isCurrent: false,
-            actions: {
-              'tv-date-validation': {
-                title: 'Valider la date de la visite technique',
-                instructions: 'Lorem ipsum dolor',
-                // screenName: 'CreateTask',
-                // screenParams: { TaskId: '' },
-                type: 'manual',                                                                                                                    //##ask: is it manual or auto -> if manual.. does it require a defined responsable to handle it ?
-                responsable: '', //Define responsable of validating date
-              },
-              //other actions...
-            }
-          },
-          //other steps...
-        }
-      }
-    }
-
-    db.collection('Process').doc('processModel-1').set(process)
   }
 
 

@@ -133,7 +133,7 @@ class AutoCompleteProducts extends React.Component {
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
                 createTagOnSpace = {false}
-                renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+              //  renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }
@@ -178,8 +178,10 @@ const styles = StyleSheet.create({
     },
     autotags: {
         backgroundColor: '#fff',
-        marginLeft: -constants.ScreenWidth * 0.025,
+        marginLeft: -constants.ScreenWidth * 0.02,
+        paddingTop: 5,
         paddingBottom: 15,
+        width: constants.ScreenWidth * 0.9,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.gray
     },

@@ -88,13 +88,14 @@ export const formatRow = (data, numColumns) => { //Format rows to display 3 colu
 }
 
 export const articles_fr = (masc, masculins, docType) => {
+
   let resp
   if (masc === 'du') {
     resp = masculins.includes(docType) ? 'du' : 'de la'
   }
   else if (masc === 'un') {
     console.log('....')
-    resp = masculins.includes(docType) ? "une" : "une"
+    resp = masculins.includes(docType) ? "un" : "une"
   }
   else if (masc === "d'un") {
     resp = masculins.includes(docType) ? "d'un" : "une"
@@ -102,8 +103,6 @@ export const articles_fr = (masc, masculins, docType) => {
   else if (masc === 'le') {
     resp = masculins.includes(docType) ? 'le' : 'la'
   }
-
-  console.log('resp', resp)
 
   return resp
 }

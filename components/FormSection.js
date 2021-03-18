@@ -6,7 +6,7 @@ import * as theme from '../core/theme'
 
 const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle }) => {
     return (
-        <View style={[styles.container, containerStyle]}>
+        <View style={[containerStyle, styles.container]}>
             <Section text={sectionTitle} icon={sectionIcon} />
 
             {form &&

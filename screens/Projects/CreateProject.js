@@ -17,7 +17,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ColorPicker, AddAttachment, Toast, Loading } from '../../components'
+import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading } from '../../components'
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
@@ -164,9 +164,9 @@ class CreateProject extends Component {
             id: this.ProjectId,
             name: name.value
         }
-        const secondPhaseId = getPhaseId(step) //used only init process stage
+        const secondPhaseId = getPhaseId(step) //used only init process stage //Step <=> Phase
 
-        const updatedProcess = await processMain(process, secondPhaseId, clientId, project) //Step <=> Phase
+        const updatedProcess = await processMain(process, secondPhaseId, clientId, project)
         this.setState({ process: updatedProcess, processUpdated: true })
     }
 
@@ -515,70 +515,6 @@ class CreateProject extends Component {
         })
     }
 
-    renderProcessCurrentAction(process) {
-        const currentAction = getCurrentAction(process)
-
-        const { title, status, screenName, screenParams, type, verificationType, choices } = currentAction
-
-        const onPress = () => {
-            if (type === 'auto') {
-                console.log('screenParams', screenParams)
-                this.props.navigation.navigate(screenName, screenParams)
-            }
-
-            else if (type === 'manual')
-                console.log('MANUAL')
-        }
-
-        const handleManualAction = async (nextStep) => {
-            const { currentPhaseId, currentStepId } = getCurrentStep(process)
-            //Update action status
-            currentAction.status = "done"
-            process[currentPhaseId].steps[currentStepId].actions[currentAction.id] = currentAction
-
-            //Set nextStep
-            process[currentPhaseId].steps[currentStepId].nextStep = nextStep
-
-            // console.log('Current action', process[currentPhaseId].steps[currentStepId].actions[currentAction.id])
-            // console.log(nextStep, process[currentPhaseId].steps)
-            await db.collection('Projects').doc(this.ProjectId).update(process).then(() => console.log('Process updated !'))
-            await this.processMain()
-        }
-
-        const renderForm = () => {
-
-            if (type === 'auto')
-                return (
-                    <TouchableOpacity onPress={onPress} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text style={[theme.customFontMSregular]}>{title}</Text>
-                        <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
-                    </TouchableOpacity>
-                )
-
-            else if (type === 'manual') {
-                if (verificationType === 'multiple-choices') {
-                    return (
-                        <TouchableOpacity onPress={onPress} style={{ flex: 1, justifyContent: 'flex-start' }}>
-                            <Text style={[theme.customFontMSregular]}>{title}</Text>
-                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}>
-                                {choices.map(({ label, nextStep }) => {
-                                    return <Button mode="outlined" onPress={() => handleManualAction(nextStep)} style={{ width: '31%' }} labelStyle={theme.customFontMSregular.small}>{label}</Button>
-                                })}
-                            </View>
-                        </TouchableOpacity>
-                    )
-                }
-            }
-        }
-
-        return (
-            <FormSection
-                sectionTitle='Prochaine tâche'
-                sectionIcon={null}
-                form={renderForm()}
-            />
-        )
-    }
 
     render() {
         let { client, clientError, name, description, note, address, addressError, state, step, color } = this.state
@@ -598,7 +534,17 @@ class CreateProject extends Component {
 
                 <ScrollView style={styles.dataContainer}>
 
-                    {!loading && process && processUpdated && this.renderProcessCurrentAction(process)}
+                    {!loading && this.isEdit &&
+                        <FormSection
+                            sectionTitle='Prochaine tâche'
+                            sectionIcon={null}
+                            form={process && processUpdated ?
+                                <ProcessAction process={process} processMain={this.processMain.bind(this)} ProjectId={this.ProjectId} />
+                                :
+                                <Loading />
+                            }
+                        />
+                    }
 
                     {!loading &&
                         <FormSection

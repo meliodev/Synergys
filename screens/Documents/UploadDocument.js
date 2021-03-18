@@ -8,6 +8,7 @@ import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
+import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faFilePlus, faFileSearch } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -19,6 +20,7 @@ import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
 import ItemPicker from "../../components/ItemPicker"
 import Button from "../../components/Button"
+import ModalOptions from "../../components/ModalOptions"
 import UploadProgress from "../../components/UploadProgress"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
@@ -39,19 +41,26 @@ const states = [
     { label: 'Validé', value: 'Validé' },
 ]
 
+const docSources = [
+    { label: 'Importer', value: 'upload', icon: faCloudUploadAlt, selected: false },
+    { label: 'Générer', value: 'generate', icon: faMagic, selected: false },
+]
+
 const types = [
-    { label: 'Bon de commande', value: 'Bon de commande', icon: 'format-list-numbered', selected: false },
-    { label: 'Devis', value: 'Devis', icon: 'alpha-d-box-outline', selected: false },
-    { label: 'Facture', value: 'Facture', icon: 'cash-usd-outline', selected: false },
-    { label: 'Dossier CEE', value: 'Dossier CEE', icon: 'certificate', selected: false },
-    { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: 'offer', selected: false },
-    { label: 'Aide et subvention', value: 'Aide et subvention', icon: 'handshake', selected: false },
-    { label: 'Action logement', value: 'Action logement', icon: 'home-floor-a', selected: false },
+    { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
+    { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
+    { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
+    { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate, selected: false },
+    { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFile, selected: false },
+    { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus, selected: false },
+    { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd, selected: false },
+    { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
+    { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
 ]
 
 const genOptions = [
-    { label: 'Une commande existante', value: 'oldOrder', icon: 'clipboard-check-outline', selected: false },
-    { label: 'Une nouvelle commande', value: 'newOrder', icon: 'clipboard-plus-outline', selected: false },
+    { label: 'Une commande existante', value: 'oldOrder', icon: faFilePlus, selected: false },
+    { label: 'Une nouvelle commande', value: 'newOrder', icon: faFileSearch, selected: false },
 ]
 
 class UploadDocument extends Component {
@@ -66,11 +75,9 @@ class UploadDocument extends Component {
         this.uploadFile = this.uploadFile.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
         this.onPressUploadPending = this.onPressUploadPending.bind(this)
-        this.renderPopUpMenuPdfSelection = this.renderPopUpMenuPdfSelection.bind(this)
-        this.renderModalPdfOptions = this.renderModalPdfOptions.bind(this)
-        this.togglePopUpMenu_pdfSelection = this.togglePopUpMenu_pdfSelection.bind(this)
-        this.toggleModal_pdfOptions = this.toggleModal_pdfOptions.bind(this)
-        this.togglePopUps = this.togglePopUps.bind(this)
+
+        //Document source (gen/upload)
+        this.toggleModal = this.toggleModal.bind(this)
         this.handleConfirmGen = this.handleConfirmGen.bind(this)
         this.handleCancelGen = this.handleCancelGen.bind(this)
         this.startGenPdf = this.startGenPdf.bind(this) //Start Pdf gen flow
@@ -94,6 +101,15 @@ class UploadDocument extends Component {
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
         this.project = this.props.navigation.getParam('project', '')
 
+        //Params (doc properties)
+        this.documentType = this.props.navigation.getParam('documentType', '')
+        if (this.documentType) {
+            types.forEach((type) => {
+                if (type.value === this.documentType) type.selected = true
+            })
+        }
+        this.goBackOnSubmit = this.documentType !== ''
+
         this.state = {
             //TEXTINPUTS
             name: { value: "", error: '' },
@@ -105,7 +121,7 @@ class UploadDocument extends Component {
 
             //Pickers
             state: 'A faire',
-            type: '',
+            type: this.documentType,
 
             //File Picker
             attachment: null,
@@ -120,8 +136,9 @@ class UploadDocument extends Component {
             //Pdf generation
             showPopUpmenu_pdfSelection: false,
             showModal_pdfOptions: false,
+            showModal: false,
             showDialog: false,
-            modalContent: 'docType',
+            modalContent: 'docSource',
             attachmentSource: '', //upload or generation or conversion
             types: types,
             genOptions: genOptions,
@@ -267,7 +284,11 @@ class UploadDocument extends Component {
 
         //3. Handle upload offline
         this.attachmentListener(DocumentId)
-        this.uploadFile(isConversion, DocumentId)
+        await this.uploadFile(isConversion, DocumentId)
+
+        //4. Go back if we came here from process action (this.documentID !== '')
+        if (this.goBackOnSubmit)
+            this.props.navigation.goBack()
     }
 
     validateInputs() {
@@ -337,6 +358,8 @@ class UploadDocument extends Component {
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
 
+        console.log('fileUploaded', fileUploaded)
+        
         if (!fileUploaded) {
             setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
         }
@@ -428,14 +451,14 @@ class UploadDocument extends Component {
                 <TouchableOpacity
                     onPress={() => {
                         if (!canUpdate) return
-                        this.togglePopUpMenu_pdfSelection()
+                        this.toggleModal('docSource')
                     }}>
                     <MyInput
                         label="Pièce jointe"
                         value={attachment && attachment.name}
                         editable={false}
                         multiline
-                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={this.togglePopUpMenu_pdfSelection} />} />
+                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.toggleModal('docSource')} />} />
                 </TouchableOpacity>
             )
         }
@@ -448,7 +471,7 @@ class UploadDocument extends Component {
                         style={{ marginTop: 5 }}
                         onPress={() => {
                             if (!canUpdate) return
-                            this.togglePopUpMenu_pdfSelection()
+                            this.toggleModal('docSource')
                         }}
                     />
                 </View>
@@ -456,36 +479,60 @@ class UploadDocument extends Component {
         }
     }
 
-    //Pdf generation flow
-    pdfSelectionOption(option) {
-        this.setState({ attachmentSource: option })
-        this.togglePopUps()
+    //*********************** Pdf generation flow ***************************
+    toggleModal(modalContent) {
+        this.setState({ showModal: !this.state.showModal, modalContent })
     }
 
-    togglePopUps() {
-        this.togglePopUpMenu_pdfSelection()
-        this.toggleModal_pdfOptions()
+    modalOptionsConfig() {
+        const { modalContent, type } = this.state
+        const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
+
+        if (modalContent === 'docSource') {
+            return {
+                title: `Créer`,
+                columns: 2,
+                elements: docSources,
+                autoValidation: true
+            }
+        }
+
+        else if (modalContent === 'docType') {
+            return {
+                title: `Choisissez le type du document`,
+                columns: 3,
+                elements: types,
+                autoValidation: false
+            }
+        }
+
+        else if (modalContent === 'genConfig') {
+            return {
+                title: `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`,
+                columns: 2,
+                elements: genOptions,
+                autoValidation: false
+            }
+        }
     }
 
-    togglePopUpMenu_pdfSelection() {
-        this.setState({ showPopUpmenu_pdfSelection: !this.state.showPopUpmenu_pdfSelection })
-    }
-
-    toggleModal_pdfOptions() {
-        this.setState({ showModal_pdfOptions: !this.state.showModal_pdfOptions, modalContent: 'docType' })
+    setDocumentSource(option) {
+        this.setState({ attachmentSource: option, modalContent: 'docType' })
     }
 
     handleConfirmGen() {
         const { modalContent, attachmentSource, type } = this.state
 
         if (modalContent === 'docType') {
+            console.log('...................................', attachmentSource)
+
             if (attachmentSource === 'generation') {
                 if (type === '') return
                 this.setState({ modalContent: 'genConfig' })
             }
 
             else if (attachmentSource === 'upload') {
-                this.toggleModal_pdfOptions()
+                this.toggleModal('docSource')
                 this.pickDoc()
             }
         }
@@ -502,13 +549,15 @@ class UploadDocument extends Component {
         if (modalContent === 'genConfig')
             this.setState({ modalContent: 'docType' })
 
-        else if (modalContent === 'docType')
-            this.toggleModal_pdfOptions()
+        else if (modalContent === 'docType') {
+
+            this.toggleModal('docSource')
+        }
     }
 
     startGenPdf(index) {
         const { genOptions, type } = this.state
-        this.toggleModal_pdfOptions()
+        this.toggleModal('docSource')
 
         //Existing order
         if (index === 0) {
@@ -552,148 +601,6 @@ class UploadDocument extends Component {
         this.props.navigation.navigate('PdfGeneration', { order, docType: 'Facture', DocumentId: generateId('GS-DOC-'), isConversion: true, onGoBack: this.getGeneratedPdf })
     }
 
-    renderPopUpMenuPdfSelection() {
-
-        const CircleButton = ({ iconName, title, onPress }) => {
-            const circleButtonSize = constants.ScreenWidth * 0.2
-            const circleButtonStyle = { justifyContent: 'center', alignItems: 'center', marginBottom: 15, width: circleButtonSize, height: circleButtonSize, borderRadius: circleButtonSize / 2, borderWidth: 1, borderColor: theme.colors.gray_light }
-            return (
-                <View style={modalStyles1.column}>
-                    <TouchableOpacity style={circleButtonStyle} onPress={onPress}>
-                        <MaterialCommunityIcons name={iconName} color={theme.colors.black} size={constants.ScreenWidth * 0.07} />
-                    </TouchableOpacity>
-                    <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{title}</Text>
-                </View>
-            )
-        }
-
-        return (
-            <Modal
-                isVisible={this.state.showPopUpmenu_pdfSelection}
-                onSwipeComplete={this.togglePopUpMenu_pdfSelection}
-                swipeDirection="down"
-                animationIn="slideInUp"
-                animationOut="slideOutDown"
-                onBackdropPress={this.togglePopUpMenu_pdfSelection}
-                style={modalStyles1.modal} >
-
-                <View style={modalStyles1.container}>
-                    <Text style={[theme.customFontMSmedium.header, { textAlign: 'center' }]}>Créer</Text>
-                    <View style={modalStyles1.buttonsContainer}>
-                        <CircleButton iconName='upload' title='Importer' onPress={() => this.pdfSelectionOption('upload')} />
-                        <CircleButton iconName='creation' title='Générer' onPress={() => this.pdfSelectionOption('generation')} />
-                    </View>
-                </View>
-            </Modal>
-        )
-    }
-
-    renderModalPdfOptions() {
-        const { type, checked, modalContent, types, genOptions } = this.state
-
-        const renderTitle = (modalContent, type) => {
-            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
-            if (modalContent === 'docType') return `Choisissez le type du document`
-            else if (modalContent === 'genConfig') return `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`
-        }
-
-        const Form = ({ modalContent }) => {
-            let elementSize = constants.ScreenWidth * 0.3
-
-            if (modalContent === 'docType') {
-                return this.renderModalForm(true, types, elementSize)
-            }
-
-            else if (modalContent === 'genConfig') {
-                elementSize = constants.ScreenWidth * 0.45
-                const containerStyleExtra = { marginTop: constants.ScreenHeight * 0.15 }
-                return this.renderModalForm(false, genOptions, elementSize, containerStyleExtra)
-            }
-        }
-
-        return (
-            <Modal
-                isVisible={this.state.showModal_pdfOptions}
-                onSwipeComplete={this.toggleModal_pdfOptions}
-                swipeDirection="right"
-                animationIn="slideInRight"
-                animationOut="slideOutLeft"
-                onBackdropPress={this.toggleModal_pdfOptions}
-                style={modalStyles2.modal} >
-
-                <View style={modalStyles2.container}>
-                    <Title style={[theme.customFontMSsemibold.header, { marginBottom: 10, textAlign: 'center' }]}>{renderTitle(modalContent, type)}</Title>
-                    <Form modalContent={modalContent} />
-                    <View style={{ position: 'absolute', bottom: 10, alignSelf: 'center', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Button mode="outlined" onPress={this.handleCancelGen} style={{ width: '40%' }}>Retour</Button>
-                        <Button mode="contained" onPress={this.handleConfirmGen} style={{ width: '45%' }}>Confirmer</Button>
-                    </View>
-                </View>
-            </Modal>
-        )
-    }
-
-    renderModalForm(isType, elements, elementSize, containerStyleExtra) {
-        const elementStaticStyle = () => {
-            return {
-                borderRadius: 5,
-                justifyContent: 'center',
-                alignItems: 'center',
-                margin: elementSize * 0.03,
-                width: elementSize,
-                height: elementSize,
-                elevation: 2,
-                backgroundColor: theme.colors.white
-            }
-        }
-
-        const elementDynamicStyle = (isSelected) => {
-            if (isSelected) return {
-                elevation: 0,
-                borderWidth: 1,
-                borderColor: theme.colors.primary
-            }
-            else return {}
-        }
-
-        const selectType = (index) => {
-            //Unselect all types
-            elements.forEach((type, key) => elements[key].selected = false)
-
-            //Select chosen type
-            elements[index].selected = true
-            this.setState({ elements })
-
-            if (isType)
-                this.setState({ type: elements[index].value })
-        }
-
-        const Element = ({ type, index }) => {
-            const color = type.selected ? theme.colors.primary : theme.colors.black
-
-            return (
-                <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(type.selected)]} onPress={() => selectType(index)}>
-                    <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
-                        <MaterialCommunityIcons name={type.icon} size={elementSize * 0.3} color={color} />
-                    </View>
-                    <View style={{ height: elementSize * 0.45 }}>
-                        <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color }]}>{type.label}</Text>
-                    </View>
-                </TouchableOpacity>
-            )
-        }
-
-        const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'flex-start', alignItems: 'center', paddingLeft: elementSize * 0.08 }
-
-        return (
-            <View style={[containerStyle, containerStyleExtra]}>
-                {elements.map((type, index) => {
-                    return (<Element type={type} index={index} />)
-                })}
-            </View>
-        )
-    }
-
     navigateToSignature(isConnected, signMode) {
         if (!this.isEdit) return
 
@@ -724,6 +631,8 @@ class UploadDocument extends Component {
         let { project, name, description, type, state, attachment, order } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, loadingConversion, toastType, toastMessage, projectError } = this.state
+        const { checked, modalContent, types, genOptions, showModal } = this.state
+        const { title, columns, elements, autoValidation } = this.modalOptionsConfig()
 
         var { canUpdate, canDelete } = this.props.permissions.documents
         canUpdate = (canUpdate || !this.isEdit)
@@ -791,8 +700,30 @@ class UploadDocument extends Component {
                                     /> */}
 
                                 {this.renderAttachment(canUpdate)}
-                                {this.renderPopUpMenuPdfSelection()}
-                                {this.renderModalPdfOptions()}
+
+                                <ModalOptions
+                                    title={title}
+                                    columns={columns}
+                                    isVisible={showModal}
+                                    toggleModal={() => this.toggleModal('docSource')}
+                                    handleCancel={this.handleCancelGen}
+                                    handleConfirm={this.handleConfirmGen}
+                                    elements={elements}
+                                    autoValidation={autoValidation}
+
+                                    handleSelectElement={(elements, index) => {
+                                        if (modalContent === 'docSource') {
+                                            const documentSource = index === 0 ? 'upload' : 'generation'
+                                            this.setDocumentSource(documentSource)
+                                        }
+
+                                        else {
+                                            this.setState({ elements })
+                                            if (modalContent === 'docType')
+                                                this.setState({ type: types[index].value })
+                                        }
+                                    }}
+                                />
 
                                 <MyInput
                                     label="Nom du document *"

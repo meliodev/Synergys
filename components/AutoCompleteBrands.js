@@ -38,10 +38,11 @@ class AutoCompleteBrands extends React.Component {
     }
 
     customRenderTags = tags => {
+        const noTags = tags.length === 0
         return (
-            <View style={styles.customTagsContainer}>
+            <View style={[styles.customTagsContainer, { borderBottomWidth: noTags ? 0 : StyleSheet.hairlineWidth * 2 }]}>
                 {this.props.tagsSelected.map((tag, i) => {
-                    return <Text numberOfLines={1} style={{ color: "#000" }}>{tag.name}</Text>
+                    return <Text numberOfLines={1} style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{tag.name}</Text>
                 })}
             </View>
         )
@@ -49,7 +50,6 @@ class AutoCompleteBrands extends React.Component {
 
     //#edit
     viewBrand(BrandId) {
-        console.log('PID', BrandId)
         this.props.navigation.navigate('CreateBrand', { BrandId: BrandId, onGoBack: (brand) => console.log(brand) })
     }
 
@@ -126,8 +126,8 @@ class AutoCompleteBrands extends React.Component {
                     showInput={this.props.showInput}
                     suggestionsBellow={this.props.suggestionsBellow}
                     editable={this.props.editable}
-                    createTagOnSpace = {false}
-                    renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+                    createTagOnSpace={false}
+                // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
                 />
                 {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{this.props.errorText}</Text>}
             </View>
@@ -143,9 +143,9 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         alignItems: "flex-start",
         alignItems: 'center',
-        paddingTop: 10,
-        marginLeft: -5,
-        width: 300
+        paddingBottom: 10,
+        borderBottomColor: theme.colors.gray_light,
+        width: constants.ScreenWidth * 0.9
     },
     customTag: {
         flexDirection: 'row',
@@ -160,7 +160,6 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: "#fff",
     },
     suggestion: {
         flexDirection: 'row',
@@ -173,8 +172,10 @@ const styles = StyleSheet.create({
     },
     autotags: {
         backgroundColor: '#fff',
-        marginLeft: -constants.ScreenWidth * 0.025,
+        marginLeft: -constants.ScreenWidth * 0.02,
+        paddingTop: 5,
         paddingBottom: 15,
+        width: constants.ScreenWidth * 0.9,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.gray
     },
