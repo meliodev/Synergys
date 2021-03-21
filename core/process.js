@@ -32,7 +32,8 @@ const processModel = {
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
-                        verificationType: 'data-fill'
+                        verificationType: 'data-fill',
+                        verificationValue: ''
                     },
                     {
                         id: 'prenom',
@@ -47,7 +48,8 @@ const processModel = {
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
-                        verificationType: 'data-fill'
+                        verificationType: 'data-fill',
+                        verificationValue: ''
                     },
                     {
                         id: 'address',
@@ -62,7 +64,8 @@ const processModel = {
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
-                        verificationType: 'data-fill'
+                        verificationType: 'data-fill',
+                        verificationValue: ''
                     },
                     {
                         id: 'phone',
@@ -77,7 +80,8 @@ const processModel = {
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
-                        verificationType: 'data-fill'
+                        verificationType: 'data-fill',
+                        verificationValue: ''
                     },
                     {
                         id: 'comment',
@@ -119,7 +123,7 @@ const processModel = {
                         //responsable: '',
                         status: 'pending',
                         verificationType: 'data-fill',
-                        dataFillType: { type: 'bool', value: false }
+                        verificationValue: true //check if fieldValue !== verificationValue
                     },
                 ]
             },
@@ -1220,7 +1224,7 @@ const processModel = {
                         queryFilters: [{ filter: 'project.id', operation: '==', value: 'Contrat CGU-CGV' }],
                         //properties: [],
                         //documentId: '',
-                        screenName: 'UploadDocument', 
+                        screenName: 'UploadDocument',
                         screenParams: { documentType: 'Contrat CGU-CGV', project: null },
                         type: 'auto',
                         //responsable: '',
@@ -1263,28 +1267,72 @@ const processModel = {
                     //Add last action multi-choice (contrat "en cours" or "terminé")
                 ]
             },
-            'facturation': {
-                title: "Contrat maintenance",
+            'quoteVerification': {
+                title: "Vérification automatique de l'existence d'un devis",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 8,
                 nextStep: '',
+                //#task: hide it from steps to no show on UI (hidden = true)
+                actions: [
+                    //Devis verification #ask: It is possible that a project starts from Installation phase so quote does not exist -> cannot create bill from quote. Is it possible that somebody deletes the signed quote ? Or is it possible that If yes should we do quote existance verification to import/sign it again before moving to billing ?
+                    {
+                        id: 'quoteVerification',
+                        title: "Vérification de l'existence d'un devis",
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        collection: 'Documents',
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Devis' }
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { documentType: 'Devis', project: null },
+                        type: 'auto',
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                        events: { onDocFound: { nextStep: 'facturationOption1' }, onDocNotFound: { nextStep: 'facturationOption2' } }
+                    },
+                ]
+            },
+            'facturationOption1': {
+                title: "Facturation",
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 9,
+                nextStep: '',
                 actions: [
                     {
-                        id: 'quoteValidation',
-                        title: "Valider l'absence de réserve",
-                        instructions: "",
+                        id: 'billingChoice',
+                        title: "Voulez-vous créer la facture à partir du devis existant ?",
+                        instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
-                        collection: '', // In case of subcollection: Projects/SubCollection
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
-                        type: 'manual',
-                        //responsable:'',
+                        collection: '', //Because manual
+                        queryFilters: [],
+                        documentId: '',
+                        //properties: [], 
+                        screenName: 'UploadDocument',
+                        screenParams: { DocumentId: '' }, //Because manual
+                        type: 'manual', //Check manually
+                        responsable: '',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'validation',
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'NON', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'OUI', id: 'confirm', nextStep: '', onSelectType: 'transition', operation: null },
+                        ]
                     },
+                ]
+            },
+            'facturationOption2': {
+                title: "Facturation",
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 9,
+                nextStep: '',
+                actions: [
+
                 ]
             },
         }
@@ -1616,8 +1664,9 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
 
             else {
                 const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
+              
+                if(nestedVal && nestedVal !== action.verificationValue) action.status = 'done'
 
-                if (nestedVal && nestedVal !== '') action.status = 'done'
                 else {
                     action.status = 'pending'
                     allActionsSameDocValid = false
@@ -1632,6 +1681,7 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     return { verifiedActionsSameDoc, allActionsSameDocValid }
 }
 
+//#Try put Step/Phase transition on action
 const verifyActions_docCreation = async (actions) => {
 
     //Verify actions for each document
@@ -1648,10 +1698,19 @@ const verifyActions_docCreation = async (actions) => {
 
         await query.get().then((querysnapshot) => { //#task: for Agenda: add .where('type', ==, param) + do conditional query depending on collection (for example "Documents" .where('type', == 'Devis'))
             if (querysnapshot.empty) {
+                if (action.events && action.events.onDocFound) {
+                    const { nextStep } = action.events.onDocFound
+                    //process[currentPhase].steps[currentStepId].nextStep
+                }
+
                 action.status = 'pending'
                 allActionsValid_docCreation = false
             }
             else {
+                if (action.events && action.events.onDocNotFound) {
+                    const { nextStep } = action.events.onDocFound
+                }
+
                 action.status = 'done'
                 action.docCreatedId = querysnapshot.docs[0].id //Id of the created document.. We can use it later on to update it
             }
