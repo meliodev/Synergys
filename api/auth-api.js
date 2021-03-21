@@ -122,3 +122,9 @@ export const sendEmailWithPassword = async email => {
     }
   }
 }
+
+export const checkEmailExistance = async (email) => {
+  const methods = await firebase.auth().fetchSignInMethodsForEmail(email)
+  const emailExist = methods.length > 0 ? true : false
+  return emailExist
+}

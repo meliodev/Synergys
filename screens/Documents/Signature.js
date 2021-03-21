@@ -6,6 +6,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import firebase from '@react-native-firebase/app';
 import Dialog from "react-native-dialog"
+import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -461,10 +462,8 @@ class Signature extends Component {
         const device_id = await DeviceInfo.getDeviceId()
 
         //store max of data (Audit) about the signee
-        const newAttachment = {
+        const document = {
             attachment: this.state.newAttachment,
-            createdAt: moment().format('lll'),
-            createdBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
             attachmentSource: 'signature',
             //Data of proofs
             sign_proofs_data: {
@@ -490,8 +489,12 @@ class Signature extends Component {
             }
         }
 
-        await db.collection('Documents').doc(this.DocumentId).update({ attachment: newAttachment.attachment })
-        await db.collection('Documents').doc(this.DocumentId).collection('Attachments').add(newAttachment)
+        const newDocument = _.cloneDeep(document)
+        newDocument.createdAt = moment().format('lll')
+        newDocument.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+
+        await db.collection('Documents').doc(this.DocumentId).set(document, { merge: true })
+        await db.collection('Documents').doc(this.DocumentId).collection('AttachmentHistory').add(newDocument)
             .finally(() => {
                 this.setState({ uploading: false, showDialog: false })
                 this.props.navigation.state.params.onGoBack() //refresh document to get url of new signed document
@@ -627,7 +630,8 @@ class Signature extends Component {
                             </View>}
 
                         {!newPdfSaved && fileDownloaded && isConnected && canUpdate &&
-                            <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
+                            <TouchableOpacity onPress={this.startSignature} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
+                            {/* <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}> */}
                                 <FontAwesome5 name='signature' size={17} color='#fff' style={{ marginRight: 7 }} />
                                 <Text style={[theme.customFontMSsemibold.header, { color: '#fff', marginLeft: 7, letterSpacing: 1 }]}>SIGNER</Text>
                             </TouchableOpacity>

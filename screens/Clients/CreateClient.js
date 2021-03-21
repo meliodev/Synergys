@@ -17,7 +17,8 @@ import _ from 'lodash'
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../../core/utils"
+import { createClient, validateClientInputs } from "../../api/firestore-api";
+import { generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
 const db = firebase.firestore()
@@ -28,6 +29,8 @@ class CreateClient extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
         this.myAlert = myAlert.bind(this)
+        this.createClient = createClient.bind(this)
+        this.validateClientInputs = validateClientInputs.bind(this)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
         this.ClientId = generateId('GS-CL-')
@@ -61,131 +64,32 @@ class CreateClient extends Component {
         load(this, false)
     }
 
-    validateInputs() {
-        let denomError = ''
-        let siretError = ''
-        let nomError = ''
-        let prenomError = ''
-
-        let { isPro, denom, siret, nom, prenom, phone, email, password } = this.state
-
-        if (isPro) {
-            denomError = nameValidator(denom.value, '"Dénomination sociale"')
-            siretError = nameValidator(siret.value, 'Siret')
-        }
-
-        else {
-            nomError = nameValidator(nom.value, '"Nom"')
-            prenomError = nameValidator(prenom.value, '"Prénom"')
-        }
-
-        const phoneError = nameValidator(phone.value, '"Téléphone"')
-        // const addressError = nameValidator(address.description, '"Adresse"')
-        const emailError = emailValidator(email.value)
-        const passwordError = passwordValidator(password.value)
-
-        if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError) {
-
-            phone.error = phoneError
-            email.error = emailError
-            password.error = passwordError
-
-            if (isPro) {
-                denom.error = denomError
-                siret.error = siretError
-                this.setState({ denom, siret, phone, email, password, loading: false })
-            }
-
-            else {
-                nom.error = nomError
-                prenom.error = prenomError
-                this.setState({ nom, prenom, phone, email, password, loading: false })
-            }
-
-            Keyboard.dismiss()
-
-            setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
-
-            return false
-        }
-
-        return true
-    }
-
-    async checkEmailExistance(email) {
-        const methods = await firebase.auth().fetchSignInMethodsForEmail(email)
-        const emailExist = methods.length > 0 ? true : false
-        return emailExist
-    }
-
-    handleSubmit = async (persist, convert) => {
-        let { isPro, error, loading } = this.state
-        let { nom, prenom, address, phone, email, password } = this.state
-        let { denom, siret } = this.state
-
+    handleSubmit = async (isConversion) => {
+        const { error, loading } = this.state
+        const { isPro, nom, prenom, denom, siret, address, phone, email, password } = this.state
+        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password }
+        const eventHandlers = { error, loading }
         const { isConnected } = this.props.network
 
-        //1. Validate inputs
-        const isValid = this.validateInputs()
+        const isValid = this.validateClientInputs(userData)
         if (!isValid) return
 
         load(this, true)
-        this.titleText = convert ? "Création du client" : `Création du ${this.userType}`
+        this.titleText = isConversion ? "Création du client" : `Création du ${this.userType}`
 
-        //2. ADDING USER DOCUMENT
-        let client = {
-            address,
-            phone: phone.value,
-            email: email.value.toLowerCase(),
-            isProspect: this.isProspect,
-            password: password.value,
-            userType: 'client',
-            deleted: false
+        const response = await createClient(userData, eventHandlers, this.ClientId, isConnected, isConversion, this.isProspect)
+        if (response && response.error) {
+            load(this, false)
+            Alert.alert(response.error.title, response.error.message)
         }
-
-        if (isPro) {
-            client.denom = denom.value
-            client.siret = siret.value
-            client.isPro = true
-            client.fullName = denom.value
-        }
-
-        else if (!isPro) {
-            client.nom = nom.value
-            client.prenom = prenom.value
-            client.isPro = false
-            client.fullName = `${prenom.value} ${nom.value}`
-        }
-
-        if (this.isProspect)
-            db.collection('Clients').doc(this.ClientId).set(client)
 
         else {
-            if (!isConnected) {
-                Alert.alert('Pas de connection internet', "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur.")
-                return
-            }
-
-            //Validate if email address already exist
-            const emailExist = await this.checkEmailExistance(email.value)
-            if (emailExist) {
-                email.error = "Cette adresse email est déjà associé à un compte."
-                this.setState({ email, loading: false })
-                return
-            }
-
-            client.role = 'Client'
-            await db.collection('newUsers').doc(this.ClientId).set(client)
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
                 load(this, false)
-                this.title = "Créer un utilisateur"
+                this.titleText = `Créer un ${this.userType}`
                 this.props.navigation.navigate(this.prevScreen)
             }, 6000) //We can reduce this timeout later on...
         }
-
-        load(this, false)
-        this.titleText = `Créer un ${this.userType}`
-        this.props.navigation.goBack()
     }
 
     refreshAddress(address) {
@@ -200,7 +104,7 @@ class CreateClient extends Component {
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar close={!loading} title titleText={this.titleText} check={!loading} handleSubmit={() => this.handleSubmit(true, false)} />
+                <Appbar close={!loading} title titleText={this.titleText} check={!loading} handleSubmit={() => this.handleSubmit(false)} />
 
                 {loading ?
                     <Loading size='large' />

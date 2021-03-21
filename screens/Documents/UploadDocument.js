@@ -8,7 +8,7 @@ import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faFilePlus, faFileSearch } from '@fortawesome/pro-light-svg-icons'
+import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -51,11 +51,15 @@ const types = [
     { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
     { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
     { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate, selected: false },
-    { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFile, selected: false },
+    { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt, selected: false },
     { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus, selected: false },
     { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd, selected: false },
     { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
     { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
+    { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
+    { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
+    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faGlobeEurope, selected: false },
+    { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
 ]
 
 const genOptions = [
@@ -287,8 +291,10 @@ class UploadDocument extends Component {
         await this.uploadFile(isConversion, DocumentId)
 
         //4. Go back if we came here from process action (this.documentID !== '')
-        if (this.goBackOnSubmit)
+        if (this.goBackOnSubmit) {
+            types.forEach((type) => type.selected = false)
             this.props.navigation.goBack()
+        }
     }
 
     validateInputs() {
@@ -342,7 +348,7 @@ class UploadDocument extends Component {
         console.log('Ready to set document...')
         const batch = db.batch()
         const documentRef = db.collection('Documents').doc(DocumentId)
-        const attachmentsRef = db.collection('Documents').doc(DocumentId).collection('Attachments').doc()
+        const attachmentsRef = db.collection('Documents').doc(DocumentId).collection('AttachmentHistory').doc()
         batch.set(documentRef, document, { merge: true })
         batch.set(attachmentsRef, attachment)
         batch.commit()
@@ -359,7 +365,7 @@ class UploadDocument extends Component {
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
 
         console.log('fileUploaded', fileUploaded)
-        
+
         if (!fileUploaded) {
             setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
         }
@@ -704,6 +710,7 @@ class UploadDocument extends Component {
                                 <ModalOptions
                                     title={title}
                                     columns={columns}
+                                    modalStyle={{ marginTop: modalContent === 'docType' ? constants.ScreenHeight * 0.1 : constants.ScreenHeight * 0.3 }}
                                     isVisible={showModal}
                                     toggleModal={() => this.toggleModal('docSource')}
                                     handleCancel={this.handleCancelGen}

@@ -1,7 +1,8 @@
 import React, { memo } from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from "react-native";
 import Modal from 'react-native-modal'
 import { Title } from 'react-native-paper'
+import { faTimes } from '@fortawesome/pro-light-svg-icons'
 
 import Button from './Button'
 import CustomIcon from './CustomIcon'
@@ -20,7 +21,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
             width: elementSize,
             height: elementSize,
             elevation: 2,
-            backgroundColor: theme.colors.white
+            backgroundColor: theme.colors.white,
         }
     }
 
@@ -59,7 +60,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
         return (
             <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
                 <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
-                    <CustomIcon icon={element.icon} size={elementSize * 0.3} color={color} />
+                    <CustomIcon icon={element.icon} size={elementSize * 0.3} color={element.iconColor || color} />
                 </View>
                 <View style={{ height: elementSize * 0.45 }}>
                     <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color }]}>{element.label}</Text>
@@ -68,7 +69,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
         )
     }
 
-    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }
+    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', justifyContent: elements.length > 1 ? 'space-between' : 'center', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }
 
     return (
         <View style={[containerStyle]}>
@@ -82,9 +83,15 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
 
 const ModalOptions = ({
     title, columns = 3, isVisible, toggleModal, handleCancel, handleConfirm,
-    elements, handleSelectElement, autoValidation, ...props }) => {
+    elements, handleSelectElement, autoValidation, isLoading, modalStyle, ...props }) => {
 
     let elementSize
+
+    if (columns === 1)
+        elementSize = constants.ScreenWidth * 0.5
+
+    if (columns === 2)
+        elementSize = constants.ScreenWidth * 0.45
 
     if (columns === 2)
         elementSize = constants.ScreenWidth * 0.45
@@ -95,23 +102,33 @@ const ModalOptions = ({
     return (
         <Modal
             isVisible={isVisible}
-            onSwipeComplete={toggleModal}
-            swipeDirection="right"
+            //  onSwipeComplete={!isLoading && toggleModal}
+            swipeDirection={!isLoading ? "down" : ""}
             animationIn="slideInUp"
             animationOut="slideOutDown"
-            onBackdropPress={toggleModal}
-            style={styles.modal} >
+            onBackdropPress={!isLoading ? toggleModal : () => console.log('No action...')}
+            style={[styles.modal, modalStyle]} >
 
-            <View style={styles.container}>
-                <Title style={[theme.customFontMSsemibold.header, { marginBottom: 30, textAlign: 'center' }]}>{title}</Title>
-                <ModalForm elements={elements} elementSize={elementSize} handleSelectElement={handleSelectElement} autoValidation={autoValidation} />
-                {!autoValidation &&
-                    <View style={styles.buttonsContainer}>
-                        <Button mode="outlined" onPress={handleCancel} style={{ width: '40%' }}>Annuler</Button>
-                        <Button mode="contained" onPress={handleConfirm} style={{ width: '45%' }}>Confirmer</Button>
-                    </View>
-                }
-            </View>
+            {isLoading ?
+                <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+                    <Text style={[theme.customFontMSsemibold.title, { marginBottom: 100 }]}>Traitement en cours...</Text>
+                    <ActivityIndicator color={theme.colors.primary} size={50} />
+                </View>
+                :
+                <View style={styles.container}>
+                    <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: theme.padding, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
+                        <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
+                    </TouchableOpacity>
+                    <Title style={[theme.customFontMSregular.header, { marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>{title}</Title>
+                    <ModalForm elements={elements} elementSize={elementSize} handleSelectElement={handleSelectElement} autoValidation={autoValidation} />
+                    {!autoValidation &&
+                        <View style={styles.buttonsContainer}>
+                            <Button mode="outlined" onPress={handleCancel} style={{ width: '40%' }}>Annuler</Button>
+                            <Button mode="contained" onPress={handleConfirm} style={{ width: '45%' }}>Confirmer</Button>
+                        </View>
+                    }
+                </View>
+            }
         </Modal>
     )
 }
@@ -128,7 +145,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingTop: constants.ScreenHeight * 0.02,
+        paddingTop: theme.padding / 1.5,
         backgroundColor: '#fff',
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
         borderTopRightRadius: constants.ScreenWidth * 0.03,

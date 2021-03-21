@@ -4,12 +4,14 @@ import '@react-native-firebase/auth'
 import '@react-native-firebase/firestore'
 import '@react-native-firebase/storage'
 import '@react-native-firebase/functions'
+import { Alert, Keyboard } from 'react-native'
+
+import { checkEmailExistance } from './auth-api'
+import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
 
 const db = firebase.firestore()
 
-//FIRESTORE CRUD
-//USERS: GET
-
+//#FETCH DOS BY QUERY
 export function fetchDocs(query, MyList, MyCount, MyCallBack) {
   this.unsubscribe = query.onSnapshot((querysnapshot) => {
     var List = []
@@ -39,61 +41,7 @@ export function fetchDocs(query, MyList, MyCount, MyCallBack) {
   })
 }
 
-export const fetchProjectName = async (project) => {
-  const projectRef = await db.collection('Projects').doc(project.id).get()
-  const fullName = projectRef.data().name
-  project.fullName = fullName
-  console.log(project)
-  return project
-}
-
-export const fetchClientName = async (client) => {
-  const user = await db.collection('Users').doc(client.id).get()
-  const fullName = user.data().fullName
-  client.fullName = fullName
-  return client
-}
-
-export const fetchCreatedByName = async (createdBy) => {
-  const user = await db.collection('Users').doc(createdBy.id).get()
-  const fullName = user.data().fullName
-  createdBy.fullName = fullName
-  return createdBy
-}
-
-export const fetchEditedByName = async (editedBy) => {
-  const user = await db.collection('Users').doc(editedBy.id).get()
-  const fullName = user.data().fullName
-  editedBy.fullName = fullName
-  return editedBy
-}
-
-export const getUsers = async (main, query) => {
-
-  await query.onSnapshot((querysnapshot) => {
-    let usersList = []
-    let usersCount = 0
-
-    querysnapshot.forEach((doc) => {
-      let id = doc.id
-      let user = doc.data()
-      user.id = id
-      usersList.push(user)
-      usersCount = usersCount + 1
-    })
-
-    main.setState({ usersList, usersCount })
-
-  })
-    .then(() => console.log('Users list retrieved'))
-    .catch((err) => alert(err))
-    .finally(() => main.setState({ loading: false }))
-}
-
-export const increaseCount = async (idCount, collection, document, update) => {
-  await db.collection(collection).doc(document).set(update, { merge: true }).then(() => console.log('PRODUCTS COUNT UPDATED !'))
-}
-
+//#TEAMS
 export const deleteTeam = async (team) => {
   // Get a new write batch
   const batch = db.batch()
@@ -121,4 +69,114 @@ export const deleteTeam = async (team) => {
   return await batch.commit()
   // .then(() => console.log('Batch succeeded !'))
   // .catch(e => console.error(e))
+}
+
+//#CLIENTS 
+export const validateClientInputs = function validateClientInputs(userData, checkPassord = true) {
+  let denomError = ''
+  let siretError = ''
+  let nomError = ''
+  let prenomError = ''
+
+  let { isPro, denom, siret, nom, prenom, phone, email, password } = userData
+
+  if (isPro) {
+    denomError = nameValidator(denom.value, '"Dénomination sociale"')
+    siretError = nameValidator(siret.value, 'Siret')
+  }
+
+  else {
+    nomError = nameValidator(nom.value, '"Nom"')
+    prenomError = nameValidator(prenom.value, '"Prénom"')
+  }
+
+  const phoneError = nameValidator(phone.value, '"Téléphone"')
+  // const addressError = nameValidator(address.description, '"Adresse"')
+  const emailError = emailValidator(email.value)
+  const passwordError = checkPassord ? passwordValidator(password.value) : ""
+
+  if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError) {
+
+    phone.error = phoneError
+    email.error = emailError
+    password.error = passwordError
+
+    if (isPro) {
+      denom.error = denomError
+      siret.error = siretError
+      this.setState({ denom, siret, phone, email, password, loading: false })
+    }
+
+    else {
+      nom.error = nomError
+      prenom.error = prenomError
+      this.setState({ nom, prenom, phone, email, password, loading: false })
+    }
+
+    Keyboard.dismiss()
+
+    setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
+
+    return false
+  }
+
+  return true
+}
+
+export const createClient = async function createClient(userData, eventHandlers, ClientId, isConnected, isConversion, isProspect) {
+  let { isPro, nom, prenom, denom, siret, address, phone, email, password } = userData
+  let { error, loading } = eventHandlers
+
+  //2. ADDING USER DOCUMENT
+  let client = {
+    address,
+    phone: phone.value,
+    email: email.value.toLowerCase(),
+    isProspect,
+    password: password.value,
+    userType: 'client',
+    deleted: false
+  }
+
+  if (isPro) {
+    client.denom = denom.value
+    client.siret = siret.value
+    client.isPro = true
+    client.fullName = denom.value
+  }
+
+  else if (!isPro) {
+    client.nom = nom.value
+    client.prenom = prenom.value
+    client.isPro = false
+    client.fullName = `${prenom.value} ${nom.value}`
+  }
+
+  //3'. CREATE CLIENT or CONVERT PROSPECT TO CLIENT (account + document)
+  if (!isProspect || isConversion) {
+
+    if (!isConnected) {
+      return { error: { title: "Pas de connection internet", message: "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur." } }
+    }
+
+    //Validate if email address already exist
+    const emailExist = await checkEmailExistance(email.value)
+    if (emailExist) {
+      return { error: { title: "", message: "L'adresse email que vous avez saisi est déjà associé à un compte." } }
+    }
+
+    if (!isConnected) {
+      return { error: { title: "Pas de connection internet", message: "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur." } }
+    }
+
+    client.role = 'Client'
+    await db.collection('newUsers').doc(ClientId).set(client)
+    return true
+  }
+
+  //3". CREATE PROSPECT (document only)
+  else {
+   // db.collection('Clients').doc(ClientId).set(client)
+    return true
+  }
 }

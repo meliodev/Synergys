@@ -49,7 +49,7 @@ class ListEmployees extends React.Component {
                     main={this}
                     title={!showInput}
                     titleText={this.titleText}
-                    placeholder='Rechercher'
+                    placeholder="Rechercher par nom, id, ou rôle"
                     showBar={showInput}
                     handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
                     searchInput={searchInput}
@@ -59,7 +59,7 @@ class ListEmployees extends React.Component {
                 <ListUsers
                     searchInput={searchInput}
                     prevScreen={this.props.prevScreen}
-                    userType='utilisateur' 
+                    userType='utilisateur'
                     offLine={!isConnected}
                     permissions={permissions}
                     query={queryUsers}

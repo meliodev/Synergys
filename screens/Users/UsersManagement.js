@@ -54,7 +54,7 @@ class UsersManagement extends React.Component {
                 <SearchBar
                     main={this}
                     title={!this.state.showInput}
-                    placeholder={index === 0 ? 'Rechercher un utilisateur, un rôle' : 'Rechercher une équipe'}
+                    placeholder={index === 0 ? 'Rechercher par nom, id, ou rôle' : 'Rechercher une équipe'}
                     showBar={this.state.showInput}
                     handleSearch={() => this.setState({ searchInput: '', showInput: !this.state.showInput })}
                     searchInput={this.state.searchInput}

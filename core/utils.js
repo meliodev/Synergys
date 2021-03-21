@@ -174,8 +174,8 @@ export const setAttachmentIcon = (type) => {
 //   })
 // }
 
-export const generateId = (suffix) => {
-  const options = { length: 4 }
+export const generateId = (suffix, length = 4) => {
+  const options = { length }
   const uid = new ShortUniqueId(options)
   const customId = suffix + uid()
   return customId
