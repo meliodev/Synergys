@@ -21,7 +21,7 @@ import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomI
 
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs } from "../../api/firestore-api";
@@ -133,14 +133,16 @@ class CreateProject extends Component {
             processUpdated: false,
 
             error: '',
-            loading: false
+            loading: true
         }
     }
 
     async componentDidMount() {
 
         if (this.isEdit) {
+
             this.focusListener = this.props.navigation.addListener('willFocus', async () => {
+                this.setState({ processUpdated: false })
                 await this.fetchProject()
                 await this.fetchDocuments()
                 await this.fetchTasks()
@@ -288,18 +290,17 @@ class CreateProject extends Component {
     }
 
     //Inputs validation
-    validateInputs() {
+    validateInputs(isConnected) {
         let { client, name, address } = this.state
-        const { isConnected } = this.props.network
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let nameError = nameValidator(name.value, '"Nom du projet"')
-        //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
+        var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
 
-        if (clientError || nameError) {
+        if (clientError || nameError || addressError) {
             name.error = nameError
             Keyboard.dismiss()
-            this.setState({ clientError, name, loading: false })
+            this.setState({ clientError, name, addressError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -309,20 +310,22 @@ class CreateProject extends Component {
 
     //#OOS
     async handleSubmit() {
+        const { isConnected } = this.props.network
+        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+        if (isEditOffLine) return
+
         //Handle Loading or No edit done
         let { loading, attachments } = this.state
         if (loading || this.state === this.initialState) return
 
         load(this, true)
 
-        const isValid = this.validateInputs()
+        const isValid = this.validateInputs(isConnected)
         if (!isValid) return
 
         let { client, name, description, note, address, state, step, tagsSelected, color } = this.state
 
         //1. UPLOADING FILES (ONLINE ONLY)
-        const { isConnected } = this.props.network
-
         if (isConnected) {
             if (attachments.length > 0) {
                 this.title = 'Exportation des images...'
@@ -534,16 +537,10 @@ class CreateProject extends Component {
 
                 <ScrollView style={styles.dataContainer}>
 
-                    {!loading && this.isEdit &&
-                        <FormSection
-                            sectionTitle='Prochaine tâche'
-                            sectionIcon={null}
-                            form={process && processUpdated ?
-                                <ProcessAction process={process} processMain={this.processMain.bind(this)} ProjectId={this.ProjectId} />
-                                :
-                                <Loading />
-                            }
-                        />
+                    {!loading && this.isEdit && process && processUpdated ?
+                        <ProcessAction initialProcess={process} processMain={this.processMain.bind(this)} ProjectId={this.ProjectId} />
+                        :
+                        <Loading style= {{paddingVertical: 50}}/>
                     }
 
                     {!loading &&

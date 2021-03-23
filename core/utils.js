@@ -67,6 +67,31 @@ export const phoneValidator = phone => {
   return "";
 }
 
+export const compareDates = (date1, date2, operator) => {
+
+  if (operator === 'isBefore') {
+    if (moment(date1).isBefore(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+  }
+
+  else if (operator === 'isAfter') {
+    if (moment(date1).isAfter(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+  }
+
+  else if (operator === 'isSame') {
+    if (moment(date1).isSame(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+  }
+
+  else if (operator === 'isSameOrAfter') {
+    if (moment(date1).isSameOrAfter(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+  }
+
+  else if (operator === 'isSameOrBefore') {
+    if (moment(date1).isSameOrBefore(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+  }
+
+  return "";
+}
+
 
 //##NAVIGATION
 export const navigateToScreen = (main, canUpdate, screen, params) => {
@@ -85,6 +110,12 @@ export const formatRow = (data, numColumns) => { //Format rows to display 3 colu
   }
 
   return data
+}
+
+export const stringifyUndefined = (data) => {
+  const stringifiedData = typeof (data) !== 'undefined' ? data : ''
+  console.log('....', typeof (stringifiedData))
+  return stringifiedData
 }
 
 export const articles_fr = (masc, masculins, docType) => {
@@ -155,6 +186,15 @@ export const setAttachmentIcon = (type) => {
   }
 
 }
+
+//##WARNINGS
+export const isEditOffline = (isEdit, isConnected) => {
+  if (!isConnected && isEdit) {
+    Alert.alert("", "La mise à jour des données n'est pas disponible en mode hors-ligne. Veuillez vous connecter à internet.")
+    return true
+  }
+  return false
+};
 
 
 // export const generateId = async (main, projectRequestId, docId, field, suffix) => {
@@ -426,7 +466,8 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
         type: res.type,
         name: attachmentName,
         size: res.size,
-        progress: 0
+        progress: 0,
+        downloadURL: ''
       }
 
       return attachment

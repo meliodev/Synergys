@@ -52,6 +52,8 @@ class Signature extends Component {
         this.sourceUrl = this.props.navigation.getParam('url', '')
         this.originalFilePath = `${Dir}/Synergys/Documents/${this.fileName}`
 
+        this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', '') //Navigation pop times when  signature is done
+
         this.termsPath = `${Dir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
         this.termsURL = 'https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/CONDITIONS%20G%C3%89N%C3%89RALES%20DE%20VENTE%20ET%20DE%20TRAVAUX.pdf?alt=media&token=3bf07ac2-6d9e-439a-91d8-f9908003488f'
 
@@ -498,7 +500,7 @@ class Signature extends Component {
             .finally(() => {
                 this.setState({ uploading: false, showDialog: false })
                 this.props.navigation.state.params.onGoBack() //refresh document to get url of new signed document
-                this.props.navigation.goBack()
+                this.props.navigation.pop(this.onSignaturePop)
             })
     }
 

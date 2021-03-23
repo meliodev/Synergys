@@ -8,7 +8,7 @@ import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt } from '@fortawesome/pro-light-svg-icons'
+import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, fileEdit } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -28,7 +28,7 @@ import LoadDialog from "../../components/LoadDialog"
 
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -58,8 +58,14 @@ const types = [
     { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
     { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
     { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
-    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faGlobeEurope, selected: false },
+    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: fileEdit, selected: false },
+    { label: 'Attestation fluide', value: 'Attestation fluide', icon: fileEdit, selected: false },
     { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
+]
+
+const genTypes = [
+    { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
+    { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
 ]
 
 const genOptions = [
@@ -105,14 +111,15 @@ class UploadDocument extends Component {
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
         this.project = this.props.navigation.getParam('project', '')
 
-        //Params (doc properties)
+        //Process params
         this.documentType = this.props.navigation.getParam('documentType', '')
-        if (this.documentType) {
+        if (!this.isEdit && this.documentType) {
             types.forEach((type) => {
                 if (type.value === this.documentType) type.selected = true
             })
         }
         this.goBackOnSubmit = this.documentType !== ''
+        this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         this.state = {
             //TEXTINPUTS
@@ -238,7 +245,6 @@ class UploadDocument extends Component {
             const prevAttachment = this.state.attachment
             if (!prevAttachment) return
 
-            console.log('DATA....', doc.data())
             const nextAttachment = doc.data().attachment
 
             const prevStatus = prevAttachment.pending
@@ -264,12 +270,10 @@ class UploadDocument extends Component {
 
     //Submit handler
     async handleSubmit(isConversion, DocumentId) {
+        //Reject offline updates
         const { isConnected } = this.props.network
-
-        if (!isConnected && this.isEdit) { //&& !isConnected
-            Alert.alert('', 'Les mises à jours sont indisponibles en mode hors-ligne')
-            return
-        }
+        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+        if (isEditOffLine) return
 
         //0. Handle isLoading or No edit done
         if (this.state.loading || this.state === this.initialState) return
@@ -283,17 +287,24 @@ class UploadDocument extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        //2. SetDocument
+        //2. SetDocument (Initiate attachment with pending = true)
         this.persistDocument(isConversion, DocumentId)
 
         //3. Handle upload offline
-        this.attachmentListener(DocumentId)
-        await this.uploadFile(isConversion, DocumentId)
+        this.attachmentListener(DocumentId) //Listens when pending = false and refreshes attachment
+        const fileUploaded = await this.uploadFile(isConversion, DocumentId)
+
+        if (!fileUploaded) {
+            setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
+            return
+        }
 
         //4. Go back if we came here from process action (this.documentID !== '')
-        if (this.goBackOnSubmit) {
-            types.forEach((type) => type.selected = false)
-            this.props.navigation.goBack()
+        else {
+            if (this.goBackOnSubmit) {
+                types.forEach((type) => type.selected = false)
+                this.props.navigation.goBack()
+            }
         }
     }
 
@@ -364,13 +375,9 @@ class UploadDocument extends Component {
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
 
-        console.log('fileUploaded', fileUploaded)
+        console.log('fileUploaded........................', fileUploaded)
 
-        if (!fileUploaded) {
-            setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
-        }
-
-        else return fileUploaded
+        return fileUploaded
     }
 
     //Delete document
@@ -491,7 +498,7 @@ class UploadDocument extends Component {
     }
 
     modalOptionsConfig() {
-        const { modalContent, type } = this.state
+        const { modalContent, type, attachmentSource } = this.state
         const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
 
         if (modalContent === 'docSource') {
@@ -506,8 +513,8 @@ class UploadDocument extends Component {
         else if (modalContent === 'docType') {
             return {
                 title: `Choisissez le type du document`,
-                columns: 3,
-                elements: types,
+                columns: attachmentSource === 'upload' ? 3 : 2,
+                elements: attachmentSource === 'upload' ? types : genTypes,
                 autoValidation: false
             }
         }
@@ -530,7 +537,6 @@ class UploadDocument extends Component {
         const { modalContent, attachmentSource, type } = this.state
 
         if (modalContent === 'docType') {
-            console.log('...................................', attachmentSource)
 
             if (attachmentSource === 'generation') {
                 if (type === '') return
@@ -624,7 +630,8 @@ class UploadDocument extends Component {
             DocumentId: this.DocumentId,
             DocumentType: type,
             fileName: attachment.name,
-            url: attachment.downloadURL
+            url: attachment.downloadURL,
+            onSignaturePop: this.onSignaturePop
         }
 
         if (signMode)
@@ -637,7 +644,7 @@ class UploadDocument extends Component {
         let { project, name, description, type, state, attachment, order } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, loadingConversion, toastType, toastMessage, projectError } = this.state
-        const { checked, modalContent, types, genOptions, showModal } = this.state
+        const { checked, modalContent, types, genOptions, showModal, attachmentSource } = this.state
         const { title, columns, elements, autoValidation } = this.modalOptionsConfig()
 
         var { canUpdate, canDelete } = this.props.permissions.documents
@@ -710,7 +717,7 @@ class UploadDocument extends Component {
                                 <ModalOptions
                                     title={title}
                                     columns={columns}
-                                    modalStyle={{ marginTop: modalContent === 'docType' ? constants.ScreenHeight * 0.1 : constants.ScreenHeight * 0.3 }}
+                                    modalStyle={{ marginTop: modalContent === 'docType' && attachmentSource === 'upload' ? 0 : constants.ScreenHeight * 0.5 }}
                                     isVisible={showModal}
                                     toggleModal={() => this.toggleModal('docSource')}
                                     handleCancel={this.handleCancelGen}

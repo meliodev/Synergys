@@ -209,12 +209,20 @@ const ProjectsStack = createStackNavigator({
         screen: UploadDocument,
         navigationOptions: hideHeader
     },
+    Signature: {
+        screen: Signature,
+        navigationOptions: hideHeader
+    },
     CreateTask: { //access tasks
         screen: CreateTask,
         navigationOptions: hideHeader
     },
     ListEmployees: {
         screen: ListEmployees,
+        navigationOptions: hideHeader
+    },
+    DatePicker: {
+        screen: DatePicker,
         navigationOptions: hideHeader
     },
 })

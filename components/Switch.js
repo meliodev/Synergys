@@ -2,8 +2,12 @@ import * as React from 'react'
 import { Switch as PaperSwitch } from 'react-native-paper'
 import * as theme from '../core/theme'
 
-const Switch = ({ onToggleSwitch }) => {
-    const [isSwitchOn, setIsSwitchOn] = React.useState(false)
+const Switch = ({ onToggleSwitch, defaultValue = false }) => {
+    const [isSwitchOn, setIsSwitchOn] = React.useState(defaultValue)
+
+    React.useEffect(() => {
+        onToggleSwitch(isSwitchOn)
+    }, [])
 
     const onToggleSwitch1 = () => {
         setIsSwitchOn(!isSwitchOn)

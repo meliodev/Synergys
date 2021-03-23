@@ -55,15 +55,16 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
     }
 
     const Element = ({ element, index }) => {
-        const color = element.selected ? theme.colors.primary : theme.colors.black
+        const iconColor = element.selected ? theme.colors.primary : element.iconColor
+        const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
 
         return (
             <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
                 <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
-                    <CustomIcon icon={element.icon} size={elementSize * 0.3} color={element.iconColor || color} />
+                    <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />
                 </View>
-                <View style={{ height: elementSize * 0.45 }}>
-                    <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color }]}>{element.label}</Text>
+                <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
+                    <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -96,7 +97,7 @@ const ModalOptions = ({
     if (columns === 2)
         elementSize = constants.ScreenWidth * 0.45
 
-    else if (columns === 3)
+    else if (columns >= 3)
         elementSize = constants.ScreenWidth * 0.3
 
     return (
@@ -111,7 +112,7 @@ const ModalOptions = ({
 
             {isLoading ?
                 <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
-                    <Text style={[theme.customFontMSsemibold.title, { marginBottom: 100 }]}>Traitement en cours...</Text>
+                    <Text style={[theme.customFontMSregular.title, { marginBottom: 100 }]}>Traitement en cours...</Text>
                     <ActivityIndicator color={theme.colors.primary} size={50} />
                 </View>
                 :
@@ -137,7 +138,7 @@ const ModalOptions = ({
 const styles = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
-        marginTop: constants.ScreenHeight * 0.3,
+        marginTop: constants.ScreenHeight * 0.55,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,

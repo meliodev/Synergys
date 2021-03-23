@@ -1,9 +1,5 @@
 25/02/2021:
 
-+ Global:
-- Notifications + Emails
-- Fetch all collections on app start (offline support)
-
 Design done:
 - Calendar like google calendars
 - Change emptylist icon color to gray
@@ -19,26 +15,6 @@ Design done:
 - SETTINGS: activate double authentication verify Twilio
 - Replace attachment pickers by Squares
 
-Design:
-- Check phone screenshots
-
-TO DO:
-- CREATETASK: Add property 'toute la journée' to task: when we give heure début et fin: 
-- DESIGN: ListDocuments XD design
-- DESIGN: favicon
-- DESIGN: splashscreen (design pending..)
-- VALIDATE DESIGN: AGENDA: align "assigned to" to right (check in case of long names)
-- DASHBOARD: notifications récentes non lu (7) + voir toutes les notifications / Aucune notification récente if nothing
-- DASHBOARD: From today to next days: red tasks, green for others
-
-- NOTIFICATION: Change Notification collection (decompose body: intervenant, action, entity) + Filter
-- EMAIL: "Entité" "Nom de l'entité" action (email title)
-- USERS: remove user account (on delete user)& keep db document to be able to restore later on
-
-- OPTIMIZE: Change filter from menu to modal
-- (Not anymore: Add tasks timeslots verification on check submit show popup with tasks conflicts)
-- BUG: address description first line is hidden somtimes when there is 2lines
-
 DONE: (09/03/2021)
 - Add initialisation & maintenance (projects phases)
 - project title decrease size + 2number of lines (like Asana)
@@ -46,7 +22,6 @@ DONE: (09/03/2021)
 - USERS: Merge client with prospects: Separate clients/prospects from users (create new collection Clients having prospect: true/false)
 - PROFILE: Add section to client 'Projects'
 - Make on screen containing both clients and prospects: LISTCLIENTS (project/request client selection)
-
 
 DONE: (08/03/2021)
 - Change picker library & change selected value style to match textinput style
@@ -62,36 +37,20 @@ DONE: (08/03/2021)
 - Change input fontfamily
 - Add motifs background to each list screen (users, teams, requests, ordersy)
 
-
 Done:
 + UploadDocument:
 - Add 'attachmentSource' property (conversion + conversionSource: 'Devis id')
 - Rester sur Document après création (pas de retour en arrière)
 - Ajouter (Facture générée) au nom d'une facture générée à partir d'un devis
-
 + Signature:
 - Rétrecir police et rétrecir saut ligne 
-
 + CreateTask:
 - CreateTask: Remove Project from mendatory fields
-
 + PdfGeneration:
 - Merger Devis avec conditions
 - Adjust Facture content
-
 + CreateOrder:
 - La remise: 2 champs textes CEE + Renov pour commande
-
-Ideas:
-+ Maintainance & Troubleshooting:
-- Add id of each item on List overview -> User can communicate easily to us the element having an issue.
-- Add pull to refresh/refresh icon on forms (instead of onSnapshot).. because user has to refresh it voluntarely
-
-#9cf8ff: En cours
-#ff9cad: Bloqué
-#fffc9c: en attente
-primary: validé/terminé
-#f5f5f5: annulé
 
 
 //Libraries modifications done:
@@ -104,6 +63,97 @@ Steps:
 4. Remove onRefresh from Agenda props as it disables zIndex
 
 2- react-native-paper: style & render
+2- react-native-paper: List.Accordion: added titleComponent prop (can be proposed on github)
 3- react-native-autocomplete-input: style & render
 4- react-native-tags-autocomplete: style & render
 5- react-navigation: Deep links support/parse firebase dynamic links
+
+
+
+22/03/2021
+TO DO:
++ PROCESS: Complete process
++ PROCESS: Add responsible for each action
++ PROCESS: Notifications & Emails
+-> pending: Waiting from explanations...
+
++ PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)
+-> OPTION 1: Verify if a task with same type already exists for the selected project (to avoid duplicates)
+-> OPTION 2 (SELECTED) "TRAVAIL A LA CHAINE: CREER UNE TACHE PAR LA BONNE PERSONNE AU BON MOMENT": Make task types list dynamic: User can create a task only through process action link, and only if he is one of the responsibles. 
++ Commercial task types = [RD1, RDN, VTP, VT] tag: com
++ Poseur task types = [Installation, Rattrapage, Panne, Entretien] tag: tech
++ Add dynamiclly task types..
++ Display 30% phase > step 
+
++ Action a faire
++ add infoCircle 
++ Remove check and do animation 
++ ModalOptions green header, white text
++ Toute la journée
++ pop up instruction when opening task swipable
+
+
++ ISSUE: Avoid duplicates of tasks/documents in "multi-users case" (especially if user is not up to date while offline)
+-> Solution: Assign the action to one and only one responsible at a time.. To make sure there will be not many users doing the same action. Indeed, it is possible that a user is not up to date while offline, so he can create a task/document that another user has created.
+
+----------------------------------------------------------------------------------------------
++ CREATETASK: Add property 'toute la journée' to task: when we give heure début et fin: 
++ Adjust navigation (Try put all screens same stack or think about a better solution)
++ USERS: onDeleteUser handler: remove user account (on delete user)& keep db document to be able to restore later on.. (links to their profile should handle empty userId or keep their documents to show off their data even if they are deleted..)
++ DESIGN: address description first line is hidden sometimes when there is 2lines
++ (Not anymore: Add tasks timeslots verification on check submit show popup with tasks conflicts)
++ PROCESS: Store process on firestore and handle it as done with permissions (redux cach)
+
+? Can a task be deleted or should it be just archived
+
+DONE:
++ BREAKING PROCESS CHANGE: Change nextStep/nextPhase from step attributes to action attributes.
++ CONDITIONAL FACTURE CHOICE: check if generated quote exist -> choose conversion or manual
++ PROCESS: Add action loading on navigating back
++ PROCESS & CREATETASK: Verify if dueDate > startDate
++ OFFLINE: Disable edit mode when offline (show pop up onsubmit)  
++ PROCESS: Update project step/status attributes all along the process evolution.
++ IMPORTANT PROCESS: Query verification Document upload (add where('attachment.downloadURL', '!=', '') && Route navigation depending on doc exist or not -> if exist we can see attachment still uploading..)
++ PROCESS & UPLOADOCUMENT: Handle waiting/or not during upload document if coming from action link
+-> OPTION1 (SELECTED): Wait (user can go back but action is still not verified until attachment is fully uploaded)
+-> OPTION2: Go back (if user press action he'll find the attachment still uploading)
++ PROCESS & UPLOADOCUMENT: Remove not available doc types from generate choices
+
+
+
+- DASHBOARD (NEW): notifications récentes non lu (7) + voir toutes les notifications / Aucune notification récente if nothing
+- DASHBOARD (NEW): From today to next days: red tasks, green for others
+
+# DESIGN: ListDocuments XD design
+# DESIGN: favicon
+# DESIGN: splashscreen (design pending..)
+# DESIGN: Check phone screenshots
+# OPTIMIZE: Change filter from menu to modal
+
++ GLOBAL: Notifications + Emails
++ GLOBAL: "Entité" "Nom de l'entité" action (email title)
++ GLOBAL: Change Notification collection (decompose body: intervenant, action, entity) + Filter (adjust cloud function)
++ GLOBAL: Fetch all collections on app start (offline support)
++ GLOBAL: enable SMS verify
+
+
+- 1. A la creation, createdBy is a collaborator.
+- 2. Add 2 Contacts as attribute of project: 
+* Contact commercial {nom, prenom, role, email, telephone}
+* Contact technique {nom, prenom, role, email, telephone}
+-> Maybe add filter to employees (by role) to select com & tech easily
+
+
+Ideas1:
+privilleges: Don't allow a task of type X to be created only from process link.
+-> tasks types list is set dynamiclly depending on the incoming link params (paramExample: enableInstallation = true will add dynamiclly a task type = 'Installation' to tasks types list)
+-> User will not be able to create a RDN if it is not the rigth time on process
+-> also Responsibles field will define (when action is current) which user has the autority and permission to create RDN
+
+-> Summary: Installation can be created only by the responsible: {admin, RT, poseur} at the rigth time (when current action = 'Créer une installation')
+-> A user cannot create a certain type of tasks only if its the rigth time on process
+
+Ideas2:
++ Maintainance & Troubleshooting:
+- Add id of each item on List overview -> User can communicate easily to us the element having an issue.
+- Add pull to refresh/refresh icon on forms (instead of onSnapshot).. because user has to refresh it voluntarely

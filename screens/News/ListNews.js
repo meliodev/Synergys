@@ -68,7 +68,6 @@ class ListNews extends Component {
         const regex = "/(<([^>]+)>)/ig"
         const { news, loading } = this.state
         const { isConnected } = this.props.network
-
         const newsCount = news.length
 
         return (
@@ -82,14 +81,12 @@ class ListNews extends Component {
                     </View>
                     :
                     <View style={styles.container}>
-                        {newsCount > 0 ?
+                        {newsCount > 0 &&
                             <FlatList
                                 data={news}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderPost(item)}
                                 contentContainerStyle={{ paddingTop: 10 }} />
-                            :
-                            <EmptyList iconName='file-document' header='Liste des documents' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
                         }
                     </View>
                 }

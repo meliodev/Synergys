@@ -21,7 +21,7 @@ import Loading from "../../components/Loading";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -198,6 +198,10 @@ class CreateRequest extends Component {
     }
 
     async handleSubmit() {
+        const { isConnected } = this.props.network
+        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+        if (isEditOffLine) return
+
         const { error, loading } = this.state
         if (loading || this.state === this.initialState) return
         load(this, true)

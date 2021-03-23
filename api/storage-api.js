@@ -152,7 +152,7 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
         uploadTask
             .then(async (res) => {
                 console.log('UPLOAD COMPLETED !')
-                
+
                 attachment.downloadURL = await storageRef.getDownloadURL()
                 attachment.generation = 'upload'
                 attachment.pending = false
@@ -164,15 +164,16 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
             })
             .catch((e) => {
                 console.error('upload error', e)
-                console.log('Removing attachment from document with Id: ', DocumentId)
 
+                //Rollback: Remove failed attachment
                 db.collection('Documents').doc(DocumentId).update({ attachment: null })
+                
                 onUploadProgressEnd(this, payload)
                 reject(false)
             })
     })
 
-    return Promise
+    return promise
 }
 
 

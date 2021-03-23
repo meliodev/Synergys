@@ -7,8 +7,9 @@ import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
 
+const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, icon = faPlusCircle, style, ...props }) => {
 
-const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, icon = faPlusCircle, ...props }) => {
+    const noError = errorText === '' || typeof (errorText) === 'undefined'
 
     const AvatarText = ({ text }) => (
         <View style={styles.avatarText} >
@@ -16,8 +17,8 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
         </View>
     )
 
-    const borderBottomColor = errorText && errorText !== '' ? theme.colors.error : theme.colors.gray_extraLight
-    const placeholderColor = errorText && errorText !== '' ? theme.colors.error : theme.colors.secondary
+    const borderBottomColor = noError ? theme.colors.gray_extraLight : theme.colors.error
+    const placeholderColor = noError ? theme.colors.secondary : theme.colors.error
 
     if (value) {
 
@@ -30,11 +31,12 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                 avatarText = `${avatarText}${element.charAt(0).toUpperCase()}`
         })
 
-        return (
-            <TouchableOpacity onPress={onPress} style={[styles.container, { marginBottom: 15, marginTop: 30 }]}>
 
-                <View >
-                    <Text style={theme.customFontMSregular.caption}>{label}</Text>
+        return (
+            <TouchableOpacity onPress={onPress} style={[styles.container, { marginTop: 30 }, style]}>
+
+                <View>
+                    <Text style={[theme.customFontMSregular.body, { color: noError ? placeholderColor : theme.colors.error }]}>{label}</Text>
                     <View style={[styles.textArea, { borderBottomColor: borderBottomColor }]}>
                         {showAvatarText &&
                             <View style={styles.left}>
@@ -50,24 +52,24 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                     </View>
                 </View>
 
-                {/* {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null} */}
+                {!noError ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
 
             </TouchableOpacity>
         )
     }
 
     else return (
-        <TouchableOpacity onPress={onPress} style={[styles.container, { marginVertical: 5 }]}>
+        <TouchableOpacity onPress={onPress} style={[styles.container, { marginVertical: 5 }, style]}>
             <View style={[styles.placeholderArea, { borderBottomColor: borderBottomColor }]}>
                 <View style={{ flex: 0.9 }}>
-                    <Text style={[theme.customFontMSregular.body, { color: placeholderColor }]}>{label}</Text>
+                    <Text style={[theme.customFontMSregular.body, { color: noError ? placeholderColor : theme.colors.error  }]}>{label}</Text>
                 </View>
                 <View style={{ flex: 0.1 }}>
                     <CustomIcon icon={icon} color={theme.colors.inpuIcon} />
                 </View>
             </View>
 
-            {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
+            {!noError ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
 
         </TouchableOpacity>
     )
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingTop: 8,
         paddingBottom: 10,
-        borderBottomWidth: StyleSheet.hairlineWidth*2,
+        borderBottomWidth: StyleSheet.hairlineWidth * 2,
         // backgroundColor: 'yellow',
     },
     placeholderArea: {
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingTop: 20,
         paddingBottom: 20,
-        borderBottomWidth: StyleSheet.hairlineWidth*2,
+        borderBottomWidth: StyleSheet.hairlineWidth * 2,
     },
     left: {
         flex: 0.08,

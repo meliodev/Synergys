@@ -29,7 +29,7 @@ import RootController from './Navigation/DrawerNavigator'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
 import Wrapper from './Wrapper'
-//import Test from './components/Test'
+import Test from './components/Test'
 
 const db = firebase.firestore()
 

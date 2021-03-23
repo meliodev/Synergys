@@ -19,7 +19,7 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr } from "../../core/utils"
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { handleFirestoreError } from '../../core/exceptions'
@@ -216,6 +216,10 @@ class CreateOrder extends Component {
     }
 
     async handleSubmit() {
+        const { isConnected } = this.props.network
+        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+        if (isEditOffLine) return
+
         //Handle Loading or No edit done
         if (this.state.loading || this.state === this.initialState && !this.autoGenPdf) return
 

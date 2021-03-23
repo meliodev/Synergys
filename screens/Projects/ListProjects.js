@@ -12,7 +12,7 @@ import CustomIcon from '../../components/CustomIcon'
 
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { load, toggleFilter, setFilter, handleFilter, formatRow } from '../../core/utils'
+import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { fetchDocs } from '../../api/firestore-api';
 
@@ -107,6 +107,7 @@ class ListProjects extends Component {
     }
 
     onPressProject(project) {
+        console.log('000')
         if (this.isRoot)
             this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
 

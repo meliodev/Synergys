@@ -4,7 +4,7 @@ import { Card, Title, FAB } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import firebase from '@react-native-firebase/app'
 import { faInfoCircle, faFileAlt, faQuestionCircle } from '@fortawesome/pro-light-svg-icons'
-import { faCalendarPlus } from '@fortawesome/pro-light-svg-icons'
+import { faCalendarPlus, faClock } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -62,6 +62,8 @@ class CreateTask extends Component {
     constructor(props) {
         super(props)
         this.refreshDate = this.refreshDate.bind(this)
+        this.refreshDay = this.refreshDay.bind(this)
+        this.refreshTime = this.refreshTime.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
         this.refreshAssignedTo = this.refreshAssignedTo.bind(this)
         this.refreshProject = this.refreshProject.bind(this)
@@ -102,8 +104,18 @@ class CreateTask extends Component {
             assignedTo: { id: '', fullName: '', error: '' },
             project: this.project,
             address: { description: '', place_id: '', error: '' },
+
+            isAllDay: false,
+
+            //isAllDay = true
             startDate: { value: moment().format(), error: '' },
             dueDate: { value: moment().add(1, 'h').format(), error: '' },
+
+            //isAllDay = false
+            startDay: { value: moment().format(), error: '' },
+            dueDay: { value: moment().format(), error: '' },
+            startTime: { value: moment().format(), error: '' },
+            dueTime: { value: moment().add(1, 'h').format(), error: '' },
 
             color: theme.colors.primary,
 
@@ -125,7 +137,6 @@ class CreateTask extends Component {
 
         else this.initialState = this.state
     }
-
 
     fetchTask() {
         db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
@@ -189,17 +200,48 @@ class CreateTask extends Component {
         }
     }
 
+    refreshDay(label, day) {
+        if (label === 'start') {
+            console.log('day start', day)
+            this.setState({ startDay: day })
+        }
+
+        else if (label === 'due') {
+            console.log('day end', day)
+            this.setState({ dueDay: day })
+        }
+    }
+
+    refreshTime(label, time) {
+        if (label === 'start') {
+            console.log('time start', time)
+            this.setState({ startTime: time })
+        }
+
+        else if (label === 'due') {
+            console.log('time end', time)
+            this.setState({ dueTime: time })
+        }
+    }
+
     refreshProject(project) {
         this.setState({ project })
     }
 
     //Inputs validation
     validateInputs() {
-        let { name, assignedTo, startDate, dueDate } = this.state
+        let { name, assignedTo, isAllDay, startDate, dueDate, startDay, dueDay, startTime, dueTime } = this.state
 
         let nameError = nameValidator(name.value, '"Nom de la tâche"')
         let assignedToError = nameValidator(assignedTo.id, '"Attribué à"')
-        let dateError = compareDates(dueDate.value, startDate.value, 'isBefore')
+
+        if (isAllDay)
+            var dateError = compareDates(dueDate.value, startDate.value, 'isBefore')
+
+        else {
+            var dayError = compareDays(dueDay.value, startDay.value, 'isBefore')
+            var timeError = compareTimes(dueTime.value, startTime.value, 'isBefore')
+        }
 
         if (nameError || assignedToError || dateError) {
             name.error = nameError
@@ -263,9 +305,9 @@ class CreateTask extends Component {
 
         console.log('Ready to add task...')
 
-        //  if (isAllDay) {
-        db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
-        // }
+        if (isAllDay) {
+            db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
+        }
 
         // else {
         //     const dateIterator = startDate
@@ -303,7 +345,7 @@ class CreateTask extends Component {
     }
 
     render() {
-        let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address, color } = this.state
+        let { name, description, assignedTo, project, startDate, dueDate, startDay, dueDay, startTime, dueTime, type, priority, status, address, color, isAllDay } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
         let { canUpdate, canDelete } = this.props.permissions.tasks
         canUpdate = (canUpdate || !this.isEdit)
@@ -426,30 +468,77 @@ class CreateTask extends Component {
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
                                         <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                            <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} />
-                                            <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size = {21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
+                                            {!this.isEdit && <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} />}
+                                            <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size={19} style={{ marginLeft: 5 }} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
                                         </View>
                                     </View>
 
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}
-                                        label='Date de début *'
-                                        value={moment(startDate.value).format('lll')}
-                                        editable={false}
-                                        showAvatarText={false}
-                                        icon={faCalendarPlus}
-                                        errorText={startDate.error}
-                                    />
+                                    {isAllDay ?
+                                        <View>
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début', isAllDay })}
+                                                label='Date de début *'
+                                                value={moment(startDate.value).format('lll')}
+                                                editable={false}
+                                                showAvatarText={false}
+                                                icon={faCalendarPlus}
+                                                errorText={startDate.error}
+                                            />
 
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}
-                                        label="Date d'échéance *"
-                                        value={moment(dueDate.value).format('lll')}
-                                        editable={false}
-                                        showAvatarText={false}
-                                        icon={faCalendarPlus}
-                                        errorText={dueDate.error}
-                                    />
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance", isAllDay })}
+                                                label="Date d'échéance *"
+                                                value={moment(dueDate.value).format('lll')}
+                                                editable={false}
+                                                showAvatarText={false}
+                                                icon={faCalendarPlus}
+                                                errorText={dueDate.error}
+                                            />
+                                        </View>
+                                        :
+                                        <View>
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDay, label: 'de début', showTimePicker: false, isAllDay })}
+                                                label='Date de début *'
+                                                value={moment(startDay.value).format('ll')}
+                                                editable={false}
+                                                showAvatarText={false}
+                                                icon={faCalendarPlus}
+                                                errorText={startDay.error}
+                                                showDayPicker
+                                            />
+
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDay, label: "de fin", showTimePicker: false, isAllDay })}
+                                                label="Date de fin *"
+                                                value={moment(dueDay.value).format('ll')}
+                                                editable={false}
+                                                showAvatarText={false}
+                                                icon={faCalendarPlus}
+                                                errorText={dueDay.error}
+                                            />
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshTime, label: 'de début', showDayPicker: false, isAllDay })}
+                                                label='Heure de début *'
+                                                value={moment(startTime.value).format('HH:mm')}
+                                                editable={false}
+                                                showAvatarText={false}
+                                                icon={faClock}
+                                                errorText={startTime.error}
+                                            />
+
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshTime, label: "d'échéance", showDayPicker: false, isAllDay })}
+                                                label="Heure d'échéance *"
+                                                value={moment(dueTime.value).format('HH:mm')}
+                                                editable={false}
+                                                showAvatarText={false}
+                                                icon={faClock}
+                                                errorText={dueDate.error}
+                                            />
+                                        </View>
+                                    }
+
                                 </View>
                             }
                         />
