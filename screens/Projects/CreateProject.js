@@ -143,11 +143,11 @@ class CreateProject extends Component {
 
             this.focusListener = this.props.navigation.addListener('willFocus', async () => {
                 this.setState({ processUpdated: false })
-                await this.fetchProject()
+                await this.fetchProject() //Get current process
                 await this.fetchDocuments()
                 await this.fetchTasks()
                 this.initialState = this.state
-                await this.processMain()
+                await this.processMain(this.state.process)
             })
         }
 
@@ -157,21 +157,15 @@ class CreateProject extends Component {
         load(this, false)
     }
 
-    async processMain() {
-        //processMain params
-        const { process } = this.state
+    async processMain(process) {
         const { client, name, step } = this.initialState
-        const clientId = client.id
-        const project = {
-            id: this.ProjectId,
-            name: name.value
-        }
         const secondPhaseId = getPhaseId(step) //used only init process stage //Step <=> Phase
+        const clientId = client.id
+        const project = { id: this.ProjectId, name: name.value }
 
         const updatedProcess = await processMain(process, secondPhaseId, clientId, project)
         this.setState({ process: updatedProcess, processUpdated: true })
     }
-
 
     //FETCHES: #edit
     async fetchProject() {
@@ -540,7 +534,7 @@ class CreateProject extends Component {
                     {!loading && this.isEdit && process && processUpdated ?
                         <ProcessAction initialProcess={process} processMain={this.processMain.bind(this)} ProjectId={this.ProjectId} />
                         :
-                        <Loading style= {{paddingVertical: 50}}/>
+                        <Loading style={{ paddingVertical: 50 }} />
                     }
 
                     {!loading &&

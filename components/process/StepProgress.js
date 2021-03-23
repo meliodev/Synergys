@@ -11,7 +11,7 @@ export default function StepProgress({ progress, style }) {
       size={27}
       width={2}
       fill={progress}
-      tintColor="#777777"
+      tintColor={progress >= 75 ? theme.colors.primary : theme.colors.secondary}
       style={style}
       // onAnimationComplete={() => console.log('onAnimationComplete')}
       backgroundColor="#D8D8D8"
@@ -20,7 +20,7 @@ export default function StepProgress({ progress, style }) {
         <Text
           style={[
             styles.percentText,
-            { color: progress > 75 ? theme.colors.primary : theme.colors.secondary },
+            { color: progress >= 75 ? theme.colors.primary : theme.colors.secondary },
           ]}>
           {parseInt(fill)}%
         </Text>
@@ -32,7 +32,7 @@ export default function StepProgress({ progress, style }) {
 const styles = StyleSheet.create({
   percentText: {
     textAlign: 'center',
-    fontSize: 7,
+    fontSize: 8,
     fontWeight: 'bold',
   },
 });

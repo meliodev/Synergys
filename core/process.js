@@ -199,7 +199,7 @@ const processModel = {
                 ]
             },
             'rd2Creation': {
-                title: 'Initiation du rendez-vous 2',
+                title: 'Initiation rendez-vous 2',
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 2,
                 actions: [
@@ -2278,7 +2278,7 @@ export const getCurrentAction = (process) => {
     let currentAction = null
 
     for (const action of actions) {
-        if (!currentAction && action.status === 'pending')
+        if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
             currentAction = action
     }
 

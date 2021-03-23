@@ -6,6 +6,7 @@ import Dialog from 'react-native-dialog'
 import firebase from '@react-native-firebase/app'
 import _ from 'lodash'
 import { faCheckCircle, faInfoCircle, faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faSpinner } from '@fortawesome/pro-light-svg-icons'
+import { faCheckCircle as faSolidCheckCircle } from '@fortawesome/pro-solid-svg-icons'
 import { withNavigation } from 'react-navigation'
 
 import FormSection from './FormSection'
@@ -19,7 +20,6 @@ import { getCurrentStep, getCurrentAction, handleTransition } from '../core/proc
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 import { projectNextStepInit, projectNextPhaseInit } from '../core/process'
-import { waitForTick } from "pdf-lib"
 
 const db = firebase.firestore()
 
@@ -40,15 +40,10 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
     const [nextStep, setNextStep] = useState('')
     const [nextPhase, setNextPhase] = useState('')
 
-    // useEffect(() => {
-
-    // })
-
     var currentAction = getCurrentAction(process)
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
     const currentPhase = process[currentPhaseId]
     const currentStep = process[currentPhaseId].steps[currentStepId]
-
 
     const configChoiceIcon = (choice) => {
         const element = _.cloneDeep(choice)
@@ -157,6 +152,8 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
 
             if (onSelectType === 'navigation') {
                 navigation.navigate(screenName, screenParams)
+                setLoadingModal(false)
+                setShowModal(false)
             }
 
             else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
@@ -180,8 +177,6 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
                 await undoPreviousAction()
             }
 
-            // setLoadingModal(false)
-            // setShowModal(false)
         }
     }
 
@@ -224,7 +219,8 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
     const validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
 
         //Update action fields
-        process[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+        let processTemp = _.cloneDeep(process)
+        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
 
             if (action.id === currentAction.id) {
                 //Update comment
@@ -236,8 +232,10 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
                     action.choices = choices
 
                 //Update action status
-                if (!stay)
+                if (!stay) {
                     action.status = "done"
+                    action.isAnimation = true
+                }
             }
 
         })
@@ -245,17 +243,25 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
         setLoadingModal(false)
         setShowModal(false)
 
+        setProcess(processTemp) //isAnimation = true
+
         console.log('Do animation now !')
 
-        await countDown(3000)
+        await countDown(1200)
 
-        const transitionRes = handleTransition(process, currentPhaseId, currentStepId, nextStep, nextPhase, ProjectId)
-        process = transitionRes.process
+        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => { //delete isAnimation
+            if (action.id === currentAction.id) {
+                action.isAnimation = false
+            }
+        })
 
-        console.log('updated process', process)
+        const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, ProjectId)
 
-        // await db.collection('Projects').doc(ProjectId).update({ process }) <- Required to succeed/ remove await for offline support
-        // // await processMain() <- Remove this
+        setProcess(transitionRes.process)
+        setShowModal(true) //#task: strange -> this line forced update state..
+
+        await db.collection('Projects').doc(ProjectId).update({ process: transitionRes.process }) //#task < - Required to succeed / remove await for offline support //do it before changing view locally
+        await processMain(transitionRes.process) //<- Remove this #task
     }
 
     const undoPreviousAction = async () => {
@@ -268,8 +274,8 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
             }
         })
 
-        await db.collection('Projects').doc(ProjectId).update({ process })
-        await processMain()
+        db.collection('Projects').doc(ProjectId).update({ process }) //#task < - Required to succeed / remove await for offline support
+        // // await processMain() <- Remove this #task
     }
 
 
@@ -323,7 +329,7 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
                 </View>
 
                 <View style={styles.actionIconsContainer}>
-                    <CustomIcon icon={faCheckCircle} size={19} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
+                    <CustomIcon icon={status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
                     <CustomIcon icon={faInfoCircle} size={19} color={theme.colors.gray_dark} onPress={() => Alert.alert('Instructions', currentAction.instructions)} />
                 </View>
 
@@ -346,7 +352,7 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
     }
 
     if (!currentAction) return <Loading />
-    
+
     return (
         <View style={{ flex: 1, elevation: 5, borderRadius: 10, backgroundColor: theme.colors.white, margin: 15, paddingHorizontal: 10 }}>
             <List.Accordion
