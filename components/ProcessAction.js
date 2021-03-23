@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, Component } from "react"
 import { View, StyleSheet, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
 import { List } from 'react-native-paper'
 import Dialog from 'react-native-dialog'
@@ -16,36 +16,119 @@ import CustomIcon from './CustomIcon'
 import Loading from './Loading'
 import StepProgress from './process/StepProgress'
 
-import { getCurrentStep, getCurrentAction, handleTransition } from '../core/process'
+import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processMain } from '../core/process'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 import { projectNextStepInit, projectNextPhaseInit } from '../core/process'
 
 const db = firebase.firestore()
 
-const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...props }) => {
+//props
+// initialProcess, project, clientId, step, navigation, ...props 
 
-    const [showModal, setShowModal] = useState(false)
-    const [showDialog, setShowDialog] = useState(false)
-    const [expanded, setExpanded] = React.useState(true);
+//component
+const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTitle, dialogInputLabel }) => {
 
-    const [dialogTitle, setDialogTitle] = useState('')
-    const [dialogInputLabel, setDialogInputLabel] = useState('')
-    const [loadingDialog, setLoadingDialog] = useState(false)
-    const [loadingModal, setLoadingModal] = useState(false)
-    const [loadingAction, setLoadingAction] = useState(true)
+    const [comment, setComment] = useState('')
 
-    const [process, setProcess] = useState(initialProcess)
-    const [choice, setChoice] = useState(null)
-    const [nextStep, setNextStep] = useState('')
-    const [nextPhase, setNextPhase] = useState('')
+    if (loadingDialog)
+        return (
+            <Dialog.Container visible={showDialog}>
+                <Dialog.Title style={[theme.customFontMSregular.header, { marginBottom: 5 }]}>Traitement en cours...</Dialog.Title>
+                <ActivityIndicator color={theme.colors.primary} size='small' />
+            </Dialog.Container>
+        )
 
-    var currentAction = getCurrentAction(process)
-    const { currentPhaseId, currentStepId } = getCurrentStep(process)
-    const currentPhase = process[currentPhaseId]
-    const currentStep = process[currentPhaseId].steps[currentStepId]
+    else return (
+        <Dialog.Container visible={showDialog}>
+            <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{dialogTitle}</Dialog.Title>
+            <Dialog.Input
+                label={dialogInputLabel}
+                returnKeyType="done"
+                value={comment}
+                onChangeText={comment => setComment(comment)}
+                autoFocus={showDialog} />
 
-    const configChoiceIcon = (choice) => {
+            <Dialog.Button label="Annuler" onPress={() => this.setState({ showDialog: true })} style={{ color: theme.colors.error }} />
+            <Dialog.Button label="Valider" onPress={() => onSubmitComment(comment)} style={{ color: theme.colors.primary }} />
+        </Dialog.Container>
+    )
+}
+
+class ProcessAction extends Component {
+
+    constructor(props) {
+        super(props);
+
+        this.runProcessAlgorithm = this.runProcessAlgorithm.bind(this)
+        this.validateAction = this.validateAction.bind(this)
+
+        this.state = {
+            showModal: false,
+            showDialog: false,
+            expanded: true,
+            dialogTitle: '',
+            dialogInputLabel: '',
+            loadingDialog: false,
+            loadingModal: false,
+            processUpdated: false,
+
+            process: this.props.initialProcess,
+            choice: null,
+            nextStep: '',
+            nextPhase: '',
+
+            currentPhase: '',
+            currentStep: '',
+            currentPhaseId: '',
+            currentStepId: '',
+
+            currentAction: null,
+        }
+    }
+
+    async componentDidMount() {
+        const { process } = this.state
+
+        await this.runProcessAlgorithm(process)
+
+        this.focusListener = this.props.navigation.addListener('willFocus', async () => {
+            //#task do conditional verification (skip it if user just pressed go back)
+            await this.runProcessAlgorithm(process)
+        })
+    }
+
+    async runProcessAlgorithm(process) {
+
+        const { project, clientId, step } = this.props
+
+        console.log('initial process.............', process)
+
+        const secondPhaseId = getPhaseId(step) //used only init process stage //Step <=> Phase
+        console.log(process, secondPhaseId, clientId, project)
+
+        const updatedProcess = await processMain(process, secondPhaseId, clientId, project)
+        console.log('updated process:', updatedProcess)
+
+        const { currentPhaseId, currentStepId } = getCurrentStep(updatedProcess)
+
+        const currentPhase = updatedProcess[currentPhaseId]
+        const currentStep = updatedProcess[currentPhaseId].steps[currentStepId]
+        console.log('currentStep', currentStep)
+
+        const currentAction = getCurrentAction(updatedProcess)
+        console.log('currentAction:', currentAction)
+
+        this.setState({
+            process: updatedProcess,
+            currentPhase, currentStep, currentPhaseId, currentStepId,
+            currentAction
+        })
+    }
+
+
+    //func
+    configChoiceIcon = (choice) => {
         const element = _.cloneDeep(choice)
         if (element.id === 'confirm') { element.icon = faCheck; element.iconColor = theme.colors.primary }
         else if (element.id === 'finish') { element.icon = faFlag; element.iconColor = theme.colors.primary }
@@ -63,56 +146,27 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
         return element
     }
 
-    if (currentAction) {
-        var { title, status, screenName, screenParams, type, verificationType, choices, responsable } = currentAction
 
-        if (choices) {
-            var elements = choices.map((choice) => configChoiceIcon(choice))
-        }
-    }
 
-    const CommentDialog = ({ title, inputLabel }) => {
-        const [comment, setComment] = useState('')
-
-        if (loadingDialog)
-            return (
-                <Dialog.Container visible={showDialog}>
-                    <Dialog.Title style={[theme.customFontMSregular.header, { marginBottom: 5 }]}>Traitement en cours...</Dialog.Title>
-                    <ActivityIndicator color={theme.colors.primary} size='small' />
-                </Dialog.Container>
-            )
-
-        else return (
-            <Dialog.Container visible={showDialog}>
-                <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{dialogTitle}</Dialog.Title>
-                <Dialog.Input
-                    label={dialogInputLabel}
-                    returnKeyType="done"
-                    value={comment}
-                    onChangeText={comment => setComment(comment)}
-                    autoFocus={showDialog} />
-
-                <Dialog.Button label="Annuler" onPress={() => setShowDialog(false)} style={{ color: theme.colors.error }} />
-                <Dialog.Button label="Valider" onPress={() => onSubmitComment(comment)} style={{ color: theme.colors.primary }} />
-            </Dialog.Container>
-        )
-    }
-
-    const onSubmitComment = async (comment) => {
+    //func
+    onSubmitComment = async (comment) => {
         if (!comment) return //show error message
-        setLoadingDialog(true)
+        this.setState({ loadingDialog: true })
 
         if (choice)
             await runChoiceOperation(choice.operation)
 
         await validateAction(comment, null, false, nextStep, nextPhase)
-        setLoadingDialog(false)
-        setShowDialog(false)
+        this.setState({ loadingDialog: false, showDialog: false })
     }
 
-    const onSelectChoice = async (choice) => {
+    //func
+    onSelectChoice = async (choice) => {
+        const { currentAction } = this.state
         const { onSelectType, commentRequired, operation } = choice
         const { screenName, screenParams } = currentAction
+
+        console.log('current action.....................', currentAction)
 
         if (typeof (choice.selected) === 'boolean') {
             choices.forEach((item) => {
@@ -121,11 +175,11 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
             })
         }
 
-        setChoice(choice)  //used in case of comment
+        this.setState({ choice })  //used in case of comment
 
         if (onSelectType === 'transition') {
             var { nextStep, nextPhase } = choice
-            configNextStepOrPhase(nextStep, nextPhase) //used in case of comment
+            this.configNextStepOrPhase(nextStep, nextPhase) //used in case of comment
         }
 
         if (commentRequired) {
@@ -141,63 +195,60 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
 
             const dialogTitle = configDialogLabels(choice.id).title
             const dialogInputLabel = configDialogLabels(choice.id).inputLabel
-            setDialogTitle(dialogTitle)
-            setDialogInputLabel(dialogInputLabel)
-            setShowModal(false)
-            setShowDialog(true)
+            this.setState({ dialogTitle, dialogInputLabel, showModal: false, showDialog: true })
         }
 
         else {
-            setLoadingModal(true)
+            this.setState({ loadingModal: true })
 
             if (onSelectType === 'navigation') {
-                navigation.navigate(screenName, screenParams)
-                setLoadingModal(false)
-                setShowModal(false)
+                this.props.navigation.navigate(screenName, screenParams)
+                this.setState({ showModal: false, loadingModal: false })
             }
 
             else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                // await runChoiceOperation(operation)
-                await validateAction(null, null, false, nextStep, nextPhase)
+                await this.runChoiceOperation(operation)
+                await this.validateAction(null, null, false, nextStep, nextPhase)
             }
 
             else if (onSelectType === 'validation') {
-                await runChoiceOperation(operation)
-                await validateAction(null, null, false, null, null)
+                await this.runChoiceOperation(operation)
+                await this.validateAction(null, null, false, null, null)
             }
 
             else if (onSelectType === 'commentPicker') {
                 var { nextStep, nextPhase } = choice
-                configNextStepOrPhase(nextStep, nextPhase)
-                await runChoiceOperation(operation)
-                await validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
+                this.configNextStepOrPhase(nextStep, nextPhase)
+                await this.runChoiceOperation(operation)
+                await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
             }
 
             else if (onSelectType === 'actionRollBack') { //roll back to previous action (update its status to "pending")
-                await undoPreviousAction()
+                await this.undoPreviousAction()
             }
 
         }
     }
 
-    const configNextStepOrPhase = (nextStep, nextPhase) => {
+    //func
+    configNextStepOrPhase = (nextStep, nextPhase) => {
         //Set next step or phase
         if (nextStep) {
-            setNextStep(nextStep)
-            setNextPhase('')
+            this.setState({ nextStep, nextPhase: '' })
         }
 
         else if (nextPhase) {
-            setNextPhase(nextPhase)
-            setNextStep('')
+            this.setState({ nextStep: '', nextPhase })
         }
 
         else return
     }
 
-    const runChoiceOperation = async (operation) => {
+    //func
+    runChoiceOperation = async (operation) => {
         if (!operation) return
 
+        const { currentAction } = this.state
         const { collection, documentId } = currentAction
         const { type, field, value } = operation
 
@@ -208,7 +259,8 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
         }
     }
 
-    const countDown = async (ms) => {
+    //func
+    countDown = async (ms) => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 resolve(ms)
@@ -216,7 +268,9 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
         })
     }
 
-    const validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
+    //func
+    validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
+        const { process, currentPhaseId, currentStepId, currentAction } = this.state
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
@@ -234,20 +288,17 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
                 //Update action status
                 if (!stay) {
                     action.status = "done"
-                    action.isAnimation = true
+                    //  action.isAnimation = true
                 }
             }
 
         })
 
-        setLoadingModal(false)
-        setShowModal(false)
-
-        setProcess(processTemp) //isAnimation = true
+        //  this.setState({ loadingModal: false, showModal: false, process: processTemp })  //isAnimation = true
 
         console.log('Do animation now !')
 
-        await countDown(1200)
+        //  await this.countDown(1200)
 
         processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => { //delete isAnimation
             if (action.id === currentAction.id) {
@@ -255,31 +306,34 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
             }
         })
 
-        const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, ProjectId)
+        const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
+        processTemp = transitionRes.process
 
-        setProcess(transitionRes.process)
-        setShowModal(true) //#task: strange -> this line forced update state..
-
-        await db.collection('Projects').doc(ProjectId).update({ process: transitionRes.process }) //#task < - Required to succeed / remove await for offline support //do it before changing view locally
-        await processMain(transitionRes.process) //<- Remove this #task
+        await this.runProcessAlgorithm(processTemp)
     }
 
-    const undoPreviousAction = async () => {
+    //func
+    undoPreviousAction = async () => {
+        const { process, currentPhaseId, currentStepId } = this.state
+
         const previousActionOrder = currentAction.actionOrder - 1
 
-        process[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+        let processTemp = _.cloneDeep(process)
+        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
             if (action.actionOrder === previousActionOrder) {
                 //undo action
                 action.status = "pending"
             }
         })
 
-        db.collection('Projects').doc(ProjectId).update({ process }) //#task < - Required to succeed / remove await for offline support
+        db.collection('Projects').doc(project.id).update({ process: processTemp }) //#task < - Required to succeed / remove await for offline support
         // // await processMain() <- Remove this #task
     }
 
-
-    const onPressAction = async () => {
+    //func
+    onPressAction = async () => {
+        const { currentAction } = this.state
+        const { responsable, verificationType, type, screenName, screenParams } = currentAction
 
         if (responsable && responsable.id !== firebase.auth().currentUser.uid) {
             Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
@@ -288,26 +342,25 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
 
         if (type === 'auto') {
             if (currentAction.choices) {
-                setShowModal(true)
+                this.setState({ showModal: true })
             }
 
-            else navigation.navigate(screenName, screenParams)
+            else this.props.navigation.navigate(screenName, screenParams)
         }
 
         else if (type === 'manual') {
             if (verificationType === 'comment') {
                 const { nextStep, nextPhase } = currentAction
-                configNextStepOrPhase(nextStep, nextPhase)
+                this.configNextStepOrPhase(nextStep, nextPhase)
 
                 const dialogTitle = "Commentaire"
                 const dialogInputLabel = "Veuillez renseigner des informations utiles."
-                setDialogTitle(dialogTitle)
-                setDialogInputLabel(dialogInputLabel)
-                setShowDialog(true)
+                this.setState({ dialogTitle, dialogInputLabel })
+                this.setState({ showDialog: true })
             }
 
             else if (verificationType === 'multiple-choices') {
-                setShowModal(true)
+                this.setState({ showModal: true })
             }
 
             else if (verificationType === 'validation') {
@@ -317,13 +370,20 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
         }
     }
 
-    const renderAction = () => {
+    //renderer
+    renderAction = () => {
+        const { currentAction, showModal, showDialog, loadingDialog, dialogTitle, dialogInputLabel } = this.state
 
-        //if (!currentAction || loadingAction) return <Loading />
+        if (currentAction) {
+            var { title, status, verificationType, choices } = currentAction
 
-        //  if (type === 'auto')
+            if (choices) {
+                var elements = choices.map((choice) => this.configChoiceIcon(choice))
+            }
+        }
+
         return (
-            <TouchableOpacity onPress={onPressAction} style={styles.actionContainer}>
+            <TouchableOpacity onPress={this.onPressAction} style={styles.actionContainer}>
                 <View style={styles.actionTitleContainer}>
                     <Text style={[theme.customFontMSmedium.caption]}>{title}</Text>
                 </View>
@@ -338,43 +398,54 @@ const ProcessAction = ({ initialProcess, processMain, ProjectId, navigation, ...
                         title={title}
                         columns={choices.length}
                         isVisible={showModal}
-                        toggleModal={() => setShowModal(!showModal)}
+                        toggleModal={() => this.setState({ showModal: !showModal })}
                         handleCancel={() => console.log('cancel')}
                         handleConfirm={() => console.log('confirm')}
                         elements={elements}
                         autoValidation={true}
-                        handleSelectElement={(element, index) => onSelectChoice(element)}
+                        handleSelectElement={(element, index) => this.onSelectChoice(element)}
                     />
                 }
-                {(currentAction && currentAction.choices || verificationType === 'comment') && <CommentDialog />}
+
+                {(currentAction && currentAction.choices || verificationType === 'comment') && (
+                    <CommentDialog
+                        showDialog={showDialog}
+                        loadingDialog={loadingDialog}
+                        dialogTitle={dialogTitle}
+                        dialogInputLabel={dialogInputLabel} />)
+                }
             </TouchableOpacity>
         )
     }
 
-    if (!currentAction) return <Loading />
+    render() {
+        const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, processUpdated, expanded } = this.state
 
-    return (
-        <View style={{ flex: 1, elevation: 5, borderRadius: 10, backgroundColor: theme.colors.white, margin: 15, paddingHorizontal: 10 }}>
-            <List.Accordion
-                showArrow
-                style={{ paddingVertical: 15, paddingHorizontal: 0, marginLeft: 0, borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}
-                title={currentPhase.title}
-                description={`${currentStep.stepOrder}. ${currentStep.title}`}
-                titleNumberOfLines={1}
-                descriptionNumberOfLines={1}
-                left={props => currentAction ? <StepProgress progress={((currentAction.actionOrder - 1) / currentStep.actions.length) * 100} style={{ marginTop: 25, marginRight: 2 }} /> : null}
-                expanded={expanded}
-                titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
-                descriptionStyle={[theme.customFontMSregular.header, { color: theme.colors.secondary }]}
-                onPress={() => setExpanded(!expanded)}>
+        if (!currentAction && !currentPhase && !currentStep) return <Loading style={{ paddingVertical: 50 }} />
+        else return (
+            <View style={{ flex: 1, elevation: 5, borderRadius: 10, backgroundColor: theme.colors.white, margin: 15, paddingHorizontal: 10 }}>
+                <List.Accordion
+                    showArrow
+                    style={{ paddingVertical: 15, paddingHorizontal: 0, marginLeft: 0, borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}
+                    title={currentPhase.title}
+                    description={`${currentStep.stepOrder}. ${currentStep.title}`}
+                    titleNumberOfLines={1}
+                    descriptionNumberOfLines={1}
+                    left={props => currentAction ? <StepProgress progress={((currentAction.actionOrder - 1) / currentStep.actions.length) * 100} style={{ marginTop: 25, marginRight: 2 }} /> : null}
+                    expanded={expanded}
+                    titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
+                    descriptionStyle={[theme.customFontMSregular.header, { color: theme.colors.secondary }]}
+                    onPress={() => this.setState({ expanded: !expanded })}>
 
-                <View style={{ paddingVertical: 15, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
-                    {renderAction()}
-                </View>
+                    <View style={{ paddingVertical: 15, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
+                        {this.renderAction()}
+                    </View>
 
-            </List.Accordion>
-        </View>
-    )
+                </List.Accordion>
+            </View>
+        )
+    }
+
 }
 
 const styles = StyleSheet.create({

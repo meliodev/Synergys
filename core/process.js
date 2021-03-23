@@ -1678,6 +1678,8 @@ const processModel = {
 //#PROCESS MAIN
 export const processMain = async (process, projectSecondPhase, clientId, project) => {
 
+    console.log('PROJECT FROM processMain........................', project)
+
     const attributes = { clientId, project }
     const currentProcess = _.cloneDeep(process)
     const updatedProjectProcess = await projectProcessHandler(currentProcess, projectSecondPhase, attributes)
@@ -1685,9 +1687,9 @@ export const processMain = async (process, projectSecondPhase, clientId, project
     console.log('OLD PROCESS:', process)
     console.log("UPDATED PROCESS:", updatedProjectProcess)
 
-    // if (!_.isEqual(process, updatedProjectProcess)) {
-    //     await db.collection('Projects').doc(project.id).update({ process: updatedProjectProcess }).then(() => console.log('PROJECT PROCESS UPDATED !'))
-    // }
+    if (!_.isEqual(process, updatedProjectProcess)) {
+        await db.collection('Projects').doc(project.id).update({ process: updatedProjectProcess }).then(() => console.log('PROJECT PROCESS UPDATED !'))
+    }
 
     return updatedProjectProcess//To avoid errors
 }
@@ -1724,6 +1726,7 @@ export const projectProcessHandler = async (process, projectSecondPhase, attribu
             console.log(`4. Verifying actions...`)
             var verif_res = await verifyActions(actions, attributes, process)
             console.log('5. Verification result:', verif_res)
+
 
             actions = verif_res.verifiedActions
             allActionsValid = verif_res.allActionsValid
@@ -1878,10 +1881,10 @@ const configureActions = async (actions, attributes, process) => {
                 await query.get().then((querysnapshot) => {
                     if (querysnapshot.empty) return
 
-                    if (action.collection === 'Agenda') 
+                    if (action.collection === 'Agenda')
                         action.screenParams.TaskId = querysnapshot.docs[0].id
 
-                    else if (action.collection === 'Documents') 
+                    else if (action.collection === 'Documents')
                         action.screenParams.DocumentId = querysnapshot.docs[0].id
 
                     action.documentId = querysnapshot.docs[0].id
@@ -2271,6 +2274,7 @@ export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
 
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
+    console.log(process[currentPhaseId].steps[currentStepId])
 
     let { actions } = process[currentPhaseId].steps[currentStepId]
     actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
@@ -2278,7 +2282,8 @@ export const getCurrentAction = (process) => {
     let currentAction = null
 
     for (const action of actions) {
-        if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
+        //if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
+        if (!currentAction && action.status === 'pending')
             currentAction = action
     }
 

@@ -130,7 +130,7 @@ class CreateProject extends Component {
 
             //Process
             process: null,
-            processUpdated: false,
+            processFetched: false,
 
             error: '',
             loading: true
@@ -142,12 +142,12 @@ class CreateProject extends Component {
         if (this.isEdit) {
 
             this.focusListener = this.props.navigation.addListener('willFocus', async () => {
-                this.setState({ processUpdated: false })
+                //this.setState({ processUpdated: false })
                 await this.fetchProject() //Get current process
                 await this.fetchDocuments()
                 await this.fetchTasks()
                 this.initialState = this.state
-                await this.processMain(this.state.process)
+                // await this.processMain(this.state.process)
             })
         }
 
@@ -157,15 +157,6 @@ class CreateProject extends Component {
         load(this, false)
     }
 
-    async processMain(process) {
-        const { client, name, step } = this.initialState
-        const secondPhaseId = getPhaseId(step) //used only init process stage //Step <=> Phase
-        const clientId = client.id
-        const project = { id: this.ProjectId, name: name.value }
-
-        const updatedProcess = await processMain(process, secondPhaseId, clientId, project)
-        this.setState({ process: updatedProcess, processUpdated: true })
-    }
 
     //FETCHES: #edit
     async fetchProject() {
@@ -210,7 +201,7 @@ class CreateProject extends Component {
                 //Address
                 address = project.address
 
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process }, async () => {
+                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process, processFetched: true }, async () => {
                     //if (this.isInit)
 
                     this.initialState = this.state
@@ -517,13 +508,15 @@ class CreateProject extends Component {
         let { client, clientError, name, description, note, address, addressError, state, step, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy, isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, tagsSelected } = this.state
-        const { process, processUpdated } = this.state
         let { error, loading, toastMessage, toastType } = this.state
+        const { process, processFetched } = this.state
+
         let { canUpdate, canDelete } = this.props.permissions.projects
         canUpdate = (canUpdate || !this.isEdit)
         const canCreateDocument = this.props.permissions.documents.canCreate
 
         const { isConnected } = this.props.network
+        const project = { id: this.ProjectId, name: name.value }
 
         return (
             <View style={styles.mainContainer}>
@@ -531,10 +524,18 @@ class CreateProject extends Component {
 
                 <ScrollView style={styles.dataContainer}>
 
-                    {!loading && this.isEdit && process && processUpdated ?
-                        <ProcessAction initialProcess={process} processMain={this.processMain.bind(this)} ProjectId={this.ProjectId} />
-                        :
-                        <Loading style={{ paddingVertical: 50 }} />
+                    {!loading && this.isEdit ?
+                        (processFetched ?
+                            <ProcessAction
+                                initialProcess={process}
+                                project={project}
+                                clientId={client.id}
+                                step={step}
+                            />
+                            :
+                            <Loading style={{ paddingVertical: 50 }} />
+                        )
+                        : null
                     }
 
                     {!loading &&
@@ -599,7 +600,6 @@ class CreateProject extends Component {
                                         errorText={step.error}
                                         selectedValue={step}
                                         onValueChange={(step) => {
-                                            console.log(step)
                                             this.setState({ step })
                                         }}
                                         title="Phase *"
