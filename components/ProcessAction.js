@@ -162,6 +162,7 @@ class ProcessAction extends Component {
 
         if (choice)
             await this.runChoiceOperation(choice.operation)
+
         await this.validateAction(comment, null, false, nextStep, nextPhase)
 
         this.setState({ loadingDialog: false, showDialog: false })
@@ -317,8 +318,8 @@ class ProcessAction extends Component {
         }
 
 
-        await this.updateProcess(processTemp)
-        //  await this.runProcessHandler(processTemp)
+        // await this.updateProcess(processTemp) //#test: removed this as it seems useless (runProcessHandler calls it after runProcessHandler returns updatedProcess)
+        await this.runProcessHandler(processTemp)
     }
 
     //func
@@ -336,10 +337,7 @@ class ProcessAction extends Component {
         })
 
         await this.updateProcess(processTemp)
-
-        if (processTemp['cancelProject'] || processTemp['endProject']) return
-        
-        await this.runProcessHandler(processTemp)
+        //await this.runProcessHandler(processTemp)
     }
 
     //func

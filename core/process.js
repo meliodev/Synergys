@@ -517,6 +517,7 @@ const processModel = {
                     }
                 ]
             },
+            //
             'signature': {
                 title: 'Signature du devis',
                 instructions: 'Lorem ipsum dolor',
@@ -651,6 +652,32 @@ const processModel = {
                         ]
                     },
                     {
+                        id: 'quoteCreation', //Verify if quote exists
+                        title: 'Créer un devis',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        collection: 'Documents',
+                        //Verification
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Devis' },
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { documentType: 'Devis', project: null },
+                        type: 'auto',
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                    },
+                    {
                         id: 'signedQuoteCreation', //#task: check if devis is still existing..
                         title: 'Signer le devis',
                         instructions: 'Lorem ipsum dolor',
@@ -780,6 +807,26 @@ const processModel = {
                 instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
                 stepOrder: 1,
                 actions: [
+                    {
+                        id: 'technicalVisitCreation', //1. verify if Visite Technique exists
+                        title: 'Créer une visite technique',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        collection: 'Agenda',
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Visite technique' }
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'CreateTask', //creation
+                        screenParams: { taskType: 'Visite technique', project: null },
+                        type: 'auto',
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                        nextStep: 'payModeValidation',
+                    },
                     {
                         id: 'technicalVisitValidation',
                         title: "Valider la date de la visite technique",
@@ -2007,6 +2054,13 @@ const configureActions = async (actions, attributes, process) => {
         console.log('configuring action:', action.id, action.verificationType, action.status, action.actionOrder)
         console.log('1.1 configuring missing project filter value:')
 
+        if (action.screenParams) {
+            for (let item in action.screenParams) {
+                if (item === 'project') action.screenParams.project = attributes.project //#task : make it dynamic (screenparams field name should be same as attributes field name)
+            }
+            console.log('1.1.3...................................... action.screenParams configured', action.screenParams)
+        }
+
         if (action.cloudFunction) {
             const { params, queryAttachmentsUrls } = action.cloudFunction
 
@@ -2053,13 +2107,6 @@ const configureActions = async (actions, attributes, process) => {
                 }
             }
             console.log('1.1.2 action.queryFilters configured', action.queryFilters)
-        }
-
-        if (action.screenParams) {
-            for (let item in action.screenParams) {
-                if (item === 'project') action.screenParams.project = attributes.project //#task : make it dynamic (screenparams field name should be same as attributes field name)
-            }
-            console.log('1.1.3 action.screenParams configured', action.screenParams)
         }
 
 
