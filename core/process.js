@@ -655,7 +655,7 @@ const processModel = {
                         id: 'quoteCreation', //Verify if quote exists
                         title: 'Créer un devis',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
+                        actionOrder: 7,
                         collection: 'Documents',
                         //Verification
                         queryFilters: [
@@ -681,7 +681,7 @@ const processModel = {
                         id: 'signedQuoteCreation', //#task: check if devis is still existing..
                         title: 'Signer le devis',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 7,
+                        actionOrder: 8,
                         collection: 'Documents',
                         queryFilters: [ //VERIFICATION: verify if signed quote exists
                             { filter: 'project.id', operation: '==', value: '' },
@@ -709,7 +709,7 @@ const processModel = {
                         id: 'comment',
                         title: 'Commentaire',
                         instructions: "Veuillez renseigner des informations utiles (exp: disponibilité du client, accessibilité....)",
-                        actionOrder: 8,
+                        actionOrder: 9,
                         collection: '',
                         documentId: '', // depending on the concerned project
                         properties: [],
@@ -825,13 +825,12 @@ const processModel = {
                         //responsable: '',
                         status: 'pending',
                         verificationType: 'doc-creation',
-                        nextStep: 'payModeValidation',
                     },
                     {
                         id: 'technicalVisitValidation',
                         title: "Valider la date de la visite technique",
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
+                        actionOrder: 2,
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
@@ -1209,7 +1208,7 @@ const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'NON, PAS MAINTENANT', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'NON, PAS MAINTENANT', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextStep: 'maintainanceContract', onSelectType: 'transition', operation: null },
                         ]
                     },
@@ -1237,7 +1236,7 @@ const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
                         ]
                     },
@@ -1268,7 +1267,7 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1327,7 +1326,7 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1727,7 +1726,6 @@ const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
                         ]
                     },
@@ -1758,7 +1756,6 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1783,7 +1780,6 @@ const processModel = {
                         screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: '',
@@ -1817,7 +1813,6 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1842,13 +1837,11 @@ const processModel = {
                         screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: '',
                         status: 'pending',
                         verificationType: 'doc-creation',
-                        nextStep: 'quoteVerification'
                     },
                     {
                         id: 'endProject',
@@ -2382,11 +2375,14 @@ export const handleTransition = (process, currentPhaseId, currentStepId, nextSte
     let processEnded = false
 
     //Next step transition
-    if (nextStepId)
+    if (nextStepId) {
+        console.log('Transition to next step:', nextStepId)
         process = projectNextStepInit(process, currentPhaseId, currentStepId, nextStepId)
+    }
 
     //Next phase transition
     else if (nextPhaseId) {
+        console.log('Transition to next phase:', nextPhaseId)
 
         //Update project (status/step)
         if (nextPhaseId === 'cancelProject') {

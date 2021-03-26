@@ -72,6 +72,7 @@ Steps:
 
 22/03/2021
 TO DO:
++ PROCESS: Remove "Ignorer option" from all actions of Maintainance (if maintainance not initialized previously)
 + PROCESS: Add verification actions in case user starts project from a phase depending on docs/tasks created on previous phase (exp: Devis, RD2), or like DOSSIER ACTION LOGEMENT which skips rd2 & rdn
 + RDN: rd2Creation, quoteCreationChoice
 + Visite technique: technicalVisitCreation, 

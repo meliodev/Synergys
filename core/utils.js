@@ -135,6 +135,7 @@ export const configChoiceIcon = (choice) => {
   if (element.id === 'confirm') { element.icon = faCheck; element.iconColor = theme.colors.primary }
   else if (element.id === 'finish') { element.icon = faFlag; element.iconColor = theme.colors.primary }
   else if (element.id === 'cancel') { element.icon = faTimes; element.iconColor = theme.colors.error }
+  else if (element.id === 'skip') { element.icon = faTimes; element.iconColor = theme.colors.error }
   else if (element.id === 'comment') { element.icon = faTimes; element.iconColor = theme.colors.error }
   else if (element.id === 'postpone') { element.icon = faClock; element.iconColor = theme.colors.secondary }
   else if (element.id === 'upload') { element.icon = faUpload; element.iconColor = theme.colors.secondary }

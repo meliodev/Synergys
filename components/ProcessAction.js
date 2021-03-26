@@ -107,7 +107,7 @@ class ProcessAction extends Component {
 
         this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
             if (doc.exists) {
-                //Task should runProcessHandler in case another user submits the last action
+                //#Task should runProcessHandler in case another user submits the last action
                 const updatedProcess = doc.data().process
                 this.refreshProcess(updatedProcess)
             }
@@ -127,10 +127,12 @@ class ProcessAction extends Component {
         const updatedProcess = await projectProcessHandler(process, secondPhaseId, clientId, project)
 
         if (!_.isEqual(process, updatedProcess)) {
+            console.log('UPDATING !!')
             await this.updateProcess(updatedProcess)
         }
 
-        else {
+        else { //#task: use this for writes optimization
+            console.log('PROCESS SAME...')
             this.refreshProcess(updatedProcess)
         }
     }
@@ -317,7 +319,6 @@ class ProcessAction extends Component {
             processTemp = transitionRes.process
         }
 
-
         // await this.updateProcess(processTemp) //#test: removed this as it seems useless (runProcessHandler calls it after runProcessHandler returns updatedProcess)
         await this.runProcessHandler(processTemp)
     }
@@ -406,7 +407,7 @@ class ProcessAction extends Component {
                     :
                     <View style={styles.actionIconsContainer}>
                         {currentAction && <CustomIcon icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
-                        <CustomIcon icon={faInfoCircle} size={19} color={theme.colors.gray_dark} onPress={() => Alert.alert('Instructions', currentAction.instructions)} />
+                        {currentAction && <CustomIcon icon={faInfoCircle} size={19} color={theme.colors.gray_dark} onPress={() => Alert.alert('Instructions', currentAction.instructions)} />}
                     </View>
                 }
 
@@ -449,7 +450,7 @@ class ProcessAction extends Component {
         return (
             <View style={styles.container}>
 
-                <View style={{ backgroundColor: theme.colors.primary, borderTopRightRadius: 10, borderTopLeftRadius: 10, paddingVertical: 5 }}>
+                <View style={{ backgroundColor: theme.colors.primary, borderTopRightRadius: 5, borderTopLeftRadius: 5, paddingVertical: 5 }}>
                     <Text style={[theme.customFontMSregular.body, { color: theme.colors.white, textAlign: 'center' }]}>Suivi du projet</Text>
                 </View>
 
@@ -481,7 +482,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         elevation: 5,
-        borderRadius: 10,
+        borderRadius: 5,
         backgroundColor: theme.colors.white,
         margin: 15,
     },

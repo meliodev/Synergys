@@ -571,7 +571,7 @@ class Signature extends Component {
         if (uploading) {
             return (
                 <View style={styles.container}>
-                    <Appbar back={false} title titleText={'Exportation du document signé...'} />
+                    <Appbar back customBackHandler={() => console.log('No action..waiting...')} title titleText={'Exportation du document signé...'} />
                     {this.renderAttachment()}
                 </View>
             )

@@ -83,7 +83,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
                 margin: elementSize * 0.03,
                 width: constants.ScreenWidth * 0.15,
                 height: constants.ScreenWidth * 0.15,
-                marginBottom: 10,
+                marginBottom: 7,
                 backgroundColor: theme.colors.white,
             }
         }
@@ -103,7 +103,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
         const titleColor = element.selected ? theme.colors.primary : theme.colors.gray_dark
 
         return (
-            <View style={{ width: constants.ScreenWidth * 0.17, height: 100, marginBottom: 30 }}>
+            <View style={{ width: constants.ScreenWidth * 0.17, height: 100, marginBottom: 25 }}>
                 <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
                     <Text style={[theme.customFontMSregular.header, { textAlign: 'center', color: numberColor }]}>{element.label}</Text>
                 </TouchableOpacity>
@@ -125,7 +125,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
         )
 
     else return (
-        <View style={[containerStyle, { justifyContent: 'space-between' }]}>
+        <View style={[containerStyle, { justifyContent: elements.length > 1 ? 'space-around' : 'center' }]}>
             {elements.map((element, index) => {
                 return (<Element element={element} index={index} />)
             })}

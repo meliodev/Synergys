@@ -8,7 +8,7 @@ import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, fileEdit } from '@fortawesome/pro-light-svg-icons'
+import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -58,8 +58,8 @@ const types = [
     { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
     { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
     { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
-    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: fileEdit, selected: false },
-    { label: 'Attestation fluide', value: 'Attestation fluide', icon: fileEdit, selected: false },
+    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit, selected: false },
+    { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit, selected: false },
     { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
 ]
 
@@ -675,7 +675,7 @@ class UploadDocument extends Component {
                 <View style={{ flex: 1 }}>
                     {this.isEdit && attachment && !attachment.pending &&
                         <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, false)}>
-                            <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>AFFICHER LE DOCUMENT</Text>
+                            <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>VOIR LE DOCUMENT</Text>
                         </Button>
                     }
 
