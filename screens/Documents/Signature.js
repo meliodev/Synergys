@@ -20,6 +20,8 @@ import { PDFDocument, StandardFontEmbedder, rgb } from "pdf-lib";
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator } from '../../core/utils'
+import { uploadFile } from "../../api/storage-api";
+
 import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
 
 import Appbar from '../../components/Appbar'
@@ -66,6 +68,7 @@ class Signature extends Component {
         this.verifyCode = this.verifyCode.bind(this)
         this.retrySign = this.retrySign.bind(this)
         this.confirmSign = this.confirmSign.bind(this)
+        this.uploadFile = uploadFile.bind(this)
 
         this.state = {
             fileDownloaded: false,
@@ -79,7 +82,7 @@ class Signature extends Component {
 
             newPdfSaved: false,
             newPdfPath: null,
-            newAttachment: {
+            signedAttachment: {
                 path: '',
                 type: '',
                 name: '',
@@ -446,7 +449,7 @@ class Signature extends Component {
     //5.2 Confirm sign
     async confirmSign() {
 
-        const result = await this.uploadFile()
+        const result = await this.uploadSignedFile()
 
         if (result === 'failure') {
             this.setState({ uploading: false })
@@ -465,7 +468,7 @@ class Signature extends Component {
 
         //store max of data (Audit) about the signee
         const document = {
-            attachment: this.state.newAttachment,
+            attachment: this.state.signedAttachment,
             attachmentSource: 'signature',
             //Data of proofs
             sign_proofs_data: {
@@ -504,12 +507,12 @@ class Signature extends Component {
             })
     }
 
-    async uploadFile() {
+    async uploadSignedFile() {
         this.setState({ uploading: true })
 
         const stats = await RNFetchBlob.fs.stat(this.state.newPdfPath)
 
-        let attachment = {
+        let signedAttachment = {
             path: this.state.newPdfPath,
             type: 'application/pdf',
             name: stats.filename,
@@ -517,7 +520,7 @@ class Signature extends Component {
             progress: 0
         }
 
-        this.setState({ newAttachment: attachment })
+        this.setState({ signedAttachment })
 
         const metadata = {
             signedAt: moment().format('lll'),
@@ -525,32 +528,14 @@ class Signature extends Component {
             phoneNumber: this.state.phoneNumber
         }
 
-        const reference = firebase.storage().ref(`Projects/${this.ProjectId}/Documents/${this.DocumentType}/${this.DocumentId}/${moment().format('ll')}/${attachment.name}`)
-        const uploadTask = reference.putFile(attachment.path, { customMetadata: metadata })
+        const storageRefPath = `Projects/${this.ProjectId}/Documents/${this.DocumentType}/${this.DocumentId}/${moment().format('ll')}/${signedAttachment.name}`
+        const response = await this.uploadFile(signedAttachment, storageRefPath, true, metadata)
 
-        const promise = new Promise((resolve, reject) => {
-            uploadTask
-                .on('state_changed', async function (snapshot) {
-                    var progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100)
-                    console.log('Upload attachment ' + progress + '% done')
-                    attachment.progress = progress / 100
-                    this.setState({ attachment })
-                }.bind(this))
-
-            uploadTask
-                .then((res) => {
-                    attachment.downloadURL = res.downloadURL
-                    this.setState({ attachment })
-                    resolve('success')
-                })
-                .catch(err => { reject('failure') })
-        })
-
-        return promise
+        return response
     }
 
     renderAttachment() {
-        let attachment = this.state.newAttachment
+        let attachment = this.state.signedAttachment
 
         let readableSize = attachment.size / 1000
         readableSize = readableSize.toFixed(1)
@@ -633,7 +618,7 @@ class Signature extends Component {
 
                         {!newPdfSaved && fileDownloaded && isConnected && canUpdate &&
                             <TouchableOpacity onPress={this.startSignature} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
-                            {/* <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}> */}
+                                {/* <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}> */}
                                 <FontAwesome5 name='signature' size={17} color='#fff' style={{ marginRight: 7 }} />
                                 <Text style={[theme.customFontMSsemibold.header, { color: '#fff', marginLeft: 7, letterSpacing: 1 }]}>SIGNER</Text>
                             </TouchableOpacity>

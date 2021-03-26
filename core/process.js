@@ -4,6 +4,7 @@ import { Text } from 'react-native'
 import { stringifyUndefined } from './utils'
 
 const db = firebase.firestore()
+const functions = firebase.functions()
 //#task add listener on project process property to handle multiple users updating process
 
 //#PROCESS MODEL
@@ -240,10 +241,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Fiche EEB' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Fiche EEB' },
                         ],
@@ -251,7 +252,6 @@ const processModel = {
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
                         screenParams: { documentType: 'Fiche EEB', project: null },
-                        // screenParams: { documentType: 'Fiche EEB', project: null },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -295,10 +295,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier aide' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier aide' },
                         ],
@@ -349,10 +349,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
                         ],
@@ -403,10 +403,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier CEE' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier CEE' },
                         ],
@@ -661,7 +661,7 @@ const processModel = {
                             { filter: 'type', operation: '==', value: 'Devis' },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
-                        queryFiltersUpdate: [ //NAVIGATION: Get id of the existing quote (to update signature) 
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
                         ],
@@ -1026,10 +1026,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'PV réception' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'PV réception' },
                         ],
@@ -1146,7 +1146,7 @@ const processModel = {
                         verificationType: 'validation',
                     },
                     {
-                        id: 'maintenanceContractChoice',
+                        id: 'maintainanceContractChoice',
                         title: 'Voulez-vous initier le contrat de maintenance ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
@@ -1190,7 +1190,7 @@ const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
                         ]
                     },
@@ -1204,10 +1204,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                         ],
@@ -1221,7 +1221,7 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1236,7 +1236,7 @@ const processModel = {
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
-                        queryFiltersUpdate: [ //Get id of the existing signed mandat (to update signature)
+                        queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                         ],
@@ -1246,7 +1246,7 @@ const processModel = {
                         screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: '',
@@ -1263,10 +1263,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                         ],
@@ -1280,7 +1280,7 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition' },
+                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1295,7 +1295,7 @@ const processModel = {
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
-                        queryFiltersUpdate: [ //Get id of the existing signed mandat (to update signature)
+                        queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                         ],
@@ -1305,7 +1305,7 @@ const processModel = {
                         screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'facturation', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: '',
@@ -1383,10 +1383,10 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' } //#task add this clause for accurate verification
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
-                        queryFiltersUpdate: [ //#task add this clause for accurate verification
+                        queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
                         ],
@@ -1410,7 +1410,7 @@ const processModel = {
                             { filter: 'type', operation: '==', value: 'Facture' },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
-                        queryFiltersUpdate: [ //NAVIGATION: Get id of the existing bill (to update signature) 
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing bill (to update signature) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
                         ],
@@ -1446,7 +1446,7 @@ const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
                         ],
-                        queryFiltersUpdate: [ //NAVIGATION: Get id of the existing quote (to generate bill from it) 
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to generate bill from it) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
                         ],
@@ -1474,7 +1474,7 @@ const processModel = {
                             { filter: 'type', operation: '==', value: 'Facture' },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
-                        queryFiltersUpdate: [ //NAVIGATION: Get id of the existing bill (to update signature) 
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing bill (to update signature) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
                         ],
@@ -1495,7 +1495,7 @@ const processModel = {
                 ]
             },
             'paymentStatus': { //conversion
-                title: "Paiement en attente",
+                title: "Finalisation de la facuration",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 10,
                 nextStep: '',
@@ -1519,22 +1519,14 @@ const processModel = {
                             { label: 'Attente paiement client', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Attente paiement financement', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Attente paiement aide', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
-                            { label: 'Payé', id: 'confirm', onSelectType: 'commentPicker', selected: false, nextStep: 'billInsertion', stay: false },
+                            { label: 'Payé', id: 'confirm', onSelectType: 'commentPicker', selected: false, stay: false },
                         ]
                     },
-                ]
-            },
-            'billInsertion': {
-                title: "Insertion de la facture dans dossier Ma prime Renov et CEE",
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 11,
-                nextStep: '',
-                actions: [
                     {
                         id: 'advValidation',
                         title: "Validation de la facture par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
                         instructions: "",
-                        actionOrder: 1,
+                        actionOrder: 2,
                         collection: '',
                         documentId: '', // depending on the concerned project
                         properties: [],
@@ -1545,21 +1537,48 @@ const processModel = {
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
-                        nextStep: 'emailBill',
+                    },
+                    {
+                        id: 'attestationCreation',
+                        title: 'Créer une attestation fluide',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 3,
+                        collection: 'Documents',
+                        //Verification:
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Attestation fluide' },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Attestation fluide' },
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { documentType: 'Attestation fluide', project: null },
+                        type: 'auto',
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                        nextStep: 'emailBill'
                     },
                 ]
             },
             'emailBill': {
-                title: "Envoie par mail automatique de la facture finale + attestation fluide",
+                title: "Envoi facture par mail",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 12,
+                stepOrder: 11,
                 nextStep: '',
                 actions: [
+                    //task: verify if bill & attestation fluide are still existing
                     {
                         id: 'emailBill',
-                        title: 'Envoie par mail automatique de la facture finale + attestation fluide',
+                        title: 'Envoi automatique de la facture finale + attestation fluide par mail en cours...',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
+                        actionOrder: 2,
                         collection: 'Projects',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
@@ -1571,131 +1590,307 @@ const processModel = {
                         verificationValue: false,
                         cloudFunction: {
                             endpoint: 'sendEmail',
+                            queryAttachmentsUrls: {
+                                'Facture': [
+                                    { filter: 'project.id', operation: '==', value: '' },
+                                    { filter: 'type', operation: '==', value: 'Facture' },
+                                    { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                                ],
+                                'Attestation fluide': [
+                                    { filter: 'project.id', operation: '==', value: '' },
+                                    { filter: 'type', operation: '==', value: 'Attestation fluide' },
+                                    { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                                ]
+                            },
                             params: {
                                 subject: "Facture finale et attestation fluide",
                                 dest: 'sa.lyoussi@gmail.com', //#task: change it
-                                source: 'process',
                                 projectId: '',
-                                attachments: [
-                                    {
-                                        filename: 'Facture.pdf',
-                                        path: 'https://raw.github.com/nodemailer/nodemailer/master/LICENSE' //downloadURL
-                                    }
-                                ]
+                                attachments: []
                             }
-                        }
-                    },
-                    {
-                        id: 'attestationFluideCreation',
-                        title: 'Créer une attestation fluide',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        collection: 'Documents',
+                        },
                         nextStep: 'clientReview'
-                    }
+                    },
                 ]
             },
             'clientReview': {
                 title: "Satisfaction client",
                 instructions: "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 13,
+                stepOrder: 12,
                 nextStep: '',
                 actions: [
                     {
-                        nextPhase: 'maintenance'
+                        id: 'clientReview',
+                        title: 'Êtes-vous satisfait de notre service ?',
+                        instructions: "Lorem ipsum dolor",
+                        actionOrder: 1,
+                        collection: '',
+                        documentId: '', // depending on the concerned project
+                        properties: [],
+                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+                        screenParams: null,
+                        type: 'manual',
+                        //responsable: '',
+                        status: 'pending',
+                        comment: '',
+                        verificationType: 'multiple-choices',
+                        isReview: true,
+                        choices: [
+                            { label: '1', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '2', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '3', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '4', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '5', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '6', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '7', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '8', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '9', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
+                            { label: '10', onSelectType: 'commentPicker', selected: false, stay: false, nextPhase: 'maintainance' },
+                        ],
                     }
                 ]
             }
         },
     },
-    //Init maintenance from previous step: Installation/maintainanceContract 
-    'maintenance': {
+    //Init maintainance from previous step: Installation/maintainanceContract 
+    'maintainance': {
         title: 'Maintenance',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 6,
-        steps: {}
+        steps: {
+            'maintainanceContract': {
+                title: "Contrat maintenance",
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 1,
+                actions: [
+                    {
+                        id: 'commercialPropositionChoice',
+                        title: "Accepter la proposition commerciale",
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        collection: '',
+                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { documentType: 'Autre', project: null },
+                        type: 'manual', //Check manually
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
+                        ]
+                    },
+                    {
+                        id: 'mandatSepaCreation',
+                        title: "Créer/Importer un mandat SEPA",
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 2,
+                        collection: 'Documents',
+                        //Verification:
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { documentType: 'Mandat SEPA', project: null },
+                        type: 'auto', //Check manually
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
+                        ]
+                    },
+                    {
+                        id: 'signedSEPACreation',
+                        title: 'Signer le mandat SEPA',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 3,
+                        collection: 'Documents',
+                        queryFilters: [ //verify if signed mandat SEPA exists
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
+                        ],
+                        queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument',
+                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        type: 'auto',
+                        choices: [
+                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
+                        ],
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                    },
+                    {
+                        id: 'contratCreation',
+                        title: "Créer/Importer un contrat",
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 4,
+                        collection: 'Documents',
+                        //Verification:
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument',
+                        screenParams: { documentType: 'Contrat CGU-CGV', project: null },
+                        type: 'auto',
+                        //responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
+                        ]
+                    },
+                    {
+                        id: 'signedContractCreation',
+                        title: 'Signer le contrat',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 5,
+                        collection: 'Documents',
+                        queryFilters: [ //verify if signed mandat SEPA exists
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
+                        ],
+                        queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                        ],
+                        //properties: [],
+                        //documentId: '',
+                        screenName: 'UploadDocument',
+                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        type: 'auto',
+                        choices: [
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
+                        ],
+                        responsable: '',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                        nextStep: 'quoteVerification'
+                    },
+                    {
+                        id: 'endProject',
+                        title: "Finaliser le projet",
+                        instructions: "",
+                        actionOrder: 6,
+                        collection: '',
+                        documentId: '', // depending on the concerned project
+                        properties: [],
+                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+                        screenParams: null,
+                        type: 'manual',
+                        responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+                        status: 'pending',
+                        comment: '',
+                        verificationType: 'validation',
+                        nextPhase: 'endProject',
+                    },
+                ]
+            },
+        }
     },
     'endProject': {
-        title: 'Projet fini',
+        title: 'Finalisation',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 7,
         steps: {
-            title: "Projet fini",
-            instructions: 'Lorem ipsum dolor',
-            stepOrder: 10,
-            nextStep: '',
-            actions: [
-                {
-                    id: 'endProject',
-                    title: 'Le projet a été finalisé.',
-                    instructions: "Lorem ipsum dolor",
-                    actionOrder: 1,
-                    collection: '',
-                    documentId: '', // depending on the concerned project
-                    properties: [],
-                    screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                    screenParams: null,
-                    type: 'manual',
-                    //responsable: '',
-                    status: 'pending',
-                    comment: '',
-                    verificationType: '',
-                },
-            ]
-        },
+            'endProject': {
+                title: "Projet finalisé",
+                instructions: '',
+                stepOrder: 1,
+                actions: [
+                    {
+                        id: 'endProject',
+                        title: 'Le process du projet est terminé.',
+                        instructions: "Lorem ipsum dolor",
+                        actionOrder: 1,
+                        collection: '',
+                        documentId: '', // depending on the concerned project
+                        properties: [],
+                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+                        screenParams: null,
+                        type: 'manual',
+                        //responsable: '',
+                        status: 'pending',
+                        comment: '',
+                        verificationType: 'no-verification',
+                    },
+                ]
+            },
+        }
     },
     'cancelProject': {
-        title: 'Projet annulé',
+        title: 'Annulation',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 7,
         steps: {
-            title: "Projet annulé",
-            instructions: 'Lorem ipsum dolor',
-            stepOrder: 10,
-            nextStep: '',
-            actions: [
-                {
-                    id: 'cancelProject',  //#task: rollback (Resume project)
-                    title: 'Le projet a été annulé.',
-                    instructions: "Lorem ipsum dolor",
-                    actionOrder: 1,
-                    collection: '',
-                    documentId: '', // depending on the concerned project
-                    properties: [],
-                    screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                    screenParams: null,
-                    type: 'manual',
-                    //responsable: '',
-                    status: 'pending',
-                    comment: '',
-                    verificationType: 'static',
-                },
-            ]
-        },
+            'cancelProject': {
+                title: "Projet annulé",
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 1,
+                actions: [
+                    {
+                        id: 'cancelProject',  //#task: rollback (Resume project)
+                        title: 'Le projet a été annulé.',
+                        instructions: "Lorem ipsum dolor",
+                        actionOrder: 1,
+                        collection: '',
+                        documentId: '', // depending on the concerned project
+                        properties: [],
+                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+                        screenParams: null,
+                        type: 'manual',
+                        //responsable: '',
+                        status: 'pending',
+                        comment: '',
+                        verificationType: 'no-verification',
+                    },
+                ]
+            },
+        }
     }
-}
-
-//#PROCESS MAIN
-export const processMain = async (process, projectSecondPhase, clientId, project) => {
-
-    console.log('PROJECT FROM processMain........................', project)
-
-    const attributes = { clientId, project }
-    const currentProcess = _.cloneDeep(process)
-    const updatedProjectProcess = await projectProcessHandler(currentProcess, projectSecondPhase, attributes)
-
-    console.log('OLD PROCESS:', process)
-    console.log("UPDATED PROCESS:", updatedProjectProcess)
-
-    if (!_.isEqual(process, updatedProjectProcess)) {
-        await db.collection('Projects').doc(project.id).update({ process: updatedProjectProcess }).then(() => console.log('PROJECT PROCESS UPDATED !'))
-    }
-
-    return updatedProjectProcess//To avoid errors
 }
 
 //#PROCESS ALGORITHM/LOGIC
-export const projectProcessHandler = async (process, projectSecondPhase, attributes) => {
+export const projectProcessHandler = async (currentProcess, projectSecondPhase, clientId, project) => {
+
+    const attributes = { clientId, project }
+    let process = _.cloneDeep(currentProcess)
 
     let loopHandler = true
 
@@ -1703,56 +1898,70 @@ export const projectProcessHandler = async (process, projectSecondPhase, attribu
 
         //0. Initialize process with 1st phase/1st step
         if (_.isEmpty(process)) {
-            console.log('********************************* Initialization ******************************')
+            console.log('0. Initialisation')
             process = initProcess(process, projectSecondPhase)
-            console.log('4. Process initialized: ', process)
         }
 
-        //1. Get current phase/step of the process
-        console.log('********************************* Verification ******************************')
         var { currentPhaseId, currentStepId } = getCurrentStep(process)
-        console.log(`1. Current phaseId/stepId fetched: ${currentPhaseId}/${currentStepId}`)
-
-        //2. Actions handler (Verifications & Status update)
         let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
         let allActionsValid = true
         let nextStep = ''
         let nextPhase = ''
 
         if (actions.length > 0) {
-            console.log(`3. Configuring actions...`)
-            actions = await configureActions(actions, attributes, process)
+            console.log('1. Configure actions...')
 
-            console.log(`4. Verifying actions...`)
+            actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
+
+            //Handle cloud function
+            if (actions[0].cloudFunction) {
+                console.log('Handling cloud function...')
+                const sendEmail = functions.httpsCallable('sendEmail')
+                const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
+                const html = `<b>${subject} du projet ${attributes.project.name}</b>`
+
+                const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
+
+                if (isSent.data)
+                    await db.collection(actions[0].collection).doc(projectId).update({ finalBillSentViaEmail: true }).then(() => console.log('FINAL BILL SENT !!!!'))
+
+                else console.log('Email was not sent......................')
+                //else return error and handle it on UI (MAKE SURE NOT UPDATE PROCESS BY ERROR)
+            }
+
+            console.log('2. verify actions...')
             var verif_res = await verifyActions(actions, attributes, process)
-            console.log('5. Verification result:', verif_res)
-
 
             actions = verif_res.verifiedActions
             allActionsValid = verif_res.allActionsValid
             nextStep = verif_res.nextStep
             nextPhase = verif_res.nextPhase
 
+            console.log('3. verification result:')
+            console.log('allActionsValid:', allActionsValid)
+            console.log('nextStep:', nextStep)
+            console.log('nextPhase:', nextPhase)
+
+            console.log('4. verified actions:')
+            actions.forEach((action) => {
+                console.log(action.id, action.actionOrder, action.status)
+            })
+
             process[currentPhaseId].steps[currentStepId].actions = actions
         }
 
         //3'. Found nextStep/nextPhase -> All actions valid -> Transition
         if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
-            console.log('NEXTSTEP:', nextStep)
-            console.log('NEXTPHASE:', nextPhase)
-
-            console.log('********************************* Transition ******************************')
+            console.log('transition...')
             const transitionRes = handleTransition(process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
             process = transitionRes.process
-
             const { processEnded } = transitionRes
             if (processEnded) loopHandler = false
-            else console.log('Transition done --> Loop')
+            else console.log('LOOP...')
         }
 
         //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
         else {
-            console.log('********************************* Break Loop ******************************')
             loopHandler = false
         }
     }
@@ -1766,17 +1975,14 @@ const initProcess = (process, projectSecondPhase) => {
 
     //Init project with first phase/first step
     let firstPhaseId = getFirstPhaseIdFromModel()
-    console.log('1. First phase of process model fetched:', firstPhaseId)
-
+    console.log('0.1 Première phase du modèle:', firstPhaseId)
     process = projectNextPhaseInit(process, firstPhaseId)
-    console.log('2. Process initialized with first phase:', process)
 
     //Set "nextPhase" dynamiclly for last action of last step
     Object.keys(process[firstPhaseId].steps).forEach((stepId) => {
         let actions = process[firstPhaseId].steps[stepId].actions
         actions[actions.length - 1].nextPhase = projectSecondPhase
         process[firstPhaseId].steps[stepId].actions = actions
-        console.log(`3. Process first phase's last step/last action now pointing toward next phase:`, process[firstPhaseId].steps[stepId].actions[actions.length - 1].nextPhase)
     })
 
     return process
@@ -1798,45 +2004,82 @@ const configureActions = async (actions, attributes, process) => {
     for (let action of actions) {
 
         //1. Complete missing params
+        console.log('configuring action:', action.id, action.verificationType, action.status, action.actionOrder)
+        console.log('1.1 configuring missing project filter value:')
+
         if (action.cloudFunction) {
-            for (let item in action.cloudFunction.params) {
-                if (item === 'projectId') action.cloudFunction.params.projectId = attributes.project.id
+            const { params, queryAttachmentsUrls } = action.cloudFunction
+
+            if (action.collection === 'Projects')
+                action.documentId = attributes.project.id
+
+            for (let item in params) {
+                if (item === 'projectId') {
+                    params.projectId = attributes.project.id
+                }
             }
+
+            for (let attachmentKey in queryAttachmentsUrls) {
+
+                for (let item of queryAttachmentsUrls[attachmentKey]) {
+                    if (item.filter === 'project.id')
+                        item.value = attributes.project.id
+                }
+
+                query = db.collection('Documents')
+                queryAttachmentsUrls[attachmentKey].forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+
+                await query.get().then((querysnapshot) => {
+
+                    if (!querysnapshot.empty) {
+                        const document = querysnapshot.docs[0].data()
+                        const attachment = {
+                            filename: `${attachmentKey}.pdf`,
+                            path: document.attachment.downloadURL
+                        }
+                        params.attachments.push(attachment)
+                    }
+
+                })
+            }
+
+            console.log('1.1.1 action.cloudFunction configured:', action.cloudFunction)
         }
 
         if (action.queryFilters) {
             for (let item of action.queryFilters) {
-                if (item.filter === 'project.id')
+                if (item.filter === 'project.id') {
                     item.value = attributes.project.id
+                }
             }
+            console.log('1.1.2 action.queryFilters configured', action.queryFilters)
         }
 
         if (action.screenParams) {
             for (let item in action.screenParams) {
                 if (item === 'project') action.screenParams.project = attributes.project //#task : make it dynamic (screenparams field name should be same as attributes field name)
             }
+            console.log('1.1.3 action.screenParams configured', action.screenParams)
         }
 
+
         //Agenda, Documents
+        console.log('1.2 configuring missing documentId')
+
         if (action.verificationType === 'doc-creation') {
 
-            //Navigate to UploadDocument: Update mode
-            if (action.queryFiltersUpdate) {
-
-                for (let item of action.queryFiltersUpdate) {
+            if (action.queryFiltersUpdateNav) {
+                for (let item of action.queryFiltersUpdateNav) {
                     if (item.filter === 'project.id')
                         item.value = attributes.project.id
                 }
 
                 query = db.collection(action.collection)
-                action.queryFiltersUpdate.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+                action.queryFiltersUpdateNav.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+
                 await query.get().then((querysnapshot) => {
 
-                    if (querysnapshot.empty) {
-                        action.screenParams.project = attributes.project
-                    }
-
-                    else {
+                    if (!querysnapshot.empty) {
                         if (action.collection === 'Agenda')
                             action.screenParams.TaskId = querysnapshot.docs[0].id
 
@@ -1846,10 +2089,6 @@ const configureActions = async (actions, attributes, process) => {
                 })
             }
 
-            //Navigate to UploadDocument: Creation mode
-            else {
-                action.screenParams.project = attributes.project
-            }
         }
 
         //Agenda, Clients
@@ -1858,18 +2097,26 @@ const configureActions = async (actions, attributes, process) => {
             if (action.collection === 'Clients') { //CASE 1: doc id already exists once project is created..
                 action.documentId = attributes.clientId
                 action.screenParams.userId = attributes.clientId
+                console.log('action.documentId55555555555555555', action.documentId)
             }
 
-            else if (action.collection === 'Agenda') { //CASE2: doc id is created later on after project is created.. (so we have to retrieve doc id using a query) #task: force user to overwrite existing task to avoid same task duplicates
+            else { //CASE2: doc id is created later on after project is created.. (so we have to retrieve doc id using a query) #task: force user to overwrite existing task to avoid same task duplicates
                 query = db.collection(action.collection)
                 action.queryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
                 await query.get().then((querysnapshot) => {
 
-                    if (!querysnapshot.empty) {
-                        action.documentId = querysnapshot.docs[0].id
+                    if (querysnapshot.empty) return
+
+                    if (action.collection === 'Agenda')
                         action.screenParams.TaskId = querysnapshot.docs[0].id
-                    }
+
+                    else if (action.collection === 'Documents')
+                        action.screenParams.DocumentId = querysnapshot.docs[0].id
+
+                    action.documentId = querysnapshot.docs[0].id
                 })
+
+                console.log('1.2.1 action.screenParams configured', action.screenParams)
             }
         }
 
@@ -1889,6 +2136,8 @@ const configureActions = async (actions, attributes, process) => {
 
                     action.documentId = querysnapshot.docs[0].id
                 })
+
+                console.log('1.2.1 action.screenParams configured', action.screenParams)
             }
         }
     }
@@ -1904,7 +2153,7 @@ const verifyActions = async (actions, attributes, process) => {
     let nextPhase = ''
 
     //1. Split actions to 4 groups based on "verificationType" property
-    const actions_groupedByVerificationType = groupBy(actions, "verificationType") //Actions grouped by verificationType ("data-fill" & "doc-creation")
+    const actions_groupedByVerificationType = groupBy(actions, "verificationType")
 
     //AUTO
     //VERIFICATION TYPE 1: data-fill
@@ -1913,6 +2162,7 @@ const verifyActions = async (actions, attributes, process) => {
 
     if (actions_dataFill.length > 0) {
         var res1 = await verifyActions_dataFill(actions_dataFill)
+
         allActionsValid_dataFill = res1.allActionsValid_dataFill
         actions_dataFill = res1.verifiedActions_dataFill
         nextStep = res1.nextStep
@@ -1932,41 +2182,21 @@ const verifyActions = async (actions, attributes, process) => {
     }
 
     //MANUAL
-    //VERIFICATION TYPE 3: multiple-choices
+    //VERIFICATION TYPE 3: 
     let actions_multipleChoices = actions_groupedByVerificationType['multiple-choices'] || []
-    let allActionsValid_multipleChoices = true
-
-    if (actions_multipleChoices.length > 0) {
-        var res3 = await verifyActions_multipleChoices(actions_multipleChoices)
-        allActionsValid_multipleChoices = res3.allActionsValid_multipleChoices
-        actions_multipleChoices = res3.verifiedActions_multipleChoices
-        //Transition is handled manually onPressChoice event
-    }
-
-    //VERIFICATION TYPE 4: comment
     let actions_comment = actions_groupedByVerificationType['comment'] || []
-    let allActionsValid_comment = true
-
-    if (actions_comment.length > 0) {
-        var res3 = await verifyActions_comment(actions_comment)
-        allActionsValid_comment = res3.allActionsValid_comment
-        actions_comment = res3.verifiedActions_comment
-        //Transition is handled manually onSubmit comment event
-    }
-
-    //VERIFICATION TYPE 4: validation
     let actions_validation = actions_groupedByVerificationType['validation'] || []
-    let allActionsValid_validation = true
+    let actions_manual = actions_multipleChoices.concat(actions_comment, actions_validation)
+    let allActionsValid_manual = true
 
-    if (actions_validation.length > 0) {
-        var res3 = await verifyActions_validation(actions_validation)
-        allActionsValid_validation = res3.allActionsValid_validation
-        actions_validation = res3.verifiedActions_validation
-        //Transition is handled manually onSubmit comment event
+    if (actions_manual.length > 0) {
+        var res3 = await verifyActions_manual(actions_manual)
+        allActionsValid_manual = res3.allActionsValid_manual
+        actions_manual = res3.verifiedActions_manual
     }
 
-    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_multipleChoices && allActionsValid_comment && allActionsValid_validation
-    verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_multipleChoices, actions_comment, actions_validation)
+    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_manual
+    verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_manual)
 
     return { allActionsValid, verifiedActions, nextStep, nextPhase }
 }
@@ -2001,6 +2231,8 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     let nextStep = ''
     let nextPhase = ''
 
+    console.log(collection, documentId)
+
     const verifiedActionsSameDoc = await db.collection(collection).doc(documentId).get().then((doc) => {
 
         const data = doc.data()
@@ -2008,6 +2240,7 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         for (let action of actionsSameDoc) {
 
             if (!doc.exists) {
+                console.log('DOC no existing...........')
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }
@@ -2015,7 +2248,13 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
             else {
                 const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
 
-                if (nestedVal || typeof (nestedVal) === 'boolean') {
+                if (typeof (nestedVal) === 'undefined') {
+                    console.log('undefined...........')
+                    action.status = 'pending'
+                    allActionsSameDocValid = false
+                }
+
+                else {
                     if (nestedVal !== action.verificationValue) {
                         action.status = 'done'
                         nextStep = stringifyUndefined(action.nextStep)
@@ -2023,6 +2262,7 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
                     }
 
                     else {
+                        console.log(nestedVal, '!================================', action.verificationValue)
                         action.status = 'pending'
                         allActionsSameDocValid = false
                     }
@@ -2034,12 +2274,11 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         return actionsSameDoc
     })
 
+    console.log('.....', verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase)
     return { verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase }
 }
 
-//#Try put Step/Phase transition on action
 const verifyActions_docCreation = async (actions) => {
-
     //Verify actions for each document
     let allActionsValid_docCreation = true
     let nextStep = ''
@@ -2065,6 +2304,7 @@ const verifyActions_docCreation = async (actions) => {
                 action.status = 'pending' //CASE2: No transition if doc not found
                 allActionsValid_docCreation = false
             }
+
             else {
                 if (action.events && action.events.onDocFound) { //CASE1: Conditional transition (2 options) depending on doc found or not
                     nextStep = action.events.onDocFound.nextStep
@@ -2083,41 +2323,18 @@ const verifyActions_docCreation = async (actions) => {
     return { allActionsValid_docCreation, verifiedActions_docCreation, nextStep, nextPhase }
 }
 
-const verifyActions_multipleChoices = async (actions) => {
-    let allActionsValid_multipleChoices = true
+const verifyActions_manual = async (actions) => {
+    let allActionsValid_manual = true
 
     for (let action of actions) {
         if (action.status === 'pending')
-            allActionsValid_multipleChoices = false
+            allActionsValid_manual = false
     }
 
-    const verifiedActions_multipleChoices = actions
-    return { allActionsValid_multipleChoices, verifiedActions_multipleChoices }
+    const verifiedActions_manual = actions
+    return { allActionsValid_manual, verifiedActions_manual }
 }
 
-const verifyActions_comment = async (actions) => {
-    let allActionsValid_comment = true
-
-    for (let action of actions) {
-        if (action.status === 'pending')
-            allActionsValid_comment = false
-    }
-
-    const verifiedActions_comment = actions
-    return { allActionsValid_comment, verifiedActions_comment }
-}
-
-const verifyActions_validation = async (actions) => {
-    let allActionsValid_validation = true
-
-    for (let action of actions) {
-        if (action.status === 'pending')
-            allActionsValid_validation = false
-    }
-
-    const verifiedActions_validation = actions
-    return { allActionsValid_validation, verifiedActions_validation }
-}
 
 //Task 4. Phase/Step transition
 export const handleTransition = (process, currentPhaseId, currentStepId, nextStepId, nextPhaseId, ProjectId) => {
@@ -2130,6 +2347,8 @@ export const handleTransition = (process, currentPhaseId, currentStepId, nextSte
 
     //Next phase transition
     else if (nextPhaseId) {
+
+        //Update project (status/step)
         if (nextPhaseId === 'cancelProject') {
             cancelProject(ProjectId)
             processEnded = true
@@ -2144,23 +2363,17 @@ export const handleTransition = (process, currentPhaseId, currentStepId, nextSte
             updateProjectPhase(nextPhaseId, ProjectId)
         }
 
-        process = projectNextPhaseInit(process, nextPhaseId)
+        //Phase transition
+        if (nextPhaseId === 'maintainance' && process['installation'].steps['maintainanceContract']) {
+            process = resumeMaintainance(process)
+        }
+
+        else {
+            process = projectNextPhaseInit(process, nextPhaseId)
+        }
     }
 
     return { process, processEnded }
-}
-
-const updateProjectPhase = (nextPhaseId, ProjectId) => {
-    const phaseTitle = processModel[nextPhaseId].title
-    db.collection('Projects').doc(ProjectId).update({ step: phaseTitle })
-}
-
-const endProject = (ProjectId) => {
-    db.collection('Projects').doc(ProjectId).update({ status: 'Terminé' })
-}
-
-const cancelProject = (ProjectId) => {
-    db.collection('Projects').doc(ProjectId).update({ status: 'Annulé' })
 }
 
 //Task 4'.
@@ -2185,12 +2398,10 @@ export const projectNextStepInit = (process, currentPhaseId, currentStepId, next
     }
 
     //1. Get next Step from process model
-    console.log('A.2 Fetching next step model...')
     const nextStepModel = processModel[currentPhaseId].steps[nextStepId]
 
     //2. Concat next step to process
     process[currentPhaseId].steps[nextStepId] = nextStepModel
-    console.log("A.3 Project process next step initialized:", process[currentPhaseId].steps[nextStepId])
 
     return process
 }
@@ -2202,24 +2413,18 @@ export const getNextPhaseId = (process, currentPhaseId, currentStepId) => {
 }
 
 export const projectNextPhaseInit = (process, nextPhaseId) => {
-
     //1. Get next Phase from process model
-    console.log('B.2 Fetching next phase model...')
-    const copyProcessModel = _.cloneDeep(processModel)
-    const nextPhaseModel = copyProcessModel[nextPhaseId]
+    const nextPhaseModel = _.cloneDeep(processModel[nextPhaseId])
 
     //2. Keep only first step (stepOrder = 1)
     const firstStep = getPhaseFirstStep(nextPhaseModel.steps)
     nextPhaseModel.steps = firstStep
-    console.log('B.3 NextPhaseModel first step only:', nextPhaseModel.steps)
 
     //3. Concat next phase to process
     process[nextPhaseId] = nextPhaseModel
-    console.log("B.4 Project process next phase initialized:", process[nextPhaseId])
 
     return process
 }
-
 
 const getPhaseFirstStep = (steps) => {
     const firstStepArray = Object.entries(steps).filter(([key, value]) => value['stepOrder'] === 1)
@@ -2227,10 +2432,43 @@ const getPhaseFirstStep = (steps) => {
     return firstStep
 }
 
-//Task 5. End process
-const handleEndProject = (process) => {
-    console.log('Process finished !')
+const resumeMaintainance = (process) => {
+    process['maintainance'] = {}
+    process['maintainance'].title = _.clone(processModel['maintainance'].title)
+    process['maintainance'].instructions = _.clone(processModel['maintainance'].instructions)
+    process['maintainance'].phaseOrder = _.clone(processModel['maintainance'].phaseOrder)
+    process['maintainance'].steps = {}
+    process['maintainance'].steps['maintainanceContract'] = _.cloneDeep(process['installation'].steps['maintainanceContract'])
+
+    const currentActions = _.cloneDeep(process['maintainance'].steps['maintainanceContract'].actions)
+    currentActions.sort((a, b) => (a.actionOrder < b.actionOrder) ? 1 : -1)
+    if (currentActions[0].nextStep) delete currentActions[0].nextStep
+    if (currentActions[0].nextPhase) delete currentActions[0].nextPhase
+
+    const { actions } = _.cloneDeep(processModel['maintainance'].steps['maintainanceContract'])
+    actions.sort((a, b) => (a.actionOrder < b.actionOrder) ? 1 : -1)
+    const lastAction = actions[0]
+    currentActions.push(lastAction)
+
+    process['maintainance'].steps['maintainanceContract'].actions = currentActions
+
+    return process
 }
+
+//Update project (status/step)
+const updateProjectPhase = (nextPhaseId, ProjectId) => {
+    const phaseTitle = processModel[nextPhaseId].title
+    db.collection('Projects').doc(ProjectId).update({ step: phaseTitle })
+}
+
+const endProject = (ProjectId) => {
+    db.collection('Projects').doc(ProjectId).update({ status: 'Terminé' })
+}
+
+const cancelProject = (ProjectId) => {
+    db.collection('Projects').doc(ProjectId).update({ status: 'Annulé' })
+}
+
 
 //#UI FUNCTIONS (PROCESS OVERVIEW)
 // Process object at the instant t contains only the current state of the global process model --> So we are sure that the object with max order is the latest phase/step
@@ -2274,7 +2512,6 @@ export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
 
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
-    console.log(process[currentPhaseId].steps[currentStepId])
 
     let { actions } = process[currentPhaseId].steps[currentStepId]
     actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
@@ -2282,7 +2519,7 @@ export const getCurrentAction = (process) => {
     let currentAction = null
 
     for (const action of actions) {
-        //if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
+        // if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
         if (!currentAction && action.status === 'pending')
             currentAction = action
     }
@@ -2426,4 +2663,154 @@ Params: comment
 //     }
 
 //     else action.screenParams.DocumentId = querysnapshot.docs[0].id
+// }
+
+
+
+
+
+
+
+
+
+
+// validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
+//     const { process, currentPhaseId, currentStepId, currentAction } = this.state
+//     const { project } = this.props
+
+//     //Update action fields
+//     let processTemp = _.cloneDeep(process)
+//     // let actionTemp
+
+//     processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+//         // actionTemp = action
+
+//         if (action.id === currentAction.id) {
+//             //Update comment
+//             if (comment)
+//                 action.comment = comment
+
+//             //Update selected choice (selected = true -> UI displays it green colored)
+//             if (choices)
+//                 action.choices = choices
+
+//             //Update action status
+//             if (!stay) {
+//                 action.status = "done"
+//                 action.isAnimation = false
+//                 //  actionTemp.isAnimation = true
+//             }
+//         }
+//     })
+
+//     processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+//         console.log(action.id, action.actionOrder, action.status, action.isAnimation)
+//     })
+
+
+//     this.setState({
+//         loadingModal: false, showModal: false,
+//         //currentAction: actionTemp
+//     })  //isAnimation = true
+
+//     // console.log('Do animation now !')
+
+//     // await this.countDown(1000)
+
+//     if (nextStep || nextPhase) {
+//         const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
+//         processTemp = transitionRes.process
+//     }
+
+//     this.updatePhaseStepAction(processTemp)
+
+//     await db.collection('Projects').doc(project.id).update({ process: processTemp })
+// }
+
+
+//TESTS
+// 'signQuote': {
+//     title: 'Signature',
+//     instructions: 'Lorem ipsum dolor',
+//     phaseOrder: 1,
+//     steps: { //One step
+//         'signQuote': {
+//             title: 'Signer le devis',
+//             instructions: 'Lorem ipsum dolor',
+//             stepOrder: 1,
+//             actions: [
+//                 {
+//                     id: 'quoteCreation',
+//                     title: 'Créer un devis',
+//                     instructions: 'Lorem ipsum dolor',
+//                     actionOrder: 1,
+//                     collection: 'Documents',
+//                     //Verification
+//                     queryFilters: [
+//                         { filter: 'project.id', operation: '==', value: '' },
+//                         { filter: 'type', operation: '==', value: 'Devis' },
+//                     //    { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+//                     ],
+//                     //Navigation
+//                     queryFiltersUpdateNav: [
+//                         { filter: 'project.id', operation: '==', value: '' },
+//                         { filter: 'type', operation: '==', value: 'Devis' },
+//                     ],
+//                     properties: [],
+//                     documentId: '',
+//                     screenName: 'UploadDocument', //creation
+//                     screenParams: { documentType: 'Devis', project: null },
+//                     type: 'auto',
+//                     responsable: '',
+//                     status: 'pending',
+//                     verificationType: 'doc-creation',
+//                 },
+//                 {
+//                     id: 'signedQuoteCreation', //#task: check if devis is still existing..
+//                     title: 'Signer le devis',
+//                     instructions: 'Lorem ipsum dolor',
+//                     actionOrder: 2,
+//                     collection: 'Documents',
+//                     queryFilters: [ //VERIFICATION: verify if signed quote exists
+//                         { filter: 'project.id', operation: '==', value: '' },
+//                         { filter: 'type', operation: '==', value: 'Devis' },
+//                         { filter: 'attachmentSource', operation: '==', value: 'signature' }
+//                     ],
+//                     queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
+//                         { filter: 'project.id', operation: '==', value: '' },
+//                         { filter: 'type', operation: '==', value: 'Devis' },
+//                     ],
+//                     //properties: [],
+//                     //documentId: '',
+//                     screenName: 'UploadDocument',
+//                     screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+//                     type: 'auto',
+//                     choices: [
+//                         { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+//                         { label: 'Signer le devis', id: 'sign', onSelectType: 'navigation' },
+//                     ],
+//                     responsable: '',
+//                     status: 'pending',
+//                     verificationType: 'doc-creation',
+//                 },
+//                 {
+//                     id: 'quoteValidation',
+//                     title: "Finaliser le test", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+//                     instructions: "",
+//                     actionOrder: 3,
+//                     collection: '',
+//                     documentId: '', // depending on the concerned project
+//                     properties: [],
+//                     screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+//                     screenParams: null,
+//                     type: 'manual',
+//                     responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+//                     status: 'pending',
+//                     comment: '',
+//                     verificationType: 'validation',
+//                     nextPhase: 'technicalVisitManagement',
+//                 },
+//             ]
+//         }
+//     }
 // }

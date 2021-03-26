@@ -280,7 +280,8 @@ class CreateProject extends Component {
 
         let clientError = nameValidator(client.fullName, '"Client"')
         let nameError = nameValidator(name.value, '"Nom du projet"')
-        var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
+        var addressError = '' //Address optional on offline mode
+        // var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
 
         if (clientError || nameError || addressError) {
             name.error = nameError

@@ -4,6 +4,7 @@ import { List, Card } from 'react-native-paper';
 import { connect } from 'react-redux'
 import { faConstruction } from '@fortawesome/pro-light-svg-icons'
 import { faThLarge, faList } from '@fortawesome/pro-solid-svg-icons'
+import _ from 'lodash'
 
 import { ActiveFilter, SearchBar, ListSubHeader, Filter, MyFAB, ProjectItem, ProjectItem2, EmptyList, Loading } from '../../components'
 
@@ -72,7 +73,7 @@ class ListProjects extends Component {
     }
 
     async componentDidMount() {
-
+        
         Keyboard.dismiss()
         requestWESPermission()
         requestRESPermission()

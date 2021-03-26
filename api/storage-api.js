@@ -7,12 +7,12 @@ import RNFS from 'react-native-fs'
 const db = firebase.firestore()
 
 //Used by CreateProduct.js
-export async function uploadFile(attachment, storageRefPath, showProgress) {
+export async function uploadFile(attachment, storageRefPath, showProgress, metadata) {
 
     const promise = new Promise((resolve, reject) => {
 
         const storageRef = firebase.storage().ref(storageRefPath)
-        this.uploadTask = storageRef.putFile(attachment.path)
+        this.uploadTask = storageRef.putFile(attachment.path, { customMetadata: metadata })
 
         this.uploadTask
             .on('state_changed', async function (tasksnapshot) {

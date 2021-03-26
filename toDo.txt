@@ -72,10 +72,12 @@ Steps:
 
 22/03/2021
 TO DO:
++ PROCESS: Add verification actions in case user starts project from a phase depending on docs/tasks created on previous phase (exp: Devis, RD2), or like DOSSIER ACTION LOGEMENT which skips rd2 & rdn
++ PROCESS: Handle action loadings to avoid press before configure action (and preferably set check animation)
 + PROCESS: Complete process
 + PROCESS: Add responsible for each action
 + PROCESS: Notifications & Emails
--> pending: Waiting from explanations...
+
 
 + PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)
 -> OPTION 1: Verify if a task with same type already exists for the selected project (to avoid duplicates)
@@ -84,6 +86,8 @@ TO DO:
 + Poseur task types = [Installation, Rattrapage, Panne, Entretien] tag: tech
 + Add dynamiclly task types..
 + Display 30% phase > step 
++ Reactiver notifications app.js
++ UPdate all user/client objects through collections on update name.. (cloud function trigger)
 
 + Action a faire
 + add infoCircle 
@@ -157,3 +161,16 @@ Ideas2:
 + Maintainance & Troubleshooting:
 - Add id of each item on List overview -> User can communicate easily to us the element having an issue.
 - Add pull to refresh/refresh icon on forms (instead of onSnapshot).. because user has to refresh it voluntarely
+
+
+
+
+
+
+
+
+
+
+
+
+

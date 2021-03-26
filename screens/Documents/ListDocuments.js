@@ -83,7 +83,8 @@ class ListDocuments extends Component {
             var query = db.collection('Documents').where('project.client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'desc')
 
         else
-            var query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
+            var query = db.collection('Documents').where('project.id', '==', 'GS-PR-Ac3P').where('type', '==', 'Devis')
+            // var query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
 
         this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
     }

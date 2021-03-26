@@ -50,18 +50,18 @@ const paperTheme = {
 
 class App extends Component {
 
-  async componentDidMount() {
-    //Notification channels
-    const channelId = await notifee.createChannel({
-      id: 'projects',
-      name: 'projects',
-      lights: false,
-      vibration: true,
-      importance: AndroidImportance.HIGH,
-    })
+  // async componentDidMount() {
+  //   //Notification channels
+  //   const channelId = await notifee.createChannel({
+  //     id: 'projects',
+  //     name: 'projects',
+  //     lights: false,
+  //     vibration: true,
+  //     importance: AndroidImportance.HIGH,
+  //   })
 
-    this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
-  }
+  //   this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
+  // }
 
 
   //Forground: messages listener

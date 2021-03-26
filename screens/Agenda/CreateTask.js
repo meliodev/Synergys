@@ -90,7 +90,7 @@ class CreateTask extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "", error: '' },
+            name: { value: "Test", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
@@ -99,7 +99,7 @@ class CreateTask extends Component {
             status: 'En cours',
 
             //Screens
-            assignedTo: { id: '', fullName: '', error: '' },
+            assignedTo: { id: 'GS-US-xQ6s', fullName: 'Salimu Lyoussi', error: '' },
             project: this.project,
             address: { description: '', place_id: '', error: '' },
             startDate: { value: moment().format(), error: '' },

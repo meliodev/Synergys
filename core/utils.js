@@ -15,6 +15,8 @@ import { decode as atob, encode as btoa } from "base-64"
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
+import _ from 'lodash'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faSpinner } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -70,28 +72,39 @@ export const phoneValidator = phone => {
 export const compareDates = (date1, date2, operator) => {
 
   if (operator === 'isBefore') {
-    if (moment(date1).isBefore(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+    if (moment(date1).isBefore(moment(date2))) return "La date d'échéance doit être supérieure à la date de début."
   }
 
   else if (operator === 'isAfter') {
-    if (moment(date1).isAfter(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+    if (moment(date1).isAfter(moment(date2))) return "La date d'échéance doit être supérieure à la date de début."
   }
 
   else if (operator === 'isSame') {
-    if (moment(date1).isSame(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+    if (moment(date1).isSame(moment(date2))) return "La date d'échéance doit être supérieure à la date de début."
   }
 
   else if (operator === 'isSameOrAfter') {
-    if (moment(date1).isSameOrAfter(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+    if (moment(date1).isSameOrAfter(moment(date2))) return "La date d'échéance doit être supérieure à la date de début."
   }
 
   else if (operator === 'isSameOrBefore') {
-    if (moment(date1).isSameOrBefore(moment(date2))) return "La date d'échance doit être superieure à la date de début."
+    if (moment(date1).isSameOrBefore(moment(date2))) return "La date d'échéance doit être supérieure à la date de début."
   }
 
   return "";
 }
 
+export const compareDays = (day1, day2, operator) => {
+  if (operator === 'isBefore') {
+    if (moment(day1).isBefore(moment(day2), 'days')) return "Le jour de fin doit être supérieur au jour de début."
+  }
+}
+
+export const compareTimes = (time1, time2, operator) => {
+  if (operator === 'isBefore') {
+    if (moment(time1).isBefore(moment(time2), 'hour')) return "L'heure d'échéance doit être supérieure à l'heure de début."
+  }
+}
 
 //##NAVIGATION
 export const navigateToScreen = (main, canUpdate, screen, params) => {
@@ -114,8 +127,25 @@ export const formatRow = (data, numColumns) => { //Format rows to display 3 colu
 
 export const stringifyUndefined = (data) => {
   const stringifiedData = typeof (data) !== 'undefined' ? data : ''
-  console.log('....', typeof (stringifiedData))
   return stringifiedData
+}
+
+export const configChoiceIcon = (choice) => {
+  const element = _.cloneDeep(choice)
+  if (element.id === 'confirm') { element.icon = faCheck; element.iconColor = theme.colors.primary }
+  else if (element.id === 'finish') { element.icon = faFlag; element.iconColor = theme.colors.primary }
+  else if (element.id === 'cancel') { element.icon = faTimes; element.iconColor = theme.colors.error }
+  else if (element.id === 'comment') { element.icon = faTimes; element.iconColor = theme.colors.error }
+  else if (element.id === 'postpone') { element.icon = faClock; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'upload') { element.icon = faUpload; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'view') { element.icon = faEye; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'edit') { element.icon = faPen; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'sign') { element.icon = faFileSignature; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'cashPayment') { element.icon = faSackDollar; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'financing') { element.icon = faEnvelopeOpenDollar; element.iconColor = theme.colors.secondary }
+  else if (element.id === 'block') { element.icon = faBan; element.iconColor = theme.colors.error }
+  else if (element.id === 'pending') { element.icon = faSpinner; element.iconColor = theme.colors.gray_dark }
+  return element
 }
 
 export const articles_fr = (masc, masculins, docType) => {

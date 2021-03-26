@@ -123,7 +123,7 @@ class UploadDocument extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "", error: '' },
+            name: { value: "Test", error: '' },
             description: { value: "", error: '' },
 
             //Screens
@@ -270,6 +270,8 @@ class UploadDocument extends Component {
 
     //Submit handler
     async handleSubmit(isConversion, DocumentId) {
+        Keyboard.dismiss()
+        
         //Reject offline updates
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)

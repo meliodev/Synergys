@@ -10,30 +10,7 @@ import CustomIcon from './CustomIcon'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation }) => {
-
-    const elementStaticStyle = () => {
-        return {
-            borderRadius: 5,
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: elementSize * 0.03,
-            width: elementSize,
-            height: elementSize,
-            elevation: 2,
-            backgroundColor: theme.colors.white,
-        }
-    }
-
-    const elementDynamicStyle = (isSelected) => {
-        if (isSelected)
-            return {
-                elevation: 0,
-                borderWidth: 1,
-                borderColor: theme.colors.primary
-            }
-        else return {}
-    }
+const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview }) => {
 
     const selectElement = (index) => {
         //Unselect all types
@@ -55,6 +32,30 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
     }
 
     const Element = ({ element, index }) => {
+
+        const elementStaticStyle = () => {
+            return {
+                borderRadius: 5,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: elementSize * 0.03,
+                width: elementSize,
+                height: elementSize,
+                elevation: 2,
+                backgroundColor: theme.colors.white,
+            }
+        }
+
+        const elementDynamicStyle = (isSelected) => {
+            if (isSelected)
+                return {
+                    elevation: 0,
+                    borderWidth: 1,
+                    borderColor: theme.colors.primary
+                }
+            else return {}
+        }
+
         const iconColor = element.selected ? theme.colors.primary : element.iconColor
         const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
 
@@ -70,9 +71,60 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
         )
     }
 
-    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', justifyContent: elements.length > 1 ? 'space-between' : 'center', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }
+    const Rate = ({ element, index, length }) => {
 
-    return (
+        const elementStaticStyle = () => {
+            return {
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: theme.colors.gray_medium,
+                borderRadius: constants.ScreenWidth * 0.075,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: elementSize * 0.03,
+                width: constants.ScreenWidth * 0.15,
+                height: constants.ScreenWidth * 0.15,
+                marginBottom: 10,
+                backgroundColor: theme.colors.white,
+            }
+        }
+
+        const elementDynamicStyle = (isSelected) => {
+            if (isSelected)
+                return {
+                    elevation: 0,
+                    borderWidth: 1,
+                    borderColor: theme.colors.primary
+                }
+            else return {}
+        }
+
+        const iconColor = element.selected ? theme.colors.primary : element.iconColor
+        const numberColor = element.selected ? theme.colors.primary : theme.colors.secondary
+        const titleColor = element.selected ? theme.colors.primary : theme.colors.gray_dark
+
+        return (
+            <View style={{ width: constants.ScreenWidth * 0.17, height: 100, marginBottom: 30 }}>
+                <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
+                    <Text style={[theme.customFontMSregular.header, { textAlign: 'center', color: numberColor }]}>{element.label}</Text>
+                </TouchableOpacity>
+                {index === 0 && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Pas du tout satisfait</Text>}
+                {index === (length - 1) &&<Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Très satisfait</Text>}
+            </View>
+        )
+    }
+
+    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }
+
+    if (isReview)
+        return (
+            <View style={[containerStyle]}>
+                {elements.map((element, index) => {
+                    return (<Rate element={element} index={index} length={elements.length} />)
+                })}
+            </View>
+        )
+
+    else return (
         <View style={[containerStyle]}>
             {elements.map((element, index) => {
                 return (<Element element={element} index={index} />)
@@ -84,7 +136,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation 
 
 const ModalOptions = ({
     title, columns = 3, isVisible, toggleModal, handleCancel, handleConfirm,
-    elements, handleSelectElement, autoValidation, isLoading, modalStyle, ...props }) => {
+    elements, handleSelectElement, autoValidation, isLoading, modalStyle, isReview, ...props }) => {
 
     let elementSize
 
@@ -121,7 +173,8 @@ const ModalOptions = ({
                         <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
                     </TouchableOpacity>
                     <Title style={[theme.customFontMSregular.header, { marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>{title}</Title>
-                    <ModalForm elements={elements} elementSize={elementSize} handleSelectElement={handleSelectElement} autoValidation={autoValidation} />
+
+                    <ModalForm elements={elements} elementSize={elementSize} handleSelectElement={handleSelectElement} autoValidation={autoValidation} isReview={isReview} />
                     {!autoValidation &&
                         <View style={styles.buttonsContainer}>
                             <Button mode="outlined" onPress={handleCancel} style={{ width: '40%' }}>Annuler</Button>

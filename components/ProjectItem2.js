@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { faBezierCurve, faDrawCircle, faDrawSquare, faTools, faToolbox } from '@fortawesome/pro-duotone-svg-icons'
+import { faBezierCurve, faDrawCircle, faDrawSquare, faTools, faToolbox, faLamp } from '@fortawesome/pro-duotone-svg-icons'
 
 import CustomIcon from './CustomIcon'
 
@@ -33,6 +33,10 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
             case 'Installation':
                 return faToolbox
+                break
+
+            case 'Maintenance':
+                return faLamp
                 break
         }
     }

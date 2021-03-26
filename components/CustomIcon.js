@@ -12,7 +12,7 @@ import PropTypes from 'prop-types'
 const CustomIcon = ({ icon = faCommentDots, size = 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, ...props }) => {
 
     if (onPress) return (
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={onPress} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}>
             <FontAwesomeIcon
                 icon={icon}
                 style={[styles.iconStyle, style]}
