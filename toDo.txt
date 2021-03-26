@@ -77,6 +77,13 @@ TO DO:
 + PROCESS: Complete process
 + PROCESS: Add responsible for each action
 + PROCESS: Notifications & Emails
++ PROCESS: Cancel annulation (rollback: delete 'cancelProcess' phase && undo latest action of latest step)
+
+//Specific bugs process
+(Maybe:::: RDN -> technicalVisitValidation (onchange date and press Valider -> The step starts again from begining.))
+Crash (project.name is undefined) if pressing quickly Installation > installationCreation > installationCreation
+(project is empty) if pressing quickly Installation > pvCreation > pvCreation
+
 
 
 + PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)
@@ -111,6 +118,7 @@ TO DO:
 ? Can a task be deleted or should it be just archived
 
 DONE:
++ PROCESS: onSnapshot to update realtime process (in case other users change it simultaneously) DRAWBACK: Offline will not be always up to date
 + BREAKING PROCESS CHANGE: Change nextStep/nextPhase from step attributes to action attributes.
 + CONDITIONAL FACTURE CHOICE: check if generated quote exist -> choose conversion or manual
 + PROCESS: Add action loading on navigating back

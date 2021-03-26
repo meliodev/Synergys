@@ -88,22 +88,6 @@ const processModel = {
                         verificationValue: ''
                     },
                     {
-                        id: 'comment',
-                        title: 'Commentaire',
-                        instructions: "Veuillez renseigner des informations utiles (exp: Informations sur l'habitation)",
-                        actionOrder: 5,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
-                        type: 'manual',
-                        //responsable: '',
-                        status: 'pending',
-                        comment: '',
-                        verificationType: 'comment',
-                    },
-                    {
                         id: 'conversionClient',
                         title: 'Convertir le prospect en client',
                         instructions: 'Appuyez sur le bouton "Convertir en client"',
@@ -118,6 +102,22 @@ const processModel = {
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: true, //check if fieldValue !== verificationValue
+                    },
+                    {
+                        id: 'comment',
+                        title: 'Commentaire',
+                        instructions: "Veuillez renseigner des informations utiles (exp: Informations sur l'habitation)",
+                        actionOrder: 5,
+                        collection: '',
+                        documentId: '', // depending on the concerned project
+                        properties: [],
+                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+                        screenParams: null,
+                        type: 'manual',
+                        //responsable: '',
+                        status: 'pending',
+                        comment: '',
+                        verificationType: 'comment',
                         nextPhase: '' //#dynamic
                     },
                 ]
@@ -1280,7 +1280,7 @@ const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1866,7 +1866,7 @@ const processModel = {
                 actions: [
                     {
                         id: 'cancelProject',  //#task: rollback (Resume project)
-                        title: 'Le projet a été annulé.',
+                        title: 'Le projet a été annulé', //#task put: "Voulez-vous reprendre le projet ?""
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
                         collection: '',
@@ -1878,7 +1878,7 @@ const processModel = {
                         //responsable: '',
                         status: 'pending',
                         comment: '',
-                        verificationType: 'no-verification',
+                        verificationType: 'no-verification', //#task: put rollback
                     },
                 ]
             },
@@ -2097,7 +2097,6 @@ const configureActions = async (actions, attributes, process) => {
             if (action.collection === 'Clients') { //CASE 1: doc id already exists once project is created..
                 action.documentId = attributes.clientId
                 action.screenParams.userId = attributes.clientId
-                console.log('action.documentId55555555555555555', action.documentId)
             }
 
             else { //CASE2: doc id is created later on after project is created.. (so we have to retrieve doc id using a query) #task: force user to overwrite existing task to avoid same task duplicates
@@ -2231,8 +2230,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     let nextStep = ''
     let nextPhase = ''
 
-    console.log(collection, documentId)
-
     const verifiedActionsSameDoc = await db.collection(collection).doc(documentId).get().then((doc) => {
 
         const data = doc.data()
@@ -2240,7 +2237,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         for (let action of actionsSameDoc) {
 
             if (!doc.exists) {
-                console.log('DOC no existing...........')
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }
@@ -2249,7 +2245,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
                 const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
 
                 if (typeof (nestedVal) === 'undefined') {
-                    console.log('undefined...........')
                     action.status = 'pending'
                     allActionsSameDocValid = false
                 }
@@ -2262,7 +2257,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
                     }
 
                     else {
-                        console.log(nestedVal, '!================================', action.verificationValue)
                         action.status = 'pending'
                         allActionsSameDocValid = false
                     }
@@ -2274,7 +2268,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         return actionsSameDoc
     })
 
-    console.log('.....', verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase)
     return { verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase }
 }
 

@@ -5,7 +5,7 @@ import { List } from 'react-native-paper'
 import Dialog from 'react-native-dialog'
 import firebase from '@react-native-firebase/app'
 import _ from 'lodash'
-import { faCheckCircle, faInfoCircle } from '@fortawesome/pro-light-svg-icons'
+import { faCheckCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
 import { faCheckCircle as faSolidCheckCircle } from '@fortawesome/pro-solid-svg-icons'
 import { withNavigation } from 'react-navigation'
 
@@ -17,7 +17,7 @@ import Loading from './Loading'
 import StepProgress from './process/StepProgress'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler } from '../core/process'
-import { configChoiceIcon } from '../core/utils'
+import { configChoiceIcon, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 
@@ -95,26 +95,32 @@ class ProcessAction extends Component {
         const { process } = this.state
         const { project } = this.props
 
-        this.setState({ loading: true })
+        load(this, true)
         await this.runProcessHandler(process)
-        this.setState({ loading: false })
+        load(this, false)
 
-        this.focusListener = this.props.navigation.addListener('didFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
-            console.log('000000000000000000000000000000000000000000000000000000000000')
-            this.setState({ loading: true })
+        this.focusListener = this.props.navigation.addListener('willFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
+            load(this, true)
             await this.runProcessHandler(this.state.process)
-            this.setState({ loading: false })
+            load(this, false)
         })
 
-        db.collection('Projects').doc(project.id).onSnapshot((doc) => {
+        this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
             if (doc.exists) {
+                //Task should runProcessHandler in case another user submits the last action
                 const updatedProcess = doc.data().process
                 this.refreshProcess(updatedProcess)
             }
         })
     }
 
+    componentWillUnmount() {
+        //this.focusListener()
+        this.unsubscribeProcessListener()
+    }
+
     async runProcessHandler(process) {
+
         const { project, clientId, step } = this.props
         const secondPhaseId = getPhaseId(step)
 
@@ -125,7 +131,6 @@ class ProcessAction extends Component {
         }
 
         else {
-            console.log('process is same....')
             this.refreshProcess(updatedProcess)
         }
     }
@@ -137,7 +142,6 @@ class ProcessAction extends Component {
     }
 
     refreshProcess(updatedProcess) {
-
         const { currentPhaseId, currentStepId } = getCurrentStep(updatedProcess)
         const currentPhase = updatedProcess[currentPhaseId]
         const currentStep = updatedProcess[currentPhaseId].steps[currentStepId]
@@ -156,7 +160,8 @@ class ProcessAction extends Component {
         if (!comment) return //show error message
         this.setState({ loadingDialog: true })
 
-        await this.runChoiceOperation(choice.operation)
+        if (choice)
+            await this.runChoiceOperation(choice.operation)
         await this.validateAction(comment, null, false, nextStep, nextPhase)
 
         this.setState({ loadingDialog: false, showDialog: false })
@@ -215,9 +220,8 @@ class ProcessAction extends Component {
             }
 
             else if (onSelectType === 'validation') {
-                this.setState({ loadingModal: true })
-                // await this.runChoiceOperation(operation)
-                // await this.validateAction(null, null, false, null, null)
+                await this.runChoiceOperation(operation)
+                await this.validateAction(null, null, false, null, null)
             }
 
             else if (onSelectType === 'commentPicker') {
@@ -297,25 +301,24 @@ class ProcessAction extends Component {
 
         })
 
+        // this.setState({
+        //    loadingModal: false
+        //    currentAction: actionTemp
+        // }) 
 
-        this.setState({
-            loadingModal: false
-            //currentAction: actionTemp
-        })  //isAnimation = true
+        // console.log('Do animation now !')
 
-        // // console.log('Do animation now !')
+        // await this.countDown(1000)
 
-        // // await this.countDown(1000)
 
         if (nextStep || nextPhase) {
             const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
             processTemp = transitionRes.process
-
-            console.log('HELLO', processTemp.endProject)
         }
 
+
         await this.updateProcess(processTemp)
-        await this.runProcessHandler(processTemp)
+        //  await this.runProcessHandler(processTemp)
     }
 
     //func
@@ -334,7 +337,9 @@ class ProcessAction extends Component {
 
         await this.updateProcess(processTemp)
 
-        // await this.runProcessHandler(processTemp)
+        if (processTemp['cancelProject'] || processTemp['endProject']) return
+        
+        await this.runProcessHandler(processTemp)
     }
 
     //func
@@ -402,7 +407,7 @@ class ProcessAction extends Component {
                     </View>
                     :
                     <View style={styles.actionIconsContainer}>
-                        <CustomIcon icon={status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
+                        {currentAction && <CustomIcon icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
                         <CustomIcon icon={faInfoCircle} size={19} color={theme.colors.gray_dark} onPress={() => Alert.alert('Instructions', currentAction.instructions)} />
                     </View>
                 }

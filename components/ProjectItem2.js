@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { faBezierCurve, faDrawCircle, faDrawSquare, faTools, faToolbox, faLamp } from '@fortawesome/pro-duotone-svg-icons'
+import { faBinoculars, faTools, faToolbox, faLamp, faUserHardHat, faCalendar, faCalendarAlt } from '@fortawesome/pro-duotone-svg-icons'
 
 import CustomIcon from './CustomIcon'
 
@@ -12,33 +12,41 @@ import { withNavigation } from 'react-navigation'
 const iconContainerSize = constants.ScreenWidth * 0.24
 
 const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
-    
+
     const setIcon = (projectStep) => {
         switch (projectStep) {
             case 'Prospect':
-                return faBezierCurve
+                return faBinoculars
                 break
 
             case 'Rendez-vous 1':
-                return faDrawCircle
+                return faCalendar
                 break
 
             case 'Rendez-vous N':
-                return faDrawSquare
+                return faCalendarAlt
                 break
 
             case 'Visite technique':
-                return faTools
+                return faUserHardHat
                 break
 
             case 'Installation':
-                return faToolbox
+                return faTools
                 break
 
             case 'Maintenance':
-                return faLamp
+                return faToolbox
                 break
         }
+    }
+
+    const titleColor = (projectStatus) => {
+        if (projectStatus === 'Terminé')
+            return theme.colors.primary
+        else if (projectStatus === 'Annulé')
+            return theme.colors.error
+        else return theme.colors.secondary
     }
 
     return (
@@ -46,8 +54,8 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
             <View style={[styles.iconContainer, { backgroundColor: project.color }]}>
                 <CustomIcon icon={setIcon(project.step)} size={constants.ScreenWidth * 0.12} color={theme.colors.white} secondaryColor={theme.colors.secondary} />
             </View>
-            <View style= {{ width: iconContainerSize*1.1 }}>
-                <Text style={[theme.customFontMSregular.caption, {flexWrap: 'wrap', textAlign: 'center'}]} numberOfLines={2}>{project.name}</Text>
+            <View style={{ width: iconContainerSize * 1.1 }}>
+                <Text style={[theme.customFontMSregular.caption, { flexWrap: 'wrap', textAlign: 'center', color: titleColor(project.status) }]} numberOfLines={2}>{project.name}</Text>
             </View>
         </TouchableOpacity>
     )
@@ -58,7 +66,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
-     //   backgroundColor: 'pink',
+        //   backgroundColor: 'pink',
     },
     iconContainer: {
         width: iconContainerSize,

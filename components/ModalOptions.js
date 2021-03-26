@@ -108,16 +108,16 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
                     <Text style={[theme.customFontMSregular.header, { textAlign: 'center', color: numberColor }]}>{element.label}</Text>
                 </TouchableOpacity>
                 {index === 0 && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Pas du tout satisfait</Text>}
-                {index === (length - 1) &&<Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Très satisfait</Text>}
+                {index === (length - 1) && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Très satisfait</Text>}
             </View>
         )
     }
 
-    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-around', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }
+    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }
 
     if (isReview)
         return (
-            <View style={[containerStyle]}>
+            <View style={[containerStyle, { justifyContent: 'space-around' }]}>
                 {elements.map((element, index) => {
                     return (<Rate element={element} index={index} length={elements.length} />)
                 })}
@@ -125,7 +125,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
         )
 
     else return (
-        <View style={[containerStyle]}>
+        <View style={[containerStyle, { justifyContent: 'space-between' }]}>
             {elements.map((element, index) => {
                 return (<Element element={element} index={index} />)
             })}
