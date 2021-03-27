@@ -4,7 +4,7 @@ import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from
 import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import firebase from '@react-native-firebase/app'
@@ -220,6 +220,7 @@ class CreateProject extends Component {
             let documentTypes = []
             querysnapshot.forEach((doc) => {
                 const document = doc.data()
+                document.id = doc.id
                 documentsList.push(document)
                 documentTypes.push(document.type)
             })
@@ -327,18 +328,28 @@ class CreateProject extends Component {
 
         //2. Set project
         //subscribers = currentUser + collaborators (tags)
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const currentSubscriber = { id: this.currentUser.uid, fullName: this.currentUser.displayName, email: this.currentUser.email }
+        const currentUser = {
+            id: this.currentUser.uid,
+            fullName: this.currentUser.displayName
+        }
 
-        var subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName } })
+        const currentSubscriber = {
+            id: this.currentUser.uid,
+            fullName: this.currentUser.displayName,
+            email: this.currentUser.email,
+            role: this.props.role.value
+        }
+
+        var subscribers = tagsSelected.map((user) => { return { id: user.id, email: user.email, fullName: user.fullName, role: user.role } })
         subscribers.push(currentSubscriber)
 
         subscribers = subscribers.reduce((unique, o) => {
-            if (!unique.some(obj => obj.id === o.id && obj.email === o.email && obj.fullName === o.fullName)) {
+            if (!unique.some(obj => obj.id === o.id && obj.email === o.email && obj.fullName === o.fullName && obj.role === o.role)) {
                 unique.push(o)
             }
             return unique
         }, [])
+
 
         let project = {
             client: client,
@@ -446,6 +457,7 @@ class CreateProject extends Component {
                         <CustomIcon
                             icon={rightIconName}
                             style={{ color: theme.colors.gray_dark }}
+                            size={19}
                         />}
                 </TouchableOpacity>
             )
@@ -460,17 +472,17 @@ class CreateProject extends Component {
 
         return (
             <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                {attachments.map((image, key) => {
+                {attachments.map((attachment, key) => {
                     if (!isUpload) {
-                        var DocumentId = image.DocumentId
-                        image = image.attachment
+                        var DocumentId = attachment.id
+                        attachment = attachment.attachment
                     }
 
                     const rightIcon = setRightIcon(key)
 
                     return (
                         <UploadProgress
-                            attachment={image}
+                            attachment={attachment}
                             showRightIcon
                             rightIcon={rightIcon}
                             onPress={() => onPressAttachment(isUpload, DocumentId)}
@@ -487,18 +499,20 @@ class CreateProject extends Component {
 
     renderTasks(tasksList) {
 
+        const onPressTask = (taskDate, TaskId) => {
+            this.props.navigation.navigate('CreateTask', { isEdit: true, title: 'Modifier la tâche', TaskId })
+        }
+
         return tasksList.map((task, key) => {
+
             return (
-                <TouchableOpacity
-                    onPress={() => this.props.navigation.navigate('CreateTask', { isEdit: true, title: 'Modifier la tâche', DateId: task.date, TaskId: task.id })}
-                    style={[styles.attachment, { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 15 }]}>
-                    <Text style={theme.customFontMSregular.body}>{task.name}</Text>
-                    <MaterialIcons
-                        name='keyboard-arrow-right'
-                        size={21}
-                        color={theme.colors.placeholder}
-                        style={{ paddingVertical: 19, paddingHorizontal: 5 }}
-                    />
+                <TouchableOpacity style={[styles.task, { backgroundColor: task.color }]} onPress={() => onPressTask(task.date, task.id)} >
+                    <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
+                        <Text style={[theme.customFontMSregular.body, { color: '#fff' }]} numberOfLines={1}>{task.name}</Text>
+                    </View>
+                    <View style={{ flex: 0.5, alignItems: 'flex-end', justifyContent: 'center', paddingLeft: 5 }}>
+                        <Text style={[theme.customFontMSregular.caption, { color: '#fff' }]} numberOfLines={1}>{task.assignedTo.fullName}</Text>
+                    </View>
                 </TouchableOpacity>
             )
         })
@@ -600,9 +614,7 @@ class CreateProject extends Component {
                                         error={!!step.error}
                                         errorText={step.error}
                                         selectedValue={step}
-                                        onValueChange={(step) => {
-                                            this.setState({ step })
-                                        }}
+                                        onValueChange={(step) => { this.setState({ step }) }}
                                         title="Phase *"
                                         elements={steps}
                                         enabled={canUpdate}
@@ -661,9 +673,13 @@ class CreateProject extends Component {
                             sectionIcon={faTasks}
                             form={
                                 <View style={{ flex: 1 }}>
-                                    <Text
-                                        onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
-                                        style={[theme.customFontMSregular.caption, { color: theme.colors.primary }]}>Voir le planning du projet</Text>
+
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10, }}>
+                                        <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
+                                        <Text
+                                            onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
+                                            style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>Voir le planning du projet</Text>
+                                    </View>
 
                                     <List.AccordionGroup
                                         expandedId={expandedTaskId}
@@ -677,7 +693,7 @@ class CreateProject extends Component {
                                             let filteredTasks = tasksList.filter((task) => task.type === type)
 
                                             return (
-                                                <List.Accordion showArrow title={type} id={type}>
+                                                <List.Accordion showArrow title={type} id={type} titleStyle={theme.customFontMSregular.body}>
                                                     {this.renderTasks(filteredTasks)}
                                                 </List.Accordion>
                                             )
@@ -693,7 +709,10 @@ class CreateProject extends Component {
                             sectionIcon={faFolder}
                             form={
                                 <View style={{ flex: 1 }}>
-                                    {canCreateDocument && <Text onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })} style={[theme.customFontMSregular.caption, { color: theme.colors.primary }]}>Ajouter un document</Text>}
+                                    {canCreateDocument &&
+                                        <Text
+                                            onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })}
+                                            style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 10 }]}>+ Ajouter un document</Text>}
 
                                     <List.AccordionGroup
                                         expandedId={this.state.expandedId}
@@ -707,7 +726,7 @@ class CreateProject extends Component {
                                             let filteredDocuments = documentsList.filter((doc) => doc.type === type)
 
                                             return (
-                                                <List.Accordion showArrow title={type} id={type}>
+                                                <List.Accordion showArrow title={type} id={type} titleStyle={theme.customFontMSregular.body}>
                                                     {this.renderAttachments(filteredDocuments, 'pdf', false)}
                                                 </List.Accordion>
                                             )
@@ -901,6 +920,17 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         borderRadius: 5,
         marginTop: 15
-    }
+    },
+    task: {
+        //flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        borderRadius: 5,
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        marginHorizontal: 15,
+        marginBottom: 10,
+        //marginTop: 10,
+    },
 })
 

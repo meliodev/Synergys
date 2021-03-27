@@ -17,6 +17,7 @@ import Loading from '../../components/Loading'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { configureQuery } from '../../core/privileges'
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
@@ -43,6 +44,9 @@ class ListOrders extends Component {
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false) // For pdf generation
         this.docType = this.props.navigation.getParam('docType', '') // For pdf generation
+        this.popCount = this.props.navigation.getParam('popCount', 1) // For pdf generation
+        this.project = this.props.navigation.getParam('project', undefined) // For pdf generation
+
         this.titleText = this.props.navigation.getParam('titleText', 'Commandes')
         this.showFAB = this.props.navigation.getParam('showFAB', true)
         this.filteredOrders = []
@@ -67,28 +71,41 @@ class ListOrders extends Component {
     async componentDidMount() {
         load(this, true)
         await this.fetchOrders()
+        if (this.project)
+            this.setState({ project: this.project }) //#task: change filter to QueryFilter
     }
 
     async fetchOrders() {
-        const query = db.collection('Orders').where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
-            let { ordersList } = this.state
+        // const query = db.collection('Orders').where('deleted', '==', false).orderBy('createdAt', 'DESC')
 
-            //Fetch client dynamicly
-            for (let i = 0; i < ordersList.length; i++) {
-                await db.collection('Projects').doc(ordersList[i].project.id).get().then((doc) => {
-                    ordersList[i].client = doc.data().client
-                })
-            }
+        const { queryFilters } = this.props.permissions.orders
+        if (queryFilters === []) this.setState({ ordersList: [], ordersCount: 0 })
+        else {
+            const params = { role: this.props.role.value }
+            var query = configureQuery('Orders', queryFilters, params)
 
-            this.setState({ ordersList, filteredOrders: ordersList })
-            load(this, false)
-        })
+            this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
+
+                //Fetch client dynamiclly
+                let { ordersList } = this.state
+                if (ordersList.length > 0) {
+                    for (let i = 0; i < ordersList.length; i++) {
+                        await db.collection('Projects').doc(ordersList[i].project.id).get().then((doc) => {
+                            if (doc.exists)
+                                ordersList[i].client = doc.data().client
+                        })
+                    }
+                    this.setState({ ordersList, filteredOrders: ordersList })
+                }
+
+                load(this, false)
+            })
+        }
     }
 
-    componentWillUnmount() {
-        this.unsubscribe()
-    }
+    // componentWillUnmount() {
+    //     this.unsubscribe()
+    // }
 
     renderOrder(order) { //#edit
         return <OrderItem order={order} onPress={() => this.onPressOrder(order)} />
@@ -98,7 +115,7 @@ class ListOrders extends Component {
         if (this.isRoot)
             this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
 
-        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), onGoBack: this.props.navigation.getParam('onGoBack', null) })
+        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), popCount: this.popCount, onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
     renderSearchBar() {
@@ -106,7 +123,7 @@ class ListOrders extends Component {
         let { searchInput, showInput } = this.state
         return (
             <SearchBar
-                close={!this.isRoot}
+                menu={this.isRoot}
                 main={this}
                 title={!this.state.showInput}
                 titleText={this.titleText}

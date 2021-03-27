@@ -26,6 +26,7 @@ import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
 
+import { configureQuery } from '../../core/privileges'
 import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as applyFilterAgenda, handleFilterTasks as applyFilterTasks } from '../../core/utils'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
@@ -120,15 +121,22 @@ class Agenda2 extends Component {
 
         let query = null
 
-        //AGENDA
+        //AGENDA (static)
         if (isAgenda) {
             query = db.collection('Agenda').where('assignedTo.id', '==', currentUser.uid).orderBy('dateKey', 'asc')
             return query
         }
 
-        //PLANNING
-        //if (roleId === 'admin')
-        else query = db.collection('Agenda').orderBy('dateKey', 'asc')
+        //PLANNING (dynamic)
+        else {
+            const { queryFilters } = this.props.permissions.tasks
+            if (queryFilters === []) return null
+            else {
+                const params = { role: this.props.role.value }
+                query = configureQuery('Agenda', queryFilters, params)
+                return query
+            }
+        }
 
         // else if (roleId === 'dircom')
         //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'com')
@@ -137,10 +145,10 @@ class Agenda2 extends Component {
         //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'poseur')
 
         // else if (roleId === 'com')
-        //     query = agendaRef.collection('Tasks').where('assignedTo.id', '==', currentUser.id)
+        //     query = agendaRef.collection('Tasks').where('project.subscribers', 'array-contains', currentUser.id)
 
         // else if (roleId === 'poseur')
-        //     query = agendaRef.collection('Tasks')
+        //     query = agendaRef.collection('Tasks').where('project.subscribers', 'array-contains', currentUser.id)
 
         return query
     }
@@ -155,6 +163,7 @@ class Agenda2 extends Component {
                 items[day.dateString] = []
 
                 const query = this.setTasksQuery()
+                if (!query) return
                 await query.get().then((tasksSnapshot) => {
 
                     if (tasksSnapshot === null) return
@@ -367,7 +376,7 @@ class Agenda2 extends Component {
     }
 
     renderItem(item) {
-        console.log(item)
+
         const itemColor = item.color
         const TaskId = item.id
 
@@ -491,6 +500,7 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         network: state.network,
+        permissions: state.permissions,
         //fcmToken: state.fcmtoken
     }
 }

@@ -1,6 +1,7 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { faBinoculars, faTools, faToolbox, faLamp, faUserHardHat, faCalendar, faCalendarAlt } from '@fortawesome/pro-duotone-svg-icons'
+import { faCheckCircle, faTimesCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import CustomIcon from './CustomIcon'
 
@@ -13,7 +14,7 @@ const iconContainerSize = constants.ScreenWidth * 0.24
 
 const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
-    const setIcon = (projectStep) => {
+    const setIconPhase = (projectStep) => {
         switch (projectStep) {
             case 'Prospect':
                 return faBinoculars
@@ -41,21 +42,22 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
         }
     }
 
-    const titleColor = (projectStatus) => {
+    const setIconStatus = (projectStatus) => {
         if (projectStatus === 'Terminé')
-            return theme.colors.primary
+            return <CustomIcon icon={faCheckCircle} color='green' size={iconContainerSize *0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
         else if (projectStatus === 'Annulé')
-            return theme.colors.error
-        else return theme.colors.secondary
+            return <CustomIcon icon={faTimesCircle} color={theme.colors.error} size={iconContainerSize *0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
+        else return null
     }
 
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>
+            {setIconStatus(project.status)}
             <View style={[styles.iconContainer, { backgroundColor: project.color }]}>
-                <CustomIcon icon={setIcon(project.step)} size={constants.ScreenWidth * 0.12} color={theme.colors.white} secondaryColor={theme.colors.secondary} />
+                <CustomIcon icon={setIconPhase(project.step)} size={iconContainerSize * 0.45} color={theme.colors.white} secondaryColor={theme.colors.secondary} />
             </View>
             <View style={{ width: iconContainerSize * 1.1 }}>
-                <Text style={[theme.customFontMSregular.caption, { flexWrap: 'wrap', textAlign: 'center', color: titleColor(project.status) }]} numberOfLines={2}>{project.name}</Text>
+                <Text style={[theme.customFontMSregular.caption, { flexWrap: 'wrap', textAlign: 'center', color: theme.colors.secondary }]} numberOfLines={2}>{project.name}</Text>
             </View>
         </TouchableOpacity>
     )

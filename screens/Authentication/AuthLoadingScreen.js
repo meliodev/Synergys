@@ -124,7 +124,7 @@ class AuthLoadingScreen extends Component {
           }
 
           //2. Set privilleges
-          await this.configurePrivilleges()
+          await this.configurePrivileges()
 
           //3. Set fcm token
           await this.requestUserPermission() //iOS only (notifications)
@@ -145,7 +145,7 @@ class AuthLoadingScreen extends Component {
     })
   }
 
-  async configurePrivilleges() {
+  async configurePrivileges() {
     //A. Compare & Update permissions config
     //A.1. Get permissions config from server
     // const remotePermissions = (await this.fetchPermissionsConfig()).data

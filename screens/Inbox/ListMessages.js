@@ -13,6 +13,7 @@ import EmptyList from '../../components/EmptyList'
 
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
+import { configureQuery } from '../../core/privileges'
 
 import { fetchDocs } from "../../api/firestore-api";
 
@@ -32,9 +33,17 @@ class ListMessages extends Component {
     }
 
     async componentDidMount() {
-        const query = db.collection('Messages').where('subscribers', 'array-contains', this.currentUser.uid)
-        //.orderBy('sentAt', 'DESC')
-        this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
+
+        const { queryFilters } = this.props.permissions
+        if (queryFilters === []) this.setState({ messagesList: [], messagesCount: 0 })
+        else {
+            const params = { role: this.props.role.value }
+            const query = configureQuery('Messages', queryFilters, params)
+            this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
+        }
+
+        //  const query = db.collection('Messages').where('subscribers', 'array-contains', this.currentUser.uid).orderBy('sentAt', 'desc')
+        // this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
     }
 
 
@@ -84,7 +93,7 @@ class ListMessages extends Component {
                 }
                 <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />
             </Background >
-        ) 
+        )
 
     }
 }
@@ -100,5 +109,15 @@ const styles = StyleSheet.create({
     }
 })
 
+
+
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        permissions: state.permissions,
+        network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
 
 export default withNavigation(ListMessages)

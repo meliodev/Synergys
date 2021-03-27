@@ -72,33 +72,20 @@ Steps:
 
 22/03/2021
 TO DO:
-+ PROCESS: Remove "Ignorer option" from all actions of Maintainance (if maintainance not initialized previously)
-+ PROCESS: Add verification actions in case user starts project from a phase depending on docs/tasks created on previous phase (exp: Devis, RD2), or like DOSSIER ACTION LOGEMENT which skips rd2 & rdn
-+ RDN: rd2Creation, quoteCreationChoice
-+ Visite technique: technicalVisitCreation, 
-
-+ PROCESS: Handle action loadings to avoid press before configure action (and preferably set check animation)
-+ PROCESS: Complete process
 + PROCESS: Add responsible for each action
 + PROCESS: Notifications & Emails
 + PROCESS: Cancel annulation (rollback: delete 'cancelProcess' phase && undo latest action of latest step)
 
-//Specific bugs process
-(Maybe:::: RDN -> technicalVisitValidation (onchange date and press Valider -> The step starts again from begining.))
-Crash (project.name is undefined) if pressing quickly Installation > installationCreation > installationCreation
-(project is empty) if pressing quickly Installation > pvCreation > pvCreation
-
-
-
 + PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)
 -> OPTION 1: Verify if a task with same type already exists for the selected project (to avoid duplicates)
 -> OPTION 2 (SELECTED) "TRAVAIL A LA CHAINE: CREER UNE TACHE PAR LA BONNE PERSONNE AU BON MOMENT": Make task types list dynamic: User can create a task only through process action link, and only if he is one of the responsibles. 
+
 + Commercial task types = [RD1, RDN, VTP, VT] tag: com
 + Poseur task types = [Installation, Rattrapage, Panne, Entretien] tag: tech
 + Add dynamiclly task types..
-+ Display 30% phase > step 
 + Reactiver notifications app.js
 + UPdate all user/client objects through collections on update name.. (cloud function trigger)
+? When generating Devis from existing order.. should we filter only orders related to the concerned project ?
 
 + Action a faire
 + add infoCircle 
@@ -122,6 +109,20 @@ Crash (project.name is undefined) if pressing quickly Installation > installatio
 ? Can a task be deleted or should it be just archived
 
 DONE:
++ PROCESS: Change action design (NEW)
++ PROCESS: Complete process model handling
++ PROCESS: Remove "Ignorer option" from all actions of Maintainance (if maintainance not initialized previously)
++ PROCESS: Handle action loadings to avoid press before configure action (and preferably set check animation)
++ PROCESS: Add verification actions in case user starts project from a phase depending on docs/tasks created on previous phase (exp: Devis, RD2), or like DOSSIER ACTION LOGEMENT which skips rd2 & rdn
+-> RDN: rd2Creation, quoteCreationChoice
+-> Visite technique: technicalVisitCreation, 
+
+
+//FIXED: Specific bugs process (test more..)
+(Maybe:::: RDN -> technicalVisitValidation (onchange date and press Valider -> The step starts again from begining.))
+Crash (project.name is undefined) if pressing quickly Installation > installationCreation > installationCreation
+(project is empty) if pressing quickly Installation > pvCreation > pvCreation
+
 + PROCESS: onSnapshot to update realtime process (in case other users change it simultaneously) DRAWBACK: Offline will not be always up to date
 + BREAKING PROCESS CHANGE: Change nextStep/nextPhase from step attributes to action attributes.
 + CONDITIONAL FACTURE CHOICE: check if generated quote exist -> choose conversion or manual

@@ -35,9 +35,7 @@ class ListNotifications extends Component {
     }
 
     async componentDidMount() {
-        let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications')
-            .where('deleted', '==', false)
-            .orderBy('sentAt', 'desc')
+        let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'desc')
         this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { })
     }
 

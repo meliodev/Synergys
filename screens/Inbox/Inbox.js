@@ -32,6 +32,9 @@ class Inbox extends React.Component {
 
         let { index } = this.state
         const { isConnected } = this.props.network
+        const { role } = this.props
+        const permissionsMessages = this.props.permissions.messages
+        console.log('permissions messages', permissionsMessages)
 
         return (
             <View style={{ flex: 1 }}>
@@ -42,8 +45,8 @@ class Inbox extends React.Component {
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
                     icon1={faBell}
                     icon2={faEnvelope}
-                    Tab1={<ListNotifications offLine={!isConnected} />}
-                    Tab2={<ListMessages offLine={!isConnected} />} />
+                    Tab1={<ListNotifications offLine={!isConnected}/>}
+                    Tab2={<ListMessages offLine={!isConnected} role={role} permissions={permissionsMessages}/>} />
             </View>
         )
     }
@@ -53,6 +56,7 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         network: state.network,
+        permissions: state.permissions
         //fcmToken: state.fcmtoken
     }
 }

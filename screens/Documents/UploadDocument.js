@@ -48,19 +48,19 @@ const docSources = [
 
 const types = [
     { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
-    { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
-    { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
-    { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate, selected: false },
-    { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt, selected: false },
-    { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus, selected: false },
-    { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd, selected: false },
+    // { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
+    // { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
+    // { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate, selected: false },
+    // { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt, selected: false },
+    // { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus, selected: false },
+    // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd, selected: false },
     { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
-    { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
-    { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
-    { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
-    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit, selected: false },
-    { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit, selected: false },
-    { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
+    // { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
+    // { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
+    // { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
+    // { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit, selected: false },
+    // { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit, selected: false },
+    { label: 'Autre', value: 'Autre', icon: faFile, selected: true },
 ]
 
 const genTypes = [
@@ -80,6 +80,7 @@ class UploadDocument extends Component {
         //Submit
         this.refreshProject = this.refreshProject.bind(this)
         this.pickDoc = this.pickDoc.bind(this)
+        this.onSelectDocumentSource = this.onSelectDocumentSource.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.persistDocument = this.persistDocument.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
@@ -109,16 +110,24 @@ class UploadDocument extends Component {
         this.isEdit = this.DocumentId ? true : false
         this.DocumentId = this.isEdit ? this.DocumentId : generateId('GS-DOC-')
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
-        this.project = this.props.navigation.getParam('project', '')
 
         //Process params
-        this.documentType = this.props.navigation.getParam('documentType', '')
-        if (!this.isEdit && this.documentType) {
+        this.dynamicType = this.props.navigation.getParam('dynamicType', false)
+        this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
+        this.project = this.props.navigation.getParam('project', undefined) //Not editable
+
+        if (this.dynamicType) {
+            types.push(this.documentType)
+        }
+
+        if (!this.isEdit && this.documentType) { //Pre-defined document creation
             types.forEach((type) => {
-                if (type.value === this.documentType) type.selected = true
+                if (type.value === this.documentType.value) type.selected = true
+                else type.selected = false
             })
         }
-        this.goBackOnSubmit = this.documentType !== ''
+
+        this.goBackOnSubmit = this.documentType !== '' && typeof (this.documentType) !== 'undefined'
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         this.state = {
@@ -127,12 +136,12 @@ class UploadDocument extends Component {
             description: { value: "", error: '' },
 
             //Screens
-            project: { id: '', name: '' },
+            project: this.project || { id: '', name: '', error: '' },
             projectError: '',
 
             //Pickers
             state: 'A faire',
-            type: this.documentType,
+            type: (this.documentType && this.documentType.value) || 'Autre',
 
             //File Picker
             attachment: null,
@@ -271,7 +280,7 @@ class UploadDocument extends Component {
     //Submit handler
     async handleSubmit(isConversion, DocumentId) {
         Keyboard.dismiss()
-        
+
         //Reject offline updates
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
@@ -486,7 +495,15 @@ class UploadDocument extends Component {
                         style={{ marginTop: 5 }}
                         onPress={() => {
                             if (!canUpdate) return
-                            this.toggleModal('docSource')
+
+                            if (this.dynamicType) {
+                                if (this.documentType.value === 'Devis' || this.documentType.value === 'Facture')
+                                    this.toggleModal('docSource')
+
+                                else this.pickDoc()
+                            }
+
+                            else this.toggleModal('docSource')
                         }}
                     />
                 </View>
@@ -531,24 +548,33 @@ class UploadDocument extends Component {
         }
     }
 
-    setDocumentSource(option) {
-        this.setState({ attachmentSource: option, modalContent: 'docType' })
+    setDocumentSource(attachmentSource) {
+        const { modalContent, type } = this.state
+
+        if (this.documentType) {
+            this.onSelectDocumentSource(attachmentSource)
+        }
+
+        else this.setState({ attachmentSource, modalContent: 'docType' })
+    }
+
+    onSelectDocumentSource(attachmentSource) {
+
+        if (attachmentSource === 'generation') {
+            this.setState({ modalContent: 'genConfig' })
+        }
+
+        else if (attachmentSource === 'upload') {
+            this.toggleModal('docSource')
+            this.pickDoc()
+        }
     }
 
     handleConfirmGen() {
         const { modalContent, attachmentSource, type } = this.state
 
         if (modalContent === 'docType') {
-
-            if (attachmentSource === 'generation') {
-                if (type === '') return
-                this.setState({ modalContent: 'genConfig' })
-            }
-
-            else if (attachmentSource === 'upload') {
-                this.toggleModal('docSource')
-                this.pickDoc()
-            }
+            this.onSelectDocumentSource(attachmentSource)
         }
 
         else if (modalContent === 'genConfig') {
@@ -575,12 +601,12 @@ class UploadDocument extends Component {
 
         //Existing order
         if (index === 0) {
-            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', autoGenPdf: true, docType: type, DocumentId: this.DocumentId, onGoBack: this.getGeneratedPdf })
+            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', autoGenPdf: true, docType: type, DocumentId: this.DocumentId, project: this.project, popCount: 3, onGoBack: this.getGeneratedPdf })
         }
 
         //New order
         else if (index === 1) {
-            this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type, DocumentId: this.DocumentId, onGoBack: this.getGeneratedPdf })
+            this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type, DocumentId: this.DocumentId, project: this.project, popCount: 2, onGoBack: this.getGeneratedPdf })
         }
 
         else return
@@ -719,7 +745,8 @@ class UploadDocument extends Component {
                                 <ModalOptions
                                     title={title}
                                     columns={columns}
-                                    modalStyle={{ marginTop: modalContent === 'docType' && attachmentSource === 'upload' ? 0 : constants.ScreenHeight * 0.5 }}
+                                    modalStyle={{ marginTop: constants.ScreenHeight * 0.5 }}
+                                    // modalStyle={{ marginTop: modalContent === 'docType' && attachmentSource === 'upload' ? 0 : constants.ScreenHeight * 0.5 }}
                                     isVisible={showModal}
                                     toggleModal={() => this.toggleModal('docSource')}
                                     handleCancel={this.handleCancelGen}
@@ -777,7 +804,11 @@ class UploadDocument extends Component {
                                 />
 
                                 <ItemPicker
-                                    onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })}
+                                    onPress={() => {
+                                        if (this.project || this.isEdit) return //pre-defined project
+                                        navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
+                                    }
+                                    }
                                     label="Projet concerné *"
                                     value={project.name}
                                     error={!!projectError}
@@ -840,7 +871,7 @@ class UploadDocument extends Component {
                         {type === 'Devis' && order ? //Document type is "Devis" & Devis was generated from an order form
                             <Button
                                 mode="contained"
-                                style={[styles.signButton, { width: constants.ScreenWidth * 0.55, backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
+                                style={[styles.signButton, { width: constants.ScreenWidth * 0.6, backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
                                 onPress={() => this.convertProposalToBill(isConnected, true)}>
                                 <Text style={[theme.customFontMSmedium.caption, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>Convertir en facture</Text>
                             </Button>

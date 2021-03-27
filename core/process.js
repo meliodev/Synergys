@@ -147,7 +147,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Visite technique préalable', project: null },
+                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -166,7 +166,7 @@ const processModel = {
                         documentId: '', //#dynamic
                         properties: ['address', 'description'],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '' }, //#dynamic
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable' }, dynamicType: true }, //#dynamic
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -186,7 +186,7 @@ const processModel = {
                         documentId: '',
                         //properties: [],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '' },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable' }, dynamicType: true },
                         type: 'manual', //Check manually
                         responsable: '',
                         status: 'pending',
@@ -217,7 +217,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Rendez-vous N', project: null, enableRDN: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -251,7 +251,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Fiche EEB', project: null },
+                        screenParams: { project: null, documentType: { label: 'Fiche EEB', value: 'Fiche EEB', selected: false }, dynamicType: true, },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -305,7 +305,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { documentType: 'Dossier aide', project: null },
+                        screenParams: { project: null, documentType: { label: 'Dossier aide', value: 'Dossier aide', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -359,7 +359,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Devis', project: null },
+                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -413,7 +413,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Dossier CEE', project: null },
+                        screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -448,7 +448,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Rendez-vous N', project: null, enableRDN: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -508,7 +508,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Rendez-vous N', project: null, enableRDN: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true },
                         type: 'auto',
                         responsable: { id: 'GS-US-xQ6s', role: 'dircom' }, //#task: set id of DC (use it to render avatarText icon to reprensent role)
                         status: 'pending',
@@ -533,7 +533,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -554,7 +554,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -576,7 +576,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -597,7 +597,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -618,7 +618,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -639,7 +639,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -671,7 +671,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Devis', project: null },
+                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -695,7 +695,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -742,7 +742,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Visite technique', project: null },
+                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -820,7 +820,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Visite technique', project: null },
+                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -839,7 +839,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { TaskId: '' },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -901,7 +901,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '' },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -970,7 +970,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Installation', project: null },
+                        screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -989,7 +989,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '' },
+                        screenParams: { TaskId: '', taskType: { label: 'Installation', value: 'Installation' }, dynamicType: true },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -1082,7 +1082,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'PV réception', project: null },
+                        screenParams: { project: null, documentType: { label: 'PV réception', value: 'PV réception', selected: false }, dynamicType: true, },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1139,7 +1139,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { taskType: 'Rattrapage', project: null },
+                        screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage' }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1228,8 +1228,8 @@ const processModel = {
                         queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
                         //properties: [],
                         //documentId: '',
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenName: '', //creation
+                        screenParams: {},
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -1260,7 +1260,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Mandat SEPA', project: null },
+                        screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true },
                         type: 'auto', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -1289,7 +1289,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
@@ -1319,7 +1319,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { documentType: 'Contrat CGU-CGV', project: null },
+                        screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1348,7 +1348,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
@@ -1383,7 +1383,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Devis', project: null },
+                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1439,7 +1439,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Facture', project: null },
+                        screenParams: { project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1463,7 +1463,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1499,7 +1499,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '' },
+                        screenParams: { DocumentId: '', documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1527,7 +1527,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1541,7 +1541,7 @@ const processModel = {
                 ]
             },
             'paymentStatus': { //conversion
-                title: "Finalisation de la facuration",
+                title: "Finalisation de la facturation",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 10,
                 nextStep: '',
@@ -1604,7 +1604,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Attestation fluide', project: null },
+                        screenParams: { project: null, documentType: { label: 'Attestation fluide', value: 'Attestation fluide', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1718,8 +1718,8 @@ const processModel = {
                         queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
                         //properties: [],
                         //documentId: '',
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Autre', project: null },
+                        screenName: '', //creation
+                        screenParams: {},
                         type: 'manual', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -1749,7 +1749,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { documentType: 'Mandat SEPA', project: null },
+                        screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true },
                         type: 'auto', //Check manually
                         //responsable: '',
                         status: 'pending',
@@ -1777,7 +1777,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
@@ -1806,7 +1806,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { documentType: 'Contrat CGU-CGV', project: null },
+                        screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1834,7 +1834,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },

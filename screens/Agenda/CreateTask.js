@@ -33,7 +33,13 @@ import { CustomIcon } from '../../components';
 
 const db = firebase.firestore()
 
-let types = [
+let staticTypes = [
+    { label: 'Normale', value: 'Normale' }, //#static
+    { label: 'Panne', value: 'Panne' }, //#static
+    { label: 'Entretien', value: 'Entretien' }, //#static
+]
+
+let allTypes = [
     { label: 'Normale', value: 'Normale' }, //#static
     { label: 'Rendez-vous 1', value: 'Rendez-vous 1' }, //#dynamic
     { label: 'Visite technique préalable', value: 'Visite technique préalable' }, //#dynamic
@@ -42,8 +48,9 @@ let types = [
     { label: 'Rattrapage', value: 'Rattrapage' }, //#dynamic
     { label: 'Panne', value: 'Panne' }, //#static
     { label: 'Entretien', value: 'Entretien' }, //#static
-    //{ label: 'Rendez-vous N', value: 'Rendez-vous N' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+    { label: 'Rendez-vous N', value: 'Rendez-vous N' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
+
 
 const priorities = [
     { label: 'Urgente', value: 'Urgente' },
@@ -81,11 +88,15 @@ class CreateTask extends Component {
         this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 
         //Params (task properties)
-        this.enableRDN = this.props.navigation.getParam('enableRDN', false)
-        this.taskType = this.props.navigation.getParam('taskType', 'Rendez-vous')
-        this.project = this.props.navigation.getParam('project', { id: '', name: '', error: '' })
-        if (this.enableRDN) {
-            types.push({ label: 'Rendez-vous N', value: 'Rendez-vous N' })
+        this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
+        this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
+        this.enableTypePicker = this.isEdit ? false : this.taskType ? false : true
+        this.project = this.props.navigation.getParam('project', undefined)
+
+        this.types = this.isEdit ? allTypes : staticTypes
+
+        if (this.dynamicType) {
+            this.types.push(this.taskType)
         }
 
         this.state = {
@@ -94,13 +105,13 @@ class CreateTask extends Component {
             description: { value: "", error: '' },
 
             //PICKERS
-            type: this.taskType,
+            type: (this.taskType && this.taskType.value) || 'Normale',
             priority: 'Moyenne',
             status: 'En cours',
 
             //Screens
             assignedTo: { id: 'GS-US-xQ6s', fullName: 'Salimu Lyoussi', error: '' },
-            project: this.project,
+            project: this.project || { id: '', name: '', error: '' },
             address: { description: '', place_id: '', error: '' },
             startDate: { value: moment().format(), error: '' },
             dueDate: { value: moment().add(1, 'h').format(), error: '' },
@@ -143,6 +154,7 @@ class CreateTask extends Component {
             priority = task.priority
             status = task.status
             type = task.type
+            console.log('type', type)
             address = task.address
             startDate.value = task.startDate
             dueDate.value = task.dueDate
@@ -242,7 +254,7 @@ class CreateTask extends Component {
             name: name.value,
             assignedTo: { id: assignedTo.id, fullName: assignedTo.fullName },
             description: description.value,
-            project: { id: project.id, name: project.name },
+            project,
             type: type,
             priority: priority,
             status: status,
@@ -253,7 +265,7 @@ class CreateTask extends Component {
             editedBy: currentUser,
             subscribers: [{ id: this.currentUser.uid }], //add others (DC, CMX)
             color,
-            timestamp: timestamp
+            deleted: false
         }
 
         if (!this.isEdit) {
@@ -362,7 +374,10 @@ class CreateTask extends Component {
                                     />
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })}
+                                        onPress={() => {
+                                            if (this.project || this.isEdit) return //pre-defined project
+                                            navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
+                                        }}
                                         label="Projet concerné"
                                         value={project.name}
                                         error={!!project.error}
@@ -382,8 +397,8 @@ class CreateTask extends Component {
                                         selectedValue={type}
                                         onValueChange={(type) => this.setState({ type })}
                                         title="Type"
-                                        elements={types}
-                                        enabled={canUpdate}
+                                        elements={this.types}
+                                        enabled={canUpdate && this.enableTypePicker} //pre-defined task type
                                         containerStyle={{ marginBottom: 10 }}
                                     />
 
@@ -427,7 +442,7 @@ class CreateTask extends Component {
                                         <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                             <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} />
-                                            <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size = {21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
+                                            <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size={21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
                                         </View>
                                     </View>
 

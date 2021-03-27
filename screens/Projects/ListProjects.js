@@ -15,6 +15,7 @@ import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
+import { configureQuery } from '../../core/privileges'
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
@@ -65,6 +66,7 @@ class ListProjects extends Component {
             client: { id: '', fullName: '' },
             filterOpened: false,
 
+            //view (grid/list)
             view: 'grid',
             columnCount: 3,
 
@@ -73,24 +75,35 @@ class ListProjects extends Component {
     }
 
     async componentDidMount() {
-        
+
         Keyboard.dismiss()
         requestWESPermission()
         requestRESPermission()
 
-        const role = this.props.role.id
-        const { currentUser } = firebase.auth()
-        const isClient = (role === 'client')
+        // const queryFilters = [
+        //     { filterOrder: 1, clause: 'where', filter: 'project.subscribers', operation: 'array-contains', value: '' },
+        //     { filterOrder: 2, clause: 'where', filter: 'deleted', operation: '==', value: false },
+        //     { filterOrder: 3, clause: 'orderBy', field: 'dateKey', sort: 'asc' },
+        // ]
 
-        if (isClient)
-            var query = db.collection('Projects').where('client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        // db.collection('Permissions').doc('Commercial').update({ 'tasks.queryFilters': queryFilters })
 
-        else
-            var query = db.collection('Projects').where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        // if (isClient)
+        //     var query = db.collection('Projects').where('client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'DESC')
 
-        this.fetchDocs(query, 'projectsList', 'projectsCount', () => load(this, false))
+        const { queryFilters } = this.props.permissions.projects
+        if (queryFilters === []) this.setState({ projectsList: [], projectsCount: 0 })
+        else {
+            const params = { role: this.props.role.value }
+            const query = configureQuery('Projects', queryFilters, params)
+            this.fetchDocs(query, 'projectsList', 'projectsCount', () => load(this, false))
+        }
     }
 
+
+    componentWillUnmount() {
+        this.unsubscribe()
+    }
 
     renderProject(project) {
         const { view } = this.state
@@ -108,12 +121,12 @@ class ListProjects extends Component {
     }
 
     onPressProject(project) {
-        console.log('000')
         if (this.isRoot)
             this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
 
         else {
-            this.props.navigation.state.params.onGoBack({ id: project.id, name: project.name, client: project.client })
+            const { id, name, client, subscribers } = project
+            this.props.navigation.state.params.onGoBack({ id, name, client, subscribers })
             this.props.navigation.goBack()
         }
     }

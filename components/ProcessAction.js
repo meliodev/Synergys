@@ -116,7 +116,8 @@ class ProcessAction extends Component {
 
     componentWillUnmount() {
         //this.focusListener()
-        this.unsubscribeProcessListener()
+        // if (this.unsubscribeProcessListener)
+        //     this.unsubscribeProcessListener()
     }
 
     async runProcessHandler(process) {
@@ -396,7 +397,8 @@ class ProcessAction extends Component {
         return (
             <TouchableOpacity onPress={this.onPressAction} style={styles.actionContainer}>
                 <View style={styles.actionTitleContainer}>
-                    <Text style={[theme.customFontMSregular.caption]}>{loading ? "Chargement de l'action à faire..." : title}</Text>
+                    {currentAction && !loading && <CustomIcon style= {{marginRight: 5}} icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
+                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? "Chargement de l'action à faire..." : title}</Text>
                 </View>
 
                 {loading ?
@@ -406,7 +408,6 @@ class ProcessAction extends Component {
                     </View>
                     :
                     <View style={styles.actionIconsContainer}>
-                        {currentAction && <CustomIcon icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
                         {currentAction && <CustomIcon icon={faInfoCircle} size={19} color={theme.colors.gray_dark} onPress={() => Alert.alert('Instructions', currentAction.instructions)} />}
                     </View>
                 }
@@ -456,7 +457,7 @@ class ProcessAction extends Component {
 
                 <List.Accordion
                     showArrow
-                    style={{ paddingVertical: 15, paddingHorizontal: 10, marginLeft: 0, borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}
+                    style={{ paddingVertical: 10, paddingHorizontal: 13, marginLeft: 0, borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}
                     title={currentPhase.title || "Chargement de la phase..."}
                     description={stepTitle}
                     titleNumberOfLines={1}
@@ -464,7 +465,7 @@ class ProcessAction extends Component {
                     left={props => currentAction && <StepProgress progress={((currentAction.actionOrder - 1) / currentStep.actions.length) * 100} style={{ marginTop: 25, marginRight: 2 }} />}
                     expanded={expanded}
                     titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
-                    descriptionStyle={[theme.customFontMSregular.header, { color: theme.colors.secondary }]}
+                    descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
                     onPress={() => this.setState({ expanded: !expanded })}>
 
                     <View style={{ height: 50, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
@@ -495,14 +496,16 @@ const styles = StyleSheet.create({
         //paddingHorizontal: 5
     },
     actionTitleContainer: {
-        flex: 0.85,
+        flex: 0.9,
+        flexDirection: 'row',
+        alignItems: 'center'
         //backgroundColor: 'brown'
     },
     actionIconsContainer: {
-        flex: 0.15,
+        flex: 0.1,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingLeft: 25
+        paddingLeft: 25,
         // backgroundColor: 'green'
     }
 })

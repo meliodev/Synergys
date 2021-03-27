@@ -99,7 +99,7 @@ class CreateRequest extends Component {
             const request = doc.data()
             //General info
             RequestId = doc.id
-            client = client
+            client = request.client
             subject.value = request.subject
             description.value = request.description
             this.chatId = request.chatId

@@ -54,6 +54,8 @@ class CreateOrder extends Component {
         //Generate pdf
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false)
         this.docType = this.props.navigation.getParam('docType', '')
+        this.popCount = this.props.navigation.getParam('popCount', 1) // For pdf generation
+
         this.titleText = this.props.navigation.getParam('titleText', '')
 
         this.OrderId = this.props.navigation.getParam('OrderId', '')
@@ -62,22 +64,22 @@ class CreateOrder extends Component {
         this.titleText = `Création ${articles_fr('du', masculins, this.docType)} ${this.docType}`
         this.title = this.autoGenPdf ? this.titleText : this.OrderId ? 'Modifier la commande' : 'Nouvelle commande'
 
+        //Params (order properties)
+        this.project = this.props.navigation.getParam('project', undefined)
+
         this.state = {
             //AUTO-GENERATED
             OrderId: '', //Not editable
 
             //Screens
-            project: { id: '', name: '', error: '' },
+            project: this.project || { id: '', name: '', error: '' },
             client: { id: '', fullName: '' },
 
             //Pickers
             state: 'En cours',
 
             //Order Lines
-            orderLines: [
-                //  { "description": "", "price": "900", "product": { "brand": { "name": "LGS", "logo": {} }, "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Machine à coudre", "price": "900", "type": "product", "category": "eee", "taxe": "25" }, "quantity": "1" }
-            ],
-            //orderLines: [],
+            orderLines: [],
             checked: 'first',
             subTotal: 900,
             taxe: 0,
@@ -106,6 +108,12 @@ class CreateOrder extends Component {
 
     async componentDidMount() {
         load(this, true)
+
+        if (this.project) {
+            const client = await this.fetchClient(this.project.id)
+            this.project.client = client
+            this.setState({ project: this.project })
+        }
 
         if (this.isEdit) {
             await this.fetchOrder()
@@ -160,11 +168,13 @@ class CreateOrder extends Component {
         })
     }
 
-    fetchClient(projectId) {
-        db.collection('Projects').doc(projectId).get().then((doc) => {
+    async fetchClient(projectId) {
+        const client = await db.collection('Projects').doc(projectId).get().then((doc) => {
             const client = doc.data().client
             this.setState({ client })
+            return client
         })
+        return client
     }
 
     //delete order
@@ -265,7 +275,7 @@ class CreateOrder extends Component {
 
     //Handle Pdf generation flow
     generatePdf(order, docType) {
-        this.props.navigation.navigate('PdfGeneration', { order, docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), onGoBack: this.props.navigation.getParam('onGoBack', null) })
+        this.props.navigation.navigate('PdfGeneration', { order, docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), popCount: this.popCount, onGoBack: this.props.navigation.getParam('onGoBack', null) })
     }
 
     //refresh inputs
@@ -533,7 +543,10 @@ class CreateOrder extends Component {
                                     />
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })}
+                                        onPress={() => {
+                                            if (this.project || this.isEdit) return //pre-defined project
+                                            navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })
+                                        }}
                                         label="Projet concerné *"
                                         value={project.name}
                                         error={!!project.error}
@@ -548,7 +561,10 @@ class CreateOrder extends Component {
                                                 label="Client concerné *"
                                                 value={client.fullName}
                                                 editable={false}
-                                                right={client.fullName !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })} />} />
+                                                right={client.fullName !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => {
+                                                    if (this.project || this.isEdit) return
+                                                    this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })
+                                                }} />} />
                                         </TouchableOpacity>
                                     }
 
@@ -664,7 +680,7 @@ class CreateOrder extends Component {
                         </ScrollView>
 
                         {this.autoGenPdf &&
-                            <Button mode="contained" onPress={this.handleSubmit} style={{ width: constants.ScreenWidth, backgroundColor: theme.colors.secondary }} >
+                            <Button mode="contained" onPress={this.handleSubmit} style={{ width: constants.ScreenWidth, backgroundColor: theme.colors.primary }} >
                                 {pdfGenButtonLabel}
                             </Button>
                         }

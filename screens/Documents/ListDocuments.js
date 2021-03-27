@@ -16,6 +16,7 @@ import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
 
+import { configureQuery } from '../../core/privileges'
 import { myAlert, downloadFile, loadLog, load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFileNew } from "../../api/storage-api";
@@ -79,14 +80,18 @@ class ListDocuments extends Component {
         const { currentUser } = firebase.auth()
         const isClient = (role === 'client')
 
-        if (isClient)
-            var query = db.collection('Documents').where('project.client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'desc')
+        // if (isClient)
+        //     var query = db.collection('Documents').where('project.client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'desc')
 
-        else
-            var query = db.collection('Documents').where('project.id', '==', 'GS-PR-Ac3P').where('type', '==', 'Devis')
-            // var query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
+        const { queryFilters } = this.props.permissions.documents
+        if (queryFilters === []) this.setState({ documentsList: [], documentsCount: 0 })
+        else {
+            const params = { role: this.props.role.value }
+            var query = configureQuery('Documents', queryFilters, params)
+            this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
+        }
 
-        this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
+        // var query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
     }
 
     bootstrapUploads() {

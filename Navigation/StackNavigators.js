@@ -20,13 +20,13 @@ import ViewTeam from '../screens/Users/ViewTeam';
 
 //Clients management
 import ClientsManagement from '../screens/Clients/ClientsManagement';
+import ListClients from '../screens/Clients/ListClients';
 import CreateClient from '../screens/Clients/CreateClient';
 
 //Requests Management
 import RequestsManagement from '../screens/Requests/RequestsManagement';
 import CreateProjectReq from '../screens/Requests/CreateProject';
 import CreateTicketReq from '../screens/Requests/CreateTicket';
-import ListClients from '../screens/Requests/ListClients';
 
 //Inbox
 import Inbox from '../screens/Inbox/Inbox'
@@ -211,6 +211,30 @@ const ProjectsStack = createStackNavigator({
     },
     Signature: {
         screen: Signature,
+        navigationOptions: hideHeader
+    },
+    PdfGeneration: {
+        screen: PdfGeneration,
+        navigationOptions: hideHeader
+    },
+    ListProjects: {
+        screen: ListProjects,
+        navigationOptions: hideHeader
+    },
+    ListOrders: {
+        screen: ListOrders,
+        navigationOptions: hideHeader
+    },
+    CreateOrder: {
+        screen: CreateOrder,
+        navigationOptions: hideHeader
+    },
+    AddItem: {
+        screen: AddItem,
+        navigationOptions: hideHeader
+    },
+    PdfGeneration: {
+        screen: PdfGeneration,
         navigationOptions: hideHeader
     },
     CreateTask: { //access tasks

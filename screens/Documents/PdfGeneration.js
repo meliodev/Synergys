@@ -48,6 +48,7 @@ export default class PdfGeneration extends Component {
         this.docType = this.props.navigation.getParam('docType', '') //Devis ou Facture (Proposal or Bill)
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.isConversion = this.props.navigation.getParam('isConversion', false) //Conversion from Devis to Facture
+        this.popCount = this.props.navigation.getParam('popCount', 1) //Conversion from Devis to Facture
 
         const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
         this.titleText = `Génération ${articles_fr('du', masculins, this.docType)} ${this.docType}`
@@ -147,7 +148,7 @@ export default class PdfGeneration extends Component {
         //Dynamic data
         const createdAt = moment().format('DD/MM/YYYY')
         const { orderLines, subTotal, taxes, project, editedBy } = this.order
-        const client = await db.collection('Users').doc(project.client.id).get().then((doc) => { return doc.data() })
+        const client = await db.collection('Clients').doc(project.client.id).get().then((doc) => { return doc.data() })
         const responsable = await db.collection('Users').doc(editedBy.id).get().then((doc) => { return doc.data() })
         // const orderLines = [ { "description": "", "price": "300", "product": { "category": "FOURNITURE ET POSE D'UNE POMPE A CHALEUR AIR/EAU", "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Installation et mise en service d'une pompe à chaleur Air/Eau", "price": "300", "type": "product" }, "quantity": "1" }, ]
         // const taxes = [ { name: '1', value: '5', value: 400 } ]
@@ -1102,13 +1103,13 @@ export default class PdfGeneration extends Component {
         const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
         const destFolder = `${Dir}/Synergys/Documents`
         await RNFS.mkdir(destFolder) //create directory if it doesn't exist
-        const pdfName = `Scan ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
+        const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
         const destPath = `${destFolder}/${pdfName}`
 
         RNFS.writeFile(destPath, pdfBase64, "base64")
             .then(() => {
                 this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName, order: this.order, isConversion: this.isConversion, DocumentId: this.DocumentId })
-                this.props.navigation.navigate('UploadDocument')
+                this.props.navigation.pop(this.popCount)
             })
             .catch((err) => {
                 console.error(err)
@@ -1153,7 +1154,7 @@ export default class PdfGeneration extends Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button mode="contained" onPress={this.savePdf} style={{ width: constants.ScreenWidth * 0.8, backgroundColor: theme.colors.secondary }} >
+                    <Button mode="contained" onPress={this.savePdf} style={{ width: constants.ScreenWidth * 0.8, backgroundColor: theme.colors.primary }} >
                         Valider
                     </Button>
                 </View>
