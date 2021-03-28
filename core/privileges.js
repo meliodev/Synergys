@@ -28,7 +28,11 @@ export const configureQuery = (collection, queryFilters, params) => {
         })
     }
 
-    console.log("queryFIlters", queryFilters)
+    if (params.role) console.log(`Query filters of role "${params.role}" for collection "${collection}"`)
+    else console.log(`Query filters for collection: ${collection}`)
+    queryFilters.forEach((item) => {
+        console.log(item)
+    })
 
     return query
 }

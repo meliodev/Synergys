@@ -4,7 +4,7 @@ import { View, Text, Alert } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as theme from "../core/theme";
 
-import { createAppContainer, NavigationEvents } from 'react-navigation';
+import { createAppContainer, createSwitchNavigator, NavigationEvents } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
 //Auth screens
@@ -429,7 +429,7 @@ export const AuthStack = createStackNavigator({
     })
 
 //App modules
-export const AppStack = createStackNavigator({
+export const AppStack = createSwitchNavigator({
     // Dashboard: {
     //     screen: Dashboard,
     //     navigationOptions: hideHeader

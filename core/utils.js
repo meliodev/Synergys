@@ -533,7 +533,6 @@ export const handleFilter = (inputList, outputList, fields, searchInput, KEYS_TO
 }
 
 export const handleFilterAgenda = (inputList, outputList, fields, KEYS_TO_FILTERS) => {
-  console.log(fields)
   outputList = JSON.parse(JSON.stringify(inputList))
 
   for (let key in outputList) {
