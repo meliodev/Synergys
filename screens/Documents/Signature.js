@@ -55,6 +55,7 @@ class Signature extends Component {
         this.originalFilePath = `${Dir}/Synergys/Documents/${this.fileName}`
 
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', '') //Navigation pop times when  signature is done
+        this.canSign = this.props.navigation.getParam('canSign', false)
 
         this.termsPath = `${Dir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
         this.termsURL = 'https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/CONDITIONS%20G%C3%89N%C3%89RALES%20DE%20VENTE%20ET%20DE%20TRAVAUX.pdf?alt=media&token=3bf07ac2-6d9e-439a-91d8-f9908003488f'

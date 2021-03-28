@@ -91,7 +91,7 @@ class CreateProject extends Component {
             //Screens
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            client: { id: 'GS-CL-9o1z', fullName: 'Client 1' },
+            client: { id: 'GS-CL-7cRp', fullName: 'Client 2' },
             clientError: '',
 
             //Pickers
@@ -526,9 +526,11 @@ class CreateProject extends Component {
         let { error, loading, toastMessage, toastType } = this.state
         const { process, processFetched } = this.state
 
+        //Privilleges
         let { canUpdate, canDelete } = this.props.permissions.projects
-        canUpdate = (canUpdate || !this.isEdit)
+        canUpdate = (canUpdate || !this.isEdit) //Creation allowed
         const canCreateDocument = this.props.permissions.documents.canCreate
+        const canReadTasks = this.props.permissions.tasks.canRead
 
         const { isConnected } = this.props.network
         const project = { id: this.ProjectId, name: name.value }
@@ -592,20 +594,23 @@ class CreateProject extends Component {
                                     <ColorPicker
                                         label='Couleur du projet'
                                         selectedColor={color}
-                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
+                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+                                        editable={canUpdate} />
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: 'CreateProject', isRoot: false, titleText: 'Clients' })}
+                                        onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: 'CreateProject', isRoot: false, titleText: 'Clients' })}
                                         label='Client concerné *'
                                         value={client.fullName}
                                         errorText={clientError}
+                                        editable = {canUpdate}
                                     />
 
                                     <AddressInput
                                         offLine={!isConnected}
-                                        onPress={() => navigateToScreen(this, canUpdate, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
                                         address={address}
                                         addressError={addressError}
+                                        editable = {canUpdate}
                                     />
 
                                     <Picker
@@ -617,8 +622,8 @@ class CreateProject extends Component {
                                         onValueChange={(step) => { this.setState({ step }) }}
                                         title="Phase *"
                                         elements={steps}
-                                        enabled={canUpdate}
-                                        containerStyle={{ marginBottom: 5 }} />
+                                        containerStyle={{ marginBottom: 5 }}
+                                        enabled={canUpdate} />
 
                                     <Picker
                                         returnKeyType="next"
@@ -674,12 +679,14 @@ class CreateProject extends Component {
                             form={
                                 <View style={{ flex: 1 }}>
 
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10, }}>
-                                        <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
-                                        <Text
-                                            onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
-                                            style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>Voir le planning du projet</Text>
-                                    </View>
+                                    {canReadTasks &&
+                                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10, }}>
+                                            <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
+                                            <Text
+                                                onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
+                                                style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>Voir le planning du projet</Text>
+                                        </View>
+                                    }
 
                                     <List.AccordionGroup
                                         expandedId={expandedTaskId}
@@ -711,7 +718,7 @@ class CreateProject extends Component {
                                 <View style={{ flex: 1 }}>
                                     {canCreateDocument &&
                                         <Text
-                                            onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value } })}
+                                            onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value, client: this.initialState.client, subscribers: this.initialState.tagsSelected } })}
                                             style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 10 }]}>+ Ajouter un document</Text>}
 
                                     <List.AccordionGroup

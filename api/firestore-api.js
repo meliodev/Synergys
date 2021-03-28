@@ -170,13 +170,11 @@ export const createClient = async function createClient(userData, eventHandlers,
     }
 
     client.role = 'Client'
-    await db.collection('newUsers').doc(ClientId).set(client)
-    return true
+    await db.collection('newUsers').doc(ClientId).set(client).then(() => console.log('YEAH!!!!!!!!'))
   }
 
   //3". CREATE PROSPECT (document only)
   else {
-   // db.collection('Clients').doc(ClientId).set(client)
-    return true
+    db.collection('Clients').doc(ClientId).set(client)
   }
 }

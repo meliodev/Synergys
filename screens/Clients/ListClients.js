@@ -13,7 +13,7 @@ import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { myAlert } from '../../core/utils'
 
-import ListUsers from '../../screens/Users/ListUsers'
+import ListUsers from '../Users/ListUsers'
 
 const db = firebase.firestore()
 
@@ -45,10 +45,10 @@ class ListClients extends Component {
 
     render() {
         const queryClients = db.collection('Clients').where('deleted', '==', false) //Client + Prospects
-        const permissions = this.props.permissions.users
+        const permissions = this.props.permissions.clients
         const { isConnected } = this.props.network
 
-        return (
+        return ( 
             <View style={{ flex: 1 }}>
                 <SearchBar
                     menu={this.isRoot}
@@ -90,4 +90,4 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps)(ListClients)
 
 const styles = StyleSheet.create({
-})
+}) 

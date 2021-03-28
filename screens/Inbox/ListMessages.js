@@ -72,6 +72,7 @@ class ListMessages extends Component {
 
     render() {
         let { messagesCount } = this.state
+        const { canCreate } = this.props.permissions
 
         const s = messagesCount > 1 ? 's' : ''
 
@@ -91,7 +92,7 @@ class ListMessages extends Component {
                     :
                     <EmptyList icon={faEnvelope} iconColor={theme.colors.miInbox} header='Messages' description="Aucun message pour le moment." offLine={this.props.offLine} />
                 }
-                <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />
+              {canCreate && <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />}
             </Background >
         )
 

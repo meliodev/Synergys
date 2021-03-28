@@ -31,7 +31,7 @@ const processModel = {
                         properties: ['nom'],
                         //Navigation (Update) params
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true }, //#dynamic
+                        screenParams: { userId: '', isClient: true, isProcess: true }, //#dynamic
                         //responsable: '',
                         status: 'pending',
                         //Verification type
@@ -48,7 +48,7 @@ const processModel = {
                         documentId: '',
                         properties: ['prenom'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -64,7 +64,7 @@ const processModel = {
                         documentId: '', // depending on the concerned project
                         properties: ['address', 'description'],
                         screenName: 'Profile',
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -80,7 +80,7 @@ const processModel = {
                         documentId: '', // depending on the concerned project
                         properties: ['phone'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -91,12 +91,12 @@ const processModel = {
                         id: 'conversionClient',
                         title: 'Convertir le prospect en client',
                         instructions: 'Appuyez sur le bouton "Convertir en client"',
-                        actionOrder: 6,
+                        actionOrder: 5,
                         collection: 'Clients',
                         documentId: '', // depending on the concerned project
                         properties: ['isProspect'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -107,7 +107,7 @@ const processModel = {
                         id: 'comment',
                         title: 'Commentaire',
                         instructions: "Veuillez renseigner des informations utiles (exp: Informations sur l'habitation)",
-                        actionOrder: 5,
+                        actionOrder: 6,
                         collection: '',
                         documentId: '', // depending on the concerned project
                         properties: [],
@@ -1208,7 +1208,7 @@ const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'NON, PAS MAINTENANT', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'Décidez plus tard', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextStep: 'maintainanceContract', onSelectType: 'transition', operation: null },
                         ]
                     },
@@ -2039,6 +2039,7 @@ const getFirstPhaseIdFromModel = () => {
 
 //Task 2. Configure actions
 const configureActions = async (actions, attributes, process) => {
+    
     let query
 
     for (let action of actions) {

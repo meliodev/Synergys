@@ -288,7 +288,7 @@ class CreateRequest extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar close title titleText={title} check handleSubmit={this.handleSubmit} />
+                <Appbar close title titleText={title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} />
 
                 {loading ?
                     <Loading size='large' />
@@ -310,12 +310,12 @@ class CreateRequest extends Component {
                                 />
 
                                 <ItemPicker
-                                    onPress={() => navigateToScreen(this, canUpdate, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: prevScreen, isRoot: false, titleText: 'Choisir un client' })}
+                                    onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: prevScreen, isRoot: false, titleText: 'Choisir un client' })}
                                     label="Client *"
                                     value={client.fullName}
                                     error={!!clientError}
                                     errorText={clientError}
-                                    editable={false}
+                                    editable={canUpdate}
                                 />
 
                                 {this.isTicket ?
@@ -335,9 +335,10 @@ class CreateRequest extends Component {
                                     <AddressInput
                                         label='Adresse postale'
                                         offLine={!isConnected}
-                                        onPress={() => navigateToScreen(this, canUpdate, 'Address', { onGoBack: this.refreshAddress })}
+                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
                                         address={address}
-                                        addressError={addressError} />
+                                        addressError={addressError}
+                                        editable={canUpdate} />
                                 }
 
                                 <MyInput

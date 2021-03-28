@@ -48,7 +48,7 @@ class ListOrders extends Component {
         this.project = this.props.navigation.getParam('project', undefined) // For pdf generation
 
         this.titleText = this.props.navigation.getParam('titleText', 'Commandes')
-        this.showFAB = this.props.navigation.getParam('showFAB', true)
+        this.showFAB = this.props.navigation.getParam('showFAB', true) && this.isRoot
         this.filteredOrders = []
 
         this.state = {
@@ -76,7 +76,6 @@ class ListOrders extends Component {
     }
 
     async fetchOrders() {
-        // const query = db.collection('Orders').where('deleted', '==', false).orderBy('createdAt', 'DESC')
 
         const { queryFilters } = this.props.permissions.orders
         if (queryFilters === []) this.setState({ ordersList: [], ordersCount: 0 })
@@ -192,7 +191,7 @@ class ListOrders extends Component {
                             <EmptyList icon={faFileInvoice} header='Aucune commande' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={!isConnected} />
                         }
 
-                        {canCreate && this.showFAB && this.isRoot &&
+                        {canCreate && this.showFAB &&
                             <MyFAB onPress={() => this.props.navigation.navigate('CreateOrder')} />
                         }
                     </Background>}

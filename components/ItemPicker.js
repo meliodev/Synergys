@@ -1,15 +1,19 @@
 import React, { memo } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
-import { TextInput as Input, ThemeProvider } from "react-native-paper";
 import { faPlusCircle } from '@fortawesome/pro-light-svg-icons'
 
 import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
 
-const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, icon = faPlusCircle, style, ...props }) => {
+const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, icon = faPlusCircle, style, editable, ...props }) => {
 
     const noError = errorText === '' || typeof (errorText) === 'undefined'
+
+    const onPressItem = () => {
+        if(!editable) return
+        else onPress()
+    }
 
     const AvatarText = ({ text }) => (
         <View style={styles.avatarText} >
@@ -33,7 +37,7 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
 
 
         return (
-            <TouchableOpacity onPress={onPress} style={[styles.container, { marginTop: 30 }, style]}>
+            <TouchableOpacity onPress={onPressItem} style={[styles.container, { marginTop: 30 }, style]}>
 
                 <View>
                     <Text style={[theme.customFontMSregular.body, { color: noError ? placeholderColor : theme.colors.error }]}>{label}</Text>
@@ -59,7 +63,7 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
     }
 
     else return (
-        <TouchableOpacity onPress={onPress} style={[styles.container, { marginVertical: 5 }, style]}>
+        <TouchableOpacity onPress={onPressItem} style={[styles.container, { marginVertical: 5 }, style]}>
             <View style={[styles.placeholderArea, { borderBottomColor: borderBottomColor }]}>
                 <View style={{ flex: 0.9 }}>
                     <Text style={[theme.customFontMSregular.body, { color: noError ? placeholderColor : theme.colors.error  }]}>{label}</Text>

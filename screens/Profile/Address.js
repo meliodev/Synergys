@@ -35,6 +35,7 @@ class MarkerTypes extends React.Component {
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.userId = this.props.navigation.getParam('userId', '')
         this.currentAddress = this.props.navigation.getParam('currentAddress', '')
+        this.collection = this.props.navigation.getParam('collection', 'Users')
 
         this.state = {
             region: {
@@ -80,8 +81,8 @@ class MarkerTypes extends React.Component {
     }
 
     handleSubmit() {
-        if(this.state.loading) return
-    
+        if (this.state.loading) return
+
         const { address, marker } = this.state
 
         address.marker = marker
@@ -94,9 +95,8 @@ class MarkerTypes extends React.Component {
         this.setState({ loading: true })
 
         if (this.prevScreen === 'Profile') {
-
             if (address.description !== this.currentAddress.description)
-                db.collection('Users').doc(this.userId).update({ address: address })
+                db.collection(this.collection).doc(this.userId).update({ address: address })
                     .then(() => this.props.navigation.goBack())
                     .catch((e) => Alert.alert(e))
                     .finally(() => this.setState({ loading: false }))
@@ -143,7 +143,7 @@ class MarkerTypes extends React.Component {
                     <Appbar close={!loading} title titleText="Modifier l'adresse" check={!loading} handleSubmit={this.handleSubmit} search={!showInput && !loading} handleSearch={() => this.setState({ showInput: true })} />
                 }
 
-                {!loading  ?
+                {!loading ?
                     <View style={{ flex: 1 }}>
                         <MapView
                             provider={PROVIDER_GOOGLE}
@@ -167,8 +167,8 @@ class MarkerTypes extends React.Component {
                             </Marker>
                         </MapView>
                     </View>
-                   
-                   :
+
+                    :
                     <Loading size='large' />
                 }
 

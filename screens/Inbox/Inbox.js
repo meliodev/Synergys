@@ -34,7 +34,6 @@ class Inbox extends React.Component {
         const { isConnected } = this.props.network
         const { role } = this.props
         const permissionsMessages = this.props.permissions.messages
-        console.log('permissions messages', permissionsMessages)
 
         return (
             <View style={{ flex: 1 }}>

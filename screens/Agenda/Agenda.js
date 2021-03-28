@@ -414,6 +414,8 @@ class Agenda2 extends Component {
     render() {
 
         const roleId = this.props.role.id
+        const { canCreate } = this.props.permissions.tasks
+
         let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
         const filterActivated = !_.isEqual(items, filteredItems)
 
@@ -486,7 +488,7 @@ class Agenda2 extends Component {
                         renderDay={this.renderDay}
                     />
                 </View>
-                <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems })} />
+                {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems })} />}
             </View>
         )
     }

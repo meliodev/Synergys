@@ -47,6 +47,7 @@ export default class ViewMessage extends Component {
     }
 
     componentDidMount() {
+        //Static query
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         const query = db.collection('Messages').doc(this.message.id).collection('AllMessages').where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
         this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })

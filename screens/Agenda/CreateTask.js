@@ -355,12 +355,12 @@ class CreateTask extends Component {
                                     />
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', isRoot: false, titleText: 'Attribuer la tâche à' })}
+                                        onPress={() => navigateToScreen(this, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', isRoot: false, titleText: 'Attribuer la tâche à' })}
                                         label="Attribuée à *"
                                         value={assignedTo.fullName}
                                         error={!!assignedTo.error}
                                         errorText={assignedTo.error}
-                                        editable={false}
+                                        editable={canUpdate}
                                     />
 
                                     <MyInput
@@ -376,17 +376,21 @@ class CreateTask extends Component {
                                     <ItemPicker
                                         onPress={() => {
                                             if (this.project || this.isEdit) return //pre-defined project
-                                            navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
+                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
                                         }}
                                         label="Projet concerné"
                                         value={project.name}
                                         error={!!project.error}
                                         errorText={project.error}
-                                        editable={false}
                                         showAvatarText={false}
+                                        editable={canUpdate}
                                     />
 
-                                    <ColorPicker label='Couleur de la tâche' selectedColor={color} updateParentColor={(selectedColor) => this.setState({ color: selectedColor })} />
+                                    <ColorPicker
+                                        label='Couleur de la tâche'
+                                        selectedColor={color}
+                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+                                        editable={canUpdate} />
 
                                     <Picker
                                         label="Type *"
@@ -441,26 +445,26 @@ class CreateTask extends Component {
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
                                         <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                            <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} />
+                                            <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} disabled={!canUpdate} />
                                             <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size={21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
                                         </View>
                                     </View>
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}
+                                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}
                                         label='Date de début *'
                                         value={moment(startDate.value).format('lll')}
-                                        editable={false}
+                                        editable={canUpdate}
                                         showAvatarText={false}
                                         icon={faCalendarPlus}
                                         errorText={startDate.error}
                                     />
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, canUpdate, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}
+                                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}
                                         label="Date d'échéance *"
                                         value={moment(dueDate.value).format('lll')}
-                                        editable={false}
+                                        editable={canUpdate}
                                         showAvatarText={false}
                                         icon={faCalendarPlus}
                                         errorText={dueDate.error}

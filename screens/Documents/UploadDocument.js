@@ -46,7 +46,7 @@ const docSources = [
     { label: 'Générer', value: 'generate', icon: faMagic, selected: false },
 ]
 
-const types = [
+let types = [
     { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
     // { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
     // { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
@@ -69,8 +69,8 @@ const genTypes = [
 ]
 
 const genOptions = [
-    { label: 'Une commande existante', value: 'oldOrder', icon: faFilePlus, selected: false },
-    { label: 'Une nouvelle commande', value: 'newOrder', icon: faFileSearch, selected: false },
+    { label: 'Une commande existante', value: 'oldOrder', icon: faFileSearch, selected: false },
+    { label: 'Une nouvelle commande', value: 'newOrder', icon: faFilePlus, selected: false },
 ]
 
 class UploadDocument extends Component {
@@ -163,6 +163,7 @@ class UploadDocument extends Component {
             types: types,
             genOptions: genOptions,
             order: null,
+            isGenerated: false,
             checked: '',
 
             error: '',
@@ -205,6 +206,7 @@ class UploadDocument extends Component {
             name.value = document.name
             description.value = document.description
             order = document.orderData
+            isGenerated = document.isGenerated
 
             //َActivity
             createdAt = document.createdAt
@@ -220,7 +222,7 @@ class UploadDocument extends Component {
             //Attachment
             attachment = document.attachment
 
-            this.setState({ project, name, description, state, type, attachment, order, createdAt, createdBy, editedAt, editedBy }, () => {
+            this.setState({ project, name, description, state, type, attachment, order, isGenerated, createdAt, createdBy, editedAt, editedBy }, () => {
                 // if (this.isInit)
                 this.initialState = this.state
                 // this.isInit = false
@@ -313,7 +315,7 @@ class UploadDocument extends Component {
         //4. Go back if we came here from process action (this.documentID !== '')
         else {
             if (this.goBackOnSubmit) {
-                types.forEach((type) => type.selected = false)
+                types = []
                 this.props.navigation.goBack()
             }
         }
@@ -337,7 +339,7 @@ class UploadDocument extends Component {
 
     async persistDocument(isConversion, DocumentId) {
         //1. ADDING document to firestore
-        const { project, name, description, type, state, attachment, attachmentSource, order } = this.state
+        const { project, name, description, type, state, attachment, attachmentSource, order, isGenerated } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         attachment.pending = true
 
@@ -353,6 +355,7 @@ class UploadDocument extends Component {
             editedBy: currentUser,
             orderData: order,
             deleted: false,
+            isGenerated: isGenerated,
         }
 
         if (!this.isEdit || isConversion) {
@@ -482,7 +485,17 @@ class UploadDocument extends Component {
                         value={attachment && attachment.name}
                         editable={false}
                         multiline
-                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.toggleModal('docSource')} />} />
+                        right={
+                            <TextInput.Icon
+                                name='attachment'
+                                color={theme.colors.placeholder}
+                                onPress={() => {
+                                    if (!canUpdate) return
+                                    this.toggleModal('docSource')
+                                }}
+                            />
+                        }
+                    />
                 </TouchableOpacity>
             )
         }
@@ -622,10 +635,10 @@ class UploadDocument extends Component {
             type: 'application/pdf',
             name,
             size: 100,
-            progress: 0
+            progress: 0,
         }
 
-        this.setState({ attachment, order }, () => {
+        this.setState({ attachment, order, isGenerated: true }, () => {
             if (isConversion) {
                 var DocumentId = genPdf.DocumentId
                 this.handleSubmit(true, DocumentId)
@@ -641,15 +654,17 @@ class UploadDocument extends Component {
         this.props.navigation.navigate('PdfGeneration', { order, docType: 'Facture', DocumentId: generateId('GS-DOC-'), isConversion: true, onGoBack: this.getGeneratedPdf })
     }
 
-    navigateToSignature(isConnected, signMode) {
+    navigateToSignature(signMode, isConnected, allowSign) {
         if (!this.isEdit) return
 
-        if (!isConnected) {
-            Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
-            return
+        if (signMode) {
+            if (!isConnected) {
+                Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
+                return
+            }
+            if (!allowSign) return
         }
 
-        const { canUpdate } = this.props.permissions.documents
         const { project, type, attachment } = this.initialState
 
         var params = {
@@ -659,13 +674,13 @@ class UploadDocument extends Component {
             DocumentType: type,
             fileName: attachment.name,
             url: attachment.downloadURL,
-            onSignaturePop: this.onSignaturePop
+            onSignaturePop: this.onSignaturePop,
         }
 
         if (signMode)
             params.initMode = 'sign'
 
-        navigateToScreen(this, canUpdate, 'Signature', params)
+        navigateToScreen(this, 'Signature', params)
     }
 
     render() {
@@ -679,6 +694,7 @@ class UploadDocument extends Component {
         canUpdate = (canUpdate || !this.isEdit)
 
         const { isConnected } = this.props.network
+        const allowSign = this.isEdit && attachment && !attachment.pending
 
         if (loadingConversion) return (
             <View style={styles.container}>
@@ -700,7 +716,7 @@ class UploadDocument extends Component {
 
                 <View style={{ flex: 1 }}>
                     {this.isEdit && attachment && !attachment.pending &&
-                        <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature(isConnected, false)}>
+                        <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature()}>
                             <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.primary }]}>VOIR LE DOCUMENT</Text>
                         </Button>
                     }
@@ -806,14 +822,13 @@ class UploadDocument extends Component {
                                 <ItemPicker
                                     onPress={() => {
                                         if (this.project || this.isEdit) return //pre-defined project
-                                        navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
-                                    }
-                                    }
+                                        navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
+                                    }}
                                     label="Projet concerné *"
                                     value={project.name}
                                     error={!!projectError}
                                     errorText={projectError}
-                                    editable={false}
+                                    editable={canUpdate}
                                     showAvatarText={false}
                                 />
 
@@ -879,12 +894,15 @@ class UploadDocument extends Component {
                             <View />
                         }
 
-                        <Button
-                            mode="contained"
-                            style={[styles.signButton, { backgroundColor: this.isEdit && attachment && !attachment.pending ? theme.colors.primary : theme.colors.gray50 }]}
-                            onPress={() => this.navigateToSignature(isConnected, true)}>
-                            <Text style={[theme.customFontMSmedium.body, { color: this.isEdit && attachment && !attachment.pending ? '#fff' : theme.colors.gray }]}>Signer</Text>
-                        </Button>
+                        {canUpdate &&
+                            <Button
+                                mode="contained"
+                                style={[styles.signButton, { backgroundColor: allowSign ? theme.colors.primary : theme.colors.gray_light }]}
+                                onPress={() => this.navigateToSignature(true, isConnected, allowSign)}>
+                                <Text style={[theme.customFontMSmedium.body, { color: allowSign ? '#fff' : theme.colors.gray }]}>Signer</Text>
+                            </Button>
+                        }
+
                     </View>
 
                     <Toast

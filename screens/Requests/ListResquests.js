@@ -11,6 +11,7 @@ import EmptyList from '../../components/EmptyList'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { fetchDocs } from '../../api/firestore-api';
+import { configureQuery } from '../../core/privileges';
 
 import { withNavigation } from 'react-navigation'
 import firebase from '@react-native-firebase/app';
@@ -38,12 +39,16 @@ class ListRequests extends Component {
         const { currentUser } = firebase.auth()
         const isClient = (role === 'client')
 
-        if (isClient)
-            var query = db.collection('Requests').where('client.id', '==', "GS-US-POqM").where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
-        else
-            var query = db.collection('Requests').where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
+        // if (isClient)
+        //     var query = db.collection('Requests').where('client.id', '==', "GS-US-POqM").where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
 
-        this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
+        const { queryFilters } = this.props.permissions
+        if (queryFilters === []) this.setState({ requestsList: [], requestsCount: 0 })
+        else {
+            const params = { type: this.props.requestType }
+            var query = configureQuery('Requests', queryFilters, params)
+            this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
+        }
     }
 
     renderTicketRequest(request) {

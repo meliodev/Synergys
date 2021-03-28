@@ -77,7 +77,35 @@ const hideHeader = () => ({
     headerShown: false
 })
 
-//2. ADMIN STACKS
+//2. All modules STACKS
+const ProfileStack = createStackNavigator({
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
+    },
+})
+
 const UsersManagementStack = createStackNavigator({
     UsersManagement: {
         screen: UsersManagement,
@@ -99,6 +127,12 @@ const UsersManagementStack = createStackNavigator({
         screen: ViewTeam,
         navigationOptions: hideHeader
     },
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
 })
 
 const ClientsManagementStack = createStackNavigator({
@@ -109,6 +143,12 @@ const ClientsManagementStack = createStackNavigator({
     CreateClient: {
         screen: CreateClient,
         navigationOptions: hideHeader
+    },
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
     },
 })
 
@@ -160,6 +200,40 @@ const InboxStack = createStackNavigator({
     },
     ListNotifications: {
         screen: ListNotifications,
+        navigationOptions: hideHeader
+    },
+    //Screens to navigate through navigation
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    CreateUser: {
+        screen: CreateUser,
+        navigationOptions: hideHeader
+    },
+    CreateTeam: {
+        screen: CreateTeam,
+        navigationOptions: hideHeader
+    },
+    CreateClient: {
+        screen: CreateClient,
+        navigationOptions: hideHeader
+    },
+    CreateProjectReq: {
+        screen: CreateProjectReq,
+        navigationOptions: hideHeader
+    },
+    CreateTicketReq: {
+        screen: CreateTicketReq,
+        navigationOptions: hideHeader
+    },
+    CreateTask: {
+        screen: CreateTask,
+        navigationOptions: hideHeader
+    },
+    CreateOrder: {
+        screen: CreateOrder,
         navigationOptions: hideHeader
     },
 })
@@ -248,6 +322,12 @@ const ProjectsStack = createStackNavigator({
     DatePicker: {
         screen: DatePicker,
         navigationOptions: hideHeader
+    },
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
     },
 })
 
@@ -359,27 +439,11 @@ export const AppStack = createStackNavigator({
         path: 'projects',
         navigationOptions: hideHeader
     },
-    Profile: {
-        screen: Profile,
+    ProfileStack: {
+        screen: ProfileStack,
         path: 'profile',
         navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
     },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-    //STACKS
     UsersManagementStack: {
         screen: UsersManagementStack,
         navigationOptions: hideHeader

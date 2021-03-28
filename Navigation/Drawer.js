@@ -20,9 +20,9 @@ const menuPrivilleges = {
     backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
     admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
     dircom: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'news', 'logout'],
-    com: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'orders', 'news', 'logout'],
+    com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'news', 'logout'],
     tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
-    poseur: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'news', 'logout'],
+    poseur: ['home', 'inbox', 'projects', 'planning', 'requests', 'news', 'logout'],
     client: ['home', 'inbox', 'projects', 'requests', 'documents', 'news', 'logout']
 }
 

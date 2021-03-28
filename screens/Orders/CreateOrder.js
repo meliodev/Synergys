@@ -380,7 +380,13 @@ class CreateOrder extends Component {
                     const totalAmount = Number(orderLine.quantity) * Number(orderLine.price)
 
                     return (
-                        <TouchableOpacity onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })} style={styles.orderLine}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                if (!canUpdate) return
+                                navigateToScreen(this, 'AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })
+                            }}
+                            style={styles.orderLine}
+                        >
 
                             {canUpdate &&
                                 <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start', justifyContent: 'center' }} onPress={() => this.removeOrderLine(key)}>
@@ -545,13 +551,13 @@ class CreateOrder extends Component {
                                     <ItemPicker
                                         onPress={() => {
                                             if (this.project || this.isEdit) return //pre-defined project
-                                            navigateToScreen(this, canUpdate, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })
+                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })
                                         }}
                                         label="Projet concerné *"
                                         value={project.name}
                                         error={!!project.error}
                                         errorText={project.error}
-                                        editable={false}
+                                        editable={canUpdate}
                                         showAvatarText={false}
                                     />
 
@@ -602,7 +608,10 @@ class CreateOrder extends Component {
                                 <Card style={{ margin: 5, paddingBottom: 10 }}>
                                     <Card.Content>
                                         <Button icon="plus-circle" loading={loading} mode="outlined"
-                                            onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { onGoBack: this.refreshOrderLine })}
+                                            onPress={() => {
+                                                if (!canUpdate) return
+                                                navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
+                                            }}
                                             style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
                                             <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
                                         </Button>
@@ -626,7 +635,10 @@ class CreateOrder extends Component {
                                 <Card style={{ margin: 5, paddingBottom: 10, paddingHorizontal: 5 }}>
                                     <Card.Content>
                                         <Button icon="plus-circle" loading={loading} mode="outlined"
-                                            onPress={() => navigateToScreen(this, canUpdate, 'AddItem', { onGoBack: this.refreshOrderLine })}
+                                            onPress={() => {
+                                                if (!canUpdate) return
+                                                navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
+                                            }}
                                             style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
                                             <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
                                         </Button>

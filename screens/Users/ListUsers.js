@@ -92,29 +92,39 @@ class ListUsers extends Component {
         this.props.onPress(item.isPro, item.id, item.nom, item.prenom, item.role)
     }
 
-    const { userType } = this.props
+    const { userType, permissions, offLine } = this.props
+    const { canRead, canUpdate, canDelete } = permissions
     const isClient = userType === 'client' || userType === 'prospect'
- 
+
+    const viewUser = () => this.props.navigation.navigate('Profile', { userId: user.id, isClient })
+    const editUser = () => this.props.navigation.navigate('Profile', { userId: user.id, isClient })
+    const deleteUser = () => {
+      if (offLine) Alert.alert('', 'Impossible de supprimer un utilisateur en mode hors-ligne')
+      else this.alertDeleteUser(user)
+    }
+
+    let functions = []
+    let options = []
+
+    if (canRead) {
+      functions.push(viewUser); options.push({ id: 0, title: 'Voir le profil' })
+    }
+
+    if (canUpdate) {
+      functions.push(editUser); options.push({ id: 1, title: "Modifier" })
+    }
+
+    if (canDelete) {
+      functions.push(deleteUser); options.push({ id: 2, title: 'Supprimer' })
+    }
+
     return (
       <UserItem
         userType={this.props.userType}
         item={user}
         onPress={() => onPressUser(user)}
-        options={[
-          { id: 0, title: 'Voir le profil' },
-          { id: 1, title: "Modifier" },
-          { id: 2, title: 'Supprimer' },
-        ]}
-
-        functions={[
-          () => this.props.navigation.navigate('Profile', { userId: item.id, isClient }),
-          () => this.props.navigation.navigate('Profile', { userId: item.id, isClient }),
-          () => {
-            if (this.props.offLine) Alert.alert('', 'Impossible de supprimer un utilisateur en mode hors-ligne')
-            else if (!canDelete) Alert.alert('Action non autorisée', 'Seul un administrateur peut supprimer un utilisateur.')
-            else this.alertDeleteUser(item)
-          },
-        ]}
+        options={options}
+        functions={functions}
       />
     )
   }

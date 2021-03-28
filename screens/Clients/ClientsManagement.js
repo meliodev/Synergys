@@ -45,7 +45,7 @@ class ClientsManagement extends React.Component {
         ]
 
         const { index, searchInput } = this.state
-        const permissionsUsers = this.props.permissions.users
+        const permissionsClients = this.props.permissions.clients
         const { isConnected } = this.props.network
 
         return (
@@ -72,9 +72,9 @@ class ClientsManagement extends React.Component {
                             userType='client'
                             menu
                             offLine={!isConnected}
-                            permissions={permissionsUsers}
+                            permissions={permissionsClients}
                             query={queryClients}
-                            showButton
+                            showButton={permissionsClients.canCreate}
                             onPress={this.viewProfile.bind(this)}
                             emptyListIcon={faUser}
                             emptyListHeader='Aucun client'
@@ -88,9 +88,9 @@ class ClientsManagement extends React.Component {
                             userType='prospect'
                             menu
                             offLine={!isConnected}
-                            permissions={permissionsUsers}
+                            permissions={permissionsClients}
                             query={queryProspects}
-                            showButton
+                            showButton={permissionsClients.canCreate}
                             onPress={this.viewProfile.bind(this)}
                             emptyListIcon={faAddressCard}
                             emptyListHeader='Aucun prospect'

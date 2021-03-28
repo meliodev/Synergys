@@ -10,7 +10,7 @@ import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 
 
-const ModalContent = ({ hideModal, updateParentColor, pickedColor }) => {
+const ModalContent = ({ hideModal, updateParentColor, pickedColor, label }) => {
 
     const [selectedColor, setSelectedColor] = useState(pickedColor)
 
@@ -31,13 +31,14 @@ const ModalContent = ({ hideModal, updateParentColor, pickedColor }) => {
 
     return (
         <View style={modalStyles1.container}>
-            <CustomIcon
-                icon={faTimes}
-                color={theme.colors.gray_dark}
-                style={{ position: 'absolute', top: theme.padding, right: theme.padding }}
-                onPress={hideModal}
-            />
-            <Text style={[theme.customFontMSregular.body, { paddingLeft: theme.padding * 1.5 }]}>Couleur du projet</Text>
+            <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: 20, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
+                <CustomIcon
+                    icon={faTimes}
+                    color={theme.colors.gray_dark}
+                    onPress={hideModal}
+                />
+            </TouchableOpacity>
+            <Text style={[theme.customFontMSregular.body, { paddingLeft: theme.padding * 1.5 }]}>{label}</Text>
             <View style={{ flexDirection: 'row', marginTop: 25, flexWrap: 'wrap' }}>
                 {theme.colors.project.map((color, index) => {
                     return (
@@ -54,7 +55,7 @@ const ModalContent = ({ hideModal, updateParentColor, pickedColor }) => {
     )
 }
 
-const ColorPicker = ({ updateParentColor, label, selectedColor, setColor, ...props }) => {
+const ColorPicker = ({ updateParentColor, label, selectedColor, setColor, editable = true, ...props }) => {
 
     const [isModalVisible, setIsModalVisible] = useState(false)
 
@@ -74,13 +75,19 @@ const ColorPicker = ({ updateParentColor, label, selectedColor, setColor, ...pro
                 animationOut="slideOutDown"
                 onBackdropPress={() => setIsModalVisible(false)}
                 style={modalStyles1.modal} >
-                <ModalContent hideModal={hideModal} updateParentColor={updateParentColor} pickedColor={selectedColor} />
+                <ModalContent hideModal={hideModal} updateParentColor={updateParentColor} pickedColor={selectedColor} label={label} />
             </Modal>
         )
     }
 
     return (
-        <TouchableOpacity onPress={() => setIsModalVisible(true)} style={[styles.container, { marginBottom: 0, marginTop: 20 }]}>
+        <TouchableOpacity
+            onPress={() => {
+                if (!editable) return
+                setIsModalVisible(true)
+            }}
+            style={[styles.container, { marginBottom: 0, marginTop: 20 }]}
+        >
             <Text style={[theme.customFontMSregular.caption, { marginBottom: 8 }]}>{label}</Text>
             <SelectedColor />
             <ColorsModal />
@@ -97,7 +104,7 @@ const styles = StyleSheet.create({
 const modalStyles1 = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
-        marginTop: constants.ScreenHeight * 0.07,
+        marginTop: constants.ScreenHeight * 0.3,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
@@ -106,8 +113,7 @@ const modalStyles1 = StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingTop: 100,
-        //paddingHorizontal: theme.padding,
+        paddingTop: 25,
         backgroundColor: theme.colors.background,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
         borderTopRightRadius: constants.ScreenWidth * 0.03,

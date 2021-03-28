@@ -86,7 +86,7 @@ class CreateClient extends Component {
         else {
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
                 load(this, false)
-                this.titleText = `Créer un ${this.userType}`
+                // this.titleText = `Créer un ${this.userType}`
                 this.props.navigation.navigate(this.prevScreen)
             }, 6000) //We can reduce this timeout later on...
         }

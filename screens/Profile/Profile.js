@@ -4,7 +4,7 @@ import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import firebase from '@react-native-firebase/app'
 import NetInfo from "@react-native-community/netinfo"
-import { faUser } from '@fortawesome/pro-solid-svg-icons'
+import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 
 import Appbar from '../../components/Appbar'
 import CustomIcon from '../../components/CustomIcon'
@@ -17,6 +17,7 @@ import ProjectItem2 from "../../components/ProjectItem2"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
+import EmptyList from "../../components/EmptyList"
 
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
@@ -48,6 +49,7 @@ class Profile extends Component {
         this.isClient = this.props.navigation.getParam('isClient', false)
         this.isClient = this.isClient || this.role === 'client'
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
+        this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.initialState = {}
 
         this.state = {
@@ -79,12 +81,14 @@ class Profile extends Component {
             error: '',
             toastMessage: '', //password change
             toastType: '',
+            userNotFound: false,
+            deleted: false
         }
     }
 
-    componentDidMount() {
-        this.fetchData()
-        if (this.isClient) this.fetchClientProjects()
+    async componentDidMount() {
+        await this.fetchUserData()
+        if (this.isClient) await this.fetchClientProjects()
         load(this, false)
     }
 
@@ -92,8 +96,15 @@ class Profile extends Component {
         this.unsubscribe()
     }
 
-    fetchData() {
+    //Fetch data...
+    fetchUserData() {
         this.unsubscribe = db.collection(this.dataCollection).doc(this.userId).onSnapshot((doc) => {
+
+            if (!doc.exists) {
+                this.setState({ userNotFound: true })
+                return
+            }
+
             const user = doc.data()
 
             let denom = ''
@@ -115,18 +126,25 @@ class Profile extends Component {
                 var isProspect = user.isProspect
             }
 
-            let email = { value: user.email, error: '' }
-            let phone = { value: user.phone, error: '' }
-            let role = user.role
-            let address = user.address
-            let isPro = user.isPro
+            const email = { value: user.email, error: '' }
+            const phone = { value: user.phone, error: '' }
+            const role = user.role
+            const address = user.address
+            const isPro = user.isPro
+            const deleted = user.deleted
 
-            this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address, isProspect }, () => {
+            this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address, isProspect, deleted }, () => {
                 this.initialState = this.state //keep the initial state to compare changes
             })
         })
     }
 
+    fetchClientProjects() {
+        var query = db.collection('Projects').where('client.id', '==', this.userId).where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => load(this, false))
+    }
+
+    //Submit data
     validateInputs() {
         let denomError = ''
         let nomError = ''
@@ -144,7 +162,7 @@ class Profile extends Component {
 
         const phoneError = nameValidator(phone.value, '"Téléphone"')
         // const addressError = nameValidator(address.description, '"Adresse"')
-        const emailError = isProspect ? nameValidator(email.value, '"Email"') : ''
+        const emailError = isProspect ? '' : nameValidator(email.value, '"Email"')
 
         if (denomError || nomError || prenomError || phoneError || emailError) {
 
@@ -225,6 +243,39 @@ class Profile extends Component {
         this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
     }
 
+    //Prospect to client conversion
+    async clientConversion() {
+
+        const resp = await this.handleSubmit()
+        if (resp && resp.error) return
+
+        const { error, loading } = this.state
+        const { isPro, nom, prenom, denom, siret, address, phone, email } = this.state
+        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password: { value: '' } }
+        //autogen password
+        userData.password.value = generateId('', 7) //#task: generate it backend side
+        const eventHandlers = { error, loading }
+        const { isConnected } = this.props.network
+
+        const isValid = this.validateClientInputs(userData, false)
+        if (!isValid) return
+
+        this.setState({ loadingDialog: true })
+        const response = await createClient(userData, eventHandlers, this.userId, isConnected, true, true)
+        if (response && response.error) {
+            this.setState({ loadingDialog: false })
+            Alert.alert(response.error.title, response.error.message)
+        }
+
+        else {
+            setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
+                this.setState({ loadingDialog: false })
+                this.props.navigation.goBack()
+            }, 6000) //We can reduce this timeout later on...
+        }
+    }
+
+    //Password change
     passwordValidation() {
         const { currentPass, newPass } = this.state
         const currentPassError = passwordValidator(currentPass.value)
@@ -280,6 +331,7 @@ class Profile extends Component {
         this.setState({ toastType, toastMessage })
     }
 
+    //Signout handler
     handleSignout() {
         this.setState({ loadingSignOut: true })
         firebase.auth().signOut().then(async () => {
@@ -291,21 +343,20 @@ class Profile extends Component {
     }
 
     //Renderers
-    renderAvatar() {
+    renderAvatar(deleted) {
+        const icon = deleted ? faUserSlash : faUser
+        const iconColor = deleted ? theme.colors.error : theme.colors.primary
+
         return (
             <View style={styles.avatar} >
-                <CustomIcon icon={faUser} color={theme.colors.primary} size={30} />
+                <CustomIcon icon={icon} color={iconColor} size={30} />
+                {deleted && <Text style={[theme.customFontMSregular.small, { position: 'absolute', bottom: 5, color: theme.colors.gray_dark, textAlign: 'center' }]}>Utilisateur supprimé</Text>}
             </View>
         )
     }
 
-    renderMetadata() {
+    renderMetadata(canUpdate, isConnected) {
         const { isPro, nom, prenom, denom, siret } = this.state
-        const { uid } = firebase.auth().currentUser
-        const { isConnected } = this.props.network
-        const isProfileOwner = this.userId === uid
-        let { canUpdate } = this.props.permissions.users
-        canUpdate = (canUpdate || isProfileOwner)
 
         return (
             <View style={styles.metadataContainer} >
@@ -317,7 +368,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, denom, text)}
                         error={!!denom.error}
                         errorText={denom.error}
-                        editable={canUpdate}
+                        editable={isConnected && canUpdate || this.isProcess}
                     />
                     :
                     <MyInput
@@ -327,7 +378,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, prenom, text)}
                         error={!!prenom.error}
                         errorText={prenom.error}
-                        editable={canUpdate && isConnected}
+                        editable={isConnected && canUpdate || this.isProcess}
                         disabled={!isConnected}
                     />
                 }
@@ -340,7 +391,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, siret, text)}
                         error={!!siret.error}
                         errorText={siret.error}
-                        editable={false}
+                        editable={isConnected && canUpdate || this.isProcess}
                     />
                     :
                     < MyInput
@@ -350,7 +401,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, nom, text)}
                         error={!!nom.error}
                         errorText={nom.error}
-                        editable={canUpdate && isConnected}
+                        editable={isConnected && canUpdate || this.isProcess}
                         disabled={!isConnected}
                     />
                 }
@@ -360,10 +411,8 @@ class Profile extends Component {
         )
     }
 
-
-    fetchClientProjects() {
-        var query = db.collection('Projects').where('client.id', '==', this.userId).where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => load(this, false))
+    onPressProject(ProjectId) {
+        this.props.navigation.navigate('CreateProject', { ProjectId })
     }
 
     renderProject(project) {
@@ -371,7 +420,7 @@ class Profile extends Component {
             return <View style={styles.invisibleItem} />
         }
 
-        else return <ProjectItem2 project={project} onPress={() => this.onPressProject(project)} />
+        else return <ProjectItem2 project={project} onPress={() => this.onPressProject(project.id)} />
     }
 
     renderClientProjects() {
@@ -393,229 +442,208 @@ class Profile extends Component {
         )
     }
 
-    async clientConversion() {
-
-        const resp = await this.handleSubmit()
-        if (resp && resp.error) return
-
-        const { error, loading } = this.state
-        const { isPro, nom, prenom, denom, siret, address, phone, email } = this.state
-        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password: { value: '' } }
-        //autogen password
-        userData.password.value = generateId('', 7) //#task: generate it backend side
-        const eventHandlers = { error, loading }
-        const { isConnected } = this.props.network
-
-        const isValid = this.validateClientInputs(userData, false)
-        if (!isValid) return
-
-        this.setState({ loadingDialog: true })
-        const response = await createClient(userData, eventHandlers, this.userId, isConnected, true, true)
-        if (response && response.error) {
-            this.setState({ loadingDialog: false })
-            Alert.alert(response.error.title, response.error.message)
-        }
-
-        else {
-            setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-                this.setState({ loadingDialog: false })
-                this.props.navigation.goBack()
-            }, 6000) //We can reduce this timeout later on...
-        }
-    }
-
     render() {
-        let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, isProspect } = this.state
+        let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, isProspect, userNotFound, deleted } = this.state
         const { isConnected } = this.props.network
         const { displayName, uid } = firebase.auth().currentUser
+
         const isProfileOwner = this.userId === uid
         const isAdmin = this.role === 'admin'
-
         let { canUpdate } = this.props.permissions.users
         canUpdate = (canUpdate || isProfileOwner)
 
+
         return (
             <View style={{ flex: 1 }}>
-                <Appbar back={!loading} title titleText='Profil' check={canUpdate} handleSubmit={this.handleSubmit} />
+                <Appbar menu={isProfileOwner} back={!isProfileOwner} title titleText='Profil' check={canUpdate || this.isClient} handleSubmit={this.handleSubmit} />
 
-                <View style={{ flex: 1 }}>
-                    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 20 }}>
-                        <LoadDialog loading={loadingDialog} message="Conversion du prospect en client en cours..." />
-                        {!loading ?
-                            <View style={{ paddingHorizontal: theme.padding }}>
-                                <View style={{ height: 130, flexDirection: 'row', alignItems: 'center', marginVertical: 30 }}>
-                                    {this.renderAvatar()}
-                                    {this.renderMetadata()}
-                                </View>
+                {userNotFound ?
+                    <EmptyList icon={faUserSlash} header='Utilisateur introuvable' description='Cet utilisateur est introuvable dans la base de données.' offLine={!isConnected} />
+                    :
+                    <View style={{ flex: 1 }}>
+                        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 20 }}>
+                            {!loading ?
+                                <View style={{ paddingHorizontal: theme.padding }}>
+                                    <View style={{ height: 130, flexDirection: 'row', alignItems: 'center', marginVertical: 30 }}>
+                                        {this.renderAvatar(deleted)}
+                                        {this.renderMetadata(canUpdate, isConnected)}
+                                    </View>
 
-                                <View style={{ flex: 1, marginBottom: 30 }}>
-                                    <MyInput
-                                        label="Numéro utilisateur"
-                                        returnKeyType="done"
-                                        value={id}
-                                        onChangeText={text => console.log(text)}
-                                        error={!!id.error}
-                                        errorText={id.error}
-                                        autoCapitalize="none"
-                                        editable={false}
-                                        disabled
-                                    />
+                                    <View style={{ flex: 1, marginBottom: 30 }}>
+                                        <MyInput
+                                            label="Numéro utilisateur"
+                                            returnKeyType="done"
+                                            value={id}
+                                            onChangeText={text => console.log(text)}
+                                            error={!!id.error}
+                                            errorText={id.error}
+                                            autoCapitalize="none"
+                                            editable={false}
+                                            disabled
+                                        />
 
-                                    {/* <TouchableOpacity onPress={() => {
-                                                if (isProfileOwner)
-                                            this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
-                                    }}> */}
-                                    <MyInput
-                                        label="Email"
-                                        returnKeyType="done"
-                                        value={email.value}
-                                        onChangeText={text => updateField(this, email, text)}
-                                        autoCapitalize="none"
-                                        error={!!email.error}
-                                        errorText={email.error}
-                                        autoCapitalize="none"
-                                        textContentType= 'emailAddress'
-                                        keyboardType= 'email-address'
-                                        editable={isProspect ? true : false}
-                                        disabled={isProspect ? true : false}
-                                    // right={isProfileOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                    //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
-                                    // } />}
-                                    />
-                                    {/* </TouchableOpacity> */}
+                                        {/* <TouchableOpacity onPress={() => {
+                               if (isProfileOwner)
+                           this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
+                   }}> */}
 
-                                    {isProfileOwner &&
-                                        <Button
-                                            loading={loadingSignOut}
-                                            mode="contained"
-                                            onPress={this.handleSignout.bind(this)}
-                                            backgroundColor='#ff5153'
-                                            style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
-                                            Se déconnecter
-                                        </Button>
-                                    }
+                                        <MyInput
+                                            label="Email"
+                                            returnKeyType="done"
+                                            value={email.value}
+                                            multiline={true}
+                                            right={<TextInput.Icon name={<CustomIcon icon={faUser} color={theme.colors.inpuIcon} />} style={{ marginTop: 30 }} />}
 
-                                    {isAdmin && !isProspect &&
-                                        <TouchableOpacity onPress={() => {
-                                            if (!isConnected) return
-                                            navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
-                                        }}>
-                                            <MyInput
-                                                label="Role"
-                                                returnKeyType="done"
-                                                value={role}
-                                                autoCapitalize="none"
-                                                editable={false}
-                                                right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
-                                                    navigateToScreen(this, isAdmin, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
-                                                } />} />
-                                        </TouchableOpacity>
-                                    }
+                                            onChangeText={text => updateField(this, email, text)}
+                                            autoCapitalize="none"
+                                            error={!!email.error}
+                                            errorText={email.error}
+                                            autoCapitalize="none"
+                                            textContentType='emailAddress'
+                                            keyboardType='email-address'
+                                            editable={false}
+                                            disabled={false}
+                                        // right={isProfileOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
+                                        //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
+                                        // } />}
+                                        />
+                                        {/* </TouchableOpacity> */}
 
-                                    <MyInput
-                                        label="Téléphone"
-                                        returnKeyType="done"
-                                        value={phone.value}
-                                        onChangeText={text => updateField(this, phone, text)}
-                                        error={!!phone.error}
-                                        errorText={phone.error}
-                                        autoCapitalize="none"
-                                        textContentType='telephoneNumber'
-                                        keyboardType='phone-pad'
-                                        dataDetectorTypes='phoneNumber'
-                                        editable={canUpdate}
-                                        render={props =>
-                                            <TextInputMask
-                                                {...props}
-                                                mask="+[00] [0] [00] [00] [00] [00]"
-                                            />
-                                        } />
+                                        {isProfileOwner &&
+                                            <Button
+                                                loading={loadingSignOut}
+                                                mode="contained"
+                                                onPress={this.handleSignout.bind(this)}
+                                                backgroundColor='#ff5153'
+                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
+                                                Se déconnecter
+                                            </Button>
+                                        }
 
-                                    <AddressInput
-                                        offLine={!isConnected}
-                                        address={address}
-                                        addressError={addressError}
-                                        onPress={() => navigateToScreen(this, canUpdate, 'Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })}
-                                        rightIcon={canUpdate && isConnected && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                            navigateToScreen(this, canUpdate, 'Address', { prevScreen: 'Profile', userId: this.userId, currentAddress: this.state.address })
-                                        } />}
-                                    />
+                                        {isAdmin && !isProspect &&
+                                            <TouchableOpacity onPress={() => {
+                                                if (!isConnected || !isAdmin) return
+                                                navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
+                                            }}>
+                                                <MyInput
+                                                    label="Role"
+                                                    returnKeyType="done"
+                                                    value={role}
+                                                    autoCapitalize="none"
+                                                    editable={false}
+                                                    right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
+                                                        navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
+                                                    } />} />
+                                            </TouchableOpacity>
+                                        }
 
-                                    {isProfileOwner &&
-                                        <View>
-                                            <View style={{ paddingTop: 30, paddingBottom: 3 }}>
-                                                <Text style={[theme.customFontMSsemibold.body, { marginBottom: 5 }]}>MODIFICATION DU MOT DE PASSE</Text>
-                                                <Text style={[theme.customFontMSregular, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
+                                        <MyInput
+                                            label="Téléphone"
+                                            returnKeyType="done"
+                                            value={phone.value}
+                                            onChangeText={text => updateField(this, phone, text)}
+                                            error={!!phone.error}
+                                            errorText={phone.error}
+                                            autoCapitalize="none"
+                                            textContentType='telephoneNumber'
+                                            keyboardType='phone-pad'
+                                            dataDetectorTypes='phoneNumber'
+                                            editable={canUpdate || this.isProcess}
+                                            render={props =>
+                                                <TextInputMask
+                                                    {...props}
+                                                    mask="+[00] [0] [00] [00] [00] [00]"
+                                                />
+                                            } />
+
+                                        <AddressInput
+                                            offLine={!isConnected}
+                                            onPress={() => navigateToScreen(this, 'Address', { prevScreen: 'Profile', userId: this.userId, collection: this.isClient ? 'Clients' : 'Users', currentAddress: this.state.address })}
+                                            address={address}
+                                            addressError={addressError}
+                                            editable={canUpdate || this.isProcess}
+                                        />
+
+                                        {isProfileOwner &&
+                                            <View>
+                                                <View style={{ paddingTop: 30, paddingBottom: 3 }}>
+                                                    <Text style={[theme.customFontMSsemibold.body, { marginBottom: 5 }]}>MODIFICATION DU MOT DE PASSE</Text>
+                                                    <Text style={[theme.customFontMSregular, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
+                                                </View>
+
+                                                <MyInput
+                                                    label="Ancien mot de passe"
+                                                    returnKeyType="done"
+                                                    value={currentPass.value}
+                                                    onChangeText={text => updateField(this, currentPass, text)}
+                                                    error={!!currentPass.error}
+                                                    errorText={currentPass.error}
+                                                    autoCapitalize="none"
+                                                    secureTextEntry={!currentPass.show}
+                                                    right={<TextInput.Icon name={currentPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
+                                                        currentPass.show = !currentPass.show
+                                                        this.setState({ currentPass })
+                                                    }} />}
+                                                />
+
+                                                <MyInput
+                                                    label="Nouveau mot de passe"
+                                                    returnKeyType="done"
+                                                    value={newPass.value}
+                                                    onChangeText={text => updateField(this, newPass, text)}
+                                                    error={!!newPass.error}
+                                                    errorText={newPass.error}
+                                                    autoCapitalize="none"
+                                                    secureTextEntry={!newPass.show}
+                                                    right={<TextInput.Icon name={newPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
+                                                        newPass.show = !newPass.show
+                                                        this.setState({ newPass })
+                                                    }} />}
+                                                />
                                             </View>
+                                        }
 
-                                            <MyInput
-                                                label="Ancien mot de passe"
-                                                returnKeyType="done"
-                                                value={currentPass.value}
-                                                onChangeText={text => updateField(this, currentPass, text)}
-                                                error={!!currentPass.error}
-                                                errorText={currentPass.error}
-                                                autoCapitalize="none"
-                                                secureTextEntry={!currentPass.show}
-                                                right={<TextInput.Icon name={currentPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                                                    currentPass.show = !currentPass.show
-                                                    this.setState({ currentPass })
-                                                }} />}
-                                            />
+                                        {isProfileOwner &&
+                                            <Button
+                                                loading={loading}
+                                                mode="contained"
+                                                onPress={this.changePassword}
+                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }}>
+                                                Modifier le mot de passe
+                                            </Button>
+                                        }
 
-                                            <MyInput
-                                                label="Nouveau mot de passe"
-                                                returnKeyType="done"
-                                                value={newPass.value}
-                                                onChangeText={text => updateField(this, newPass, text)}
-                                                error={!!newPass.error}
-                                                errorText={newPass.error}
-                                                autoCapitalize="none"
-                                                secureTextEntry={!newPass.show}
-                                                right={<TextInput.Icon name={newPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                                                    newPass.show = !newPass.show
-                                                    this.setState({ newPass })
-                                                }} />}
-                                            />
-                                        </View>
-                                    }
+                                    </View>
 
-                                    {isProfileOwner &&
-                                        <Button
-                                            loading={loading}
-                                            mode="contained"
-                                            onPress={this.changePassword}
-                                            style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }}>
-                                            Modifier le mot de passe
-                                        </Button>
-                                    }
+                                    {this.isClient && clientProjectsList.length > 0 && this.renderClientProjects()}
 
                                 </View>
+                                :
+                                <Loading style={{ marginTop: constants.ScreenHeight * 0.4 }} size='large' />
+                            }
+                        </ScrollView >
 
-                                {this.isClient && clientProjectsList.length > 0 && this.renderClientProjects()}
-                            </View>
-                            :
-                            <Loading style={{ marginTop: constants.ScreenHeight * 0.4 }} size='large' />
+                        {this.isClient && isProspect && !loading &&
+                            <Button
+                                mode="contained"
+                                onPress={this.clientConversion}
+                                backgroundColor={theme.colors.primary}
+                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
+                                Convertir en client
+                            </Button>
                         }
-                    </ScrollView >
+                        <LoadDialog loading={loadingDialog} message="Conversion du prospect en client en cours..." />
 
-                    {this.isClient && isProspect &&
-                        <Button
-                            mode="contained"
-                            onPress={this.clientConversion}
-                            backgroundColor={theme.colors.primary}
-                            style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
-                            Convertir en client
-                        </Button>
-                    }
-                </View>
+                    </View>
+
+                }
 
                 <Toast
                     containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
                     message={toastMessage}
                     type={this.state.toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })} />
-            </View>
+            </View >
         )
     }
 }
@@ -641,6 +669,7 @@ const styles = StyleSheet.create({
         width: 130,
         height: 130,
         marginTop: 10,
+        paddingHorizontal: 10,
         borderRadius: 10,
         backgroundColor: theme.colors.gray_light,
         justifyContent: 'center',

@@ -50,7 +50,7 @@ class ListProjects extends Component {
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.titleText = this.props.navigation.getParam('titleText', 'Projets')
-        this.showFAB = this.props.navigation.getParam('showFAB', true)
+        this.showFAB = this.props.navigation.getParam('showFAB', true) && this.isRoot
         this.filteredProjects = []
 
         this.state = {
@@ -224,7 +224,7 @@ class ListProjects extends Component {
                             <EmptyList icon={faConstruction} header='Aucun projet' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
                         }
 
-                        {canCreate && this.showFAB && this.isRoot &&
+                        {canCreate && this.showFAB &&
                             <MyFAB onPress={() => this.props.navigation.navigate('CreateProject')} />
                         }
                     </Background>}

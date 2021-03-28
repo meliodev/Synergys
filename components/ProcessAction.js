@@ -211,6 +211,7 @@ class ProcessAction extends Component {
             this.setState({ loadingModal: true })
 
             if (onSelectType === 'navigation') {
+                screenParams.isProcess = true
                 this.props.navigation.navigate(screenName, screenParams)
             }
 
@@ -347,17 +348,20 @@ class ProcessAction extends Component {
         const { currentAction } = this.state
         const { responsable, verificationType, type, screenName, screenParams } = currentAction
 
-        if (responsable && responsable.id !== firebase.auth().currentUser.uid) {
-            Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
-            return
-        }
+        // if (responsable && responsable.id !== firebase.auth().currentUser.uid) {
+        //     Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+        //     return
+        // }
 
         if (type === 'auto') {
             if (currentAction.choices) {
                 this.setState({ showModal: true })
             }
 
-            else this.props.navigation.navigate(screenName, screenParams)
+            else {
+                screenParams.isProcess = true
+                this.props.navigation.navigate(screenName, screenParams)
+            }
         }
 
         else if (type === 'manual') {
@@ -397,7 +401,7 @@ class ProcessAction extends Component {
         return (
             <TouchableOpacity onPress={this.onPressAction} style={styles.actionContainer}>
                 <View style={styles.actionTitleContainer}>
-                    {currentAction && !loading && <CustomIcon style= {{marginRight: 5}} icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
+                    {currentAction && !loading && <CustomIcon style={{ marginRight: 5 }} icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
                     <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? "Chargement de l'action à faire..." : title}</Text>
                 </View>
 

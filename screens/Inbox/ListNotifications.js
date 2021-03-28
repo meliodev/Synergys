@@ -35,6 +35,7 @@ class ListNotifications extends Component {
     }
 
     async componentDidMount() {
+        //Static query
         let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'desc')
         this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { })
     }
@@ -56,17 +57,18 @@ class ListNotifications extends Component {
     markAsReadAndNavigate = async (notification) => {
         const params = notification.navigation
         const screen = params.screen
-
+        
         if (!notification.read) {
-            await db.collection('Users').doc(this.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
+            db.collection('Users').doc(this.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
         }
 
-        this.props.navigation.navigate(screen, params) //generic form
+        this.props.navigation.navigate(screen, params) //dynamic form
     }
 
 
     render() {
         let { notificationsCount } = this.state
+        
         const s = notificationsCount > 1 ? 's' : ''
 
         return (
