@@ -14,7 +14,7 @@ import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState } from '../../core/redux'
 
-const roles = [{ id: 'admin', value: 'Admin' }, { id: 'backoffice', value: 'Back office' }, { id: 'dircom', value: 'Directeur commercial' }, { id: 'com', value: 'Commercial' }, { id: 'poseur', value: 'Poseur' }, { id: 'tech', value: 'Responsable technique' }, { id: 'client', value: 'Client' }]
+const roles = [{ id: 'admin', value: 'Admin', level: 3 }, { id: 'backoffice', value: 'Back office', level: 3 }, { id: 'dircom', value: 'Directeur commercial', level: 2 }, { id: 'com', value: 'Commercial', level: 1 }, { id: 'poseur', value: 'Poseur', level: 1 }, { id: 'tech', value: 'Responsable technique', level: 2 }, { id: 'client', value: 'Client', level: 0 }]
 const db = firebase.firestore()
 
 class AuthLoadingScreen extends Component {
@@ -34,17 +34,24 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
+    console.log('1. authloading screen did mount..................................')
     //1. Notification action listeners
     await this.bootstrapNotifications()
+    console.log('Notifications bootstraped..........................')
     this.forgroundNotificationListener()
+    console.log('forgroundNotificationListener is now running...................')
+
     this.backgroundNotificationListener()
+    console.log('backgroundNotificationListener is now running...................')
 
     //2. Auth listener & Navigation rooter
+    console.log('5. ready to start navigationRooterAuthListener...................')
     this.unsububscribe = this.navigationRooterAuthListener()
   }
 
   //User action on a notification has caused app to open
   async bootstrapNotifications() {
+    console.log('2. Bootstraping notifications...................')
     const initialNotification = await notifee.getInitialNotification()
     //set screen & params on asyncstorage
     if (initialNotification) {
@@ -68,6 +75,7 @@ class AuthLoadingScreen extends Component {
   }
 
   forgroundNotificationListener() {
+    console.log('3. forgroundNotificationListener launch...................')
     notifee.onForegroundEvent(({ type, detail }) => {
       switch (type) {
         case EventType.DISMISSED:
@@ -81,6 +89,8 @@ class AuthLoadingScreen extends Component {
   }
 
   backgroundNotificationListener() {
+    console.log('4. backgroundNotificationListener launch...................')
+
     notifee.onBackgroundEvent(async ({ type, detail }) => {
       //const { pressAction } = notification.android
       const { notification } = detail
@@ -106,6 +116,7 @@ class AuthLoadingScreen extends Component {
 
   //Auth Listener & Navigation Rooter
   navigationRooterAuthListener() {
+
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
 
@@ -118,16 +129,20 @@ class AuthLoadingScreen extends Component {
 
           if (idTokenResult) {
             for (const role of roles) {
-              if (idTokenResult.claims[role.id])
+              if (idTokenResult.claims[role.id]) {
                 setRole(this, role)
+                var roleValue = role.value
+              }
             }
           }
 
           //2. Set privilleges
-          await this.configurePrivileges()
+          const remotePermissions = await this.configurePrivileges(roleValue)
+          const action = { type: "SET_PERMISSIONS", value: remotePermissions }
+          this.props.dispatch(action)
 
           //3. Set fcm token
-          await this.requestUserPermission() //iOS only (notifications)
+          await this.requestUserPermission() //iOS only
           await this.configureFcmToken()
         }
 
@@ -137,25 +152,29 @@ class AuthLoadingScreen extends Component {
         if (initialNotification)
           this.props.navigation.navigate(screen, params)
 
-        else
-          this.props.navigation.navigate("ProjectsStack")
+        else this.props.navigation.navigate("ListProjects")
       }
 
-      else this.props.navigation.navigate("LoginScreen")
+      else {
+        this.props.navigation.navigate("LoginScreen")
+      }
     })
   }
 
-  async configurePrivileges() {
+  async configurePrivileges(role) {
     //A. Compare & Update permissions config
     //A.1. Get permissions config from server
     // const remotePermissions = (await this.fetchPermissionsConfig()).data
-    const remotePermissions = await db.collection('Permissions').doc(this.props.role.value).get().then((doc) => { return doc.data() })
+    const remotePermissions = await db.collection('Permissions').doc(role).get().then((doc) => {
+      return doc.data()
+    })
     const localPermissions = this.props.permissions
     //A.2. Compare local permissions config & server permissions config
     const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(localPermissions)
     //A.3 Update local config if different from server config
-    if (permissionsChanged)
-      setPermissions(this, remotePermissions)
+    //if (permissionsChanged)
+    // console.log('READY TO SET PERMISSONS...', remotePermissions)
+    return remotePermissions
   }
 
   //FCM token configuration

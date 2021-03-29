@@ -19,11 +19,6 @@ import firebase from '@react-native-firebase/app'
 const db = firebase.firestore()
 
 const MessageItem = ({ message, navigation, options, functions, ...props }) => {
-    const currentUser = firebase.auth().currentUser
-    let haveRead = message.haveRead.includes(currentUser.uid)
-    const isCurrentuserSender = message.sender.id === currentUser.uid
-    const isCurrentUserReceiver = message.receivers.find((receiver) => receiver.id === currentUser.uid)
-    const showMessageDescription = isCurrentuserSender || isCurrentUserReceiver  //currentUser is speaker ?
 
     const markAsReadAndNavigate = (message) => {
         let haveRead = message.haveRead.find((id) => id === currentUser.uid)
@@ -37,8 +32,18 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
         navigation.navigate('ViewMessage', { message: message })
     }
 
+
+    const currentUser = firebase.auth().currentUser
+    let haveRead = true
+    if (currentUser) {
+        const isCurrentuserSender = message.sender.id === currentUser.uid
+        const isCurrentUserReceiver = message.receivers.find((receiver) => receiver.id === currentUser.uid)
+        var showMessageDescription = isCurrentuserSender || isCurrentUserReceiver  //currentUser is speaker ?
+        haveRead = message.haveRead.includes(currentUser.uid)
+    }
+
     const atColor = haveRead ? theme.colors.white : theme.colors.white
-    const atBackgroundColor = haveRead ? theme.colors.gray_medium : theme.colors.error
+    const atBackgroundColor = haveRead ? theme.colors.gray_medium : theme.colors.primary
 
     return (
         <List.Item
@@ -59,13 +64,13 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
             )}
 
             left={props =>
-                <View style={{ justifyContent: 'center', alignItems: 'center', marginHorizontal: theme.padding/2 }}>
-                    <AvatarText label={message.sender.fullName.charAt(0)} size={40} labelStyle={{ color: atColor }} style= {{backgroundColor: atBackgroundColor, elevation: 1}} />
+                <View style={{ justifyContent: 'center', alignItems: 'center', marginHorizontal: theme.padding / 2 }}>
+                    <AvatarText label={message.sender.fullName.charAt(0)} size={40} labelStyle={{ color: atColor }} style={{ backgroundColor: atBackgroundColor, elevation: 1 }} />
                 </View>
             }
 
             right={props =>
-                <View style={{ alignItems: 'center', paddingTop: 9, marginRight: theme.padding/2 }}>
+                <View style={{ alignItems: 'center', paddingTop: 9, marginRight: theme.padding / 2 }}>
                     <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(message.sentAt).format("Do MMM")}</Text>
                     {/* <Menu
                         options={[

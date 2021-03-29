@@ -127,11 +127,31 @@ const UsersManagementStack = createStackNavigator({
         screen: ViewTeam,
         navigationOptions: hideHeader
     },
+    //Profile screens
     Profile: {
         screen: Profile,
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
     },
 })
 
@@ -149,6 +169,32 @@ const ClientsManagementStack = createStackNavigator({
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
     },
 })
 
@@ -178,6 +224,32 @@ const RequestsManagementStack = createStackNavigator({
         screen: VideoPlayer,
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
     },
 })
 
@@ -236,6 +308,32 @@ const InboxStack = createStackNavigator({
         screen: CreateOrder,
         navigationOptions: hideHeader
     },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
+    },
 })
 
 const AgendaStack = createStackNavigator({
@@ -257,6 +355,32 @@ const AgendaStack = createStackNavigator({
     },
     DatePicker: {
         screen: DatePicker,
+        navigationOptions: hideHeader
+    },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
         navigationOptions: hideHeader
     },
 })
@@ -323,11 +447,36 @@ const ProjectsStack = createStackNavigator({
         screen: DatePicker,
         navigationOptions: hideHeader
     },
+    //Agenda screens
+    Agenda: {
+        screen: Agenda,
+        navigationOptions: hideHeader
+    },
+    //Profile screens
     Profile: {
         screen: Profile,
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
     },
 })
 
@@ -368,6 +517,32 @@ const DocumentsStack = createStackNavigator({
         screen: PdfGeneration,
         navigationOptions: hideHeader
     },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
+    },
 })
 
 const OrdersStack = createStackNavigator({
@@ -393,6 +568,32 @@ const OrdersStack = createStackNavigator({
     },
     ListClients: {
         screen: ListClients,
+        navigationOptions: hideHeader
+    },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
         navigationOptions: hideHeader
     },
 })

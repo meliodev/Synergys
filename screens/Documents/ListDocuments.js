@@ -34,15 +34,22 @@ const states = [
     { label: 'Validé', value: 'Validé' },
 ]
 
-const types = [
+let types = [
     { label: 'Tous', value: '' },
     { label: 'Bon de commande', value: 'Bon de commande' },
     { label: 'Devis', value: 'Devis' },
     { label: 'Facture', value: 'Facture' },
     { label: 'Dossier CEE', value: 'Dossier CEE' },
+    { label: 'Fiche EEB', value: 'Fiche EEB' },
+    { label: 'Dossier aide', value: 'Dossier aide' },
     { label: 'Prime de rénovation', value: 'Prime de rénovation' },
     { label: 'Aide et subvention', value: 'Aide et subvention' },
     { label: 'Action logement', value: 'Action logement' },
+    { label: 'PV réception', value: 'PV réception' },
+    { label: 'Mandat SEPA', value: 'Mandat SEPA' },
+    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV' },
+    { label: 'Attestation fluide', value: 'Attestation fluide' },
+    { label: 'Autre', value: 'Autre' },
 ]
 
 class ListDocuments extends Component {
@@ -90,8 +97,6 @@ class ListDocuments extends Component {
             var query = configureQuery('Documents', queryFilters, params)
             this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
         }
-
-        // var query = db.collection('Documents').where('deleted', '==', false).orderBy('createdAt', 'desc')
     }
 
     bootstrapUploads() {

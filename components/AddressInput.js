@@ -10,7 +10,7 @@ import { TextInput } from 'react-native-paper'
 import * as theme from "../core/theme";
 import { notAvailableOffline } from '../core/exceptions';
 
-const AddressInput = ({ offLine, onPress, rightIcon, address, addressError, label, editable, ...props }) => {
+const AddressInput = ({ offLine, onPress, rightIcon, address, addressError, label, editable = true, isEdit, ...props }) => {
 
     const onPressHandler = () => {
         if (!editable) return
@@ -22,7 +22,7 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, addressError, labe
         onPress()
     }
 
-    if (address.description !== '')
+    const renderAddressInput = () => {
         return (
             <TouchableOpacity onPress={onPressHandler}>
                 <MyInput
@@ -31,12 +31,14 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, addressError, labe
                     error={!!addressError}
                     errorText={addressError}
                     editable={false}
-                    multiline={true}
-                    right={<TextInput.Icon name={<CustomIcon icon={faMapMarkerAlt} color={theme.colors.inpuIcon} />} onPress={onPressHandler} style={{ marginTop: 30 }} />}
+                    // multiline={true}
+                    right={<TextInput.Icon name={<CustomIcon icon={faMapMarkerAlt} color={theme.colors.inpuIcon} />} onPress={onPressHandler} />}
                 />
             </TouchableOpacity>
         )
-    else return null
+    }
+
+    return renderAddressInput()
 }
 
 export default withNavigation(AddressInput)

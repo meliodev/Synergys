@@ -73,7 +73,7 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
                     <Paragraph style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>Modifié le {moment(request.editedAt).format('lll')}</Paragraph>
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
-                        <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >Par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: request.editedBy.userId })}>{request.editedBy.userName}</Text></Paragraph>
+                        <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >Par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: request.editedBy.id })}>{request.editedBy.userName}</Text></Paragraph>
                         <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2, elevation: 2 }}>
                             <Paragraph style={[theme.customFontMSmedium.caption, { textAlign: 'center' }]}>{request.state}</Paragraph>
                         </View>

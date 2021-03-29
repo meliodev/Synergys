@@ -323,8 +323,6 @@ class CreateRequest extends Component {
                                         label="Département *"
                                         returnKeyType="next"
                                         value={department}
-                                        error={!!department.error}
-                                        errorText={department.error}
                                         selectedValue={department}
                                         onValueChange={(department) => this.setState({ department })}
                                         title="Département"
@@ -338,7 +336,8 @@ class CreateRequest extends Component {
                                         onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={addressError}
-                                        editable={canUpdate} />
+                                        editable={canUpdate} 
+                                        isEdit = {this.isEdit}/>
                                 }
 
                                 <MyInput

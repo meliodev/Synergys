@@ -9,7 +9,7 @@ export const setPermissions = (main, permissions) => {
     const action = { type: "SET_PERMISSIONS", value: permissions }
     main.props.dispatch(action)
 }
-
+ 
 export const setNetwork = (main, network) => {
     const action = { type: "NET", value: network }
     main.props.dispatch(action)

@@ -12,7 +12,7 @@ export async function uploadFile(attachment, storageRefPath, showProgress, metad
     const promise = new Promise((resolve, reject) => {
 
         const storageRef = firebase.storage().ref(storageRefPath)
-        this.uploadTask = storageRef.putFile(attachment.path, { customMetadata: metadata })
+        this.uploadTask = storageRef.putFile(attachment.path, { customMetadata: metadata || {} })
 
         this.uploadTask
             .on('state_changed', async function (tasksnapshot) {

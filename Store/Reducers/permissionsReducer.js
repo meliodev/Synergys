@@ -9,11 +9,13 @@ const initialState = {
     requests: { canCreate: false, canRead: false, canUpdate: false, canDelete: false, queryFilters: [] },
     tasks: { canCreate: false, canRead: false, canUpdate: false, canDelete: false, queryFilters: [] },
     clients: { canCreate: false, canRead: false, canUpdate: false, canDelete: false, queryFilters: [] },
+    active: false
 }
 
 function setPermissions(state = initialState, action) {
     let nextState
-   
+
+
     switch (action.type) {
         case 'SET_PERMISSIONS':
             nextState = {
@@ -90,7 +92,10 @@ function setPermissions(state = initialState, action) {
                     canDelete: action.value.clients.canDelete,
                     queryFilters: action.value.clients.queryFilters
                 },
+                active: true
             }
+
+          console.log('DOCUMENT REDUX NEXTSTATE:', nextState.documents)
 
             return nextState || state
 

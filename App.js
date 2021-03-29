@@ -50,6 +50,7 @@ const paperTheme = {
 
 class App extends Component {
 
+
   // async componentDidMount() {
   //   //Notification channels
   //   const channelId = await notifee.createChannel({
@@ -186,3 +187,51 @@ export default App
     //   type: 'auto',
     //   responsable: '',
     // }, ##PROJECT.NOTE
+
+
+
+      //   const clients = {
+  //     canCreate: false,
+  //     canRead: false,
+  //     canUpdate: false,
+  //     canDelete: false
+  //   }
+
+  //   // //documents
+  //   // const queryFilters = [
+  //   //   { filterOrder: 1, clause: 'where', filter: 'project.subscribers', operation: 'array-contains', value: { id: '', fullName: '', email: '', role: '' }, valueSource: 'currentUser' },
+  //   //   { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+  //   // ]
+
+  //   // //client
+  //   // const queryFilters = [
+  //   //   { filterOrder: 1, clause: 'where', filter: 'client.id', operation: '==', value: '', valueSource: 'currentUser' },
+  //   //   { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+  //   // ]
+
+  //   // const queryFilters = [
+  //   //   { filterOrder: 1, clause: 'where', filter: 'client.id', operation: '==', value: '', valueSource: '' },
+  //   //   { filterOrder: 2, clause: 'where', filter: 'type', operation: '==', value: '', valueSource: 'type' },
+  //   //   { filterOrder: 3, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+  //   // ]
+
+
+  //   // //messages
+  //   // const queryFilters = [
+  //   //   { filterOrder: 1, clause: 'where', filter: 'subscribers', operation: 'array-contains', value: '', valueSource: 'currentUser' },
+  //   //   { filterOrder: 2, clause: 'orderBy', field: 'sentAt', sort: 'desc' },
+  //   // ]
+
+
+  //   //Tasks
+  //   // const queryFilters = [
+  //   //   { filterOrder: 1, clause: 'where', filter: 'natures', operation: 'array-contains', value: 'tech' },
+  //   //   { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+  //   // ]
+
+  //   // //orderBy only
+  //   // const queryFilters = [
+  //   //   { filterOrder: 1, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+  //   // ]
+
+  // //  db.collection('Permissions').doc('Client').update({ 'requests.queryFilters': queryFilters })

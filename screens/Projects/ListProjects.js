@@ -35,9 +35,12 @@ const states = [
 
 const steps = [
     { label: 'Toutes', value: '' },
-    { label: 'Prospect', value: 'Prospect' },
-    { label: 'Chantier', value: 'Chantier' },
-    { label: 'SAV', value: 'SAV' },
+    { label: 'Initialisation', value: 'Initialisation' },
+    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' },
+    { label: 'Rendez-vous N', value: 'Rendez-vous N' },
+    { label: 'Visite technique', value: 'Visite technique' },
+    { label: 'Installation', value: 'Installation' },
+    { label: 'Maintenance', value: 'Maintenance' },
 ]
 
 const db = firebase.firestore()
@@ -67,8 +70,8 @@ class ListProjects extends Component {
             filterOpened: false,
 
             //view (grid/list)
-            view: 'grid',
-            columnCount: 3,
+            view: 'list',
+            columnCount: 1,
 
             loading: true,
         }
@@ -90,6 +93,9 @@ class ListProjects extends Component {
 
         // if (isClient)
         //     var query = db.collection('Projects').where('client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'DESC')
+
+        console.log("Permissions")
+        console.log(this.props.permissions)
 
         const { queryFilters } = this.props.permissions.projects
         if (queryFilters === []) this.setState({ projectsList: [], projectsCount: 0 })
@@ -125,8 +131,8 @@ class ListProjects extends Component {
             this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
 
         else {
-            const { id, name, client, subscribers } = project
-            this.props.navigation.state.params.onGoBack({ id, name, client, subscribers })
+            const { id, name, client, subscribers, step } = project
+            this.props.navigation.state.params.onGoBack({ id, name, client, subscribers, step })
             this.props.navigation.goBack()
         }
     }
@@ -212,7 +218,7 @@ class ListProjects extends Component {
 
                             <FlatList
                                 enableEmptySections={true}
-                                data={formatRow(this.filteredProjects, columnCount)}
+                                data={formatRow(this.state.view === 'list' ? false : true, this.filteredProjects, columnCount)}
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderProject(item)}
                                 style={{ zIndex: 1 }}

@@ -344,7 +344,9 @@ class ProcessAction extends Component {
     }
 
     //func
-    onPressAction = async () => {
+    onPressAction = async (canUpdate) => {
+        if (!canUpdate) return
+
         const { currentAction } = this.state
         const { responsable, verificationType, type, screenName, screenParams } = currentAction
 
@@ -387,7 +389,7 @@ class ProcessAction extends Component {
     }
 
     //renderer
-    renderAction = () => {
+    renderAction = (canUpdate) => {
         const { currentAction, showModal, showDialog, loadingDialog, dialogTitle, dialogInputLabel, nextStep, nextPhase, loadingModal, choice, loading } = this.state
 
         if (currentAction) {
@@ -399,7 +401,7 @@ class ProcessAction extends Component {
         }
 
         return (
-            <TouchableOpacity onPress={this.onPressAction} style={styles.actionContainer}>
+            <TouchableOpacity onPress={() => this.onPressAction(canUpdate)} style={styles.actionContainer}>
                 <View style={styles.actionTitleContainer}>
                     {currentAction && !loading && <CustomIcon style={{ marginRight: 5 }} icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
                     <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? "Chargement de l'action à faire..." : title}</Text>
@@ -451,6 +453,7 @@ class ProcessAction extends Component {
     render() {
         const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, processUpdated, expanded, loading } = this.state
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
+        const { canUpdate } = this.props
 
         return (
             <View style={styles.container}>
@@ -473,7 +476,7 @@ class ProcessAction extends Component {
                     onPress={() => this.setState({ expanded: !expanded })}>
 
                     <View style={{ height: 50, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
-                        {this.renderAction()}
+                        {this.renderAction(canUpdate)}
                     </View>
 
                 </List.Accordion>

@@ -187,3 +187,36 @@ Ideas2:
 
 
 
+
+
+
+
+
+// const clients = {
+//     canCreate: true,
+//     canUpdate: true,
+//     canRead: true,
+//     canDelete: false
+// }
+
+// const queryFilters = [
+//     { filterOrder: 1, clause: 'where', filter: 'project.subscribers', operation: 'array-contains', value: '' },
+// ]
+
+// const queryFilters = [
+//     { filterOrder: 1, clause: 'where', filter: 'project.subscribers', operation: 'array-contains', value: '' },
+// ]
+
+// const queryFilters = [
+//     { filterOrder: 1, clause: 'where', filter: 'type', operation: '==', value: 'ticket' },
+//     { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+// ]
+
+// const queryFilters = [
+//     { filterOrder: 1, clause: 'where', filter: 'subscribers', operation: 'array-contains', value: '' },
+//     { filterOrder: 2, clause: 'where', filter: 'deleted', operation: '==', value: false },
+//     { filterOrder: 3, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
+// ]
+
+
+        // db.collection('Permissions').doc('Poseur').update({ 'clients': clients })

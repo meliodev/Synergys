@@ -27,6 +27,7 @@ import TaskState from "../../components/RequestState"
 import * as theme from "../../core/theme"
 import { constants, adminId } from "../../core/constants"
 import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, isEditOffline } from "../../core/utils"
+import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { connect } from 'react-redux'
 import { CustomIcon } from '../../components';
@@ -40,15 +41,15 @@ let staticTypes = [
 ]
 
 let allTypes = [
-    { label: 'Normale', value: 'Normale' }, //#static
-    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' }, //#dynamic
-    { label: 'Visite technique préalable', value: 'Visite technique préalable' }, //#dynamic
-    { label: 'Visite technique', value: 'Visite technique' }, //#dynamic
-    { label: 'Installation', value: 'Installation' }, //#dynamic
-    { label: 'Rattrapage', value: 'Rattrapage' }, //#dynamic
-    { label: 'Panne', value: 'Panne' }, //#static
-    { label: 'Entretien', value: 'Entretien' }, //#static
-    { label: 'Rendez-vous N', value: 'Rendez-vous N' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+    { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
+    { label: 'Rendez-vous 1', value: 'Rendez-vous 1', natures: ['com'] }, //#dynamic
+    { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, //#dynamic
+    { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
+    { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
+    { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
+    { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
+    { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
+    { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
 
@@ -154,7 +155,6 @@ class CreateTask extends Component {
             priority = task.priority
             status = task.status
             type = task.type
-            console.log('type', type)
             address = task.address
             startDate.value = task.startDate
             dueDate.value = task.dueDate
@@ -227,6 +227,8 @@ class CreateTask extends Component {
         return true
     }
 
+
+
     //Submit
     async handleSubmit() {
 
@@ -240,14 +242,25 @@ class CreateTask extends Component {
         if (loading || this.state === this.initialState) return
         load(this, true)
 
-        //1. Validate inputs
+        //1. Validate inputs 
         const isValid = this.validateInputs()
         if (!isValid) return
+
+        //POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
+        const currentRole = this.props.role.id
+        const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
+        if (isBlockedUpdates) {
+            Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
+            load(this, false)
+            return
+        }
 
         // 2. ADDING task DOCUMENT
         const currentUser = { userId: this.currentUser.uid, userName: this.currentUser.displayName }
         const dateKey = moment(startDate.value).format('YYYY-MM-DD')
         const timestamp = moment(startDate.value).format()
+        let natures
+        allTypes.forEach((t) => { if (t.value === type) natures = t.natures })
 
         let task = {
             dateKey: dateKey,
@@ -256,6 +269,7 @@ class CreateTask extends Component {
             description: description.value,
             project,
             type: type,
+            natures,
             priority: priority,
             status: status,
             address: { description: address.description, place_id: address.place_id },
@@ -401,7 +415,7 @@ class CreateTask extends Component {
                                         selectedValue={type}
                                         onValueChange={(type) => this.setState({ type })}
                                         title="Type"
-                                        elements={this.types}
+                                        elements={this.isEdit ? allTypes : this.types}
                                         enabled={canUpdate && this.enableTypePicker} //pre-defined task type
                                         containerStyle={{ marginBottom: 10 }}
                                     />
@@ -440,7 +454,9 @@ class CreateTask extends Component {
                                         onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={address.error}
-                                        editable={canUpdate} />
+                                        editable={canUpdate}
+                                        isEdit={this.isEdit} />
+
 
                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
                                         <Text style={theme.customFontMSregular.body}>Toute la journée</Text>

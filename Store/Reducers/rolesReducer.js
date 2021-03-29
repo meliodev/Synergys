@@ -1,5 +1,5 @@
 
-const initialState = { role: { id: '', value: '' } }
+const initialState = { role: { id: '', value: '', level: 0 } }
 
 function setRole(state = initialState, action) {
   let nextState
@@ -11,6 +11,7 @@ function setRole(state = initialState, action) {
           ...state.role,
           id: action.value.id,
           value: action.value.value,
+          level: action.value.level
         }
       }
 

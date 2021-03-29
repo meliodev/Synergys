@@ -47,13 +47,15 @@ const KEYS_TO_FILTERS = ['type', 'status', 'priority', 'project.id', 'assignedTo
 
 const types = [
     { label: 'Tous', value: '' },
-    { label: 'Normale', value: 'Normale' },
-    { label: 'Rendez-vous', value: 'Rendez-vous' },
-    { label: 'Visite technique', value: 'Visite technique' },
-    { label: 'Installation', value: 'Installation' },
-    { label: 'Rattrapage', value: 'Rattrapage' },
-    { label: 'Panne', value: 'Panne' },
-    { label: 'Entretien', value: 'Entretien' },
+    { label: 'Normale', value: 'Normale' }, //#static
+    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' }, //#dynamic
+    { label: 'Visite technique préalable', value: 'Visite technique préalable' }, //#dynamic
+    { label: 'Visite technique', value: 'Visite technique' }, //#dynamic
+    { label: 'Installation', value: 'Installation' }, //#dynamic
+    { label: 'Rattrapage', value: 'Rattrapage' }, //#dynamic
+    { label: 'Panne', value: 'Panne' }, //#static
+    { label: 'Entretien', value: 'Entretien' }, //#static
+    { label: 'Rendez-vous N', value: 'Rendez-vous N' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
 const priorities = [
@@ -75,11 +77,17 @@ class Agenda2 extends Component {
     constructor(props) {
         super(props)
         this.isAgenda = this.props.navigation.getParam('isAgenda', false) //#task: set it to true
+        this.isRoot = this.props.navigation.getParam('isRoot', true) //#task: set it to true
         this.loadItems = this.loadItems.bind(this)
         this.refreshItems = this.refreshItems.bind(this)
         this.handleFilter = this.handleFilter.bind(this)
         this.togglePlanningTabs = this.togglePlanningTabs.bind(this)
         this.projectFilter = this.props.navigation.getParam('projectFilter', { id: '', name: '' })
+
+        const lowRoles = ['com', 'poseur']
+        const currentRole = this.props.role.id
+        const isLowRole = lowRoles.includes(currentRole)
+        this.isAgenda = isLowRole || this.isAgenda
 
         this.state = {
             //Settings
@@ -385,9 +393,10 @@ class Agenda2 extends Component {
         }
 
         const progress = item.dayProgress !== '1/1' ? ` (jour ${item.dayProgress})` : ''
+        const done = item.status === 'Terminé'
 
         return (
-            <TouchableOpacity style={[styles.item, { backgroundColor: itemColor }]} onPress={onPressItem} >
+            <TouchableOpacity style={[styles.item, { backgroundColor: itemColor, opacity: done ? 0.5 : 1 }]} onPress={onPressItem} >
                 <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
                     <Text style={[theme.customFontMSregular.body, { color: '#fff' }]} numberOfLines={1}>{item.name}{progress}</Text>
                 </View>
@@ -418,11 +427,12 @@ class Agenda2 extends Component {
 
         let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
         const filterActivated = !_.isEqual(items, filteredItems)
+        const highRoles = (roleId === 'admin' || roleId === 'backoffice' || roleId === 'dircom' || roleId === 'tech')
 
         return (
             <View style={{ flex: 1 }}>
 
-                { (roleId === 'admin' || roleId === 'dircom' || roleId === 'tech') ?
+                { highRoles ?
                     <PickerBar
                         main={this}
                         //Refresh
@@ -437,10 +447,10 @@ class Agenda2 extends Component {
                         project={project}
                         assignedTo={assignedTo} />
                     :
-                    <Appbar menu title titleText='Mon agenda' />
+                    <Appbar back={!this.isRoot} menu={this.isRoot} title titleText='Mon agenda' />
                 }
 
-                <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />
+                {highRoles && <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />}
 
                 {filterActivated && <ActiveFilter />}
 
@@ -457,6 +467,7 @@ class Agenda2 extends Component {
                         renderEmptyDate={this.renderEmptyDate.bind(this)}
                         rowHasChanged={this.rowHasChanged.bind(this)}
                         displayLoadingIndicator={true}
+                        // style= {{paddingBottom: 65}}
                         //onRefresh={() => this.refreshItems(true)} <-- #bug: this line disables zIndex which is used to put background below flatlist items (issue is followed up on react-native github repository)
                         theme={{
                             dotColor: theme.colors.agendaLight,
@@ -488,7 +499,7 @@ class Agenda2 extends Component {
                         renderDay={this.renderDay}
                     />
                 </View>
-                {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems })} />}
+                {canCreate && this.isRoot && <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { onGoBack: this.refreshItems })} />}
             </View>
         )
     }

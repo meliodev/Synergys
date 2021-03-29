@@ -12,6 +12,7 @@ import Picker from "../../components/Picker"
 import RadioButton from "../../components/RadioButton"
 import MyInput from "../../components/TextInput"
 import Toast from "../../components/Toast"
+import LoadDialog from "../../components/LoadDialog"
 
 import * as theme from "../../core/theme";
 import { constants, rolesRedux } from "../../core/constants";
@@ -79,7 +80,10 @@ class CreateUser extends Component {
       password: { value: '', error: '', show: false },
 
       loading: false,
+      loadingDialog: false,
       error: "",
+      toastType: '',
+      toastMessage: '',
     }
   }
 
@@ -145,7 +149,7 @@ class CreateUser extends Component {
     const passwordError = passwordValidator(password.value)
 
     if (denomError || siretError || nomError || prenomError || phoneError || addressError || emailError || passwordError) {
-
+      console.log(denomError, siretError, nomError, prenomError, phoneError, addressError, emailError, passwordError)
       phone.error = phoneError
       email.error = emailError
       password.error = passwordError
@@ -195,8 +199,8 @@ class CreateUser extends Component {
     //   }
     // }
 
-    load(this, true)
-    this.title = "Création de l'utilisateur"
+    this.setState({ loadingDialog: true })
+
     //2. ADDING USER DOCUMENT
     let user = {
       address,
@@ -228,8 +232,7 @@ class CreateUser extends Component {
 
     await db.collection('newUsers').doc(userId).set(user).catch(e => handleFirestoreError(e))
     setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-      load(this, false)
-      this.title = "Créer un utilisateur"
+      this.setState({ loadingDialog: false })
       this.props.navigation.navigate(this.prevScreen)
     }
       , 6000) //We can reduce this timeout later on...
@@ -240,7 +243,7 @@ class CreateUser extends Component {
   }
 
   render() {
-    let { role, isPro, error, loading } = this.state
+    let { role, isPro, error, loading, loadingDialog, toastType, toastMessage } = this.state
     let { userId, nom, prenom, address, addressError, phone, email, password } = this.state
     let { denom, siret } = this.state
     const { isConnected } = this.props.network
@@ -309,6 +312,15 @@ class CreateUser extends Component {
               errorText={isPro ? denom.error : nom.error}
             />
 
+            <AddressInput
+              label='Adresse postale'
+              offLine={!isConnected}
+              onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+              address={address}
+              addressError={addressError}
+              isEdit={false}
+            />
+
             {isPro &&
               <MyInput
                 label='Numéro siret *'
@@ -320,13 +332,7 @@ class CreateUser extends Component {
                 render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
               />}
 
-            <AddressInput
-              label='Adresse postale'
-              offLine={!isConnected}
-              onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-              address={address}
-              addressError={addressError}
-            />
+
 
             <MyInput
               label="Téléphone *"
@@ -369,7 +375,12 @@ class CreateUser extends Component {
               }} />}
             />
 
-            <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
+            <Toast
+              message={toastMessage}
+              type={toastType}
+              onDismiss={() => this.setState({ toastMessage: '' })} />
+
+            <LoadDialog loading={loadingDialog} message="Création de l'utilisateur en cours..." />
 
           </ScrollView >
         }

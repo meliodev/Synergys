@@ -125,7 +125,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
         )
 
     else return (
-        <View style={[containerStyle, { justifyContent: elements.length > 1 ? 'space-around' : 'center' }]}>
+        <View style={[containerStyle, { justifyContent: elements.length > 1 ? 'space-between' : 'center' }]}>
             {elements.map((element, index) => {
                 return (<Element element={element} index={index} />)
             })}

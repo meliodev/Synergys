@@ -200,7 +200,8 @@ class Chat extends Component {
             createdAt: new Date().getTime(),
             user: {
                 _id: this.currentUser.uid,
-                email: this.currentUser.email
+                email: this.currentUser.email,
+                name: this.currentUser.displayName
             },
             sent: true,
             received: true,
@@ -264,6 +265,7 @@ class Chat extends Component {
         return (
             <Bubble
                 {...props}
+
                 wrapperStyle={{
                     right: {
                         backgroundColor: '#C5E1A5',
@@ -283,6 +285,10 @@ class Chat extends Component {
                     right: [theme.customFontMSregular.caption, {
                         color: theme.colors.placeholder
                     }]
+                }}
+
+                tickStyle={{
+                    color: theme.colors.primary
                 }}
 
             />
@@ -456,6 +462,11 @@ class Chat extends Component {
         )
     }
 
+    navigateToProfile(user){
+        console.log(user)
+      //  this.props.navigation.navigate('Profile', {})
+    }
+
     render() {
         const { messages, attachments, showVideoPlayer, videoUrl, isImageViewVisible, imageUrl, toastMessage, toastType } = this.state
         const imagesView = [{
@@ -492,10 +503,12 @@ class Chat extends Component {
                 <Appbar back title titleText='Espace messagerie' />
                 <GiftedChat
                     ref={(ref) => { this.chatRef = ref }}
+                    renderUsernameOnMessage={true}
+                    onPressAvatar={(user) => this.navigateToProfile(user)}
                     messagesContainerStyle={{ backgroundColor: theme.colors.chatBackground }}
                     messages={messages}
                     onSend={this.handleSend}
-                    user={{ _id: this.currentUser.uid }}
+                    user={{ _id: this.currentUser.uid, _name: this.currentUser.displayName }}
                     placeholder='Tapez un message'
                     alwaysShowSend
                     showUserAvatar={false}

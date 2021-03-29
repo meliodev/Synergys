@@ -17,8 +17,7 @@ import { constants } from '../core/constants';
 import { ThemeColors, withNavigation } from 'react-navigation'
 
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
-
-
+    
     const setStateColor = (state) => {
         switch (state) {
             case 'En attente':
@@ -42,21 +41,6 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     }
 
     const setStepColor = (step) => {
-        // switch (step) {
-        //     case 'Prospect':
-        //         return [theme.colors.gray400, theme.colors.gray400, theme.colors.gray400]
-
-        //     case 'Chantier':
-        //         return ['#09a500', '#69b300', '#9fbc00']
-        //         break
-
-        //     case 'SAV':
-        //         return ['#0288D1', '#03A9F4', '#4FC3F7']
-        //         break
-
-        //     default:
-        //         return '#333'
-        // }
         return [theme.colors.valid, theme.colors.valid, theme.colors.valid]
     }
 
@@ -72,15 +56,15 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
                     <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{project.description}</Paragraph>
 
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                        <Paragraph numberOfLines={2} style={theme.customFontMSregular.header}>à {project.address.description}</Paragraph>
-                        <Paragraph numberOfLines={1} style={theme.customFontMSregular.header}>chez <Paragraph style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id })}>{project.client.fullName}</Paragraph></Paragraph>
+                        {project.address && <Paragraph numberOfLines={2} style={theme.customFontMSregular.header}>à {project.address.description}</Paragraph>}
+                        <Paragraph numberOfLines={1} style={theme.customFontMSregular.header}>chez <Paragraph style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id, isClient: true })}>{project.client.fullName}</Paragraph></Paragraph>
                     </View>
 
                     <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.editedBy.id })}>{project.editedBy.fullName}</Text></Paragraph>
 
                     <View style={styles.footer}>
                         <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]} >{moment(project.editedAt, 'lll').format('ll')} - {moment(project.editedAt, 'lll').format('HH:mm')}</Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2 , elevation: 2}}>
+                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2, elevation: 2 }}>
                             <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{project.state}</Paragraph>
                         </View>
                     </View>

@@ -1,18 +1,19 @@
 
 import * as React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { List, Appbar } from 'react-native-paper';
 import { faFilter, faTimes } from '@fortawesome/pro-light-svg-icons'
 import { MenuProvider, Menu as PopupMenu, MenuOptions, MenuOption, MenuTrigger, renderers } from 'react-native-popup-menu';
 import { withNavigation } from 'react-navigation'
 
-import * as theme from '../core/theme';
-import { constants } from '../core/constants';
-
 import Picker from '../components/Picker'
 import TextInput from '../components/TextInput'
 import Button from '../components/Button'
 import CustomIcon from '../components/CustomIcon'
+import { SystemMessage } from 'react-native-gifted-chat';
+
+import * as theme from '../core/theme';
+import { constants } from '../core/constants';
 
 const { SlideInMenu } = renderers
 
@@ -21,14 +22,8 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
     //Screen filters: refresh selected value
     const refreshClient = (isPro, id, nom, prenom) => {
         toggleFilter()
-        let fullName = ''
-        let client = { id: '', fullName: '' }
-        if (isPro)
-            fullName = nom
-        else
-            fullName = prenom + ' ' + nom
-        client.id = id
-        client.fullName = fullName
+        let fullName = isPro ? nom : `${prenom} ${nom}`
+        let client = { id, fullName }
         main.setState({ client })
     }
 
@@ -54,16 +49,17 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                 {renderFilterIcon()}
             </MenuTrigger>
 
-            <MenuOptions optionsContainerStyle={{ height: constants.ScreenHeight * 0.95, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, elevation: 50 }}>
-                <View style={{ flexDirection: 'row', backgroundColor: theme.colors.primary, borderTopLeftRadius: constants.ScreenWidth * 0.03, borderTopRightRadius: constants.ScreenWidth * 0.03, paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 10 }}>
+            <MenuOptions optionsContainerStyle={{ height: constants.ScreenHeight * 0.935, elevation: 50 }}>
+                <View style={styles.header}>
                     <View style={{ flexDirection: 'row', alignItems: "center" }}>
                         <CustomIcon icon={faFilter} color={theme.colors.white} size={15} />
-                        <Text style={[theme.customFontMSregular.header, { color: '#fff', textAlign: 'center', marginLeft: 5 }]}>Filtrer par</Text>
+                        <Text style={[theme.customFontMSregular.header, { color: '#fff', textAlign: 'center', marginLeft: 10 }]}>Filtrer par</Text>
                     </View>
-                    <CustomIcon onPress={toggleFilter} icon={faTimes} color={theme.colors.white} style={{ position: 'absolute', right: theme.padding, top: 10 }} />
+                    <CustomIcon onPress={toggleFilter} icon={faTimes} color={theme.colors.white} />
                 </View>
 
-                <View style={{ paddingHorizontal: constants.ScreenWidth * 0.05, paddingVertical: 5, }}>
+
+                <View style={{ paddingHorizontal: theme.padding, paddingVertical: 5, }}>
                     {options.map((option) => {
                         if (option.type === 'picker')
                             return (
@@ -106,7 +102,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     })
                     }
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <View style={styles.buttonContainer}>
                         <Button mode="outlined" onPress={resetFilter} style={{ width: constants.ScreenWidth * 0.45 }} outlinedColor={theme.colors.primary}>
                             Réinitialiser
                         </Button>
@@ -121,6 +117,23 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
         </PopupMenu>
     )
 }
+
+const styles = StyleSheet.create({
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: theme.colors.primary,
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+        paddingHorizontal: theme.padding,
+        paddingVertical: 10
+    },
+    buttonContainer: {
+        flexDirection: 'row', 
+        justifyContent: 'space-between',
+        marginTop: 15
+    }
+})
 
 export default withNavigation(Filter)
 

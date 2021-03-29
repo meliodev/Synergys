@@ -22,6 +22,7 @@ import Loading from "../../components/Loading"
 import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
+import { blockRoleUpdateOnPhase } from '../../core/privileges'
 import { handleFirestoreError } from '../../core/exceptions'
 
 const db = firebase.firestore()
@@ -170,6 +171,7 @@ class CreateOrder extends Component {
 
     async fetchClient(projectId) {
         const client = await db.collection('Projects').doc(projectId).get().then((doc) => {
+            if (!doc.exists) return
             const client = doc.data().client
             this.setState({ client })
             return client
@@ -238,6 +240,15 @@ class CreateOrder extends Component {
         //0. Validate inputs
         const isValid = this.validateInputs()
         if (!isValid) return
+
+        // //POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
+        // const currentRole = this.props.role.id
+        // const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
+        // if (isBlockedUpdates) {
+        //     Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
+        //     load(this, false)
+        //     return
+        // }
 
         // 1. ADDING document to firestore
         const { OrderId, project, state, orderLines, subTotal, taxes, primeCEE, primeRenov, total } = this.state

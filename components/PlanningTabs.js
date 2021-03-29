@@ -11,7 +11,6 @@ import CustomIcon from './CustomIcon'
 const PlanningTabs = ({ isAgenda, onPress1, onPress2, ...props }) => {
 
     const tabWidth = constants.ScreenWidth * 0.125
-    console.log('isagenda', isAgenda)
 
     const Tab = ({ label, icon, active, onPress }) => {
         const backgroundColor = active ? theme.colors.white : theme.colors.gray_light

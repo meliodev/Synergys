@@ -455,7 +455,7 @@ class Profile extends Component {
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar menu={isProfileOwner} back={!isProfileOwner} title titleText='Profil' check={canUpdate || this.isClient} handleSubmit={this.handleSubmit} />
+                <Appbar menu={isProfileOwner} back={!isProfileOwner} title titleText='Profil' check={userNotFound && (canUpdate || this.isClient)} handleSubmit={this.handleSubmit} />
 
                 {userNotFound ?
                     <EmptyList icon={faUserSlash} header='Utilisateur introuvable' description='Cet utilisateur est introuvable dans la base de données.' offLine={!isConnected} />
@@ -492,8 +492,6 @@ class Profile extends Component {
                                             returnKeyType="done"
                                             value={email.value}
                                             multiline={true}
-                                            right={<TextInput.Icon name={<CustomIcon icon={faUser} color={theme.colors.inpuIcon} />} style={{ marginTop: 30 }} />}
-
                                             onChangeText={text => updateField(this, email, text)}
                                             autoCapitalize="none"
                                             error={!!email.error}
@@ -562,6 +560,7 @@ class Profile extends Component {
                                             address={address}
                                             addressError={addressError}
                                             editable={canUpdate || this.isProcess}
+                                            isEdit={true}
                                         />
 
                                         {isProfileOwner &&

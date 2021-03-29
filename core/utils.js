@@ -16,7 +16,7 @@ import SearchInput, { createFilter } from 'react-native-search-filter'
 import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
 import _ from 'lodash'
-import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faSpinner } from '@fortawesome/pro-light-svg-icons'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPause } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -113,7 +113,8 @@ export const navigateToScreen = (main, screen, params) => {
 
 //##HELPERS
 
-export const formatRow = (data, numColumns) => { //Format rows to display 3 columns grid
+export const formatRow = (active, data, numColumns) => { //Format rows to display 3 columns grid
+  if(!active) return data
   const numberOfFullRows = Math.floor(data.length / numColumns)
   let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns)
   while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
@@ -144,7 +145,7 @@ export const configChoiceIcon = (choice) => {
   else if (element.id === 'cashPayment') { element.icon = faSackDollar; element.iconColor = theme.colors.secondary }
   else if (element.id === 'financing') { element.icon = faEnvelopeOpenDollar; element.iconColor = theme.colors.secondary }
   else if (element.id === 'block') { element.icon = faBan; element.iconColor = theme.colors.error }
-  else if (element.id === 'pending') { element.icon = faSpinner; element.iconColor = theme.colors.gray_dark }
+  else if (element.id === 'pending') { element.icon = faPause; element.iconColor = theme.colors.gray_dark }
   return element
 }
 
@@ -335,7 +336,6 @@ export const setToast = (main, type, toastMessage) => {
   else if (type === 'i')
     toastType = 'info'
 
-  console.log(toastType, toastMessage)
   main.setState({ toastType, toastMessage })
 }
 
@@ -505,9 +505,58 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
   }
 
   catch (error) {
-    if (DocumentPicker.isCancel(error)) return
+    if (DocumentPicker.isCancel(error)) return { hasCanceled: true }
     return { error }
   }
+}
+
+import { faCloudUploadAlt, faMagic } from '@fortawesome/pro-light-svg-icons'
+
+export const setPickerDocTypes = (isProcess, currentRole, dynamicType, documentType, allTypes, publicTypes) => {
+  const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
+  const uploadSource = { label: 'Importer', value: 'upload', icon: faCloudUploadAlt, selected: false }
+  const generateSource = { label: 'Générer', value: 'generate', icon: faMagic, selected: false }
+  const enableGeneration =  documentType  && (documentType.label === 'Devis' || documentType.label === 'Facture')
+  let types = []
+  let docSources = []
+
+  //Process case
+  if (isProcess) {
+    if (highRoles.includes(currentRole)) {
+      types = allTypes
+      docSources = [uploadSource]
+      if (enableGeneration) {
+        docSources.push(generateSource)
+      }
+    }
+
+    else {
+      types = publicTypes
+      docSources = [uploadSource]
+
+      if (dynamicType) {
+        types.push(documentType)
+        if (enableGeneration)
+          docSources.push(generateSource)
+      }
+    }
+  }
+
+  //Normal case
+  else if (!isProcess) {
+    if (highRoles.includes(currentRole)) {
+      types = allTypes
+      docSources = [uploadSource, generateSource]
+    }
+    else {
+      types = publicTypes
+      docSources = [uploadSource]
+      console.log('docSources', docSources)
+    }
+  }
+
+  const response = { types, docSources }
+  return response
 }
 
 //##FILTERS

@@ -26,13 +26,14 @@ export const configureQuery = (collection, queryFilters, params) => {
                 query = query.orderBy(field, sort)
             }
         })
-    }
 
-    if (params.role) console.log(`Query filters of role "${params.role}" for collection "${collection}"`)
-    else console.log(`Query filters for collection: ${collection}`)
-    queryFilters.forEach((item) => {
-        console.log(item)
-    })
+
+        if (params.role) console.log(`Query filters of role "${params.role}" for collection "${collection}"`)
+        else console.log(`Query filters for collection: ${collection}`)
+        queryFilters.forEach((item) => {
+            console.log(item)
+        })
+    }
 
     return query
 }
@@ -69,6 +70,19 @@ const configureQueryParams = (queryFilters, params) => { //Task: Send the right 
     }
 
     return queryFilters
+}
+
+export const blockRoleUpdateOnPhase = (role, phase) => {
+    let isBlockedUpdates = false
+    const comPhases = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+    const techPhases = ['Visite technique', 'Installation', 'Maintenance']
+    const isComPhase = comPhases.includes(phase)
+    const isTechPhase = techPhases.includes(phase)
+
+    if (role === 'com' && isTechPhase || role === 'poseur' && isComPhase)
+        isBlockedUpdates = true
+
+    return isBlockedUpdates
 }
 
 

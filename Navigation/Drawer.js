@@ -71,16 +71,21 @@ class DrawerMenu extends React.Component {
     }
 
     setMenuItems(role) {
+        // console.log('ROOLE..........................', role)
+        // console.log('menuPrivilleges', menuPrivilleges)
+
         var arrMenuPrivilleges = menuPrivilleges[role]
-        const menu = menuItems.filter(menuItem => arrMenuPrivilleges.includes(menuItem.id))
-        return menu
+        if (arrMenuPrivilleges) {
+            const menu = menuItems.filter(menuItem => arrMenuPrivilleges.includes(menuItem.id))
+            return menu
+        }
     }
 
     renderHeader(currentUser, role) {
         const { displayName } = currentUser
 
         return (
-            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
+            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isClient: role.id === 'client' ? true : false })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
                     {currentUser && <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />}
                 </View>

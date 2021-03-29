@@ -43,13 +43,15 @@ class RequestsManagement extends React.Component {
         const { index, showInput, searchInput } = this.state
         const permissionsRequests = this.props.permissions.requests
         const { isConnected } = this.props.network
+        const roleId = this.props.role.id
+        const showTabs = (roleId === 'admin' || roleId === 'backoffice' || roleId === 'dircom' || roleId === 'tech' || roleId === 'client')
 
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
                     main={this}
                     title={!showInput}
-                    titleText='Demandes'
+                    titleText={showTabs ? 'Demandes' : 'Tickets'}
                     placeholder='Rechercher une demande'
                     showBar={this.state.showInput}
                     handleSearch={() => this.setState({ searchInput: '', showInput: !this.state.showInput })}
@@ -57,13 +59,18 @@ class RequestsManagement extends React.Component {
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 
-                <TabView
-                    navigationState={{ index, routes }}
-                    onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
-                    icon1={faConstruction}
-                    icon2={faTicket}
-                    Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role={this.props.role} />}
-                    Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role={this.props.role} />} />
+                {showTabs ?
+                    <TabView
+                        navigationState={{ index, routes }}
+                        onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
+                        icon1={faConstruction}
+                        icon2={faTicket}
+                        Tab1={<ListProjects searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role={this.props.role} />}
+                        Tab2={<ListTickets searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role={this.props.role} />} />
+                    :
+                    <ListTickets searchInput={searchInput} offLine={!isConnected} permissions={permissionsRequests} role={this.props.role} />
+                }
+
             </View>
         )
     }

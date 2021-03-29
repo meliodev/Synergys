@@ -7,6 +7,7 @@ import { connect } from 'react-redux'
 
 import Appbar from "../../components/Appbar"
 import Loading from "../../components/Loading"
+import LoadDialog from "../../components/LoadDialog"
 import RadioButton from "../../components/RadioButton"
 import MyInput from "../../components/TextInput"
 import AddressInput from "../../components/AddressInput"
@@ -55,6 +56,7 @@ class CreateClient extends Component {
             password: { value: 'Aaaa111', error: '', show: false },
 
             loading: true,
+            loadingDialog: false,
             error: "",
         }
     }
@@ -74,19 +76,17 @@ class CreateClient extends Component {
         const isValid = this.validateClientInputs(userData)
         if (!isValid) return
 
-        load(this, true)
-        this.titleText = isConversion ? "Création du client" : `Création du ${this.userType}`
+        this.setState({ loadingDialog: true })
 
         const response = await createClient(userData, eventHandlers, this.ClientId, isConnected, isConversion, this.isProspect)
         if (response && response.error) {
-            load(this, false)
+            this.setState({ loadingDialog: false })
             Alert.alert(response.error.title, response.error.message)
         }
 
         else {
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-                load(this, false)
-                // this.titleText = `Créer un ${this.userType}`
+                this.setState({ loadingDialog: false })
                 this.props.navigation.navigate(this.prevScreen)
             }, 6000) //We can reduce this timeout later on...
         }
@@ -97,10 +97,11 @@ class CreateClient extends Component {
     }
 
     render() {
-        let { isPro, error, loading } = this.state
+        let { isPro, error, loading, loadingDialog } = this.state
         let { nom, prenom, address, addressError, phone, email, password } = this.state
         let { denom, siret } = this.state
         const { isConnected } = this.props.network
+        const loadingMessage = `Création du ${this.userType} en cours...`
 
         return (
             <View style={{ flex: 1 }}>
@@ -162,7 +163,7 @@ class CreateClient extends Component {
 
                         <AddressInput
                             offLine={!isConnected}
-                            onPress={() => navigateToScreen(this, true, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                            onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
                             address={address}
                             addressError={addressError}
                         />
@@ -211,6 +212,8 @@ class CreateClient extends Component {
                         />
 
                         <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
+
+                        <LoadDialog loading={loadingDialog} message={loadingMessage} />
 
                     </ScrollView >
                 }
