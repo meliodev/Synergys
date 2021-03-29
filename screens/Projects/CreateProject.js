@@ -143,15 +143,12 @@ class CreateProject extends Component {
     async componentDidMount() {
 
         if (this.isEdit) {
-
-            this.focusListener = this.props.navigation.addListener('willFocus', async () => {
-                //this.setState({ processUpdated: false })
-                await this.fetchProject() //Get current process
-                await this.fetchDocuments()
-                await this.fetchTasks()
-                this.initialState = this.state
-                // await this.processMain(this.state.process)
-            })
+            //this.setState({ processUpdated: false })
+            await this.fetchProject() //Get current process
+            await this.fetchDocuments()
+            await this.fetchTasks()
+            this.initialState = this.state
+            // await this.processMain(this.state.process)
         }
 
         else this.initialState = this.state
