@@ -9,7 +9,7 @@ import { gestureHandlerRootHOC } from 'react-native-gesture-handler'
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import messaging from '@react-native-firebase/messaging'
 
-//background & quit state: messages listener   
+//Background & quit state: messages listener   
 async function onBackgroundMessageReceived(message) {
 
     const channelId = await notifee.createChannel({
@@ -19,7 +19,7 @@ async function onBackgroundMessageReceived(message) {
         vibration: true,
         importance: AndroidImportance.HIGH,
     })
-
+ 
     await notifee.displayNotification(JSON.parse(message.data.notifee))
 }
 

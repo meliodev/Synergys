@@ -85,7 +85,7 @@ class AddItem extends Component {
 
     handleSubmit() {
         //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+        if (this.state.loading) return
 
         load(this, true)
 

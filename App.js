@@ -5,6 +5,8 @@ import notifee, { EventType, AndroidImportance } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/es/integration/react'
+import { Provider } from 'react-redux'
+import { MenuProvider } from 'react-native-popup-menu';
 
 import firebase from '@react-native-firebase/app'
 import '@react-native-firebase/auth'
@@ -14,22 +16,20 @@ import '@react-native-firebase/functions'
 import '@react-native-firebase/messaging'
 
 import OffLineBar from './components/OffLineBar'
+import Test from './components/Test'
+
+import Store from './Store/configureStore'
+import { fontsConfig } from './fontConfig'
+import * as theme from './core/theme'
+import Wrapper from './Wrapper'
+import RootController from './Navigation/DrawerNavigator'
+
 
 const settings = {
   cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
 }
 
 firebase.firestore().settings(settings)
-
-import { Provider } from 'react-redux'
-import { MenuProvider } from 'react-native-popup-menu';
-import Store from './Store/configureStore'
-
-import RootController from './Navigation/DrawerNavigator'
-import { fontsConfig } from './fontConfig'
-import * as theme from './core/theme'
-import Wrapper from './Wrapper'
-import Test from './components/Test'
 
 const db = firebase.firestore()
 
@@ -51,18 +51,18 @@ const paperTheme = {
 class App extends Component {
 
 
-  // async componentDidMount() {
-  //   //Notification channels
-  //   const channelId = await notifee.createChannel({
-  //     id: 'projects',
-  //     name: 'projects',
-  //     lights: false,
-  //     vibration: true,
-  //     importance: AndroidImportance.HIGH,
-  //   })
+  async componentDidMount() {
+    //Notification channels
+    const channelId = await notifee.createChannel({
+      id: 'projects',
+      name: 'projects',
+      lights: false,
+      vibration: true,
+      importance: AndroidImportance.HIGH,
+    })
 
-  //   this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
-  // }
+    this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
+  }
 
 
   //Forground: messages listener
@@ -73,7 +73,6 @@ class App extends Component {
   componentWillUnmount() {
     this.foregroundMessages && this.foregroundMessages()
   }
-
 
   render() {
     let persistor = persistStore(Store)
@@ -86,7 +85,6 @@ class App extends Component {
             <MenuProvider>
               <Wrapper>
                 <RootController />
-                {/* <Test /> */}
               </Wrapper>
             </MenuProvider>
           </PaperProvider>

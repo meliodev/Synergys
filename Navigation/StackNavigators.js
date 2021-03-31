@@ -431,6 +431,10 @@ const ProjectsStack = createStackNavigator({
         screen: AddItem,
         navigationOptions: hideHeader
     },
+    CreateProduct: {
+        screen: CreateProduct,
+        navigationOptions: hideHeader
+    },
     PdfGeneration: {
         screen: PdfGeneration,
         navigationOptions: hideHeader

@@ -1,7 +1,7 @@
 
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList, ScrollView, TouchableOpacity, Alert } from 'react-native'
+import { StyleSheet, View, FlatList, Alert } from 'react-native'
 import firebase from '@react-native-firebase/app'
 import { faUserPlus, faUserFriends } from '@fortawesome/pro-light-svg-icons'
 
@@ -26,7 +26,7 @@ const db = firebase.firestore()
 class ListUsers extends Component {
 
   constructor(props) {
-    super(props);
+    super(props)
     this.myAlert = myAlert.bind(this)
     this.renderUser = this.renderUser.bind(this)
     this.fetchDocs = fetchDocs.bind(this)
@@ -34,7 +34,6 @@ class ListUsers extends Component {
     this.state = {
       usersList: [],
       usersCount: 0,
-
       loading: true
     }
   }
@@ -50,7 +49,7 @@ class ListUsers extends Component {
 
   alertDeleteUser(user) {
     const title = "Supprimer l'utilisateur"
-    const message = 'Etes-vous sûr de vouloir supprimer cet utilisateur ? Cette opération est irreversible.'
+    const message = 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette opération est irreversible.'
     const handleConfirm = () => this.deleteUser(user)
     this.myAlert(title, message, handleConfirm)
   }
@@ -173,7 +172,7 @@ class ListUsers extends Component {
 
           </View>}
       </View>
-    )
+    ) 
   }
 }
 

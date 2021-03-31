@@ -27,7 +27,7 @@ class ListClients extends Component {
         this.titleText = this.props.navigation.getParam('titleText', '')
         this.showButton = this.props.navigation.getParam('showButton', true)
 
-        this.state = {
+        this.state = { 
             index: 0,
             showInput: false,
             searchInput: ''

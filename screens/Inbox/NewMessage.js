@@ -181,7 +181,7 @@ class NewMessage extends Component {
         const { isConnected } = this.props.network
 
         //0. Handle isLoading or No edit done
-        if (loading || this.state === this.initialState) return
+        if (loading) return
         load(this, true)
 
         //1. Validate inputs

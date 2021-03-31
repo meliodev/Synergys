@@ -37,6 +37,24 @@ class LoginScreen extends Component {
     this.setState({ email, password }, () => Keyboard.dismiss())
   }
 
+  validateInputs() {
+    const { email, password } = this.state
+    const emailError = emailValidator(email.value)
+    const passwordError = passwordValidator(password.value)
+
+    if (emailError) {
+      this.setState({ ...email, error: emailError })
+      return false
+    }
+
+    if (passwordError) {
+      this.setState({ ...password, error: passwordError })
+      return false
+    }
+
+    return true
+  }
+
   handleLogin = async () => {
     let { loading, email, password, error } = this.state
 
@@ -45,27 +63,18 @@ class LoginScreen extends Component {
     load(this, true)
 
     //Inputs validation
-    const emailError = emailValidator(email.value)
-    const passwordError = passwordValidator(password.value)
-
-    if (emailError) {
-      this.setState({ ...email, error: emailError })
-      load(this, false)
-      return
-    }
-
-    if (passwordError) {
-      this.setState({ ...password, error: passwordError })
+    const isValid = this.validateInputs()
+    if (!isValid) {
       load(this, false)
       return
     }
 
     const response = await loginUser({ email: email.value, password: password.value })
-
     if (response.error) {
-      load(this, false)
       this.setState({ error: response.error })
     }
+
+    load(this, false)
   }
 
   render() {
@@ -82,7 +91,7 @@ class LoginScreen extends Component {
           <Logo />
 
           <TextInput
-            style={{ marginVertical: 0, zIndex: 1, backgroundColor: theme.colors.background }}
+            style={styles.credInput}
             label="Email"
             returnKeyType="next"
             value={email.value}
@@ -97,7 +106,7 @@ class LoginScreen extends Component {
           />
 
           <TextInput
-            style={{ marginVertical: 0, zIndex: 1, backgroundColor: theme.colors.background }}
+            style={styles.credInput}
             label="Mot de passe"
             returnKeyType="done"
             value={password.value}
@@ -115,11 +124,11 @@ class LoginScreen extends Component {
 
           <View style={styles.forgotPassword}>
             <TouchableOpacity onPress={() => this.props.navigation.navigate("ForgotPasswordScreen")}>
-              <Text style={[theme.customFontMSregular.body, { color: theme.colors.secondary, zIndex: 1 }]}>Mot de passe oublié ?</Text>
+              <Text style={[theme.customFontMSregular.body, styles.forgetPasswordLink]}>Mot de passe oublié ?</Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 30, zIndex: 1 }} onPress={this.handleLogin}>
+          <TouchableOpacity style={styles.loginButton} onPress={this.handleLogin}>
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
               {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
               <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginRight: 10 }]}>SE CONNECTER</Text>
@@ -128,7 +137,10 @@ class LoginScreen extends Component {
 
         </View>
 
-        <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
+        <Toast 
+        message={error} 
+        onDismiss={() => this.setState({ error: '' })} 
+        containerStyle={{ bottom: constants.ScreenHeight*0.35 }}/>
       </NewBackground>
     )
 
@@ -140,6 +152,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: constants.ScreenWidth * 0.1,
     paddingTop: constants.ScreenWidth * 0.1,
+  },
+  credInput: {
+    marginVertical: 0,
+    zIndex: 1,
+    backgroundColor: theme.colors.background
   },
   synergys: {
     textAlign: 'center',
@@ -171,6 +188,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 5
   },
+  forgetPasswordLink: {
+    color: theme.colors.secondary,
+    zIndex: 1
+  },
+  loginButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+    zIndex: 1
+  }
 })
 
 export default memo(LoginScreen);

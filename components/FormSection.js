@@ -4,10 +4,10 @@ import { View, Text, StyleSheet } from 'react-native'
 import Section from './Section'
 import * as theme from '../core/theme'
 
-const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle }) => {
+const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle, onPressIcon, iconColor }) => {
     return (
         <View style={[containerStyle, styles.container]}>
-            <Section text={sectionTitle} icon={sectionIcon} />
+            <Section text={sectionTitle} icon={sectionIcon} onPressIcon={onPressIcon} iconColor={iconColor} />
 
             {form &&
                 <View style={styles.formContainer}>
@@ -23,7 +23,7 @@ export default FormSection
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingBottom: theme.padding/2,
+        paddingBottom: theme.padding / 2,
     },
     formContainer: {
         flex: 1,

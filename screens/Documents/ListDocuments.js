@@ -39,7 +39,7 @@ let types = [
     { label: 'Bon de commande', value: 'Bon de commande' },
     { label: 'Devis', value: 'Devis' },
     { label: 'Facture', value: 'Facture' },
-    { label: 'Dossier CEE', value: 'Dossier CEE' },
+    { label: 'Dossier CEE', value: 'Dossier CEE' }, 
     { label: 'Fiche EEB', value: 'Fiche EEB' },
     { label: 'Dossier aide', value: 'Dossier aide' },
     { label: 'Prime de rénovation', value: 'Prime de rénovation' },

@@ -50,7 +50,7 @@ class ListTeams extends Component {
         this.props.navigation.navigate('ViewTeam', { teamId: team.id })
     }
 
-    alertDeleteTeam(team) {
+    alertDeleteTeam(team) { 
         const title = "Supprimer l'équipe"
         const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
         const handleConfirm = async () => await deleteTeam(team).then(() => console.log('Batch succeeded !!!'))

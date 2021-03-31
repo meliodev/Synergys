@@ -5,6 +5,7 @@ import TextInputMask from 'react-native-text-input-mask'
 import firebase from '@react-native-firebase/app'
 import NetInfo from "@react-native-community/netinfo"
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
+import _ from 'lodash'
 
 import Appbar from '../../components/Appbar'
 import CustomIcon from '../../components/CustomIcon'
@@ -87,6 +88,8 @@ class Profile extends Component {
     }
 
     async componentDidMount() {
+        //        await firebase.auth().currentUser.reload().then(() => console.log('CURRENT USER'))
+
         await this.fetchUserData()
         if (this.isClient) await this.fetchClientProjects()
         load(this, false)
@@ -134,7 +137,7 @@ class Profile extends Component {
             const deleted = user.deleted
 
             this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address, isProspect, deleted }, () => {
-                this.initialState = this.state //keep the initial state to compare changes
+                this.initialState = _.cloneDeep(this.state) //keep the initial state to compare changes
             })
         })
     }
@@ -190,6 +193,9 @@ class Profile extends Component {
     }
 
     async handleSubmit() {
+
+        Keyboard.dismiss()
+
         //Handle Loading or No edit done
         if (this.state.loading || this.state === this.initialState) return
 
@@ -227,17 +233,29 @@ class Profile extends Component {
 
         if (!isConnected) return
 
-        const nomChanged = nom !== this.initialState.nom
-        const prenomChanged = prenom !== this.initialState.prenom
-        const denomChanged = denom !== this.initialState.denom
+        const nomChanged = nom.value !== this.initialState.nom.value
+        const prenomChanged = prenom.value !== this.initialState.prenom.value
+        const denomChanged = denom.value !== this.initialState.denom.value
 
         //A cloud function updating firebase auth displayName is triggered -> give it some time to finish...
-        if (nomChanged || prenomChanged || denomChanged)
+        if (nomChanged || prenomChanged || denomChanged) {
             setTimeout(async () => {
-                await firebase.auth().currentUser.reload()
+                await firebase.auth().currentUser.reload().then(() => console.log('CURRENT USER'))
                 const currentUser = firebase.auth().currentUser
+                // const idTokenResult = await currentUser.getIdTokenResult()
+
+                // if (idTokenResult) {
+                //   for (const role of roles) {
+                //     if (idTokenResult.claims[role.id]) {
+                //       setRole(this, role)
+                //       var roleValue = role.value
+                //     }
+                //   }
+                // }
+
                 this.setState({ currentUser })
             }, 5000)
+        }
 
         load(this, false)
         this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
@@ -432,7 +450,7 @@ class Profile extends Component {
             <View style={{ flex: 1 }}>
                 <FormSection sectionTitle={`${mes}Projets`} sectionIcon={faConstruction} form={null} containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center' }} />
                 <FlatList
-                    data={formatRow(clientProjectsList, 3)}
+                    data={formatRow(true, clientProjectsList, 3)}
                     keyExtractor={item => item.id.toString()}
                     renderItem={({ item }) => this.renderProject(item)}
                     style={{ zIndex: 1 }}
@@ -455,7 +473,7 @@ class Profile extends Component {
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar menu={isProfileOwner} back={!isProfileOwner} title titleText='Profil' check={userNotFound && (canUpdate || this.isClient)} handleSubmit={this.handleSubmit} />
+                <Appbar menu={isProfileOwner} back={!isProfileOwner} title titleText='Profil' check={!userNotFound && (canUpdate || this.isClient)} handleSubmit={this.handleSubmit} />
 
                 {userNotFound ?
                     <EmptyList icon={faUserSlash} header='Utilisateur introuvable' description='Cet utilisateur est introuvable dans la base de données.' offLine={!isConnected} />

@@ -77,25 +77,12 @@ class ListProjects extends Component {
         }
     }
 
+
     async componentDidMount() {
 
         Keyboard.dismiss()
         requestWESPermission()
         requestRESPermission()
-
-        // const queryFilters = [
-        //     { filterOrder: 1, clause: 'where', filter: 'project.subscribers', operation: 'array-contains', value: '' },
-        //     { filterOrder: 2, clause: 'where', filter: 'deleted', operation: '==', value: false },
-        //     { filterOrder: 3, clause: 'orderBy', field: 'dateKey', sort: 'asc' },
-        // ]
-
-        // db.collection('Permissions').doc('Commercial').update({ 'tasks.queryFilters': queryFilters })
-
-        // if (isClient)
-        //     var query = db.collection('Projects').where('client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'DESC')
-
-        console.log("Permissions")
-        console.log(this.props.permissions)
 
         const { queryFilters } = this.props.permissions.projects
         if (queryFilters === []) this.setState({ projectsList: [], projectsCount: 0 })
@@ -105,7 +92,6 @@ class ListProjects extends Component {
             this.fetchDocs(query, 'projectsList', 'projectsCount', () => load(this, false))
         }
     }
-
 
     componentWillUnmount() {
         this.unsubscribe()

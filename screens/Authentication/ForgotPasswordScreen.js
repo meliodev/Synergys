@@ -27,28 +27,40 @@ class ForgotPasswordScreen extends Component {
     }
   }
 
+  validateInputs() {
+    const { email } = this.state
+    const emailError = emailValidator(email.value)
+
+    if (emailError) {
+      setToast(this, 'e', 'Le champs "email est obligatoire.')
+      return false
+    }
+
+    return true
+  }
+
   handleSendEmail = async () => {
     let { loading, email, toast } = this.state
 
     if (loading) return
     load(this, true)
 
-    const emailError = emailValidator(email.value)
-
-    if (emailError) {
-      setToast(this, 'e', emailError)
+    //Inputs validation
+    const isValid = this.validateInputs()
+    if (!isValid) {
       load(this, false)
       return
     }
 
     const response = await sendEmailWithPassword(email.value);
-    load(this, false)
 
     if (response.error)
       setToast(this, 'e', response.error)
 
     else
       setToast(this, 'i', 'Un email pour modifier le mot de passe a été envoyé.')
+
+    load(this, false)
   }
 
   render() {
@@ -86,8 +98,9 @@ class ForgotPasswordScreen extends Component {
             type={toastType}
             message={toastMessage}
             onDismiss={() => this.setState({ toastType: '', toastMessage: '' })}
+            containerStyle={{ bottom: constants.ScreenHeight*0.35 }}
           />
-          
+
         </View>
 
       </NewBackground>

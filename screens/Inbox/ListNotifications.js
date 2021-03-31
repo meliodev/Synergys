@@ -86,7 +86,7 @@ class ListNotifications extends Component {
                     />
                     :
                     <EmptyList icon={faBell} iconColor={theme.colors.miInbox} header='Notifications' description='Aucune notification pour le moment.' offLine={this.props.offLine} />
-                }
+                } 
             </Background >
         )
 

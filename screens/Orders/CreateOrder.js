@@ -5,6 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Dialog from "react-native-dialog"
 import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
+import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -124,7 +125,7 @@ class CreateOrder extends Component {
         else {
             const OrderId = generateId('GS-CO-')
             this.setState({ OrderId }, () => {
-                this.initialState = this.state
+                this.initialState = _.cloneDeep(this.state)
                 load(this, false)
             })
         }
@@ -159,7 +160,7 @@ class CreateOrder extends Component {
 
             this.setState({ OrderId, project, state, orderLines, taxes, primeCEE, primeRenov, createdAt, createdBy, editedAt, editedBy, order }, () => {
                 if (this.isInit)
-                    this.initialState = this.state
+                    this.initialState = _.cloneDeep(this.state)
 
                 this.isInit = false
 

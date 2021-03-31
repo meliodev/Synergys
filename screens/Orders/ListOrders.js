@@ -45,6 +45,8 @@ class ListOrders extends Component {
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false) // For pdf generation
         this.docType = this.props.navigation.getParam('docType', '') // For pdf generation
         this.popCount = this.props.navigation.getParam('popCount', 1) // For pdf generation
+
+        //filters
         this.project = this.props.navigation.getParam('project', undefined) // For pdf generation
 
         this.titleText = this.props.navigation.getParam('titleText', 'Commandes')
@@ -141,10 +143,10 @@ class ListOrders extends Component {
                         resetFilter={() => this.setState({ state: '', client: { id: '', fullName: '' }, project: { id: '', name: '' } })}
                         options={[
                             { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                            { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
-                            { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
+                           // { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
+                            { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet', disabled: this.project },
                         ]}
-                    />
+                    /> 
                 }
             />
         )

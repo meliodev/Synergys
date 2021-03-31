@@ -95,8 +95,6 @@ function setPermissions(state = initialState, action) {
                 active: true
             }
 
-          console.log('DOCUMENT REDUX NEXTSTATE:', nextState.documents)
-
             return nextState || state
 
         default:

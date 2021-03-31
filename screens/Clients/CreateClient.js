@@ -4,6 +4,7 @@ import { TextInput } from 'react-native-paper'
 import firebase from '@react-native-firebase/app';
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
+import _ from 'lodash'
 
 import Appbar from "../../components/Appbar"
 import Loading from "../../components/Loading"
@@ -13,8 +14,6 @@ import MyInput from "../../components/TextInput"
 import AddressInput from "../../components/AddressInput"
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
-
-import _ from 'lodash'
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
@@ -43,17 +42,17 @@ class CreateClient extends Component {
         this.state = {
             checked: 'first', //professional/Particular
             isPro: false,
-            nom: { value: '2', error: '' },
-            prenom: { value: 'Client', error: '' },
+            nom: { value: '', error: '' },
+            prenom: { value: '', error: '' },
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
 
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            email: { value: "client2@eqx-software.com", error: "" },
-            phone: { value: "+33111111111", error: '' },
+            email: { value: "", error: "" },
+            phone: { value: "", error: '' },
 
-            password: { value: 'Aaaa111', error: '', show: false },
+            password: { value: '', error: '', show: false },
 
             loading: true,
             loadingDialog: false,
@@ -62,7 +61,7 @@ class CreateClient extends Component {
     }
 
     componentDidMount() {
-        this.initialState = this.state
+        this.initialState = _.cloneDeep(this.state)
         load(this, false)
     }
 

@@ -83,13 +83,11 @@ TO DO:
 + Commercial task types = [RD1, RDN, VTP, VT] tag: com
 + Poseur task types = [Installation, Rattrapage, Panne, Entretien] tag: tech
 + Add dynamiclly task types..
-+ Reactiver notifications app.js
 + UPdate all user/client objects through collections on update name.. (cloud function trigger)
-? When generating Devis from existing order.. should we filter only orders related to the concerned project ?
 
 + Action a faire
 + add infoCircle 
-+ Remove check and do animation 
++ Remove check and do animation  
 + ModalOptions green header, white text
 + Toute la journée
 + pop up instruction when opening task swipable
@@ -181,6 +179,10 @@ Ideas2:
 
 
 
+//Bugs:
+1. Modalité de paiement blocage
+2. Après création nouveau client à partir d'un nouveau projet, le client n'est pas renseigné automatiquement, et quand on clique sur client ça retourne vers liste projects
+3. Exporter document.
 
 
 

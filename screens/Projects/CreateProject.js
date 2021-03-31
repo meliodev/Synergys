@@ -4,7 +4,7 @@ import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from
 import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import firebase from '@react-native-firebase/app'
@@ -59,6 +59,7 @@ const imagePickerOptions = {
 class CreateProject extends Component {
     constructor(props) {
         super(props)
+        this.fetchProject = this.fetchProject.bind(this)
         this.fetchDocs = fetchDocs.bind(this)
         this.refreshClient = this.refreshClient.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
@@ -81,17 +82,18 @@ class CreateProject extends Component {
         this.isEdit = this.ProjectId ? true : false
         this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-PR-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
+        this.isClient = this.props.role.id === 'client'
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "Project G", error: '' },
+            name: { value: "", error: '' },
             description: { value: "", error: '' },
             note: { value: "", error: '' },
 
             //Screens
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            client: { id: 'GS-CL-7cRp', fullName: 'Client 2' },
+            client: { id: '', fullName: '' },
             clientError: '',
 
             //Pickers
@@ -147,11 +149,11 @@ class CreateProject extends Component {
             await this.fetchProject() //Get current process
             await this.fetchDocuments()
             await this.fetchTasks()
-            this.initialState = this.state
+            this.initialState = _.cloneDeep(this.state)
             // await this.processMain(this.state.process)
         }
 
-        else this.initialState = this.state
+        else this.initialState = _.cloneDeep(this.state)
 
         this.fetchSuggestions()
         load(this, false)
@@ -161,6 +163,7 @@ class CreateProject extends Component {
     //FETCHES: #edit
     async fetchProject() {
         await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
+
             if (doc.exists) {
                 let { client, name, description, note, address, state, step, tagsSelected, color } = this.state
                 let { createdAt, createdBy, editedAt, editedBy, attachedImages, process } = this.state
@@ -205,11 +208,19 @@ class CreateProject extends Component {
                 const currentRole = this.props.role.id
                 const isBlockedUpdates = this.blockRoleUpdateOnPhase(currentRole, step)
 
+                //PROCESS ACTION PROJECT DATA
+                this.project = {
+                    id: this.ProjectId,
+                    name: name.value,
+                    client,
+                    subscribers: tagsSelected,
+                    step
+                }
+
                 this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, tagsSelected, color, process, processFetched: true, isBlockedUpdates }, async () => {
                     //if (this.isInit)
 
-                    this.initialState = this.state
-
+                    this.initialState = _.cloneDeep(this.state)
                     //this.isInit = false
                 })
             }
@@ -551,8 +562,6 @@ class CreateProject extends Component {
         const canReadTasks = this.props.permissions.tasks.canRead
 
         const { isConnected } = this.props.network
-        const project = { id: this.ProjectId, name: name.value }
-        const isClient = this.props.role.id === 'client'
 
         return (
             <View style={styles.mainContainer}>
@@ -564,10 +573,11 @@ class CreateProject extends Component {
                         (processFetched ?
                             <ProcessAction
                                 initialProcess={process}
-                                project={project}
+                                project={this.project}
                                 clientId={client.id}
                                 step={step}
-                                canUpdate={canUpdate && !isClient}
+                                canUpdate={canUpdate && !this.isClient}
+                                role={this.props.role}
                             />
                             :
                             <Loading style={{ paddingVertical: 50 }} />
@@ -578,7 +588,12 @@ class CreateProject extends Component {
                     {!loading &&
                         <FormSection
                             sectionTitle='Informations générales'
-                            sectionIcon={faInfoCircle}
+                            sectionIcon={this.isEdit ? faRedo : faInfoCircle}
+                            onPressIcon={() => {
+                                if (this.isEdit)
+                                    this.fetchProject
+                            }}
+                            iconColor={theme.colors.primary}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <MyInput
@@ -617,7 +632,7 @@ class CreateProject extends Component {
                                         updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
                                         editable={canUpdate} />
 
-                                    {!isClient &&
+                                    {!this.isClient &&
                                         <ItemPicker
                                             onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: 'CreateProject', isRoot: false, titleText: 'Clients' })}
                                             label='Client concerné *'

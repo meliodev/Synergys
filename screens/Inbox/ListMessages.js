@@ -96,7 +96,7 @@ class ListMessages extends Component {
             </Background >
         )
 
-    }
+    } 
 }
 
 const styles = StyleSheet.create({

@@ -175,9 +175,8 @@ class DrawerMenu extends React.Component {
                 </View>
 
                 <View style={[styles.footerContainer, { bottom: 5 }]}>
-                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.3</Text>
+                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.8</Text>
                 </View>
-
             </SafeAreaView>
         )
     }

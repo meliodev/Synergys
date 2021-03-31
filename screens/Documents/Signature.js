@@ -263,11 +263,9 @@ class Signature extends Component {
 
     async sendEmail() {
         const html = emailTemplate(this.sourceUrl)
-        const sendMail = functions.httpsCallable('sendMail')
-
-        return await sendMail({ dest: this.currentUser.email, subject: "Vous avez un document à signer.", html: html })
-            .then(() => { return true })
-            .catch((e) => { return false })
+        const sendMail = functions.httpsCallable('sendEmail')
+        const isSent = await sendMail({ receivers: this.currentUser.email, subject: "Vous avez un document à signer.", html, attachments: [] })
+        return isSent
     }
 
     tick() {
@@ -618,8 +616,8 @@ class Signature extends Component {
                             </View>}
 
                         {!newPdfSaved && fileDownloaded && isConnected && canUpdate &&
-                            <TouchableOpacity onPress={this.startSignature} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
-                                {/* <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}> */}
+                            // <TouchableOpacity onPress={this.startSignature} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
+                            <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
                                 <FontAwesome5 name='signature' size={17} color='#fff' style={{ marginRight: 7 }} />
                                 <Text style={[theme.customFontMSsemibold.header, { color: '#fff', marginLeft: 7, letterSpacing: 1 }]}>SIGNER</Text>
                             </TouchableOpacity>

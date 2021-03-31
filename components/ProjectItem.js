@@ -17,7 +17,7 @@ import { constants } from '../core/constants';
 import { ThemeColors, withNavigation } from 'react-navigation'
 
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
-    
+
     const setStateColor = (state) => {
         switch (state) {
             case 'En attente':
@@ -53,11 +53,11 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
             <Card.Content style={styles.content}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
                     <Title style={[theme.customFontMSregular.header]} numberOfLines={1}>{project.name}</Title>
-                    <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{project.description}</Paragraph>
+                    {project.description !== '' && <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{project.description}</Paragraph>}
 
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                        {project.address && <Paragraph numberOfLines={2} style={theme.customFontMSregular.header}>à {project.address.description}</Paragraph>}
-                        <Paragraph numberOfLines={1} style={theme.customFontMSregular.header}>chez <Paragraph style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id, isClient: true })}>{project.client.fullName}</Paragraph></Paragraph>
+                        {project.address.description !== '' && <Paragraph numberOfLines={2} style={theme.customFontMSregular.body}>à {project.address.description}</Paragraph>}
+                        <Paragraph numberOfLines={1} style={theme.customFontMSregular.body}>chez <Paragraph style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id, isClient: true })}>{project.client.fullName}</Paragraph></Paragraph>
                     </View>
 
                     <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.editedBy.id })}>{project.editedBy.fullName}</Text></Paragraph>

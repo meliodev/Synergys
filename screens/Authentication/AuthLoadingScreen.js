@@ -34,24 +34,17 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
-    console.log('1. authloading screen did mount..................................')
     //1. Notification action listeners
     await this.bootstrapNotifications()
-    console.log('Notifications bootstraped..........................')
     this.forgroundNotificationListener()
-    console.log('forgroundNotificationListener is now running...................')
-
     this.backgroundNotificationListener()
-    console.log('backgroundNotificationListener is now running...................')
 
-    //2. Auth listener & Navigation rooter
-    console.log('5. ready to start navigationRooterAuthListener...................')
-    this.unsububscribe = this.navigationRooterAuthListener()
+    //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
+    this.unsububscribe = this.onAuthStateChanged()
   }
 
   //User action on a notification has caused app to open
   async bootstrapNotifications() {
-    console.log('2. Bootstraping notifications...................')
     const initialNotification = await notifee.getInitialNotification()
     //set screen & params on asyncstorage
     if (initialNotification) {
@@ -75,7 +68,6 @@ class AuthLoadingScreen extends Component {
   }
 
   forgroundNotificationListener() {
-    console.log('3. forgroundNotificationListener launch...................')
     notifee.onForegroundEvent(({ type, detail }) => {
       switch (type) {
         case EventType.DISMISSED:
@@ -89,8 +81,6 @@ class AuthLoadingScreen extends Component {
   }
 
   backgroundNotificationListener() {
-    console.log('4. backgroundNotificationListener launch...................')
-
     notifee.onBackgroundEvent(async ({ type, detail }) => {
       //const { pressAction } = notification.android
       const { notification } = detail
@@ -115,7 +105,7 @@ class AuthLoadingScreen extends Component {
   }
 
   //Auth Listener & Navigation Rooter
-  navigationRooterAuthListener() {
+  onAuthStateChanged() {
 
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
@@ -168,12 +158,12 @@ class AuthLoadingScreen extends Component {
     const remotePermissions = await db.collection('Permissions').doc(role).get().then((doc) => {
       return doc.data()
     })
-    const localPermissions = this.props.permissions
-    //A.2. Compare local permissions config & server permissions config
-    const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(localPermissions)
-    //A.3 Update local config if different from server config
-    //if (permissionsChanged)
-    // console.log('READY TO SET PERMISSONS...', remotePermissions)
+    // const localPermissions = this.props.permissions
+    // //A.2. Compare local permissions config & server permissions config
+    // const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(localPermissions)
+    // //A.3 Update local config if different from server config
+    // if (permissionsChanged)
+    //  console.log('READY TO SET PERMISSONS...', remotePermissions)
     return remotePermissions
   }
 
@@ -248,8 +238,8 @@ class AuthLoadingScreen extends Component {
   render() {
     return (
       <Background>
-        <Background style={{ transform: [{ scaleY: -1 }] }}>
-          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', transform: [{ scaleY: -1 }] }}>
+        <Background style={styles.nestedBackground}>
+          <View style={styles.container}>
             <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
           </View>
         </Background>
@@ -270,6 +260,15 @@ const mapStateToProps = (state) => {
 }
 
 const styles = StyleSheet.create({
+  nestedBackground: {
+    transform: [{ scaleY: -1 }]
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    transform: [{ scaleY: -1 }]
+  },
   synergys: {
     textAlign: 'center',
     color: theme.colors.primary,
@@ -282,7 +281,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.colors.white
-  }
+  },
 })
 
 export default connect(mapStateToProps)(AuthLoadingScreen)

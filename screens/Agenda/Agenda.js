@@ -488,7 +488,7 @@ class Agenda2 extends Component {
                                 //     width: 63,
                                 //     alignItems: 'center',
                                 //     justifyContent: 'flex-start',
-                                //     marginTop: 0,
+                                //     marginTop: 0, 
                                 //     backgroundColor: 'brown'
                                 // },
                                 dayNum: styles.dayNum,

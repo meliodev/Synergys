@@ -88,7 +88,7 @@ class Chat extends Component {
     }
 
     fetchMessages() {
-        this.messagesListener = db.collection('Chats').doc(this.chatId).collection('Messages').orderBy('createdAt', 'desc')
+        this.messagesListener = db.collection('Chats').doc(this.chatId).collection('ChatMessages').orderBy('createdAt', 'desc')
             .onSnapshot(querySnapshot => {
                 const messages = querySnapshot.docs.map(doc => { return doc.data() })
                 this.setState({ messages })
@@ -181,7 +181,7 @@ class Chat extends Component {
             else if (type === pdf || type === doc || type === docx)
                 payload.file = { source: downloadURL, name, size, type: type }
 
-            await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).update(payload)
+            await db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId).update(payload)
         }
     }
 
@@ -208,8 +208,6 @@ class Chat extends Component {
             pending: false,
         }
 
-        console.log('msg', msg)
-
         // Handle attachments
         if (imageSource || videoSource || file && file.source) {
             console.log('file', file)
@@ -234,22 +232,15 @@ class Chat extends Component {
             }
         }
 
-        const latestMsg = {
-            latestMessage: {
-                text,
-                createdAt: new Date().getTime()
-            }
-        }
-
         const batch = db.batch()
         const chatsRef = db.collection('Chats').doc(this.chatId)
-        const messagesRef = db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId)
+        const messagesRef = db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId)
 
-        batch.set(chatsRef, latestMsg, { merge: true })
+        batch.set(chatsRef, msg)
         batch.set(messagesRef, msg)
         batch.commit()
 
-        // await db.collection('Chats').doc(this.chatId).collection('Messages').doc(messageId).set(msg)
+        // await db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId).set(msg)
         // await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
         this.setState({ imageSource: '', videoSource: '', file: {} })
     }
@@ -350,8 +341,7 @@ class Chat extends Component {
     }
 
     sendSystemMessage(message) {
-        db.collection('Chats').doc(this.chatId)
-            .collection('Messages').add({
+        db.collection('Chats').doc(this.chatId).collection('ChatMessages').add({
                 text: message,
                 createdAt: new Date().getTime(),
                 system: true

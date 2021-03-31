@@ -32,7 +32,7 @@ const processModel = {
                         //Navigation (Update) params
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: { userId: '', isClient: true, isProcess: true }, //#dynamic
-                        //responsable: '',
+                        responsable: '',
                         status: 'pending',
                         //Verification type
                         type: 'auto',
@@ -510,7 +510,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsable: { id: 'GS-US-xQ6s', role: 'dircom' }, //#task: set id of DC (use it to render avatarText icon to reprensent role)
+                       // responsable: { id: 'GS-US-xQ6s', role: 'dircom' }, //#task: set id of DC (use it to render avatarText icon to reprensent role)
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'rdnChoice',
@@ -787,7 +787,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+                     //   responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -1579,7 +1579,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+                       // responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -1854,7 +1854,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+                        //responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -2039,7 +2039,7 @@ const getFirstPhaseIdFromModel = () => {
 
 //Task 2. Configure actions
 const configureActions = async (actions, attributes, process) => {
-    
+
     let query
 
     for (let action of actions) {
@@ -2556,8 +2556,8 @@ export const getCurrentAction = (process) => {
     let currentAction = null
 
     for (const action of actions) {
-        // if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
-        if (!currentAction && action.status === 'pending')
+        if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
+            //if (!currentAction && action.status === 'pending')
             currentAction = action
     }
 

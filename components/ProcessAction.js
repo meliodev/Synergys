@@ -17,13 +17,12 @@ import Loading from './Loading'
 import StepProgress from './process/StepProgress'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler } from '../core/process'
+import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 
 const db = firebase.firestore()
-
-
 
 //component
 const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTitle, dialogInputLabel, onSubmitComment, hideDialog, choice, nextStep, nextPhase }) => {
@@ -127,15 +126,14 @@ class ProcessAction extends Component {
 
         const updatedProcess = await projectProcessHandler(process, secondPhaseId, clientId, project)
 
-        if (!_.isEqual(process, updatedProcess)) {
-            console.log('UPDATING !!')
-            await this.updateProcess(updatedProcess)
-        }
+        //if (!_.isEqual(process, updatedProcess)) {
+        await this.updateProcess(updatedProcess)
+        // }
 
-        else { //#task: use this for writes optimization
-            console.log('PROCESS SAME...')
-            this.refreshProcess(updatedProcess)
-        }
+        // else { //#task: use this for writes optimization
+        //     console.log('PROCESS SAME...')
+        //     this.refreshProcess(updatedProcess)
+        // }
     }
 
 
@@ -226,7 +224,7 @@ class ProcessAction extends Component {
 
             else if (onSelectType === 'validation') {
                 await this.runChoiceOperation(operation)
-                await this.validateAction(null, null, false, null, null)
+                await this.validateAction(null, null, false, null, null, true)
             }
 
             else if (onSelectType === 'commentPicker') {
@@ -278,15 +276,17 @@ class ProcessAction extends Component {
     }
 
     //func
-    validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
+    validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
         const { process, currentPhaseId, currentStepId, currentAction } = this.state
+
+        console.log(comment, choices, stay, nextStep, nextPhase)
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
-        // let actionTemp
+        let actionTemp
 
         processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-            // actionTemp = action
+            actionTemp = action
 
             if (action.id === currentAction.id) {
                 //Update comment
@@ -300,20 +300,21 @@ class ProcessAction extends Component {
                 //Update action status
                 if (!stay) {
                     action.status = "done"
-                    //actionTemp.isAnimation = true
+                    actionTemp.isAnimation = true
                 }
             }
 
         })
 
-        // this.setState({
-        //    loadingModal: false
-        //    currentAction: actionTemp
-        // }) 
+        this.setState({
+            loadingModal: false,
+            currentAction: actionTemp, //for check animation
+            currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
+        })
 
         // console.log('Do animation now !')
 
-        // await this.countDown(1000)
+        await this.countDown(1000)
 
 
         if (nextStep || nextPhase) {
@@ -347,13 +348,16 @@ class ProcessAction extends Component {
     onPressAction = async (canUpdate) => {
         if (!canUpdate) return
 
-        const { currentAction } = this.state
+        const { currentPhase, currentAction } = this.state
         const { responsable, verificationType, type, screenName, screenParams } = currentAction
+        const currentUserId = firebase.auth().currentUser.uid
+        const currentUserRole = this.props.role.id
 
-        // if (responsable && responsable.id !== firebase.auth().currentUser.uid) {
-        //     Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
-        //     return
-        // }
+        const enabledAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
+        if (!enabledAction) {
+            Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+            return
+        }
 
         if (type === 'auto') {
             if (currentAction.choices) {
@@ -455,6 +459,11 @@ class ProcessAction extends Component {
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
         const { canUpdate } = this.props
 
+        if (currentStep) {
+            const doneActions = currentStep.actions.filter((action) => action.status === 'done')
+            var progress = (doneActions.length / currentStep.actions.length) * 100
+        }
+
         return (
             <View style={styles.container}>
 
@@ -469,7 +478,7 @@ class ProcessAction extends Component {
                     description={stepTitle}
                     titleNumberOfLines={1}
                     descriptionNumberOfLines={1}
-                    left={props => currentAction && <StepProgress progress={((currentAction.actionOrder - 1) / currentStep.actions.length) * 100} style={{ marginTop: 25, marginRight: 2 }} />}
+                    left={props => currentAction && <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} />}
                     expanded={expanded}
                     titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
                     descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}

@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, Keyboard } from 'react-native'
+import _ from 'lodash'
 
 import moment from 'moment'
 import 'moment/locale/fr'  // without this line it didn't work
@@ -58,7 +59,7 @@ export default class CreateTeam extends Component {
             const teamId = this.teamId
             const name = { value: this.name, error: '' }
             const description = { value: this.description, error: '' }
-            this.setState({ teamId, name, description }, () => this.initialState = { teamId, name, description })
+            this.setState({ teamId, name, description }, () => this.initialState = _.cloneDeep(this.state))
         }
     }
 

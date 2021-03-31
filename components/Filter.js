@@ -74,6 +74,8 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                         else if (option.type === 'screen')
                             return (
                                 <TouchableOpacity onPress={() => {
+                                    if (option.disabled) return
+
                                     toggleFilter()
 
                                     let refresh
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
         paddingVertical: 10
     },
     buttonContainer: {
-        flexDirection: 'row', 
+        flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 15
     }

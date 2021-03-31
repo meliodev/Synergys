@@ -22,7 +22,7 @@ const db = firebase.firestore()
 class UsersManagement extends React.Component {
 
     constructor(props) {
-        super(props)
+        super(props) 
 
         this.state = {
             index: 0,

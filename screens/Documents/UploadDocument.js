@@ -9,6 +9,7 @@ import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit } from '@fortawesome/pro-light-svg-icons'
+import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -116,7 +117,6 @@ class UploadDocument extends Component {
         this.title = this.DocumentId ? 'Nouveau document' : 'Modifier le document'
 
         //Navigation goBack behaviours
-        this.goBackOnSubmit = this.documentType !== '' && typeof (this.documentType) !== 'undefined'
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         //Process params
@@ -183,9 +183,9 @@ class UploadDocument extends Component {
 
         else {
             if (this.project)  // coming from CreateProject Screen
-                this.setState({ project: this.project }, () => this.initialState = this.state)
+                this.setState({ project: this.project }, () => this.initialState = _.cloneDeep(this.state))
 
-            else this.initialState = this.state
+            else this.initialState = _.cloneDeep(this.state)
         }
     }
 
@@ -223,7 +223,7 @@ class UploadDocument extends Component {
 
             this.setState({ project, name, description, state, type, attachment, order, createdAt, createdBy, editedAt, editedBy }, () => {
                 // if (this.isInit)
-                this.initialState = this.state
+                this.initialState = _.cloneDeep(this.state)
                 // this.isInit = false
             })
         })
@@ -268,7 +268,7 @@ class UploadDocument extends Component {
 
             if (prevStatus && !nextStatus) {
                 this.setState({ attachment: nextAttachment })
-                setToast(this, 's', 'Le document a été exporté avec succès.')
+               // setToast(this, 's', 'Le document a été exporté avec succès.')
             }
         })
     }
@@ -276,8 +276,8 @@ class UploadDocument extends Component {
     async pickDoc() {
         const attachment = await pickDoc(true, [DocumentPicker.types.pdf])
 
-        if (attachment.hascanceled) {
-            this.setState({ attachment: this.initialState.attachment })
+        if (attachment.hasCanceled) {
+            this.setState({ attachment: this.initialState.attachment }, () => console.log(this.state.attachment))
         }
 
         this.setState({ attachment, order: null }) //order: Form fields to generate a pdf 
@@ -317,22 +317,22 @@ class UploadDocument extends Component {
         this.persistDocument(isConversion, DocumentId)
 
         //3. Handle upload offline (an upload file can not be edited)
-        if (!this.isEdit) {
+        //if (!this.isEdit) {
+        if (!_.isEqual(this.state.attachment, this.initialState.attachment)) {
             this.attachmentListener(DocumentId) //Listens when pending = false and refreshes attachment
             const fileUploaded = await this.uploadFile(isConversion, DocumentId)
-
+            console.log('fileUploaded', fileUploaded)
             if (!fileUploaded) {
                 setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
                 return
             }
         }
+        //}
 
-        //4. Go back if we came here from process action (this.documentID !== '')
-        else {
-            if (this.goBackOnSubmit) {
-                this.types = []
-                this.props.navigation.goBack()
-            }
+        //4. Go back if we came here from process action
+        if (this.isProcess) {
+            this.types = []
+            this.props.navigation.goBack()
         }
     }
 
@@ -356,7 +356,9 @@ class UploadDocument extends Component {
         //1. ADDING document to firestore
         const { project, name, description, type, state, attachment, attachmentSource, order } = this.state
         const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        attachment.pending = true
+
+        if (!_.isEqual(attachment, this.initialState.attachment))
+            attachment.pending = true
 
         let document = {
             project,
@@ -398,12 +400,13 @@ class UploadDocument extends Component {
     async uploadFile(isConversion, DocumentId) {
         var { project, type, attachment } = this.state
 
-        if (this.isEdit && !isConversion && attachment && attachment.pending) return //User tries to update Document data while an attachment is still pending..
+        // if (this.isEdit && !isConversion && attachment && attachment.pending) { //creation + not conversion
+        //     console.log('................')
+        //     return //User tries to update Document data while an attachment is still pending..
+        // }
 
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
-
-        console.log('fileUploaded........................', fileUploaded)
 
         return fileUploaded
     }
@@ -470,30 +473,26 @@ class UploadDocument extends Component {
 
     onPressAttachment() {
         //if (!canUpdate) return
-        if (this.isEdit) return
+        // if (this.isEdit) return
 
         if (this.isProcess) {
             if (this.dynamicType) {
                 if (this.documentType.value === 'Devis' || this.documentType.value === 'Facture')
                     this.toggleModal('docSource') //Upload or Generate
 
-                else this.pickDoc()
-                return
+                else this.pickDoc(); return
             }
 
-            else this.pickDoc()
-            return
+            else this.pickDoc(); return
         }
 
         else {
             if (this.isEdit) {
-                this.pickDoc()
-                return
+                this.pickDoc(); return
             }
 
             else {
-                this.toggleModal('docSource')
-                return
+                this.toggleModal('docSource'); return
             }
         }
     }
@@ -915,7 +914,7 @@ class UploadDocument extends Component {
                             <View />
                         }
 
-                        {(canUpdate || this.props.role.id === 'client') && 
+                        {(canUpdate || this.props.role.id === 'client') &&
                             <Button
                                 mode="contained"
                                 style={[styles.signButton, { backgroundColor: allowSign ? theme.colors.primary : theme.colors.gray_light }]}

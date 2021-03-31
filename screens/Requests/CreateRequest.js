@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from '
 import { Card, Title } from 'react-native-paper'
 import firebase from '@react-native-firebase/app';
 import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
+import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -54,6 +55,7 @@ class CreateRequest extends Component {
 
         this.RequestId = this.props.navigation.getParam('RequestId', '')
         this.isEdit = this.RequestId ? true : false
+        this.isClient = this.props.role.id === 'client'
 
         this.state = {
             idCount: 0,
@@ -68,9 +70,9 @@ class CreateRequest extends Component {
             state: 'En attente',
 
             createdAt: '',
-            createdBy: { id: '', userName: '' },
+            createdBy: { id: '', fullName: '' },
             editedAt: '',
-            editedBy: { id: '', userName: '' },
+            editedBy: { id: '', fullName: '' },
 
             error: '',
             loading: false,
@@ -87,9 +89,21 @@ class CreateRequest extends Component {
         //Creation
         else {
             const RequestId = this.isTicket ? generateId('GS-DTC-') : generateId('GS-DPR-')
-            this.setState({ RequestId }, () => this.initialState = this.state)
+            var client = { id: '', fullName: '' }
+            if (this.isClient) client = this.autoFillClient()
+            this.setState({ RequestId, client }, () => this.initialState = _.cloneDeep(this.state))
         }
     }
+
+    autoFillClient() {
+        const { currentUser } = firebase.auth()
+        const client = {
+            id: currentUser.uid,
+            fullName: currentUser.displayName
+        }
+        return client
+    }
+
 
     fetchRequest() {
         db.collection('Requests').doc(this.RequestId).get().then((doc) => {
@@ -122,7 +136,7 @@ class CreateRequest extends Component {
             this.setState({ createdAt, createdBy, editedAt, editedBy })
             this.setState({ RequestId, client, department, subject, description, address, state }, () => {
                 if (this.isInit)
-                    this.initialState = this.state
+                    this.initialState = _.cloneDeep(this.state)
 
                 this.isInit = false
             })
@@ -158,37 +172,26 @@ class CreateRequest extends Component {
     }
 
     async AddRequestAndChatRoom(RequestId, request) {
-        const chat = {
-            name: this.state.subject.value,
-            latestMessage: {
-                text: `La demande de projet a été initiée.`,
-                createdAt: new Date().getTime()
-            }
-        }
 
         const messageId = await uuidGenerator()
         const systemMessage = {
             _id: messageId,
-            text: `La demande de projet a été initiée.`,
+            text: `La demande de projet a été initiée.....`,
             createdAt: new Date().getTime(),
             system: true
         }
 
         //Batch write
         const batch = db.batch()
-
         const chatId = await uuidGenerator()
-
+        request.chatId = chatId
         const requestsRef = db.collection('Requests').doc(RequestId)
         const chatRef = db.collection('Chats').doc(chatId)
-        const messagesRef = chatRef.collection('Messages').doc(messageId)
+        const messagesRef = chatRef.collection('ChatMessages').doc(messageId)
 
-        request.chatId = chatId
-
-        batch.set(requestsRef, request, { merge: true })
-        batch.set(chatRef, chat)
+        batch.set(requestsRef, request)
+        batch.set(chatRef, systemMessage)
         batch.set(messagesRef, systemMessage)
-
         batch.commit()
 
         // .catch((e) => {
@@ -212,10 +215,9 @@ class CreateRequest extends Component {
 
         //2. ADDING REQUEST DOCUMENT
         const { RequestId, client, department, subject, description, address, state } = this.state
-        const currentUser = { id: this.currentUser.uid, userName: this.currentUser.displayName }
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
         let request = {
-            RequestId: RequestId,
             client: client,
             subject: subject.value,
             description: description.value,
@@ -309,14 +311,17 @@ class CreateRequest extends Component {
                                     editable={false}
                                 />
 
-                                <ItemPicker
-                                    onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: prevScreen, isRoot: false, titleText: 'Choisir un client' })}
-                                    label="Client *"
-                                    value={client.fullName}
-                                    error={!!clientError}
-                                    errorText={clientError}
-                                    editable={canUpdate}
-                                />
+                                {!this.isClient &&
+                                    <ItemPicker
+                                        onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: prevScreen, isRoot: false, titleText: 'Choisir un client' })}
+                                        label="Client *"
+                                        value={client.fullName}
+                                        error={!!clientError}
+                                        errorText={clientError}
+                                        editable={canUpdate}
+                                    />
+                                }
+
 
                                 {this.isTicket ?
                                     <Picker
@@ -336,8 +341,8 @@ class CreateRequest extends Component {
                                         onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={addressError}
-                                        editable={canUpdate} 
-                                        isEdit = {this.isEdit}/>
+                                        editable={canUpdate}
+                                        isEdit={this.isEdit} />
                                 }
 
                                 <MyInput
@@ -376,7 +381,7 @@ class CreateRequest extends Component {
                                     <MyInput
                                         label="Auteur"
                                         returnKeyType="done"
-                                        value={createdBy.userName}
+                                        value={createdBy.fullName}
                                         editable={false}
                                     />
                                     <MyInput
@@ -388,7 +393,7 @@ class CreateRequest extends Component {
                                     <MyInput
                                         label="Dernier intervenant"
                                         returnKeyType="done"
-                                        value={editedBy.userName}
+                                        value={editedBy.fullName}
                                         editable={false}
                                     />
                                 </Card.Content>

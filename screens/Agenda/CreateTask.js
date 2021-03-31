@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons'
 import firebase from '@react-native-firebase/app'
 import { faInfoCircle, faFileAlt, faQuestionCircle } from '@fortawesome/pro-light-svg-icons'
 import { faCalendarPlus } from '@fortawesome/pro-light-svg-icons'
+import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -102,7 +103,7 @@ class CreateTask extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "Test", error: '' },
+            name: { value: "", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
@@ -111,7 +112,7 @@ class CreateTask extends Component {
             status: 'En cours',
 
             //Screens
-            assignedTo: { id: 'GS-US-xQ6s', fullName: 'Salimu Lyoussi', error: '' },
+            assignedTo: { id: '', fullName: '', error: '' },
             project: this.project || { id: '', name: '', error: '' },
             address: { description: '', place_id: '', error: '' },
             startDate: { value: moment().format(), error: '' },
@@ -120,9 +121,9 @@ class CreateTask extends Component {
             color: theme.colors.primary,
 
             createdAt: '',
-            createdBy: { userId: '', userName: '' },
+            createdBy: { id: '', fullName: '' },
             editedAt: '',
-            editedBy: { userId: '', userName: '' },
+            editedBy: { id: '', fullName: '' },
 
             error: '',
             loading: false
@@ -135,7 +136,7 @@ class CreateTask extends Component {
             await this.fetchTask()
         }
 
-        else this.initialState = this.state
+        else this.initialState = _.cloneDeep(this.state)
     }
 
 
@@ -169,8 +170,7 @@ class CreateTask extends Component {
             this.setState({ createdAt, createdBy, editedAt, editedBy })
             this.setState({ name, assignedTo, description, project, type, priority, status, address, startDate, dueDate, color }, () => {
                 // if (this.isInit)
-                this.initialState = this.state
-
+                this.initialState = _.cloneDeep(this.state)
                 // this.isInit = false
             })
         })
@@ -227,7 +227,14 @@ class CreateTask extends Component {
         return true
     }
 
-
+    alertCollaborator() {
+        const title = ""
+        const message = "L'utilisateur à qui vous voulez assigner cette tâche n'est pas un collaborateur dans le projet selectionné. Veuillez utiliser la barre de recherche pour trouver un collaborateur."
+        const handleConfirm = () => navigateToScreen(this, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', isRoot: false, titleText: 'Attribuer la tâche à' })
+        const handleCancel = () => console.log('cancel')
+        const confirmText = 'OK'
+        this.myAlert(title, message, handleConfirm, handleCancel, confirmText)
+    }
 
     //Submit
     async handleSubmit() {
@@ -242,9 +249,19 @@ class CreateTask extends Component {
         if (loading || this.state === this.initialState) return
         load(this, true)
 
-        //1. Validate inputs 
+        //1.1 Validate inputs 
         const isValid = this.validateInputs()
         if (!isValid) return
+
+        //1.2 ASSIGNED TO VERIFICATION (if he is one of the project's collaborators)
+        if (project && project.subscribers) {
+            const collaborators = project.subscribers.map((sub) => sub.id)
+            if (!collaborators.includes(assignedTo.id)) {
+                this.alertCollaborator()
+                load(this, false)
+                return
+            }
+        }
 
         //POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
         const currentRole = this.props.role.id
@@ -256,7 +273,7 @@ class CreateTask extends Component {
         }
 
         // 2. ADDING task DOCUMENT
-        const currentUser = { userId: this.currentUser.uid, userName: this.currentUser.displayName }
+        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         const dateKey = moment(startDate.value).format('YYYY-MM-DD')
         const timestamp = moment(startDate.value).format()
         let natures
@@ -277,7 +294,6 @@ class CreateTask extends Component {
             dueDate: dueDate.value,
             editedAt: moment().format(),
             editedBy: currentUser,
-            subscribers: [{ id: this.currentUser.uid }], //add others (DC, CMX)
             color,
             deleted: false
         }
@@ -458,13 +474,13 @@ class CreateTask extends Component {
                                         isEdit={this.isEdit} />
 
 
-                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
+                                    {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
                                         <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                             <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} disabled={!canUpdate} />
                                             <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size={21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
                                         </View>
-                                    </View>
+                                    </View> */}
 
                                     <ItemPicker
                                         onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}
@@ -504,7 +520,7 @@ class CreateTask extends Component {
                                         <MyInput
                                             label="Auteur"
                                             returnKeyType="done"
-                                            value={createdBy.userName}
+                                            value={createdBy.fullName}
                                             editable={false}
                                         />
                                         <MyInput
@@ -516,7 +532,7 @@ class CreateTask extends Component {
                                         <MyInput
                                             label="Dernier intervenant"
                                             returnKeyType="done"
-                                            value={editedBy.userName}
+                                            value={editedBy.fullName}
                                             editable={false}
                                         />
                                     </View>

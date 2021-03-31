@@ -13,6 +13,7 @@ import firebase from '@react-native-firebase/app'
 import ImageView from 'react-native-image-view'
 import { connect } from 'react-redux'
 import Dialog from "react-native-dialog"
+import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -107,7 +108,7 @@ class CreateProduct extends Component {
 
         else {
             const ProductId = generateId('GS-AR-')
-            this.setState({ ProductId }, () => this.initialState = this.state)
+            this.setState({ ProductId }, () => this.initialState = _.cloneDeep(this.state))
         }
 
         this.fetchCategories()
@@ -170,7 +171,7 @@ class CreateProduct extends Component {
 
             this.setState({ ProductId, category, name, tagsSelected, description, price, taxe, createdAt, createdBy, editedAt, editedBy }, () => {
                 if (this.isInit)
-                    this.initialState = this.state
+                    this.initialState = _.cloneDeep(this.state)
 
                 this.isInit = false
             })

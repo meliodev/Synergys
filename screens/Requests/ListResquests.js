@@ -49,7 +49,7 @@ class ListRequests extends Component {
             var query = configureQuery('Requests', queryFilters, params)
             this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
         }
-    }
+    } 
 
     renderTicketRequest(request) {
         return <RequestItem request={request} requestType={this.props.requestType} chatId={request.chatId} />

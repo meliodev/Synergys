@@ -16,7 +16,7 @@ import SearchInput, { createFilter } from 'react-native-search-filter'
 import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
 import _ from 'lodash'
-import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPause } from '@fortawesome/pro-light-svg-icons'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -145,7 +145,7 @@ export const configChoiceIcon = (choice) => {
   else if (element.id === 'cashPayment') { element.icon = faSackDollar; element.iconColor = theme.colors.secondary }
   else if (element.id === 'financing') { element.icon = faEnvelopeOpenDollar; element.iconColor = theme.colors.secondary }
   else if (element.id === 'block') { element.icon = faBan; element.iconColor = theme.colors.error }
-  else if (element.id === 'pending') { element.icon = faPause; element.iconColor = theme.colors.gray_dark }
+  else if (element.id === 'pending') { element.icon = faPauseCircle; element.iconColor = theme.colors.gray_dark }
   return element
 }
 

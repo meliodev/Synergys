@@ -1,5 +1,3 @@
-//Conditionnal rendering depending on USER ROLE
-
 import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { connect } from 'react-redux'
@@ -26,7 +24,7 @@ class ClientsManagement extends React.Component {
         this.state = {
             index: 0,
             showInput: false,
-            searchInput: ''
+            searchInput: '' 
         }
     }
 
@@ -44,19 +42,19 @@ class ClientsManagement extends React.Component {
             { key: 'second', title: 'PROSPECTS' },
         ]
 
-        const { index, searchInput } = this.state
-        const permissionsClients = this.props.permissions.clients
+        const { index, searchInput, showInput } = this.state
         const { isConnected } = this.props.network
+        const permissionsClients = this.props.permissions.clients
 
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
                     main={this}
-                    title={!this.state.showInput}
+                    title={!showInput}
+                    showBar={showInput}
                     placeholder={index === 0 ? 'Rechercher un client' : 'Rechercher un prospect'}
-                    showBar={this.state.showInput}
-                    handleSearch={() => this.setState({ searchInput: '', showInput: !this.state.showInput })}
-                    searchInput={this.state.searchInput}
+                    handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                    searchInput={searchInput}
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 

@@ -1,5 +1,5 @@
 import React from "react"
-import { StyleSheet, View, Text } from "react-native"
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native"
 import { Title } from 'react-native-paper'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 
@@ -8,11 +8,15 @@ import { CustomIcon } from './CustomIcon'
 import * as theme from "../core/theme"
 import { constants } from '../core/constants'
 
-const Section = ({ style, text, icon }) => {
+const Section = ({ style, text, icon, onPressIcon, iconColor = theme.colors.gray_dark }) => {
   return (
     <View style={[styles.section, style]}>
       <Text style={theme.customFontMSregular.header}>{text}</Text>
-     {icon && <FontAwesomeIcon icon={icon} size={21} color={theme.colors.gray_dark} />}
+      {icon &&
+        <TouchableOpacity onPress={onPressIcon}>
+          <FontAwesomeIcon icon={icon} size={21} color={iconColor} />
+        </TouchableOpacity>
+      }
     </View>
   )
 }

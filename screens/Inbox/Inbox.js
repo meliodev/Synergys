@@ -49,7 +49,7 @@ class Inbox extends React.Component {
             </View>
         )
     }
-}
+} 
 
 const mapStateToProps = (state) => {
     return {
