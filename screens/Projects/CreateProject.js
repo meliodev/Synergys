@@ -97,8 +97,8 @@ class CreateProject extends Component {
             clientError: '',
 
             //Pickers
-            state: 'En attente',
-            step: 'Rendez-vous 1',
+            state: 'En cours',
+            step: 'Initialisation',
 
             //Tag Autocomplete
             suggestions: [],
@@ -284,18 +284,8 @@ class CreateProject extends Component {
 
     //Screen inputs
     refreshClient(isPro, id, nom, prenom) {
-        let fullName = ''
-        let client = { id: '', fullName: '' }
-
-        if (isPro)
-            fullName = nom
-
-        else
-            fullName = prenom + ' ' + nom
-
-        client.id = id
-        client.fullName = fullName
-
+        let fullName = isPro ? nom : `${prenom} ${nom}`
+        let client = { id, fullName }
         this.setState({ client })
     }
 
@@ -634,7 +624,7 @@ class CreateProject extends Component {
 
                                     {!this.isClient &&
                                         <ItemPicker
-                                            onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: 'CreateProject', isRoot: false, titleText: 'Clients' })}
+                                            onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false })}
                                             label='Client concerné *'
                                             value={client.fullName}
                                             errorText={clientError}

@@ -283,10 +283,10 @@ class ProcessAction extends Component {
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
-        let actionTemp
+        //let actionTemp
 
         processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-            actionTemp = action
+            //  actionTemp = action
 
             if (action.id === currentAction.id) {
                 //Update comment
@@ -300,17 +300,19 @@ class ProcessAction extends Component {
                 //Update action status
                 if (!stay) {
                     action.status = "done"
-                    actionTemp.isAnimation = true
+                    //  actionTemp.isAnimation = true
                 }
             }
 
         })
 
-        this.setState({
-            loadingModal: false,
-            currentAction: actionTemp, //for check animation
-            currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
-        })
+        // this.setState({
+        //    // loadingModal: false,
+        //    // currentAction: actionTemp, //for check animation
+        //     currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
+        // })
+
+        await this.updateProcess(updatedProcess)
 
         // console.log('Do animation now !')
 

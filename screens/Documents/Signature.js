@@ -109,7 +109,7 @@ class Signature extends Component {
             statusMessage: '',
             codeApproved: false,
             approvalMessage: '',
-            code: 0,
+            code: '',
 
             phoneNumber: '+212621581718',
             timeLeft: 60,
@@ -304,8 +304,8 @@ class Signature extends Component {
                     <Dialog.Input
                         label="Code de confirmation"
                         returnKeyType="done"
-                        value={this.state.code}
-                        onChangeText={code => this.setState({ code })}
+                        value={this.state.code.toString()}
+                        onChangeText={code => this.setState({ code: Number(code) })}
                         //secureTextEntry
                         autoFocus={showDialog} />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 15, paddingHorizontal: constants.ScreenWidth * 0.03 }}>
@@ -628,9 +628,9 @@ class Signature extends Component {
                 {showTerms &&
                     <TermsConditions
                         showTerms={showTerms}
-                        toggleTerms={this.toggleTerms}
+                        //toggleTerms={this.toggleTerms}
                         acceptTerms={this.verifyUser}
-                        //acceptTerms={this.startSignature}
+                        acceptTerms={this.startSignature}
                         dowloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
                             this.downloadFile(this.termsPath, this.termsURL)

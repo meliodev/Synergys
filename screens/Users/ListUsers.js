@@ -85,10 +85,12 @@ class ListUsers extends Component {
 
   renderUser = (user) => {
     const onPressUser = (item) => {
-      if (item.isPro)
-        this.props.onPress(item.isPro, item.id, item.denom, '', item.role)
+      const { isPro, id, denom, nom, prenom, role } = item
+
+      if (isPro)
+        this.props.onPress(isPro, id, denom, '', role)
       else
-        this.props.onPress(item.isPro, item.id, item.nom, item.prenom, item.role)
+        this.props.onPress(isPro, id, nom, prenom, role)
     }
 
     const { userType, permissions, offLine } = this.props
@@ -130,10 +132,10 @@ class ListUsers extends Component {
 
 
   onPressFAB() {
-    const { prevScreen, userType } = this.props
+    const { prevScreen, userType, onGoBack } = this.props
     const nextScreen = userType === 'utilisateur' ? 'CreateUser' : 'CreateClient'
-    const isProspect = userType === 'prospect' ? true : false
-    this.props.navigation.navigate(nextScreen, { prevScreen, isProspect })
+    const isProspect = userType === 'prospect'
+    this.props.navigation.navigate(nextScreen, { prevScreen, isProspect, onGoBack })
   }
 
   render() {
@@ -172,7 +174,7 @@ class ListUsers extends Component {
 
           </View>}
       </View>
-    ) 
+    )
   }
 }
 

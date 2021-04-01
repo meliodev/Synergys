@@ -399,8 +399,8 @@ const ProjectsStack = createStackNavigator({
         screen: ListClients,
         navigationOptions: hideHeader
     },
-    CreateUser: {
-        screen: CreateUser,
+    CreateClient: {
+        screen: CreateClient,
         navigationOptions: hideHeader
     },
     UploadDocument: { //access documents
@@ -515,6 +515,10 @@ const DocumentsStack = createStackNavigator({
     },
     AddItem: {
         screen: AddItem,
+        navigationOptions: hideHeader
+    },
+    CreateProduct: {
+        screen: CreateProduct,
         navigationOptions: hideHeader
     },
     PdfGeneration: {

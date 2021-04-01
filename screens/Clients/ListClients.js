@@ -23,20 +23,17 @@ class ListClients extends Component {
         this.getClient = this.getClient.bind(this)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
+        this.onGoBack = this.props.navigation.getParam('onGoBack', undefined)
         this.isRoot = this.props.navigation.getParam('isRoot', true)
-        this.titleText = this.props.navigation.getParam('titleText', '')
+        // this.titleText = this.props.navigation.getParam('titleText', '')
         this.showButton = this.props.navigation.getParam('showButton', true)
 
-        this.state = { 
+        this.state = {
             index: 0,
             showInput: false,
             searchInput: ''
         }
     }
-
-    // componentDidUpdate() {
-    //     console.log(this.state.searchInput)
-    // }
 
     getClient(isPro, id, prenom, nom) {
         this.props.navigation.state.params.onGoBack(isPro, id, prenom, nom)
@@ -47,25 +44,27 @@ class ListClients extends Component {
         const queryClients = db.collection('Clients').where('deleted', '==', false) //Client + Prospects
         const permissions = this.props.permissions.clients
         const { isConnected } = this.props.network
+        const { showInput, searchInput } = this.state
 
-        return ( 
+        return (
             <View style={{ flex: 1 }}>
                 <SearchBar
                     menu={this.isRoot}
                     main={this}
-                    title={!this.state.showInput}
-                    titleText={this.titleText}
+                    title={!showInput}
+                    titleText='Clients'
                     placeholder='Rechercher'
-                    showBar={this.state.showInput}
-                    handleSearch={() => this.setState({ searchInput: '', showInput: !this.state.showInput })}
-                    searchInput={this.state.searchInput}
+                    showBar={showInput}
+                    handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                    searchInput={searchInput}
                     searchUpdated={(searchInput) => this.setState({ searchInput })}
                 />
 
                 <ListUsers
-                    searchInput={this.state.searchInput}
+                    searchInput={searchInput}
                     prevScreen={this.prevScreen}
                     userType='client'
+                    onGoBack={this.onGoBack}
                     offLine={!isConnected}
                     permissions={permissions}
                     query={queryClients}
@@ -90,4 +89,4 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps)(ListClients)
 
 const styles = StyleSheet.create({
-}) 
+})

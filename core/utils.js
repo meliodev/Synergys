@@ -114,7 +114,7 @@ export const navigateToScreen = (main, screen, params) => {
 //##HELPERS
 
 export const formatRow = (active, data, numColumns) => { //Format rows to display 3 columns grid
-  if(!active) return data
+  if (!active) return data
   const numberOfFullRows = Math.floor(data.length / numColumns)
   let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns)
   while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
@@ -510,35 +510,49 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
   }
 }
 
-import { faCloudUploadAlt, faMagic } from '@fortawesome/pro-light-svg-icons'
+import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 
-export const setPickerDocTypes = (isProcess, currentRole, dynamicType, documentType, allTypes, publicTypes) => {
+let publicTypes = [
+  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
+  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
+  { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
+]
+
+let allTypes = [
+  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
+  { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
+  { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
+  { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate, selected: false },
+  { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt, selected: false },
+  { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus, selected: false },
+  { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd, selected: false },
+  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
+  { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
+  { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
+  { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
+  { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit, selected: false },
+  { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit, selected: false },
+  { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
+]
+
+export const setPickerDocTypes = (isProcess, currentRole, dynamicType, documentType) => {
   const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
   const uploadSource = { label: 'Importer', value: 'upload', icon: faCloudUploadAlt, selected: false }
   const generateSource = { label: 'Générer', value: 'generate', icon: faMagic, selected: false }
-  const enableGeneration =  documentType  && (documentType.label === 'Devis' || documentType.label === 'Facture')
+
   let types = []
   let docSources = []
 
-  //Process case
   if (isProcess) {
-    if (highRoles.includes(currentRole)) {
-      types = allTypes
-      docSources = [uploadSource]
-      if (enableGeneration) {
+    types = publicTypes
+    docSources = [uploadSource]
+
+    if (dynamicType) {
+      types.push(documentType)
+      const isQuoteOrBill = documentType.label === 'Devis' || documentType.label === 'Facture'
+      const enableGeneration = documentType && isQuoteOrBill
+      if (enableGeneration)
         docSources.push(generateSource)
-      }
-    }
-
-    else {
-      types = publicTypes
-      docSources = [uploadSource]
-
-      if (dynamicType) {
-        types.push(documentType)
-        if (enableGeneration)
-          docSources.push(generateSource)
-      }
     }
   }
 
@@ -551,7 +565,6 @@ export const setPickerDocTypes = (isProcess, currentRole, dynamicType, documentT
     else {
       types = publicTypes
       docSources = [uploadSource]
-      console.log('docSources', docSources)
     }
   }
 
@@ -676,3 +689,32 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 //       Alert.alert('Erreur lors de la séléction de fichier(s)')
 //   }
 // }
+
+
+
+
+
+
+
+
+  //Process case
+  // if (isProcess) {
+  //   if (highRoles.includes(currentRole)) {
+  //     types = allTypes
+  //     docSources = [uploadSource]
+  //     if (enableGeneration) {
+  //       docSources.push(generateSource)
+  //     }
+  //   }
+
+  //   else {
+  //     types = publicTypes
+  //     docSources = [uploadSource]
+
+  //     if (dynamicType) {
+  //       types.push(documentType)
+  //       if (enableGeneration)
+  //         docSources.push(generateSource)
+  //     }
+  //   }
+  // }

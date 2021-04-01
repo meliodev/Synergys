@@ -24,6 +24,7 @@ import { handleFirestoreError } from "../../core/exceptions";
 const db = firebase.firestore()
 
 class CreateClient extends Component {
+    
     constructor(props) {
         super(props)
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -66,8 +67,10 @@ class CreateClient extends Component {
     }
 
     handleSubmit = async (isConversion) => {
+
         const { error, loading } = this.state
         const { isPro, nom, prenom, denom, siret, address, phone, email, password } = this.state
+
         const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password }
         const eventHandlers = { error, loading }
         const { isConnected } = this.props.network
@@ -86,13 +89,14 @@ class CreateClient extends Component {
         else {
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
                 this.setState({ loadingDialog: false })
+                this.props.navigation.state.params.onGoBack(isPro, this.ClientId, isPro ? denom.value : nom.value, isPro ? '' : prenom.value)
                 this.props.navigation.navigate(this.prevScreen)
             }, 6000) //We can reduce this timeout later on...
         }
     }
 
     refreshAddress(address) {
-        this.setState({ address, addressError: '' })
+        this.setState({ address, addressError: '' }) 
     }
 
     render() {
@@ -211,7 +215,6 @@ class CreateClient extends Component {
                         />
 
                         <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
-
                         <LoadDialog loading={loadingDialog} message={loadingMessage} />
 
                     </ScrollView >

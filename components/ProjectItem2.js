@@ -1,6 +1,6 @@
 import React from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
-import { faBinoculars, faTools, faToolbox, faLamp, faUserHardHat, faCalendar, faCalendarAlt } from '@fortawesome/pro-duotone-svg-icons'
+import { faTools, faToolbox, faLamp, faUserHardHat, faCalendar, faCalendarAlt, faFolderOpen } from '@fortawesome/pro-duotone-svg-icons'
 import { faCheckCircle, faTimesCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import CustomIcon from './CustomIcon'
@@ -16,8 +16,8 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
     const setIconPhase = (projectStep) => {
         switch (projectStep) {
-            case 'Prospect':
-                return faBinoculars
+            case 'Initialisation':
+                return faFolderOpen
                 break
 
             case 'Rendez-vous 1':
@@ -44,9 +44,9 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
     const setIconStatus = (projectStatus) => {
         if (projectStatus === 'Terminé')
-            return <CustomIcon icon={faCheckCircle} color='green' size={iconContainerSize *0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
+            return <CustomIcon icon={faCheckCircle} color='green' size={iconContainerSize * 0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
         else if (projectStatus === 'Annulé')
-            return <CustomIcon icon={faTimesCircle} color={theme.colors.error} size={iconContainerSize *0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
+            return <CustomIcon icon={faTimesCircle} color={theme.colors.error} size={iconContainerSize * 0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
         else return null
     }
 

@@ -510,7 +510,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                       // responsable: { id: 'GS-US-xQ6s', role: 'dircom' }, //#task: set id of DC (use it to render avatarText icon to reprensent role)
+                        // responsable: { id: 'GS-US-xQ6s', role: 'dircom' }, //#task: set id of DC (use it to render avatarText icon to reprensent role)
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'rdnChoice',
@@ -787,7 +787,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                     //   responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+                        //   responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -884,7 +884,7 @@ const processModel = {
                 ]
             },
             'poseurAffectation': {
-                title: "Affectation à poseur",
+                title: "Affectation à un poseur",
                 instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
                 stepOrder: 3,
                 actions: [
@@ -1292,7 +1292,7 @@ const processModel = {
                         screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: '',
@@ -1579,7 +1579,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                       // responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
+                        // responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -2012,6 +2012,9 @@ export const projectProcessHandler = async (currentProcess, projectSecondPhase, 
 //#PROCESS TASKS:
 //Task 1. Init
 const initProcess = (process, projectSecondPhase) => {
+    if (projectSecondPhase === 'init') {
+        projectSecondPhase = getSecondPhaseId()
+    }
 
     //Init project with first phase/first step
     let firstPhaseId = getFirstPhaseIdFromModel()
@@ -2026,6 +2029,13 @@ const initProcess = (process, projectSecondPhase) => {
     })
 
     return process
+}
+
+const getSecondPhaseId = () => {
+    const firstPhaseArray = Object.entries(processModel).filter(([key, value]) => value['phaseOrder'] === 2)
+    const firstPhase = Object.fromEntries(firstPhaseArray)
+    const firstPhaseId = Object.keys(firstPhase)[0]
+    return firstPhaseId
 }
 
 const getFirstPhaseIdFromModel = () => {
@@ -2369,7 +2379,6 @@ const verifyActions_manual = async (actions) => {
     return { allActionsValid_manual, verifiedActions_manual }
 }
 
-
 //Task 4. Phase/Step transition
 export const handleTransition = (process, currentPhaseId, currentStepId, nextStepId, nextPhaseId, ProjectId) => {
 
@@ -2556,8 +2565,8 @@ export const getCurrentAction = (process) => {
     let currentAction = null
 
     for (const action of actions) {
-        if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
-            //if (!currentAction && action.status === 'pending')
+        //if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
+        if (!currentAction && action.status === 'pending')
             currentAction = action
     }
 
