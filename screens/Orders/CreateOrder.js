@@ -234,7 +234,7 @@ class CreateOrder extends Component {
         if (isEditOffLine) return
 
         //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState && !this.autoGenPdf) return
+        if (this.state.loading || _.isEqual(this.state, this.initialState) && !this.autoGenPdf) return
 
         load(this, true)
 
@@ -383,7 +383,7 @@ class CreateOrder extends Component {
     }
 
     //renderers
-    renderOrderLines(canUpdate) {
+    renderOrderLines(canWrite) {
         const { orderLines } = this.state
 
         return (
@@ -394,19 +394,19 @@ class CreateOrder extends Component {
                     return (
                         <TouchableOpacity
                             onPress={() => {
-                                if (!canUpdate) return
+                                if (!canWrite) return
                                 navigateToScreen(this, 'AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })
                             }}
                             style={styles.orderLine}
                         >
 
-                            {canUpdate &&
+                            {canWrite &&
                                 <TouchableOpacity style={{ flex: 0.1, alignItems: 'flex-start', justifyContent: 'center' }} onPress={() => this.removeOrderLine(key)}>
                                     <MaterialCommunityIcons name='close-circle-outline' color={theme.colors.error} size={20} />
                                 </TouchableOpacity>
                             }
 
-                            <View style={{ flex: canUpdate ? 0.65 : 0.75 }}>
+                            <View style={{ flex: canWrite ? 0.65 : 0.75 }}>
                                 <Text style={theme.customFontMSsemibold.body}>{orderLine.product.name}</Text>
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{orderLine.quantity} x {orderLine.price} (+ {orderLine.taxe.name}% TVA)</Text>
                             </View>
@@ -528,8 +528,8 @@ class CreateOrder extends Component {
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, toastType, toastMessage } = this.state
 
-        var { canUpdate, canDelete } = this.props.permissions.documents
-        canUpdate = (canUpdate || !this.isEdit)
+        let { canCreate, canUpdate, canDelete } = this.props.permissions.orders
+        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
 
@@ -537,7 +537,7 @@ class CreateOrder extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar close={!loading} title titleText={this.title} check={this.autoGenPdf ? false : this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading && !this.autoGenPdf} handleDelete={this.showAlert} />
+                <Appbar close={!loading} title titleText={this.title} check={this.autoGenPdf ? false : this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading && !this.autoGenPdf} handleDelete={this.showAlert} />
 
                 {loading ?
                     <View style={{ flex: 1 }}>
@@ -569,7 +569,7 @@ class CreateOrder extends Component {
                                         value={project.name}
                                         error={!!project.error}
                                         errorText={project.error}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                         showAvatarText={false}
                                     />
 
@@ -579,7 +579,7 @@ class CreateOrder extends Component {
                                                 label="Client concerné *"
                                                 value={client.fullName}
                                                 editable={false}
-                                                right={client.fullName !== '' && canUpdate && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => {
+                                                right={client.fullName !== '' && canWrite && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => {
                                                     if (this.project || this.isEdit) return
                                                     this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })
                                                 }} />} />
@@ -595,7 +595,7 @@ class CreateOrder extends Component {
                                         onValueChange={(state) => this.setState({ state })}
                                         title="Etat *"
                                         elements={states}
-                                        enabled={canUpdate}
+                                        enabled={canWrite}
                                     />
 
                                     <MyInput
@@ -621,7 +621,7 @@ class CreateOrder extends Component {
                                     <Card.Content>
                                         <Button icon="plus-circle" loading={loading} mode="outlined"
                                             onPress={() => {
-                                                if (!canUpdate) return
+                                                if (!canWrite) return
                                                 navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
                                             }}
                                             style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
@@ -633,7 +633,7 @@ class CreateOrder extends Component {
                                             <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
                                         </View>
 
-                                        {this.renderOrderLines(canUpdate)}
+                                        {this.renderOrderLines(canWrite)}
                                         {this.renderSubTotal()}
                                         {taxes.length > 0 && this.renderTaxes()}
                                         {this.renderTotal()}
@@ -648,7 +648,7 @@ class CreateOrder extends Component {
                                     <Card.Content>
                                         <Button icon="plus-circle" loading={loading} mode="outlined"
                                             onPress={() => {
-                                                if (!canUpdate) return
+                                                if (!canWrite) return
                                                 navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
                                             }}
                                             style={{ borderWidth: 1, borderColor: theme.colors.primary }}>

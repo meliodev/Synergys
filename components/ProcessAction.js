@@ -306,18 +306,15 @@ class ProcessAction extends Component {
 
         })
 
-        // this.setState({
-        //    // loadingModal: false,
-        //    // currentAction: actionTemp, //for check animation
-        //     currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
-        // })
-
-        await this.updateProcess(updatedProcess)
+        this.setState({
+           // loadingModal: false,
+           // currentAction: actionTemp, //for check animation
+            currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
+        })
 
         // console.log('Do animation now !')
-
+        
         await this.countDown(1000)
-
 
         if (nextStep || nextPhase) {
             const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)

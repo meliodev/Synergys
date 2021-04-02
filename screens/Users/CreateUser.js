@@ -19,34 +19,22 @@ import { constants, rolesRedux } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
-const roles_l1 = [ //level1: Admin
-  { label: 'Admin', value: 'Admin' },
-  { label: 'Directeur commercial', value: 'Directeur commercial' },
-  { label: 'Commercial', value: 'Commercial' },
-  { label: 'Responsable technique', value: 'Responsable technique' },
-  { label: 'Poseur', value: 'Poseur' },
-  { label: 'Client', value: 'Client' },
-  { label: 'Back office', value: 'Back office' },
-]
-
-const roles_l2 = [ //level2: Directeur commercial & Responsable technique
-  { label: 'Directeur commercial', value: 'Directeur commercial' },
-  { label: 'Commercial', value: 'Commercial' },
-  { label: 'Responsable technique', value: 'Responsable technique' },
-  { label: 'Poseur', value: 'Poseur' },
-  { label: 'Client', value: 'Client' }
-]
-
-const roles_l3 = [ //level3: Commercial & Poseur
-  { label: 'Commercial', value: 'Commercial' },
-  { label: 'Responsable technique', value: 'Responsable technique' },
-  { label: 'Poseur', value: 'Poseur' },
-  { label: 'Client', value: 'Client' }
-]
-
-const roles_l4 = [ //level4:: Client
-  { label: 'Client', value: 'Client' }
-]
+const rolesPicker = {
+  3: [
+    { label: 'Admin', value: 'Admin' },
+    { label: 'Directeur commercial', value: 'Directeur commercial' },
+    { label: 'Commercial', value: 'Commercial' },
+    { label: 'Responsable technique', value: 'Responsable technique' },
+    { label: 'Poseur', value: 'Poseur' },
+    { label: 'Back office', value: 'Back office' },
+  ],
+  2: [
+    { label: 'Commercial', value: 'Commercial' },
+    { label: 'Poseur', value: 'Poseur' },
+  ],
+  1: [],
+  0: []
+}
 
 const db = firebase.firestore()
 
@@ -109,20 +97,6 @@ class CreateUser extends Component {
   }
 
   //#PERMISSIONS: config role picker items (depending on user's role)
-  configRolesPicker() {
-    let { isAdmin, isBackOffice, isDirCom, isCom, isTech, isPoseur } = this.state
-    if (isAdmin)
-      return roles_l1
-
-    else if (isDirCom)
-      return roles_l2
-
-    else if (isCom)
-      return roles_l3
-
-    else if (isTech || isPoseur)
-      return roles_l4
-  }
 
   async validateInputs() {
     let denomError = ''
@@ -249,7 +223,8 @@ class CreateUser extends Component {
     const { isConnected } = this.props.network
 
     const showUserTypeRadio = (role === 'Poseur' || role === 'Client')
-    const roles = this.configRolesPicker()
+    const roleLevel = this.props.role.level
+    const roles = rolesPicker[roleLevel]
 
     return (
       <View style={{ flex: 1 }}>

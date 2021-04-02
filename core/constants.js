@@ -17,3 +17,5 @@ export const rolesRedux = [
     { id: 'poseur', value: 'Poseur', bool: 'isPoseur' }
 ]
 
+export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
+

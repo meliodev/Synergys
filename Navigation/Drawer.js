@@ -71,9 +71,6 @@ class DrawerMenu extends React.Component {
     }
 
     setMenuItems(role) {
-        // console.log('ROOLE..........................', role)
-        // console.log('menuPrivilleges', menuPrivilleges)
-
         var arrMenuPrivilleges = menuPrivilleges[role]
         if (arrMenuPrivilleges) {
             const menu = menuItems.filter(menuItem => arrMenuPrivilleges.includes(menuItem.id))
@@ -87,12 +84,12 @@ class DrawerMenu extends React.Component {
         return (
             <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isClient: role.id === 'client' ? true : false })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
-                    {currentUser && <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />}
+                    <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>
 
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
                     <View style={{ flex: 0.8 }}>
-                        {currentUser && <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{displayName}</Text>}
+                        <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{displayName}</Text>
                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role.value}</Text>
                     </View>
                     <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
@@ -103,18 +100,18 @@ class DrawerMenu extends React.Component {
         )
     }
 
-    renderFlatList() {
-
+    renderMenu() {
         const arrMenu = this.setMenuItems(this.props.role.id)
         const { notificationCount } = this.state
 
         return (
             <FlatList
-                scrollEnabled={(constants.ScreenHeight >= 667) ? false : true}
+                scrollEnabled={!(constants.ScreenHeight >= 667)}
                 data={arrMenu}
                 keyExtractor={item => item.id.toString()}
                 style={{ paddingTop: theme.padding, paddingLeft: theme.padding }}
-                renderItem={({ item }) => this.renderMenuItem(item)} />)
+                renderItem={({ item }) => this.renderMenuItem(item)} />
+        )
     }
 
     renderMenuItem(item) {
@@ -148,12 +145,7 @@ class DrawerMenu extends React.Component {
     }
 
     handleSignout() {
-        firebase.auth().signOut().then(async () => {
-            resetState(this)
-            const { type, isConnected } = await NetInfo.fetch()
-            const network = { type, isConnected }
-            setNetwork(this, network)
-        })
+        firebase.auth().signOut()
     }
 
     navigateToScreen(navScreen) {
@@ -171,11 +163,11 @@ class DrawerMenu extends React.Component {
                 {currentUser && this.renderHeader(currentUser, role)}
 
                 <View style={styles.menuContainer}>
-                    {currentUser && this.renderFlatList()}
+                    {currentUser && this.renderMenu()}
                 </View>
 
                 <View style={[styles.footerContainer, { bottom: 5 }]}>
-                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.0.8</Text>
+                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.1.15</Text>
                 </View>
             </SafeAreaView>
         )

@@ -6,13 +6,14 @@ import firebase from '@react-native-firebase/app'
 import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
+import NetInfo from "@react-native-community/netinfo"
 
 import Background from "../../components/NewBackground"
 import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
-import { setRole, setPermissions, userLoggedOut, resetState } from '../../core/redux'
+import { setRole, setPermissions, userLoggedOut, resetState, setNetwork } from '../../core/redux'
 
 const roles = [{ id: 'admin', value: 'Admin', level: 3 }, { id: 'backoffice', value: 'Back office', level: 3 }, { id: 'dircom', value: 'Directeur commercial', level: 2 }, { id: 'com', value: 'Commercial', level: 1 }, { id: 'poseur', value: 'Poseur', level: 1 }, { id: 'tech', value: 'Responsable technique', level: 2 }, { id: 'client', value: 'Client', level: 0 }]
 const db = firebase.firestore()
@@ -146,6 +147,15 @@ class AuthLoadingScreen extends Component {
       }
 
       else {
+        resetState(this)
+        const { type, isConnected } = await NetInfo.fetch()
+        const network = { type, isConnected }
+        setNetwork(this, network)
+
+        console.log('AUTH LISTENER: logout...')
+        console.log(this.props.role)
+        console.log(this.props.permissions.active)
+        console.log(this.props.permissions.projects)
         this.props.navigation.navigate("LoginScreen")
       }
     })

@@ -41,14 +41,14 @@ const states = [
     { label: 'Validé', value: 'Validé' },
 ]
 
-const genTypes = [
-    { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
-    { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
+const docSources = [
+    { label: 'Importer', value: 'upload', icon: faCloudUploadAlt },
+    { label: 'Générer', value: 'generate', icon: faMagic }
 ]
 
-const genOptions = [
-    { label: 'Une commande existante', value: 'oldOrder', icon: faFileSearch, selected: false },
-    { label: 'Une nouvelle commande', value: 'newOrder', icon: faFilePlus, selected: false },
+const genSources = [
+    { label: 'Une commande existante', value: 'oldOrder', icon: faFileSearch },
+    { label: 'Une nouvelle commande', value: 'newOrder', icon: faFilePlus },
 ]
 
 class UploadDocument extends Component {
@@ -72,12 +72,9 @@ class UploadDocument extends Component {
         //Document source (gen/upload)
         this.resetModalOptions = this.resetModalOptions.bind(this)
         this.modalOptionsConfig = this.modalOptionsConfig.bind(this)
-        this.onSelectDocumentSource = this.onSelectDocumentSource.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
-        this.handleConfirmModal = this.handleConfirmModal.bind(this)
-        this.handleCancelGen = this.handleCancelGen.bind(this)
         this.startGenPdf = this.startGenPdf.bind(this) //Start Pdf gen flow
-        this.getGeneratedPdf = this.getGeneratedPdf.bind(this) //End Pdf gen flow
+        this.getGenPdf = this.getGenPdf.bind(this) //End Pdf gen flow
 
         //Delete
         this.myAlert = myAlert.bind(this)
@@ -99,17 +96,14 @@ class UploadDocument extends Component {
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         //Process params
-        this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined) //Not editable
 
         const currentRole = this.props.role.id
-        const response = setPickerDocTypes(this.isProcess, currentRole, this.dynamicType, this.documentType)
-        const { types, docSources } = response
-        this.types = types
+        this.types = setPickerDocTypes(currentRole, this.dynamicType, this.documentType)
         this.docSources = docSources
-        this.initSelectedDocType()
+        this.genSources = genSources
 
         this.state = {
             //TEXTINPUTS
@@ -136,7 +130,7 @@ class UploadDocument extends Component {
 
             //Pdf generation
             showModal: false,
-            modalContent: 'docSource',
+            modalContent: 'docTypes',
             attachmentSource: '', //upload or generation or conversion
             order: null,
             checked: '',
@@ -163,18 +157,6 @@ class UploadDocument extends Component {
 
             else this.initialState = _.cloneDeep(this.state)
         }
-    }
-
-    initSelectedDocType() {
-        this.types.forEach((type) => {
-            if (this.documentType && this.documentType.value) {
-                if (type.value === this.documentType.value)
-                    type.selected = true
-            }
-
-            else if (type.value === 'Autre')
-                type.selected = true
-        })
     }
 
     componentWillUnmount() {
@@ -263,16 +245,6 @@ class UploadDocument extends Component {
         })
     }
 
-    async pickDoc() {
-        const attachment = await pickDoc(true, [DocumentPicker.types.pdf])
-
-        if (attachment.hasCanceled) {
-            this.setState({ attachment: this.initialState.attachment })
-        }
-
-        this.setState({ attachment, order: null }) //order: Form fields to generate a pdf 
-    }
-
     //Submit handler
     async handleSubmit(isConversion, DocumentId) {
         Keyboard.dismiss()
@@ -283,7 +255,7 @@ class UploadDocument extends Component {
         if (isEditOffLine) return
 
         //0. Handle isLoading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+        if (this.state.loading || _.isEqual(this.state, this.initialState)) return
         load(this, true)
 
         if (isConversion) {
@@ -328,7 +300,7 @@ class UploadDocument extends Component {
         }
 
         //4. Go back if we came here from process action
-        if (this.isProcess) {
+        if (this.documentType) {
             this.props.navigation.goBack()
         }
     }
@@ -434,46 +406,23 @@ class UploadDocument extends Component {
         this.setState({ project, projectError: '' })
     }
 
-    //Renderers
-    renderSignees() {
-        const { signatures } = this.state
+    //Attachment component handlers
+    onPressAttachment(canWrite) {
 
-        return signatures.map((signature, index) => {
-            const { signedAt, signedBy } = signature
-            const signDate = moment(signedAt, 'lll').format('ll')
-            const signTime = moment(signedAt, 'lll').format('HH:mm')
-            // const navigateToSigneeProfile = () => this.props.navigation.navigate('Profile', { userId: signedBy.id })
+        if (!canWrite) return
 
-            return (
-                <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 30, marginBottom: 10 }}>
-                    <CustomIcon icon={faPen} size={24} color={theme.colors.placeholder} />
-                    <View>
-                        <Text numberOfLines={1} style={[theme.customFontMSmedium.body, { marginLeft: 15 }]}>
-                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary }]}>{signedBy.fullName} </Text>
-                             a signé le document</Text>
-                        <Text style={[theme.customFontMSmedium.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {signDate} à {signTime}</Text>
-                    </View>
-                </View>
-            )
-        })
-    }
-
-    onPressAttachment(canUpdate) {
-
-        if (!canUpdate) return
-        // if (this.isEdit) return
-
-        if (this.isProcess) {
-            const isQuoteOrBill = this.documentType.value === 'Devis' || this.documentType.value === 'Facture'
-            if (isQuoteOrBill) this.toggleModal('docSource') //Upload or Generate
-            else this.pickDoc(); return
-        }
+        if (!this.isEdit && !this.documentType)  //Creation & not pre-defined document type
+            this.toggleModal()
 
         else {
-            if (this.isEdit) this.pickDoc()
-            else this.toggleModal('docSource')
-            return
+            const type = this.isEdit ? this.state.type : this.documentType.value //this.isEdit || !this.isEdit && this.documentType
+            let isQuoteOrBill = type === 'Devis' || type === 'Facture'
+            if (isQuoteOrBill)
+                this.setState({ modalContent: 'docSources', showModal: true })
+            else this.pickDoc()
         }
+
+        return
     }
 
     onPressUploadPending(uploadRunning) {
@@ -482,11 +431,11 @@ class UploadDocument extends Component {
             else Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
         }
 
-        else //In case remote user presses the attachment while it is still pending.
-            Alert.alert("", "Ce document est en cours d'exportation. Le document sera bientôt disponible, veuillez patienter...")
+        //In case remote user presses the attachment while it is still pending.
+        else Alert.alert("", "Ce document est en cours d'exportation. Le document sera bientôt disponible, veuillez patienter...")
     }
 
-    renderAttachment(canUpdate) {
+    renderAttachment(canWrite) {
         const { attachment } = this.state
 
         //upload task is running -> show progress for local user
@@ -508,13 +457,13 @@ class UploadDocument extends Component {
         else if (attachment && !attachment.pending) {
             return (
                 <TouchableOpacity
-                    onPress={() => this.onPressAttachment(canUpdate)}>
+                    onPress={() => this.onPressAttachment(canWrite)}>
                     <MyInput
                         label="Pièce jointe"
                         value={attachment && attachment.name}
                         editable={false}
                         multiline
-                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.onPressAttachment(canUpdate)} />}
+                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.onPressAttachment(canWrite)} />}
                     />
                 </TouchableOpacity>
             )
@@ -526,7 +475,7 @@ class UploadDocument extends Component {
                     <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>
                     <AddAttachment
                         style={{ marginTop: 5 }}
-                        onPress={() => this.onPressAttachment(canUpdate)}
+                        onPress={() => this.onPressAttachment(canWrite)}
                     />
                 </View>
             )
@@ -534,97 +483,80 @@ class UploadDocument extends Component {
     }
 
     //*********************** Pdf generation flow ***************************
-    toggleModal(modalContent) {
-        this.setState({ showModal: !this.state.showModal, modalContent })
+    toggleModal() {
+        this.setState({ showModal: !this.state.showModal, modalContent: 'docTypes' })
     }
 
     modalOptionsConfig() {
-        const { modalContent, type, attachmentSource } = this.state
+
+        const { modalContent, type } = this.state
         const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
 
-        if (modalContent === 'docSource') {
-            return {
-                title: `Créer`,
-                columns: 2,
-                elements: this.docSources,
-                autoValidation: true
-            }
-        }
-
-        else if (modalContent === 'docType') {
+        if (modalContent === 'docTypes') {
             return {
                 title: `Choisissez le type du document`,
-                columns: attachmentSource === 'upload' ? 3 : 2,
-                elements: attachmentSource === 'upload' ? this.types : genTypes,
-                autoValidation: false
+                columns: 3,
+                elements: this.types,
             }
         }
 
-        else if (modalContent === 'genConfig') {
+        else if (modalContent === 'docSources') {
+            return {
+                title: `Créer ${articles_fr('un', masculins, type)} ${type.toLowerCase()}`,
+                columns: 2,
+                elements: this.docSources,
+            }
+        }
+
+        else if (modalContent === 'genSources') {
             return {
                 title: `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`,
                 columns: 2,
-                elements: genOptions,
-                autoValidation: false
+                elements: this.genSources,
             }
         }
     }
 
-    setDocumentSource(attachmentSource) {
-        const { modalContent, type } = this.state
-        if (this.documentType) this.onSelectDocumentSource(attachmentSource)
-        else this.setState({ attachmentSource, modalContent: 'docType' })
+    resetModalOptions() {
+        const { attachment, type } = this.initialState
+        this.setState({ attachment, type })
     }
 
-    onSelectDocumentSource(attachmentSource) {
+    async pickDoc() {
+        const attachment = await pickDoc(true, [DocumentPicker.types.pdf])
 
-        if (attachmentSource === 'generation') {
-            this.setState({ modalContent: 'genConfig' })
+        if (attachment.hasCanceled) {
+            const { attachment, type } = this.initialState
+            this.setState({ attachment, type })
+            return
         }
 
-        else if (attachmentSource === 'upload') {
-            this.toggleModal('docSource')
-            this.pickDoc()
-        }
-    }
-
-    handleConfirmModal() {
-        const { modalContent, attachmentSource, type } = this.state
-
-        if (modalContent === 'docType') {
-            this.onSelectDocumentSource(attachmentSource)
-        }
-
-        else if (modalContent === 'genConfig') {
-            const index = genOptions.findIndex((option) => option.selected)
-            if (index === -1) return
-            this.startGenPdf(index)
-        }
-    }
-
-    handleCancelGen() {
-        this.resetModalOptions()
-        this.toggleModal('docSource')
+        this.setState({ attachment, order: null }) //order: Form fields to generate a pdf 
     }
 
     startGenPdf(index) {
-        const { genOptions, type } = this.state
-        this.toggleModal('docSource')
+        const { type } = this.state
+        this.toggleModal()
+        const navParams = { autoGenPdf: true, docType: type, DocumentId: this.DocumentId, project: this.project, onGoBack: this.getGenPdf }
 
         //Existing order
         if (index === 0) {
-            this.props.navigation.navigate('ListOrders', { isRoot: false, titleText: 'Choix de la commande', autoGenPdf: true, docType: type, DocumentId: this.DocumentId, project: this.project, popCount: 3, onGoBack: this.getGeneratedPdf })
+            navParams.isRoot = false
+            navParams.titleText = 'Choix de la commande'
+            navParams.popCount = 3
+            this.props.navigation.navigate('ListOrders', navParams)
         }
 
         //New order
         else if (index === 1) {
-            this.props.navigation.navigate('CreateOrder', { autoGenPdf: true, docType: type, DocumentId: this.DocumentId, project: this.project, popCount: 2, onGoBack: this.getGeneratedPdf })
+            navParams.popCount = 2
+            this.props.navigation.navigate('CreateOrder', navParams)
         }
 
-        else return
+        return
     }
 
-    getGeneratedPdf(genPdf) {
+    getGenPdf(genPdf) {
         const { pdfBase64Path: path, pdfName: name, order, isConversion } = genPdf
         //order: The order from which this "Devis" was generated
         //isConversion: Conversion from Devis to Facture (boolean)
@@ -650,7 +582,8 @@ class UploadDocument extends Component {
     convertProposalToBill() {
         if (!this.isEdit) return
         const { order } = this.state
-        this.props.navigation.navigate('PdfGeneration', { order, docType: 'Facture', DocumentId: generateId('GS-DOC-'), isConversion: true, onGoBack: this.getGeneratedPdf })
+        const navParams = { order, docType: 'Facture', DocumentId: generateId('GS-DOC-'), isConversion: true, onGoBack: this.getGenPdf }
+        this.props.navigation.navigate('PdfGeneration', navParams)
     }
 
     navigateToSignature(signMode, isConnected, allowSign) {
@@ -683,12 +616,27 @@ class UploadDocument extends Component {
         navigateToScreen(this, 'Signature', params)
     }
 
-    resetModalOptions(isUnmount) {
-        if (!this.documentType)
-            this.setState({ type: 'Autre', attachment: this.initialState.attachment })
-        genTypes.forEach((type) => type.selected = false)
-        if (isUnmount)
-            this.types.forEach((type) => type.selected = false)
+    renderSignees() {
+        const { signatures } = this.state
+
+        return signatures.map((signature, index) => {
+            const { signedAt, signedBy } = signature
+            const signDate = moment(signedAt, 'lll').format('ll')
+            const signTime = moment(signedAt, 'lll').format('HH:mm')
+            // const navigateToSigneeProfile = () => this.props.navigation.navigate('Profile', { userId: signedBy.id })
+
+            return (
+                <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 30, marginBottom: 10 }}>
+                    <CustomIcon icon={faPen} size={24} color={theme.colors.placeholder} />
+                    <View>
+                        <Text numberOfLines={1} style={[theme.customFontMSmedium.body, { marginLeft: 15 }]}>
+                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary }]}>{signedBy.fullName} </Text>
+                             a signé le document</Text>
+                        <Text style={[theme.customFontMSmedium.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {signDate} à {signTime}</Text>
+                    </View>
+                </View>
+            )
+        })
     }
 
     render() {
@@ -696,13 +644,14 @@ class UploadDocument extends Component {
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
         let { error, loading, loadingConversion, toastType, toastMessage, projectError } = this.state
         const { checked, modalContent, showModal, attachmentSource } = this.state
-        const { title, columns, elements, autoValidation } = this.modalOptionsConfig()
-
-        var { canUpdate, canDelete } = this.props.permissions.documents
-        canUpdate = (canUpdate || !this.isEdit)
-
         const { isConnected } = this.props.network
-        const allowSign = this.isEdit && attachment && !attachment.pending
+
+        let { canCreate, canUpdate, canDelete } = this.props.permissions.documents
+        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+
+        const { title, columns, elements, autoValidation } = this.modalOptionsConfig()
+        const attachmentUploaded = attachment && !attachment.pending
+        const allowSign = this.isEdit && attachmentUploaded
 
         if (loadingConversion) return (
             <View style={styles.container}>
@@ -717,7 +666,7 @@ class UploadDocument extends Component {
                     close title
                     titleText={loading ? 'Exportation du document...' : this.isEdit ? 'Modifier le document' : 'Nouveau document'}
                     loading={loading}
-                    check={this.isEdit ? canUpdate && !loading : !loading}
+                    check={this.isEdit ? canWrite && !loading : !loading}
                     handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
                     del={canDelete && this.isEdit && !loading}
                     handleDelete={this.showAlert} />
@@ -752,7 +701,7 @@ class UploadDocument extends Component {
                                         onValueChange={(type) => this.setState({ type })}
                                         title="Type"
                                         elements={types}
-                                        enabled={canUpdate}
+                                        enabled={canWrite}
                                     /> */}
 
                                 <ItemPicker
@@ -764,11 +713,11 @@ class UploadDocument extends Component {
                                     value={project.name}
                                     error={!!projectError}
                                     errorText={projectError}
-                                    editable={canUpdate}
+                                    editable={canWrite}
                                     showAvatarText={false}
                                 />
 
-                                {this.renderAttachment(canUpdate)}
+                                {this.renderAttachment(canWrite)}
 
                                 {type !== '' &&
                                     <MyInput
@@ -783,31 +732,42 @@ class UploadDocument extends Component {
                                     title={title}
                                     columns={columns}
                                     //modalStyle={{ marginTop: constants.ScreenHeight * 0.5 }}
-                                    modalStyle={{ marginTop: modalContent === 'docType' && attachmentSource === 'upload' ? 0 : constants.ScreenHeight * 0.5 }}
+                                    modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
                                     isVisible={showModal}
                                     toggleModal={() => {
-                                        this.toggleModal('docSource')
+                                        this.toggleModal()
                                         this.resetModalOptions()
                                     }}
-                                    handleCancel={this.handleCancelGen}
-                                    handleConfirm={this.handleConfirmModal}
+                                    //  handleCancel={this.handleCancelGen}
+                                    // handleConfirm={this.handleConfirmModal}
                                     elements={elements}
-                                    autoValidation={autoValidation}
+                                    autoValidation={true}
 
                                     handleSelectElement={(elements, index) => {
-                                        if (modalContent === 'docSource') {
-                                            const documentSource = index === 0 ? 'upload' : 'generation'
-                                            this.setDocumentSource(documentSource)
+
+                                        if (modalContent === 'docTypes') {
+                                            const type = this.types[index].value
+                                            this.setState({ type })
+                                            let isQuoteOrBill = type === 'Devis' || type === 'Facture'
+                                            if (isQuoteOrBill) this.setState({ modalContent: 'docSources' })
+                                            else {
+                                                this.toggleModal()
+                                                this.pickDoc()
+                                            }
                                         }
 
-                                        else {
-                                            this.setState({ elements })
-                                            if (modalContent === 'docType') {
-                                                if (attachmentSource === 'upload')
-                                                    this.setState({ type: this.types[index].value })
-                                                if (attachmentSource === 'generation')
-                                                    this.setState({ type: genTypes[index].value })
+                                        else if (modalContent === 'docSources') {
+                                            const attachmentSource = index === 0 ? 'upload' : 'generation'
+                                            this.setState({ attachmentSource })
+                                            if (attachmentSource === 'upload') {
+                                                this.toggleModal()
+                                                this.pickDoc()
                                             }
+                                            else this.setState({ modalContent: 'genSources' })
+                                        }
+
+                                        else if (modalContent === 'genSources') {
+                                            this.startGenPdf(index)
                                         }
                                     }}
                                 />
@@ -820,7 +780,7 @@ class UploadDocument extends Component {
                                     error={!!name.error}
                                     errorText={name.error}
                                     multiline={true}
-                                    editable={canUpdate}
+                                    editable={canWrite}
                                 />
 
                                 <MyInput
@@ -831,7 +791,7 @@ class UploadDocument extends Component {
                                     error={!!description.error}
                                     errorText={description.error}
                                     multiline={true}
-                                    editable={canUpdate}
+                                    editable={canWrite}
                                 />
 
                                 <Picker
@@ -843,7 +803,7 @@ class UploadDocument extends Component {
                                     onValueChange={(state) => this.setState({ state })}
                                     title="Etat"
                                     elements={states}
-                                    enabled={canUpdate}
+                                    enabled={canWrite}
                                     containerStyle={{ marginBottom: 0 }}
                                 />
 
@@ -909,7 +869,7 @@ class UploadDocument extends Component {
                             <View />
                         }
 
-                        {(canUpdate || this.props.role.id === 'client') &&
+                        {(canWrite || this.props.role.id === 'client') &&
                             <Button
                                 mode="contained"
                                 style={[styles.signButton, { backgroundColor: allowSign ? theme.colors.primary : theme.colors.gray_light }]}
@@ -1160,16 +1120,16 @@ const modalStyles2 = StyleSheet.create({
     //     const title = `Générer un ${type.toLowerCase()} à partir de:`
 
     //     const renderTitle = (dialogElement, type) => {
-    //         if (dialogElement === 'docType') return `Choisissez le type du document`
-    //         else if (dialogElement === 'genConfig') return `Générer un ${type.toLowerCase()} à partir de:`
+    //         if (dialogElement === 'docTypes') return `Choisissez le type du document`
+    //         else if (dialogElement === 'genSources') return `Générer un ${type.toLowerCase()} à partir de:`
     //     }
 
     //     const Form = ({ dialogElement }) => {
-    //         if (dialogElement === 'docType') {
-    //             return this.renderDocTypeForm()
+    //         if (dialogElement === 'docTypes') {
+    //             return this.renderdocTypesForm()
     //         }
 
-    //         else if (dialogElement === 'genConfig') {
+    //         else if (dialogElement === 'genSources') {
     //             return (
     //                 <RadioButton
     //                     checked={checked}

@@ -149,21 +149,20 @@ export const configChoiceIcon = (choice) => {
   return element
 }
 
-export const articles_fr = (masc, masculins, docType) => {
+export const articles_fr = (masc, masculins, target) => {
 
   let resp
   if (masc === 'du') {
-    resp = masculins.includes(docType) ? 'du' : 'de la'
+    resp = masculins.includes(target) ? 'du' : 'de la'
   }
   else if (masc === 'un') {
-    console.log('....')
-    resp = masculins.includes(docType) ? "un" : "une"
+    resp = masculins.includes(target) ? "un" : "une"
   }
   else if (masc === "d'un") {
-    resp = masculins.includes(docType) ? "d'un" : "une"
+    resp = masculins.includes(target) ? "d'un" : "une"
   }
   else if (masc === 'le') {
-    resp = masculins.includes(docType) ? 'le' : 'la'
+    resp = masculins.includes(target) ? 'le' : 'la'
   }
 
   return resp
@@ -511,65 +510,71 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
 }
 
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
+import { highRoles } from './constants'
 
-let publicTypes = [
-  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
-  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
-  { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
+const publicDocTypes = [
+  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
+  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
+  { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 
-let allTypes = [
-  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot, selected: false },
-  { label: 'Devis', value: 'Devis', icon: faFileInvoice, selected: false },
-  { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar, selected: false },
-  { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate, selected: false },
-  { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt, selected: false },
-  { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus, selected: false },
-  { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd, selected: false },
-  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake, selected: false },
-  { label: 'Action logement', value: 'Action logement', icon: faHomeAlt, selected: false },
-  { label: 'PV réception', value: 'PV réception', icon: faReceipt, selected: false },
-  { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope, selected: false },
-  { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit, selected: false },
-  { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit, selected: false },
-  { label: 'Autre', value: 'Autre', icon: faFile, selected: false },
+const allDocTypes = [
+  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
+  { label: 'Devis', value: 'Devis', icon: faFileInvoice },
+  { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
+  { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
+  { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
+  { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
+  { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
+  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
+  { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
+  { label: 'PV réception', value: 'PV réception', icon: faReceipt },
+  { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
+  { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
+  { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
+  { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 
-export const setPickerDocTypes = (isProcess, currentRole, dynamicType, documentType) => {
-  const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
-  const uploadSource = { label: 'Importer', value: 'upload', icon: faCloudUploadAlt, selected: false }
-  const generateSource = { label: 'Générer', value: 'generate', icon: faMagic, selected: false }
+let publicTaskTypes = [
+  { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
+  { label: 'Panne', value: 'Panne', natures: ['com', 'tech'] }, //#static
+  { label: 'Entretien', value: 'Entretien', natures: ['com', 'tech'] }, //#static
+]
 
-  let types = []
-  let docSources = []
+let alltaskTypes = [
+  { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
+  { label: 'Rendez-vous 1', value: 'Rendez-vous 1', natures: ['com'] }, //#dynamic
+  { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, //#dynamic
+  { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
+  { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
+  { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
+  { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
+  { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
+  { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+]
 
-  if (isProcess) {
-    types = publicTypes
-    docSources = [uploadSource]
+export const setPickerDocTypes = (currentRole, dynamicType, documentType) => {
+  return setPickerTypes(currentRole, dynamicType, documentType, publicDocTypes, allDocTypes)
+}
 
-    if (dynamicType) {
-      types.push(documentType)
-      const isQuoteOrBill = documentType.label === 'Devis' || documentType.label === 'Facture'
-      const enableGeneration = documentType && isQuoteOrBill
-      if (enableGeneration)
-        docSources.push(generateSource)
-    }
+export const setPickerTaskTypes = (currentRole, dynamicType, documentType) => {
+  return setPickerTypes(currentRole, dynamicType, documentType, publicTaskTypes, alltaskTypes)
+}
+
+const setPickerTypes = (currentRole, dynamicType, documentType, publicTypes, allTypes) => {
+  let types = publicTypes
+
+  if (dynamicType && documentType) {
+    types.push(documentType)
   }
 
   //Normal case
-  else if (!isProcess) {
-    if (highRoles.includes(currentRole)) {
+  else {
+    if (highRoles.includes(currentRole))
       types = allTypes
-      docSources = [uploadSource, generateSource]
-    }
-    else {
-      types = publicTypes
-      docSources = [uploadSource]
-    }
   }
 
-  const response = { types, docSources }
-  return response
+  return types
 }
 
 //##FILTERS
@@ -601,7 +606,6 @@ export const handleFilterAgenda = (inputList, outputList, fields, KEYS_TO_FILTER
     let items = outputList[key]
 
     for (const field of fields) {
-      console.log('field', field)
       items = items.filter(createFilter(field.value, field.label))
     }
 

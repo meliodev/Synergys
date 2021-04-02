@@ -147,7 +147,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -166,7 +166,7 @@ const processModel = {
                         documentId: '', //#dynamic
                         properties: ['address', 'description'],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable' }, dynamicType: true, isProcess: true }, //#dynamic
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true }, //#dynamic
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -186,7 +186,7 @@ const processModel = {
                         documentId: '',
                         //properties: [],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable' }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual', //Check manually
                         responsable: '',
                         status: 'pending',
@@ -217,7 +217,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -241,12 +241,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Fiche EEB' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Fiche EEB' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -295,12 +297,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier aide' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier aide' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -349,12 +353,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -403,12 +409,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier CEE' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Dossier CEE' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -448,7 +456,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -508,7 +516,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         // responsable: { id: 'GS-US-xQ6s', role: 'dircom' }, //#task: set id of DC (use it to render avatarText icon to reprensent role)
                         status: 'pending',
@@ -661,12 +669,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -686,16 +696,18 @@ const processModel = {
                         queryFilters: [ //VERIFICATION: verify if signed quote exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -742,7 +754,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -820,7 +832,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -839,7 +851,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -901,7 +913,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique' }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -970,7 +982,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -989,7 +1001,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Installation', value: 'Installation' }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual',
                         //responsable: '',
                         status: 'pending',
@@ -1072,12 +1084,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'PV réception' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'PV réception' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1139,7 +1153,7 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage' }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         //responsable: '',
                         status: 'pending',
@@ -1250,12 +1264,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1280,16 +1296,18 @@ const processModel = {
                         queryFilters: [ //verify if signed mandat SEPA exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
@@ -1309,12 +1327,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1339,16 +1359,18 @@ const processModel = {
                         queryFilters: [ //verify if signed mandat SEPA exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
@@ -1378,6 +1400,7 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'generation' }
                         ],
                         //properties: [],
@@ -1429,12 +1452,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1454,16 +1479,18 @@ const processModel = {
                         queryFilters: [ //VERIFICATION: verify if signed bill exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing bill (to update signature) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1491,10 +1518,12 @@ const processModel = {
                         queryFilters: [ //VERIFICATION: verify if bill exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to generate bill from it) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Devis' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1518,16 +1547,18 @@ const processModel = {
                         queryFilters: [ //VERIFICATION: verify if signed bill exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing bill (to update signature) 
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Facture' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1594,12 +1625,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Attestation fluide' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Attestation fluide' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1739,12 +1772,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1768,16 +1803,18 @@ const processModel = {
                         queryFilters: [ //verify if signed mandat SEPA exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
@@ -1796,12 +1833,14 @@ const processModel = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
@@ -1825,16 +1864,18 @@ const processModel = {
                         queryFilters: [ //verify if signed mandat SEPA exists
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'signature' }
                         ],
                         queryFiltersUpdateNav: [ //Get id of the existing signed mandat (to update signature)
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+                            { filter: 'deleted', operation: '==', value: false },
                         ],
                         //properties: [],
                         //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },

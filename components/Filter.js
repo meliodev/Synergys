@@ -61,7 +61,8 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
                 <View style={{ paddingHorizontal: theme.padding, paddingVertical: 5, }}>
                     {options.map((option) => {
-                        if (option.type === 'picker')
+                  
+                        if (option.type === 'picker') 
                             return (
                                 <Picker
                                     title={option.title}
@@ -93,7 +94,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                                         userType = 'utilisateur'
                                     }
 
-                                    props.navigation.navigate(option.screen, { onGoBack: refresh, userType: userType, titleText: option.titleText, showButton: false, isRoot: false })
+                                    props.navigation.push(option.screen, { onGoBack: refresh, userType: userType, titleText: option.titleText, showButton: false, isRoot: false })
                                 }}>
                                     <TextInput
                                         label={option.title}

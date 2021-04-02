@@ -197,7 +197,7 @@ class Profile extends Component {
         Keyboard.dismiss()
 
         //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+        if (this.state.loading || _.isEqual(this.state, this.initialState)) return
 
         load(this, true)
 
@@ -352,12 +352,7 @@ class Profile extends Component {
     //Signout handler
     handleSignout() {
         this.setState({ loadingSignOut: true })
-        firebase.auth().signOut().then(async () => {
-            resetState(this)
-            const { type, isConnected } = await NetInfo.fetch()
-            const network = { type, isConnected }
-            setNetwork(this, network)
-        })
+        firebase.auth().signOut()
     }
 
     //Renderers
@@ -463,13 +458,15 @@ class Profile extends Component {
     render() {
         let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, isProspect, userNotFound, deleted } = this.state
         const { isConnected } = this.props.network
-        const { displayName, uid } = firebase.auth().currentUser
+
+        const { currentUser } = firebase.auth()
+        if (currentUser) var { uid } = currentUser
 
         const isProfileOwner = this.userId === uid
         const isAdmin = this.role === 'admin'
+
         let { canUpdate } = this.props.permissions.users
         canUpdate = (canUpdate || isProfileOwner)
-
 
         return (
             <View style={{ flex: 1 }}>
@@ -525,17 +522,6 @@ class Profile extends Component {
                                         />
                                         {/* </TouchableOpacity> */}
 
-                                        {isProfileOwner &&
-                                            <Button
-                                                loading={loadingSignOut}
-                                                mode="contained"
-                                                onPress={this.handleSignout.bind(this)}
-                                                backgroundColor='#ff5153'
-                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
-                                                Se déconnecter
-                                            </Button>
-                                        }
-
                                         {isAdmin && !isProspect &&
                                             <TouchableOpacity onPress={() => {
                                                 if (!isConnected || !isAdmin) return
@@ -580,6 +566,17 @@ class Profile extends Component {
                                             editable={canUpdate || this.isProcess}
                                             isEdit={true}
                                         />
+
+                                        {isProfileOwner &&
+                                            <Button
+                                                loading={loadingSignOut}
+                                                mode="contained"
+                                                onPress={this.handleSignout.bind(this)}
+                                                backgroundColor='#ff5153'
+                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
+                                                Se déconnecter
+                                            </Button>
+                                        }
 
                                         {isProfileOwner &&
                                             <View>

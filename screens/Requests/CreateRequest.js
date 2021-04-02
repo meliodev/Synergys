@@ -206,7 +206,7 @@ class CreateRequest extends Component {
         if (isEditOffLine) return
 
         const { error, loading } = this.state
-        if (loading || this.state === this.initialState) return
+        if (loading || _.isEqual(this.state, this.initialState)) return
         load(this, true)
 
         //1. Validate inputs
@@ -253,13 +253,13 @@ class CreateRequest extends Component {
         this.props.navigation.goBack()
     }
 
-    renderStateToggle(currentState, canUpdate) {
+    renderStateToggle(currentState, canWrite) {
         const label = this.isTicket ? 'ticket' : 'projet'
-        return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, label, canUpdate)} />
+        return <RequestState state={currentState} onPress={(state) => this.alertUpdateRequestState(state, label, canWrite)} />
     }
 
-    alertUpdateRequestState(nextState, label, canUpdate) {
-        if (nextState === this.state.state || !canUpdate) return
+    alertUpdateRequestState(nextState, label, canWrite) {
+        if (nextState === this.state.state || !canWrite) return
 
         const title = "Mettre à jour le " + label
         const message = "Etes-vous sûr de vouloir changer l'état de ce " + label + ' ?'
@@ -281,8 +281,10 @@ class CreateRequest extends Component {
         const { RequestId, client, department, subject, state, description, address } = this.state
         const { createdAt, createdBy, editedAt, editedBy, loading, toastMessage, toastType, clientError, addressError } = this.state
         const { requestType } = this.props
-        let { canUpdate, canDelete } = this.props.permissions.requests
-        canUpdate = (canUpdate || !this.isEdit)
+
+        let { canCreate, canUpdate, canDelete } = this.props.permissions.requests
+        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+
         const { isConnected } = this.props.network
 
         const title = ' Demande de ' + requestType
@@ -290,7 +292,7 @@ class CreateRequest extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar close title titleText={title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} />
+                <Appbar close title titleText={title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} />
 
                 {loading ?
                     <Loading size='large' />
@@ -318,7 +320,7 @@ class CreateRequest extends Component {
                                         value={client.fullName}
                                         error={!!clientError}
                                         errorText={clientError}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
                                 }
 
@@ -332,7 +334,7 @@ class CreateRequest extends Component {
                                         onValueChange={(department) => this.setState({ department })}
                                         title="Département"
                                         elements={departments}
-                                        enabled={canUpdate}
+                                        enabled={canWrite}
                                     />
                                     :
                                     <AddressInput
@@ -341,7 +343,7 @@ class CreateRequest extends Component {
                                         onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={addressError}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                         isEdit={this.isEdit} />
                                 }
 
@@ -352,7 +354,7 @@ class CreateRequest extends Component {
                                     onChangeText={text => updateField(this, subject, text)}
                                     error={!!subject.error}
                                     errorText={subject.error}
-                                    editable={canUpdate}
+                                    editable={canWrite}
                                 />
 
                                 <MyInput
@@ -362,7 +364,7 @@ class CreateRequest extends Component {
                                     onChangeText={text => updateField(this, description, text)}
                                     error={!!description.error}
                                     errorText={description.error}
-                                    editable={canUpdate}
+                                    editable={canWrite}
                                 />
 
                             </Card.Content>
@@ -414,7 +416,7 @@ class CreateRequest extends Component {
                             onPress={() => this.props.navigation.navigate('Chat', { chatId: this.chatId })}
                             icon={faCommentDots}
                             style={styles.fab} />
-                        {this.renderStateToggle(state, canUpdate)}
+                        {this.renderStateToggle(state, canWrite)}
                     </View>}
             </View>
         );

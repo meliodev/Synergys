@@ -217,7 +217,7 @@ class CreateProduct extends Component {
 
     async handleSubmit() {
         //Handle Loading or No edit done
-        if (this.state.loading || this.state === this.initialState) return
+        if (this.state.loading || _.isEqual(this.state, this.initialState)) return
 
         load(this, true)
 

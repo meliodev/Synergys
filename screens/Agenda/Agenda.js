@@ -29,7 +29,7 @@ import Loading from '../../components/Loading'
 import { configureQuery } from '../../core/privileges'
 import { load, myAlert, toggleFilter, setFilter, handleFilterAgenda as applyFilterAgenda, handleFilterTasks as applyFilterTasks } from '../../core/utils'
 import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
+import { constants, highRoles } from '../../core/constants'
 import { connect } from 'react-redux'
 import { ActivityIndicator } from 'react-native';
 
@@ -291,7 +291,13 @@ class Agenda2 extends Component {
         if (toggle) toggleFilter(this)
 
         const { items, taskItems, type, status, priority, assignedTo, project, filterOpened } = this.state
-        const fields = [{ label: 'type', value: type }, { label: 'status', value: status }, { label: 'priority', value: priority }, { label: 'project.id', value: project.id }, { label: 'assignedTo.id', value: assignedTo.id }]
+        const fields = [
+            { label: 'type', value: type },
+            { label: 'status', value: status },
+            { label: 'priority', value: priority },
+            { label: 'project.id', value: project.id },
+            { label: 'assignedTo.id', value: assignedTo.id }
+        ]
 
         let filteredItems = {}
         filteredItems = applyFilterAgenda(items, filteredItems, fields, KEYS_TO_FILTERS)
@@ -427,14 +433,15 @@ class Agenda2 extends Component {
 
         let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
         const filterActivated = !_.isEqual(items, filteredItems)
-        const highRoles = (roleId === 'admin' || roleId === 'backoffice' || roleId === 'dircom' || roleId === 'tech')
+        const isHighrole = highRoles.includes(this.props.role.id)
 
         return (
             <View style={{ flex: 1 }}>
 
-                { highRoles ?
+                { isHighrole ?
                     <PickerBar
                         main={this}
+                        menu={this.isRoot}
                         //Refresh
                         refresh
                         onRefresh={() => this.refreshItems(true)}
@@ -450,7 +457,7 @@ class Agenda2 extends Component {
                     <Appbar back={!this.isRoot} menu={this.isRoot} title titleText='Mon agenda' />
                 }
 
-                {highRoles && <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />}
+                {isHighrole && <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />}
 
                 {filterActivated && <ActiveFilter />}
 

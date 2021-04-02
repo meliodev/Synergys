@@ -83,7 +83,7 @@ export default class CreateTeam extends Component {
     }
 
     handleSubmit() {
-        if (this.state.loading || this.state === this.initialState) return
+        if (this.state.loading || _.isEqual(this.state, this.initialState)) return
 
         load(this, true)
 

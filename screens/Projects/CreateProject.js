@@ -321,7 +321,7 @@ class CreateProject extends Component {
 
         //Handle Loading or No edit done
         let { loading, attachments } = this.state
-        if (loading || this.state === this.initialState) return
+        if (loading || _.isEqual(this.state, this.initialState)) return
 
         load(this, true)
 
@@ -546,8 +546,9 @@ class CreateProject extends Component {
         const { isBlockedUpdates } = this.state
 
         //Privilleges
-        let { canUpdate, canDelete } = this.props.permissions.projects
-        canUpdate = (canUpdate && !isBlockedUpdates || !this.isEdit) //Creation allowed
+        let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
+        canWrite = (canUpdate && this.isEdit && !isBlockedUpdates || canCreate && !this.isEdit && !isBlockedUpdates)
+
         const canCreateDocument = this.props.permissions.documents.canCreate
         const canReadTasks = this.props.permissions.tasks.canRead
 
@@ -555,7 +556,7 @@ class CreateProject extends Component {
 
         return (
             <View style={styles.mainContainer}>
-                <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
+                <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 
                 <ScrollView style={styles.dataContainer}>
 
@@ -566,7 +567,7 @@ class CreateProject extends Component {
                                 project={this.project}
                                 clientId={client.id}
                                 step={step}
-                                canUpdate={canUpdate && !this.isClient}
+                                canUpdate={canWrite && !this.isClient}
                                 role={this.props.role}
                             />
                             :
@@ -602,7 +603,7 @@ class CreateProject extends Component {
                                         error={name.error}
                                         errorText={name.error}
                                         multiline={true}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
 
                                     <MyInput
@@ -613,14 +614,14 @@ class CreateProject extends Component {
                                         error={!!description.error}
                                         errorText={description.error}
                                         multiline={true}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
 
                                     <ColorPicker
                                         label='Couleur du projet'
                                         selectedColor={color}
                                         updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canUpdate} />
+                                        editable={canWrite} />
 
                                     {!this.isClient &&
                                         <ItemPicker
@@ -628,7 +629,7 @@ class CreateProject extends Component {
                                             label='Client concerné *'
                                             value={client.fullName}
                                             errorText={clientError}
-                                            editable={canUpdate}
+                                            editable={canWrite}
                                         />
                                     }
 
@@ -637,7 +638,7 @@ class CreateProject extends Component {
                                         onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
                                         address={address}
                                         addressError={addressError}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                         isEdit={this.isEdit}
                                     />
 
@@ -651,7 +652,7 @@ class CreateProject extends Component {
                                         title="Phase *"
                                         elements={steps}
                                         containerStyle={{ marginBottom: 5 }}
-                                        enabled={canUpdate} />
+                                        enabled={canWrite} />
 
                                     <Picker
                                         returnKeyType="next"
@@ -660,7 +661,7 @@ class CreateProject extends Component {
                                         onValueChange={(state) => this.setState({ state })}
                                         title="État *"
                                         elements={states}
-                                        enabled={canUpdate} />
+                                        enabled={canWrite} />
 
                                     <View style={{ marginTop: 10 }}>
                                         <Text style={theme.customFontMSregular.caption}>Collaborateurs</Text>
@@ -672,7 +673,7 @@ class CreateProject extends Component {
                                             autoFocus={false}
                                             showInput={true}
                                             suggestionsBellow={false}
-                                            editable={canUpdate}
+                                            editable={canWrite}
                                         />
                                     </View>
                                 </View>
@@ -695,7 +696,7 @@ class CreateProject extends Component {
                                         value={note.value}
                                         style={styles.note}
                                         autoCapitalize='sentences'
-                                        editable={canUpdate} />
+                                        editable={canWrite} />
                                 </View>
                             } />
                     }
@@ -744,7 +745,7 @@ class CreateProject extends Component {
                             sectionIcon={faFolder}
                             form={
                                 <View style={{ flex: 1 }}>
-                                    {canCreateDocument && canUpdate &&
+                                    {canCreateDocument && canWrite &&
                                         <Text
                                             onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value, client: this.initialState.client, subscribers: this.initialState.tagsSelected } })}
                                             style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 10 }]}>+ Ajouter un document</Text>}
@@ -835,7 +836,7 @@ class CreateProject extends Component {
                                     }
 
                                     {this.renderAttachments(attachments, 'image', true)}
-                                    {canUpdate && !loading && <AddAttachment onPress={this.pickImage} style={{ marginTop: 5 }} />}
+                                    {canWrite && !loading && <AddAttachment onPress={this.pickImage} style={{ marginTop: 5 }} />}
 
                                 </View>
                             } />

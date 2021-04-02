@@ -27,32 +27,13 @@ import TaskState from "../../components/RequestState"
 
 import * as theme from "../../core/theme"
 import { constants, adminId } from "../../core/constants"
-import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, isEditOffline } from "../../core/utils"
+import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, isEditOffline, setPickerTaskTypes } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { connect } from 'react-redux'
 import { CustomIcon } from '../../components';
 
 const db = firebase.firestore()
-
-let staticTypes = [
-    { label: 'Normale', value: 'Normale' }, //#static
-    { label: 'Panne', value: 'Panne' }, //#static
-    { label: 'Entretien', value: 'Entretien' }, //#static
-]
-
-let allTypes = [
-    { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
-    { label: 'Rendez-vous 1', value: 'Rendez-vous 1', natures: ['com'] }, //#dynamic
-    { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, //#dynamic
-    { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
-    { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
-    { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
-    { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
-    { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
-    { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
-]
-
 
 const priorities = [
     { label: 'Urgente', value: 'Urgente' },
@@ -92,14 +73,11 @@ class CreateTask extends Component {
         //Params (task properties)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
-        this.enableTypePicker = this.isEdit ? false : this.taskType ? false : true
         this.project = this.props.navigation.getParam('project', undefined)
+        this.enableTypePicker = !this.isEdit && !this.taskType
 
-        this.types = this.isEdit ? allTypes : staticTypes
-
-        if (this.dynamicType) {
-            this.types.push(this.taskType)
-        }
+        const currentRole = this.props.role.id
+        this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
 
         this.state = {
             //TEXTINPUTS
@@ -140,7 +118,7 @@ class CreateTask extends Component {
     }
 
 
-    fetchTask() {
+    async fetchTask() {
         db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
             let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate, color } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
@@ -219,7 +197,6 @@ class CreateTask extends Component {
             startDate.error = dateError
             dueDate.error = dateError
 
-            Keyboard.dismiss()
             this.setState({ name, assignedTo, startDate, dueDate, loading: false })
             return false
         }
@@ -238,6 +215,7 @@ class CreateTask extends Component {
 
     //Submit
     async handleSubmit() {
+        Keyboard.dismiss()
 
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
@@ -246,7 +224,7 @@ class CreateTask extends Component {
         let { error, loading } = this.state
         let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate, color } = this.state
 
-        if (loading || this.state === this.initialState) return
+        if (loading || _.isEqual(this.state, this.initialState)) return
         load(this, true)
 
         //1.1 Validate inputs 
@@ -277,7 +255,7 @@ class CreateTask extends Component {
         const dateKey = moment(startDate.value).format('YYYY-MM-DD')
         const timestamp = moment(startDate.value).format()
         let natures
-        allTypes.forEach((t) => { if (t.value === type) natures = t.natures })
+        this.types.forEach((t) => { if (t.value === type) natures = t.natures })
 
         let task = {
             dateKey: dateKey,
@@ -347,13 +325,15 @@ class CreateTask extends Component {
     render() {
         let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
-        let { canUpdate, canDelete } = this.props.permissions.tasks
-        canUpdate = (canUpdate || !this.isEdit)
+
+        let { canCreate, canUpdate, canDelete } = this.props.permissions.tasks
+        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.container}>
-                <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canUpdate && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
+                <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
 
                 {loading ?
                     <Loading size='large' />
@@ -381,7 +361,7 @@ class CreateTask extends Component {
                                         onChangeText={text => updateField(this, name, text)}
                                         error={!!name.error}
                                         errorText={name.error}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
 
                                     <ItemPicker
@@ -390,7 +370,7 @@ class CreateTask extends Component {
                                         value={assignedTo.fullName}
                                         error={!!assignedTo.error}
                                         errorText={assignedTo.error}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
 
                                     <MyInput
@@ -400,7 +380,7 @@ class CreateTask extends Component {
                                         onChangeText={text => updateField(this, description, text)}
                                         error={!!description.error}
                                         errorText={description.error}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
 
                                     <ItemPicker
@@ -413,14 +393,14 @@ class CreateTask extends Component {
                                         error={!!project.error}
                                         errorText={project.error}
                                         showAvatarText={false}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                     />
 
                                     <ColorPicker
                                         label='Couleur de la tâche'
                                         selectedColor={color}
                                         updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canUpdate} />
+                                        editable={canWrite} />
 
                                     <Picker
                                         label="Type *"
@@ -431,8 +411,8 @@ class CreateTask extends Component {
                                         selectedValue={type}
                                         onValueChange={(type) => this.setState({ type })}
                                         title="Type"
-                                        elements={this.isEdit ? allTypes : this.types}
-                                        enabled={canUpdate && this.enableTypePicker} //pre-defined task type
+                                        elements={this.types}
+                                        enabled={canWrite && this.enableTypePicker} //pre-defined task type
                                         containerStyle={{ marginBottom: 10 }}
                                     />
 
@@ -446,7 +426,7 @@ class CreateTask extends Component {
                                         onValueChange={(status) => this.setState({ status })}
                                         title="État"
                                         elements={statuses}
-                                        enabled={canUpdate}
+                                        enabled={canWrite}
                                         containerStyle={{ marginBottom: 10 }}
                                     />
 
@@ -460,7 +440,7 @@ class CreateTask extends Component {
                                         onValueChange={(priority) => this.setState({ priority })}
                                         title="Priorité"
                                         elements={priorities}
-                                        enabled={canUpdate}
+                                        enabled={canWrite}
                                         containerStyle={{ marginBottom: 10 }}
                                     />
 
@@ -470,14 +450,14 @@ class CreateTask extends Component {
                                         onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={address.error}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                         isEdit={this.isEdit} />
 
 
                                     {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
                                         <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
                                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                            <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} disabled={!canUpdate} />
+                                            <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} disabled={!canWrite} />
                                             <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size={21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
                                         </View>
                                     </View> */}
@@ -486,7 +466,7 @@ class CreateTask extends Component {
                                         onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}
                                         label='Date de début *'
                                         value={moment(startDate.value).format('lll')}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                         showAvatarText={false}
                                         icon={faCalendarPlus}
                                         errorText={startDate.error}
@@ -496,7 +476,7 @@ class CreateTask extends Component {
                                         onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}
                                         label="Date d'échéance *"
                                         value={moment(dueDate.value).format('lll')}
-                                        editable={canUpdate}
+                                        editable={canWrite}
                                         showAvatarText={false}
                                         icon={faCalendarPlus}
                                         errorText={dueDate.error}

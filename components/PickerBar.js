@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native"
 import { Appbar as appbar } from 'react-native-paper'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faBars, faFilter, faRedo } from '@fortawesome/pro-light-svg-icons'
+import { faArrowLeft, faBars, faFilter, faRedo } from '@fortawesome/pro-light-svg-icons'
 
 import Menu from './Menu'
 import Filter from './Filter'
@@ -16,17 +16,19 @@ import { withNavigation } from 'react-navigation'
 const PickerBar = ({
     options, functions, menuTrigger, style, navigation,
     main, filterOpened, type, status, priority, project, assignedTo,
-    filter, refresh, onRefresh, ...props }) => {
+    filter, refresh, onRefresh, menu = true, ...props }) => {
 
     const types = [
         { label: 'Tous', value: '' },
-        { label: 'Normale', value: 'Normale' },
-        { label: 'Rendez-vous', value: 'Rendez-vous' },
-        { label: 'Visite technique', value: 'Visite technique' },
-        { label: 'Installation', value: 'Installation' },
-        { label: 'Rattrapage', value: 'Rattrapage' },
-        { label: 'Panne', value: 'Panne' },
-        { label: 'Entretien', value: 'Entretien' },
+        { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
+        { label: 'Rendez-vous 1', value: 'Rendez-vous 1', natures: ['com'] }, //#dynamic
+        { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, //#dynamic
+        { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
+        { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
+        { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
+        { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
+        { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
+        { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
     ]
 
     const priorities = [
@@ -44,15 +46,21 @@ const PickerBar = ({
         { label: 'Annulé', value: 'Annulé' },
     ]
 
-    const showMenu = () => navigation.openDrawer()
-
     const AppBarIcon = ({ icon, onPress, style }) => {
         const faIcon = <FontAwesomeIcon icon={icon} size={24} color={theme.colors.appBarIcon} />
         return <appbar.Action icon={faIcon} onPress={onPress} />
     }
 
     const renderLeftIcon = () => {
-        return <AppBarIcon icon={faBars} onPress={showMenu} />
+        const showMenu = () => navigation.openDrawer()
+        const navBack = () => navigation.goBack()
+
+        const onPressLeftIcon = () => {
+            if (menu) showMenu()
+            else navBack()
+        }
+
+        return <AppBarIcon icon={menu ? faBars : faArrowLeft} onPress={onPressLeftIcon} />
     }
 
     return (
@@ -80,7 +88,7 @@ const PickerBar = ({
                     { id: 0, type: 'picker', title: "Type", values: types, value: type, field: 'type' },
                     { id: 1, type: 'picker', title: "État", values: statuses, value: status, field: 'status' },
                     { id: 2, type: 'picker', title: "Priorité", values: priorities, value: priority, field: 'priority' },
-                    { id: 3, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
+                    { id: 3, type: 'screen', title: "Projet", value: project.name.value, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
                     { id: 4, type: 'screen', title: "Affecté à", value: assignedTo.fullName, field: 'assignedTo', screen: 'ListEmployees', titleText: 'Filtre par utilisateur' },
                 ]}
             />
