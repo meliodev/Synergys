@@ -22,7 +22,7 @@ import Loading from "../../components/Loading";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -40,7 +40,7 @@ const departments = [
 class CreateRequest extends Component {
     constructor(props) {
         super(props)
-        this.refreshClient = this.refreshClient.bind(this)
+        this.refreshClient = refreshClient.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -143,12 +143,6 @@ class CreateRequest extends Component {
         })
     }
 
-    refreshClient(isPro, id, nom, prenom) {
-        const fullName = isPro ? nom : prenom + ' ' + nom
-        const client = { id, fullName }
-        this.setState({ client })
-    }
-
     refreshAddress(address) {
         this.setState({ address })
     }
@@ -237,7 +231,7 @@ class CreateRequest extends Component {
         }
 
         if (!this.isEdit) {
-            request.createdAt = moment().format('lll')
+            request.createdAt = moment().format()
             request.createdBy = currentUser
         }
 

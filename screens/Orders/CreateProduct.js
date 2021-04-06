@@ -237,13 +237,13 @@ class CreateProduct extends Component {
             description: description.value,
             price: price.value,
             taxe: taxe.value,
-            editedAt: moment().format('lll'),
+            editedAt: moment().format(),
             editedBy: currentUser,
             deleted: false,
         }
 
         if (!this.isEdit) {
-            product.createdAt = moment().format('lll')
+            product.createdAt = moment().format()
             product.createdBy = currentUser
         }
 

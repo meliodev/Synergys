@@ -265,13 +265,13 @@ class CreateOrder extends Component {
             primeCEE,
             primeRenov,
 
-            editedAt: moment().format('lll'),
+            editedAt: moment().format(),
             editedBy: currentUser,
             deleted: false,
         }
 
         if (!this.isEdit) {
-            order.createdAt = moment().format('lll')
+            order.createdAt = moment().format()
             order.createdBy = currentUser
         }
 

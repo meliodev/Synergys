@@ -9,7 +9,6 @@ import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 
 const ProspectItem = ({ main, onPress, item, controller, itemStyle, iconStyle, ...props }) => {
-    console.log('item.........', item)
     return (
         <TouchableOpacity onPress={() => onPress()} style={[styles.item, itemStyle]}>
 

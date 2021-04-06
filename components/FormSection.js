@@ -4,10 +4,10 @@ import { View, Text, StyleSheet } from 'react-native'
 import Section from './Section'
 import * as theme from '../core/theme'
 
-const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle, onPressIcon, iconColor }) => {
+const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle, onPressIcon, iconColor, showSection = true }) => {
     return (
         <View style={[containerStyle, styles.container]}>
-            <Section text={sectionTitle} icon={sectionIcon} onPressIcon={onPressIcon} iconColor={iconColor} />
+          {showSection && <Section text={sectionTitle} icon={sectionIcon} onPressIcon={onPressIcon} iconColor={iconColor} />}
 
             {form &&
                 <View style={styles.formContainer}>

@@ -24,6 +24,7 @@ class ListEmployees extends React.Component {
         this.getEmployee = this.getEmployee.bind(this)
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.titleText = this.props.navigation.getParam('titleText', '')
+        this.query = this.props.navigation.getParam('query', null)
 
         this.state = {
             showInput: false,
@@ -31,13 +32,13 @@ class ListEmployees extends React.Component {
         }
     }
 
-    getEmployee(isPro, id, nom, prenom, role) {
-        this.props.navigation.state.params.onGoBack(isPro, id, prenom, nom, role)
+    getEmployee(isPro, id, nom, prenom, role, email) {
+        this.props.navigation.state.params.onGoBack(isPro, id, nom, prenom, role, email)
         this.props.navigation.goBack()
     }
 
     render() {
-        const queryUsers = db.collection('Users').where('deleted', '==', false)
+        const queryUsers = this.query || db.collection('Users').where('deleted', '==', false)
         const { searchInput, showInput } = this.state
         const permissions = this.props.permissions.users
         const { isConnected } = this.props.network

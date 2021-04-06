@@ -98,7 +98,7 @@ export default class CreateTeam extends Component {
             name: name.value,
             description: description.value,
             members: [],
-            editedAt: moment().format('lll'),
+            editedAt: moment().format(),
             editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
             deleted: false
         }
@@ -108,7 +108,7 @@ export default class CreateTeam extends Component {
         }
 
         if (!this.isEdit) {
-            team.createdAt = moment().format('lll')
+            team.createdAt = moment().format()
             team.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
         }
 

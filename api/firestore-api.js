@@ -178,3 +178,19 @@ export const createClient = async function createClient(userData, eventHandlers,
     db.collection('Clients').doc(ClientId).set(client)
   }
 }
+
+
+//READ
+export const getResponsableByRole = async (role) => {
+  const user = await db.collection('Users').where('role', '==', role).get()
+    .then((querySnapshot) => {
+      if (querySnapshot.empty) return null
+      const doc = querySnapshot.docs[0]
+      const id = doc.id
+      const { fullName, email, role } = doc.data()
+      userObject = { id, fullName, email, role }
+      return userObject
+    })
+    .catch((err) => { return null })
+  return user
+}

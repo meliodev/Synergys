@@ -152,10 +152,6 @@ class AuthLoadingScreen extends Component {
         const network = { type, isConnected }
         setNetwork(this, network)
 
-        console.log('AUTH LISTENER: logout...')
-        console.log(this.props.role)
-        console.log(this.props.permissions.active)
-        console.log(this.props.permissions.projects)
         this.props.navigation.navigate("LoginScreen")
       }
     })

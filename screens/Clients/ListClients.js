@@ -35,8 +35,8 @@ class ListClients extends Component {
         }
     }
 
-    getClient(isPro, id, prenom, nom) {
-        this.props.navigation.state.params.onGoBack(isPro, id, prenom, nom)
+    getClient(isPro, id, nom, prenom, role, email) {
+        this.props.navigation.state.params.onGoBack(isPro, id, nom, prenom, role, email)
         this.props.navigation.goBack()
     }
 

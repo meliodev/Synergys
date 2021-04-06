@@ -6,6 +6,11 @@ import { faConstruction } from '@fortawesome/pro-light-svg-icons'
 import { faThLarge, faList } from '@fortawesome/pro-solid-svg-icons'
 import _ from 'lodash'
 
+
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import { ActiveFilter, SearchBar, ListSubHeader, Filter, MyFAB, ProjectItem, ProjectItem2, EmptyList, Loading } from '../../components'
 
 import Background from '../../components/NewBackground'

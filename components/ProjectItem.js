@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { List, Card, Paragraph, Title, Avatar } from 'react-native-paper';
+import { List, Card, Avatar, Title } from 'react-native-paper';
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import LinearGradient from 'react-native-linear-gradient'
@@ -17,6 +17,8 @@ import { constants } from '../core/constants';
 import { ThemeColors, withNavigation } from 'react-navigation'
 
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
+
+    const { id, step, name, description, address, state, client, editedAt, editedBy } = project
 
     const setStateColor = (state) => {
         switch (state) {
@@ -44,28 +46,35 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
         return [theme.colors.valid, theme.colors.valid, theme.colors.valid]
     }
 
+    const viewClientProfile = () => {
+        navigation.navigate('Profile', { userId: client.id, isClient: true })
+    }
+
+    const lastUpdate = `${moment(editedAt).format('ll')} - ${moment(editedAt).format('HH:mm')}`
+
     return (
         <Card style={styles.container} onPress={onPress}>
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(project.step)} style={[styles.linearGradient, styles.stepContainer]}>
-                <Text style={[theme.customFontMSregular.body, { color: theme.colors.white }]}>{project.step}</Text>
+            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(step)} style={[styles.linearGradient, styles.stepContainer]}>
+                <Text style={[theme.customFontMSregular.small, styles.header]} numberOfLines={1}>{id}</Text>
+                <Text style={[theme.customFontMSregular.body, { color: theme.colors.white }]}>{step}</Text>
             </LinearGradient>
 
             <Card.Content style={styles.content}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
-                    <Title style={[theme.customFontMSregular.header]} numberOfLines={1}>{project.name}</Title>
-                    {project.description !== '' && <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{project.description}</Paragraph>}
+                    <Title style={[theme.customFontMSregular.body]} numberOfLines={1}>{name}</Title>
+                    {description !== '' && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{description}</Text>}
 
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                        {project.address.description !== '' && <Paragraph numberOfLines={2} style={theme.customFontMSregular.body}>à {project.address.description}</Paragraph>}
-                        <Paragraph numberOfLines={1} style={theme.customFontMSregular.body}>chez <Paragraph style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.client.id, isClient: true })}>{project.client.fullName}</Paragraph></Paragraph>
+                        {address.description !== '' && <Text numberOfLines={2} style={theme.customFontMSregular.body}>à {address.description}</Text>}
+                        <Text numberOfLines={1} style={theme.customFontMSregular.caption}>chez <Text style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={viewClientProfile}>{client.fullName}</Text></Text>
                     </View>
 
-                    <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: project.editedBy.id })}>{project.editedBy.fullName}</Text></Paragraph>
+                    {/* <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: editedBy.id })}>{editedBy.fullName}</Text></Text> */}
 
                     <View style={styles.footer}>
-                        <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]} >{moment(project.editedAt, 'lll').format('ll')} - {moment(project.editedAt, 'lll').format('HH:mm')}</Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(project.state), padding: 2, elevation: 2 }}>
-                            <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{project.state}</Paragraph>
+                        <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]} >{lastUpdate}</Text>
+                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(state), padding: 5, elevation: 2 }}>
+                            <Text style={[theme.customFontMSregular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{state}</Text>
                         </View>
                     </View>
                 </View>
@@ -79,25 +88,31 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 const styles = StyleSheet.create({
     container: {
         marginVertical: theme.padding / 2,
-        borderRadius: 15,
+        borderRadius: 10,
+        elevation: 4,
     },
     linearGradient: {
         flex: 1,
         paddingLeft: 15,
         paddingRight: 15,
-        borderRadius: 5
+        borderRadius: 0
+    },
+    header: {
+        position: 'absolute',
+        left: theme.padding,
+        color: theme.colors.white
     },
     content: {
         flex: 1,
         flexDirection: 'row',
-        paddingTop: 10
+        paddingTop: 5
     },
     stepContainer: {
         height: 33,
         justifyContent: 'center',
         alignItems: 'center',
-        borderTopLeftRadius: 15,
-        borderTopRightRadius: 15
+        borderTopLeftRadius: 10,
+        borderTopRightRadius: 10
     },
     footer: {
         flexDirection: 'row',

@@ -160,7 +160,7 @@ class CreateTask extends Component {
     }
 
     refreshAssignedTo(isPro, id, prenom, nom, role) {
-        const assignedTo = { id, fullName: `${prenom} ${nom}`, role, error: '' }
+        const assignedTo = { id, fullName: isPro ? nom : `${prenom} ${nom}`, role, error: '' }
         this.setState({ assignedTo })
     }
 
@@ -207,7 +207,13 @@ class CreateTask extends Component {
     alertCollaborator() {
         const title = ""
         const message = "L'utilisateur à qui vous voulez assigner cette tâche n'est pas un collaborateur dans le projet selectionné. Veuillez utiliser la barre de recherche pour trouver un collaborateur."
-        const handleConfirm = () => navigateToScreen(this, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', isRoot: false, titleText: 'Attribuer la tâche à' })
+        const handleConfirm = () => navigateToScreen(this, 'ListEmployees', {
+            onGoBack: this.refreshAssignedTo,
+            prevScreen: 'CreateTask',
+            isRoot: false,
+            titleText: 'Attribuer la tâche à' ?
+                query : db.collection('Users').where('role', '==', 'Commercial').where('deleted', '==', false)
+        })
         const handleCancel = () => console.log('cancel')
         const confirmText = 'OK'
         this.myAlert(title, message, handleConfirm, handleCancel, confirmText)
@@ -322,6 +328,34 @@ class CreateTask extends Component {
         this.props.navigation.goBack()
     }
 
+    setListEmployeesQuery() {
+
+        const { type } = this.state
+        let query
+        let natures = []
+        this.types.forEach((t) => { if (t.value === type) natures = t.natures })
+
+        const neutral = natures.includes('com', 'tech')
+
+        if (neutral) {
+            query = db.collection('Users').where('deleted', '==', false)
+        }
+
+        else {
+            const isCom = _.isEqual(natures, ['com'])
+            const isTech = _.isEqual(natures, ['tech'])
+
+            if (isCom)
+                var queryFilter = 'Commercial'
+            else if (isTech)
+                var queryFilter = 'Poseur'
+
+            query = db.collection('Users').where('role', '==', queryFilter).where('deleted', '==', false)
+        }
+
+        return query
+    }
+
     render() {
         let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
@@ -365,7 +399,13 @@ class CreateTask extends Component {
                                     />
 
                                     <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'ListEmployees', { onGoBack: this.refreshAssignedTo, prevScreen: 'CreateTask', isRoot: false, titleText: 'Attribuer la tâche à' })}
+                                        onPress={() => navigateToScreen(this, 'ListEmployees', {
+                                            onGoBack: this.refreshAssignedTo,
+                                            prevScreen: 'CreateTask',
+                                            isRoot: false,
+                                            titleText: 'Attribuer la tâche à',
+                                            query: this.setListEmployeesQuery()
+                                        })}
                                         label="Attribuée à *"
                                         value={assignedTo.fullName}
                                         error={!!assignedTo.error}

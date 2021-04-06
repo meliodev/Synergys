@@ -85,12 +85,12 @@ class ListUsers extends Component {
 
   renderUser = (user) => {
     const onPressUser = (item) => {
-      const { isPro, id, denom, nom, prenom, role } = item
+      const { isPro, id, denom, nom, prenom, role, email } = item
 
       if (isPro)
-        this.props.onPress(isPro, id, denom, '', role)
+        this.props.onPress(isPro, id, denom, '', role, email)
       else
-        this.props.onPress(isPro, id, nom, prenom, role)
+        this.props.onPress(isPro, id, nom, prenom, role, email)
     }
 
     const { userType, permissions, offLine } = this.props

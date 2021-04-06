@@ -476,7 +476,7 @@ class Signature extends Component {
                 //User identity     
                 signedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },//only when signGenerated = true
                 //Timestamp
-                signedAt: moment().format('lll'),//only when signGenerated = true
+                signedAt: moment().format(),//only when signGenerated = true
                 //Device data
                 phoneNumber: this.state.phoneNumber,//only when signGenerated = true
                 ipLocalAddress: ipLocalAddress,
@@ -494,7 +494,7 @@ class Signature extends Component {
         }
 
         const newDocument = _.cloneDeep(document)
-        newDocument.createdAt = moment().format('lll')
+        newDocument.createdAt = moment().format()
         newDocument.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
 
         await db.collection('Documents').doc(this.DocumentId).set(document, { merge: true })
@@ -522,7 +522,7 @@ class Signature extends Component {
         this.setState({ signedAttachment })
 
         const metadata = {
-            signedAt: moment().format('lll'),
+            signedAt: moment().format(),
             signedBy: this.currentUser.uid,
             phoneNumber: this.state.phoneNumber
         }

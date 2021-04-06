@@ -337,14 +337,14 @@ class UploadDocument extends Component {
             state,
             attachment, //To Keep track of last attached file
             attachmentSource,
-            editedAt: moment().format('lll'),
+            editedAt: moment().format(),
             editedBy: currentUser,
             orderData: order,
             deleted: false,
         }
 
         if (!this.isEdit || isConversion) {
-            document.createdAt = moment().format('lll')
+            document.createdAt = moment().format()
             document.createdBy = currentUser
         }
 

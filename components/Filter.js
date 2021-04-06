@@ -20,10 +20,10 @@ const { SlideInMenu } = renderers
 const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, functions, menuStyle, isAppBar = false, ...props }) => {
 
     //Screen filters: refresh selected value
-    const refreshClient = (isPro, id, nom, prenom) => {
+    const refreshClient = (isPro, id, nom, prenom, role, email) => {
         toggleFilter()
-        let fullName = isPro ? nom : `${prenom} ${nom}`
-        let client = { id, fullName }
+        const fullName = isPro ? nom : `${prenom} ${nom}`
+        const client = { id, fullName }
         main.setState({ client })
     }
 
@@ -34,13 +34,86 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
     const refreshEmployee = (isPro, id, prenom, nom) => {
         toggleFilter()
-        const assignedTo = { id, fullName: `${prenom} ${nom}`, error: '' }
+        const assignedTo = { id, fullName: `${prenom} ${nom}` }
         main.setState({ assignedTo })
     }
 
+    const onPressScreenPicker = (option) => {
+        if (option.disabled) return
+
+        toggleFilter()
+
+        let refresh
+
+        if (option.screen === 'ListClients')
+            refresh = refreshClient
+
+        else if (option.screen === 'ListProjects')
+            refresh = refreshProject
+
+        else if (option.screen === 'ListEmployees')
+            refresh = refreshEmployee
+
+        const navParams = { isRoot: false, titleText: option.titleText, showButton: false, onGoBack: refresh }
+        props.navigation.push(option.screen, navParams)
+    }
+
+    //RENDERERS
     const renderFilterIcon = () => {
         if (isAppBar) return <Appbar.Action icon={<CustomIcon icon={faFilter} color={theme.colors.appBarIcon} />} />
         else return <CustomIcon icon={faFilter} />
+    }
+
+    const renderHeader = () => {
+        return (
+            <View style={styles.header}>
+                <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                    <CustomIcon icon={faFilter} color={theme.colors.white} size={15} />
+                    <Text style={[theme.customFontMSregular.header, { color: '#fff', textAlign: 'center', marginLeft: 10 }]}>Filtrer par</Text>
+                </View>
+                <CustomIcon onPress={toggleFilter} icon={faTimes} color={theme.colors.white} />
+            </View>
+        )
+    }
+
+    const renderOptions = () => {
+        return options.map((option) => renderOption(option))
+    }
+
+    const renderOption = (option) => {
+
+        if (option.type === 'picker')
+            return (
+                <Picker
+                    title={option.title}
+                    value={option.value}
+                    selectedValue={option.value}
+                    onValueChange={(value) => setFilter(option.field, value)}
+                    elements={option.values} />
+            )
+
+        else if (option.type === 'screen')
+            return (
+                <TouchableOpacity onPress={() => onPressScreenPicker(option)}>
+                    <TextInput
+                        label={option.title}
+                        value={option.value}
+                        editable={false} />
+                </TouchableOpacity>
+            )
+    }
+
+    const renderFooter = () => {
+        return (
+            <View style={styles.buttonsContainer}>
+                <Button mode="outlined" onPress={resetFilter} style={{ width: constants.ScreenWidth * 0.45 }} outlinedColor={theme.colors.primary}>
+                    Réinitialiser
+                </Button>
+                <Button mode="contained" onPress={toggleFilter} style={{ width: constants.ScreenWidth * 0.4, backgroundColor: theme.colors.primary }} >
+                    Confirmer
+                </Button>
+            </View>
+        )
     }
 
     return (
@@ -50,69 +123,12 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
             </MenuTrigger>
 
             <MenuOptions optionsContainerStyle={{ height: constants.ScreenHeight * 0.935, elevation: 50 }}>
-                <View style={styles.header}>
-                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
-                        <CustomIcon icon={faFilter} color={theme.colors.white} size={15} />
-                        <Text style={[theme.customFontMSregular.header, { color: '#fff', textAlign: 'center', marginLeft: 10 }]}>Filtrer par</Text>
-                    </View>
-                    <CustomIcon onPress={toggleFilter} icon={faTimes} color={theme.colors.white} />
-                </View>
 
+                {renderHeader()}
 
-                <View style={{ paddingHorizontal: theme.padding, paddingVertical: 5, }}>
-                    {options.map((option) => {
-                  
-                        if (option.type === 'picker') 
-                            return (
-                                <Picker
-                                    title={option.title}
-                                    value={option.value}
-                                    selectedValue={option.value}
-                                    onValueChange={(value) => setFilter(option.field, value)}
-                                    elements={option.values} />
-                            )
-
-                        else if (option.type === 'screen')
-                            return (
-                                <TouchableOpacity onPress={() => {
-                                    if (option.disabled) return
-
-                                    toggleFilter()
-
-                                    let refresh
-                                    let userType = ''
-                                    if (option.screen === 'ListClients') {
-                                        refresh = refreshClient
-                                        userType = 'client'
-                                    }
-
-                                    else if (option.screen === 'ListProjects')
-                                        refresh = refreshProject
-
-                                    else if (option.screen === 'ListEmployees') {
-                                        refresh = refreshEmployee
-                                        userType = 'utilisateur'
-                                    }
-
-                                    props.navigation.push(option.screen, { onGoBack: refresh, userType: userType, titleText: option.titleText, showButton: false, isRoot: false })
-                                }}>
-                                    <TextInput
-                                        label={option.title}
-                                        value={option.value}
-                                        editable={false} />
-                                </TouchableOpacity>
-                            )
-                    })
-                    }
-
-                    <View style={styles.buttonContainer}>
-                        <Button mode="outlined" onPress={resetFilter} style={{ width: constants.ScreenWidth * 0.45 }} outlinedColor={theme.colors.primary}>
-                            Réinitialiser
-                        </Button>
-                        <Button mode="contained" onPress={toggleFilter} style={{ width: constants.ScreenWidth * 0.4, backgroundColor: theme.colors.primary }} >
-                            Confirmer
-                        </Button>
-                    </View>
+                <View style={{ paddingHorizontal: theme.padding, paddingVertical: 5 }}>
+                    {renderOptions()}
+                    {renderFooter()}
                 </View>
 
             </MenuOptions>
@@ -131,7 +147,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.padding,
         paddingVertical: 10
     },
-    buttonContainer: {
+    buttonsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 15

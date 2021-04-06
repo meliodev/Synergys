@@ -112,7 +112,6 @@ export const navigateToScreen = (main, screen, params) => {
 }
 
 //##HELPERS
-
 export const formatRow = (active, data, numColumns) => { //Format rows to display 3 columns grid
   if (!active) return data
   const numberOfFullRows = Math.floor(data.length / numColumns)
@@ -619,8 +618,6 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 
   let outputList = []
 
-  console.log('inputList', inputList)
-
   inputList.forEach(taskItems => {
 
     for (const field of fields) {
@@ -636,9 +633,28 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 }
 
 
+//## Refresh inputs
+export function refreshClient(isPro, id, nom, prenom, role, email) {
+  const client = refreshUser(isPro, id, nom, prenom, role, email)
+  console.log(client)
+  this.setState({ client })
+}
 
+export function refreshComContact(isPro, id, nom, prenom, role, email) {
+  const comContact = refreshUser(isPro, id, nom, prenom, role, email)
+  this.setState({ comContact })
+}
 
+export function refreshTechContact(isPro, id, nom, prenom, role, email) {
+  const techContact = refreshUser(isPro, id, nom, prenom, role, email)
+  this.setState({ techContact })
+}
 
+const refreshUser = (isPro, id, nom, prenom, role, email) => {
+  const fullName = isPro ? nom : `${prenom} ${nom}`
+  const user = { id, fullName, email, role }
+  return user
+}
 
 
 
