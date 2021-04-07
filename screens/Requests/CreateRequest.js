@@ -277,7 +277,7 @@ class CreateRequest extends Component {
         const { requestType } = this.props
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.requests
-        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+        const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
 

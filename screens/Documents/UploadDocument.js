@@ -647,7 +647,7 @@ class UploadDocument extends Component {
         const { isConnected } = this.props.network
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.documents
-        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+        const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { title, columns, elements, autoValidation } = this.modalOptionsConfig()
         const attachmentUploaded = attachment && !attachment.pending

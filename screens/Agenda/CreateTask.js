@@ -361,7 +361,7 @@ class CreateTask extends Component {
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.tasks
-        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+        const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
 

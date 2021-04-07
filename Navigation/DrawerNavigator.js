@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
+import { Text } from 'react-native'
 import firebase from '@react-native-firebase/app'
 
-import { createAppContainer, createSwitchNavigator } from 'react-navigation';
+import { createAppContainer, createSwitchNavigator, NavigationActions } from 'react-navigation';
 import { createDrawerNavigator } from 'react-navigation-drawer';
 import { createStackNavigator } from 'react-navigation-stack';
 
@@ -17,7 +18,7 @@ const AppDrawer = createDrawerNavigator({
     path: ''
   }
 }
-  ,{
+  , {
     contentComponent: props => <DrawerMenu role={props} {...props} />,
     drawerLockMode: "locked-closed",
     drawerWidth: constants.ScreenWidth * 0.83,
@@ -29,18 +30,34 @@ const AppDrawer = createDrawerNavigator({
     },
   })
 
-const MainSwitch = createSwitchNavigator(
+
+const MyApp = createSwitchNavigator(
   {
     Starter: AuthLoadingScreen,
     App: AppDrawer,
-    Auth: AuthStack
+    Auth: AuthStack,
   },
-  {
-    initialRouteName: 'Starter'
-  }
 )
 
-const App = createAppContainer(MainSwitch)
+
+const previousGetActionForPathAndParams = MyApp.router.getActionForPathAndParams;
+
+Object.assign(MyApp.router, {
+  getActionForPathAndParams(path, params) {
+    // const isAuthLink = path.startsWith('auth-link');
+
+    // if (isAuthLink) {
+    return NavigationActions.navigate({
+      routeName: 'Starter',
+      params: { ...params, path },
+    });
+    //  }
+
+  //  return previousGetActionForPathAndParams(path, params);
+  },
+});
+
+const App = createAppContainer(MyApp)
 
 const prefix = /https:\/\/synergys.page.link\/|synergys:\/\//
 

@@ -44,6 +44,7 @@ import DatePicker from '../screens/DatePicker/DatePicker'
 //Projects
 import ListProjects from '../screens/Projects/ListProjects'
 import CreateProject from '../screens/Projects/CreateProject'
+import Progression from '../screens/src/screen/Progression'
 
 //Documents
 import ListDocuments from '../screens/Documents/ListDocuments'
@@ -393,6 +394,10 @@ const ProjectsStack = createStackNavigator({
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    Progression: {
+        screen: Progression,
         navigationOptions: hideHeader
     },
     ListClients: {

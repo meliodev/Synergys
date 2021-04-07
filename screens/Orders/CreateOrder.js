@@ -529,7 +529,7 @@ class CreateOrder extends Component {
         let { error, loading, toastType, toastMessage } = this.state
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.orders
-        canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
+        const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
 

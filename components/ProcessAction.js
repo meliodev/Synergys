@@ -6,7 +6,7 @@ import Dialog from 'react-native-dialog'
 import firebase from '@react-native-firebase/app'
 import _ from 'lodash'
 import { faCheckCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
-import { faCheckCircle as faSolidCheckCircle } from '@fortawesome/pro-solid-svg-icons'
+import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-solid-svg-icons'
 import { withNavigation } from 'react-navigation'
 
 import FormSection from './FormSection'
@@ -64,6 +64,7 @@ class ProcessAction extends Component {
         this.undoPreviousAction = this.undoPreviousAction.bind(this)
         this.updateProcess = this.updateProcess.bind(this)
         this.refreshProcess = this.refreshProcess.bind(this)
+        this.navigateToProgression = this.navigateToProgression.bind(this)
 
         this.state = {
             showModal: false,
@@ -307,13 +308,13 @@ class ProcessAction extends Component {
         })
 
         this.setState({
-           // loadingModal: false,
-           // currentAction: actionTemp, //for check animation
+            // loadingModal: false,
+            // currentAction: actionTemp, //for check animation
             currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
         })
 
         // console.log('Do animation now !')
-        
+
         await this.countDown(1000)
 
         if (nextStep || nextPhase) {
@@ -453,6 +454,10 @@ class ProcessAction extends Component {
         )
     }
 
+    navigateToProgression(process) {
+        this.props.navigation.navigate('Progression', { process })
+    }
+
     render() {
         const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, processUpdated, expanded, loading } = this.state
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
@@ -468,6 +473,9 @@ class ProcessAction extends Component {
 
                 <View style={{ backgroundColor: theme.colors.primary, borderTopRightRadius: 5, borderTopLeftRadius: 5, paddingVertical: 5 }}>
                     <Text style={[theme.customFontMSregular.body, { color: theme.colors.white, textAlign: 'center' }]}>Suivi du projet</Text>
+                    <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: 2, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
+                        <CustomIcon icon={faEye} color={theme.colors.white} onPress={() => this.navigateToProgression(process)} />
+                    </TouchableOpacity>
                 </View>
 
                 <List.Accordion

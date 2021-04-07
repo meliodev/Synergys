@@ -44,11 +44,11 @@ export const requestWESPermission = async () => {
                 buttonPositive: "OK"
             }
         );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            console.log("WRITE_EXTERNAL_STORAGE GRANTED");
-        } else {
-            console.log(" WRITE_EXTERNAL_STORAGE denied");
-        }
+        // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        //     console.log("WRITE_EXTERNAL_STORAGE GRANTED");
+        // } else {
+        //     console.log(" WRITE_EXTERNAL_STORAGE denied");
+        // }
     } catch (err) {
         console.warn(err);
     }

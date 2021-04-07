@@ -94,7 +94,7 @@ class CreateProject extends Component {
 
             //Screens
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' },
-            client: { id: 'GS-CL-obKk', fullName: 'Client 1' },
+            client: { id: 'GS-CL-obKk', fullName: 'Client 1', email: '', role: 'Client' },
 
             //Pickers
             state: 'En cours',
@@ -102,8 +102,8 @@ class CreateProject extends Component {
 
             //Subscribers (collaborators)
             subscribers: [],
-            comContact: { id: 'GS-US-zzEg', fullName: 'Poseur 1', email: '', role: '' },
-            techContact: { id: 'GS-US-wuHB', fullName: 'Commercial 1', email: '', role: '' },
+            comContact: { id: 'GS-US-wuHB', fullName: 'Commercial 1', email: '', role: 'Commercial' },
+            techContact: { id: 'GS-US-zzEg', fullName: 'Poseur 1', email: '', role: 'Poseur' },
 
             color: theme.colors.primary,
 
@@ -627,7 +627,7 @@ class CreateProject extends Component {
 
         //Privilleges
         let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
-        canWrite = (canUpdate && this.isEdit && !isBlockedUpdates || canCreate && !this.isEdit && !isBlockedUpdates)
+        const canWrite = (canUpdate && this.isEdit && !isBlockedUpdates || canCreate && !this.isEdit && !isBlockedUpdates)
 
         const canCreateDocument = this.props.permissions.documents.canCreate
         const canReadTasks = this.props.permissions.tasks.canRead
@@ -645,14 +645,16 @@ class CreateProject extends Component {
 
                         {this.isEdit ?
                             (processFetched ?
-                                <ProcessAction
-                                    initialProcess={process}
-                                    project={this.project}
-                                    clientId={client.id}
-                                    step={step}
-                                    canUpdate={canWrite && !this.isClient}
-                                    role={this.props.role}
-                                />
+                                <View>
+                                    <ProcessAction
+                                        initialProcess={process}
+                                        project={this.project}
+                                        clientId={client.id}
+                                        step={step}
+                                        canUpdate={canWrite && !this.isClient}
+                                        role={this.props.role}
+                                    />
+                                </View>
                                 :
                                 <Loading style={{ paddingVertical: 50 }} />
                             )

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Button, Dimensions, Alert, Text } from 'react-native'
+import { Button, Dimensions, Alert, Text, LogBox } from 'react-native'
 import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-native-paper';
 import notifee, { EventType, AndroidImportance } from '@notifee/react-native'
 import { connect } from 'react-redux'
@@ -62,6 +62,8 @@ class App extends Component {
     })
 
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
+
+    console.log('MOUNTING APP.............................')
   }
 
 
@@ -95,7 +97,7 @@ class App extends Component {
 }
 
 
-console.disableYellowBox = true;
+LogBox.ignoreAllLogs(true)
 
 export default App
 

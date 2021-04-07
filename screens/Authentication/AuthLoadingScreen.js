@@ -138,10 +138,20 @@ class AuthLoadingScreen extends Component {
         }
 
         //4. Navigation
-        const { initialNotification, screen, params } = this.state
+        const { initialNotification } = this.state
+        const { params } = this.props.navigation.state
 
-        if (initialNotification)
+        //Email Link
+        if (params && params.routeName) {
+          const { routeName, ...routeParams } = params;
+          this.props.navigation.navigate(routeName, routeParams)
+        }
+
+        //Notification link
+        else if (initialNotification) {
+          const { screen, params } = this.state
           this.props.navigation.navigate(screen, params)
+        }
 
         else this.props.navigation.navigate("ListProjects")
       }
