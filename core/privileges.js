@@ -90,29 +90,23 @@ export const enableProcessAction = (responsable, currentUserId, currentUserRole,
 
     let enabledAction = false
 
-    if (responsable) {
-        if (responsable.id === currentUserId) {
-            enabledAction = true
-        }
-    }
+    if (responsable === currentUserRole)
+        enabledAction = true
 
-    else {
-        const comPhases = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
-        const techPhases = ['Visite technique', 'Installation', 'Maintenance']
-        const isComPhase = comPhases.includes(currentPhase)
-        const isTechPhase = techPhases.includes(currentPhase)
+    const comPhases = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+    const techPhases = ['Visite technique', 'Installation', 'Maintenance']
+    const isComPhase = comPhases.includes(currentPhase)
+    const isTechPhase = techPhases.includes(currentPhase)
 
-        const respRoles = ['admin', 'backoffice']
-        if (isComPhase) respRoles.push(['dircom', 'com'])
-        else if (isTechPhase) respRoles.push(['tech', 'poseur'])
+    const respRoles = ['admin', 'backoffice']
+    if (isComPhase) respRoles.push(['dircom', 'com'])
+    else if (isTechPhase) respRoles.push(['tech', 'poseur'])
 
-        if (respRoles.includes(currentUserRole)) {
-            enabledAction = true
-        }
+    if (respRoles.includes(currentUserRole)) {
+        enabledAction = true
     }
 
     return enabledAction
-
 }
 
 

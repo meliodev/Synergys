@@ -13,6 +13,7 @@ const processModel = {
         title: 'Initialisation',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 1,
+        followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: { //One step
             'prospectCreation': {
                 title: 'Création prospect',
@@ -32,7 +33,7 @@ const processModel = {
                         //Navigation (Update) params
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: { userId: '', isClient: true, isProcess: true }, //#dynamic
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         //Verification type
                         type: 'auto',
@@ -50,7 +51,7 @@ const processModel = {
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: ''
@@ -66,7 +67,7 @@ const processModel = {
                         screenName: 'Profile',
                         screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: ''
@@ -82,7 +83,7 @@ const processModel = {
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: ''
@@ -98,7 +99,7 @@ const processModel = {
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: { userId: '', isClient: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: true, //check if fieldValue !== verificationValue
@@ -114,7 +115,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         comment: '',
                         verificationType: 'comment',
@@ -128,6 +129,7 @@ const processModel = {
         title: 'Rendez-vous 1',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 2,
+        followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
             'priorTechnicalVisit': {
                 title: 'Visite technique préalable',
@@ -147,9 +149,9 @@ const processModel = {
                         //properties: [],
                         //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -168,7 +170,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true }, //#dynamic
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: '',
@@ -188,7 +190,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -219,7 +221,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'housingActionFile'
@@ -255,7 +257,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Fiche EEB', value: 'Fiche EEB', selected: false }, dynamicType: true, isProcess: true, },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -271,7 +273,7 @@ const processModel = {
                         screenName: '',
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -311,7 +313,7 @@ const processModel = {
                         screenName: 'UploadDocument',
                         screenParams: { project: null, documentType: { label: 'Dossier aide', value: 'Dossier aide', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -327,7 +329,7 @@ const processModel = {
                         screenName: '',
                         screenParams: null,
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -367,7 +369,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -383,7 +385,7 @@ const processModel = {
                         screenName: '',
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -423,7 +425,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextPhase: 'rdn',
@@ -436,6 +438,7 @@ const processModel = {
         title: 'Rendez-vous N',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 3,
+        followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
             'rd2Creation': {
                 title: 'Créer un rendez-vous 2',
@@ -458,7 +461,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'rdnChoice',
@@ -486,7 +489,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -542,7 +545,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
                         type: 'manual',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -563,7 +566,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -585,7 +588,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -606,7 +609,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -627,7 +630,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -648,7 +651,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -682,7 +685,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -712,7 +715,7 @@ const processModel = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le devis', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -727,7 +730,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         comment: '',
                         verificationType: 'comment',
@@ -755,7 +758,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'payModeValidation',
@@ -778,7 +781,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Commercial'],
+                        responsable: 'Commercial',
                         status: 'pending',
                         comment: '',
                         verificationType: 'multiple-choices',
@@ -798,7 +801,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['ADV'],
+                        responsable: 'ADV',
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -812,6 +815,7 @@ const processModel = {
         title: 'Visite technique',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 4,
+        followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
             'siteCreation': {
                 title: 'Création chantier',
@@ -833,7 +837,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -852,7 +856,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -883,7 +887,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -914,7 +918,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'manual',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '',
@@ -945,7 +949,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -962,6 +966,7 @@ const processModel = {
         title: 'Installation',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 5,
+        followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
             'installationCreation': {
                 title: 'Plannification installation',
@@ -983,7 +988,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1032,7 +1037,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -1056,7 +1061,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -1096,7 +1101,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'PV réception', value: 'PV réception', selected: false }, dynamicType: true, isProcess: true, },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'reserve',
@@ -1120,7 +1125,7 @@ const processModel = {
                         screenName: '',
                         screenParams: null, //Because manual
                         type: 'manual', //Check manually
-                        responsables: ['Client'],
+                        responsable: 'Client',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //comments are joined (separated by ;)
@@ -1153,7 +1158,7 @@ const processModel = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1173,7 +1178,7 @@ const processModel = {
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -1198,7 +1203,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -1215,7 +1220,7 @@ const processModel = {
                         screenName: '',
                         screenParams: null,
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -1243,7 +1248,7 @@ const processModel = {
                         screenName: '', //creation
                         screenParams: {},
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -1276,7 +1281,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
@@ -1311,7 +1316,7 @@ const processModel = {
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1339,7 +1344,7 @@ const processModel = {
                         screenName: 'UploadDocument',
                         screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
@@ -1374,7 +1379,7 @@ const processModel = {
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'quoteVerification'
@@ -1406,7 +1411,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        //  responsables: '',
+                        //  responsable: '',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         events: { onDocFound: { nextStep: '' }, onDocNotFound: { nextStep: 'facturationOption1' } }
@@ -1423,7 +1428,7 @@ const processModel = {
                         screenName: '',
                         screenParams: null, //Because manual
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -1464,7 +1469,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1494,7 +1499,7 @@ const processModel = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'paymentStatus'
@@ -1532,7 +1537,7 @@ const processModel = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Voir le devis', id: 'view', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1562,7 +1567,7 @@ const processModel = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'paymentStatus',
@@ -1586,7 +1591,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         comment: '',
                         verificationType: 'multiple-choices',
@@ -1608,7 +1613,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['ADV'],
+                        responsable: 'ADV',
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -1637,7 +1642,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Attestation fluide', value: 'Attestation fluide', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         nextStep: 'emailBill'
@@ -1733,6 +1738,7 @@ const processModel = {
         title: 'Maintenance',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 6,
+        followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
             'maintainanceContract': {
                 title: "Contrat maintenance",
@@ -1751,7 +1757,7 @@ const processModel = {
                         screenName: '', //creation
                         screenParams: {},
                         type: 'manual', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
@@ -1783,7 +1789,7 @@ const processModel = {
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto', //Check manually
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
@@ -1816,7 +1822,7 @@ const processModel = {
                         choices: [
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1844,7 +1850,7 @@ const processModel = {
                         screenName: 'UploadDocument',
                         screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true },
                         type: 'auto',
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
@@ -1877,7 +1883,7 @@ const processModel = {
                         choices: [
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsables: ['Poseur'],
+                        responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1892,7 +1898,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        responsables: ['ADV'],
+                        responsable: 'ADV',
                         status: 'pending',
                         comment: '',
                         verificationType: 'validation',
@@ -1906,6 +1912,7 @@ const processModel = {
         title: 'Finalisation',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 7,
+        followers: ['Admin', 'Directeur commercial', 'Commercial', 'Responsable technique', 'Poseur'],
         steps: {
             'endProject': {
                 title: "Projet finalisé",
@@ -1923,7 +1930,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        //responsables: '',
+                        //responsable: '',
                         status: 'pending',
                         comment: '',
                         verificationType: 'no-verification',
@@ -1936,6 +1943,7 @@ const processModel = {
         title: 'Annulation',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 7,
+        followers: ['Admin', 'Directeur commercial', 'Commercial', 'Responsable technique', 'Poseur'],
         steps: {
             'cancelProject': {
                 title: "Projet annulé",
@@ -1953,7 +1961,7 @@ const processModel = {
                         screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
                         screenParams: null,
                         type: 'manual',
-                        //responsables: '',
+                        //responsable: '',
                         status: 'pending',
                         comment: '',
                         verificationType: 'no-verification', //#task: put rollback
@@ -2721,7 +2729,7 @@ Params: comment
 
 
 
-//#idea put icon/tag on action defining role responsables for action
+//#idea put icon/tag on action defining role responsable for action
 //assign to each role a representative icon/color to help users recognize each role
 
 
@@ -2845,7 +2853,7 @@ Params: comment
 //                     screenName: 'UploadDocument', //creation
 //                     screenParams: { documentType: 'Devis', project: null },
 //                     type: 'auto',
-//                     responsables: '',
+//                     responsable: '',
 //                     status: 'pending',
 //                     verificationType: 'doc-creation',
 //                 },
@@ -2873,7 +2881,7 @@ Params: comment
 //                         { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
 //                         { label: 'Signer le devis', id: 'sign', onSelectType: 'navigation' },
 //                     ],
-//                     responsables: '',
+//                     responsable: '',
 //                     status: 'pending',
 //                     verificationType: 'doc-creation',
 //                 },
@@ -2888,7 +2896,7 @@ Params: comment
 //                     screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
 //                     screenParams: null,
 //                     type: 'manual',
-//                     responsables: { id: 'GS-US-xQ6s' }, //ADV is the responsables
+//                     responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
 //                     status: 'pending',
 //                     comment: '',
 //                     verificationType: 'validation',

@@ -159,7 +159,7 @@ class CreateTask extends Component {
         this.setState({ address })
     }
 
-    refreshAssignedTo(isPro, id, prenom, nom, role) {
+    refreshAssignedTo(isPro, id, nom, prenom, role) {
         const assignedTo = { id, fullName: isPro ? nom : `${prenom} ${nom}`, role, error: '' }
         this.setState({ assignedTo })
     }
@@ -305,7 +305,7 @@ class CreateTask extends Component {
         //     this.props.navigation.state.params.onGoBack(true) //Don't refresh tasks in agenda
 
         // else
-        //     this.props.navigation.state.params.onGoBack(true) //Refresh tasks in agenda
+        //this.props.navigation.state.params.onGoBack(true) //Refresh tasks in agenda
 
         this.props.navigation.goBack()
     }
@@ -335,7 +335,7 @@ class CreateTask extends Component {
         let natures = []
         this.types.forEach((t) => { if (t.value === type) natures = t.natures })
 
-        const neutral = natures.includes('com', 'tech')
+        const neutral = _.isEqual(natures, ['com', 'tech'])
 
         if (neutral) {
             query = db.collection('Users').where('deleted', '==', false)

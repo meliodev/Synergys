@@ -636,7 +636,6 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 //## Refresh inputs
 export function refreshClient(isPro, id, nom, prenom, role, email) {
   const client = refreshUser(isPro, id, nom, prenom, role, email)
-  console.log(client)
   this.setState({ client })
 }
 

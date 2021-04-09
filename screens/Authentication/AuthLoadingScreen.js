@@ -138,10 +138,10 @@ class AuthLoadingScreen extends Component {
         }
 
         //4. Navigation
-        const { initialNotification } = this.state
-        const { params } = this.props.navigation.state
+        const { initialNotification } = this.state //Notification
+        const { params } = this.props.navigation.state //Dynamic link
 
-        //Email Link
+        //Dynamic link (email)
         if (params && params.routeName) {
           const { routeName, ...routeParams } = params;
           this.props.navigation.navigate(routeName, routeParams)

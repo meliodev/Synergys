@@ -62,8 +62,6 @@ class App extends Component {
     })
 
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
-
-    console.log('MOUNTING APP.............................')
   }
 
 
