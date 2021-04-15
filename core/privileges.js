@@ -1,5 +1,6 @@
 import { Alert } from 'react-native'
 import firebase from '@react-native-firebase/app'
+
 const db = firebase.firestore()
 
 
@@ -98,9 +99,9 @@ export const enableProcessAction = (responsable, currentUserId, currentUserRole,
     const isComPhase = comPhases.includes(currentPhase)
     const isTechPhase = techPhases.includes(currentPhase)
 
-    const respRoles = ['admin', 'backoffice']
-    if (isComPhase) respRoles.push(['dircom', 'com'])
-    else if (isTechPhase) respRoles.push(['tech', 'poseur'])
+    const respRoles = ['Admin', 'Back office']
+    if (isComPhase) respRoles.push(['Directeur commercial', 'Commercial'])
+    else if (isTechPhase) respRoles.push(['Responsable technique', 'Poseur'])
 
     if (respRoles.includes(currentUserRole)) {
         enabledAction = true

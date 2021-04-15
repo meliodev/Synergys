@@ -71,10 +71,8 @@ class LoginScreen extends Component {
 
     const response = await loginUser({ email: email.value, password: password.value })
     if (response.error) {
-      this.setState({ error: response.error })
+      this.setState({ loading: false, error: response.error })
     }
-
-    load(this, false)
   }
 
   render() {
@@ -137,10 +135,10 @@ class LoginScreen extends Component {
 
         </View>
 
-        <Toast 
-        message={error} 
-        onDismiss={() => this.setState({ error: '' })} 
-        containerStyle={{ bottom: constants.ScreenHeight*0.35 }}/>
+        <Toast
+          message={error}
+          onDismiss={() => this.setState({ error: '' })}
+          containerStyle={{ bottom: constants.ScreenHeight * 0.35 }} />
       </NewBackground>
     )
 

@@ -260,11 +260,10 @@ class CreateOrder extends Component {
             state,
             orderLines,
             subTotal,
-            taxes,
+            taxes, 
             total,
             primeCEE,
             primeRenov,
-
             editedAt: moment().format(),
             editedBy: currentUser,
             deleted: false,

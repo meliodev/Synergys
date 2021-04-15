@@ -227,7 +227,6 @@ class Signature extends Component {
         const sendCode = functions.httpsCallable('sendCode')
         return await sendCode({ phoneNumber: phoneNumber })
             .then((resp) => {
-                console.log(resp)
                 if (resp.data.status === 'pending')
                     return true
             })
@@ -304,7 +303,7 @@ class Signature extends Component {
                     <Dialog.Input
                         label="Code de confirmation"
                         returnKeyType="done"
-                        value={this.state.code.toString()}
+                        value={this.state.code}
                         onChangeText={code => this.setState({ code: Number(code) })}
                         //secureTextEntry
                         autoFocus={showDialog} />

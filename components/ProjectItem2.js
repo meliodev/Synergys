@@ -42,17 +42,25 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
         }
     }
 
-    const setIconStatus = (projectStatus) => {
-        if (projectStatus === 'Terminé')
-            return <CustomIcon icon={faCheckCircle} color='green' size={iconContainerSize * 0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
-        else if (projectStatus === 'Annulé')
-            return <CustomIcon icon={faTimesCircle} color={theme.colors.error} size={iconContainerSize * 0.2} style={{ position: 'absolute', top: 5, right: 10, zIndex: 1 }} />
+    const setIconState = (projectState) => {
+        const projectEnded = projectState === 'Terminé'
+        const projectCanceled = projectState === 'Annulé'
+        const finalState = projectEnded || projectCanceled
+
+        if (finalState) {
+            const icon = projectEnded ? faCheckCircle : faTimesCircle
+            const color = projectEnded ? 'green' : theme.colors.error
+            const iconSize = iconContainerSize * 0.2
+            const iconStyle = { position: 'absolute', top: 5, right: 10, zIndex: 1 }
+            return <CustomIcon icon={icon} color={color} size={iconSize} style={iconStyle} />
+        }
+
         else return null
     }
 
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>
-            {setIconStatus(project.status)}
+            {setIconState(project.state)}
             <View style={[styles.iconContainer, { backgroundColor: project.color }]}>
                 <CustomIcon icon={setIconPhase(project.step)} size={iconContainerSize * 0.45} color={theme.colors.white} secondaryColor={theme.colors.secondary} />
             </View>

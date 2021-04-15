@@ -13,7 +13,7 @@ import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
-import { setRole, setPermissions, userLoggedOut, resetState, setNetwork } from '../../core/redux'
+import { setRole, setPermissions, userLoggedOut, resetState, setNetwork, setProcessModel } from '../../core/redux'
 
 const roles = [{ id: 'admin', value: 'Admin', level: 3 }, { id: 'backoffice', value: 'Back office', level: 3 }, { id: 'dircom', value: 'Directeur commercial', level: 2 }, { id: 'com', value: 'Commercial', level: 1 }, { id: 'poseur', value: 'Poseur', level: 1 }, { id: 'tech', value: 'Responsable technique', level: 2 }, { id: 'client', value: 'Client', level: 0 }]
 const db = firebase.firestore()
@@ -132,7 +132,10 @@ class AuthLoadingScreen extends Component {
           const action = { type: "SET_PERMISSIONS", value: remotePermissions }
           this.props.dispatch(action)
 
-          //3. Set fcm token
+          //3. Set processModel
+          await this.fetchProcessModel()
+
+          //4. Set fcm token
           await this.requestUserPermission() //iOS only
           await this.configureFcmToken()
         }
@@ -165,6 +168,19 @@ class AuthLoadingScreen extends Component {
         this.props.navigation.navigate("LoginScreen")
       }
     })
+  }
+
+  async fetchProcessModel() {
+    const processModel = await db.collection('Process').orderBy('createdAt', 'desc').limit(1).get().then((querySnapshot) => {
+      if (querySnapshot.empty) {
+        return undefined
+      }
+
+      const processModel = querySnapshot.docs[0].data().process
+      return processModel
+    })
+
+    setProcessModel(this, processModel)
   }
 
   async configurePrivileges(role) {

@@ -18,62 +18,54 @@ class MyDatePicker extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
 
         this.label = this.props.navigation.getParam('label', '')
-        this.userId = this.props.navigation.getParam('userId', '')
         this.showDayPicker = this.props.navigation.getParam('showDayPicker', true)
         this.showTimePicker = this.props.navigation.getParam('showTimePicker', true)
-        this.isAllDay = this.props.navigation.getParam('isAllDay', true)
+        this.isAllDay = this.props.navigation.getParam('isAllDay', false)
+        this.targetField = this.props.navigation.getParam('targetField', '')
 
         this.state = {
-            startDate: new Date(),
-            startHour: new Date()
+            selectedDate: new Date(),
+            selectedHour: new Date()
         }
     }
 
     handleSubmit() {
 
-        let date
-        let time
+        const { selectedDate, selectedHour } = this.state
+
+        var date = moment(selectedDate).format()
+        var time = moment(selectedHour).format('HH:mm')
         let output
 
-        if (this.isAllDay) {
-            date = moment(this.state.startDate).format('YYYY-MM-DD')
-            time = moment(this.state.startHour).format('HH:mm')
-            output = moment(date + " " + time)
-        }
+        if (!this.showDayPicker)
+            output = time
 
-        else {
-            if (!this.showDayPicker) { //time picker
-                time = moment(this.state.startHour).format('HH:mm')
-                output = time
-            }
+        else if (!this.showTimePicker)
+            output = date
 
-            else if (!this.showTimePicker) { //day picker
-                date = moment(this.state.startDate).format('YYYY-MM-DD')
-                output = date
-            }
-        }
+        else output = moment(`${date} ${time}`)
 
-        if (this.label === 'de début')
-            this.props.navigation.state.params.onGoBack('start', output, this.isAllDay)
-        else
-            this.props.navigation.state.params.onGoBack('due', output, this.isAllDay)
-
+        this.props.navigation.state.params.onGoBack(output, this.targetField, this.isAllDay)
         this.props.navigation.goBack()
     }
 
     render() {
-        let { startDate, startHour } = this.state
+        let { selectedDate, selectedHour } = this.state
+
+        const titleText = this.isAllDay ? 'Journée de la tâche' : `Date ${this.label}`
+        const dateTitle = this.isAllDay ? 'Selectionnez une date' : `Date ${this.label}`
+        const hourTitle = `Heure ${this.label}`
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar close title titleText={`Date ${this.label}`} check handleSubmit={this.handleSubmit} />
-                <View style={{ flex: 1, alignItems: 'center' }}>
+                <Appbar close title titleText={titleText} check handleSubmit={this.handleSubmit} />
+                <View style={styles.container}>
                     {this.showDayPicker &&
-                        <View style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center', borderBottomColor: theme.colors.gray, borderBottomWidth: StyleSheet.hairlineWidth * 2 }}>
-                            <Title style={{ marginBottom: 15 }}>Date {this.label}</Title>
+                        <View style={styles.dateContainer}>
+                            <Title style={{ marginBottom: 15 }}>{dateTitle}</Title>
                             <DatePicker
-                                date={startDate}
-                                onDateChange={(startDate) => this.setState({ startDate })}
+                                date={selectedDate}
+                                onDateChange={(selectedDate) => this.setState({ selectedDate })}
                                 mode='date'
                                 locale='fr'
                                 androidVariant="nativeAndroid"
@@ -82,15 +74,16 @@ class MyDatePicker extends Component {
                         </View>
                     }
 
-
                     {this.showTimePicker &&
-                        <View style={{ flex: 0.5, alignItems: 'center', justifyContent: 'center' }}>
-                            <Title style={{ marginBottom: 15 }}>Heure {this.label}</Title>
+                        <View style={styles.hourContainer}>
+                            <Title style={{ marginBottom: 15 }}>{hourTitle}</Title>
                             <DatePicker
-                                date={startHour}
-                                onDateChange={(startHour) => this.setState({ startHour })}
+                                date={selectedHour}
+                                onDateChange={(selectedHour) => this.setState({ selectedHour })}
                                 mode='time'
+                                locale='fr'
                                 androidVariant="nativeAndroid"
+                                fadeToColor={theme.colors.primary}
                             />
                         </View>
                     }
@@ -101,6 +94,25 @@ class MyDatePicker extends Component {
     }
 
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center'
+    },
+    dateContainer: {
+        flex: 0.5,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderBottomColor: theme.colors.gray,
+        borderBottomWidth: StyleSheet.hairlineWidth * 2
+    },
+    hourContainer: {
+        flex: 0.5,
+        alignItems: 'center',
+        justifyContent: 'center'
+    }
+})
 
 const mapStateToProps = (state) => {
     return {

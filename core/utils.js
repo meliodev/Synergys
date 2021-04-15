@@ -106,6 +106,26 @@ export const compareTimes = (time1, time2, operator) => {
   }
 }
 
+export const checkOverlap = (timeSegments) => {
+  console.log(timeSegments)
+  if (timeSegments.length === 1) return false;
+
+  timeSegments.sort((timeSegment1, timeSegment2) =>
+    timeSegment1[0].localeCompare(timeSegment2[0])
+  );
+
+  for (let i = 0; i < timeSegments.length - 1; i++) {
+    const currentEndTime = timeSegments[i][1];
+    const nextStartTime = timeSegments[i + 1][0];
+
+    if (currentEndTime > nextStartTime) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 //##NAVIGATION
 export const navigateToScreen = (main, screen, params) => {
   main.props.navigation.navigate(screen, params)
@@ -543,7 +563,7 @@ let publicTaskTypes = [
 let alltaskTypes = [
   { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
   { label: 'Rendez-vous 1', value: 'Rendez-vous 1', natures: ['com'] }, //#dynamic
-  { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, //#dynamic
+  { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, //#dynamic
   { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
   { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
   { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
@@ -580,6 +600,7 @@ const setPickerTypes = (currentRole, dynamicType, documentType, publicTypes, all
 export const setFilter = (main, field, value) => {
   const update = {}
   update[field] = value
+  console.log('update', update)
   main.setState(update)
 }
 
@@ -588,6 +609,7 @@ export const toggleFilter = (main) => {
 }
 
 export const handleFilter = (inputList, outputList, fields, searchInput, KEYS_TO_FILTERS) => {
+
   outputList = inputList
 
   for (const field of fields) {
@@ -654,6 +676,22 @@ const refreshUser = (isPro, id, nom, prenom, role, email) => {
   const user = { id, fullName, email, role }
   return user
 }
+
+export function refreshAddress(address) {
+  this.setState({ address })
+}
+
+export function refreshProject(project) {
+  this.setState({ project })
+}
+
+export function refreshAssignedTo(isPro, id, nom, prenom, role, email) {
+  const fullName = isPro ? nom : `${prenom} ${nom}`
+  const assignedTo = { id, fullName, role, email }
+  console.log(assignedTo)
+  this.setState({ assignedTo })
+}
+
 
 
 

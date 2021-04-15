@@ -4,6 +4,12 @@ export const setRole = (main, role) => {
     main.props.dispatch(action)
 }
 
+//Process
+export const setProcessModel = (main, processModel) => {
+    const action = { type: "SET_PROCESS_MODEL", value: processModel }
+    main.props.dispatch(action)
+}
+
 //Permissions
 export const setPermissions = (main, permissions) => {
     const action = { type: "SET_PERMISSIONS", value: permissions }

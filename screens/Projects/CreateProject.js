@@ -88,13 +88,13 @@ class CreateProject extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "Projet 10", error: '' },
+            name: { value: "", error: '' },
             description: { value: "", error: '' },
             note: { value: "", error: '' },
 
             //Screens
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' },
-            client: { id: 'GS-CL-obKk', fullName: 'Client 1', email: '', role: 'Client' },
+            client: { id: '', fullName: '', email: '', role: '' },
 
             //Pickers
             state: 'En cours',
@@ -102,8 +102,8 @@ class CreateProject extends Component {
 
             //Subscribers (collaborators)
             subscribers: [],
-            comContact: { id: 'GS-US-wuHB', fullName: 'Commercial 1', email: '', role: 'Commercial' },
-            techContact: { id: 'GS-US-zzEg', fullName: 'Poseur 1', email: '', role: 'Poseur' },
+            comContact: { id: '', fullName: '', email: '', role: '' },
+            techContact: { id: '', fullName: '', email: '', role: '' },
 
             color: theme.colors.primary,
 
@@ -146,18 +146,23 @@ class CreateProject extends Component {
     async componentDidMount() {
 
         if (this.isEdit) {
-            //this.setState({ processUpdated: false })
             await this.fetchProject() //Get current process
-            await this.fetchDocuments()
-            await this.fetchTasks()
+            this.fetchDocuments()
+            this.fetchTasks()
             this.initialState = _.cloneDeep(this.state)
-            // await this.processMain(this.state.process)
         }
 
         else this.initialState = _.cloneDeep(this.state)
 
         this.fetchSuggestions()
         load(this, false)
+    }
+
+    componentWillUnmount() {
+        if (this.isEdit) {
+            this.unsubscribeDocuments()
+            this.unsubscribeTasks()
+        }
     }
 
 
@@ -245,7 +250,7 @@ class CreateProject extends Component {
     }
 
     fetchDocuments() {
-        db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').get().then((querysnapshot) => {
+        this.unsubscribeDocuments = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
             if (querysnapshot.empty) return
 
             let documentsList = []
@@ -262,7 +267,7 @@ class CreateProject extends Component {
     }
 
     fetchTasks() {
-        db.collection('Agenda').where('project.id', '==', this.ProjectId).get().then((agendaSnapshot) => {
+        this.unsubscribeTasks = db.collection('Agenda').where('project.id', '==', this.ProjectId).onSnapshot((agendaSnapshot) => {
             if (agendaSnapshot.empty) return
 
             let tasksList = []
@@ -701,12 +706,6 @@ class CreateProject extends Component {
                                         editable={canWrite}
                                     />
 
-                                    <ColorPicker
-                                        label='Couleur du projet'
-                                        selectedColor={color}
-                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite} />
-
                                     {!this.isClient &&
                                         <ItemPicker
                                             onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false })}
@@ -714,6 +713,7 @@ class CreateProject extends Component {
                                             value={client.fullName}
                                             errorText={client.error}
                                             editable={canWrite}
+                                            style={{ marginTop: 15 }}
                                         />
                                     }
 
@@ -724,6 +724,7 @@ class CreateProject extends Component {
                                         addressError={address.error}
                                         editable={canWrite}
                                         isEdit={this.isEdit}
+                                        style={{ marginTop: 10 }}
                                     />
 
                                     <Picker
@@ -746,6 +747,12 @@ class CreateProject extends Component {
                                         title="État *"
                                         elements={states}
                                         enabled={canWrite} />
+
+                                    <ColorPicker
+                                        label='Couleur du projet'
+                                        selectedColor={color}
+                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+                                        editable={canWrite} />
                                 </View>
                             } />
 

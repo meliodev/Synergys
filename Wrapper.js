@@ -6,8 +6,11 @@ import { connect } from 'react-redux'
 
 import OfflineBar from './components/OffLineBar'
 
-import { setNetwork } from './core/redux'
+import { setNetwork, setProcessModel } from './core/redux'
 import { stat } from 'react-native-fs'
+import firebase from '@react-native-firebase/app'
+
+const db = firebase.firestore()
 
 class Wrapper extends Component {
     constructor(props) {
@@ -18,6 +21,7 @@ class Wrapper extends Component {
 
     componentDidMount() {
         this.networkListener()
+       // this.fetchProcessModel()
     }
 
     networkListener() {
@@ -29,6 +33,19 @@ class Wrapper extends Component {
             setNetwork(this, network)
         })
     }
+
+    // async fetchProcessModel() {
+    //     const processModel = await db.collection('Process').orderBy('createdAt', 'desc').limit(1).get().then((querySnapshot) => {
+    //         if (querySnapshot.empty) {
+    //             return undefined
+    //         }
+
+    //         const processModel = querySnapshot.docs[0].data().process
+    //         return processModel
+    //     })
+
+    //     setProcessModel(this, processModel)
+    // }
 
     componentWillUnmount() {
         this.unsubscribeNetwork && this.unsubscribeNetwork()
@@ -50,6 +67,7 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         network: state.network,
+        processModel: state.process.processModel
         //fcmToken: state.fcmtoken
     }
 }
@@ -62,3 +80,16 @@ const styles = StyleSheet.create({
     },
 })
 
+
+
+
+
+// persistProcessModel() {
+//     const { version } = processModel
+//     let copyProcessModel = _.cloneDeep(processModel)
+//     delete copyProcessModel.version
+//     const createdAt = moment().format()
+//     const payload = { process: copyProcessModel, createdAt }
+
+//     db.collection('Process').doc(`version${version}`).set(payload).then(() => console.log('YEAH'))
+// }

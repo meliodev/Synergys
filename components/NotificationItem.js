@@ -24,14 +24,14 @@ const NotificationItem = ({ notification, actions, ...props }) => {
         const iconColor = notification.read ? theme.colors.white : theme.colors.white
         const backgroundColor = notification.read ? theme.colors.gray_medium : theme.colors.primary
 
-        switch (topic) {
-            case 'projects':
-                return (
-                    <View style={[styles.leftIcon, { backgroundColor: backgroundColor }]}>
-                        <CustomIcon icon={icon} color={iconColor} />
-                    </View>
-                )
-        }
+        // switch (topic) {
+        //     case 'projects':
+        return (
+            <View style={[styles.leftIcon, { backgroundColor: backgroundColor }]}>
+                <CustomIcon icon={icon} color={iconColor} />
+            </View>
+        )
+        // }
     }
 
     //menu config

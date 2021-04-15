@@ -524,7 +524,7 @@ class Profile extends Component {
 
                                         {isAdmin && !isProspect &&
                                             <TouchableOpacity onPress={() => {
-                                                if (!isConnected || !isAdmin) return
+                                                if (!isConnected || !isAdmin || this.isClient) return
                                                 navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
                                             }}>
                                                 <MyInput
@@ -533,7 +533,7 @@ class Profile extends Component {
                                                     value={role}
                                                     autoCapitalize="none"
                                                     editable={false}
-                                                    right={isAdmin && isConnected && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
+                                                    right={isAdmin && isConnected && !this.isClient && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
                                                         navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
                                                     } />} />
                                             </TouchableOpacity>

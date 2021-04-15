@@ -39,25 +39,25 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
 
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 }}>
-                <Text numberOfLines={1} style={theme.customFontMSmedium.body}>{order.project.name}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{order.id}</Text>
                 <Text style={theme.customFontMSmedium.header}>€ {order.total}</Text>
             </View>
 
-            <View>
-                {order.client && <Text><Text style={theme.customFontMSregular.body}>chez</Text> <Text style={theme.customFontMSmedium.body}>{order.client.fullName}</Text></Text>}
-                <Text style={[theme.customFontMSregular.caption, { paddingTop: 10 }]}>{order.id}</Text>
+            <View style={{ marginBottom: 15, marginTop: 3 }}>
+                {order.project && <Text numberOfLines={1} style={[theme.customFontMSmedium.body, { marginBottom: 5 }]}>{order.project.name}</Text>}
+                {order.client && <Text><Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>chez</Text> <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.gray_dark }]}>{order.client.fullName}</Text></Text>}
             </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 10 }}>
-                <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{moment(order.editedAt, 'lll').format('ll')}</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(order.editedAt).format('ll')}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{ width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 50, backgroundColor: setStateColor(order.state), padding: 2, elevation: 2 }}>
                         <Text style={theme.customFontMSregular.caption}>{order.state}</Text>
                     </View>
                 </View>
             </View>
-        </TouchableOpacity>
+        </TouchableOpacity >
     )
 }
 
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 15,
-        paddingVertical: 5,
+        paddingVertical: 10,
         backgroundColor: theme.colors.background,
         elevation: 3,
         borderRadius: 10,

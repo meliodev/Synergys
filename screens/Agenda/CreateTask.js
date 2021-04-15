@@ -1,37 +1,33 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert } from 'react-native';
-import { Card, Title, FAB } from 'react-native-paper'
-import Ionicons from 'react-native-vector-icons/Ionicons'
+import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native';
+import { Title, Switch } from 'react-native-paper'
 import firebase from '@react-native-firebase/app'
-import { faInfoCircle, faFileAlt, faQuestionCircle } from '@fortawesome/pro-light-svg-icons'
-import { faCalendarPlus } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import FormSection from '../../components/FormSection'
-import OffLineBar from '../../components/OffLineBar'
 import Appbar from '../../components/Appbar'
+import FormSection from '../../components/FormSection'
 import MyInput from '../../components/TextInput'
+import Picker from "../../components/Picker"
 import ItemPicker from '../../components/ItemPicker'
 import AddressInput from '../../components/AddressInput'
-import Picker from "../../components/Picker"
-import Switch from "../../components/Switch"
-import Loading from "../../components/Loading"
-
-//Task state
 import ColorPicker from "../../components/ColorPicker"
 import TaskState from "../../components/RequestState"
+import TasksConflicts from "../../components/TasksConflicts"
+import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants, adminId } from "../../core/constants"
-import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, isEditOffline, setPickerTaskTypes } from "../../core/utils"
+import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { connect } from 'react-redux'
-import { CustomIcon } from '../../components';
+import { CustomIcon } from '../../components'
+import { getSystemAvailableFeatures } from 'react-native-device-info'
 
 const db = firebase.firestore()
 
@@ -51,20 +47,25 @@ const statuses = [
 class CreateTask extends Component {
     constructor(props) {
         super(props)
+        this.refreshTaskConflictDate = this.refreshTaskConflictDate.bind(this)
         this.refreshDate = this.refreshDate.bind(this)
-        this.refreshAddress = this.refreshAddress.bind(this)
-        this.refreshAssignedTo = this.refreshAssignedTo.bind(this)
-        this.refreshProject = this.refreshProject.bind(this)
+        this.refreshAddress = refreshAddress.bind(this)
+        this.refreshAssignedTo = refreshAssignedTo.bind(this)
+        this.refreshProject = refreshProject.bind(this)
 
-        this.validateInputs = this.validateInputs.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+        this.validateInputs = this.validateInputs.bind(this)
+        this.validateSchedule = this.validateSchedule.bind(this)
+        this.setTasks = this.setTasks.bind(this)
+        this.persistTasks = this.persistTasks.bind(this)
         this.myAlert = myAlert.bind(this)
         this.alertDeleteTask = this.alertDeleteTask.bind(this)
+        this.renderTimeForm = this.renderTimeForm.bind(this)
 
         this.initialState = {}
         this.isInit = true
-        this.currentUser = firebase.auth().currentUser
 
+        this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.TaskId = this.props.navigation.getParam('TaskId', '')
         this.isEdit = this.TaskId ? true : false
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
@@ -81,52 +82,73 @@ class CreateTask extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "", error: '' },
+            name: { value: "Task 2", error: '' },
             description: { value: "", error: '' },
 
             //PICKERS
             type: (this.taskType && this.taskType.value) || 'Normale',
             priority: 'Moyenne',
             status: 'En cours',
-
-            //Screens
-            assignedTo: { id: '', fullName: '', error: '' },
-            project: this.project || { id: '', name: '', error: '' },
-            address: { description: '', place_id: '', error: '' },
-            startDate: { value: moment().format(), error: '' },
-            dueDate: { value: moment().add(1, 'h').format(), error: '' },
-
             color: theme.colors.primary,
 
+            //Screens
+            assignedTo: { id: 'GS-US-xQ6s', fullName: 'ole Lyoussi', error: '' },
+            project: this.project || { id: '', name: '', error: '' },
+            address: { description: '', place_id: '', error: '' },
+
+            //Schedule
+            isAllDay: true,
+            startDate: { value: moment().format(), error: '' },
+            endDate: { value: moment().format(), error: '' },
+            startHour: { value: moment().format('HH:mm'), error: '' },
+            dueHour: { value: moment().format('HH:mm'), error: '' },
+
+            //Conflicts
+            showTasksConflicts: false,
+            overlappingTasks: [],
+            newTask: null,
+            selectedIsAllDay: false,
+            selectedDate: '',
+            selectedStartHour: '',
+            selectedDueHour: '',
+            pickedDate: '',
+            pickedTask: '',
+
+            //Logs
             createdAt: '',
             createdBy: { id: '', fullName: '' },
             editedAt: '',
             editedBy: { id: '', fullName: '' },
 
+            //Events
             error: '',
-            loading: false
+            loading: true
         }
     }
 
 
     async componentDidMount() {
+
         if (this.isEdit) {
             await this.fetchTask()
         }
 
         else this.initialState = _.cloneDeep(this.state)
+
+        load(this, false)
     }
 
-
     async fetchTask() {
-        db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
-            let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate, color } = this.state
+        await db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
+
+            if (!doc.exists)
+                this.props.navigation.goBack()
+
+            let { name, assignedTo, description, project, type, priority, status, address, isAllDay, startDate, startHour, dueHour, color } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             const task = doc.data()
 
-            if (!task) return
-
-            // //General info
+            //General info
             name.value = task.name
             assignedTo = task.assignedTo
             description.value = task.description
@@ -135,9 +157,12 @@ class CreateTask extends Component {
             status = task.status
             type = task.type
             address = task.address
-            startDate.value = task.startDate
-            dueDate.value = task.dueDate
             color = task.color
+
+            isAllDay = task.isAllDay
+            startDate.value = moment(task.date, 'YYYY-MM-DD').format()
+            startHour.value = task.startHour || moment().format('HH:mm')
+            dueHour.value = task.dueHour || moment().add(1, 'hour').format('HH:mm')
 
             //َActivity
             createdAt = task.createdAt
@@ -146,7 +171,7 @@ class CreateTask extends Component {
             editedBy = task.editedBy
 
             this.setState({ createdAt, createdBy, editedAt, editedBy })
-            this.setState({ name, assignedTo, description, project, type, priority, status, address, startDate, dueDate, color }, () => {
+            this.setState({ name, assignedTo, description, project, type, priority, status, address, isAllDay, startDate, startHour, dueHour, color }, () => {
                 // if (this.isInit)
                 this.initialState = _.cloneDeep(this.state)
                 // this.isInit = false
@@ -155,64 +180,67 @@ class CreateTask extends Component {
     }
 
     //Screen inputs
-    refreshAddress(address) {
-        this.setState({ address })
-    }
+    async refreshDate(output, field, isAllDay) {
 
-    refreshAssignedTo(isPro, id, nom, prenom, role) {
-        const assignedTo = { id, fullName: isPro ? nom : `${prenom} ${nom}`, role, error: '' }
-        this.setState({ assignedTo })
-    }
-
-    refreshDate(label, date) {
-        const pickedDate = {
-            value: moment(date).format(),
+        let date = {
+            value: output,
             error: ''
         }
 
-        if (label === 'start') {
-            this.setState({ startDate: pickedDate })
-        }
+        let update = {}
+        update[field] = date
 
-        else if (label === 'due') {
-            this.setState({ dueDate: pickedDate })
-        }
-    }
+        if (field === 'startDate' && isAllDay)
+            update['endDate'] = date
 
-    refreshProject(project) {
-        this.setState({ project })
+        this.setState(update, () => this.validateSchedule())
     }
 
     //Inputs validation
-    validateInputs() {
-        let { name, assignedTo, startDate, dueDate } = this.state
+    validateSchedule() {
+        const { isAllDay, startDate, endDate, startHour, dueHour } = this.state
+        const periodicTaskCreation = !this.isEdit && !isAllDay
+        const dateError = periodicTaskCreation ? compareDates(endDate.value, startDate.value, 'isBefore') : ''
+        const timeError = isAllDay ? '' : compareTimes(moment(dueHour.value, 'hh:mm'), moment(startHour.value, 'hh:mm'), 'isBefore')
 
-        let nameError = nameValidator(name.value, '"Nom de la tâche"')
-        let assignedToError = nameValidator(assignedTo.id, '"Attribué à"')
-        let dateError = compareDates(dueDate.value, startDate.value, 'isBefore')
-
-        if (nameError || assignedToError || dateError) {
-            name.error = nameError
-            assignedTo.error = assignedToError
-            startDate.error = dateError
-            dueDate.error = dateError
-
-            this.setState({ name, assignedTo, startDate, dueDate, loading: false })
+        if (dateError || timeError) {
+            endDate.error = dateError
+            dueHour.error = timeError
+            this.setState({ endDate, dueHour })
             return false
         }
 
-        return true
+        else return true
+    }
+
+    validateInputs() {
+        let isValid = true
+        let { name, assignedTo, isAllDay } = this.state
+
+        let isValid1 = true
+        const nameError = nameValidator(name.value, '"Nom de la tâche"')
+        const assignedToError = nameValidator(assignedTo.id, '"Attribué à"')
+
+        if (nameError || assignedToError) {
+            name.error = nameError
+            assignedTo.error = assignedToError
+            isValid1 = false
+            this.setState({ name, assignedTo, loading: false })
+        }
+        const isValid2 = this.validateSchedule()
+        isValid = isValid1 && isValid2
+        return isValid
     }
 
     alertCollaborator() {
         const title = ""
-        const message = "L'utilisateur à qui vous voulez assigner cette tâche n'est pas un collaborateur dans le projet selectionné. Veuillez utiliser la barre de recherche pour trouver un collaborateur."
+        const message = "L'utilisateur à qui vous voulez assigner cette tâche n'est pas un collaborateur dans le projet selectionné."
         const handleConfirm = () => navigateToScreen(this, 'ListEmployees', {
             onGoBack: this.refreshAssignedTo,
             prevScreen: 'CreateTask',
             isRoot: false,
-            titleText: 'Attribuer la tâche à' ?
-                query : db.collection('Users').where('role', '==', 'Commercial').where('deleted', '==', false)
+            titleText: 'Attribuer la tâche à',
+            query: db.collection('Users').where('role', '==', 'Commercial').where('deleted', '==', false)
         })
         const handleCancel = () => console.log('cancel')
         const confirmText = 'OK'
@@ -220,24 +248,36 @@ class CreateTask extends Component {
     }
 
     //Submit
-    async handleSubmit() {
+    async handleSubmit(isConflictHandler = false) {
         Keyboard.dismiss()
 
+        //1. Check network (disable edit offline)
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
         if (isEditOffLine) return
 
+        //2. Init variables
         let { error, loading } = this.state
-        let { name, assignedTo, description, project, type, priority, status, address, startDate, dueDate, color } = this.state
+        let { name, assignedTo, description, project, type, priority, status, address, color } = this.state
+        const { isAllDay, startDate, endDate, startHour, dueHour } = this.state
 
         if (loading || _.isEqual(this.state, this.initialState)) return
         load(this, true)
 
-        //1.1 Validate inputs 
+        //3.1 Validate inputs 
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        //1.2 ASSIGNED TO VERIFICATION (if he is one of the project's collaborators)
+        //3.2 POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
+        const currentRole = this.props.role.id
+        const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
+        if (isBlockedUpdates) {
+            Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
+            load(this, false)
+            return
+        }
+
+        //3.3 "ASSIGNED TO" VERIFICATION (if he is one of the project's collaborators)
         if (project && project.subscribers) {
             const collaborators = project.subscribers.map((sub) => sub.id)
             if (!collaborators.includes(assignedTo.id)) {
@@ -247,35 +287,26 @@ class CreateTask extends Component {
             }
         }
 
-        //POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
-        const currentRole = this.props.role.id
-        const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
-        if (isBlockedUpdates) {
-            Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
-            load(this, false)
-            return
-        }
-
-        // 2. ADDING task DOCUMENT
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const dateKey = moment(startDate.value).format('YYYY-MM-DD')
-        const timestamp = moment(startDate.value).format()
+        //4. Building task(s)
+        const currentUser = { id: firebase.auth().currentUser.uid, fullName: firebase.auth().currentUser.displayName }
         let natures
         this.types.forEach((t) => { if (t.value === type) natures = t.natures })
 
         let task = {
-            dateKey: dateKey,
+            id: this.TaskId,
             name: name.value,
             assignedTo: { id: assignedTo.id, fullName: assignedTo.fullName },
             description: description.value,
             project,
-            type: type,
+            type,
             natures,
-            priority: priority,
-            status: status,
+            priority,
+            status,
             address: { description: address.description, place_id: address.place_id },
-            startDate: startDate.value,
-            dueDate: dueDate.value,
+            isAllDay,
+            date: moment(startDate.value).format('YYYY-MM-DD'),
+            startHour: isAllDay ? undefined : startHour.value,
+            dueHour: isAllDay ? undefined : dueHour.value,
             editedAt: moment().format(),
             editedBy: currentUser,
             color,
@@ -287,30 +318,155 @@ class CreateTask extends Component {
             task.createdBy = currentUser
         }
 
-        console.log('Ready to add task...')
+        let tasks = this.isEdit ? [task] : this.setTasks(task, startDate, endDate)
 
-        //  if (isAllDay) {
-        db.collection('Agenda').doc(this.TaskId).set(task, { merge: true })
-        // }
+        //5. Limit number of tasks created
+        const isOverLimit = this.limitTasks(tasks.length)
+        if (isOverLimit) {
+            load(this, false)
+            return
+        }
 
-        // else {
-        //     const dateIterator = startDate
-        //     while (moment(dateIterator).isBefore(dueDate)) {
-        //         console.log(dateIterator)
-        //         dateIterator = moment(dateIterator).add(1, 'day')
-        //     }
-        // }
+        //6. Handle conflicts
+        const overlappingTasks = await this.checkTasksConflicts(tasks)
+        if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+            load(this, false)
+            this.handleConflicts(overlappingTasks, task)
+            return
+        }
 
-        // if (this.isEdit)
-        //     this.props.navigation.state.params.onGoBack(true) //Don't refresh tasks in agenda
+        //7. Persist task(s)
+        await this.persistTasks(tasks)
 
-        // else
-        //this.props.navigation.state.params.onGoBack(true) //Refresh tasks in agenda
+        //8. Go back
+        if (this.prevScreen === 'Agenda') {
+            const refreshAgenda = true
+            this.props.navigation.state.params.onGoBack(refreshAgenda)
+        }
 
         this.props.navigation.goBack()
     }
 
+    //Conflicts handlers
+    async checkTasksConflicts(tasks) {
+        let overlappingTasks = {}
 
+        for (const tsk of tasks) {
+            const overlappingTasksArr = await this.checkAssignedToAvailability(tsk)
+            if (overlappingTasksArr.length > 0) {
+                overlappingTasks[tsk.id] = overlappingTasksArr
+            }
+        }
+
+        return overlappingTasks
+    }
+
+    async checkAssignedToAvailability(task) {
+
+        const dateChanged = this.initialState.startDate !== task.date
+        const timeChanged = this.initialState.startHour !== task.startHour
+        const assignedToChanged = this.initialState.assignedTo.id !== task.assignedTo.id
+
+        if (!dateChanged && !timeChanged && !assignedToChanged) return
+
+        const today = moment().format('YYYY-MM-DD')
+        const overlappingTasks = await db.collection('Agenda').where('assignedTo.id', '==', task.assignedTo.id).where('date', '>=', today)
+            .get().then((querySnapshot) => {
+
+                if (querySnapshot.empty) return []
+
+                let overlappingTasks = []
+                for (const doc of querySnapshot.docs) {
+
+                    const taskDoc = doc.data()
+                    const notSameDoc = taskDoc.id !== task.id //updating document
+                    if (notSameDoc && taskDoc.date === task.date) {
+                        if (taskDoc.isAllDay) {
+                            overlappingTasks.push(taskDoc)
+                        }
+
+                        else {
+                            if (task.isAllDay)
+                                overlappingTasks.push(taskDoc)
+
+                            else {
+                                const timerange1 = [taskDoc.startHour, taskDoc.dueHour]
+                                const timerange2 = [task.startHour, task.dueHour]
+                                const timeranges = [timerange1, timerange2]
+                                const isOverlap = checkOverlap(timeranges)
+                                if (isOverlap)
+                                    overlappingTasks.push(taskDoc)
+                            }
+                        }
+                    }
+                }
+                return overlappingTasks
+            })
+
+        return overlappingTasks
+    }
+
+    handleConflicts(overlappingTasks, newTask) {
+        this.setState({ showTasksConflicts: true, overlappingTasks, newTask })
+    }
+
+    //Firestore handlers
+    async persistTasks(tasks) {
+        if (this.isEdit) {
+            await this.updateTask(tasks[0])
+        }
+
+        else this.createTasks(tasks)
+    }
+
+    async updateTask(task) {
+        await db.collection('Agenda').doc(task.id).set(task, { merge: true })
+    }
+
+    createTasks(tasks) {
+        for (const task of tasks) {
+            db.collection('Agenda').doc(task.id).set(task)
+        }
+    }
+
+    setTasks(task, startDate, endDate) {
+        let tasks = []
+        let { isAllDay, startHour, dueHour } = task
+
+        const startDateFormated = moment(startDate.value).format('YYYY-MM-DD')
+        const endDateFormated = moment(endDate.value).format('YYYY-MM-DD')
+
+        //Duplicate over the period startDate - endDate
+        var dateIterator = moment(startDateFormated).format('YYYY-MM-DD')
+        let predicate = moment(dateIterator).isSameOrBefore(endDateFormated, 'day')
+
+        while (predicate) {
+
+            let tempTask = _.cloneDeep(task)
+
+            tempTask.id = generateId('GS-TC-')
+            tempTask.date = dateIterator
+            tempTask.startHour = startHour
+            tempTask.dueHour = dueHour
+
+            tasks.push(tempTask)
+
+            dateIterator = moment(dateIterator).add(1, 'day').format('YYYY-MM-DD')
+            predicate = moment(dateIterator).isSameOrBefore(endDateFormated, 'day')
+        }
+
+        return tasks
+    }
+
+    limitTasks(tasksLength) {
+        if (tasksLength > 25) {
+            Alert.alert('Limite dépassée', "Impossible d'ajouter plus de 25 tâches en une seule fois.")
+            return true
+        }
+        else return false
+    }
+
+    //Delete task
     alertDeleteTask() {
         const title = "Supprimer la tâche"
         const message = 'Êtes-vous sûr de vouloir supprimer cette tâche ?'
@@ -356,8 +512,137 @@ class CreateTask extends Component {
         return query
     }
 
+    renderTimeForm(canWrite) {
+        const { isAllDay, startDate, endDate, startHour, dueHour } = this.state
+        const showEndDate = !this.isEdit && !isAllDay
+
+        return (
+            <View style={{ flex: 1 }}>
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
+                    <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Switch
+                            value={isAllDay}
+                            onValueChange={(isAllDay) => this.setState({ isAllDay })}
+                            color={theme.colors.primary}
+                            disabled={!canWrite}
+                        />
+                    </View>
+                </View>
+
+                <ItemPicker
+                    onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début', isAllDay, showTimePicker: false, targetField: 'startDate' })}
+                    label={'Date de début *'}
+                    value={moment(startDate.value).format('ll')}
+                    editable={canWrite}
+                    showAvatarText={false}
+                    icon={faCalendarPlus}
+                    errorText={startDate.error}
+                />
+
+                {showEndDate &&
+                    <ItemPicker
+                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: "de fin", isAllDay, showTimePicker: false, targetField: 'endDate' })}
+                        label="Date de fin *"
+                        value={moment(endDate.value).format('ll')}
+                        editable={canWrite}
+                        showAvatarText={false}
+                        icon={faCalendarPlus}
+                        errorText={endDate.error}
+                    />
+                }
+
+                {!isAllDay &&
+                    <ItemPicker
+                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début', isAllDay, showDayPicker: false, targetField: 'startHour' })}
+                        label={'Heure de début *'}
+                        value={startHour.value}
+                        editable={canWrite}
+                        showAvatarText={false}
+                        icon={faClock}
+                        errorText={startHour.error}
+                    />
+                }
+
+                {!isAllDay &&
+                    <ItemPicker
+                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de fin', isAllDay, showDayPicker: false, targetField: 'dueHour' })}
+                        label={"Heure d'échéance *"}
+                        value={dueHour.value}
+                        editable={canWrite}
+                        showAvatarText={false}
+                        icon={faClock}
+                        errorText={dueHour.error}
+                        style={{ marginBottom: 15 }}
+                    />
+                }
+            </View>
+        )
+    }
+
+    refreshTaskConflictDate(output, field, isAllDay) {
+        let update = {}
+        update[field] = output
+        this.setState(update)
+        this.setState({ showTasksConflicts: !this.state.showTasksConflicts })
+    }
+
+    renderTasksConflicts() {
+        const { showTasksConflicts, overlappingTasks, newTask, isAllDay, startDate, endDate } = this.state
+        const { selectedDate, selectedStartHour, selectedDueHour, pickedDate, pickedTask, selectedIsAllDay } = this.state
+        const { isConnected } = this.props.network
+
+        const dateHandler = (label, targetField, showDayPicker, showTimePicker) => {
+            this.setState({ showTasksConflicts: !showTasksConflicts }, () => {
+                navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshTaskConflictDate, label, isAllDay, showDayPicker, showTimePicker, targetField })
+            })
+        }
+
+        const rehydrateTaskConflictsProps = (pickedDate, pickedTask, selectedIsAllDay) => {
+            this.setState({ pickedDate, pickedTask, selectedIsAllDay })
+        }
+
+        const myHandler = (pickedDate, pickedTask, selectedIsAllDay, label, targetField, showDayPicker, showTimePicker) => {
+            rehydrateTaskConflictsProps(pickedDate, pickedTask, selectedIsAllDay)
+            dateHandler(label, targetField, showDayPicker, showTimePicker)
+        }
+
+        const initPickedTaskSelectedItems = (selectedIsAllDay, selectedDate, selectedStartHour, selectedDueHour) => {
+            this.setState({ selectedIsAllDay, selectedDate, selectedStartHour, selectedDueHour })
+        }
+
+        return (
+            <TasksConflicts
+                isVisible={showTasksConflicts}
+                tasks={overlappingTasks}
+                toggleModal={() => this.setState({ showTasksConflicts: !showTasksConflicts })}
+                refreshConflicts={async () => await this.handleSubmit(true)}
+                isEdit={this.isEdit}
+                newTask={newTask}
+
+                startDate={startDate.value}
+                endDate={endDate.value}
+                handleDate={(pickedDate, pickedTask, selectedIsAllDay) => myHandler(pickedDate, pickedTask, selectedIsAllDay, "de début", 'selectedDate', true, false)}
+                handleStartHour={(pickedDate, pickedTask, selectedIsAllDay) => myHandler(pickedDate, pickedTask, selectedIsAllDay, "de début", 'selectedStartHour', false, true)}
+                handleDueHour={(pickedDate, pickedTask, selectedIsAllDay) => myHandler(pickedDate, pickedTask, selectedIsAllDay, "de fin", 'selectedDueHour', false, true)}
+
+                initPickedTaskSelectedItems={initPickedTaskSelectedItems}
+                parentSelectedIsAllDay={selectedIsAllDay}
+                parentSelectedDate={selectedDate}
+                parentSelectedStartHour={selectedStartHour}
+                parentSelectedDueHour={selectedDueHour}
+                parentPickedDate={pickedDate}
+                parentPickedTask={pickedTask}
+
+                loading={this.state.loading}
+                isConnected={isConnected}
+            />
+        )
+    }
+
     render() {
-        let { name, description, assignedTo, project, startDate, startHour, dueDate, dueHour, type, priority, status, address, color } = this.state
+        let { name, description, assignedTo, project, startDate, startHour, endDate, dueHour, isAllDay, type, priority, status, address, color, showTasksConflicts, overlappingTasks } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.tasks
@@ -367,7 +652,7 @@ class CreateTask extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar close={!loading} title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
+                <Appbar close title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={() => this.handleSubmit(false)} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
 
                 {loading ?
                     <Loading size='large' />
@@ -436,12 +721,6 @@ class CreateTask extends Component {
                                         editable={canWrite}
                                     />
 
-                                    <ColorPicker
-                                        label='Couleur de la tâche'
-                                        selectedColor={color}
-                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite} />
-
                                     <Picker
                                         label="Type *"
                                         returnKeyType="next"
@@ -493,37 +772,20 @@ class CreateTask extends Component {
                                         editable={canWrite}
                                         isEdit={this.isEdit} />
 
-
-                                    {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 25 }}>
-                                        <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
-                                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                            <Switch onToggleSwitch={(isAllDay) => this.setState({ isAllDay })} disabled={!canWrite} />
-                                            <CustomIcon icon={faQuestionCircle} color={theme.colors.gray_dark} size={21} onPress={() => Alert.alert('Toute la journée', `Si vous activez "Toute la journée", Une seule tâche va être crée et étendue sur toute la période définie. Sinon, la tâche se répétera chaque jour quotidiennement dans le créneau horaire défini.`)} />
-                                        </View>
-                                    </View> */}
-
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début' })}
-                                        label='Date de début *'
-                                        value={moment(startDate.value).format('lll')}
-                                        editable={canWrite}
-                                        showAvatarText={false}
-                                        icon={faCalendarPlus}
-                                        errorText={startDate.error}
-                                    />
-
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: "d'échéance" })}
-                                        label="Date d'échéance *"
-                                        value={moment(dueDate.value).format('lll')}
-                                        editable={canWrite}
-                                        showAvatarText={false}
-                                        icon={faCalendarPlus}
-                                        errorText={dueDate.error}
-                                    />
+                                    <ColorPicker
+                                        label='Couleur de la tâche'
+                                        selectedColor={color}
+                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+                                        editable={canWrite} />
                                 </View>
                             }
                         />
+
+                        {<FormSection
+                            sectionTitle='Créneau horaire'
+                            sectionIcon={faCalendar}
+                            form={this.renderTimeForm(canWrite)}
+                        />}
 
                         {this.isEdit &&
                             <FormSection
@@ -534,7 +796,7 @@ class CreateTask extends Component {
                                         <MyInput
                                             label="Date de création"
                                             returnKeyType="done"
-                                            value={createdAt}
+                                            value={moment(createdAt).format('LLL')}
                                             editable={false}
                                         />
                                         <MyInput
@@ -546,7 +808,7 @@ class CreateTask extends Component {
                                         <MyInput
                                             label="Dernière mise à jour"
                                             returnKeyType="done"
-                                            value={editedAt}
+                                            value={moment(editedAt).format('LLL')}
                                             editable={false}
                                         />
                                         <MyInput
@@ -559,6 +821,8 @@ class CreateTask extends Component {
                                 }
                             />
                         }
+
+                        {showTasksConflicts && this.renderTasksConflicts()}
                     </ScrollView>
                 }
             </View>

@@ -8,6 +8,7 @@ import _ from 'lodash'
 import { faCheckCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
 import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-solid-svg-icons'
 import { withNavigation } from 'react-navigation'
+import { connect } from 'react-redux'
 
 import FormSection from './FormSection'
 import ModalOptions from './ModalOptions'
@@ -95,6 +96,8 @@ class ProcessAction extends Component {
         const { process } = this.state
         const { project } = this.props
 
+        console.log(this.props.processModel)
+
         load(this, true)
         await this.runProcessHandler(process)
         load(this, false)
@@ -122,10 +125,11 @@ class ProcessAction extends Component {
 
     async runProcessHandler(process) {
 
-        const { project, clientId, step } = this.props
+        const { project, clientId, step, processModel } = this.props
         const secondPhaseId = getPhaseId(step)
 
-        const updatedProcess = await projectProcessHandler(process, secondPhaseId, clientId, project)
+        const copyProcessModel = _.cloneDeep(processModel)
+        const updatedProcess = await projectProcessHandler(copyProcessModel, process, secondPhaseId, clientId, project)
 
         //if (!_.isEqual(process, updatedProcess)) {
         await this.updateProcess(updatedProcess)
@@ -279,8 +283,7 @@ class ProcessAction extends Component {
     //func
     validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
         const { process, currentPhaseId, currentStepId, currentAction } = this.state
-
-        console.log(comment, choices, stay, nextStep, nextPhase)
+        const { processModel } = this.props
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
@@ -318,7 +321,7 @@ class ProcessAction extends Component {
         await this.countDown(1000)
 
         if (nextStep || nextPhase) {
-            const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
+            const transitionRes = handleTransition(processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
             processTemp = transitionRes.process
         }
 
@@ -351,8 +354,8 @@ class ProcessAction extends Component {
         const { currentPhase, currentAction } = this.state
         const { responsable, verificationType, type, screenName, screenParams } = currentAction
         const currentUserId = firebase.auth().currentUser.uid
-        const currentUserRole = this.props.role.id
-
+        const currentUserRole = this.props.role.value
+       
         const enabledAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
         if (!enabledAction) {
             Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
@@ -533,7 +536,17 @@ const styles = StyleSheet.create({
     }
 })
 
-export default withNavigation(ProcessAction)
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        processModel: state.process.processModel
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default withNavigation(connect(mapStateToProps)(ProcessAction))
+
+// export default withNavigation(ProcessAction)
 
 
 

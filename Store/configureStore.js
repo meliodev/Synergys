@@ -9,6 +9,7 @@ import permissionsReducer from './Reducers/permissionsReducer'
 import fcmtokenReducer from './Reducers/fcmtokenReducer'
 import networkReducer from './Reducers/networkReducer'
 import documentsReducer from './Reducers/documentsReducer'
+import processReducer from './Reducers/processReducer'
 import { resetState } from '../core/redux';
 
 const rootPersistConfig = {
@@ -16,7 +17,15 @@ const rootPersistConfig = {
     storage: AsyncStorage
 }
 
-const appReducer = persistCombineReducers(rootPersistConfig, { roles: rolesReducer, permissions: permissionsReducer, fcmtoken: fcmtokenReducer, network: networkReducer, documents: documentsReducer })
+const appReducer = persistCombineReducers(rootPersistConfig, {
+    roles: rolesReducer,
+    permissions: permissionsReducer,
+    fcmtoken: fcmtokenReducer,
+    network: networkReducer,
+    documents: documentsReducer,
+    process: processReducer
+})
+
 //const rootReducer = combineReducers({ roles: rolesReducer, fcmtoken: fcmtokenReducer, network: networkReducer, documents: documentsReducer })
 
 const rootReducer = (state, action) => {

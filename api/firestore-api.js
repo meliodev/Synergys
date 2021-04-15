@@ -179,7 +179,6 @@ export const createClient = async function createClient(userData, eventHandlers,
   }
 }
 
-
 //READ
 export const getResponsableByRole = async (role) => {
   const user = await db.collection('Users').where('role', '==', role).get()

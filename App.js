@@ -7,6 +7,11 @@ import { persistStore } from 'redux-persist'
 import { PersistGate } from 'redux-persist/es/integration/react'
 import { Provider } from 'react-redux'
 import { MenuProvider } from 'react-native-popup-menu';
+import _ from 'lodash'
+
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
 
 import firebase from '@react-native-firebase/app'
 import '@react-native-firebase/auth'
@@ -23,15 +28,16 @@ import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
 import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
+import { processModel } from './processModel'
 
-
-const settings = {
-  cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-}
-
-firebase.firestore().settings(settings)
 
 const db = firebase.firestore()
+db.settings({
+  cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
+  // persistence: false,
+  // host: 'localhost:8080',
+  // ssl: false,
+})
 
 const paperTheme = {
   ...DefaultTheme,
@@ -50,7 +56,6 @@ const paperTheme = {
 
 class App extends Component {
 
-
   async componentDidMount() {
     //Notification channels
     const channelId = await notifee.createChannel({
@@ -64,7 +69,6 @@ class App extends Component {
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
   }
 
-
   //Forground: messages listener
   async onForegroundMessageReceived(message) {
     await notifee.displayNotification(JSON.parse(message.data.notifee))
@@ -76,7 +80,7 @@ class App extends Component {
 
   render() {
     let persistor = persistStore(Store)
-    // persistor.purge()
+    //  persistor.purge()
 
     return (
       <Provider store={Store}>
@@ -85,6 +89,7 @@ class App extends Component {
             <MenuProvider>
               <Wrapper>
                 <RootController />
+                {/* <Text>Hello world !</Text> */}
               </Wrapper>
             </MenuProvider>
           </PaperProvider>
