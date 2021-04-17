@@ -1,32 +1,22 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { faInfoCircle } from '@fortawesome/pro-light-svg-icons';
 
-export default function StepInstruction({
-  instructions,
-  showPopup,
-  setShowPopup,
-}) {
+import { CustomIcon } from '../../../components';
+import * as theme from '../../../core/theme'
+
+export default function StepInstruction({ instructions }) {
   return (
     <View>
-      <Ionicons
-        onPress={() => setShowPopup(!showPopup)}
-        name="ios-information-circle-outline"
-        size={20}
+      <CustomIcon
+        icon={faInfoCircle}
+        onPress={() => Alert.alert('', instructions)}
+        size={16}
         color="#0A0F70"
       />
-      {showPopup && (
-        <View style={styles.instructionContainer}>
-          <TouchableOpacity
-            onPress={() => setShowPopup(false)}
-            style={styles.instructionSection}>
-            <Text style={{ fontSize: 12 }}>{instructions}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({

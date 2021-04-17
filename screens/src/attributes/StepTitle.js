@@ -1,14 +1,14 @@
-import React from 'react';
-import { StyleSheet, Text } from 'react-native';
+import React from 'react'
+import { StyleSheet, Text } from 'react-native'
+import * as theme from '../../../core/theme'
 
 export default function StepTitle({ title }) {
-  return <Text style={styles.stepTitle}>{title}</Text>;
+  return <Text style={[theme.customFontMSregular.body, styles.stepTitle]}>{title}</Text>
 }
 
 const styles = StyleSheet.create({
   stepTitle: {
-    color: '#25D366',
-    // fontWeight: 'bold',
-    marginHorizontal: 10,
-  },
-});
+    color: theme.colors.primary,
+    marginHorizontal: 10
+  }
+})

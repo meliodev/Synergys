@@ -3,23 +3,21 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import * as theme from '../../../core/theme'
 
 export default function StepProgress({ progress }) {
+  const color = progress >= 75 ? theme.colors.primary : theme.colors.secondary
   return (
     <AnimatedCircularProgress
-      size={35}
+      size={33}
       width={2}
       fill={progress}
-      tintColor="#777777"
+      tintColor={color}
       // onAnimationComplete={() => console.log('onAnimationComplete')}
       backgroundColor="#D8D8D8"
       rotation={0}>
       {(fill) => (
-        <Text
-          style={[
-            styles.percentText,
-            { color: progress > 75 ? '#25D366' : '#0A0F70' },
-          ]}>
+        <Text style={[theme.customFontMSmedium.extraSmall, { color, textAlign: 'center' },]}>
           {parseInt(fill)}%
         </Text>
       )}

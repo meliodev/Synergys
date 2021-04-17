@@ -1,9 +1,11 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, ScrollView, Text } from 'react-native';
 import StepIndicator from 'react-native-step-indicator';
 import PhaseTitle from '../attributes/PhastTitle';
 import PhaseStatus from '../attributes/PhaseStatus';
 import { PRIMARY_COLOR } from '../utils/color';
+import { constants } from '../../../core/constants';
+import * as theme from '../../../core/theme';
 
 const secondIndicatorStyles = {
   stepIndicatorSize: 30,
@@ -20,29 +22,25 @@ const secondIndicatorStyles = {
   stepIndicatorFinishedColor: '#ffffff',
   stepIndicatorUnFinishedColor: '#ffffff',
   stepIndicatorCurrentColor: '#ffffff',
-  stepIndicatorLabelFontSize: 13,
-  currentStepIndicatorLabelFontSize: 13,
+  stepIndicatorLabelFontSize: 5,
+  currentStepIndicatorLabelFontSize: 8,
   stepIndicatorLabelCurrentColor: '#aaaaaa',
   stepIndicatorLabelFinishedColor: '#ffffff',
   stepIndicatorLabelUnFinishedColor: '#aaaaaa',
-  labelColor: '#999999',
-  labelSize: 13,
+  labelColor: theme.colors.secondary,
+  labelSize: 8,
   currentStepLabelColor: '#999999',
 };
 
-export default function PhaseComponent({
-  labels,
-  status,
-  currentPage,
-  setCurrentPage,
-}) {
+export default function PhaseComponent({ labels, status, currentPage, setCurrentPage }) {
+
   const onStepPress = (position) => {
-    setCurrentPage(position);
-  };
+    setCurrentPage(position)
+  }
 
   const renderStepIndicator = (params) => (
-     <PhaseStatus params={params} status={status[params.position]} />
-  );
+    <PhaseStatus params={params} status={status[params.position]} />
+  )
 
   const renderLabel = ({ position, label, currentPosition }) => {
     return (
@@ -54,8 +52,9 @@ export default function PhaseComponent({
             : styles.stepLabel
         }
       />
-    );
-  };
+    )
+  }
+
   return (
     <View style={styles.container}>
       <StepIndicator
@@ -68,7 +67,7 @@ export default function PhaseComponent({
         labels={labels}
       />
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -79,6 +78,6 @@ const styles = StyleSheet.create({
     color: '#25D366'
   },
   stepLabel: {
-   // color: '#000'
+    // color: '#000'
   }
 });

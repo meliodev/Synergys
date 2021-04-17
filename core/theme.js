@@ -225,6 +225,14 @@ const customFontMSmedium = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-Medium',
   },
+  small: {
+    fontSize: 10,
+    fontFamily: 'Montserrat-Medium',
+  },
+  extraSmall: {
+    fontSize: 8,
+    fontFamily: 'Montserrat-Medium',
+  },
 }
 
 const customFontMSregular = {
@@ -258,6 +266,10 @@ const customFontMSregular = {
   },
   small: {
     fontSize: 10,
+    fontFamily: 'Montserrat-Regular',
+  },
+  extraSmall: {
+    fontSize: 8,
     fontFamily: 'Montserrat-Regular',
   },
 }

@@ -410,6 +410,7 @@ const verifyActions_docCreation = async (actions) => {
             query = query.where(filter, operation, value) //exp: db.collection(collection).where('project.id', '==', projectId).where('type', '==', x)
         })
 
+        console.log(collection, action.queryFilters)
         await query.get().then((querysnapshot) => {
 
             if (querysnapshot.empty) {

@@ -58,7 +58,7 @@ const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTit
 class ProcessAction extends Component {
 
     constructor(props) {
-        super(props);
+        super(props)
 
         this.runProcessHandler = this.runProcessHandler.bind(this)
         this.validateAction = this.validateAction.bind(this)
@@ -93,28 +93,29 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
+
         const { process } = this.state
-        const { project } = this.props
+        const { project, canUpdate } = this.props
 
-        console.log(this.props.processModel)
-
-        load(this, true)
-        await this.runProcessHandler(process)
-        load(this, false)
-
-        this.focusListener = this.props.navigation.addListener('willFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
+        if (canUpdate) {
             load(this, true)
-            await this.runProcessHandler(this.state.process)
+            await this.runProcessHandler(process)
             load(this, false)
-        })
 
-        this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
-            if (doc.exists) {
-                //#Task should runProcessHandler in case another user submits the last action
-                const updatedProcess = doc.data().process
-                this.refreshProcess(updatedProcess)
-            }
-        })
+            this.focusListener = this.props.navigation.addListener('willFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
+                load(this, true)
+                await this.runProcessHandler(this.state.process)
+                load(this, false)
+            })
+
+            this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
+                if (doc.exists) {
+                    //#Task should runProcessHandler in case another user submits the last action
+                    const updatedProcess = doc.data().process
+                    this.refreshProcess(updatedProcess)
+                }
+            })
+        }
     }
 
     componentWillUnmount() {
@@ -140,7 +141,6 @@ class ProcessAction extends Component {
         //     this.refreshProcess(updatedProcess)
         // }
     }
-
 
     async updateProcess(updatedProcess) {
         const { project } = this.props
@@ -355,7 +355,7 @@ class ProcessAction extends Component {
         const { responsable, verificationType, type, screenName, screenParams } = currentAction
         const currentUserId = firebase.auth().currentUser.uid
         const currentUserRole = this.props.role.value
-       
+
         const enabledAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
         if (!enabledAction) {
             Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
@@ -397,7 +397,10 @@ class ProcessAction extends Component {
 
     //renderer
     renderAction = (canUpdate) => {
-        const { currentAction, showModal, showDialog, loadingDialog, dialogTitle, dialogInputLabel, nextStep, nextPhase, loadingModal, choice, loading } = this.state
+
+        let currentAction = null
+        const { showModal, showDialog, loadingDialog, dialogTitle, dialogInputLabel, nextStep, nextPhase, loadingModal, choice, loading } = this.state
+        currentAction = this.props.isActionOnly ? this.props.action : this.state.currentAction
 
         if (currentAction) {
             var { title, status, verificationType, choices } = currentAction
@@ -458,26 +461,40 @@ class ProcessAction extends Component {
     }
 
     navigateToProgression(process) {
-        this.props.navigation.navigate('Progression', { process })
+        const { project, clientId, step, canUpdate, role } = this.props
+        const navParams = { process, project, clientId, step, canUpdate, role }
+        this.props.navigation.navigate('Progression', navParams)
     }
 
     render() {
         const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, processUpdated, expanded, loading } = this.state
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
-        const { canUpdate } = this.props
+        const { canUpdate, isActionOnly } = this.props
 
         if (currentStep) {
             const doneActions = currentStep.actions.filter((action) => action.status === 'done')
             var progress = (doneActions.length / currentStep.actions.length) * 100
         }
 
-        return (
+        if (isActionOnly) {
+            return (
+                <View style={{ height: 50, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
+                    {this.renderAction(canUpdate)}
+                </View>
+            )
+        }
+
+        else return (
             <View style={styles.container}>
 
                 <View style={{ backgroundColor: theme.colors.primary, borderTopRightRadius: 5, borderTopLeftRadius: 5, paddingVertical: 5 }}>
                     <Text style={[theme.customFontMSregular.body, { color: theme.colors.white, textAlign: 'center' }]}>Suivi du projet</Text>
                     <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: 2, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
-                        <CustomIcon icon={faEye} color={theme.colors.white} onPress={() => this.navigateToProgression(process)} />
+                        <CustomIcon
+                            onPress={() => this.navigateToProgression(process)}
+                            icon={faEye}
+                            color={theme.colors.white}
+                        />
                     </TouchableOpacity>
                 </View>
 

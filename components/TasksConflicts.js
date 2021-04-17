@@ -23,9 +23,7 @@ import Loading from "./Loading"
 const db = firebase.firestore()
 
 const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTask, isEdit, startDate, endDate, handleDate, handleStartHour, handleDueHour, initPickedTaskSelectedItems, parentSelectedIsAllDay, parentPickedDate, parentPickedTask, parentSelectedDate, parentSelectedStartHour, parentSelectedDueHour, loading, isConnected, ...props }) => {
-
     const firstTaskId = Object.keys(tasks)[0]
-    //const chosenDate = firstTaskId ? tasks[firstTaskId][0].date : ''
     const [pickedDate, setPickedDate] = React.useState('')
     const [pickedTask, setPickedTask] = React.useState(null)
     const [updateTaskLoading, setUpdateTaskLoading] = React.useState(false)

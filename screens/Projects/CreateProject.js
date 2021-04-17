@@ -657,6 +657,7 @@ class CreateProject extends Component {
                                         clientId={client.id}
                                         step={step}
                                         canUpdate={canWrite && !this.isClient}
+                                        isActionOnly={false}
                                         role={this.props.role}
                                     />
                                 </View>
