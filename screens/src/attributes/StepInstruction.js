@@ -13,7 +13,7 @@ export default function StepInstruction({ instructions }) {
         icon={faInfoCircle}
         onPress={() => Alert.alert('', instructions)}
         size={16}
-        color="#0A0F70"
+        color={theme.colors.gray_dark}
       />
     </View>
   )

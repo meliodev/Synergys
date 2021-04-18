@@ -11,7 +11,6 @@ import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
 const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview }) => {
-
     const selectElement = (index) => {
         //Unselect all types
         elements.forEach((element, key) => elements[key].selected = false)
@@ -137,6 +136,7 @@ const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation,
 const ModalOptions = ({
     title, columns = 3, isVisible, toggleModal, handleCancel, handleConfirm,
     elements, handleSelectElement, autoValidation, isLoading, modalStyle, isReview, ...props }) => {
+        console.log('title.............', title)
 
     let elementSize
 

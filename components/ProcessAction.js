@@ -5,7 +5,7 @@ import { List } from 'react-native-paper'
 import Dialog from 'react-native-dialog'
 import firebase from '@react-native-firebase/app'
 import _ from 'lodash'
-import { faCheckCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
+import { faCheckCircle, faExclamationCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
 import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-solid-svg-icons'
 import { withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
@@ -22,6 +22,7 @@ import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
+import ProcessContainer from "../screens/src/container/ProcessContainer"
 
 const db = firebase.firestore()
 
@@ -60,6 +61,7 @@ class ProcessAction extends Component {
     constructor(props) {
         super(props)
 
+        this.refreshProcessHistory = this.refreshProcessHistory.bind(this)
         this.runProcessHandler = this.runProcessHandler.bind(this)
         this.validateAction = this.validateAction.bind(this)
         this.undoPreviousAction = this.undoPreviousAction.bind(this)
@@ -87,35 +89,50 @@ class ProcessAction extends Component {
             currentPhaseId: '',
             currentStepId: '',
 
+            phaseLabels: [],
+            phaseStatuses: [],
+            stepsData: [],
+
             currentAction: null,
+            pressedAction: null,
             loading: false
         }
     }
 
     async componentDidMount() {
 
-        const { process } = this.state
-        const { project, canUpdate } = this.props
+        let { process } = this.state
+        const { project, isAllProcess, canUpdate } = this.props
 
-        if (canUpdate) {
+        load(this, true)
+        await this.runProcessHandler(process)
+        load(this, false)
+
+        this.focusListener = this.props.navigation.addListener('willFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
             load(this, true)
-            await this.runProcessHandler(process)
+            await this.runProcessHandler(this.state.process)
             load(this, false)
+        })
 
-            this.focusListener = this.props.navigation.addListener('willFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
-                load(this, true)
-                await this.runProcessHandler(this.state.process)
-                load(this, false)
-            })
+        this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
+            if (doc.exists) {
+                //#Task should runProcessHandler in case another user submits the last action
+                const updatedProcess = doc.data().process
+                this.refreshProcess(updatedProcess)
 
-            this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
-                if (doc.exists) {
-                    //#Task should runProcessHandler in case another user submits the last action
-                    const updatedProcess = doc.data().process
-                    this.refreshProcess(updatedProcess)
+                if (isAllProcess) {
+                    this.refreshProcessHistory(updatedProcess)
                 }
-            })
-        }
+            }
+        })
+    }
+
+    sortPhases(process) {
+        const procesTemp = Object.entries(process).sort(([keyA, valueA], [keyB, valueB]) => {
+            return (valueA.phaseOrder > valueB.phaseOrder ? 1 : -1)
+        })
+        process = Object.fromEntries(procesTemp)
+        return process
     }
 
     componentWillUnmount() {
@@ -145,6 +162,45 @@ class ProcessAction extends Component {
     async updateProcess(updatedProcess) {
         const { project } = this.props
         await db.collection('Projects').doc(project.id).update({ process: updatedProcess })
+    }
+
+    refreshProcessHistory(process) {
+        let phaseLabels = []
+        let phaseStatuses = []
+        let steps = []
+
+        process = this.sortPhases(process)
+
+        for (let phaseId in process) {
+            const processData = process[phaseId]
+            phaseLabels.push(processData.title)
+
+            let phaseSteps = []
+            let phaseStatus = 'done'
+            for (let stepId in processData.steps) {
+                let step = processData.steps[stepId]
+
+                let actionsDoneCount = 0
+                for (let action of step.actions) {
+                    if (action.status === 'done')
+                        actionsDoneCount += 1
+                }
+                step.actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
+
+                //Step & Phase progress
+                step.progress = actionsDoneCount / step.actions.length * 100
+                if (step.progress < 100)
+                    phaseStatus = 'pending'
+
+                phaseSteps.push(step)
+            }
+
+            phaseStatuses.push(phaseStatus)
+            phaseSteps.sort((a, b) => (a.stepOrder > b.stepOrder) ? 1 : -1)
+            steps.push(phaseSteps)
+        }
+
+        this.setState({ process, phaseLabels, phaseStatuses, stepsData: steps })
     }
 
     refreshProcess(updatedProcess) {
@@ -267,7 +323,7 @@ class ProcessAction extends Component {
         if (type === 'update') {
             const update = {}
             update[field] = value
-            await db.collection(collection).doc(documentId).update(update).then(() => console.log('Document with Id ', documentId, ' updated:', update))
+            await db.collection(collection).doc(documentId).update(update)
         }
     }
 
@@ -348,10 +404,10 @@ class ProcessAction extends Component {
     }
 
     //func
-    onPressAction = async (canUpdate) => {
+    onPressAction = async (canUpdate, currentAction) => {
         if (!canUpdate) return
 
-        const { currentPhase, currentAction } = this.state
+        const { currentPhase } = this.state
         const { responsable, verificationType, type, screenName, screenParams } = currentAction
         const currentUserId = firebase.auth().currentUser.uid
         const currentUserRole = this.props.role.value
@@ -364,7 +420,7 @@ class ProcessAction extends Component {
 
         if (type === 'auto') {
             if (currentAction.choices) {
-                this.setState({ showModal: true })
+                this.setState({ showModal: true, pressedAction: currentAction })
             }
 
             else {
@@ -385,7 +441,7 @@ class ProcessAction extends Component {
             }
 
             else if (verificationType === 'multiple-choices') {
-                this.setState({ showModal: true })
+                this.setState({ showModal: true, pressedAction: currentAction })
             }
 
             else if (verificationType === 'validation') {
@@ -396,14 +452,80 @@ class ProcessAction extends Component {
     }
 
     //renderer
-    renderAction = (canUpdate) => {
+    renderAction = (canUpdate, action) => {
 
-        let currentAction = null
+        const currentAction = action ? action : this.state.currentAction
+
         const { showModal, showDialog, loadingDialog, dialogTitle, dialogInputLabel, nextStep, nextPhase, loadingModal, choice, loading } = this.state
-        currentAction = this.props.isActionOnly ? this.props.action : this.state.currentAction
+        const loadingMessage = action ? "Chargement de l'action..." : "Chargement de l'action à faire..."
 
         if (currentAction) {
-            var { title, status, verificationType, choices } = currentAction
+            var { title, status, verificationType } = currentAction
+            var noComment = currentAction.comment === '' || typeof (currentAction.comment) === 'undefined'
+        }
+
+        return (
+            <View style={styles.action}>
+                <TouchableOpacity onPress={() => this.onPressAction(canUpdate, currentAction)} style={styles.actionTouchable}>
+                    <View style={styles.actionTitleContainer}>
+                        {currentAction && !loading &&
+                            <CustomIcon
+                                style={{ marginRight: 5 }}
+                                icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary}
+                            />
+                        }
+                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? loadingMessage : title}</Text>
+                    </View>
+
+                    {loading ?
+                        <View style={styles.actionIconsContainer}>
+                            <ActivityIndicator size='small' color={theme.colors.white} />
+                            <ActivityIndicator size='small' color={theme.colors.primary} />
+                        </View>
+                        :
+                        <View style={[styles.actionIconsContainer, { justifyContent: (currentAction && !noComment) ? 'space-between' : 'flex-end' }]}>
+                            {currentAction && !noComment &&
+                                <CustomIcon
+                                    icon={faExclamationCircle}
+                                    size={16}
+                                    color={theme.colors.gray_dark}
+                                    onPress={() => Alert.alert('Commentaire', currentAction.comment)}
+                                />
+                            }
+                            {currentAction &&
+                                <CustomIcon
+                                    icon={faInfoCircle}
+                                    size={16}
+                                    color={theme.colors.gray_dark}
+                                    onPress={() => Alert.alert('Instructions', currentAction.instructions)}
+                                />
+                            }
+                        </View>
+                    }
+
+                    {(currentAction && currentAction.choices || verificationType === 'comment') && (
+                        <CommentDialog
+                            showDialog={showDialog}
+                            loadingDialog={loadingDialog}
+                            dialogTitle={dialogTitle}
+                            dialogInputLabel={dialogInputLabel}
+                            hideDialog={() => this.setState({ showDialog: false })}
+                            onSubmitComment={this.onSubmitComment}
+                            choice={choice}
+                            nextStep={nextStep}
+                            nextPhase={nextPhase} />
+                    )}
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    renderModal = () => {
+        const { pressedAction: currentAction, showModal, loadingModal } = this.state
+
+        if (currentAction) {
+            var { title, choices } = currentAction
+            var noComment = currentAction.comment === '' || typeof (currentAction.comment) === 'undefined'
 
             if (choices) {
                 var elements = choices.map((choice) => configChoiceIcon(choice))
@@ -411,52 +533,19 @@ class ProcessAction extends Component {
         }
 
         return (
-            <TouchableOpacity onPress={() => this.onPressAction(canUpdate)} style={styles.actionContainer}>
-                <View style={styles.actionTitleContainer}>
-                    {currentAction && !loading && <CustomIcon style={{ marginRight: 5 }} icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />}
-                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? "Chargement de l'action à faire..." : title}</Text>
-                </View>
-
-                {loading ?
-                    <View style={styles.actionIconsContainer}>
-                        <ActivityIndicator size='small' color={theme.colors.white} />
-                        <ActivityIndicator size='small' color={theme.colors.primary} />
-                    </View>
-                    :
-                    <View style={styles.actionIconsContainer}>
-                        {currentAction && <CustomIcon icon={faInfoCircle} size={19} color={theme.colors.gray_dark} onPress={() => Alert.alert('Instructions', currentAction.instructions)} />}
-                    </View>
-                }
-
-                {currentAction && currentAction.choices &&
-                    <ModalOptions
-                        title={title}
-                        columns={choices.length}
-                        isVisible={showModal}
-                        isLoading={loadingModal}
-                        toggleModal={() => this.setState({ showModal: !showModal })}
-                        handleCancel={() => console.log('cancel')}
-                        handleConfirm={() => console.log('confirm')}
-                        elements={elements}
-                        isReview={currentAction.isReview}
-                        autoValidation={true}
-                        handleSelectElement={(element, index) => this.onSelectChoice(element)}
-                    />
-                }
-
-                {(currentAction && currentAction.choices || verificationType === 'comment') && (
-                    <CommentDialog
-                        showDialog={showDialog}
-                        loadingDialog={loadingDialog}
-                        dialogTitle={dialogTitle}
-                        dialogInputLabel={dialogInputLabel}
-                        hideDialog={() => this.setState({ showDialog: false })}
-                        onSubmitComment={this.onSubmitComment}
-                        choice={choice}
-                        nextStep={nextStep}
-                        nextPhase={nextPhase} />
-                )}
-            </TouchableOpacity>
+            <ModalOptions
+                title={title}
+                columns={choices.length}
+                isVisible={showModal}
+                isLoading={loadingModal}
+                toggleModal={() => this.setState({ showModal: !showModal })}
+                handleCancel={() => console.log('cancel')}
+                handleConfirm={() => console.log('confirm')}
+                elements={elements}
+                isReview={currentAction.isReview}
+                autoValidation={true}
+                handleSelectElement={(element, index) => this.onSelectChoice(element)}
+            />
         )
     }
 
@@ -467,19 +556,30 @@ class ProcessAction extends Component {
     }
 
     render() {
-        const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, processUpdated, expanded, loading } = this.state
+        const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, pressedAction, processUpdated, expanded, loading } = this.state
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
-        const { canUpdate, isActionOnly } = this.props
+        const { canUpdate, isAllProcess } = this.props
 
         if (currentStep) {
             const doneActions = currentStep.actions.filter((action) => action.status === 'done')
             var progress = (doneActions.length / currentStep.actions.length) * 100
         }
 
-        if (isActionOnly) {
+        if (isAllProcess) {
+            const { process, currentPage, phaseLabels, phaseStatuses, stepsData } = this.state
+            const { project, clientId, step, canUpdate, role } = this.props
             return (
-                <View style={{ height: 50, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
-                    {this.renderAction(canUpdate)}
+                <View style={{ flex: 1 }}>
+                    <ProcessContainer
+                        process={process}
+                        currentPage={currentPage}
+                        phaseLabels={phaseLabels}
+                        phaseStatuses={phaseStatuses}
+                        stepsData={stepsData}
+                        canUpdate={canUpdate}
+                        renderAction={this.renderAction}
+                    />
+                    {pressedAction && pressedAction.choices && this.renderModal()}
                 </View>
             )
         }
@@ -511,11 +611,12 @@ class ProcessAction extends Component {
                     descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
                     onPress={() => this.setState({ expanded: !expanded })}>
 
-                    <View style={{ height: 50, paddingLeft: 0, paddingRight: 0, marginHorizontal: 5 }}>
-                        {this.renderAction(canUpdate)}
-                    </View>
+                    {this.renderAction(canUpdate, null)}
 
                 </List.Accordion>
+
+                {pressedAction && pressedAction.choices && this.renderModal()}
+
             </View>
         )
     }
@@ -530,26 +631,32 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         margin: 15,
     },
-    actionContainer: {
+    action: {
+        height: 50,
+        paddingLeft: 0,
+        paddingRight: 0,
+        marginHorizontal: 5
+    },
+    actionTouchable: {
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 10,
+        //backgroundColor: 'pink'
         //paddingHorizontal: 5
     },
     actionTitleContainer: {
         flex: 0.9,
         flexDirection: 'row',
-        alignItems: 'center'
-        //backgroundColor: 'brown'
+        alignItems: 'center',
+        // backgroundColor: 'brown'
     },
     actionIconsContainer: {
         flex: 0.1,
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingLeft: 25,
-        // backgroundColor: 'green'
+        justifyContent: 'flex-end',
+        //  backgroundColor: 'green'
     }
 })
 
@@ -562,69 +669,3 @@ const mapStateToProps = (state) => {
 }
 
 export default withNavigation(connect(mapStateToProps)(ProcessAction))
-
-// export default withNavigation(ProcessAction)
-
-
-
-//#bug: on choosing Dossier action logement: Visite technique n'est pas crée (rajouter un fonction pour créer la VT si elle n'existe pas) 
-
-
-/* <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', marginTop: 5 }}> */
-/* {choices.map((choice) => {
-        return (
-            <Button
-                mode="outlined"
-                onPress={() => onSelectChoice(choice)}
-                style={{ width: '31%' }}
-                labelStyle={theme.customFontMSregular.small}>
-                {choice.label}
-            </Button>
-        )
-    })} */
-/* </View> */
-
-
-
-    // else if (type === 'manual') {
-        //     if (verificationType === 'validation') {
-        //         return (
-        //             <TouchableOpacity onPress={onPressAction} style={[styles.actionContainer]}>
-        //                 <Text style={[theme.customFontMSregular.body]}>{title}</Text>
-        //                 <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
-        //             </TouchableOpacity>
-        //         )
-        //     }
-
-        //     if (verificationType === 'multiple-choices') {
-        //         return (
-        //             <TouchableOpacity onPress={onPressAction} style={[styles.actionContainer, styles.actionContainerMultiChoice]}>
-        //                 <Text style={[theme.customFontMSregular.body]}>{title}</Text>
-        //                 <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
-        //                 <ModalOptions
-        //                     title={title}
-        //                     columns={choices.length}
-        //                     isVisible={showModal}
-        //                     isLoading={loadingModal}
-        //                     toggleModal={() => setShowModal(!showModal)}
-        //                     handleCancel={() => console.log('cancel')}
-        //                     handleConfirm={() => console.log('confirm')}
-        //                     elements={elements}
-        //                     autoValidation={true}
-        //                     handleSelectElement={(element, index) => onSelectChoice(element)}
-        //                 />
-        //                 <CommentDialog />
-        //             </TouchableOpacity>
-        //         )
-        //     }
-
-        //     else if (verificationType === 'comment') {
-        //         return (
-        //             <TouchableOpacity onPress={onPressAction} style={[styles.actionContainer, styles.actionContainerComment]}>
-        //                 <Text style={[theme.customFontMSregular.body]}>{title}</Text>
-        //                 <CustomIcon icon={faCheckCircle} color={status === 'pending' ? theme.colors.gray_dark : theme.colors.primary} />
-        //                 <CommentDialog />
-        //             </TouchableOpacity>
-        //         )
-        //     }
-        // }
