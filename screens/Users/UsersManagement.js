@@ -12,17 +12,14 @@ import TabView from '../../components/TabView'
 import ListUsers from './ListUsers';
 import ListTeams from './ListTeams';
 
+import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-
-import firebase from '@react-native-firebase/app';
-
-const db = firebase.firestore()
 
 class UsersManagement extends React.Component {
 
     constructor(props) {
-        super(props) 
+        super(props)
 
         this.state = {
             index: 0,

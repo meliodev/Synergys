@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Text } from 'react-native'
-import firebase from '@react-native-firebase/app'
 
 import { createAppContainer, createSwitchNavigator, NavigationActions } from 'react-navigation';
 import { createDrawerNavigator } from 'react-navigation-drawer';

@@ -8,9 +8,7 @@ import Button from "../components/Button"
 
 import { constants } from "../core/constants"
 
-import firebase from '@react-native-firebase/app'
-
-const functions = firebase.functions()
+import firebase, { functions } from '../firebase'
 
 class Dashboard extends React.Component {
   constructor(props) {
@@ -84,7 +82,7 @@ class Dashboard extends React.Component {
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <Appbar menu title titleText='Accueil' />
         <View style={{ flex: 1, justifyContent: 'space-evenly', alignItems: 'center' }}>
-          <View style= {{ justifyContent: 'center', alignItems: 'center', marginTop: 33}}>
+          <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 33 }}>
             <Text style={theme.customFontMSbold.h2}>Tableau de bord Admin</Text>
             <Text style={[theme.customFontMSsemibold.header, { marginTop: 15 }]}>{firebase.auth().currentUser.displayName}</Text>
           </View>

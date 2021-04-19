@@ -4,6 +4,7 @@ import { Card, Title, FAB, ProgressBar, List } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { connect } from 'react-redux'
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 
@@ -14,9 +15,6 @@ import Picker from "../../components/Picker"
 
 import { updateField, nameValidator, arrayValidator, priceValidator, setToast, load } from "../../core/utils";
 import { fetchDocs } from '../../api/firestore-api';
-import firebase from '@react-native-firebase/app';
-
-const db = firebase.firestore()
 
 class AddItem extends Component {
     constructor(props) {

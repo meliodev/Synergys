@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Platform, BackHandler } from 'react-native';
 import { Card, Title, TextInput } from 'react-native-paper'
-import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
@@ -24,6 +23,7 @@ import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
 
+import firebase, { db } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes } from "../../core/utils";
@@ -32,8 +32,6 @@ import { constants } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { handleFirestoreError } from '../../core/exceptions';
 import CustomIcon from '../../components/CustomIcon';
-
-const db = firebase.firestore()
 
 const states = [
     { label: 'A faire', value: 'A faire' },

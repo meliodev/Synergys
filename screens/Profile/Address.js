@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, View, Dimensions, Alert } from 'react-native';
-import firebase from '@react-native-firebase/app'
 import Geocoder from 'react-native-geocoding'
 import MapView, { Marker, ProviderPropType, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -8,6 +7,7 @@ import AddressSearch from '../../components/AddressSearch'
 import Appbar from '../../components/Appbar'
 import Loading from "../../components/Loading"
 
+import { db } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
 
@@ -21,8 +21,6 @@ const LONGITUDE = 3.003078;  //Narbonne
 const LATITUDE_DELTA = 0.0922;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 const SPACE = 0.01
-
-const db = firebase.firestore()
 
 class MarkerTypes extends React.Component {
     constructor(props) {

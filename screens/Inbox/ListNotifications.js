@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react
 import { List } from 'react-native-paper';
 import { faBell } from '@fortawesome/pro-light-svg-icons'
 
-import firebase from '@react-native-firebase/app'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 
@@ -13,12 +12,11 @@ import NotificationItem from '../../components/NotificationItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
 
+import firebase, { db } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { myAlert } from "../../core/utils";
 
 import { withNavigation } from 'react-navigation'
-
-const db = firebase.firestore()
 
 class ListNotifications extends Component {
     constructor(props) {
@@ -57,7 +55,7 @@ class ListNotifications extends Component {
     markAsReadAndNavigate = async (notification) => {
         const params = notification.navigation
         const screen = params.screen
-        
+
         if (!notification.read) {
             db.collection('Users').doc(this.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
         }
@@ -68,7 +66,7 @@ class ListNotifications extends Component {
 
     render() {
         let { notificationsCount } = this.state
-        
+
         const s = notificationsCount > 1 ? 's' : ''
 
         return (
@@ -86,7 +84,7 @@ class ListNotifications extends Component {
                     />
                     :
                     <EmptyList icon={faBell} iconColor={theme.colors.miInbox} header='Notifications' description='Aucune notification pour le moment.' offLine={this.props.offLine} />
-                } 
+                }
             </Background >
         )
 

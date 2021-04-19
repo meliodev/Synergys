@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native';
 import { Title, Switch } from 'react-native-paper'
-import firebase from '@react-native-firebase/app'
+import firebase, { db } from '../../firebase'
 import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
@@ -28,8 +28,6 @@ import { blockRoleUpdateOnPhase } from "../../core/privileges"
 import { connect } from 'react-redux'
 import { CustomIcon } from '../../components'
 import { getSystemAvailableFeatures } from 'react-native-device-info'
-
-const db = firebase.firestore()
 
 const priorities = [
     { label: 'Urgente', value: 'Urgente' },

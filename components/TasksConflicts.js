@@ -2,7 +2,6 @@ import React from "react"
 import { View, StyleSheet, Text, TouchableOpacity, FlatList, Alert } from "react-native"
 import { Switch } from "react-native-paper"
 import Modal from 'react-native-modal'
-import firebase from '@react-native-firebase/app'
 import { faInfoCircle, faTimes, faCalendarPlus, faClock, faShieldCheck, faChevronUp, faChevronDown } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
@@ -10,6 +9,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import { db } from '../firebase'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 import { isEditOffline, navigateToScreen, compareTimes } from "../core/utils"
@@ -19,8 +19,6 @@ import Button from './Button'
 import EmptyList from './EmptyList'
 import Section from "./Section"
 import Loading from "./Loading"
-
-const db = firebase.firestore()
 
 const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTask, isEdit, startDate, endDate, handleDate, handleStartHour, handleDueHour, initPickedTaskSelectedItems, parentSelectedIsAllDay, parentPickedDate, parentPickedTask, parentSelectedDate, parentSelectedStartHour, parentSelectedDueHour, loading, isConnected, ...props }) => {
     const firstTaskId = Object.keys(tasks)[0]

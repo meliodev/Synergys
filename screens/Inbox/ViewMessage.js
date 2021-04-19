@@ -6,6 +6,7 @@ import { List, Headline } from 'react-native-paper'
 import { faArrowAltToBottom, faReply, faShare } from '@fortawesome/pro-solid-svg-icons'
 import Entypo from 'react-native-vector-icons/Entypo'
 
+import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { downloadFile, setToast, load } from '../../core/utils'
@@ -20,10 +21,6 @@ import Button from '../../components/Button'
 import UploadProgress from '../../components/UploadProgress'
 import CustomIcon from '../../components/CustomIcon'
 import Toast from '../../components/Toast'
-
-import firebase from '@react-native-firebase/app'
-
-const db = firebase.firestore()
 
 export default class ViewMessage extends Component {
 

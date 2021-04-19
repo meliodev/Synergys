@@ -8,19 +8,16 @@ import moment from 'moment'
 import 'moment/locale/fr'  // without this line it didn't work
 moment.locale('fr')
 
-import firebase from '@react-native-firebase/app'
-
 import Appbar from "../../components/Appbar"
 import MyInput from '../../components/TextInput'
 import Toast from "../../components/Toast"
 import Loading from '../../components/Loading'
 
+import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { nameValidator, updateField, generateId, setToast, load } from "../../core/utils"
 import { handleFirestoreError } from '../../core/exceptions'
-
-const db = firebase.firestore()
 
 export default class CreateTeam extends Component {
 

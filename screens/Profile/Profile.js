@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard, FlatList, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
-import firebase from '@react-native-firebase/app'
 import NetInfo from "@react-native-community/netinfo"
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 import _ from 'lodash'
@@ -20,6 +19,7 @@ import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
 import EmptyList from "../../components/EmptyList"
 
+import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
 import { resetState, setNetwork } from '../../core/redux'
@@ -29,7 +29,6 @@ import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordEr
 import { connect } from 'react-redux'
 import { faConstruction } from '@fortawesome/pro-light-svg-icons'
 
-const db = firebase.firestore()
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
 
 class Profile extends Component {

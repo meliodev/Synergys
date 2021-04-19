@@ -1,10 +1,9 @@
-import { setToast } from "../core/utils"
-import firebase from '@react-native-firebase/app'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { onUploadProgressStart, onUploadProgressChange, onUploadProgressEnd } from '../core/redux'
 import RNFS from 'react-native-fs'
 
-const db = firebase.firestore()
+import firebase from '../firebase'
+import { setToast } from "../core/utils"
+import { onUploadProgressStart, onUploadProgressChange, onUploadProgressEnd } from '../core/redux'
 
 //Used by CreateProduct.js
 export async function uploadFile(attachment, storageRefPath, showProgress, metadata) {

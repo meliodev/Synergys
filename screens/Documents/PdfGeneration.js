@@ -5,9 +5,8 @@ import { PDFDocument, PageSizes, StandardFonts, rgb, values, PDFTextField, degre
 import Pdf from "react-native-pdf"
 import RNFS from 'react-native-fs'
 import RNFetchBlob from 'rn-fetch-blob'
-import firebase from '@react-native-firebase/app'
-const db = firebase.firestore()
 
+import { db } from '../../firebase'
 import Appbar from '../../components/Appbar'
 import Button from "../../components/Button"
 import LoadDialog from '../../components/LoadDialog'

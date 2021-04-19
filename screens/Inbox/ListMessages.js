@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { StyleSheet, View, TouchableOpacity, FlatList, Text } from 'react-native'
 import { List } from 'react-native-paper';
 import { withNavigation } from 'react-navigation'
-import firebase from '@react-native-firebase/app'
 import { faPen, faEnvelope } from '@fortawesome/pro-light-svg-icons'
 
 import Background from '../../components/NewBackground'
@@ -11,13 +10,12 @@ import MessageItem from '../../components/MessageItem'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
 
+import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { configureQuery } from '../../core/privileges'
 
 import { fetchDocs } from "../../api/firestore-api";
-
-const db = firebase.firestore()
 
 class ListMessages extends Component {
     constructor(props) {
@@ -92,11 +90,11 @@ class ListMessages extends Component {
                     :
                     <EmptyList icon={faEnvelope} iconColor={theme.colors.miInbox} header='Messages' description="Aucun message pour le moment." offLine={this.props.offLine} />
                 }
-              {canCreate && <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />}
+                {canCreate && <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />}
             </Background >
         )
 
-    } 
+    }
 }
 
 const styles = StyleSheet.create({

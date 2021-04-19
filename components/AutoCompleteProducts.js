@@ -4,8 +4,8 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from "react-nativ
 import { Avatar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import AutoTags from "react-native-tag-autocomplete"
-import firebase from '@react-native-firebase/app'
 
+import { db } from '../firebase'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 import { myAlert } from "../core/utils";
@@ -13,7 +13,6 @@ import { myAlert } from "../core/utils";
 import { withNavigation } from 'react-navigation'
 
 const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg";
-const db = firebase.firestore()
 
 class AutoCompleteProducts extends React.Component {
     constructor(props) {
@@ -133,11 +132,11 @@ class AutoCompleteProducts extends React.Component {
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
                 createTagOnSpace={false}
-                // renderTextInput={() => {
-                //     return (
-                //         <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.secondary }]} {...this.props} />
-                //     )
-                // }}
+            // renderTextInput={() => {
+            //     return (
+            //         <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.secondary }]} {...this.props} />
+            //     )
+            // }}
             />
         )
     }
@@ -186,7 +185,7 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         paddingBottom: 15,
         width: constants.ScreenWidth * 0.85,
-        borderBottomWidth: StyleSheet.hairlineWidth*3,
+        borderBottomWidth: StyleSheet.hairlineWidth * 3,
         borderBottomColor: theme.colors.gray_extraLight
     },
     error: {

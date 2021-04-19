@@ -3,7 +3,7 @@ import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog } from '@fortawesome/pro-light-svg-icons'
-import firebase from '@react-native-firebase/app'
+import firebase, { db } from '../firebase'
 import { connect } from 'react-redux'
 import NetInfo from "@react-native-community/netinfo"
 
@@ -13,8 +13,6 @@ import CustomIcon from '../components/CustomIcon'
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 import { resetState, setNetwork } from '../core/redux'
-
-const db = firebase.firestore()
 
 const menuPrivilleges = {
     backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],

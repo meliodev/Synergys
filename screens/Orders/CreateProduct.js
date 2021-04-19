@@ -9,7 +9,6 @@ import { Card, Title, TextInput } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Modal from 'react-native-modal'
-import firebase from '@react-native-firebase/app'
 import ImageView from 'react-native-image-view'
 import { connect } from 'react-redux'
 import Dialog from "react-native-dialog"
@@ -29,6 +28,7 @@ import AutoCompleteBrands from "../../components/AutoCompleteBrands"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
+import firebase, { db } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
@@ -36,8 +36,6 @@ import { generateId, myAlert, updateField, pickImage, renderImages, nameValidato
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
-
-const db = firebase.firestore()
 
 class CreateProduct extends Component {
     constructor(props) {

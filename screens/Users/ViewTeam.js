@@ -3,9 +3,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Alert, FlatList, ScrollView } from 'react-native';
 import { List, Card, Title, Paragraph, IconButton } from 'react-native-paper';
-import firebase from '@react-native-firebase/app';
 import { faPen, faUserPlus } from '@fortawesome/pro-light-svg-icons'
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { checkPlural, load, myAlert, setToast } from '../../core/utils';
@@ -19,8 +19,6 @@ import Loading from '../../components/Loading';
 import Toast from '../../components/Toast';
 import CustomIcon from '../../components/CustomIcon';
 import MyFAB from '../../components/MyFAB';
-
-const db = firebase.firestore()
 
 export default class ViewTeam extends Component {
 

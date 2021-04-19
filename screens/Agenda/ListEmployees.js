@@ -3,7 +3,7 @@
 import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { connect } from 'react-redux'
-import firebase from '@react-native-firebase/app'
+import { db } from '../../firebase'
 import { withNavigation } from 'react-navigation'
 
 import TwoTabs from '../../components/TwoTabs'
@@ -14,8 +14,6 @@ import ListUsers from '../Users/ListUsers'
 
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
-
-const db = firebase.firestore()
 
 class ListEmployees extends React.Component {
 

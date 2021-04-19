@@ -7,8 +7,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
-import firebase from '@react-native-firebase/app'
-
 import ImagePicker from 'react-native-image-picker'
 import ImageView from 'react-native-image-view'
 import { SliderBox } from "react-native-image-slider-box"
@@ -19,6 +17,7 @@ moment.locale('fr')
 
 import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading } from '../../components'
 
+import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, adminId } from "../../core/constants";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact } from "../../core/utils";
@@ -29,8 +28,6 @@ import { uploadFiles } from "../../api/storage-api";
 import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
 
 import { connect } from 'react-redux'
-
-const db = firebase.firestore()
 
 const states = [
     { label: 'En attente', value: 'En attente' },

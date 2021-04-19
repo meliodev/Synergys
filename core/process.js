@@ -1,10 +1,7 @@
-import firebase from '@react-native-firebase/app'
+import { db, functions } from '../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
 import { stringifyUndefined } from './utils'
-
-const db = firebase.firestore()
-const functions = firebase.functions()
 
 //#PROCESS ALGORITHM/LOGIC
 export const projectProcessHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {

@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, 
 import { Card, Title, TextInput as PaperInput } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import Dialog from "react-native-dialog"
-import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 
@@ -20,13 +19,12 @@ import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
+import firebase, { db } from '../../firebase'
 import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'
 import { handleFirestoreError } from '../../core/exceptions'
-
-const db = firebase.firestore()
 
 const states = [
     { label: 'Terminé', value: 'Terminé' },
@@ -260,7 +258,7 @@ class CreateOrder extends Component {
             state,
             orderLines,
             subTotal,
-            taxes, 
+            taxes,
             total,
             primeCEE,
             primeRenov,

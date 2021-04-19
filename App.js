@@ -13,16 +13,11 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import firebase from '@react-native-firebase/app'
-import '@react-native-firebase/auth'
-import '@react-native-firebase/firestore'
-import '@react-native-firebase/storage'
-import '@react-native-firebase/functions'
-import '@react-native-firebase/messaging'
 
 import OffLineBar from './components/OffLineBar'
 import Test from './components/Test'
 
+import { db } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
@@ -30,14 +25,6 @@ import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
 import { processModel } from './processModel'
 
-
-const db = firebase.firestore()
-db.settings({
-  cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED,
-  // persistence: false,
-  // host: 'localhost:8080',
-  // ssl: false,
-})
 
 const paperTheme = {
   ...DefaultTheme,

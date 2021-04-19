@@ -8,8 +8,6 @@ import moment from 'moment'
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import firebase from '@react-native-firebase/app'
-
 import Appbar from "../../components/Appbar"
 import SearchBar from "../../components/SearchBar"
 import EmptyList from "../../components/EmptyList"
@@ -18,6 +16,7 @@ import Toast from "../../components/Toast"
 import UserItem from '../../components/UserItem'
 import Loading from '../../components/Loading'
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load } from "../../core/utils"
@@ -27,7 +26,6 @@ import { handleFirestoreError } from '../../core/exceptions'
 import { faUsers, faUser } from '@fortawesome/pro-light-svg-icons'
 
 const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom']
-const db = firebase.firestore()
 
 export default class AddMembers extends Component {
 
@@ -109,7 +107,7 @@ export default class AddMembers extends Component {
                     <Checkbox
                         status={members[key].checked ? 'checked' : 'unchecked'}
                         onPress={check.bind(this, key)}
-                        color= {theme.colors.primary}
+                        color={theme.colors.primary}
                     />
                 }
             />
@@ -194,7 +192,7 @@ export default class AddMembers extends Component {
 
                 {membersCount > 0 ?
                     <SearchBar
-                        menu= {false}
+                        menu={false}
                         main={this}
                         title={!this.state.showInput}
                         titleText={title}

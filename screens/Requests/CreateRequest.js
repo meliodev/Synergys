@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
 import { Card, Title } from 'react-native-paper'
-import firebase from '@react-native-firebase/app';
 import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
@@ -20,6 +19,7 @@ import Toast from "../../components/Toast";
 import MyFAB from "../../components/MyFAB";
 import Loading from "../../components/Loading";
 
+import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient } from "../../core/utils";
@@ -27,8 +27,6 @@ import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuid
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
 import CreateProject from './CreateProject';
-
-const db = firebase.firestore()
 
 const departments = [
     { label: 'Commercial', value: 'Commercial' },

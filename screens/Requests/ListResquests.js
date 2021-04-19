@@ -2,24 +2,22 @@ import React, { Component } from 'react';
 import { StyleSheet, View, FlatList } from 'react-native';
 import { List, Card, Paragraph, Title } from 'react-native-paper';
 import { faTicketAlt } from '@fortawesome/pro-light-svg-icons'
+import { withNavigation } from 'react-navigation'
+import SearchInput, { createFilter } from 'react-native-search-filter'
 
 import ListSubHeader from '../../components/ListSubHeader'
 import MyFAB from '../../components/MyFAB'
 import RequestItem from '../../components/RequestItem'
 import EmptyList from '../../components/EmptyList'
 
+import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { fetchDocs } from '../../api/firestore-api';
 import { configureQuery } from '../../core/privileges';
 
-import { withNavigation } from 'react-navigation'
-import firebase from '@react-native-firebase/app';
-
-import SearchInput, { createFilter } from 'react-native-search-filter'
 const KEYS_TO_FILTERS = ['id', 'client.fullName', 'subject', 'state']
 
-const db = firebase.firestore()
 //#task replace this component by 'List' component
 
 class ListRequests extends Component {
@@ -49,7 +47,7 @@ class ListRequests extends Component {
             var query = configureQuery('Requests', queryFilters, params)
             this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
         }
-    } 
+    }
 
     renderTicketRequest(request) {
         return <RequestItem request={request} requestType={this.props.requestType} chatId={request.chatId} />

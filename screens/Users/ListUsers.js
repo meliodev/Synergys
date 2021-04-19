@@ -2,9 +2,11 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, View, FlatList, Alert } from 'react-native'
-import firebase from '@react-native-firebase/app'
 import { faUserPlus, faUserFriends } from '@fortawesome/pro-light-svg-icons'
+import { withNavigation } from 'react-navigation'
+import SearchInput, { createFilter } from 'react-native-search-filter'
 
+import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load, myAlert } from '../../core/utils'
@@ -13,15 +15,10 @@ import { fetchDocs } from '../../api/firestore-api'
 import UserItem from '../../components/UserItem'
 import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
-
-import { withNavigation } from 'react-navigation'
-
-import SearchInput, { createFilter } from 'react-native-search-filter'
 import Loading from '../../components/Loading'
 import ListSubHeader from '../../components/ListSubHeader'
 
 const KEYS_TO_FILTERS = ['id', 'fullName', 'nom', 'prenom', 'denom', 'role']
-const db = firebase.firestore()
 
 class ListUsers extends Component {
 

@@ -3,7 +3,9 @@ import { StyleSheet, Text, View, FlatList } from 'react-native';
 import { List } from 'react-native-paper';
 import { connect } from 'react-redux'
 import { faFileInvoice } from '@fortawesome/pro-light-svg-icons'
+import { withNavigation } from 'react-navigation'
 
+import SearchInput, { createFilter } from 'react-native-search-filter'
 import Background from '../../components/NewBackground'
 import ActiveFilter from '../../components/ActiveFilter'
 import SearchBar from '../../components/SearchBar'
@@ -14,16 +16,13 @@ import OrderItem from '../../components/OrderItem' //#add
 import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { configureQuery } from '../../core/privileges'
 import { fetchDocs } from '../../api/firestore-api';
 
-import { withNavigation } from 'react-navigation'
-import firebase from '@react-native-firebase/app';
-
-import SearchInput, { createFilter } from 'react-native-search-filter'
 const KEYS_TO_FILTERS = ['id', 'name', 'state'] //#edit
 
 const states = [
@@ -32,8 +31,6 @@ const states = [
     { label: 'Terminé', value: 'Terminé' },
     { label: 'Annulé', value: 'Annulé' },
 ]
-
-const db = firebase.firestore()
 
 class ListOrders extends Component {
     constructor(props) {
@@ -143,10 +140,10 @@ class ListOrders extends Component {
                         resetFilter={() => this.setState({ state: '', client: { id: '', fullName: '' }, project: { id: '', name: '' } })}
                         options={[
                             { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                           // { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
+                            // { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
                             { id: 2, type: 'screen', title: "Projet", value: project.name.value, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet', disabled: this.project },
                         ]}
-                    /> 
+                    />
                 }
             />
         )

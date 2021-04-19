@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native'
 import { List } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import firebase from '@react-native-firebase/app'
 
 import Menu from './Menu'
 import CustomIcon from './CustomIcon'
@@ -14,8 +13,6 @@ import { constants } from '../core/constants'
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
-
-const db = firebase.firestore()
 
 const NotificationItem = ({ notification, actions, ...props }) => {
 

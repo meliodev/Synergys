@@ -9,12 +9,9 @@ import TabView from '../../components/TabView'
 
 import ListUsers from '../Users/ListUsers'
 
+import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-
-import firebase from '@react-native-firebase/app';
-
-const db = firebase.firestore()
 
 class ClientsManagement extends React.Component {
 

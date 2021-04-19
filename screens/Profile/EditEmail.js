@@ -1,6 +1,7 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, View, ActivityIndicator } from 'react-native'
+import Dialog from "react-native-dialog"
 
 import Appbar from '../../components/Appbar'
 import AddressSearch from '../../components/AddressSearch'
@@ -8,16 +9,11 @@ import MyInput from '../../components/TextInput'
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
+import { db } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
-
 import { emailValidator, updateField, load, setToast } from "../../core/utils"
 import { handleReauthenticateError, handleUpdateEmailError } from "../../core/exceptions"
-
-import firebase from '@react-native-firebase/app'
-import Dialog from "react-native-dialog"
-
-const db = firebase.firestore()
 
 export default class Address extends Component {
 

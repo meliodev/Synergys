@@ -14,9 +14,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import { withNavigation } from 'react-navigation'
-import firebase from '@react-native-firebase/app'
-
-const db = firebase.firestore()
+import firebase, { db } from '../firebase'
 
 const MessageItem = ({ message, navigation, options, functions, ...props }) => {
 

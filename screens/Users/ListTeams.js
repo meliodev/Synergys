@@ -2,9 +2,11 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native'
 import { List } from 'react-native-paper'
-import firebase from '@react-native-firebase/app'
 import { faUsers } from '@fortawesome/pro-light-svg-icons'
+import { withNavigation } from 'react-navigation'
+import SearchInput, { createFilter } from 'react-native-search-filter'
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { myAlert, checkPlural, load } from '../../core/utils'
@@ -16,11 +18,7 @@ import EmptyList from '../../components/EmptyList'
 import MyFAB from '../../components/MyFAB'
 import Loading from '../../components/Loading'
 
-import { withNavigation } from 'react-navigation'
-import SearchInput, { createFilter } from 'react-native-search-filter'
-
 const KEYS_TO_FILTERS = ['id', 'name']
-const db = firebase.firestore()
 
 class ListTeams extends Component {
 

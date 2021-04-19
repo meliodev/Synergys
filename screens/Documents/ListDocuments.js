@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList } from 'react-native'
 import { List } from 'react-native-paper'
-import firebase from '@react-native-firebase/app'
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { connect } from 'react-redux'
 import { faFolder } from '@fortawesome/pro-light-svg-icons'
@@ -21,11 +20,11 @@ import { myAlert, downloadFile, loadLog, load, toggleFilter, setFilter, handleFi
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFileNew } from "../../api/storage-api";
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 
 const KEYS_TO_FILTERS = ['id', 'name', 'state', 'type',]
-const db = firebase.firestore()
 
 const states = [
     { label: 'Tous', value: '' },
@@ -84,11 +83,6 @@ class ListDocuments extends Component {
         this.bootstrapUploads()
 
         const role = this.props.role.id
-        const { currentUser } = firebase.auth()
-        const isClient = (role === 'client')
-
-        // if (isClient)
-        //     var query = db.collection('Documents').where('project.client.id', '==', currentUser.uid).where('deleted', '==', false).orderBy('createdAt', 'desc')
 
         const { queryFilters } = this.props.permissions.documents
         if (queryFilters === []) this.setState({ documentsList: [], documentsCount: 0 })

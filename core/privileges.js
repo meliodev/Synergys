@@ -1,8 +1,5 @@
 import { Alert } from 'react-native'
-import firebase from '@react-native-firebase/app'
-
-const db = firebase.firestore()
-
+import firebase, { db } from '../firebase'
 
 export const configureQuery = (collection, queryFilters, params) => {
 

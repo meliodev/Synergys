@@ -15,7 +15,6 @@ import moment from 'moment'
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
@@ -26,12 +25,11 @@ import Loading from '../../components/Loading'
 
 import { uuidGenerator, setAttachmentIcon, downloadFile } from '../../core/utils'
 
+import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { uploadFiles } from '../../api/storage-api'
 import EmptyList from '../../components/EmptyList';
-
-const db = firebase.firestore()
 
 const mp4 = 'video/mp4'
 const jpeg = 'image/jpeg'
@@ -342,10 +340,10 @@ class Chat extends Component {
 
     sendSystemMessage(message) {
         db.collection('Chats').doc(this.chatId).collection('ChatMessages').add({
-                text: message,
-                createdAt: new Date().getTime(),
-                system: true
-            })
+            text: message,
+            createdAt: new Date().getTime(),
+            system: true
+        })
     }
 
     //Files (pdf, docs...)
@@ -452,9 +450,9 @@ class Chat extends Component {
         )
     }
 
-    navigateToProfile(user){
+    navigateToProfile(user) {
         console.log(user)
-      //  this.props.navigation.navigate('Profile', {})
+        //  this.props.navigation.navigate('Profile', {})
     }
 
     render() {

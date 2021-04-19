@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import firebase from '@react-native-firebase/app'
 import { View, Text, Alert } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as theme from "../core/theme";

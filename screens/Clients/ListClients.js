@@ -4,18 +4,16 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableHighlight, FlatList, ScrollView, Alert } from 'react-native'
 import { List, FAB } from 'react-native-paper'
 import { TouchableOpacity } from 'react-native'
-import firebase from '@react-native-firebase/app'
 import { connect } from 'react-redux'
 
 import SearchBar from '../../components/SearchBar'
 
+import { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { myAlert } from '../../core/utils'
 
 import ListUsers from '../Users/ListUsers'
-
-const db = firebase.firestore()
 
 class ListClients extends Component {
     constructor(props) {

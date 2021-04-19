@@ -8,9 +8,7 @@ import OfflineBar from './components/OffLineBar'
 
 import { setNetwork, setProcessModel } from './core/redux'
 import { stat } from 'react-native-fs'
-import firebase from '@react-native-firebase/app'
-
-const db = firebase.firestore()
+import { db } from './firebase'
 
 class Wrapper extends Component {
     constructor(props) {
@@ -21,7 +19,7 @@ class Wrapper extends Component {
 
     componentDidMount() {
         this.networkListener()
-       // this.fetchProcessModel()
+        // this.fetchProcessModel()
     }
 
     networkListener() {

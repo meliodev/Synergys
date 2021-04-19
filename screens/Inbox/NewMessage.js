@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert, Key
 import { List, ProgressBar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import firebase from '@react-native-firebase/app'
 import RNFS from 'react-native-fs'
 import { connect } from 'react-redux'
 
@@ -15,6 +14,7 @@ import AutoCompleteUsers from '../../components/AutoCompleteUsers'
 import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 
+import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { load, setToast, updateField, setAttachmentIcon, nameValidator, uuidGenerator, pickDocs } from '../../core/utils'
@@ -28,8 +28,6 @@ moment.locale('fr')
 
 import DocumentPicker from 'react-native-document-picker';
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
-
-const db = firebase.firestore()
 
 class NewMessage extends Component {
     constructor(props) {

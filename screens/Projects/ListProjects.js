@@ -24,7 +24,6 @@ import { configureQuery } from '../../core/privileges'
 import { fetchDocs } from '../../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
-import firebase from '@react-native-firebase/app';
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -47,8 +46,6 @@ const steps = [
     { label: 'Installation', value: 'Installation' },
     { label: 'Maintenance', value: 'Maintenance' },
 ]
-
-const db = firebase.firestore()
 
 class ListProjects extends Component {
     constructor(props) {

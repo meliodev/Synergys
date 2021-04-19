@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Keyboard } from "react-native";
 import { TextInput } from 'react-native-paper'
-import firebase from '@react-native-firebase/app';
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
 
@@ -14,6 +13,7 @@ import MyInput from "../../components/TextInput"
 import Toast from "../../components/Toast"
 import LoadDialog from "../../components/LoadDialog"
 
+import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, rolesRedux } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load } from "../../core/utils"
@@ -35,8 +35,6 @@ const rolesPicker = {
   1: [],
   0: []
 }
-
-const db = firebase.firestore()
 
 class CreateUser extends Component {
   constructor(props) {

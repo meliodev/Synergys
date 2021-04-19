@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Keyboard } from "react-native";
 import { TextInput } from 'react-native-paper'
-import firebase from '@react-native-firebase/app';
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
 import _ from 'lodash'
@@ -15,13 +14,12 @@ import AddressInput from "../../components/AddressInput"
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
 
+import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { createClient, validateClientInputs } from "../../api/firestore-api";
 import { generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
-
-const db = firebase.firestore()
 
 class CreateClient extends Component {
 

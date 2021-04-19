@@ -4,7 +4,7 @@ import { StyleSheet, View, Text, TouchableOpacity, Platform, PixelRatio, Activit
 import { ProgressBar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
-import firebase from '@react-native-firebase/app';
+import firebase, { db, functions } from '../../firebase'
 import Dialog from "react-native-dialog"
 import _ from 'lodash'
 
@@ -34,8 +34,6 @@ import { connect } from 'react-redux'
 import DeviceInfo from 'react-native-device-info';
 import { NetworkInfo } from "react-native-network-info";
 
-const db = firebase.firestore()
-const functions = firebase.functions()
 const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
 
 class Signature extends Component {

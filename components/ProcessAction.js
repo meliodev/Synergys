@@ -3,7 +3,7 @@ import React, { useState, useEffect, Component } from "react"
 import { View, StyleSheet, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
 import { List } from 'react-native-paper'
 import Dialog from 'react-native-dialog'
-import firebase from '@react-native-firebase/app'
+import firebase, { db } from '../firebase'
 import _ from 'lodash'
 import { faCheckCircle, faExclamationCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
 import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-solid-svg-icons'
@@ -23,8 +23,6 @@ import { configChoiceIcon, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 import ProcessContainer from "../screens/src/container/ProcessContainer"
-
-const db = firebase.firestore()
 
 //component
 const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTitle, dialogInputLabel, onSubmitComment, hideDialog, choice, nextStep, nextPhase }) => {

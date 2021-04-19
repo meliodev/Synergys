@@ -1,15 +1,8 @@
 
-import firebase from '@react-native-firebase/app';
-import '@react-native-firebase/auth'
-import '@react-native-firebase/firestore'
-import '@react-native-firebase/storage'
-import '@react-native-firebase/functions'
 import { Alert, Keyboard } from 'react-native'
-
+import { db } from '../firebase'
 import { checkEmailExistance } from './auth-api'
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
-
-const db = firebase.firestore()
 
 //#FETCH DOS BY QUERY
 export function fetchDocs(query, MyList, MyCount, MyCallBack) {

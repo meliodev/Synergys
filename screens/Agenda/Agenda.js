@@ -9,7 +9,7 @@ const XDate = require('xdate')
 import dateutils from 'react-native-calendars/src/dateutils'
 
 import _ from 'lodash'
-import firebase from '@react-native-firebase/app'
+import firebase, { db } from '../../firebase'
 
 import moment from 'moment'
 import 'moment/locale/fr'
@@ -42,7 +42,6 @@ LocaleConfig.locales['fr'] = {
 }
 LocaleConfig.defaultLocale = 'fr'
 
-const db = firebase.firestore()
 const KEYS_TO_FILTERS = ['type', 'status', 'priority', 'project.id', 'assignedTo.id']
 
 const types = [

@@ -8,7 +8,6 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import * as theme from "../core/theme"
 import { constants } from '../core/constants'
-import firebase from '@react-native-firebase/app'
 
 Geocoder.init("AIzaSyDKYloIbFHpaNh5QWGa7CWjKr8v-3aiu80", { language: "fr" })
 
