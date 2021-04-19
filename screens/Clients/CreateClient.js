@@ -119,7 +119,6 @@ class CreateClient extends Component {
                             label="Identifiant client"
                             value={this.ClientId}
                             editable={false}
-                            style={{ marginBottom: 15 }}
                             disabled
                         />
 
@@ -128,7 +127,8 @@ class CreateClient extends Component {
                             secondChoice={{ title: 'Professionnel', value: 'Professionnel' }}
                             onPress1={() => this.setState({ checked: 'first', isPro: false })}
                             onPress2={() => this.setState({ checked: 'second', isPro: true })}
-                            style={{ justifyContent: 'space-between', marginVertical: 5 }} />
+                            style={{ justifyContent: 'space-between', marginTop: 20 }}
+                        />
 
                         {!isPro &&
                             <MyInput
@@ -145,10 +145,8 @@ class CreateClient extends Component {
                             returnKeyType="next"
                             value={isPro ? denom.value : nom.value}
                             onChangeText={text => {
-                                if (isPro)
-                                    updateField(this, denom, text)
-                                else
-                                    updateField(this, nom, text)
+                                const name = isPro ? denom : nom
+                                updateField(this, name, text)
                             }}
                             error={isPro ? !!denom.error : !!nom.error}
                             errorText={isPro ? denom.error : nom.error}
@@ -199,7 +197,6 @@ class CreateClient extends Component {
                         />
 
                         <MyInput
-                            style={{ marginVertical: 0, zIndex: 1, backgroundColor: theme.colors.background }}
                             label="Mot de passe"
                             returnKeyType="done"
                             value={password.value}
@@ -208,7 +205,6 @@ class CreateClient extends Component {
                             errorText={password.error}
                             secureTextEntry={!password.show}
                             autoCapitalize="none"
-
                             right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
                                 password.show = !password.show
                                 this.setState({ password })
@@ -237,4 +233,7 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps)(CreateClient)
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    }
 })

@@ -4,13 +4,13 @@ import { Picker } from '@react-native-picker/picker'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled = true, ...props }) => (
-    <View style={[styles.container, containerStyle]}>
+const MyPicker = ({ containerStyle, elements, title, errorText, enabled = true, ...props }) => (
+    <View style={[styles.container]}>
 
         <View style={[styles.pickerContainer]}>
             <Text style={theme.customFontMSregular.caption}>{title}</Text>
             <Picker
-                style={[styles.input, style]}
+                style={[styles.input]}
                 enabled={enabled}
                 dropdownIconColor={theme.colors.gray_dark}
                 {...props}
@@ -18,6 +18,7 @@ const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled =
                 {elements.map((item) => <Picker.Item label={item.label} value={item.value} />)}
             </Picker>
         </View>
+        
         {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
 
     </View>
@@ -26,11 +27,11 @@ const MyPicker = ({ containerStyle, style, elements, title, errorText, enabled =
 const styles = StyleSheet.create({
     container: {
         width: "100%",
-        marginVertical: 25,
-        // backgroundColor: 'brown'
+        paddingTop: 15,
+      //  backgroundColor: 'brown'
     },
     pickerContainer: {
-        borderBottomWidth: StyleSheet.hairlineWidth * 2,
+        borderBottomWidth: StyleSheet.hairlineWidth * 3,
         borderBottomColor: theme.colors.gray_extraLight,
     },
     label: {
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
         color: '#757575',
     },
     input: {
-       // marginLeft: -8,
+        // marginLeft: -8,
         color: theme.colors.gray_dark,
         height: 40,
         alignItems: 'flex-start',

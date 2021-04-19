@@ -4,15 +4,15 @@ import { TextInput as NativeTextInput } from 'react-native';
 import { TextInput as Input } from "react-native-paper";
 import * as theme from "../core/theme";
 
-const TextInput = ({ errorText, style, disabled, whiteTheme, link, ...props }) => (
+const TextInput = ({ errorText, disabled, whiteTheme, link, ...props }) => (
   <View style={styles.container}>
     <Input
-      style={[theme.customFontMSregular.body, styles.input, style]}
+      style={[theme.customFontMSregular.body, styles.input]}
       selectionColor={whiteTheme ? '#fff' : theme.colors.primary}
       underlineColor={theme.colors.gray_extraLight}
       theme={
         {
-          colors: {
+          colors: { 
             placeholder: theme.colors.secondary,
             text: (disabled && props.editable === false) ? theme.colors.placeholder : link ? 'green' : theme.colors.gray_dark,
             error: theme.colors.error
@@ -28,8 +28,9 @@ const TextInput = ({ errorText, style, disabled, whiteTheme, link, ...props }) =
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginVertical: 5,
-    //backgroundColor: 'yellow'
+    paddingTop: 5,
+   // marginBottom: 10,
+   //backgroundColor: 'yellow'
   },
   input: {
     width: "100%",
@@ -39,6 +40,7 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.gray_extraLight,
     textAlign: 'center',
     paddingHorizontal: 0,
+//    backgroundColor: 'pink'
   },
   error: {
     // paddingHorizontal: 4,

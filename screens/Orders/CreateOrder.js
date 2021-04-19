@@ -406,12 +406,12 @@ class CreateOrder extends Component {
                             }
 
                             <View style={{ flex: canWrite ? 0.65 : 0.75 }}>
-                                <Text style={theme.customFontMSsemibold.body}>{orderLine.product.name}</Text>
+                                <Text style={theme.customFontMSmedium.body}>{orderLine.product.name}</Text>
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>{orderLine.quantity} x {orderLine.price} (+ {orderLine.taxe.name}% TVA)</Text>
                             </View>
 
                             <View style={{ flex: 0.25, alignItems: 'flex-end' }}>
-                                <Text style={theme.customFontMSsemibold.body}>{totalAmount}</Text>
+                                <Text style={theme.customFontMSmedium.body}>{totalAmount}</Text>
                             </View>
 
                         </TouchableOpacity>
@@ -462,11 +462,11 @@ class CreateOrder extends Component {
         return (
             <View style={{ flex: 1, flexDirection: 'row', marginTop: 15 }}>
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.body}>Total T.T.C</Text>
+                    <Text style={theme.customFontMSmedium.body}>Total T.T.C</Text>
                 </View>
 
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.body}>€{total}</Text>
+                    <Text style={theme.customFontMSmedium.body}>€{total}</Text>
                 </View>
             </View>
         )
@@ -511,11 +511,11 @@ class CreateOrder extends Component {
         return (
             <View style={{ flex: 1, flexDirection: 'row', marginTop: 15 }}>
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.header}>Net à payer</Text>
+                    <Text style={theme.customFontMSmedium.header}>Net à payer</Text>
                 </View>
 
                 <View style={{ flex: 0.5, alignItems: 'flex-end' }}>
-                    <Text style={theme.customFontMSbold.header}>€{totalNet}</Text>
+                    <Text style={theme.customFontMSmedium.header}>€{totalNet}</Text>
                 </View>
             </View>
         )
@@ -624,12 +624,12 @@ class CreateOrder extends Component {
                                                 navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
                                             }}
                                             style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
-                                            <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
+                                            <Text style={theme.customFontMSmedium.caption}>Ajouter une ligne de commande</Text>
                                         </Button>
 
                                         <View style={{ flexDirection: 'row', paddingBottom: 10, paddingTop: 25, justifyContent: 'space-between', alignItems: 'center', borderBottomColor: '#E0E0E0', borderBottomWidth: 1 }}>
-                                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Articles</Text>
-                                            <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
+                                            <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder }]}>Articles</Text>
+                                            <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
                                         </View>
 
                                         {this.renderOrderLines(canWrite)}

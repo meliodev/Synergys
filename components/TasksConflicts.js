@@ -53,7 +53,7 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
         setSelectedDueHour('')
     }
 
-    const separator = () => <View style={{ flex: 0.1 }} />
+    const separator = (flex) => <View style={{ flex }} />
 
     //APPBAR
     const AppBar = ({ }) => {
@@ -275,7 +275,7 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
         const showEndDate = !isEdit && !isAllDay
 
         return (
-            <View style={{ flexDirection: 'row', marginVertical: 20 }}>
+            <View>
                 <ItemPicker
                     onPress={() => handleDate(pickedDate, pickedTask, isAllDay)}
                     label={showEndDate ? 'Date de début *' : 'Jour *'}
@@ -284,11 +284,9 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                     showAvatarText={false}
                     icon={faCalendarPlus}
                     errorText={startDate && startDate.error}
-                    pickerStyle={{ width: showEndDate ? constants.ScreenWidth * 0.4 : '110%' }}
-                    style={{ marginTop: 0 }}
                 />
 
-                {separator()}
+                {separator(0.1)}
 
                 {showEndDate &&
                     <ItemPicker
@@ -299,8 +297,6 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                         showAvatarText={false}
                         icon={faCalendarPlus}
                         errorText={endDate && endDate.error}
-                        pickerStyle={{ width: constants.ScreenWidth * 0.4 }}
-                        style={{ marginTop: 0 }}
                     />
                 }
             </View>
@@ -318,11 +314,10 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                     editable={editable}
                     showAvatarText={false}
                     icon={faClock}
-                    // errorText={startHour && startHour.error}
-                    style={{ marginTop: 0 }}
+                    style={{ flex: 0.47 }}
                 />
 
-                {separator()}
+                {separator(0.06)}
 
                 <ItemPicker
                     onPress={() => handleDueHour(pickedDate, pickedTask, isAllDay)}
@@ -332,7 +327,7 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                     showAvatarText={false}
                     icon={faClock}
                     errorText={editable && selectedDueHour && selectedDueHourError}
-                    style={{ marginTop: 0 }}
+                    style={{ flex: 0.47 }}
                 />
             </View>
         )

@@ -407,7 +407,7 @@ class CreateProduct extends Component {
         const { category, categories, dialogType } = this.state
 
         return (
-            <View style={{ marginBottom: 30 }}>
+            <View style={{ marginBottom: 20 }}>
                 <Picker
                     title="Catégorie *"
                     returnKeyType="next"
@@ -416,7 +416,7 @@ class CreateProduct extends Component {
                     elements={categories}
                     errorText={category.error} />
 
-                <TouchableOpacity onPress={() => this.toggleDialog('category')}>
+                <TouchableOpacity onPress={() => this.toggleDialog('category')} style={{ marginTop: 10 }}>
                     <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+ Nouvelle catégorie</Text>
                 </TouchableOpacity>
             </View>
@@ -514,25 +514,32 @@ class CreateProduct extends Component {
                                         errorText={description.error}
                                         multiline={true} />
 
-                                    <MyInput
-                                        label="Prix de vente (€) *"
-                                        returnKeyType="done"
-                                        keyboardType='numeric'
-                                        value={price.value}
-                                        onChangeText={text => updateField(this, price, text)}
-                                        error={!!price.error}
-                                        errorText={price.error}
-                                    />
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <View style={{ flex: 0.5, paddingRight: 15 }}>
+                                            <MyInput
+                                                label="Prix de vente (€) *"
+                                                returnKeyType="done"
+                                                keyboardType='numeric'
+                                                value={price.value}
+                                                onChangeText={text => updateField(this, price, text)}
+                                                error={!!price.error}
+                                                errorText={price.error}
+                                            />
+                                        </View>
 
-                                    <MyInput
-                                        label="Taxe (%)"
-                                        returnKeyType="done"
-                                        keyboardType='numeric'
-                                        value={taxe.value}
-                                        onChangeText={text => updateField(this, taxe, text)}
-                                        error={!!taxe.error}
-                                        errorText={taxe.error}
-                                    />
+                                        <View style={{ flex: 0.5, paddingLeft: 15 }}>
+                                            <MyInput
+                                                label="Taxe (%)"
+                                                returnKeyType="done"
+                                                keyboardType='numeric'
+                                                value={taxe.value}
+                                                onChangeText={text => updateField(this, taxe, text)}
+                                                error={!!taxe.error}
+                                                errorText={taxe.error}
+                                            />
+                                        </View>
+                                    </View>
+
                                 </Card.Content>
                             </Card>
 

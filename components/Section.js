@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: constants.ScreenHeight * 0.02,
     paddingHorizontal: theme.padding,
-    marginBottom: theme.padding / 2,
+    //marginBottom: theme.padding / 2,
     backgroundColor: theme.colors.gray_light
   }
 })

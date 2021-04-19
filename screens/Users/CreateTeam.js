@@ -136,7 +136,6 @@ export default class CreateTeam extends Component {
                             label="Identifiant de l'équipe"
                             value={teamId}
                             editable={false}
-                            style={{ marginBottom: 15 }}
                             disabled
                         />
 

@@ -671,8 +671,8 @@ class CreateProject extends Component {
                             sectionTitle='Informations générales'
                             sectionIcon={this.isEdit ? faRedo : faInfoCircle}
                             onPressIcon={() => {
-                                if (this.isEdit)
-                                    this.fetchProject()
+                                if (!this.isEdit) return
+                                this.fetchProject()
                             }}
                             iconColor={this.isEdit ? theme.colors.primary : theme.colors.gray_dark}
                             form={
@@ -694,6 +694,48 @@ class CreateProject extends Component {
                                         errorText={name.error}
                                         multiline={true}
                                         editable={canWrite}
+                                        autoFocus={!this.isEdit}
+                                    />
+
+                                    {!this.isClient &&
+                                        <ItemPicker
+                                            onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false })}
+                                            label='Client concerné *'
+                                            value={client.fullName}
+                                            errorText={client.error}
+                                            editable={canWrite}
+                                        />
+                                    }
+
+                                    <AddressInput
+                                        offLine={!isConnected}
+                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                        address={address}
+                                        addressError={address.error}
+                                        editable={canWrite}
+                                        isEdit={this.isEdit}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={step}
+                                        error={!!step.error}
+                                        errorText={step.error}
+                                        selectedValue={step}
+                                        onValueChange={(step) => this.setState({ step })}
+                                        title="Phase *"
+                                        elements={steps}
+                                        enabled={canWrite}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={state}
+                                        selectedValue={state}
+                                        onValueChange={(state) => this.setState({ state })}
+                                        title="État *"
+                                        elements={states}
+                                        enabled={canWrite}
                                     />
 
                                     <MyInput
@@ -707,53 +749,12 @@ class CreateProject extends Component {
                                         editable={canWrite}
                                     />
 
-                                    {!this.isClient &&
-                                        <ItemPicker
-                                            onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false })}
-                                            label='Client concerné *'
-                                            value={client.fullName}
-                                            errorText={client.error}
-                                            editable={canWrite}
-                                            style={{ marginTop: 15 }}
-                                        />
-                                    }
-
-                                    <AddressInput
-                                        offLine={!isConnected}
-                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
-                                        address={address}
-                                        addressError={address.error}
-                                        editable={canWrite}
-                                        isEdit={this.isEdit}
-                                        style={{ marginTop: 10 }}
-                                    />
-
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={step}
-                                        error={!!step.error}
-                                        errorText={step.error}
-                                        selectedValue={step}
-                                        onValueChange={(step) => this.setState({ step })}
-                                        title="Phase *"
-                                        elements={steps}
-                                        containerStyle={{ marginBottom: 5 }}
-                                        enabled={canWrite} />
-
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={state}
-                                        selectedValue={state}
-                                        onValueChange={(state) => this.setState({ state })}
-                                        title="État *"
-                                        elements={states}
-                                        enabled={canWrite} />
-
                                     <ColorPicker
                                         label='Couleur du projet'
                                         selectedColor={color}
                                         updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite} />
+                                        editable={canWrite}
+                                    />
                                 </View>
                             } />
 
@@ -799,6 +800,7 @@ class CreateProject extends Component {
                         <FormSection
                             sectionTitle='Bloc Notes'
                             sectionIcon={faQuoteRight}
+                            formContainerStyle={{ paddingTop: 25 }}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <TextInput
@@ -887,7 +889,7 @@ class CreateProject extends Component {
                         }
 
                         {this.renderPlacePictures(canWrite)}
-                        {canWrite && isConnected && <AddAttachment onPress={this.pickImage} style={{ margin: theme.padding }} />}
+                        {canWrite && isConnected && <AddAttachment onPress={this.pickImage} style={{ marginLeft: theme.padding, marginBottom: theme.padding }} />}
 
                         {this.isEdit &&
                             <FormSection

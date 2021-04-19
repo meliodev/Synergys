@@ -681,6 +681,7 @@ class CreateTask extends Component {
                                         error={!!name.error}
                                         errorText={name.error}
                                         editable={canWrite}
+                                        autoFocus={!this.isEdit}
                                     />
 
                                     <ItemPicker
@@ -695,16 +696,6 @@ class CreateTask extends Component {
                                         value={assignedTo.fullName}
                                         error={!!assignedTo.error}
                                         errorText={assignedTo.error}
-                                        editable={canWrite}
-                                    />
-
-                                    <MyInput
-                                        label="Description"
-                                        returnKeyType="done"
-                                        value={description.value}
-                                        onChangeText={text => updateField(this, description, text)}
-                                        error={!!description.error}
-                                        errorText={description.error}
                                         editable={canWrite}
                                     />
 
@@ -763,14 +754,24 @@ class CreateTask extends Component {
                                         containerStyle={{ marginBottom: 10 }}
                                     />
 
-                                    <AddressInput
+                                    <MyInput
+                                        label="Description"
+                                        returnKeyType="done"
+                                        value={description.value}
+                                        onChangeText={text => updateField(this, description, text)}
+                                        error={!!description.error}
+                                        errorText={description.error}
+                                        editable={canWrite}
+                                    />
+
+                                    {/* <AddressInput
                                         label='Adresse postale'
                                         offLine={!isConnected}
                                         onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={address.error}
                                         editable={canWrite}
-                                        isEdit={this.isEdit} />
+                                        isEdit={this.isEdit} /> */}
 
                                     <ColorPicker
                                         label='Couleur de la tâche'

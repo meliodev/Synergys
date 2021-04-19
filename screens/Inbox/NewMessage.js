@@ -331,7 +331,7 @@ class NewMessage extends Component {
                             tagsSelected={tagsSelected}
                             main={this}
                             placeholder="Ajouter un destinataire"
-                            autoFocus={false}
+                            autoFocus={true}
                             showInput={true}
                             suggestionsBellow={true}
                             editable={!loading}
@@ -348,7 +348,6 @@ class NewMessage extends Component {
                         error={!!subject.error}
                         errorText={subject.error}
                         editable={!this.isReply && !loading}
-                        style={{ marginTop: 15 }}
                     />
 
                     <View style={{ flex: 1, backgroundColor: '#fff', elevation: 0 }}>

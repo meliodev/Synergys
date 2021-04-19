@@ -238,7 +238,6 @@ class CreateUser extends Component {
               label="Identifiant utilisateur"
               value={userId}
               editable={false}
-              style={{ marginBottom: 15 }}
               disabled
             />
 
@@ -256,12 +255,16 @@ class CreateUser extends Component {
               />
             }
 
-            {showUserTypeRadio && <RadioButton checked={this.state.checked}
-              firstChoice={{ title: 'Particulier', value: 'Particulier' }}
-              secondChoice={{ title: 'Professionnel', value: 'Professionnel' }}
-              onPress1={() => this.setState({ checked: 'first', isPro: false })}
-              onPress2={() => this.setState({ checked: 'second', isPro: true })}
-              style={{ justifyContent: 'space-between', marginVertical: 5 }} />}
+            {showUserTypeRadio &&
+              <RadioButton
+                checked={this.state.checked}
+                firstChoice={{ title: 'Particulier', value: 'Particulier' }}
+                secondChoice={{ title: 'Professionnel', value: 'Professionnel' }}
+                onPress1={() => this.setState({ checked: 'first', isPro: false })}
+                onPress2={() => this.setState({ checked: 'second', isPro: true })}
+                style={{ justifyContent: 'space-between', marginTop: 20 }}
+              />
+            }
 
             {!isPro &&
               <MyInput
@@ -271,17 +274,16 @@ class CreateUser extends Component {
                 onChangeText={text => updateField(this, prenom, text)}
                 error={!!prenom.error}
                 errorText={prenom.error}
-              />}
+              />
+            }
 
             <MyInput
               label={isPro ? 'Dénomination sociale *' : 'Nom *'}
               returnKeyType="next"
               value={isPro ? denom.value : nom.value}
               onChangeText={text => {
-                if (isPro)
-                  updateField(this, denom, text)
-                else
-                  updateField(this, nom, text)
+                const name = isPro ? denom : nom
+                updateField(this, name, text)
               }}
               error={isPro ? !!denom.error : !!nom.error}
               errorText={isPro ? denom.error : nom.error}
@@ -306,8 +308,6 @@ class CreateUser extends Component {
                 errorText={siret.error}
                 render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
               />}
-
-
 
             <MyInput
               label="Téléphone *"

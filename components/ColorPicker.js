@@ -88,7 +88,7 @@ const ColorPicker = ({ updateParentColor, label, selectedColor, setColor, editab
             }}
             style={[styles.container, { marginBottom: 0, marginTop: 20 }]}
         >
-            <Text style={[theme.customFontMSregular.caption, { marginBottom: 8 }]}>{label}</Text>
+            <Text style={[theme.customFontMSregular.caption, { marginBottom: 15 }]}>{label}</Text>
             <SelectedColor />
             <ColorsModal />
         </TouchableOpacity>

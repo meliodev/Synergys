@@ -40,6 +40,7 @@ const colors = {
   accent: "#F3534A",
   black: "#323643",
   white: "#FFFFFF", //new
+  inputBorderBottom: '#d9d9d9',
   gray_extraLight: "#F1F1F1", //new
   gray_light: "#EBEBEB", //new
   gray_medium: "#BCBCBC", //new

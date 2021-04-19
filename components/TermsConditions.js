@@ -14,8 +14,10 @@ const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
 
 export default class TermsConditions extends Component {
 
-    state = {
-        accepted: false
+    constructor(props) {
+        this.state = {
+            accepted: false
+        }
     }
 
     render() {

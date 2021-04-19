@@ -176,8 +176,8 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         paddingBottom: 15,
         width: constants.ScreenWidth * 0.9,
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: theme.colors.gray
+        borderBottomWidth: StyleSheet.hairlineWidth*3,
+        borderBottomColor: theme.colors.gray_extraLight
     },
     error: {
         paddingHorizontal: 4,
