@@ -23,7 +23,6 @@ class ListNotifications extends Component {
         super(props)
         this.fetchDocs = fetchDocs.bind(this)
         this.myAlert = myAlert.bind(this)
-        this.markAsReadAndNavigate = this.markAsReadAndNavigate.bind(this)
         this.currentUser = firebase.auth().currentUser
 
         this.state = {
@@ -40,27 +39,6 @@ class ListNotifications extends Component {
 
     componentWillUnmount() {
         this.unsubscribe()
-    }
-
-    renderNotification(item) {
-        const notification = item
-
-        return (
-            <TouchableOpacity onPress={() => this.markAsReadAndNavigate(notification)}>
-                <NotificationItem notification={notification} />
-            </TouchableOpacity>
-        )
-    }
-
-    markAsReadAndNavigate = async (notification) => {
-        const params = notification.navigation
-        const screen = params.screen
-
-        if (!notification.read) {
-            db.collection('Users').doc(this.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
-        }
-
-        this.props.navigation.navigate(screen, params) //dynamic form
     }
 
 
@@ -80,7 +58,7 @@ class ListNotifications extends Component {
                         data={this.state.notificationsList}
                         extraData={this.state}
                         keyExtractor={(item) => { return item.id }}
-                        renderItem={(item) => this.renderNotification(item.item)}
+                        renderItem={(item) => <NotificationItem notification={item.item} navigation={this.props.navigation} />}
                     />
                     :
                     <EmptyList icon={faBell} iconColor={theme.colors.miInbox} header='Notifications' description='Aucune notification pour le moment.' offLine={this.props.offLine} />

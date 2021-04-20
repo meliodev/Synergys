@@ -15,6 +15,7 @@ class Inbox extends React.Component {
 
     constructor(props) {
         super(props)
+        this.isRoot = this.props.navigation.getParam('isRoot', true) //#task: set it to true
 
         this.state = {
             index: 0,
@@ -31,13 +32,13 @@ class Inbox extends React.Component {
         ]
 
         let { index } = this.state
-        const { isConnected } = this.props.network
+        const { isConnected } = this.props.network 
         const { role } = this.props
         const permissionsMessages = this.props.permissions.messages
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar menu title titleText='Boîte de réception' />
+                <Appbar menu= {this.isRoot} back= {!this.isRoot} title titleText='Boîte de réception' />
 
                 <TabView
                     navigationState={{ index, routes }}

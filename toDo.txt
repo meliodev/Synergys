@@ -1,12 +1,5 @@
 TO DO:
 
-+ CREATETASK: Handle conflicts
-+ CREATETASK: com / poseur should not be able to assign a task to another user (assignedTo is disabled. It is by default filled with currentUser)
-
-+ PROCESS: ADD PROCESS PROGRESS SCREEN
-
-+ NOTIFICATION: Handle open screen through deeplink after pressing a notification 
-
 + DASHBOARD (NEW): notifications récentes non lu (5) + voir toutes les notifications / Aucune notification récente if nothing
 + DASHBOARD (NEW): tasks (recent and display outdated)
 + DASHBOARD (NEW): Shortcuts: CreateProspect/CreateClient
@@ -28,6 +21,10 @@ TO DO:
 + BACKEND: Update all client & project objects through collections on update name.. (cloud function trigger)
 + GLOBAL: Fetch all collections on app start (offline support)
 + USERS: onDeleteUser handler: remove user account (on delete user)& keep db document to be able to restore later on.. (links to their profile should handle empty userId or keep their documents to show off their data even if they are deleted..)
+
++ CREATETASK: com / poseur should not be able to assign a task to another user (assignedTo is disabled. It is by default filled with currentUser)
++ NOTIFICATION: Handle open screen through deeplink after pressing a notification 
++ NOTIFICATION: Handle navigation to deleted document
 
 + MAINTAINANCE: Add library to make auto version upgrade from google play
 
@@ -58,6 +55,8 @@ Design done:
 - Replace attachment pickers by Squares
 
 DONE: (05/04/2021)
++ PROCESS: ADD PROCESS PROGRESS SCREEN
++ CREATETASK: Handle conflicts
 + CREATETASK: Add property 'toute la journée' to task
 + PROCESS: Store process on firestore and handle it as done with permissions (redux cach)
 + ISSUE: Avoid duplicates of tasks/documents in "multi-users case" (especially if user is not up to date while offline)

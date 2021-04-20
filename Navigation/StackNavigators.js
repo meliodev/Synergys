@@ -7,9 +7,16 @@ import { createAppContainer, createSwitchNavigator, NavigationEvents } from 'rea
 import { createStackNavigator } from 'react-navigation-stack';
 
 //Auth screens
-import { HomeScreen, LoginScreen, ForgotPasswordScreen, AuthLoadingScreen, Dashboard } from "../screens/Authentication";
+import { HomeScreen, LoginScreen, ForgotPasswordScreen, AuthLoadingScreen } from "../screens/Authentication";
 
-//1. ADMIN SCREENS
+//SCREENS
+
+//Dashboard
+import Dashboard from '../screens/Dashboard/Dashboard'
+import Summary from '../screens/Dashboard/Summary'
+import Statistics from '../screens/Dashboard/Statistics'
+import Shortcuts from '../screens/Dashboard/Shortcuts'
+
 //Users & Teams Management
 import UsersManagement from '../screens/Users/UsersManagement'
 import CreateUser from '../screens/Users/CreateUser';
@@ -78,6 +85,112 @@ const hideHeader = () => ({
 })
 
 //2. All modules STACKS
+
+const DashboardStack = createStackNavigator({
+    Dashboard: {
+        screen: Dashboard,
+        navigationOptions: hideHeader
+    },
+    Summary: {
+        screen: Summary,
+        navigationOptions: hideHeader
+    },
+    Statistics: {
+        screen: Statistics,
+        navigationOptions: hideHeader
+    },
+    Shortcuts: {
+        screen: Shortcuts,
+        navigationOptions: hideHeader
+    },
+    //Notifications Links
+    Inbox: {
+        screen: Inbox,
+        navigationOptions: hideHeader
+    },
+    ListMessages: {
+        screen: ListMessages,
+        navigationOptions: hideHeader
+    },
+    ViewMessage: {
+        screen: ViewMessage,
+        navigationOptions: hideHeader
+    },
+    NewMessage: {
+        screen: NewMessage,
+        navigationOptions: hideHeader
+    },
+    ListNotifications: {
+        screen: ListNotifications,
+        navigationOptions: hideHeader
+    },
+    //Screens to navigate through navigation
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    CreateUser: {
+        screen: CreateUser,
+        navigationOptions: hideHeader
+    },
+    CreateTeam: {
+        screen: CreateTeam,
+        navigationOptions: hideHeader
+    },
+    CreateClient: {
+        screen: CreateClient,
+        navigationOptions: hideHeader
+    },
+    CreateProjectReq: {
+        screen: CreateProjectReq,
+        navigationOptions: hideHeader
+    },
+    CreateTicketReq: {
+        screen: CreateTicketReq,
+        navigationOptions: hideHeader
+    },
+    CreateTask: {
+        screen: CreateTask,
+        navigationOptions: hideHeader
+    },
+    CreateOrder: {
+        screen: CreateOrder,
+        navigationOptions: hideHeader
+    },
+    //Profile screens
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+        // navigationOptions: navOptionsBackCheck
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
+    },
+    //Agenda link
+    Agenda: {
+        screen: Agenda,
+        navigationOptions: hideHeader
+    },
+})
+
 const ProfileStack = createStackNavigator({
     Profile: {
         screen: Profile,
@@ -643,10 +756,10 @@ export const AuthStack = createStackNavigator({
 
 //App modules
 export const AppStack = createSwitchNavigator({
-    // Dashboard: {
-    //     screen: Dashboard,
-    //     navigationOptions: hideHeader
-    // },
+    DashboardStack: {
+        screen: DashboardStack,
+        navigationOptions: hideHeader
+    },
     ProjectsStack: {
         screen: ProjectsStack,
         path: 'projects',

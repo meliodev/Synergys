@@ -17,7 +17,7 @@ moment.locale('fr')
 import OffLineBar from './components/OffLineBar'
 import Test from './components/Test'
 
-import { db } from './firebase'
+import firebase, { db } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'

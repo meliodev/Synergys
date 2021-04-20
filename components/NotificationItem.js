@@ -7,6 +7,7 @@ import Menu from './Menu'
 import CustomIcon from './CustomIcon'
 import { faBell, faBellExclamation } from '@fortawesome/pro-solid-svg-icons'
 
+import { db, auth } from '../firebase'
 import * as theme from '../core/theme'
 import { constants } from '../core/constants'
 
@@ -14,7 +15,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-const NotificationItem = ({ notification, actions, ...props }) => {
+const NotificationItem = ({ notification, actions, navigation, ...props }) => {
 
     const setLeftIcon = (topic) => {
         const icon = notification.read ? faBell : faBellExclamation
@@ -31,13 +32,25 @@ const NotificationItem = ({ notification, actions, ...props }) => {
         // }
     }
 
+    const markAsReadAndNavigate = async () => {
+        const params = notification.navigation
+        const screen = params.screen
+
+        if (!notification.read) {
+            db.collection('Users').doc(auth.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
+        }
+
+        navigation.navigate(screen, params)
+    }
+
+
     //menu config
     const options = [
         { id: 0, title: 'Archiver' },
     ]
 
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={markAsReadAndNavigate}>
 
             {setLeftIcon(notification.topic)}
 
@@ -56,7 +69,7 @@ const NotificationItem = ({ notification, actions, ...props }) => {
 
             </View>
 
-        </View>
+        </TouchableOpacity>
     )
 
 }

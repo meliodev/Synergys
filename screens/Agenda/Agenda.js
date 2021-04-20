@@ -32,6 +32,7 @@ import * as theme from '../../core/theme'
 import { constants, highRoles } from '../../core/constants'
 import { connect } from 'react-redux'
 import { ActivityIndicator } from 'react-native';
+import { TaskItem } from '../../components';
 
 LocaleConfig.locales['fr'] = {
     monthNames: ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'],
@@ -76,6 +77,7 @@ class Agenda2 extends Component {
     constructor(props) {
         super(props)
         this.isAgenda = this.props.navigation.getParam('isAgenda', false) //#task: set it to true
+        console.log('IS AGENDA', this.isAgenda)
         this.isRoot = this.props.navigation.getParam('isRoot', true) //#task: set it to true
         this.loadItems = this.loadItems.bind(this)
         this.refreshItems = this.refreshItems.bind(this)
@@ -301,21 +303,6 @@ class Agenda2 extends Component {
         return tasksList
     }
 
-    renderTaskItems() {
-        const { filteredTaskItems } = this.state
-
-        return filteredTaskItems.map((item, key) => {
-            return (
-                <View style={{ padding: 15 }}>
-                    <Text style={theme.customFontMSbold.header}>{item[0].date}</Text>
-                    {item.map((taskItem) => {
-                        return this.renderItem(taskItem)
-                    })}
-                </View>
-            )
-        })
-    }
-
     togglePlanningTabs(isAgenda) {
         this.setState({ isAgenda }, () => this.refreshItems(true))
     }
@@ -355,25 +342,11 @@ class Agenda2 extends Component {
 
     renderItem(item) {
 
-        const itemColor = item.color
-        const TaskId = item.id
-
         const onPressItem = () => {
-            this.props.navigation.navigate('CreateTask', { prevScreen: 'Agenda', onGoBack: this.refreshItems, TaskId })
+            this.props.navigation.navigate('CreateTask', { prevScreen: 'Agenda', onGoBack: this.refreshItems, TaskId: item.id })
         }
 
-        const done = item.status === 'Terminé'
-
-        return (
-            <TouchableOpacity style={[styles.item, { backgroundColor: itemColor, opacity: done ? 0.5 : 1 }]} onPress={onPressItem} >
-                <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
-                    <Text style={[theme.customFontMSregular.body, { color: '#fff' }]} numberOfLines={1}>{item.name}</Text>
-                </View>
-                <View style={{ flex: 0.5, alignItems: 'flex-end', justifyContent: 'center', paddingLeft: 5 }}>
-                    <Text style={[theme.customFontMSregular.caption, { color: '#fff' }]} numberOfLines={1}>{item.assignedTo.fullName}</Text>
-                </View>
-            </TouchableOpacity>
-        )
+        return <TaskItem task={item} onPress={onPressItem} />
     }
 
     renderEmptyData() {

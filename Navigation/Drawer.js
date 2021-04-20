@@ -25,7 +25,7 @@ const menuPrivilleges = {
 }
 
 const menuItems = [
-    { id: 'home', name: 'Accueil', icon: faHomeLgAlt, color: theme.colors.miHome, navScreen: 'ProjectsStack' },
+    { id: 'home', name: 'Accueil', icon: faHomeLgAlt, color: theme.colors.miHome, navScreen: 'DashboardStack' },
     { id: 'inbox', name: 'Boite de réception', icon: faInbox, color: '#EF6C00', navScreen: 'InboxStack' },
     { id: 'projects', name: 'Projets', icon: faConstruction, color: '#3F51B5', navScreen: 'ProjectsStack' }, //Create
     { id: 'planning', name: 'Planning', icon: faCalendarAlt, color: theme.colors.miPlanning, navScreen: 'AgendaStack' },
