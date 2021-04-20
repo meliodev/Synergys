@@ -189,8 +189,11 @@ class Agenda2 extends Component {
 
                         items[date].push({
                             id: taskDoc.id,
-                            date: date,
                             name: task.name,
+                            date: date,
+                            isAllDay: task.isAllDay,
+                            startHour: task.startHour,
+                            dueHour: task.dueHour,
                             type: task.type,
                             status: task.status,
                             priority: task.priority.toLowerCase(),

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native';
 import { Title, Switch } from 'react-native-paper'
 import firebase, { db } from '../../firebase'
-import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar, faTimes } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
 import moment from 'moment';
@@ -18,6 +18,7 @@ import AddressInput from '../../components/AddressInput'
 import ColorPicker from "../../components/ColorPicker"
 import TaskState from "../../components/RequestState"
 import TasksConflicts from "../../components/TasksConflicts"
+import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
@@ -120,7 +121,8 @@ class CreateTask extends Component {
 
             //Events
             error: '',
-            loading: true
+            loading: true,
+            docNotFound: false,
         }
     }
 
@@ -128,7 +130,11 @@ class CreateTask extends Component {
     async componentDidMount() {
 
         if (this.isEdit) {
-            await this.fetchTask()
+            const docNotFound = await this.fetchTask()
+            if (docNotFound) {
+                load(this, false)
+                return
+            }
         }
 
         else this.initialState = _.cloneDeep(this.state)
@@ -139,8 +145,10 @@ class CreateTask extends Component {
     async fetchTask() {
         await db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
 
-            if (!doc.exists)
-                this.props.navigation.goBack()
+            if (!doc.exists) {
+                this.setState({ docNotFound: true })
+                return true
+            }
 
             let { name, assignedTo, description, project, type, priority, status, address, isAllDay, startDate, startHour, dueHour, color } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
@@ -641,14 +649,22 @@ class CreateTask extends Component {
 
     render() {
         let { name, description, assignedTo, project, startDate, startHour, endDate, dueHour, isAllDay, type, priority, status, address, color, showTasksConflicts, overlappingTasks } = this.state
-        let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
+        let { createdAt, createdBy, editedAt, editedBy, loading, docNotFound } = this.state
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.tasks
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
 
-        return (
+        if (docNotFound)
+            return (
+                <View style={styles.container}>
+                    <Appbar close title titleText={this.title} />
+                    <EmptyList icon={faTimes} header='Tâche introuvable' description="Le tâche est introuvable dans la base de données. Il se peut qu'elle ait été supprimé." offLine={!isConnected} />
+                </View>
+            )
+
+        else return (
             <View style={styles.container}>
                 <Appbar close title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={() => this.handleSubmit(false)} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
 

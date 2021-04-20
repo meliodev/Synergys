@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
 import { Card, Title } from 'react-native-paper'
-import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
+import { faCommentDots, faTimes } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
 import moment from 'moment';
@@ -17,6 +17,7 @@ import MyInput from '../../components/TextInput'
 import RequestState from "../../components/RequestState";
 import Toast from "../../components/Toast";
 import MyFAB from "../../components/MyFAB";
+import EmptyList from "../../components/EmptyList";
 import Loading from "../../components/Loading";
 
 import firebase, { db } from '../../firebase'
@@ -73,7 +74,8 @@ class CreateRequest extends Component {
             editedBy: { id: '', fullName: '' },
 
             error: '',
-            loading: false,
+            loading: true,
+            docNotFound: false,
             toastMessage: '',
             toastType: ''
         }
@@ -81,8 +83,13 @@ class CreateRequest extends Component {
 
     async componentDidMount() {
         //Edition
-        if (this.isEdit)
-            this.fetchRequest()
+        if (this.isEdit) {
+            const docNotFound = await this.fetchRequest()
+            if (docNotFound) {
+                load(this, false)
+                return
+            }
+        }
 
         //Creation
         else {
@@ -91,6 +98,8 @@ class CreateRequest extends Component {
             if (this.isClient) client = this.autoFillClient()
             this.setState({ RequestId, client }, () => this.initialState = _.cloneDeep(this.state))
         }
+
+        load(this, false)
     }
 
     autoFillClient() {
@@ -103,8 +112,14 @@ class CreateRequest extends Component {
     }
 
 
-    fetchRequest() {
-        db.collection('Requests').doc(this.RequestId).get().then((doc) => {
+    async fetchRequest() {
+        await db.collection('Requests').doc(this.RequestId).get().then((doc) => {
+
+            if (!doc.exists) {
+                this.setState({ docNotFound: true })
+                return true
+            }
+
             let { RequestId, department, client, subject, state, description, address } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
 
@@ -271,7 +286,7 @@ class CreateRequest extends Component {
 
     render() {
         const { RequestId, client, department, subject, state, description, address } = this.state
-        const { createdAt, createdBy, editedAt, editedBy, loading, toastMessage, toastType, clientError, addressError } = this.state
+        const { createdAt, createdBy, editedAt, editedBy, loading, docNotFound, toastMessage, toastType, clientError, addressError } = this.state
         const { requestType } = this.props
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.requests
@@ -282,7 +297,15 @@ class CreateRequest extends Component {
         const title = ' Demande de ' + requestType
         const prevScreen = requestType === 'ticket' ? 'CreateTicketReq' : 'CreateProjectReq'
 
-        return (
+        if (docNotFound)
+            return (
+                <View style={styles.container}>
+                    <Appbar close title titleText={title} />
+                    <EmptyList icon={faTimes} header='Demande introuvable' description="Le demande est introuvable dans la base de données. Il se peut qu'elle ait été supprimé." offLine={!isConnected} />
+                </View>
+            )
+
+        else return (
             <View style={styles.container}>
                 <Appbar close title titleText={title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} />
 

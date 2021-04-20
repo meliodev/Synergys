@@ -4,7 +4,7 @@ import { Card, Title, TextInput } from 'react-native-paper'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs'
-import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal } from '@fortawesome/pro-light-svg-icons'
+import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
 import moment from 'moment';
@@ -20,6 +20,7 @@ import Button from "../../components/Button"
 import ModalOptions from "../../components/ModalOptions"
 import UploadProgress from "../../components/UploadProgress"
 import Toast from "../../components/Toast"
+import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
 
@@ -134,7 +135,8 @@ class UploadDocument extends Component {
             checked: '',
 
             error: '',
-            loading: false,
+            loading: true,
+            docNotFound: false,
             loadingConversion: false,
             toastType: '',
             toastMessage: ''
@@ -144,7 +146,11 @@ class UploadDocument extends Component {
     async componentDidMount() {
 
         if (this.isEdit) {
-            await this.fetchDocument(this.DocumentId)
+            const docNotFound = await this.fetchDocument(this.DocumentId)
+            if (docNotFound) {
+                load(this, false)
+                return
+            }
             await this.fetchSignees()
             this.attachmentListener(this.DocumentId)
         }
@@ -155,6 +161,8 @@ class UploadDocument extends Component {
 
             else this.initialState = _.cloneDeep(this.state)
         }
+
+        load(this, false)
     }
 
     componentWillUnmount() {
@@ -165,6 +173,11 @@ class UploadDocument extends Component {
     //on Edit
     async fetchDocument(DocumentId) {
         await db.collection('Documents').doc(DocumentId).get().then((doc) => {
+
+            if (!doc.exists) {
+                this.setState({ docNotFound: true })
+                return true
+            }
 
             let { project, name, description, type, state, attachment, order } = this.state
             let { createdAt, createdBy, editedAt, editedBy, loading } = this.state
@@ -640,7 +653,7 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment, order } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { error, loading, loadingConversion, toastType, toastMessage, projectError } = this.state
+        let { error, loading, docNotFound, loadingConversion, toastType, toastMessage, projectError } = this.state
         const { checked, modalContent, showModal, attachmentSource } = this.state
         const { isConnected } = this.props.network
 
@@ -651,12 +664,21 @@ class UploadDocument extends Component {
         const attachmentUploaded = attachment && !attachment.pending
         const allowSign = this.isEdit && attachmentUploaded
 
-        if (loadingConversion) return (
-            <View style={styles.container}>
-                <Appbar close title titleText='Exportation du document...' />
-                <LoadDialog loading={loadingConversion} message="Conversion du document en cours. Veuillez patienter..." />
-            </View>
-        )
+        if (!docNotFound)
+            return (
+                <View style={styles.container}>
+                    <Appbar close title titleText='Modifier le document' />
+                    <EmptyList icon={faTimes} header='Document introuvable' description="Le document est introuvable dans la base de données. Il se peut qu'il ait été supprimé." offLine={!isConnected} />
+                </View>
+            )
+
+        else if (loadingConversion)
+            return (
+                <View style={styles.container}>
+                    <Appbar close title titleText='Exportation du document...' />
+                    <LoadDialog loading={loadingConversion} message="Conversion du document en cours. Veuillez patienter..." />
+                </View>
+            )
 
         else return (
             <View style={styles.container}>

@@ -67,12 +67,12 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                         </View>
                     </View>
                     :
-                    <View style={{ height: 45, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: 11 }}>
+                    <View style={{ height: 45, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 
-                        <View style= {{flex: 0.9}}>
+                        <View style= {{flex: 0.905}}>
                             {renderLabel(theme.customFontMSregular.body, true)}
                         </View>
-                        <View style={{ flex: 0.1 }}>
+                        <View style={{ flex: 0.095 }}>
                             <CustomIcon icon={icon} color={theme.colors.inpuIcon} />
                         </View>
                     </View>

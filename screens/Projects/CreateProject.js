@@ -15,7 +15,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading } from '../../components'
+import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading, EmptyList } from '../../components'
 
 import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
@@ -134,6 +134,7 @@ class CreateProject extends Component {
 
             error: '',
             loading: true,
+            docNotFound: false,
 
             //Specific privileges (poseur & commercial)
             isBlockedUpdates: false
@@ -143,7 +144,11 @@ class CreateProject extends Component {
     async componentDidMount() {
 
         if (this.isEdit) {
-            await this.fetchProject() //Get current process
+            const docNotFound = await this.fetchProject() //Get current process
+            if (docNotFound) {
+                load(this, false)
+                return
+            }
             this.fetchDocuments()
             this.fetchTasks()
             this.initialState = _.cloneDeep(this.state)
@@ -166,70 +171,72 @@ class CreateProject extends Component {
     //FETCHES: #edit
     async fetchProject() {
         await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
-
-            if (doc.exists) {
-                let { client, name, description, note, address, state, step, subscribers, comContact, techContact, color } = this.state
-                let { createdAt, createdBy, editedAt, editedBy, attachedImages, process } = this.state
-                let { error, loading } = this.state
-                var imagesView = []
-                var imagesCarousel = []
-
-                //General info
-                const project = doc.data()
-                client = project.client
-                name.value = project.name
-                description.value = project.description
-                note.value = project.note
-                subscribers = project.subscribers
-                console.log(subscribers)
-                comContact = project.subscribers.filter((sub) => sub.role === 'Commercial')[0]
-                techContact = project.subscribers.filter((sub) => sub.role === 'Poseur')[0]
-                color = project.color
-
-                //َActivity
-                createdAt = project.createdAt
-                createdBy = project.createdBy
-                editedAt = project.editedAt
-                editedBy = project.editedBy
-
-                process = project.process
-
-                //Images
-                attachedImages = project.attachments || []
-
-                if (attachedImages) {
-                    attachedImages = attachedImages.filter((image) => !image.deleted)
-                    imagesView = attachedImages.map((image) => { return ({ source: { uri: image.downloadURL } }) })
-                    imagesCarousel = attachedImages.map((image) => image.downloadURL)
-                }
-
-                //State
-                state = project.state
-                step = project.step
-
-                //Address
-                address = project.address
-
-                //IMPORTANT FOR UI PRIVILLEGES
-                const currentRole = this.props.role.id
-                const isBlockedUpdates = this.blockRoleUpdateOnPhase(currentRole, step)
-
-                //PROCESS ACTION PROJECT DATA
-                this.project = {
-                    id: this.ProjectId,
-                    name: name.value,
-                    client,
-                    subscribers,
-                    step
-                }
-
-                this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, color, process, processFetched: true, isBlockedUpdates }, async () => {
-                    //if (this.isInit)
-
-                    this.initialState = _.cloneDeep(this.state)
-                    //this.isInit = false
-                })
+            if (!doc.exists) {
+                this.setState({ docNotFound: true })
+                return true
             }
+
+            let { client, name, description, note, address, state, step, subscribers, comContact, techContact, color } = this.state
+            let { createdAt, createdBy, editedAt, editedBy, attachedImages, process } = this.state
+            let { error, loading } = this.state
+            var imagesView = []
+            var imagesCarousel = []
+
+            //General info
+            const project = doc.data()
+            client = project.client
+            name.value = project.name
+            description.value = project.description
+            note.value = project.note
+            subscribers = project.subscribers
+            console.log(subscribers)
+            comContact = project.subscribers.filter((sub) => sub.role === 'Commercial')[0]
+            techContact = project.subscribers.filter((sub) => sub.role === 'Poseur')[0]
+            color = project.color
+
+            //َActivity
+            createdAt = project.createdAt
+            createdBy = project.createdBy
+            editedAt = project.editedAt
+            editedBy = project.editedBy
+
+            process = project.process
+
+            //Images
+            attachedImages = project.attachments || []
+
+            if (attachedImages) {
+                attachedImages = attachedImages.filter((image) => !image.deleted)
+                imagesView = attachedImages.map((image) => { return ({ source: { uri: image.downloadURL } }) })
+                imagesCarousel = attachedImages.map((image) => image.downloadURL)
+            }
+
+            //State
+            state = project.state
+            step = project.step
+
+            //Address
+            address = project.address
+
+            //IMPORTANT FOR UI PRIVILLEGES
+            const currentRole = this.props.role.id
+            const isBlockedUpdates = this.blockRoleUpdateOnPhase(currentRole, step)
+
+            //PROCESS ACTION PROJECT DATA
+            this.project = {
+                id: this.ProjectId,
+                name: name.value,
+                client,
+                subscribers,
+                step
+            }
+
+            this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, color, process, processFetched: true, isBlockedUpdates }, async () => {
+                //if (this.isInit)
+
+                this.initialState = _.cloneDeep(this.state)
+                //this.isInit = false
+            })
         })
     }
 
@@ -623,7 +630,7 @@ class CreateProject extends Component {
         let { client, name, description, note, address, state, step, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, comContact, techContact } = this.state
-        let { error, loading, toastMessage, toastType } = this.state
+        let { error, loading, docNotFound, toastMessage, toastType } = this.state
         const { process, processFetched } = this.state
         const { isBlockedUpdates } = this.state
 
@@ -636,7 +643,15 @@ class CreateProject extends Component {
 
         const { isConnected } = this.props.network
 
-        return (
+        if (docNotFound)
+            return (
+                <View style={styles.mainContainer}>
+                    <Appbar close title titleText={this.title} />
+                    <EmptyList icon={faTimes} header='Projet introuvable' description="Le projet est introuvable dans la base de données. Il se peut qu'il ait été supprimé." offLine={!isConnected} />
+                </View>
+            )
+
+        else return (
             <View style={styles.mainContainer}>
                 <Appbar close title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
 

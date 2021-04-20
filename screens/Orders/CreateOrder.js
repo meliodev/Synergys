@@ -5,6 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Dialog from "react-native-dialog"
 import { connect } from 'react-redux'
 import _ from 'lodash'
+import { faTimes } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -17,6 +18,7 @@ import ItemPicker from "../../components/ItemPicker"
 import Button from "../../components/Button"
 import RadioButton from "../../components/RadioButton"
 import Toast from "../../components/Toast"
+import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import firebase, { db } from '../../firebase'
@@ -95,7 +97,8 @@ class CreateOrder extends Component {
             editededAt: '',
 
             error: '',
-            loading: false,
+            loading: true,
+            docNotFound: false,
             toastType: '',
             toastMessage: '',
 
@@ -107,7 +110,21 @@ class CreateOrder extends Component {
     }
 
     async componentDidMount() {
-        load(this, true)
+
+        if (this.isEdit) {
+            const docNotFound = await this.fetchOrder()
+            if (docNotFound) {
+                load(this, false)
+                return
+            }
+        }
+
+        else {
+            const OrderId = generateId('GS-CO-')
+            this.setState({ OrderId }, () => {
+                this.initialState = _.cloneDeep(this.state)
+            })
+        }
 
         if (this.project) {
             const client = await this.fetchClient(this.project.id)
@@ -115,23 +132,18 @@ class CreateOrder extends Component {
             this.setState({ project: this.project })
         }
 
-        if (this.isEdit) {
-            await this.fetchOrder()
-            load(this, false)
-        }
-
-        else {
-            const OrderId = generateId('GS-CO-')
-            this.setState({ OrderId }, () => {
-                this.initialState = _.cloneDeep(this.state)
-                load(this, false)
-            })
-        }
+        load(this, false)
     }
 
     //on Edit: fetch data
     async fetchOrder() {
         await db.collection('Orders').doc(this.OrderId).get().then((doc) => {
+
+            if (!doc.exists) {
+                this.setState({ docNotFound: true })
+                return true
+            }
+
             let { OrderId, project, state, orderLines, taxes, primeCEE, primeRenov } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
@@ -523,7 +535,7 @@ class CreateOrder extends Component {
         let { OrderId, project, state, client } = this.state
         let { orderLines, subTotal, taxes, total, primeCEE, primeRenov, order, docType } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { error, loading, toastType, toastMessage } = this.state
+        let { error, loading, docNotFound, toastType, toastMessage } = this.state
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.orders
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
@@ -532,7 +544,15 @@ class CreateOrder extends Component {
 
         const pdfGenButtonLabel = `Générer ${articles_fr('le', masculins, docType)} ${docType}`
 
-        return (
+        if (docNotFound)
+            return (
+                <View style={styles.container}>
+                    <Appbar close title titleText={this.title} />
+                    <EmptyList icon={faTimes} header='Commande introuvable' description="Le commande est introuvable dans la base de données. Il se peut qu'elle ait été supprimé." offLine={!isConnected} />
+                </View>
+            )
+
+        else return (
             <View style={styles.container}>
                 <Appbar close={!loading} title titleText={this.title} check={this.autoGenPdf ? false : this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading && !this.autoGenPdf} handleDelete={this.showAlert} />
 

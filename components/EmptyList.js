@@ -28,7 +28,7 @@ const EmptyList = ({ icon, iconStyle, header, headerTextStyle, description, desc
 
 const styles = StyleSheet.create({
     container: {
-     //   flex: 1,
+        flex: 1,
         paddingHorizontal: 33,
         justifyContent: 'center',
         alignItems: 'center',
