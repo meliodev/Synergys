@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native'
-import { faBell, faCalendar } from '@fortawesome/pro-light-svg-icons'
+import { StyleSheet, Text, View, FlatList } from 'react-native'
 import { connect } from 'react-redux'
+import { faCalendar } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -12,17 +12,16 @@ import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
+import { renderSection } from './helpers'
 
-import { Appbar, CustomIcon, Section, EmptyList, NotificationItem, TaskItem, Loading } from '../../components'
+import { EmptyList, TaskItem, Loading } from '../../components'
 
-class Summary extends Component {
+class Tasks extends Component {
     constructor(props) {
         super(props)
         this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
-            notificationsList: [],
-            notificationsCount: 0,
             tasksList: [],
             tasksCount: 0,
             loading: true
@@ -30,15 +29,6 @@ class Summary extends Component {
     }
 
     componentDidMount() {
-        const queryNotifications = db
-            .collection('Users')
-            .doc(auth.currentUser.uid)
-            .collection('Notifications')
-            .where('deleted', '==', false)
-            .where('read', '==', false)
-            .orderBy('sentAt', 'desc')
-            .limit(5)
-
         const today = moment().format('YYYY-MM-DD')
         const queryTasks = db
             .collection('Agenda')
@@ -47,58 +37,11 @@ class Summary extends Component {
             .orderBy('date', 'asc')
             .limit(5)
 
-        this.fetchDocs(queryNotifications, 'notificationsList', 'notificationsCount', () => { })
         this.fetchDocs(queryTasks, 'tasksList', 'tasksCount', () => {
             let { tasksList } = this.state
-            //  tasksList.forEach((task) => console.log(task.id, task.date))
             tasksList = this.formatTasks(tasksList)
             this.setState({ tasksList }, () => load(this, false))
         })
-    }
-
-    viewMoreLink(navScreen, navParams) {
-        const customStyle = { textAlign: 'center', color: theme.colors.primary, marginTop: 10 }
-        return (
-            <Text
-                style={[theme.customFontMSmedium.body, customStyle]}
-                onPress={() => this.props.navigation.navigate(navScreen, navParams)}
-            >
-                Voir plus
-            </Text>
-        )
-    }
-
-    renderSection(sectionTitle, sectionIcon, listItems, countItems, navScreen, navParams = {}, renderItem, emptyListHeader, emptyListDesc, isConnected) {
-        return (
-            <View style={styles.notificationsContainer}>
-                <Section text={sectionTitle} icon={sectionIcon} />
-                <View style={styles.notificationsList}>
-                    {countItems > 0 ?
-                        <FlatList
-                            style={styles.root}
-                            data={listItems}
-                            keyExtractor={(item) => { return item.id }}
-                            ListFooterComponent={this.viewMoreLink(navScreen, navParams)}
-                            renderItem={renderItem}
-                        />
-                        :
-                        <EmptyList
-                            icon={sectionIcon}
-                            header={emptyListHeader}
-                            description={emptyListDesc}
-                            offLine={!isConnected}
-                        />
-                    }
-                </View>
-            </View>
-        )
-    }
-
-    notificationsSection(isConnected) {
-        const { notificationsCount, notificationsList } = this.state
-        const renderItem = (item) => <NotificationItem notification={item.item} navigation={this.props.navigation} />
-        const navParams = { isRoot: false }
-        return this.renderSection('Notifications', faBell, notificationsList, notificationsCount, 'Inbox', navParams, renderItem, 'Notifications', 'Aucune nouvelle notification.', isConnected)
     }
 
     tasksSection(isConnected) {
@@ -116,7 +59,7 @@ class Summary extends Component {
         }
 
         const navParams = { isRoot: false, isAgenda: true }
-        return this.renderSection('Tâches', faCalendar, tasksList, tasksCount, 'Agenda', navParams, renderItem, 'Tâches', 'Aucune nouvelle tâche.', isConnected)
+        return renderSection('Tâches', faCalendar, tasksList, tasksCount, 'Agenda', navParams, renderItem, 'Tâches', 'Aucune nouvelle tâche.', isConnected)
     }
 
     formatTasks(tasksList) {
@@ -155,20 +98,39 @@ class Summary extends Component {
         return tasksList
     }
 
+    tasksSummary() {
+        const columnStyle = { flex: 1, justifyContent: 'center', alignItems: 'center' }
+        return (
+            <View style={{ height: constants.ScreenHeight*0.15, borderRadius: 25, elevation: 5, backgroundColor: theme.colors.white, flexDirection: 'row' }}>
+                <View style={columnStyle}>
+                    <Text>30</Text>
+                    <Text>En retard</Text>
+                </View>
+                <View style={columnStyle}>
+                    <Text>55</Text>
+                    <Text>En cours</Text>
+                </View>
+                <View style={columnStyle}>
+                    <Text>280</Text>
+                    <Text>Terminé</Text>
+                </View>
+            </View>
+        )
+    }
+
     render() {
         const { loading } = this.state
         const { isConnected } = this.props.network
 
         return (
             <View style={styles.mainContainer}>
-                <Appbar back title titleText='Nouveautés' />
                 {loading ?
                     <Loading />
                     :
-                    <ScrollView>
-                        {this.notificationsSection(isConnected)}
+                    <View>
+                        {/* {this.tasksSummary()} */}
                         {this.tasksSection(isConnected)}
-                    </ScrollView>
+                    </View>
                 }
             </View>
         )
@@ -184,8 +146,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(Summary)
-
+export default connect(mapStateToProps)(Tasks)
 
 
 const styles = StyleSheet.create({
@@ -193,16 +154,5 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.white
     },
-    notificationsList: {
-        paddingVertical: 15
-    },
-    tasksList: {
-        paddingVertical: 15
-    },
-    root: {
-        zIndex: 1,
-        paddingHorizontal: theme.padding,
-        //backgroundColor: 'green',
-    }
-});
+})
 

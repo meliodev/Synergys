@@ -1,46 +1,123 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import { Appbar, CustomIcon, NewBackground } from '../../components'
 import { constants } from '../../core/constants';
 import { faLayerPlus, faChartLine, faArrowAltToRight } from '@fortawesome/pro-duotone-svg-icons'
 
 import * as theme from '../../core/theme'
+import { faBell, faTasks } from '@fortawesome/pro-light-svg-icons'
+
+import Analytics from './Analytics'
+import Tasks from './Tasks'
+import Notifications from './Notifications'
+import Shortcuts from './Shortcuts'
+
+const colors1 = { primary: '#565df9', secondary: '#e3e3ff' }
+const colors2 = { primary: '#ff8400', secondary: '#ffebce' }
+const colors3 = { primary: '#64ab5d', secondary: '#e3f0e1' }
+const colors4 = { primary: '#df8ad6', secondary: '#faebf7' }
+
+const menuItems = [
+    {
+        icon: faChartLine,
+        colors: colors1,
+        label: 'Analytiques',
+        content: 'analytics',
+    },
+    {
+        icon: faTasks,
+        colors: colors3,
+        label: 'Tâches',
+        content: 'tasks',
+    },
+    {
+        icon: faBell,
+        colors: colors4,
+        label: 'Notifications',
+        content: 'notifications',
+    },
+    {
+        icon: faArrowAltToRight,
+        colors: colors2,
+        label: 'Raccourcis',
+        content: 'shortcuts',
+    },
+]
 
 export default class Dashboard extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            a: ''
+            content: 'analytics'
         }
     }
 
-    renderItem(icon, colors, label, navScreen, style) {
-        const { primary, secondary, tertiary } = colors
+    renderMenuItem(item, index) {
+        const { icon, colors, label, content } = item
+        const { primary, secondary } = colors
+        const isSelected = content === this.state.content
+        const backgroundColor = isSelected ? primary : secondary
+        const iconColor = isSelected ? theme.colors.white : primary
+        const borderBottomColor = isSelected ? primary : theme.colors.white
+        const textColor = isSelected ? primary : theme.colors.secondary
+        const iconWrapperSize = constants.ScreenWidth * 0.15
+        const iconSize = iconWrapperSize * 0.4
+
+        const onPressItem = () => {
+            this.setState({ content })
+        }
+
+        const menuItemIconWrapperStyle = {
+            height: iconWrapperSize,
+            width: iconWrapperSize,
+            borderRadius: iconWrapperSize / 2,
+            borderColor: primary,
+            backgroundColor
+        }
+
         return (
-            <TouchableOpacity style={[styles.menuItem, style]} onPress={() => this.props.navigation.navigate(navScreen)}>
-                <CustomIcon
-                    icon={icon}
-                    color={primary}
-                    secondaryColor={secondary}
-                    size={constants.ScreenHeight * 0.07}
-                />
-                <View style={[styles.itemLabel, { backgroundColor: tertiary }]}>
-                    <Text style={[theme.customFontMSmedium.h3, { letterSpacing: 1.5, color: primary, textAlign: 'center' }]}>{label}</Text>
+            <TouchableOpacity style={[styles.menuItem, { borderBottomColor }]} onPress={onPressItem}>
+                <View style={[styles.menuItemIconWrapper, menuItemIconWrapperStyle]}>
+                    <CustomIcon icon={icon} size={iconSize} color={iconColor} />
+                </View>
+                <View>
+                    <Text style={[theme.customFontMSregular.caption, { color: textColor, textAlign: 'center' }]}>{label}</Text>
                 </View>
             </TouchableOpacity>
         )
     }
 
-    render() {
+    renderMenuItems() {
         return (
-            <NewBackground style={styles.mainContainer}>
+            <View style={{ paddingHorizontal: 10 }}>
+                <FlatList
+                    horizontal={true}
+                    data={menuItems}
+                    keyExtractor={item => item.content}
+                    ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+                    renderItem={({ item, index }) => this.renderMenuItem(item, index)}
+                    style={{ marginTop: 10 }}
+                    contentContainerStyle={{ justifyContent: 'center' }}
+                    showsHorizontalScrollIndicator={false}
+                />
+            </View>
+        )
+    }
+
+    render() {
+        const { content } = this.state
+
+        return (
+            <View style={styles.mainContainer}>
                 <Appbar menu title titleText='Accueil' />
-                <View style={styles.contentContainer}>
-                    {this.renderItem(faLayerPlus, { primary: '#4699f5', secondary: '#bfe1fa', tertiary: '#cee8f9' }, 'NOUVEAUTÉS', 'Summary', { backgroundColor: '#deeff9' })}
-                    {this.renderItem(faChartLine, { primary: '#fab627', secondary: '#fbde98', tertiary: '#faebce' }, 'STATISTIQUES', 'Statistics', { backgroundColor: '#fbf4e4' })}
-                    {this.renderItem(faArrowAltToRight, { primary: '#fa2788', secondary: '#f8bad1', tertiary: '#f8d6e4' }, 'RACCOURCIS', 'Shortcuts', { backgroundColor: '#f9e6ec' })}
+                {this.renderMenuItems()}
+                <View style={styles.container}>
+                    {content === 'analytics' && <Analytics />}
+                    {content === 'tasks' && <Tasks />}
+                    {content === 'notifications' && <Notifications />}
+                    {content === 'shortcuts' && <Shortcuts />}
                 </View>
-            </NewBackground>
+            </View>
         )
     }
 }
@@ -48,28 +125,23 @@ export default class Dashboard extends Component {
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
-    },
-    contentContainer: {
-        flex: 1,
-        paddingHorizontal: theme.padding,
-        paddingVertical: constants.ScreenHeight * 0.05
+        backgroundColor: theme.colors.white
     },
     menuItem: {
-        elevation: 3,
-        height: constants.ScreenHeight * 0.25,
-        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingLeft: 40,
-        borderRadius: 25,
-        marginBottom: 20,
+        width: constants.ScreenWidth * 0.22,
+        borderBottomWidth: 3,
+        paddingBottom: 10
     },
-    itemLabel: {
-        elevation: 4,
-        paddingHorizontal: 30,
-        paddingVertical: 25,
-        borderTopLeftRadius: 100,
-        borderBottomLeftRadius: 100
+    menuItemIconWrapper: {
+        borderWidth: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 5,
+    },
+    container: {
+        flex: 1,
+        padding: theme.padding,
     }
-});
+})
 

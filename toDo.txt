@@ -1,7 +1,5 @@
 TO DO:
 
-+ DASHBOARD (NEW): notifications récentes non lu (5) + voir toutes les notifications / Aucune notification récente if nothing
-+ DASHBOARD (NEW): tasks (recent and display outdated)
 + DASHBOARD (NEW): Shortcuts: CreateProspect/CreateClient
 + DASHBOARD (NEW):
 -> COM: show objectives: DC defines a "Chiffre d'affaire" every month for com. 
@@ -24,7 +22,7 @@ TO DO:
 
 + CREATETASK: com / poseur should not be able to assign a task to another user (assignedTo is disabled. It is by default filled with currentUser)
 + NOTIFICATION: Handle open screen through deeplink after pressing a notification 
-+ NOTIFICATION: Handle navigation to deleted document
++ NOTIFICATION: Mark all as read.
 
 + MAINTAINANCE: Add library to make auto version upgrade from google play
 
@@ -55,6 +53,9 @@ Design done:
 - Replace attachment pickers by Squares
 
 DONE: (05/04/2021)
++ DASHBOARD (NEW): tasks (recent and display outdated)
++ DASHBOARD (NEW): notifications récentes non lu (5) + voir toutes les notifications / Aucune notification récente if nothing
++ NOTIFICATION: Handle navigation to deleted document
 + PROCESS: ADD PROCESS PROGRESS SCREEN
 + CREATETASK: Handle conflicts
 + CREATETASK: Add property 'toute la journée' to task

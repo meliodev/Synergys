@@ -4,11 +4,11 @@ import { Picker } from '@react-native-picker/picker'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const MyPicker = ({ containerStyle, elements, title, errorText, enabled = true, ...props }) => (
-    <View style={[styles.container]}>
+const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title, showTitle = true, errorText, enabled = true, ...props }) => (
+    <View style={[styles.container, style]}>
 
-        <View style={[styles.pickerContainer]}>
-            <Text style={theme.customFontMSregular.caption}>{title}</Text>
+        <View style={[styles.pickerContainer, pickerContainerStyle]}>
+            {showTitle && <Text style={theme.customFontMSregular.caption}>{title}</Text>}
             <Picker
                 style={[styles.input]}
                 enabled={enabled}
@@ -18,7 +18,7 @@ const MyPicker = ({ containerStyle, elements, title, errorText, enabled = true, 
                 {elements.map((item) => <Picker.Item label={item.label} value={item.value} />)}
             </Picker>
         </View>
-        
+
         {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
 
     </View>
@@ -28,15 +28,10 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         paddingTop: 15,
-      //  backgroundColor: 'brown'
     },
     pickerContainer: {
         borderBottomWidth: StyleSheet.hairlineWidth * 3,
         borderBottomColor: theme.colors.gray_extraLight,
-    },
-    label: {
-        fontSize: 12,
-        color: '#757575',
     },
     input: {
         // marginLeft: -8,

@@ -664,7 +664,7 @@ class UploadDocument extends Component {
         const attachmentUploaded = attachment && !attachment.pending
         const allowSign = this.isEdit && attachmentUploaded
 
-        if (!docNotFound)
+        if (docNotFound)
             return (
                 <View style={styles.container}>
                     <Appbar close title titleText='Modifier le document' />

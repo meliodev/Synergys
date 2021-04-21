@@ -154,6 +154,10 @@ const DashboardStack = createStackNavigator({
         screen: CreateTask,
         navigationOptions: hideHeader
     },
+    DatePicker: {
+        screen: DatePicker,
+        navigationOptions: hideHeader
+    },
     CreateOrder: {
         screen: CreateOrder,
         navigationOptions: hideHeader

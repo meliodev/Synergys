@@ -95,7 +95,7 @@ export const compareDays = (day1, day2, operator) => {
 
 export const compareTimes = (time1, time2, operator) => {
   if (operator === 'isBefore') {
-    if (moment(time1).isBefore(moment(time2), 'hour')) return "L'heure d'échéance doit être supérieure à l'heure de début."
+    if (moment(time1, 'hh:mm').isBefore(moment(time2, 'hh:mm'), 'hour')) return "L'heure d'échéance doit être supérieure à l'heure de début."
   }
 }
 
