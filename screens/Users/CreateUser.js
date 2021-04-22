@@ -4,6 +4,10 @@ import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
 
+import moment from 'moment'
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import Appbar from "../../components/Appbar"
 import AddressInput from "../../components/AddressInput"
 import Loading from "../../components/Loading"
@@ -13,7 +17,7 @@ import MyInput from "../../components/TextInput"
 import Toast from "../../components/Toast"
 import LoadDialog from "../../components/LoadDialog"
 
-import firebase, { db } from '../../firebase'
+import firebase, { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, rolesRedux } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load } from "../../core/utils"
@@ -180,7 +184,9 @@ class CreateUser extends Component {
       email: email.value.toLowerCase(),
       role,
       password: password.value,
-      userType: 'utilisateur'
+      userType: 'utilisateur',
+      createdBy: { id: auth.currentUser.uid, fullName: auth.currentUser.displayName },
+      createdAt: moment().format(),
     }
 
     if (isPro) {

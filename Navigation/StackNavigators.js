@@ -13,9 +13,7 @@ import { HomeScreen, LoginScreen, ForgotPasswordScreen, AuthLoadingScreen } from
 
 //Dashboard
 import Dashboard from '../screens/Dashboard/Dashboard'
-import Summary from '../screens/Dashboard/Summary'
-import Statistics from '../screens/Dashboard/Statistics'
-import Shortcuts from '../screens/Dashboard/Shortcuts'
+import AddGoal from '../screens/Dashboard/AddGoal'
 
 //Users & Teams Management
 import UsersManagement from '../screens/Users/UsersManagement'
@@ -85,22 +83,13 @@ const hideHeader = () => ({
 })
 
 //2. All modules STACKS
-
 const DashboardStack = createStackNavigator({
     Dashboard: {
         screen: Dashboard,
         navigationOptions: hideHeader
     },
-    Summary: {
-        screen: Summary,
-        navigationOptions: hideHeader
-    },
-    Statistics: {
-        screen: Statistics,
-        navigationOptions: hideHeader
-    },
-    Shortcuts: {
-        screen: Shortcuts,
+    AddGoal: {
+        screen: AddGoal,
         navigationOptions: hideHeader
     },
     //Notifications Links

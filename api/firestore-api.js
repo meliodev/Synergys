@@ -1,8 +1,11 @@
 
 import { Alert, Keyboard } from 'react-native'
-import { db } from '../firebase'
+import { auth, db } from '../firebase'
 import { checkEmailExistance } from './auth-api'
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
+import moment from 'moment'
+import 'moment/locale/fr'
+moment.locale('fr')
 
 //#FETCH DOS BY QUERY
 export function fetchDocs(query, MyList, MyCount, MyCallBack) {
@@ -128,6 +131,8 @@ export const createClient = async function createClient(userData, eventHandlers,
     isProspect,
     password: password.value,
     userType: 'client',
+    createdBy: { id: auth.currentUser.uid, fullName: auth.currentUser.displayName },
+    createdAt: moment().format(),
     deleted: false
   }
 

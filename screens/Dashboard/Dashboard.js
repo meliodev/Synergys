@@ -75,13 +75,18 @@ export default class Dashboard extends Component {
             backgroundColor
         }
 
+        const labelStyle = {
+            color: textColor,
+            textAlign: 'center',
+        }
+
         return (
             <TouchableOpacity style={[styles.menuItem, { borderBottomColor }]} onPress={onPressItem}>
                 <View style={[styles.menuItemIconWrapper, menuItemIconWrapperStyle]}>
                     <CustomIcon icon={icon} size={iconSize} color={iconColor} />
                 </View>
                 <View>
-                    <Text style={[theme.customFontMSregular.caption, { color: textColor, textAlign: 'center' }]}>{label}</Text>
+                    <Text style={[theme.customFontMSregular.small, labelStyle]}>{label}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -89,17 +94,21 @@ export default class Dashboard extends Component {
 
     renderMenuItems() {
         return (
-            <View style={{ paddingHorizontal: 10 }}>
-                <FlatList
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: theme.padding, marginTop: 10 }}>
+                {menuItems.map((item, index) => {
+                    return this.renderMenuItem(item, index)
+                })}
+
+                { /* <FlatList
                     horizontal={true}
                     data={menuItems}
                     keyExtractor={item => item.content}
-                    ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
+                    ItemSeparatorComponent={() => <View style={{ width: constants.ScreenWidth * 0.045 }} />}
                     renderItem={({ item, index }) => this.renderMenuItem(item, index)}
                     style={{ marginTop: 10 }}
-                    contentContainerStyle={{ justifyContent: 'center' }}
+                    //contentContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
                     showsHorizontalScrollIndicator={false}
-                />
+                /> */}
             </View>
         )
     }
@@ -112,10 +121,10 @@ export default class Dashboard extends Component {
                 <Appbar menu title titleText='Accueil' />
                 {this.renderMenuItems()}
                 <View style={styles.container}>
-                    {content === 'analytics' && <Analytics />}
-                    {content === 'tasks' && <Tasks />}
-                    {content === 'notifications' && <Notifications />}
-                    {content === 'shortcuts' && <Shortcuts />}
+                    {content === 'analytics' && <Analytics navigation={this.props.navigation} />}
+                    {content === 'tasks' && <Tasks navigation={this.props.navigation} />}
+                    {content === 'notifications' && <Notifications navigation={this.props.navigation} />}
+                    {content === 'shortcuts' && <Shortcuts navigation={this.props.navigation} />}
                 </View>
             </View>
         )
@@ -129,7 +138,7 @@ const styles = StyleSheet.create({
     },
     menuItem: {
         alignItems: 'center',
-        width: constants.ScreenWidth * 0.22,
+        width: constants.ScreenWidth * 0.2,
         borderBottomWidth: 3,
         paddingBottom: 10
     },

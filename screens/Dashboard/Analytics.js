@@ -15,6 +15,7 @@ import { load } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
 
 import { Picker, Loading } from '../../components'
+import { TouchableOpacity } from 'react-native-gesture-handler'
 
 class Analytics extends Component {
     constructor(props) {
@@ -22,16 +23,67 @@ class Analytics extends Component {
         this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
+            userGoals: [],
+            totalProjects: 0,
+            totalClients: 0,
             chartPeriod: 'lastSemester',
             loading: true
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
+        // this.fetchUserRevenue()
+        const userGoals = await this.fetchUserGoals()
+        const totalProjects = await this.fetchTotalProjects()
+        const totalClients = await this.fetchTotalClients()
+        this.setState({ userGoals, totalProjects, totalClients })
         load(this, false)
     }
 
+    async fetchTotalProjects() {
+        return db.collection('Projects').where('createdBy.id', '==', auth.currentUser.uid).get().then((querySnapshot) => {
+            const totalProjects = querySnapshot.docs.length
+            return totalProjects
+        })
+    }
+
+    async fetchTotalClients() {
+        return db.collection('Clients').where('createdBy.id', '==', auth.currentUser.uid).get().then((querySnapshot) => {
+            const totalClients = querySnapshot.docs.length
+            return totalClients
+        })
+    }
+
+    async fetchUserGoals() {
+        let userGoals = []
+        const startOfLastSemester = moment().subtract(6, 'months').format()
+        await db
+            .collection('Users')
+            .doc(auth.currentUser.uid)
+            .collection('TurnoverGoals')
+            .where('monthYear', '>=', startOfLastSemester)
+            .orderBy('monthYear', 'desc')
+            .get()
+            .then((querySnapshot) => {
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data()
+                    const goal = {
+                        month: moment(data.monthYear).format('MM'),
+                        year: moment(data.monthYear).format('YYYY'),
+                        target: data.target,
+                        current: data.current || 0
+                    }
+                    userGoals.push(goal)
+                })
+            })
+
+        return userGoals
+    }
+
     renderSummary() {
+        const { totalProjects, totalClients } = this.state
+
         const summaryData = [
             {
                 label: 'REVENU TOTAL',
@@ -41,13 +93,13 @@ class Analytics extends Component {
             },
             {
                 label: 'CLIENTS',
-                value: 7,
+                value: totalClients,
                 symbol: '',
                 colors: { primary: '#F5276D', secondary: '#FFEFF4' }
             },
             {
                 label: 'PROJETS',
-                value: 18,
+                value: totalProjects,
                 symbol: '',
                 colors: { primary: '#FF9A27', secondary: '#FFF6E6' }
             },
@@ -58,19 +110,21 @@ class Analytics extends Component {
 
                 {summaryData.map((data) => {
                     const columnStyle = {
-                        height: constants.ScreenHeight * 0.13,
+                        height: constants.ScreenHeight * 0.1,
                         width: constants.ScreenWidth * 0.29,
                         borderRadius: 16,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        paddingTop: 15,
-                        paddingHorizontal: 5,
                         backgroundColor: data.colors.secondary
                     }
                     return (
                         <View style={columnStyle}>
-                            <Text style={[theme.customFontMSregular.small, { color: theme.colors.secondary, textAlign: 'center', marginBottom: 12, letterSpacing: 1.5 }]}>{data.label}</Text>
-                            <Text style={[theme.customFontMSmedium.body, { color: data.colors.primary }]}>{data.symbol}{data.value.toString()}</Text>
+                            <View style={{ flex: 0.15 }} />
+                            <View style={{ flex: 0.45, paddingHorizontal: 10, justifyContent: 'center' }}>
+                                <Text style={[theme.customFontMSregular.small, { color: theme.colors.secondary, textAlign: 'center', letterSpacing: 1.5 }]}>{data.label}</Text>
+                            </View>
+                            <View style={{ flex: 0.25, justifyContent: 'center' }}>
+                                <Text style={[theme.customFontMSmedium.body, { color: data.colors.primary, textAlign: 'center' }]}>{data.symbol}{data.value.toString()}</Text>
+                            </View>
+                            <View style={{ flex: 0.15 }} />
                         </View>
                     )
                 })
@@ -147,7 +201,7 @@ class Analytics extends Component {
                     bezier
                     style={{
                         marginTop: 5,
-                        marginBottom: 15,
+                        marginBottom: 25,
                         borderRadius: 16
                     }}
                 />
@@ -155,83 +209,69 @@ class Analytics extends Component {
         )
     }
 
-    addGoal() {
-        const size = 
-        return (
-            <View style= {{}}>
-                <Text>+</Text>
-            </View>
-        )
+    onPressGoal(goal, index) {
+        console.log(index)
+        // this.props.navigation.navigate('AddGoal', { userId: auth.currentUser.uid, GoalId: goal.id })
     }
 
     renderGoals() {
-        const goalsData = [
-            {
-                month: 'Janvier',
-                target: 10000,
-                current: 6000,
-            },
-            {
-                month: 'Février',
-                target: 10000,
-                current: 6000,
-            },
-            {
-                month: 'Mars',
-                target: 10000,
-                current: 6000,
-            },
-            {
-                month: 'Avril',
-                target: 10000,
-                current: 6000,
-            },
-            {
-                month: 'Mai',
-                target: 10000,
-                current: 6000,
-            },
-            {
-                month: 'Juin',
-                target: 10000,
-                current: 6000,
-            }
-        ]
+
+        const { userGoals } = this.state
 
         return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {this.addGoal()}
-                {goalsData.map((data) => {
+                {userGoals.map((data, index) => {
+                    const { current, target, month } = data
+                    const progress = (current / target) * 100
+                    const targetReached = progress >= 100
+                    const currentLow = progress < 33
+                    const tintColor = targetReached ? theme.colors.primary : currentLow ? theme.colors.error : 'orange'
                     return (
-                        <View style= {{marginBottom: 25}}>
+                        <TouchableOpacity style={{ marginBottom: 17, marginLeft: (index + 1) % 3 === 0 ? 0 : constants.ScreenWidth * 0.07 }} onPress={() => this.onPressGoal(data, index)}>
                             <AnimatedCircularProgress
-                                size={constants.ScreenWidth * 0.27}
+                                size={constants.ScreenWidth * 0.26}
                                 width={5}
-                                fill={(data.current / data.target) * 100}
-                                tintColor="#00e0ff"
+                                fill={progress}
+                                tintColor={tintColor}
                                 onAnimationComplete={() => console.log('onAnimationComplete')}
                                 arcSweepAngle={270}
                                 rotation={227}
-                                backgroundColor={theme.colors.gray_light}>
+                                backgroundColor={theme.colors.gray_light}
+                                style={{ marginBottom: 10 }}>
                                 {(fill) => (
                                     <Text style={[theme.customFontMSregular.header]}>
                                         {parseInt(fill)}%
                                     </Text>
                                 )}
                             </AnimatedCircularProgress>
-                            <Text style={[theme.customFontMSregular.caption, { textAlign: 'center' }]}>{data.current}€/{data.target}€</Text>
-                            <Text style={[theme.customFontMSregular.small, { textAlign: 'center' }]}>{data.month}</Text>
-                        </View>
+                            <Text style={[theme.customFontMSregular.caption, { textAlign: 'center' }]}>{current}€/{target}€</Text>
+                            <Text style={[theme.customFontMSregular.small, { textAlign: 'center', marginTop: 5 }]}>{month}</Text>
+                        </TouchableOpacity>
                     )
                 })
                 }
             </View>
         )
+    }
 
+    addGoal() {
+        const size = constants.ScreenWidth * 0.26
+        const onPress = () => {
+            this.props.navigation.navigate('AddGoal')
+        }
+        return (
+            <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={onPress}>
+                <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 1, borderColor: theme.colors.gray_dark, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                    <Text style={[theme.customFontMSregular.h1, { color: theme.colors.gray_dark }]}>+</Text>
+                </View>
+                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, textAlign: 'center' }]}>Nouvel objectif</Text>
+            </TouchableOpacity>
+        )
     }
 
     render() {
-        const { loading } = this.state
+        const { userGoals, loading } = this.state
         const { isConnected } = this.props.network
 
         return (
@@ -239,7 +279,7 @@ class Analytics extends Component {
                 {loading ?
                     <Loading />
                     :
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         {this.renderSummary()}
                         {this.renderChart()}
                         {this.renderGoals()}
