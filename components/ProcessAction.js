@@ -25,10 +25,11 @@ import { constants } from "../core/constants"
 import ProcessContainer from "../screens/src/container/ProcessContainer"
 
 //component
-const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTitle, dialogInputLabel, onSubmitComment, hideDialog, choice, nextStep, nextPhase }) => {
+const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTitle, dialogDescription, keyboardType = "default", onSubmitComment, hideDialog, currentAction, operation, nextStep, nextPhase }) => {
 
     const [comment, setComment] = useState('')
-    const emptyComment = () => setComment('')
+    const clearComment = () => setComment('')
+
 
     if (loadingDialog)
         return (
@@ -42,14 +43,15 @@ const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTit
         <Dialog.Container visible={showDialog}>
             <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{dialogTitle}</Dialog.Title>
             <Dialog.Input
-                label={dialogInputLabel}
+                label={dialogDescription}
                 returnKeyType="done"
                 value={comment}
                 onChangeText={comment => setComment(comment)}
-                autoFocus={showDialog} />
+                autoFocus={showDialog}
+                keyboardType={keyboardType} />
 
             <Dialog.Button label="Annuler" onPress={hideDialog} style={{ color: theme.colors.error }} />
-            <Dialog.Button label="Valider" onPress={() => onSubmitComment(comment, choice, nextStep, nextPhase, emptyComment)} style={{ color: theme.colors.primary }} />
+            <Dialog.Button label="Valider" onPress={() => onSubmitComment(comment, currentAction, operation, nextStep, nextPhase, clearComment)} style={{ color: theme.colors.primary }} />
         </Dialog.Container>
     )
 }
@@ -72,7 +74,7 @@ class ProcessAction extends Component {
             showDialog: false,
             expanded: true,
             dialogTitle: '',
-            dialogInputLabel: '',
+            dialogDescription: '',
             loadingDialog: false,
             loadingModal: false,
             processUpdated: false,
@@ -216,17 +218,17 @@ class ProcessAction extends Component {
     }
 
     //func
-    onSubmitComment = async (comment, choice, nextStep, nextPhase, emptyComment) => {
+    onSubmitComment = async (comment, currentAction, operation, nextStep, nextPhase, clearComment) => {
         if (!comment) return //show error message
         this.setState({ loadingDialog: true })
 
-        if (choice)
-            await this.runChoiceOperation(choice.operation)
-
+        if (operation)
+            operation.value = comment
+        await this.runChoiceOperation(operation, currentAction)
         await this.validateAction(comment, null, false, nextStep, nextPhase)
 
         this.setState({ loadingDialog: false, showDialog: false })
-        emptyComment()
+        clearComment()
     }
 
     //func
@@ -259,8 +261,8 @@ class ProcessAction extends Component {
             }
 
             const dialogTitle = configDialogLabels(choice.id).title
-            const dialogInputLabel = configDialogLabels(choice.id).inputLabel
-            this.setState({ dialogTitle, dialogInputLabel, showModal: false, showDialog: true })
+            const dialogDescription = configDialogLabels(choice.id).inputLabel
+            this.setState({ dialogTitle, dialogDescription, showModal: false, showDialog: true })
             return
         }
 
@@ -277,17 +279,17 @@ class ProcessAction extends Component {
             }
 
             else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                await this.runChoiceOperation(operation)
+                await this.runChoiceOperation(operation, currentAction)
                 await this.validateAction(null, null, false, nextStep, nextPhase)
             }
 
             else if (onSelectType === 'validation') {
-                await this.runChoiceOperation(operation)
+                await this.runChoiceOperation(operation, currentAction)
                 await this.validateAction(null, null, false, null, null, true)
             }
 
             else if (onSelectType === 'commentPicker') {
-                await this.runChoiceOperation(operation)
+                await this.runChoiceOperation(operation, currentAction)
                 await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
             }
 
@@ -311,12 +313,12 @@ class ProcessAction extends Component {
     }
 
     //func
-    runChoiceOperation = async (operation) => {
+    runChoiceOperation = async (operation, currentAction) => {
         if (!operation) return
 
-        const { currentAction } = this.state
         const { collection, documentId } = currentAction
         const { type, field, value } = operation
+
 
         if (type === 'update') {
             const update = {}
@@ -429,12 +431,13 @@ class ProcessAction extends Component {
 
         else if (type === 'manual') {
             if (verificationType === 'comment') {
-                const { nextStep, nextPhase } = currentAction
+                const { nextStep, nextPhase, formSettings } = currentAction
+
                 this.configNextStepOrPhase(nextStep, nextPhase)
 
-                const dialogTitle = "Commentaire"
-                const dialogInputLabel = "Veuillez renseigner des informations utiles."
-                this.setState({ dialogTitle, dialogInputLabel })
+                const dialogTitle = formSettings && formSettings.label || 'Commentaire'
+                const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
+                this.setState({ dialogTitle, dialogDescription })
                 this.setState({ showDialog: true })
             }
 
@@ -454,7 +457,7 @@ class ProcessAction extends Component {
 
         const currentAction = action ? action : this.state.currentAction
 
-        const { showModal, showDialog, loadingDialog, dialogTitle, dialogInputLabel, nextStep, nextPhase, loadingModal, choice, loading } = this.state
+        const { showModal, showDialog, loadingDialog, dialogTitle, dialogDescription, nextStep, nextPhase, loadingModal, choice, loading } = this.state
         const loadingMessage = action ? "Chargement de l'action..." : "Chargement de l'action à faire..."
 
         if (currentAction) {
@@ -504,12 +507,14 @@ class ProcessAction extends Component {
                     {(currentAction && currentAction.choices || verificationType === 'comment') && (
                         <CommentDialog
                             showDialog={showDialog}
-                            loadingDialog={loadingDialog}
                             dialogTitle={dialogTitle}
-                            dialogInputLabel={dialogInputLabel}
+                            dialogDescription={dialogDescription}
+                            loadingDialog={loadingDialog}
+                            keyboardType={currentAction.formSettings && currentAction.formSettings.keyboardType}
                             hideDialog={() => this.setState({ showDialog: false })}
                             onSubmitComment={this.onSubmitComment}
-                            choice={choice}
+                            currentAction={currentAction}
+                            operation={choice && choice.operation || currentAction.operation || null}
                             nextStep={nextStep}
                             nextPhase={nextPhase} />
                     )}

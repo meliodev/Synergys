@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard, TextInput, ActivityIndicator } from 'react-native';
 import MonthPicker from 'react-native-month-year-picker'
-import { faCalendarPlus, faInfoCircle } from '@fortawesome/pro-light-svg-icons'
+import { faCalendarPlus, faInfoCircle, faFileAlt } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { Appbar, FormSection, ItemPicker, Loading, Toast } from '../../components'
+import { Appbar, FormSection, ItemPicker, Loading, Toast, TurnoverGoal } from '../../components'
 import MyInput from '../../components/TextInput'
 
 import firebase, { db, auth } from '../../firebase'
@@ -39,12 +39,15 @@ class AddGoal extends Component {
         this.userId = this.props.navigation.getParam('userId', auth.currentUser.uid)
         this.GoalId = this.props.navigation.getParam('GoalId', '')
         this.isEdit = this.GoalId ? true : false
-        this.GoalId = this.isEdit ? this.GoalId : generateId('GS-OBJ-')
+        this.GoalId = this.isEdit ? this.GoalId : moment().format('MM-YYYY')
         this.title = this.isEdit ? "Modifier l'objectif" : "Nouvel objectif"
 
         this.state = {
+            //ID
+            GoalId: this.GoalId,
             //TEXTINPUTS
             target: { value: 0, error: '' },
+            current: 0,
             description: '',
 
             //Pickers
@@ -64,7 +67,6 @@ class AddGoal extends Component {
     }
 
     async componentDidMount() {
-     
         if (this.isEdit) {
             const docNotFound = await this.fetchGoal() //Get current process
             if (docNotFound) {
@@ -82,29 +84,34 @@ class AddGoal extends Component {
 
     //FETCHES: #edit
     async fetchGoal() {
-        await db.collection('Users').doc(this.userId).collection('TurnoverGoals').doc(this.GoalId).get().then((doc) => {
+        await db.collection('Users').doc(this.userId).collection('Turnover').doc(this.GoalId).get().then((doc) => {
             if (!doc.exists) {
                 this.setState({ docNotFound: true })
                 return true
             }
 
-            let { monthYear, target, description } = this.state
+            let { monthYear, target, current, description } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
             //General info
-            const goal = doc.data()
+            let goal = doc.data()
             monthYear = goal.monthYear
             target.value = goal.target
-            description.value = goal.description
+            description = goal.description
+
+            current = 0
+            for (var projectId in goal.projectsIncome) {
+                current += Number(goal.projectsIncome[projectId])
+            }
 
             //َActivity
-            createdAt = project.createdAt
-            createdBy = project.createdBy
-            editedAt = project.editedAt
-            editedBy = project.editedBy
+            createdAt = goal.createdAt
+            createdBy = goal.createdBy
+            editedAt = goal.editedAt
+            editedBy = goal.editedBy
 
-            this.setState({ monthYear, target, description, createdAt, createdBy, editedAt, editedBy }, async () => {
+            this.setState({ monthYear, target, current, description, createdAt, createdBy, editedAt, editedBy }, async () => {
                 //if (this.isInit)
 
                 this.initialState = _.cloneDeep(this.state)
@@ -117,7 +124,7 @@ class AddGoal extends Component {
     validateInputs() {
         let { target } = this.state
 
-        let targetError = priceValidator(client.fullName, '"Valeur cible"')
+        let targetError = priceValidator(target.value, `"Chiffre d'affaire cible"`)
 
         if (targetError) {
             target.error = targetError
@@ -145,7 +152,7 @@ class AddGoal extends Component {
         const isValid = this.validateInputs(isConnected)
         if (!isValid) return
 
-        let { monthYear, target, description } = this.state
+        let { GoalId, monthYear, target, description } = this.state
 
         const currentUser = {
             id: this.currentUser.uid,
@@ -166,7 +173,8 @@ class AddGoal extends Component {
             goal.createdBy = currentUser
         }
 
-        db.collection('Users').doc(this.userId).collection('TurnoverGoals').doc(this.GoalId).set(goal, { merge: true }) //Nothing to wait for -> data persisted to local cache
+        db.collection('Users').doc(this.userId).collection('Turnover').doc(GoalId).set(goal, { merge: true }) //Nothing to wait for -> data persisted to local cache
+        this.props.navigation.state.params.onGoBack()
         this.props.navigation.goBack()
     }
 
@@ -180,10 +188,37 @@ class AddGoal extends Component {
     //#OOS
     handleDeleteGoal() {
         load(this, true)
-        db.collection('Users').doc(this.userId).collection('TurnoverGoals').doc(this.GoalId).update({ deleted: true })
-        setTimeout(() => this.props.navigation.goBack(), 1000)
+        db.collection('Users').doc(this.userId).collection('Turnover').doc(this.state.GoalId).update({ deleted: true })
+        setTimeout(() => {
+            load(this, false)
+            this.props.navigation.goBack(), 1000
+        })
     }
 
+    goalOverview() {
+        const { GoalId, target, current } = this.initialState
+        const monthTemp = moment(GoalId, 'MM-YYYY').format('MMMM')
+        const month = monthTemp.charAt(0).toUpperCase() + monthTemp.slice(1)
+        const year = moment(GoalId, 'MM-YYYY').format('YYYY')
+
+        const goal = {
+            id: GoalId,
+            month,
+            year,
+            target: target.value,
+            current
+        }
+        return (
+            <View style={{ marginTop: 10 }}>
+                <TurnoverGoal
+                    goal={goal}
+                    index={0}
+                    onPress={() => console.log('No action...')}
+                    isList={false}
+                />
+            </View>
+        )
+    }
 
     render() {
         let { monthYear, target, description } = this.state
@@ -213,25 +248,20 @@ class AddGoal extends Component {
                     :
                     <ScrollView style={styles.dataContainer}>
 
+                        {this.isEdit && this.goalOverview()}
                         <FormSection
-                            sectionTitle='Informations générales'
+                            sectionTitle='Détails'
                             sectionIcon={faInfoCircle}
                             iconColor={theme.colors.gray_dark}
                             form={
                                 <View style={{ flex: 1 }}>
-                                    <MyInput
-                                        label="Numéro de l'objectif"
-                                        returnKeyType="done"
-                                        value={this.GoalId}
-                                        editable={false}
-                                        disabled
-                                    />
 
                                     {showMonthPicker && (
                                         <MonthPicker
                                             onChange={(event, newDate) => {
                                                 const selectedDate = newDate || monthYear
-                                                this.setState({ monthYear: selectedDate, showMonthPicker: false })
+                                                const GoalId = moment(selectedDate).format('MM-YYYY')
+                                                this.setState({ monthYear: selectedDate, GoalId, showMonthPicker: false })
                                             }}
                                             value={monthYear}
                                             minimumDate={new Date()}
@@ -245,7 +275,7 @@ class AddGoal extends Component {
                                     <ItemPicker
                                         onPress={() => this.setState({ showMonthPicker: !showMonthPicker })}
                                         label={'Mois *'}
-                                        value={moment(monthYear).format('MM-YYYY')}
+                                        value={moment(monthYear).format('MMMM YYYY').charAt(0).toUpperCase() + moment(monthYear).format('MMMM YYYY').slice(1)}
                                         editable={canWrite}
                                         showAvatarText={false}
                                         icon={faCalendarPlus}
@@ -282,7 +312,7 @@ class AddGoal extends Component {
                                         <MyInput
                                             label="Date de création"
                                             returnKeyType="done"
-                                            value={createdAt}
+                                            value={moment(createdAt).format('ll')}
                                             editable={false}
                                         />
 
@@ -299,7 +329,7 @@ class AddGoal extends Component {
                                         <MyInput
                                             label="Dernière mise à jour"
                                             returnKeyType="done"
-                                            value={editedAt}
+                                            value={moment(editedAt).format('ll')}
                                             editable={false}
                                         />
 

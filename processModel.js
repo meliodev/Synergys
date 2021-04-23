@@ -316,7 +316,7 @@ export const processModel = {
                         queryFilters: [], //not used by choices
                         documentId: '',
                         //properties: [], 
-                        screenName: '', 
+                        screenName: '',
                         screenParams: null,
                         type: 'manual', //Check manually
                         responsable: 'Commercial',
@@ -1609,10 +1609,32 @@ export const processModel = {
                         verificationType: 'validation',
                     },
                     {
+                        id: 'billAmount',
+                        title: "Montant de la facture", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+                        instructions: "",
+                        actionOrder: 3,
+                        collection: 'Projects',
+                        documentId: '',
+                        properties: [],
+                        screenName: '',
+                        screenParams: null,
+                        type: 'manual',
+                        responsable: 'ADV',
+                        status: 'pending',
+                        comment: '',
+                        formSettings: {
+                            label: 'Montant de la facture',
+                            description: 'Veuillez renseigner le montant total de la facture de ce projet.',
+                            keyboardType: 'Numeric'
+                        },
+                        operation: { type: 'update', field: 'billAmount' },
+                        verificationType: 'comment',
+                    },
+                    {
                         id: 'attestationCreation',
                         title: 'Créer une attestation fluide',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 3,
+                        actionOrder: 4,
                         collection: 'Documents',
                         //Verification:
                         queryFilters: [
@@ -1960,5 +1982,9 @@ export const processModel = {
             },
         }
     },
-    'version': 1
+    'version': 2
 }
+
+
+
+

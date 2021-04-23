@@ -76,7 +76,6 @@ class App extends Component {
             <MenuProvider>
               <Wrapper>
                 <RootController />
-                {/* <Text>Hello world !</Text> */}
               </Wrapper>
             </MenuProvider>
           </PaperProvider>

@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, Dimensions, ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { LineChart } from 'react-native-chart-kit'
-import { AnimatedCircularProgress } from 'react-native-circular-progress'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -14,7 +13,7 @@ import { constants } from '../../core/constants'
 import { load } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
 
-import { Picker, Loading } from '../../components'
+import { Picker, TurnoverGoal, Loading } from '../../components'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
 class Analytics extends Component {
@@ -24,6 +23,7 @@ class Analytics extends Component {
 
         this.state = {
             userGoals: [],
+            totalIncome: 0,
             totalProjects: 0,
             totalClients: 0,
             chartPeriod: 'lastSemester',
@@ -32,11 +32,10 @@ class Analytics extends Component {
     }
 
     async componentDidMount() {
-        // this.fetchUserRevenue()
-        const userGoals = await this.fetchUserGoals()
+        const { userGoals, totalIncome } = await this.fetchUserGoals()
         const totalProjects = await this.fetchTotalProjects()
         const totalClients = await this.fetchTotalClients()
-        this.setState({ userGoals, totalProjects, totalClients })
+        this.setState({ userGoals, totalIncome, totalProjects, totalClients })
         load(this, false)
     }
 
@@ -57,37 +56,61 @@ class Analytics extends Component {
     async fetchUserGoals() {
         let userGoals = []
         const startOfLastSemester = moment().subtract(6, 'months').format()
+        let monthTemp, month, year;
+        let goal = 0
+        let current = 0
+        let totalIncome = 0
+
         await db
             .collection('Users')
             .doc(auth.currentUser.uid)
-            .collection('TurnoverGoals')
-            .where('monthYear', '>=', startOfLastSemester)
-            .orderBy('monthYear', 'desc')
+            .collection('Turnover')
+            // .where('monthYear', '>=', moment(startOfLastSemester).toDate())
+            // .orderBy('monthYear', 'desc')
             .get()
             .then((querySnapshot) => {
-
                 querySnapshot.forEach((doc) => {
                     const data = doc.data()
-                    const goal = {
-                        month: moment(data.monthYear).format('MM'),
-                        year: moment(data.monthYear).format('YYYY'),
-                        target: data.target,
-                        current: data.current || 0
+
+                    for (var projectId in data.projectsIncome) {
+                        totalIncome += Number(data.projectsIncome[projectId])
                     }
-                    userGoals.push(goal)
+lk
+                    if (moment(data.monthYear).isSameOrAfter(moment(startOfLastSemester))) {
+
+                        if (data.target) {
+                            monthTemp = moment(doc.id, 'MM-YYYY').format('MMMM')
+                            month = monthTemp.charAt(0).toUpperCase() + monthTemp.slice(1)
+                            year = moment(doc.id, 'MM-YYYY').format('YYYY')
+
+                            for (var projectId in data.projectsIncome) {
+                                current += Number(data.projectsIncome[projectId])
+                            }
+
+                            goal = {
+                                id: doc.id,
+                                month,
+                                year,
+                                target: data.target,
+                                current,
+                            }
+                            userGoals.push(goal)
+                            current = 0
+                        }
+                    }
                 })
             })
 
-        return userGoals
+        return { userGoals, totalIncome }
     }
 
     renderSummary() {
-        const { totalProjects, totalClients } = this.state
+        const { totalIncome, totalProjects, totalClients } = this.state
 
         const summaryData = [
             {
                 label: 'REVENU TOTAL',
-                value: 50000,
+                value: totalIncome,
                 symbol: '€',
                 colors: { primary: '#555CC4', secondary: '#EEEFFF' }
             },
@@ -137,8 +160,8 @@ class Analytics extends Component {
         const { chartPeriod } = this.state
         const periods = [
             { label: 'Le mois courant', value: 'currentMonth' },
-            { label: 'Les derniers 6 mois', value: 'lastSemester' },
-            { label: 'La dernière année', value: 'lastYear' },
+            { label: 'Les 6 derniers mois', value: 'lastSemester' },
+            { label: "L'année dernière", value: 'lastYear' },
         ]
 
         return (
@@ -210,47 +233,21 @@ class Analytics extends Component {
     }
 
     onPressGoal(goal, index) {
-        console.log(index)
-        // this.props.navigation.navigate('AddGoal', { userId: auth.currentUser.uid, GoalId: goal.id })
+        this.props.navigation.navigate('AddGoal', { userId: auth.currentUser.uid, GoalId: goal.id })
     }
 
     renderGoals() {
-
         const { userGoals } = this.state
-
         return (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                 {this.addGoal()}
-                {userGoals.map((data, index) => {
-                    const { current, target, month } = data
-                    const progress = (current / target) * 100
-                    const targetReached = progress >= 100
-                    const currentLow = progress < 33
-                    const tintColor = targetReached ? theme.colors.primary : currentLow ? theme.colors.error : 'orange'
-                    return (
-                        <TouchableOpacity style={{ marginBottom: 17, marginLeft: (index + 1) % 3 === 0 ? 0 : constants.ScreenWidth * 0.07 }} onPress={() => this.onPressGoal(data, index)}>
-                            <AnimatedCircularProgress
-                                size={constants.ScreenWidth * 0.26}
-                                width={5}
-                                fill={progress}
-                                tintColor={tintColor}
-                                onAnimationComplete={() => console.log('onAnimationComplete')}
-                                arcSweepAngle={270}
-                                rotation={227}
-                                backgroundColor={theme.colors.gray_light}
-                                style={{ marginBottom: 10 }}>
-                                {(fill) => (
-                                    <Text style={[theme.customFontMSregular.header]}>
-                                        {parseInt(fill)}%
-                                    </Text>
-                                )}
-                            </AnimatedCircularProgress>
-                            <Text style={[theme.customFontMSregular.caption, { textAlign: 'center' }]}>{current}€/{target}€</Text>
-                            <Text style={[theme.customFontMSregular.small, { textAlign: 'center', marginTop: 5 }]}>{month}</Text>
-                        </TouchableOpacity>
-                    )
-                })
-                }
+                {userGoals.map((goal, index) => (
+                    <TurnoverGoal
+                        goal={goal}
+                        index={index}
+                        onPress={this.onPressGoal.bind(this)}
+                    />
+                ))}
             </View>
         )
     }
@@ -258,7 +255,7 @@ class Analytics extends Component {
     addGoal() {
         const size = constants.ScreenWidth * 0.26
         const onPress = () => {
-            this.props.navigation.navigate('AddGoal')
+            this.props.navigation.navigate('AddGoal', { onGoback: this.fetchUserGoals })
         }
         return (
             <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={onPress}>

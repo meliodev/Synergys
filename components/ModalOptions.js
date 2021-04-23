@@ -10,118 +10,6 @@ import CustomIcon from './CustomIcon'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const Element1 = ({ element, index, elementSize }) => {
-
-    const elementStaticStyle = () => {
-        return {
-            borderRadius: 5,
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: elementSize * 0.03,
-            width: elementSize,
-            height: elementSize,
-            elevation: 2,
-            backgroundColor: theme.colors.white,
-        }
-    }
-
-    const elementDynamicStyle = (isSelected) => {
-        if (isSelected)
-            return {
-                elevation: 0,
-                borderWidth: 1,
-                borderColor: theme.colors.primary
-            }
-        else return {}
-    }
-
-    const iconColor = element.selected ? theme.colors.primary : element.iconColor
-    const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
-
-    return (
-        <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
-            <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
-                <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />
-            </View>
-            <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
-                <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
-            </View>
-        </TouchableOpacity>
-    )
-}
-
-const Element2 = ({ element, index, elementSize }) => {
-
-    const elementStyle = {
-        borderRadius: 30,
-        // justifyContent: 'space-evenly',
-        alignItems: 'center',
-        marginBottom: elementSize * 0.1,
-        width: elementSize,
-        height: elementSize,
-        elevation: 3,
-        backgroundColor: theme.colors.white,
-    }
-
-    const { primary, secondary } = element.colors
-    const textColor = primary
-    const iconColor = primary
-    const backgroundColor = theme.colors.white
-    const iconSize = element.icon === faUserAlt ? elementSize * 0.18 : elementSize * 0.23
-
-    return (
-        <TouchableOpacity style={elementStyle} onPress={() => onPressElement(element, index)}>
-            <View style={{ flex: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
-                <CustomIcon icon={element.icon} size={iconSize} color={iconColor} style={{ marginBottom: elementSize * 0.05 }} />
-            </View>
-            <View style={{ flex: 0.5, justifyContent: 'center', alignItems: 'center', paddingHorizontal: elementSize / 6 }}>
-                <Text style={[theme.customFontMSregular.body, { textAlign: 'center', color: theme.colors.secondary }]}>{element.label}</Text>
-            </View>
-        </TouchableOpacity>
-    )
-}
-
-const Rate = ({ element, index, length }) => {
-
-    const elementStaticStyle = () => {
-        return {
-            borderWidth: StyleSheet.hairlineWidth,
-            borderColor: theme.colors.gray_medium,
-            borderRadius: constants.ScreenWidth * 0.075,
-            justifyContent: 'center',
-            alignItems: 'center',
-            margin: elementSize * 0.03,
-            width: constants.ScreenWidth * 0.15,
-            height: constants.ScreenWidth * 0.15,
-            marginBottom: 7,
-            backgroundColor: theme.colors.white,
-        }
-    }
-
-    const elementDynamicStyle = (isSelected) => {
-        if (isSelected)
-            return {
-                elevation: 0,
-                borderWidth: 1,
-                borderColor: theme.colors.primary
-            }
-        else return {}
-    }
-
-    const iconColor = element.selected ? theme.colors.primary : element.iconColor
-    const numberColor = element.selected ? theme.colors.primary : theme.colors.secondary
-    const titleColor = element.selected ? theme.colors.primary : theme.colors.gray_dark
-
-    return (
-        <View style={{ width: constants.ScreenWidth * 0.17, height: 100, marginBottom: 25 }}>
-            <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
-                <Text style={[theme.customFontMSregular.header, { textAlign: 'center', color: numberColor }]}>{element.label}</Text>
-            </TouchableOpacity>
-            {index === 0 && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Pas du tout satisfait</Text>}
-            {index === (length - 1) && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Très satisfait</Text>}
-        </View>
-    )
-}
 
 export const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview, model = 'Element1' }) => {
     const selectElement = (index) => {
@@ -141,6 +29,119 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
         }
 
         else selectElement(index)
+    }
+
+    const Element1 = ({ element, index, elementSize }) => {
+
+        const elementStaticStyle = () => {
+            return {
+                borderRadius: 5,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: elementSize * 0.03,
+                width: elementSize,
+                height: elementSize,
+                elevation: 2,
+                backgroundColor: theme.colors.white,
+            }
+        }
+
+        const elementDynamicStyle = (isSelected) => {
+            if (isSelected)
+                return {
+                    elevation: 0,
+                    borderWidth: 1,
+                    borderColor: theme.colors.primary
+                }
+            else return {}
+        }
+
+        const iconColor = element.selected ? theme.colors.primary : element.iconColor
+        const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
+
+        return (
+            <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
+                <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
+                    <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />
+                </View>
+                <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
+                    <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
+
+    const Element2 = ({ element, index, elementSize }) => {
+
+        const elementStyle = {
+            borderRadius: 30,
+            // justifyContent: 'space-evenly',
+            alignItems: 'center',
+            marginBottom: elementSize * 0.1,
+            width: elementSize,
+            height: elementSize,
+            elevation: 3,
+            backgroundColor: theme.colors.white,
+        }
+
+        const { primary, secondary } = element.colors
+        const textColor = primary
+        const iconColor = primary
+        const backgroundColor = theme.colors.white
+        const iconSize = element.icon === faUserAlt ? elementSize * 0.18 : elementSize * 0.23
+
+        return (
+            <TouchableOpacity style={elementStyle} onPress={() => onPressElement(element, index)}>
+                <View style={{ flex: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
+                    <CustomIcon icon={element.icon} size={iconSize} color={iconColor} style={{ marginBottom: elementSize * 0.05 }} />
+                </View>
+                <View style={{ flex: 0.5, justifyContent: 'center', alignItems: 'center', paddingHorizontal: elementSize / 6 }}>
+                    <Text style={[theme.customFontMSregular.body, { textAlign: 'center', color: theme.colors.secondary }]}>{element.label}</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
+
+    const Rate = ({ element, index, length }) => {
+
+        const elementStaticStyle = () => {
+            return {
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: theme.colors.gray_medium,
+                borderRadius: constants.ScreenWidth * 0.075,
+                justifyContent: 'center',
+                alignItems: 'center',
+                margin: elementSize * 0.03,
+                width: constants.ScreenWidth * 0.15,
+                height: constants.ScreenWidth * 0.15,
+                marginBottom: 7,
+                backgroundColor: theme.colors.white,
+            }
+        }
+
+        const elementDynamicStyle = (isSelected) => {
+            if (isSelected)
+                return {
+                    elevation: 0,
+                    borderWidth: 1,
+                    borderColor: theme.colors.primary
+                }
+            else return {}
+        }
+
+        const iconColor = element.selected ? theme.colors.primary : element.iconColor
+        const numberColor = element.selected ? theme.colors.primary : theme.colors.secondary
+        const titleColor = element.selected ? theme.colors.primary : theme.colors.gray_dark
+
+        return (
+            <View style={{ width: constants.ScreenWidth * 0.17, height: 100, marginBottom: 25 }}>
+                <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
+                    <Text style={[theme.customFontMSregular.header, { textAlign: 'center', color: numberColor }]}>{element.label}</Text>
+                </TouchableOpacity>
+                {index === 0 && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Pas du tout satisfait</Text>}
+                {index === (length - 1) && <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: titleColor }]}>Très satisfait</Text>}
+            </View>
+        )
     }
 
     const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingHorizontal: elementSize * 0.04 }

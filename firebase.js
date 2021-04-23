@@ -3,6 +3,7 @@ import '@react-native-firebase/firestore'
 import '@react-native-firebase/auth'
 import '@react-native-firebase/messaging'
 import '@react-native-firebase/functions'
+import '@react-native-firebase/storage'
 
 // exports
 const dbTemp = firebase.firestore()

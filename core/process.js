@@ -203,11 +203,22 @@ const configureActions = async (actions, attributes, process) => {
                 await query.get().then((querysnapshot) => {
 
                     if (!querysnapshot.empty) {
-                        if (action.collection === 'Agenda')
+                        if (action.collection === 'Agenda') {
                             action.screenParams.TaskId = querysnapshot.docs[0].id
+                        }
 
                         if (action.collection === 'Documents')
                             action.screenParams.DocumentId = querysnapshot.docs[0].id
+                    }
+
+                    //Reinitialize nav params in case document was deleted
+                    else {
+                        if (action.collection === 'Agenda') {
+                            action.screenParams.TaskId = ''
+                        }
+
+                        if (action.collection === 'Documents')
+                            action.screenParams.DocumentId = ''
                     }
                 })
             }
@@ -257,6 +268,11 @@ const configureActions = async (actions, attributes, process) => {
                     action.documentId = querysnapshot.docs[0].id
                 })
             }
+        }
+
+        else if (action.verificationType === 'comment') {
+            if (action.collection === 'Projects')
+                action.documentId = attributes.project.id
         }
     }
 

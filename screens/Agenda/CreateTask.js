@@ -778,14 +778,14 @@ class CreateTask extends Component {
                                         editable={canWrite}
                                     />
 
-                                    {/* <AddressInput
+                                    <AddressInput
                                         label='Adresse postale'
                                         offLine={!isConnected}
                                         onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
                                         address={address}
                                         addressError={address.error}
                                         editable={canWrite}
-                                        isEdit={this.isEdit} /> */}
+                                        isEdit={this.isEdit} />
 
                                     <ColorPicker
                                         label='Couleur de la tâche'

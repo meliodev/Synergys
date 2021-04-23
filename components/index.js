@@ -54,6 +54,7 @@ export { default as TeamItem } from './TeamItem';
 export { default as TermsConditions } from './TermsConditions';
 export { default as TextInput } from './TextInput';
 export { default as Toast } from './Toast';
+export { default as TurnoverGoal } from './TurnoverGoal';
 export { default as TwoTabs } from './TwoTabs';
 export { default as UploadProgress } from './UploadProgress';
 export { default as UserItem } from './UserItem';

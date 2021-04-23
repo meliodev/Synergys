@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import RNFS from 'react-native-fs'
 
-import firebase from '../firebase'
+import firebase, { db } from '../firebase'
 import { setToast } from "../core/utils"
 import { onUploadProgressStart, onUploadProgressChange, onUploadProgressEnd } from '../core/redux'
 
@@ -166,7 +166,7 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
 
                 //Rollback: Remove failed attachment
                 db.collection('Documents').doc(DocumentId).update({ attachment: null })
-                
+
                 onUploadProgressEnd(this, payload)
                 reject(false)
             })
