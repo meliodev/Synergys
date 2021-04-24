@@ -80,7 +80,7 @@ class DrawerMenu extends React.Component {
         const { displayName } = currentUser
 
         return (
-            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isClient: role.id === 'client' ? true : false })}>
+            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isClient: role.id === 'client' })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
                     <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>

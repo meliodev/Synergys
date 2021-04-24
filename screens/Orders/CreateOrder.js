@@ -687,7 +687,7 @@ class CreateOrder extends Component {
                                             editable={false}
                                         />
 
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
+                                        <TouchableOpacity>
                                             <MyInput
                                                 label="Crée par"
                                                 returnKeyType="done"
@@ -704,7 +704,7 @@ class CreateOrder extends Component {
                                             editable={false}
                                         />
 
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
+                                        <TouchableOpacity>
                                             <MyInput
                                                 label="Dernier intervenant"
                                                 returnKeyType="done"

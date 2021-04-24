@@ -6,6 +6,7 @@ TO DO:
 -> DC: graph all comercials: global "Chiffre d'affaire"
 + DASHBOARD (NEW): From today to next days: red tasks, green for others
 + DASHBOARD (NEW): Add objectives
++ UX: onPress other form field focus it on one press not two
 
 + PROCESS: Cancel annulation (rollback: delete 'cancelProcess' phase && undo latest action of latest step)
 + PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)

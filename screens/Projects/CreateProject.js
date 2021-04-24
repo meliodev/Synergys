@@ -4,7 +4,7 @@ import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from
 import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import ImagePicker from 'react-native-image-picker'
@@ -102,6 +102,9 @@ class CreateProject extends Component {
             comContact: { id: '', fullName: '', email: '', role: '' },
             techContact: { id: '', fullName: '', email: '', role: '' },
 
+            //Billing
+            bill: null,
+
             color: theme.colors.primary,
 
             //logs (Auto-Gen)
@@ -176,7 +179,7 @@ class CreateProject extends Component {
                 return true
             }
 
-            let { client, name, description, note, address, state, step, subscribers, comContact, techContact, color } = this.state
+            let { client, name, description, note, address, state, step, subscribers, comContact, techContact, bill, color } = this.state
             let { createdAt, createdBy, editedAt, editedBy, attachedImages, process } = this.state
             let { error, loading } = this.state
             var imagesView = []
@@ -189,9 +192,9 @@ class CreateProject extends Component {
             description.value = project.description
             note.value = project.note
             subscribers = project.subscribers
-            console.log(subscribers)
             comContact = project.subscribers.filter((sub) => sub.role === 'Commercial')[0]
             techContact = project.subscribers.filter((sub) => sub.role === 'Poseur')[0]
+            bill = project.bill
             color = project.color
 
             //َActivity
@@ -231,9 +234,8 @@ class CreateProject extends Component {
                 step
             }
 
-            this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, color, process, processFetched: true, isBlockedUpdates }, async () => {
+            this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, bill, color, process, processFetched: true, isBlockedUpdates }, async () => {
                 //if (this.isInit)
-
                 this.initialState = _.cloneDeep(this.state)
                 //this.isInit = false
             })
@@ -340,7 +342,7 @@ class CreateProject extends Component {
         const isValid = this.validateInputs(isConnected)
         if (!isValid) return
 
-        let { client, name, description, note, address, state, step, comContact, techContact, color } = this.state
+        let { client, name, description, note, address, state, step, comContact, techContact, bill, color } = this.state
 
         //1. UPLOADING FILES (ONLINE ONLY)
         if (isConnected) {
@@ -357,8 +359,6 @@ class CreateProject extends Component {
         }
 
         //2. Set project
-        //subscribers = currentUser + collaborators (tags)
-
         const currentSub = {
             id: this.currentUser.uid,
             fullName: this.currentUser.displayName,
@@ -396,6 +396,7 @@ class CreateProject extends Component {
             editedAt: moment().format(),
             editedBy: currentUser,
             subscribers,
+            bill,
             color: color,
             deleted: false,
         }
@@ -627,7 +628,7 @@ class CreateProject extends Component {
     }
 
     render() {
-        let { client, name, description, note, address, state, step, color } = this.state
+        let { client, name, description, note, address, state, step, bill, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, comContact, techContact } = this.state
         let { error, loading, docNotFound, toastMessage, toastType } = this.state
@@ -809,6 +810,27 @@ class CreateProject extends Component {
                                 </View>
                             } />
 
+                        {this.isEdit && bill && < FormSection
+                            sectionTitle='Facturation'
+                            sectionIcon={faEuroSign}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    <MyInput
+                                        label="Montant facturé (€)*"
+                                        returnKeyType="done"
+                                        keyboardType='numeric'
+                                        value={bill.amount}
+                                        onChangeText={amount => {
+                                            bill.amount = amount
+                                            this.setState({ bill })
+                                        }}
+                                    // error={!!price.error}
+                                    // errorText={price.error}
+                                    />
+                                </View>
+                            } />
+                        }
+
                         <FormSection
                             sectionTitle='Bloc Notes'
                             sectionIcon={faQuoteRight}
@@ -916,7 +938,7 @@ class CreateProject extends Component {
                                             editable={false}
                                         />
 
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
+                                        <TouchableOpacity>
                                             <MyInput
                                                 label="Crée par"
                                                 returnKeyType="done"
@@ -933,7 +955,7 @@ class CreateProject extends Component {
                                             editable={false}
                                         />
 
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
+                                        <TouchableOpacity>
                                             <MyInput
                                                 label="Dernier intervenant"
                                                 returnKeyType="done"

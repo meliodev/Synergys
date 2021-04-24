@@ -47,7 +47,7 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     }
 
     const viewClientProfile = () => {
-        navigation.navigate('Profile', { userId: client.id, isClient: true })
+        navigation.navigate('Profile', { user: { id: client.id, roleId: 'client' }, isClient: true })
     }
 
     const lastUpdate = `${moment(editedAt).format('ll')} - ${moment(editedAt).format('HH:mm')}`

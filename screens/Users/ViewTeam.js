@@ -8,7 +8,7 @@ import { faPen, faUserPlus } from '@fortawesome/pro-light-svg-icons'
 import { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { checkPlural, load, myAlert, setToast } from '../../core/utils';
+import { checkPlural, getRoleIdFromValue, load, myAlert, setToast } from '../../core/utils';
 
 // import { deleteTeam } from '../../api/firestore-api';
 
@@ -119,7 +119,7 @@ export default class ViewTeam extends Component {
                         ]}
 
                         functions={[
-                            () => this.viewProfil(member.id),
+                            () => this.viewProfil(member.id, member.role),
                             () => this.removeMember(member.id),
                         ]}
                     />
@@ -177,8 +177,9 @@ export default class ViewTeam extends Component {
             })
     }
 
-    viewProfil(userId) {
-        this.props.navigation.navigate('Profile', { userId: userId })
+    viewProfil(id, role) {
+        const roleId = getRoleIdFromValue(role)
+        this.props.navigation.navigate('Profile', { user: { id, roleId } })
     }
 
     // showAlert(team) {

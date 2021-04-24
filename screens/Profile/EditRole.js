@@ -12,23 +12,13 @@ import { load } from "../../core/utils"
 import { setRole } from "../../core/redux"
 
 import * as theme from "../../core/theme"
-import { constants, rolesRedux } from '../../core/constants'
+import { constants, roles } from '../../core/constants'
 
 import firebase from '@react-native-firebase/app'
 const functions = firebase.functions()
 const db = firebase.firestore()
 
 import { connect } from 'react-redux'
-
-const roles = [
-    { label: 'Admin', value: 'Admin' },
-    { label: 'Directeur commercial', value: 'Directeur commercial' },
-    { label: 'Commercial', value: 'Commercial' },
-    { label: 'Responsable technique', value: 'Responsable technique' },
-    { label: 'Poseur', value: 'Poseur' },
-    { label: 'Client', value: 'Client' },
-    { label: 'Back office', value: 'Back office' },
-]
 
 class EditRole extends Component {
 
@@ -69,7 +59,7 @@ class EditRole extends Component {
 
                 if (this.userId === firebase.auth().currentUser.uid) {
                     firebase.auth().currentUser.getIdToken(true)
-                    for (const role of rolesRedux) {
+                    for (const role of roles) {
                         if (role.value === this.state.role.toLocaleLowerCase())
                             setRole(this, role)
                     }

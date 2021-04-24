@@ -15,6 +15,7 @@ import ListTeams from './ListTeams';
 import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
+import { getRoleIdFromValue } from "../../core/utils";
 
 class UsersManagement extends React.Component {
 
@@ -29,8 +30,9 @@ class UsersManagement extends React.Component {
     }
 
 
-    viewProfile(isPro, id, nom, prenom) {
-        this.props.navigation.navigate('Profile', { userId: id })
+    viewProfile(isPro, id, nom, prenom, role, email) {
+        const roleId = getRoleIdFromValue(role)
+        this.props.navigation.navigate('Profile', { user: { id, roleId } })
     }
 
     render() {

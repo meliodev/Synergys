@@ -14,6 +14,7 @@ import MyInput from '../../components/TextInput'
 import AddressInput from '../../components/AddressInput'
 import Button from "../../components/Button"
 import ProjectItem2 from "../../components/ProjectItem2"
+import TurnoverGoal from "../../components/TurnoverGoal"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
@@ -21,13 +22,13 @@ import EmptyList from "../../components/EmptyList"
 
 import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme"
-import { constants } from '../../core/constants'
+import { constants, highRoles } from '../../core/constants'
 import { resetState, setNetwork } from '../../core/redux'
 import { fetchDocs, validateClientInputs, createClient } from '../../api/firestore-api'
-import { navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast, formatRow, generateId } from "../../core/utils"
+import { fetchTurnoverData, navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast, formatRow, generateId } from "../../core/utils"
 import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
-import { faConstruction } from '@fortawesome/pro-light-svg-icons'
+import { faBullseyeArrow, faConstruction } from '@fortawesome/pro-light-svg-icons'
 
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
 
@@ -44,16 +45,16 @@ class Profile extends Component {
         this.fetchDocs = fetchDocs.bind(this)
         this.validateClientInputs = validateClientInputs.bind(this)
 
-        this.userId = this.props.navigation.getParam('userId', firebase.auth().currentUser.uid)
-        this.role = this.props.role.id
+        this.roleId = this.props.role.id
+        this.userParam = this.props.navigation.getParam('user', { id: firebase.auth().currentUser.uid, roleId: this.roleId })
         this.isClient = this.props.navigation.getParam('isClient', false)
-        this.isClient = this.isClient || this.role === 'client'
+        this.isClient = this.isClient || this.roleId === 'client'
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
         this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.initialState = {}
 
         this.state = {
-            id: this.userId, //Not editable
+            id: this.userParam.id, //Not editable
             currentUser: firebase.auth().currentUser,
 
             isPro: false,
@@ -87,12 +88,16 @@ class Profile extends Component {
     }
 
     async componentDidMount() {
-        //        await firebase.auth().currentUser.reload().then(() => console.log('CURRENT USER'))
-
         await this.fetchUserData()
         if (this.isClient) await this.fetchClientProjects()
+
+        if (this.userParam.role === 'com') {
+            const monthlyGoals = fetchTurnoverData(query)
+            this.setState({ monthlyGoals })
+        }
         load(this, false)
     }
+
 
     componentWillUnmount() {
         this.unsubscribe()
@@ -100,7 +105,7 @@ class Profile extends Component {
 
     //Fetch data...
     fetchUserData() {
-        this.unsubscribe = db.collection(this.dataCollection).doc(this.userId).onSnapshot((doc) => {
+        this.unsubscribe = db.collection(this.dataCollection).doc(this.userParam.id).onSnapshot((doc) => {
 
             if (!doc.exists) {
                 this.setState({ userNotFound: true })
@@ -142,7 +147,7 @@ class Profile extends Component {
     }
 
     fetchClientProjects() {
-        var query = db.collection('Projects').where('client.id', '==', this.userId).where('deleted', '==', false).orderBy('createdAt', 'DESC')
+        var query = db.collection('Projects').where('client.id', '==', this.userParam.id).where('deleted', '==', false).orderBy('createdAt', 'DESC')
         this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => load(this, false))
     }
 
@@ -228,7 +233,7 @@ class Profile extends Component {
         }
 
         //Persist data
-        db.collection(this.dataCollection).doc(this.userId).set(user, { merge: true })
+        db.collection(this.dataCollection).doc(this.userParam.id).set(user, { merge: true })
 
         if (!isConnected) return
 
@@ -278,7 +283,7 @@ class Profile extends Component {
         if (!isValid) return
 
         this.setState({ loadingDialog: true })
-        const response = await createClient(userData, eventHandlers, this.userId, isConnected, true, true)
+        const response = await createClient(userData, eventHandlers, this.userParam.id, isConnected, true, true)
         if (response && response.error) {
             this.setState({ loadingDialog: false })
             Alert.alert(response.error.title, response.error.message)
@@ -437,12 +442,12 @@ class Profile extends Component {
 
     renderClientProjects() {
         const { clientProjectsList } = this.state
-        const isProfileOwner = this.userId === firebase.auth().currentUser.uid
+        const isProfileOwner = this.userParam.id === firebase.auth().currentUser.uid
         const mes = isProfileOwner ? 'Mes ' : ''
 
         return (
             <View style={{ flex: 1 }}>
-                <FormSection sectionTitle={`${mes}Projets`} sectionIcon={faConstruction} form={null} containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center' }} />
+                <FormSection sectionTitle={`${mes}Projets`} sectionIcon={faConstruction} form={null} containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }} />
                 <FlatList
                     data={formatRow(true, clientProjectsList, 3)}
                     keyExtractor={item => item.id.toString()}
@@ -454,6 +459,26 @@ class Profile extends Component {
         )
     }
 
+    renderCommercialGoals() {
+        const { monthlyGoals } = this.state
+        const isCurrentUserCom = this.props.role.id !== 'com'
+        return (
+            <View style={{ flex: 1 }}>
+                <FormSection sectionTitle='Objectifs' sectionIcon={faBullseyeArrow} form={null} containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }} />
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {!isCurrentUserCom && this.addGoal()}
+                    {monthlyGoals.map((goal, index) => (
+                        <TurnoverGoal
+                            goal={goal}
+                            index={index}
+                            onPress={this.onPressGoal.bind(this)}
+                        />
+                    ))}
+                </View>
+            </View>
+        )
+    }
+
     render() {
         let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, isProspect, userNotFound, deleted } = this.state
         const { isConnected } = this.props.network
@@ -461,8 +486,9 @@ class Profile extends Component {
         const { currentUser } = firebase.auth()
         if (currentUser) var { uid } = currentUser
 
-        const isProfileOwner = this.userId === uid
-        const isAdmin = this.role === 'admin'
+        const isProfileOwner = this.userParam.id === uid
+        const isAdmin = this.roleId === 'admin'
+        const showGoalsSection = highRoles.includes(this.roleId) && !isProfileOwner && this.userParam.roleId === 'com'
 
         let { canUpdate } = this.props.permissions.users
         canUpdate = (canUpdate || isProfileOwner)
@@ -498,7 +524,7 @@ class Profile extends Component {
 
                                         {/* <TouchableOpacity onPress={() => {
                                if (isProfileOwner)
-                           this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
+                           this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userParam.id })
                    }}> */}
 
                                         <MyInput
@@ -513,10 +539,10 @@ class Profile extends Component {
                                             autoCapitalize="none"
                                             textContentType='emailAddress'
                                             keyboardType='email-address'
-                                            editable={false}
+                                            editable={isProspect}
                                             disabled={false}
                                         // right={isProfileOwner && <TextInput.Icon name='pencil' color={theme.colors.primary} size={21} onPress={() =>
-                                        //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userId })
+                                        //     this.props.navigation.navigate('EditEmail', { onGoBack: this.refreshToast, userId: this.userParam.id })
                                         // } />}
                                         />
                                         {/* </TouchableOpacity> */}
@@ -524,7 +550,7 @@ class Profile extends Component {
                                         {isAdmin && !isProspect &&
                                             <TouchableOpacity onPress={() => {
                                                 if (!isConnected || !isAdmin || this.isClient) return
-                                                navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
+                                                navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
                                             }}>
                                                 <MyInput
                                                     label="Role"
@@ -533,7 +559,7 @@ class Profile extends Component {
                                                     autoCapitalize="none"
                                                     editable={false}
                                                     right={isAdmin && isConnected && !this.isClient && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
-                                                        navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userId, currentRole: role, dataCollection: this.dataCollection })
+                                                        navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
                                                     } />} />
                                             </TouchableOpacity>
                                         }
@@ -559,7 +585,7 @@ class Profile extends Component {
 
                                         <AddressInput
                                             offLine={!isConnected}
-                                            onPress={() => navigateToScreen(this, 'Address', { prevScreen: 'Profile', userId: this.userId, collection: this.isClient ? 'Clients' : 'Users', currentAddress: this.state.address })}
+                                            onPress={() => navigateToScreen(this, 'Address', { prevScreen: 'Profile', userId: this.userParam.id, collection: this.isClient ? 'Clients' : 'Users', currentAddress: this.state.address })}
                                             address={address}
                                             addressError={addressError}
                                             editable={canUpdate || this.isProcess}
@@ -628,7 +654,8 @@ class Profile extends Component {
 
                                     </View>
 
-                                    {this.isClient && clientProjectsList.length > 0 && this.renderClientProjects()}
+                                    {this.isClient && !isProspect && clientProjectsList.length > 0 && this.renderClientProjects()}
+                                    {showGoalsSection && this.renderCommercialGoals()}
 
                                 </View>
                                 :

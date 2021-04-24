@@ -21,13 +21,13 @@ class ClientsManagement extends React.Component {
         this.state = {
             index: 0,
             showInput: false,
-            searchInput: '' 
+            searchInput: ''
         }
     }
 
 
     viewProfile(isPro, id, nom, prenom) {
-        this.props.navigation.navigate('Profile', { userId: id, isClient: true })
+        this.props.navigation.navigate('Profile', { user: { id, roleId: 'client' }, isClient: true })
     }
 
     render() {

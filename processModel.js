@@ -1627,7 +1627,7 @@ export const processModel = {
                             description: 'Veuillez renseigner le montant total de la facture de ce projet.',
                             keyboardType: 'Numeric'
                         },
-                        operation: { type: 'update', field: 'billAmount' },
+                        operation: { type: 'update', field: 'bill.amount' },
                         verificationType: 'comment',
                     },
                     {

@@ -15,6 +15,7 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, ...props }) => {
     const currentLow = progress < 33
     const tintColor = targetReached ? theme.colors.primary : currentLow ? '#F5276D' : 'orange'
     const isFirstColumn = (index + 1) % 3 === 0
+    const textColor = goal.isCurrent ? theme.colors.primary : theme.colors.secondary
 
     return (
         <TouchableOpacity style={{ marginBottom: 17, marginLeft: !isList ? 0 : isFirstColumn ? 0 : constants.ScreenWidth * 0.06 }} onPress={() => onPress(goal, index)}>
@@ -34,8 +35,8 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, ...props }) => {
                     </Text>
                 )}
             </AnimatedCircularProgress>
-            <Text style={[theme.customFontMSregular.caption, { textAlign: 'center' }]}>{current}€/{target}€</Text>
-            <Text style={[theme.customFontMSregular.small, { textAlign: 'center', marginTop: 5 }]}>{month}</Text>
+            <Text style={[theme.customFontMSregular.caption, { textAlign: 'center', color: textColor }]}>{current}€/{target}€</Text>
+            <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: textColor, marginTop: 5 }]}>{month}</Text>
         </TouchableOpacity>
     )
 }

@@ -39,7 +39,8 @@ class AddGoal extends Component {
         this.userId = this.props.navigation.getParam('userId', auth.currentUser.uid)
         this.GoalId = this.props.navigation.getParam('GoalId', '')
         this.isEdit = this.GoalId ? true : false
-        this.GoalId = this.isEdit ? this.GoalId : moment().format('MM-YYYY')
+        this.GoalId = this.isEdit ? this.GoalId : moment().format('YYYY')
+        this.monthYear = this.props.navigation.getParam('monthYear', '')
         this.title = this.isEdit ? "Modifier l'objectif" : "Nouvel objectif"
 
         this.state = {
@@ -67,6 +68,7 @@ class AddGoal extends Component {
     }
 
     async componentDidMount() {
+
         if (this.isEdit) {
             const docNotFound = await this.fetchGoal() //Get current process
             if (docNotFound) {
@@ -95,15 +97,13 @@ class AddGoal extends Component {
             let { error, loading } = this.state
 
             //General info
-            let goal = doc.data()
+            let monthsTurnovers = doc.data()
+            const goal = monthsTurnovers[this.monthYear]
             monthYear = goal.monthYear
             target.value = goal.target
             description = goal.description
 
-            current = 0
-            for (var projectId in goal.projectsIncome) {
-                current += Number(goal.projectsIncome[projectId])
-            }
+            console.log('GOAL', goal)
 
             //َActivity
             createdAt = goal.createdAt
@@ -159,21 +159,27 @@ class AddGoal extends Component {
             fullName: this.currentUser.displayName
         }
 
-        let goal = {
+        const formatedMonthYear = moment(monthYear).format('MM-YYYY')
+
+        let monthlyGoal = {
             monthYear,
             target: target.value,
-            description: description.value,
+            description,
             editedAt: moment().format(),
             editedBy: currentUser,
+            lastMonthEdited: formatedMonthYear,
             deleted: false,
         }
 
         if (!this.isEdit) {
-            goal.createdAt = moment().format()
-            goal.createdBy = currentUser
+            monthlyGoal.createdAt = moment().format()
+            monthlyGoal.createdBy = currentUser
         }
 
-        db.collection('Users').doc(this.userId).collection('Turnover').doc(GoalId).set(goal, { merge: true }) //Nothing to wait for -> data persisted to local cache
+        let payload = {}
+        payload[formatedMonthYear] = monthlyGoal
+
+        db.collection('Users').doc(this.userId).collection('Turnover').doc(GoalId).set(payload, { merge: true }) 
         this.props.navigation.state.params.onGoBack()
         this.props.navigation.goBack()
     }
@@ -196,18 +202,18 @@ class AddGoal extends Component {
     }
 
     goalOverview() {
-        const { GoalId, target, current } = this.initialState
-        const monthTemp = moment(GoalId, 'MM-YYYY').format('MMMM')
+        const { GoalId, target, current, monthYear } = this.initialState
+        const monthTemp = moment(monthYear, 'MM-YYYY').format('MMMM')
         const month = monthTemp.charAt(0).toUpperCase() + monthTemp.slice(1)
-        const year = moment(GoalId, 'MM-YYYY').format('YYYY')
 
         const goal = {
             id: GoalId,
             month,
-            year,
+            year: GoalId,
             target: target.value,
             current
         }
+
         return (
             <View style={{ marginTop: 10 }}>
                 <TurnoverGoal
@@ -260,7 +266,7 @@ class AddGoal extends Component {
                                         <MonthPicker
                                             onChange={(event, newDate) => {
                                                 const selectedDate = newDate || monthYear
-                                                const GoalId = moment(selectedDate).format('MM-YYYY')
+                                                const GoalId = moment(selectedDate).format('YYYY')
                                                 this.setState({ monthYear: selectedDate, GoalId, showMonthPicker: false })
                                             }}
                                             value={monthYear}
@@ -316,7 +322,7 @@ class AddGoal extends Component {
                                             editable={false}
                                         />
 
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
+                                        <TouchableOpacity>
                                             <MyInput
                                                 label="Crée par"
                                                 returnKeyType="done"
@@ -333,7 +339,7 @@ class AddGoal extends Component {
                                             editable={false}
                                         />
 
-                                        <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
+                                        <TouchableOpacity>
                                             <MyInput
                                                 label="Dernier intervenant"
                                                 returnKeyType="done"

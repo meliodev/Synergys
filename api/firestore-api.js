@@ -2,7 +2,7 @@
 import { Alert, Keyboard } from 'react-native'
 import { auth, db } from '../firebase'
 import { checkEmailExistance } from './auth-api'
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
+import { sortMonths, nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
 import moment from 'moment'
 import 'moment/locale/fr'
 moment.locale('fr')
@@ -175,6 +175,81 @@ export const createClient = async function createClient(userData, eventHandlers,
   else {
     db.collection('Clients').doc(ClientId).set(client)
   }
+}
+
+export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects) {
+
+  let turnoverdata = []
+
+  //Initialize last semester
+
+  let chartDataObjects = []
+  let chartDataSets = []
+  const currentMonth = moment().format('MM-YYYY')
+
+  await query.get().then((querySnapshot) => {
+
+    for (const doc of querySnapshot.docs) {
+      const monthsTurnovers = doc.data()
+      delete monthsTurnovers.target
+      delete monthsTurnovers.current
+
+      for (const month in monthsTurnovers) {
+
+        //Update user income for "month"
+        let currentIncome = turnoverObjects[month] && turnoverObjects[month].current || 0
+        const projectsIncome = monthsTurnovers[month].projectsIncome || {}
+        for (var projectId in projectsIncome) {
+          currentIncome += Number(projectsIncome[projectId].amount)
+        }
+
+        // const isGoalDefined = monthsTurnovers[month].target
+        // if (isGoalDefined && (Object.keys(turnoverObjects).length < 6 || month === currentMonth)) {
+
+        const year = moment(month, 'MM-YYYY').format('YYYY')
+        const monthLowerCase = moment(month, 'MM-YYYY').format('MMM')
+        const monthUpperCase = monthLowerCase.charAt(0).toUpperCase() + monthLowerCase.slice(1)
+        // const { target } = monthsTurnovers[month]
+
+        const monthTurnover = {
+          id: year,
+          month: monthUpperCase,
+          year,
+          monthYear: month,
+          //  target,
+          isCurrent: month === moment().format('MM-YYYY'),
+          current: currentIncome,
+        }
+
+        turnoverObjects[month] = monthTurnover
+        //  }
+      }
+    }
+  })
+
+  //Each user has his target (DC's monthly target is the global turnover of month) (Com's monthly target is his own turnover)
+  await db
+    .collection('Users')
+    .doc(auth.currentUser.uid)
+    .collection('Turnover')
+    .get()
+    .then((querySnapshot) => {
+      for (const doc of querySnapshot.docs) {
+        const monthsTurnovers = doc.data()
+        delete monthsTurnovers.target
+        delete monthsTurnovers.current
+
+        for (const month in monthsTurnovers) {
+          turnoverObjects[month].target = monthsTurnovers[month].target
+        }
+      }
+    })
+
+  return turnoverObjects
+}
+
+export const fetchTurnoverDataAllUsers = async function fetchTurnoverDataAllUsers() {
+
 }
 
 //READ

@@ -319,9 +319,8 @@ class ProcessAction extends Component {
         const { collection, documentId } = currentAction
         const { type, field, value } = operation
 
-
         if (type === 'update') {
-            const update = {}
+            let update = {}
             update[field] = value
             await db.collection(collection).doc(documentId).update(update)
         }

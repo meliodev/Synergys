@@ -19,7 +19,7 @@ import LoadDialog from "../../components/LoadDialog"
 
 import firebase, { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, rolesRedux } from "../../core/constants";
+import { constants, roles as allRoles } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
@@ -85,7 +85,7 @@ class CreateUser extends Component {
 
   //#PERMISSIONS:  (exp: isAdmin = true, isDirCom = false, isCom = false, isTech = false, isPoseur = false)
   setRoleBasedPermissions() {
-    rolesRedux.forEach((role, key) => {
+    allRoles.forEach((role, key) => {
       const update = {}
 
       if (role.id === this.role)

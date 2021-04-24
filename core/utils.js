@@ -16,6 +16,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
+import { roles } from './constants'
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -227,6 +228,31 @@ export const setAttachmentIcon = (type) => {
       break
   }
 
+}
+
+export const sortMonths = (monthYearArray) => {
+
+  const months = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai.', 'Juin.', 'Juil.', 'Août.', 'Sept.', 'Oct.', 'Nov.', 'Déc.']
+  // const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
+  const sorter = (a, b) => {
+    if (a.year !== b.year) {
+      return a.year - b.year
+    }
+    else {
+      return months.indexOf(a.month) - months.indexOf(b.month)
+    }
+  }
+
+  monthYearArray.sort(sorter)
+
+  return monthYearArray
+}
+
+export const getRoleIdFromValue = (roleValue) => {
+  for (const role of roles) {
+    if (role.value === roleValue)
+      return role.id
+  }
 }
 
 //##WARNINGS

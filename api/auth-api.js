@@ -1,5 +1,5 @@
 
-import { functions } from '../firebase'
+import firebase, { functions } from '../firebase'
 
 export const loginUser = async ({ email, password }) => {
   try {

@@ -634,7 +634,6 @@ class UploadDocument extends Component {
             const { signedAt, signedBy } = signature
             const signDate = moment(signedAt, 'lll').format('ll')
             const signTime = moment(signedAt, 'lll').format('HH:mm')
-            // const navigateToSigneeProfile = () => this.props.navigation.navigate('Profile', { userId: signedBy.id })
 
             return (
                 <View style={{ flexDirection: 'row', alignItems: 'center', paddingRight: 30, marginBottom: 10 }}>
@@ -844,7 +843,7 @@ class UploadDocument extends Component {
                                         editable={false}
                                     />
 
-                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: createdBy.id })}>
+                                    <TouchableOpacity>
                                         <MyInput
                                             label="Crée par"
                                             returnKeyType="done"
@@ -861,7 +860,7 @@ class UploadDocument extends Component {
                                         editable={false}
                                     />
 
-                                    <TouchableOpacity onPress={() => this.props.navigation.navigate('Profile', { userId: editedBy.id })}>
+                                    <TouchableOpacity>
                                         <MyInput
                                             label="Dernier intervenant"
                                             returnKeyType="done"

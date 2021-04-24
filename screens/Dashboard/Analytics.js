@@ -9,9 +9,9 @@ moment.locale('fr')
 
 import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
-import { load } from '../../core/utils'
-import { fetchDocs } from '../../api/firestore-api'
+import { constants, highRoles } from '../../core/constants'
+import { load, sortMonths } from '../../core/utils'
+import { fetchDocs, fetchTurnoverData } from '../../api/firestore-api'
 
 import { Picker, TurnoverGoal, Loading } from '../../components'
 import { TouchableOpacity } from 'react-native-gesture-handler'
@@ -20,88 +20,194 @@ class Analytics extends Component {
     constructor(props) {
         super(props)
         this.fetchDocs = fetchDocs.bind(this)
+        this.refreshMonthlyGoals = this.refreshMonthlyGoals.bind(this)
+        this.currentMonth = moment().format('MMM')
+        this.currentMonth = this.currentMonth.charAt(0).toUpperCase() + this.currentMonth.slice(1)
+
+        this.queries = this.setQueriesBasedOnRole()
+        this.initialTurnoverObjects = this.initTurnoverObjects()
 
         this.state = {
-            userGoals: [],
             totalIncome: 0,
             totalProjects: 0,
             totalClients: 0,
+            chartLabels: [],
+            chartDataSets: [[]],
             chartPeriod: 'lastSemester',
+            monthlyGoals: [],
             loading: true
         }
     }
 
     async componentDidMount() {
-        const { userGoals, totalIncome } = await this.fetchUserGoals()
-        const totalProjects = await this.fetchTotalProjects()
-        const totalClients = await this.fetchTotalClients()
-        this.setState({ userGoals, totalIncome, totalProjects, totalClients })
+        await this.fetchData()
         load(this, false)
     }
 
-    async fetchTotalProjects() {
-        return db.collection('Projects').where('createdBy.id', '==', auth.currentUser.uid).get().then((querySnapshot) => {
-            const totalProjects = querySnapshot.docs.length
-            return totalProjects
-        })
+    //Initial config.
+    setQueriesBasedOnRole() {
+        const role = this.props.role
+        const roleId = role.id
+        let queries = {}
+        if (highRoles.includes(roleId)) {
+            queries.turnover = db
+                .collectionGroup('Turnover')
+
+            queries.projects = db
+                .collection('Projects')
+        }
+
+        else if (roleId === 'com') {
+            queries.turnover = db
+                .collection('Users')
+                .doc(auth.currentUser.uid)
+                .collection('Turnover')
+
+            queries.projects = db
+                .collection('Projects')
+                .where('createdBy.id', '==', auth.currentUser.uid)
+        }
+
+        return queries
     }
 
-    async fetchTotalClients() {
-        return db.collection('Clients').where('createdBy.id', '==', auth.currentUser.uid).get().then((querySnapshot) => {
-            const totalClients = querySnapshot.docs.length
-            return totalClients
-        })
+    initTurnoverObjects() {
+        let turnoverObjects = {}
+
+        const sixMmonthsAgo = moment().subtract('5', 'months').format('YYYY-MM')
+        const currentMonth = moment().format('YYYY-MM')
+        let monthIterator = sixMmonthsAgo
+
+        while (moment(monthIterator).isSameOrBefore(currentMonth)) {
+            const year = moment(monthIterator, 'YYYY-MM').format('YYYY')
+            const monthNameLowerCase = moment(monthIterator, 'YYYY-MM').format('MMM')
+            const monthNameUpperCase = monthNameLowerCase.charAt(0).toUpperCase() + monthNameLowerCase.slice(1)
+            const formatedMonth = moment(monthIterator, 'YYYY-MM').format('MM-YYYY')
+            turnoverObjects[formatedMonth] = {
+                year,
+                month: monthNameUpperCase,
+                current: 0,
+                monthYear: formatedMonth
+            }
+            monthIterator = moment(monthIterator).add(1, 'month').format('YYYY-MM')
+        }
+
+        return turnoverObjects
     }
 
-    async fetchUserGoals() {
-        let userGoals = []
-        const startOfLastSemester = moment().subtract(6, 'months').format()
-        let monthTemp, month, year;
-        let goal = 0
-        let current = 0
+
+    async fetchData() {
+        const totalIncome = await this.fetchTotalIncome(this.queries.turnover)
+        const { totalProjects, totalClients } = await this.fetchTotals(this.queries.projects)
+        // let turnoverObjects = {
+        //     "03-2021": { "current": 3000, "id": "2021", "isCurrent": true, "month": "Mars.", "monthYear": "03-2021", "target": undefined, "year": "2021" },
+        //     "02-2021": { "current": 2000, "id": "2021", "isCurrent": true, "month": "Févr.", "monthYear": "02-2021", "target": undefined, "year": "2021" },
+        //     "04-2021": { "current": 4000, "id": "2021", "isCurrent": true, "month": "Avr.", "monthYear": "04-2021", "target": undefined, "year": "2021" },
+        //     "01-2021": { "current": 600, "id": "2021", "isCurrent": true, "month": "Janv.", "monthYear": "01-2021", "target": undefined, "year": "2021" },
+        //     "12-2020": { "current": 500, "id": "2020", "isCurrent": true, "month": "Dec.", "monthYear": "12-2020", "target": undefined, "year": "2020" },
+        //     "11-2020": { "current": 200, "id": "2020", "isCurrent": true, "month": "Nov.", "monthYear": "11-2020", "target": undefined, "year": "2020" },
+        // }
+
+        let turnoverObjects = this.initialTurnoverObjects
+
+        // turnoverObjects["03-2021"] = { "current": 5000, "id": "2021", "isCurrent": true, "month": "Mars", "monthYear": "03-2021", "target": undefined, "year": "2021" }
+        // turnoverObjects["02-2021"] = { "current": 4000, "id": "2021", "isCurrent": true, "month": "Févr.", "monthYear": "02-2021", "target": undefined, "year": "2021" }
+        // turnoverObjects["04-2021"] = { "current": 6000, "id": "2021", "isCurrent": true, "month": "Avr.", "monthYear": "04-2021", "target": undefined, "year": "2021" }
+        // turnoverObjects["01-2021"] = { "current": 1000, "id": "2021", "isCurrent": true, "month": "Janv.", "monthYear": "01-2021", "target": undefined, "year": "2021" }
+        // turnoverObjects["11-2020"] = { "current": 200, "id": "2020", "isCurrent": true, "month": "Nov.", "monthYear": "11-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["12-2020"] = { "current": 300, "id": "2020", "isCurrent": true, "month": "Déc.", "monthYear": "12-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["10-2020"] = { "current": 100, "id": "2020", "isCurrent": true, "month": "Oct.", "monthYear": "10-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["09-2020"] = { "current": 90, "id": "2020", "isCurrent": true, "month": "Sept.", "monthYear": "09-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["08-2020"] = { "current": 80, "id": "2020", "isCurrent": true, "month": "Août.", "monthYear": "08-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["07-2020"] = { "current": 50, "id": "2020", "isCurrent": true, "month": "Juil.", "monthYear": "07-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["06-2020"] = { "current": 30, "id": "2020", "isCurrent": true, "month": "Juin.", "monthYear": "06-2020", "target": undefined, "year": "2020" }
+        // turnoverObjects["05-2020"] = { "current": 20, "id": "2020", "isCurrent": true, "month": "Mai.", "monthYear": "05-2020", "target": undefined, "year": "2020" }
+
+        turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects)
+        let turnoverArr = this.setTurnoverArr(turnoverObjects)
+        turnoverArr = sortMonths(turnoverArr)
+        const monthlyGoals = this.setMonthlyGoals(turnoverArr)
+        const { chartLabels, chartDataSets } = this.setChart(turnoverArr)
+        this.setState({ totalIncome, monthlyGoals, chartDataSets, chartLabels, totalProjects, totalClients })
+    }
+
+    setTurnoverArr(turnoverObjects) {
+        let turnoverArr = []
+        for (const key in turnoverObjects) {
+            turnoverArr.push(turnoverObjects[key])
+        }
+        return turnoverArr
+    }
+
+    setMonthlyGoals(turnoverArr) {
+        let monthlyGoals = []
+
+        for (const turnover of turnoverArr) {
+            if (turnover.target)
+                monthlyGoals.push(turnover)
+        }
+
+        return monthlyGoals
+    }
+
+    setChart(turnoverArr) {
+        let semesterTurnoverArr = this.filterSemesterTurnover(turnoverArr)
+        const chartData = semesterTurnoverArr.map((turnover) => turnover.current)
+        const chartLabels = semesterTurnoverArr.map((turnover) => turnover.month)
+        const chartDataSets = [chartData]
+        return { chartLabels, chartDataSets }
+    }
+
+    filterSemesterTurnover(turnoverArr) {
+
+        const sixMmonthsAgo = moment().subtract('5', 'months').format('YYYY-MM')
+
+        turnoverArr = turnoverArr.filter((turnover) => {
+            const monthYear = moment(turnover.monthYear, 'MM-YYYY').format('YYYY-MM')
+            const isLastSemester = moment(monthYear).isSameOrAfter(sixMmonthsAgo, 'month')
+            if (isLastSemester) return turnover
+        })
+
+        return turnoverArr
+    }
+
+    //SUMMARY DATA
+    async fetchTotalIncome(query) {
         let totalIncome = 0
+        let monthsTurnovers = {}
+        await query.get().then((querySnapshot) => {
+            for (const doc of querySnapshot.docs) {
+                monthsTurnovers = doc.data()
+                delete monthsTurnovers.current
+                delete monthsTurnovers.target
 
-        await db
-            .collection('Users')
-            .doc(auth.currentUser.uid)
-            .collection('Turnover')
-            // .where('monthYear', '>=', moment(startOfLastSemester).toDate())
-            // .orderBy('monthYear', 'desc')
-            .get()
-            .then((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data()
-
-                    for (var projectId in data.projectsIncome) {
-                        totalIncome += Number(data.projectsIncome[projectId])
+                for (const month in monthsTurnovers) {
+                    const projectsIncome = monthsTurnovers[month].projectsIncome || {}
+                    for (var projectId in projectsIncome) {
+                        totalIncome += Number(projectsIncome[projectId].amount)
                     }
-lk
-                    if (moment(data.monthYear).isSameOrAfter(moment(startOfLastSemester))) {
+                }
+            }
+        })
 
-                        if (data.target) {
-                            monthTemp = moment(doc.id, 'MM-YYYY').format('MMMM')
-                            month = monthTemp.charAt(0).toUpperCase() + monthTemp.slice(1)
-                            year = moment(doc.id, 'MM-YYYY').format('YYYY')
+        return totalIncome
+    }
 
-                            for (var projectId in data.projectsIncome) {
-                                current += Number(data.projectsIncome[projectId])
-                            }
+    async fetchTotals(query) {
+        return query.get().then((querySnapshot) => {
+            const clients = []
 
-                            goal = {
-                                id: doc.id,
-                                month,
-                                year,
-                                target: data.target,
-                                current,
-                            }
-                            userGoals.push(goal)
-                            current = 0
-                        }
-                    }
-                })
+            querySnapshot.forEach((doc) => {
+                const project = doc.data()
+                const clientId = project.client.id
+                if (!clients.includes(clientId))
+                    clients.push(clientId)
             })
 
-        return { userGoals, totalIncome }
+            const totalProjects = querySnapshot.docs.length
+            const totalClients = clients.length
+            return { totalProjects, totalClients }
+        })
     }
 
     renderSummary() {
@@ -128,26 +234,21 @@ lk
             },
         ]
 
-        return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        const emptySpace = () => <View style={{ flex: 0.15 }} />
 
+        return (
+            <View style={styles.summaryContainer}>
                 {summaryData.map((data) => {
-                    const columnStyle = {
-                        height: constants.ScreenHeight * 0.1,
-                        width: constants.ScreenWidth * 0.29,
-                        borderRadius: 16,
-                        backgroundColor: data.colors.secondary
-                    }
                     return (
-                        <View style={columnStyle}>
-                            <View style={{ flex: 0.15 }} />
-                            <View style={{ flex: 0.45, paddingHorizontal: 10, justifyContent: 'center' }}>
-                                <Text style={[theme.customFontMSregular.small, { color: theme.colors.secondary, textAlign: 'center', letterSpacing: 1.5 }]}>{data.label}</Text>
+                        <View style={[styles.summaryColumn, { backgroundColor: data.colors.secondary }]}>
+                            {emptySpace()}
+                            <View style={styles.summaryLabelContainer}>
+                                <Text style={[theme.customFontMSregular.small, styles.summaryLabel]}>{data.label}</Text>
                             </View>
-                            <View style={{ flex: 0.25, justifyContent: 'center' }}>
-                                <Text style={[theme.customFontMSmedium.body, { color: data.colors.primary, textAlign: 'center' }]}>{data.symbol}{data.value.toString()}</Text>
+                            <View style={styles.summaryValueContainer}>
+                                <Text style={[theme.customFontMSmedium.body, styles.summaryValue, { color: data.colors.primary }]}>{data.symbol}{data.value.toString()}</Text>
                             </View>
-                            <View style={{ flex: 0.15 }} />
+                            {emptySpace()}
                         </View>
                     )
                 })
@@ -157,17 +258,24 @@ lk
     }
 
     renderChart() {
-        const { chartPeriod } = this.state
+        const { chartPeriod, monthlyGoals, chartDataSets, chartLabels } = this.state
         const periods = [
             { label: 'Le mois courant', value: 'currentMonth' },
             { label: 'Les 6 derniers mois', value: 'lastSemester' },
             { label: "L'année dernière", value: 'lastYear' },
         ]
 
+        let labels = chartLabels
+        let datasets = []
+        for (const chartData of chartDataSets) {
+            const data = chartData
+            datasets.push({ data })
+        }
+
         return (
             <View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                <View style={styles.chartHeader}>
                     <View style={{ paddingBottom: 10 }}>
                         <Text style={[theme.customFontMSregular.caption]}>Statistiques</Text>
                     </View>
@@ -178,7 +286,7 @@ lk
                         selectedValue={chartPeriod}
                         onValueChange={(chartPeriod) => this.setState({ chartPeriod })}
                         elements={periods}
-                        enabled={true}
+                        enabled={false}
                         style={{ width: '50%', marginRight: -15 }}
                         pickerContainerStyle={{ borderBottomWidth: 0 }}
                     />
@@ -186,24 +294,13 @@ lk
 
                 <LineChart
                     data={{
-                        labels: ["Janvier", "Fevrier", "Mars", "Avril", "Mai", "Juin"],
-                        datasets: [
-                            {
-                                data: [
-                                    Math.random() * 100,
-                                    Math.random() * 100,
-                                    Math.random() * 100,
-                                    Math.random() * 100,
-                                    Math.random() * 100,
-                                    Math.random() * 100
-                                ]
-                            }
-                        ]
+                        labels,
+                        datasets
                     }}
                     width={Dimensions.get("window").width - theme.padding * 2} // from react-native
                     height={220}
                     yAxisLabel="€"
-                    yAxisSuffix="k"
+                    yAxisSuffix=""
                     yAxisInterval={1} // optional, defaults to 1
                     chartConfig={{
                         backgroundColor: "#e26a00",
@@ -221,6 +318,7 @@ lk
                             stroke: "#ffa726"
                         }
                     }}
+                    onDataPointClick={(data) => console.log(data)}
                     bezier
                     style={{
                         marginTop: 5,
@@ -233,15 +331,30 @@ lk
     }
 
     onPressGoal(goal, index) {
-        this.props.navigation.navigate('AddGoal', { userId: auth.currentUser.uid, GoalId: goal.id })
+        const navParams = {
+            userId: auth.currentUser.uid,
+            GoalId: goal.id,
+            monthYear: goal.monthYear,
+            onGoBack: this.refreshMonthlyGoals
+        }
+
+        this.props.navigation.navigate('AddGoal', navParams)
     }
 
-    renderGoals() {
-        const { userGoals } = this.state
+    async refreshMonthlyGoals() {
+        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, this.initialTurnoverObjects)
+        const turnoverArr = this.setTurnoverArr(turnoverObjects)
+        const monthlyGoals = this.setMonthlyGoals(turnoverArr)
+        this.setState({ monthlyGoals })
+    }
+
+    renderGoals(isCom) {
+        const { monthlyGoals } = this.state
+
         return (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {this.addGoal()}
-                {userGoals.map((goal, index) => (
+                {!isCom && this.addGoal()}
+                {monthlyGoals.map((goal, index) => (
                     <TurnoverGoal
                         goal={goal}
                         index={index}
@@ -255,7 +368,7 @@ lk
     addGoal() {
         const size = constants.ScreenWidth * 0.26
         const onPress = () => {
-            this.props.navigation.navigate('AddGoal', { onGoback: this.fetchUserGoals })
+            this.props.navigation.navigate('AddGoal', { onGoBack: this.refreshMonthlyGoals })
         }
         return (
             <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={onPress}>
@@ -268,8 +381,10 @@ lk
     }
 
     render() {
-        const { userGoals, loading } = this.state
+        const { monthlyGoals, chartLabels, loading } = this.state
         const { isConnected } = this.props.network
+        const roleId = this.props.role.id
+        const isCom = roleId === 'com'
 
         return (
             <View style={styles.mainContainer}>
@@ -278,8 +393,8 @@ lk
                     :
                     <ScrollView showsVerticalScrollIndicator={false}>
                         {this.renderSummary()}
-                        {this.renderChart()}
-                        {this.renderGoals()}
+                        {chartLabels.length > 0 && this.renderChart()}
+                        {this.renderGoals(isCom)}
                     </ScrollView>
                 }
             </View>
@@ -298,23 +413,43 @@ const mapStateToProps = (state) => {
 
 export default connect(mapStateToProps)(Analytics)
 
-
-
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
         backgroundColor: theme.colors.white
     },
-    notificationsList: {
-        paddingVertical: 15
+    //Summary
+    summaryContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between'
     },
-    tasksList: {
-        paddingVertical: 15
+    summaryColumn: {
+        height: constants.ScreenHeight * 0.1,
+        width: constants.ScreenWidth * 0.29,
+        borderRadius: 16,
     },
-    root: {
-        zIndex: 1,
-        paddingHorizontal: theme.padding,
-        //backgroundColor: 'green',
+    summaryLabelContainer: {
+        flex: 0.45,
+        paddingHorizontal: 10,
+        justifyContent: 'center'
+    },
+    summaryLabel: {
+        color: theme.colors.secondary,
+        textAlign: 'center',
+        letterSpacing: 1.5
+    },
+    summaryValueContainer: {
+        flex: 0.25,
+        justifyContent: 'center'
+    },
+    summaryValue: {
+        textAlign: 'center'
+    },
+    //CHART
+    chartHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between'
     }
-});
+})
 

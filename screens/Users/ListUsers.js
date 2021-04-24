@@ -9,7 +9,7 @@ import SearchInput, { createFilter } from 'react-native-search-filter'
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { load, myAlert } from '../../core/utils'
+import { load, myAlert, getRoleIdFromValue } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api'
 
 import UserItem from '../../components/UserItem'
@@ -81,6 +81,7 @@ class ListUsers extends Component {
   }
 
   renderUser = (user) => {
+
     const onPressUser = (item) => {
       const { isPro, id, denom, nom, prenom, role, email } = item
 
@@ -94,8 +95,10 @@ class ListUsers extends Component {
     const { canRead, canUpdate, canDelete } = permissions
     const isClient = userType === 'client' || userType === 'prospect'
 
-    const viewUser = () => this.props.navigation.navigate('Profile', { userId: user.id, isClient })
-    const editUser = () => this.props.navigation.navigate('Profile', { userId: user.id, isClient })
+    const roleId = getRoleIdFromValue(user.role)
+    const viewProfile = () => this.props.navigation.navigate('Profile', { user: { id: user.id, roleId }, isClient })
+    const viewUser = viewProfile
+    const editUser = viewProfile
     const deleteUser = () => {
       if (offLine) Alert.alert('', 'Impossible de supprimer un utilisateur en mode hors-ligne')
       else this.alertDeleteUser(user)
@@ -153,7 +156,7 @@ class ListUsers extends Component {
           <View style={styles.container}>
 
             {usersCount > 0 && <ListSubHeader style={{ backgroundColor: theme.colors.background }}>{usersCount} {userType}{s}</ListSubHeader>}
-            {usersCount > 0 ?
+            {usersCount > 0 ? 
               <FlatList
                 enableEmptySections={true}
                 data={filteredUsers}
