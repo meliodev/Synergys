@@ -38,6 +38,8 @@ class AddGoal extends Component {
 
         this.userId = this.props.navigation.getParam('userId', auth.currentUser.uid)
         this.GoalId = this.props.navigation.getParam('GoalId', '')
+        this.currentTurnover = this.props.navigation.getParam('currentTurnover', '')
+        this.incomeSources = this.props.navigation.getParam('incomeSources', [])
         this.isEdit = this.GoalId ? true : false
         this.GoalId = this.isEdit ? this.GoalId : moment().format('YYYY')
         this.monthYear = this.props.navigation.getParam('monthYear', '')
@@ -92,18 +94,17 @@ class AddGoal extends Component {
                 return true
             }
 
-            let { monthYear, target, current, description } = this.state
+            let { monthYear, target, description } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
 
             //General info
             let monthsTurnovers = doc.data()
             const goal = monthsTurnovers[this.monthYear]
-            monthYear = goal.monthYear
+            monthYear = moment(goal.monthYear, 'MM-YYYY').toDate()
             target.value = goal.target
             description = goal.description
-
-            console.log('GOAL', goal)
+            const current = this.currentTurnover
 
             //َActivity
             createdAt = goal.createdAt
@@ -162,7 +163,7 @@ class AddGoal extends Component {
         const formatedMonthYear = moment(monthYear).format('MM-YYYY')
 
         let monthlyGoal = {
-            monthYear,
+            monthYear: formatedMonthYear,
             target: target.value,
             description,
             editedAt: moment().format(),
@@ -179,7 +180,7 @@ class AddGoal extends Component {
         let payload = {}
         payload[formatedMonthYear] = monthlyGoal
 
-        db.collection('Users').doc(this.userId).collection('Turnover').doc(GoalId).set(payload, { merge: true }) 
+        db.collection('Users').doc(this.userId).collection('Turnover').doc(GoalId).set(payload, { merge: true })
         this.props.navigation.state.params.onGoBack()
         this.props.navigation.goBack()
     }
@@ -203,7 +204,8 @@ class AddGoal extends Component {
 
     goalOverview() {
         const { GoalId, target, current, monthYear } = this.initialState
-        const monthTemp = moment(monthYear, 'MM-YYYY').format('MMMM')
+        console.log('.....', moment(monthYear, 'X').format('lll'))
+        const monthTemp = moment(monthYear).format('MMMM')
         const month = monthTemp.charAt(0).toUpperCase() + monthTemp.slice(1)
 
         const goal = {
@@ -223,6 +225,39 @@ class AddGoal extends Component {
                     isList={false}
                 />
             </View>
+        )
+    }
+
+    renderIncomeSources() {
+
+        const onPressProjectId = (ProjectId) => this.props.navigation.navigate('CreateProject', { ProjectId })
+        const textStyle = theme.customFontMSregular.body
+
+        return (
+            <FormSection
+                sectionTitle='Historique des sources'
+                sectionIcon={faFileAlt}
+                form={
+                    <View style={styles.incSourcesContainer}>
+                        <View style={styles.incSourcesHeader}>
+                            <Text style={[textStyle]}>Projet</Text>
+                            <Text style={[textStyle]}>Revenu</Text>
+                        </View>
+
+                        {this.incomeSources.map((source, index) => {
+                            return (
+                                <TouchableOpacity
+                                    onPress={() => onPressProjectId(source.projectId)}
+                                    style={styles.incSourcesRow}
+                                >
+                                    <Text style={[textStyle, { color: theme.colors.primary }]}>{source.projectId}</Text>
+                                    <Text style={[textStyle]}>€ {source.amount}</Text>
+                                </TouchableOpacity>
+                            )
+                        })}
+                    </ View>
+                }
+            />
         )
     }
 
@@ -253,7 +288,6 @@ class AddGoal extends Component {
                     <Loading />
                     :
                     <ScrollView style={styles.dataContainer}>
-
                         {this.isEdit && this.goalOverview()}
                         <FormSection
                             sectionTitle='Détails'
@@ -271,7 +305,7 @@ class AddGoal extends Component {
                                             }}
                                             value={monthYear}
                                             minimumDate={new Date()}
-                                            maximumDate={new Date(2025, 5)}
+                                            maximumDate={new Date(2030, 5)}
                                             locale="fr"
                                             cancelButton="Annuler"
                                             okButton="Valider"
@@ -308,6 +342,8 @@ class AddGoal extends Component {
 
                                 </View>
                             } />
+
+                        {this.isEdit && this.incomeSources.length > 0 && this.renderIncomeSources()}
 
                         {this.isEdit &&
                             <FormSection
@@ -385,54 +421,28 @@ const styles = StyleSheet.create({
     },
     dataContainer: {
         flex: 1,
-        //paddingHorizontal: theme.padding
     },
-    fab: {
-        //flex: 1,
-        backgroundColor: theme.colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        alignSelf: 'flex-end',
-        marginBottom: 10,
-        width: 50,
-        height: 50,
-        borderRadius: 100,
+    incSourcesContainer: {
+        flex: 1,
+        backgroundColor: theme.colors.white,
+        borderRadius: 25,
+        elevation: 3,
+        marginTop: 12
     },
-    note: {
-        //backgroundColor: 'green',
-        alignSelf: 'center',
-        textAlignVertical: 'top',
-        backgroundColor: '#ffffff',
-        borderRadius: 5,
-        paddingTop: 15,
-        paddingLeft: 15,
-        width: constants.ScreenWidth * 0.91,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.32,
-        shadowRadius: 5.46,
-        elevation: 2,
-    },
-    attachment: {
-        // flex: 1,
-        elevation: 1,
-        backgroundColor: theme.colors.gray50,
-        width: '90%',
-        height: 60,
-        alignSelf: 'center',
-        borderRadius: 5,
-        marginTop: 15
-    },
-    task: {
-        //flex: 1,
+    incSourcesHeader: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        borderRadius: 5,
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        marginHorizontal: 15,
-        marginBottom: 10,
-        //marginTop: 10,
+        padding: theme.padding,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
+        justifyContent: 'space-between',
+        backgroundColor: '#EAF7F1'
     },
+    incSourcesRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: theme.padding,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_light,
+    }
 })
 

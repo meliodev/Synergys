@@ -59,7 +59,7 @@ class Tasks extends Component {
         }
 
         const navParams = { isRoot: false, isAgenda: true }
-        return renderSection('Tâches', faCalendar, tasksList, tasksCount, 'Agenda', navParams, renderItem, 'Tâches', 'Aucune nouvelle tâche.', isConnected)
+        return renderSection('Tâches', faCalendar, tasksList, tasksCount, this.props.navigation, 'Agenda', navParams, renderItem, 'Tâches', 'Aucune nouvelle tâche.', isConnected)
     }
 
     formatTasks(tasksList) {
@@ -101,7 +101,7 @@ class Tasks extends Component {
     tasksSummary() {
         const columnStyle = { flex: 1, justifyContent: 'center', alignItems: 'center' }
         return (
-            <View style={{ height: constants.ScreenHeight*0.15, borderRadius: 25, elevation: 5, backgroundColor: theme.colors.white, flexDirection: 'row' }}>
+            <View style={{ height: constants.ScreenHeight * 0.15, borderRadius: 25, elevation: 5, backgroundColor: theme.colors.white, flexDirection: 'row' }}>
                 <View style={columnStyle}>
                     <Text>30</Text>
                     <Text>En retard</Text>

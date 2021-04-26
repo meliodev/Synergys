@@ -108,9 +108,6 @@ export const enableProcessAction = (responsable, currentUserId, currentUserRole,
 }
 
 
-
-
-
 // const rootConfigureQueryParams = (collection, queryFilters, params) => {
 
 //     switch (collection) {

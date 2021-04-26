@@ -1,13 +1,7 @@
 TO DO:
-
-+ DASHBOARD (NEW): Shortcuts: CreateProspect/CreateClient
-+ DASHBOARD (NEW):
--> COM: show objectives: DC defines a "Chiffre d'affaire" every month for com. 
--> DC: graph all comercials: global "Chiffre d'affaire"
-+ DASHBOARD (NEW): From today to next days: red tasks, green for others
-+ DASHBOARD (NEW): Add objectives
++ PROFILE: Refresh goals onGoBack
 + UX: onPress other form field focus it on one press not two
-
++ Ordre decroissant etapes / phases text show / dash between Steps.
 + PROCESS: Cancel annulation (rollback: delete 'cancelProcess' phase && undo latest action of latest step)
 + PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)
 -> OPTION 1: Verify if a task with same type already exists for the selected project (to avoid duplicates)
@@ -54,6 +48,12 @@ Design done:
 - Replace attachment pickers by Squares
 
 DONE: (05/04/2021)
++ DASHBOARD (NEW): From today to next days: red tasks, green for others
++ DASHBOARD (NEW): Add objectives
++ DASHBOARD (NEW):
+-> COM: show objectives: DC defines a "Chiffre d'affaire" every month for com. 
+-> DC: graph all comercials: global "Chiffre d'affaire"
++ DASHBOARD (NEW): Shortcuts: CreateProspect/CreateClient
 + DASHBOARD (NEW): tasks (recent and display outdated)
 + DASHBOARD (NEW): notifications récentes non lu (5) + voir toutes les notifications / Aucune notification récente if nothing
 + NOTIFICATION: Handle navigation to deleted document

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
-import { Appbar, CustomIcon, NewBackground } from '../../components'
+import { Appbar, CustomIcon, NewBackground, EmptyList } from '../../components'
 import { constants } from '../../core/constants';
 import { faLayerPlus, faChartLine, faArrowAltToRight } from '@fortawesome/pro-duotone-svg-icons'
 
 import * as theme from '../../core/theme'
-import { faBell, faTasks } from '@fortawesome/pro-light-svg-icons'
+import { faAbacus, faBell, faTasks } from '@fortawesome/pro-light-svg-icons'
 
 import Analytics from './Analytics'
 import Tasks from './Tasks'
@@ -94,21 +94,10 @@ export default class Dashboard extends Component {
 
     renderMenuItems() {
         return (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: theme.padding, marginTop: 10 }}>
+            <View style={styles.menuContainer}>
                 {menuItems.map((item, index) => {
                     return this.renderMenuItem(item, index)
                 })}
-
-                { /* <FlatList
-                    horizontal={true}
-                    data={menuItems}
-                    keyExtractor={item => item.content}
-                    ItemSeparatorComponent={() => <View style={{ width: constants.ScreenWidth * 0.045 }} />}
-                    renderItem={({ item, index }) => this.renderMenuItem(item, index)}
-                    style={{ marginTop: 10 }}
-                    //contentContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
-                    showsHorizontalScrollIndicator={false}
-                /> */}
             </View>
         )
     }
@@ -136,6 +125,12 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.white
     },
+    menuContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: theme.padding,
+        marginTop: 10
+    },
     menuItem: {
         alignItems: 'center',
         width: constants.ScreenWidth * 0.2,
@@ -150,7 +145,9 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
+        // backgroundColor: 'pink',
         padding: theme.padding,
+        paddingTop: theme.padding * 1.25
     }
 })
 

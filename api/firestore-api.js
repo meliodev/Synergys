@@ -177,11 +177,9 @@ export const createClient = async function createClient(userData, eventHandlers,
   }
 }
 
-export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects) {
+export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects, userId) {
 
   let turnoverdata = []
-
-  //Initialize last semester
 
   let chartDataObjects = []
   let chartDataSets = []
@@ -203,8 +201,14 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
           currentIncome += Number(projectsIncome[projectId].amount)
         }
 
-        // const isGoalDefined = monthsTurnovers[month].target
-        // if (isGoalDefined && (Object.keys(turnoverObjects).length < 6 || month === currentMonth)) {
+        //Update Income sources
+        let sources = turnoverObjects[month] && turnoverObjects[month].sources || []
+        for (var projectId in projectsIncome) {
+          let source = {}
+          source.projectId = projectId
+          source.amount = projectsIncome[projectId].amount
+          sources.push(source)
+        }
 
         const year = moment(month, 'MM-YYYY').format('YYYY')
         const monthLowerCase = moment(month, 'MM-YYYY').format('MMM')
@@ -216,13 +220,13 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
           month: monthUpperCase,
           year,
           monthYear: month,
-          //  target,
+          //target,
           isCurrent: month === moment().format('MM-YYYY'),
           current: currentIncome,
+          sources,
         }
 
         turnoverObjects[month] = monthTurnover
-        //  }
       }
     }
   })
@@ -230,7 +234,7 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
   //Each user has his target (DC's monthly target is the global turnover of month) (Com's monthly target is his own turnover)
   await db
     .collection('Users')
-    .doc(auth.currentUser.uid)
+    .doc(userId)
     .collection('Turnover')
     .get()
     .then((querySnapshot) => {
@@ -245,12 +249,10 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
       }
     })
 
+
   return turnoverObjects
 }
 
-export const fetchTurnoverDataAllUsers = async function fetchTurnoverDataAllUsers() {
-
-}
 
 //READ
 export const getResponsableByRole = async (role) => {

@@ -32,7 +32,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 33,
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1
+        zIndex: 2
+       // backgroundColor: 'green',
     },
 })
 

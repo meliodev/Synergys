@@ -158,6 +158,10 @@ const DashboardStack = createStackNavigator({
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
+    },
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
@@ -190,6 +194,10 @@ const ProfileStack = createStackNavigator({
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
     },
     CreateProject: {
         screen: CreateProject,
@@ -240,6 +248,10 @@ const UsersManagementStack = createStackNavigator({
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
+    },
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
@@ -277,11 +289,9 @@ const ClientsManagementStack = createStackNavigator({
         // navigationOptions: navOptionsBackCheck
     },
     //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
+    AddGoal: {
+        screen: AddGoal,
         navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
     },
     CreateProject: {
         screen: CreateProject,
@@ -337,6 +347,10 @@ const RequestsManagementStack = createStackNavigator({
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
     },
     CreateProject: {
         screen: CreateProject,
@@ -421,6 +435,10 @@ const InboxStack = createStackNavigator({
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
+    },
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
@@ -469,6 +487,10 @@ const AgendaStack = createStackNavigator({
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
     },
     CreateProject: {
         screen: CreateProject,
@@ -573,6 +595,10 @@ const ProjectsStack = createStackNavigator({
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
+    },
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
@@ -642,6 +668,10 @@ const DocumentsStack = createStackNavigator({
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
+    },
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
@@ -694,6 +724,10 @@ const OrdersStack = createStackNavigator({
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    AddGoal: {
+        screen: AddGoal,
+        navigationOptions: hideHeader
     },
     CreateProject: {
         screen: CreateProject,

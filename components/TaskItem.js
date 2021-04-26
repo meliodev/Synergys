@@ -8,7 +8,7 @@ moment.locale('fr')
 
 import * as theme from '../core/theme'
 
-const TaskItem = ({ task, onPress }) => {
+const TaskItem = ({ task, onPress, style }) => {
 
     const { id, name, status, isAllDay, color, date, startHour, dueHour } = task
     const TaskId = id
@@ -30,7 +30,7 @@ const TaskItem = ({ task, onPress }) => {
     const opacity = done ? 0.5 : 1
 
     return (
-        <TouchableOpacity style={[styles.item, { backgroundColor: taskColor, opacity, borderColor: theme.colors.error, borderWidth }]} onPress={onPress} >
+        <TouchableOpacity style={[styles.item, { backgroundColor: taskColor, opacity, borderColor: theme.colors.error, borderWidth }, style]} onPress={onPress} >
             <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
                 <Text style={[theme.customFontMSregular.body, { color: textColor }]} numberOfLines={1}>{name}</Text>
             </View>

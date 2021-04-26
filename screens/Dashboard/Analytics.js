@@ -12,8 +12,10 @@ import * as theme from '../../core/theme'
 import { constants, highRoles } from '../../core/constants'
 import { load, sortMonths } from '../../core/utils'
 import { fetchDocs, fetchTurnoverData } from '../../api/firestore-api'
+import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from './helpers'
 
 import { Picker, TurnoverGoal, Loading } from '../../components'
+import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
 class Analytics extends Component {
@@ -24,8 +26,10 @@ class Analytics extends Component {
         this.currentMonth = moment().format('MMM')
         this.currentMonth = this.currentMonth.charAt(0).toUpperCase() + this.currentMonth.slice(1)
 
-        this.queries = this.setQueriesBasedOnRole()
-        this.initialTurnoverObjects = this.initTurnoverObjects()
+        const role = this.props.role
+        const roleId = role.id
+        this.queries = analyticsQueriesBasedOnRole(roleId, auth.currentUser.uid)
+        this.initialTurnoverObjects = initTurnoverObjects()
 
         this.state = {
             totalIncome: 0,
@@ -43,58 +47,6 @@ class Analytics extends Component {
         await this.fetchData()
         load(this, false)
     }
-
-    //Initial config.
-    setQueriesBasedOnRole() {
-        const role = this.props.role
-        const roleId = role.id
-        let queries = {}
-        if (highRoles.includes(roleId)) {
-            queries.turnover = db
-                .collectionGroup('Turnover')
-
-            queries.projects = db
-                .collection('Projects')
-        }
-
-        else if (roleId === 'com') {
-            queries.turnover = db
-                .collection('Users')
-                .doc(auth.currentUser.uid)
-                .collection('Turnover')
-
-            queries.projects = db
-                .collection('Projects')
-                .where('createdBy.id', '==', auth.currentUser.uid)
-        }
-
-        return queries
-    }
-
-    initTurnoverObjects() {
-        let turnoverObjects = {}
-
-        const sixMmonthsAgo = moment().subtract('5', 'months').format('YYYY-MM')
-        const currentMonth = moment().format('YYYY-MM')
-        let monthIterator = sixMmonthsAgo
-
-        while (moment(monthIterator).isSameOrBefore(currentMonth)) {
-            const year = moment(monthIterator, 'YYYY-MM').format('YYYY')
-            const monthNameLowerCase = moment(monthIterator, 'YYYY-MM').format('MMM')
-            const monthNameUpperCase = monthNameLowerCase.charAt(0).toUpperCase() + monthNameLowerCase.slice(1)
-            const formatedMonth = moment(monthIterator, 'YYYY-MM').format('MM-YYYY')
-            turnoverObjects[formatedMonth] = {
-                year,
-                month: monthNameUpperCase,
-                current: 0,
-                monthYear: formatedMonth
-            }
-            monthIterator = moment(monthIterator).add(1, 'month').format('YYYY-MM')
-        }
-
-        return turnoverObjects
-    }
-
 
     async fetchData() {
         const totalIncome = await this.fetchTotalIncome(this.queries.turnover)
@@ -123,31 +75,12 @@ class Analytics extends Component {
         // turnoverObjects["06-2020"] = { "current": 30, "id": "2020", "isCurrent": true, "month": "Juin.", "monthYear": "06-2020", "target": undefined, "year": "2020" }
         // turnoverObjects["05-2020"] = { "current": 20, "id": "2020", "isCurrent": true, "month": "Mai.", "monthYear": "05-2020", "target": undefined, "year": "2020" }
 
-        turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects)
-        let turnoverArr = this.setTurnoverArr(turnoverObjects)
+        turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects, auth.currentUser.uid)
+        let turnoverArr = setTurnoverArr(turnoverObjects)
         turnoverArr = sortMonths(turnoverArr)
-        const monthlyGoals = this.setMonthlyGoals(turnoverArr)
+        const monthlyGoals = setMonthlyGoals(turnoverArr)
         const { chartLabels, chartDataSets } = this.setChart(turnoverArr)
-        this.setState({ totalIncome, monthlyGoals, chartDataSets, chartLabels, totalProjects, totalClients })
-    }
-
-    setTurnoverArr(turnoverObjects) {
-        let turnoverArr = []
-        for (const key in turnoverObjects) {
-            turnoverArr.push(turnoverObjects[key])
-        }
-        return turnoverArr
-    }
-
-    setMonthlyGoals(turnoverArr) {
-        let monthlyGoals = []
-
-        for (const turnover of turnoverArr) {
-            if (turnover.target)
-                monthlyGoals.push(turnover)
-        }
-
-        return monthlyGoals
+        this.setState({ totalIncome, totalProjects, totalClients, chartDataSets, chartLabels, monthlyGoals })
     }
 
     setChart(turnoverArr) {
@@ -330,10 +263,20 @@ class Analytics extends Component {
         )
     }
 
+    onPressNewGoal() {
+        this.props.navigation.navigate('AddGoal', { onGoBack: this.refreshMonthlyGoals })
+    }
+
     onPressGoal(goal, index) {
+
+        let incomeSources = []
+        let incomeSource = {}
+
         const navParams = {
             userId: auth.currentUser.uid,
             GoalId: goal.id,
+            currentTurnover: goal.current,
+            incomeSources: goal.sources,
             monthYear: goal.monthYear,
             onGoBack: this.refreshMonthlyGoals
         }
@@ -342,49 +285,31 @@ class Analytics extends Component {
     }
 
     async refreshMonthlyGoals() {
-        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, this.initialTurnoverObjects)
-        const turnoverArr = this.setTurnoverArr(turnoverObjects)
-        const monthlyGoals = this.setMonthlyGoals(turnoverArr)
+        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, this.initialTurnoverObjects, auth.currentUser.uid)
+        const turnoverArr = setTurnoverArr(turnoverObjects)
+        const monthlyGoals = setMonthlyGoals(turnoverArr)
         this.setState({ monthlyGoals })
     }
 
-    renderGoals(isCom) {
+    renderGoals() {
         const { monthlyGoals } = this.state
+        const roleId = this.props.role.id
+        const isCom = roleId === 'com'
 
         return (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {!isCom && this.addGoal()}
-                {monthlyGoals.map((goal, index) => (
-                    <TurnoverGoal
-                        goal={goal}
-                        index={index}
-                        onPress={this.onPressGoal.bind(this)}
-                    />
-                ))}
-            </View>
-        )
-    }
-
-    addGoal() {
-        const size = constants.ScreenWidth * 0.26
-        const onPress = () => {
-            this.props.navigation.navigate('AddGoal', { onGoBack: this.refreshMonthlyGoals })
-        }
-        return (
-            <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={onPress}>
-                <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 1, borderColor: theme.colors.gray_dark, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                    <Text style={[theme.customFontMSregular.h1, { color: theme.colors.gray_dark }]}>+</Text>
-                </View>
-                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, textAlign: 'center' }]}>Nouvel objectif</Text>
-            </TouchableOpacity>
+            <TurnoverGoalsContainer
+                monthlyGoals={monthlyGoals}
+                onPressNewGoal={this.onPressNewGoal.bind(this)}
+                onPressGoal={this.onPressGoal.bind(this)}
+                navigation={this.props.navigation}
+                isCom={isCom}
+            />
         )
     }
 
     render() {
-        const { monthlyGoals, chartLabels, loading } = this.state
+        const { chartLabels, loading } = this.state
         const { isConnected } = this.props.network
-        const roleId = this.props.role.id
-        const isCom = roleId === 'com'
 
         return (
             <View style={styles.mainContainer}>
@@ -394,7 +319,7 @@ class Analytics extends Component {
                     <ScrollView showsVerticalScrollIndicator={false}>
                         {this.renderSummary()}
                         {chartLabels.length > 0 && this.renderChart()}
-                        {this.renderGoals(isCom)}
+                        {this.renderGoals()}
                     </ScrollView>
                 }
             </View>
@@ -424,8 +349,9 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between'
     },
     summaryColumn: {
+        elevation: 4,
         height: constants.ScreenHeight * 0.1,
-        width: constants.ScreenWidth * 0.29,
+        width: constants.ScreenWidth * 0.275,
         borderRadius: 16,
     },
     summaryLabelContainer: {

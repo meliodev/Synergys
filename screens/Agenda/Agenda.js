@@ -349,7 +349,7 @@ class Agenda2 extends Component {
             this.props.navigation.navigate('CreateTask', { prevScreen: 'Agenda', onGoBack: this.refreshItems, TaskId: item.id })
         }
 
-        return <TaskItem task={item} onPress={onPressItem} />
+        return <TaskItem task={item} onPress={onPressItem} style={{ width: constants.ScreenWidth * 0.8 }} />
     }
 
     renderEmptyData() {

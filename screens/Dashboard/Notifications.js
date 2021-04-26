@@ -45,7 +45,7 @@ class Summary extends Component {
         const { notificationsCount, notificationsList } = this.state
         const renderItem = (item) => <NotificationItem notification={item.item} navigation={this.props.navigation} />
         const navParams = { isRoot: false }
-        return renderSection('Notifications', faBell, notificationsList, notificationsCount, 'Inbox', navParams, renderItem, 'Notifications', 'Aucune nouvelle notification.', isConnected)
+        return renderSection('Notifications', faBell, notificationsList, notificationsCount, this.props.navigation, 'Inbox', navParams, renderItem, 'Notifications', 'Aucune nouvelle notification.', isConnected)
     }
 
     render() {
@@ -53,7 +53,7 @@ class Summary extends Component {
         const { isConnected } = this.props.network
 
         return (
-            <View style={styles.mainContainer}>
+            <View style={{ flex: 1 }}>
                 {loading ?
                     <Loading />
                     :
@@ -78,18 +78,6 @@ export default connect(mapStateToProps)(Summary)
 
 
 const styles = StyleSheet.create({
-    mainContainer: {
-        flex: 1,
-        backgroundColor: theme.colors.white
-    },
-    notificationsList: {
-        paddingVertical: 15
-    },
-    tasksList: {
-        paddingVertical: 15
-    },
-    root: {
-        paddingHorizontal: theme.padding,
-    }
-});
+
+})
 
