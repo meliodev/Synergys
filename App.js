@@ -21,7 +21,7 @@ import firebase, { db } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
-import Wrapper from './Wrapper'
+import Wrapper from './Wrapper' 
 import RootController from './Navigation/DrawerNavigator'
 import { processModel } from './processModel'
 

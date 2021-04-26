@@ -5,8 +5,8 @@ export const setRole = (main, role) => {
 }
 
 //Process
-export const setProcessModel = (main, processModel) => {
-    const action = { type: "SET_PROCESS_MODEL", value: processModel }
+export const setProcessModel = (main, processModels) => {
+    const action = { type: "SET_PROCESS_MODELS", value: processModels }
     main.props.dispatch(action)
 }
 

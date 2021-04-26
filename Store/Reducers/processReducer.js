@@ -1,13 +1,14 @@
 
-const initialState = { processModel: undefined }
+const initialState = { processModels: undefined }
 
 function setProcessModel(state = initialState, action) {
     let nextState
+
     switch (action.type) {
-        case 'SET_PROCESS_MODEL':
+        case 'SET_PROCESS_MODELS':
             nextState = {
                 ...state,
-                processModel: action.value
+                processModels: action.value
             }
 
             return nextState || state

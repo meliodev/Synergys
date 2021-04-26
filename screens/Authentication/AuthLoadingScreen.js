@@ -46,10 +46,8 @@ class AuthLoadingScreen extends Component {
   //User action on a notification has caused app to open
   async bootstrapNotifications() {
     const initialNotification = await notifee.getInitialNotification()
-    //set screen & params on asyncstorage
+
     if (initialNotification) {
-      // console.log('Notification caused application to open from quit state', initialNotification.notification)
-      // console.log('Press action used to open the app', initialNotification.pressAction)
 
       const { data } = initialNotification.notification
       const screen = data['screen']
@@ -132,7 +130,7 @@ class AuthLoadingScreen extends Component {
           this.props.dispatch(action)
 
           //3. Set processModel
-          await this.fetchProcessModel()
+          await this.fetchProcessModels()
 
           //4. Set fcm token
           await this.requestUserPermission() //iOS only
@@ -169,17 +167,24 @@ class AuthLoadingScreen extends Component {
     })
   }
 
-  async fetchProcessModel() {
-    const processModel = await db.collection('Process').orderBy('createdAt', 'desc').limit(1).get().then((querySnapshot) => {
+  async fetchProcessModels() {
+    const processModels = await db.collection('Process').orderBy('createdAt', 'desc').get().then((querySnapshot) => {
+      let processModels = {}
+
       if (querySnapshot.empty) {
         return undefined
       }
 
-      const processModel = querySnapshot.docs[0].data().process
-      return processModel
+      for (const doc of querySnapshot.docs) {
+        const version = doc.id
+        const model = doc.data()
+        processModels[version] = model
+      }
+
+      return processModels
     })
 
-    setProcessModel(this, processModel)
+    setProcessModel(this, processModels)
   }
 
   async configurePrivileges(role) {

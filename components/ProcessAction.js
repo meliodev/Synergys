@@ -17,7 +17,7 @@ import CustomIcon from './CustomIcon'
 import Loading from './Loading'
 import StepProgress from './process/StepProgress'
 
-import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler } from '../core/process'
+import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler, getLatestProcessModel } from '../core/process'
 import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, load } from '../core/utils'
 import * as theme from "../core/theme"
@@ -102,7 +102,9 @@ class ProcessAction extends Component {
     async componentDidMount() {
 
         let { process } = this.state
-        const { project, isAllProcess, canUpdate } = this.props
+        const { processModels, initialProcess, project, isAllProcess, canUpdate } = this.props
+        const { version } = initialProcess
+        this.processModel = processModels[version].process
 
         load(this, true)
         await this.runProcessHandler(process)
@@ -143,10 +145,9 @@ class ProcessAction extends Component {
 
     async runProcessHandler(process) {
 
-        const { project, clientId, step, processModel } = this.props
+        const { project, clientId, step } = this.props
         const secondPhaseId = getPhaseId(step)
-
-        const copyProcessModel = _.cloneDeep(processModel)
+        const copyProcessModel = _.cloneDeep(this.processModel)
         const updatedProcess = await projectProcessHandler(copyProcessModel, process, secondPhaseId, clientId, project)
 
         //if (!_.isEqual(process, updatedProcess)) {
@@ -338,7 +339,6 @@ class ProcessAction extends Component {
     //func
     validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
         const { process, currentPhaseId, currentStepId, currentAction } = this.state
-        const { processModel } = this.props
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
@@ -376,7 +376,7 @@ class ProcessAction extends Component {
         await this.countDown(1000)
 
         if (nextStep || nextPhase) {
-            const transitionRes = handleTransition(processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
+            const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
             processTemp = transitionRes.process
         }
 
@@ -665,7 +665,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
-        processModel: state.process.processModel
+        processModels: state.process.processModels
         //fcmToken: state.fcmtoken
     }
 }

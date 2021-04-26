@@ -24,7 +24,7 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, ...props }) => {
                 width={5}
                 fill={progress}
                 tintColor={tintColor}
-                onAnimationComplete={() => console.log('onAnimationComplete')}
+            //    onAnimationComplete={() => console.log('onAnimationComplete')}
                 arcSweepAngle={270}
                 rotation={227}
                 backgroundColor={theme.colors.gray_light}

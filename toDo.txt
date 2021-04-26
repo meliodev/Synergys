@@ -1,6 +1,5 @@
 TO DO:
 + PROFILE: Refresh goals onGoBack
-+ UX: onPress other form field focus it on one press not two
 + Ordre decroissant etapes / phases text show / dash between Steps.
 + PROCESS: Cancel annulation (rollback: delete 'cancelProcess' phase && undo latest action of latest step)
 + PROCESS & CREATETASK: Unicity of docType verification: (We suppose, according to the process model, that each task/document type is unic per project. Example: A project has only one Installation/one quote)
@@ -8,6 +7,7 @@ TO DO:
 -> OPTION 2: "TRAVAIL A LA CHAINE: CREER UNE TACHE PAR LA BONNE PERSONNE AU BON MOMENT": Make task types list dynamic: User can create a task only through process action link, and only if he is one of the responsibles. 
 -> OPTION 3 (SELECTED): Admin can create any type of task/doc at any time -> Do a verification and alert him if the type he is attempting to create already exists (in the state !== 'Annulé' and deleted = false) for the project.
 + LISTEMPLOYEES: Prompt user to change Contact com/tech if he attempts to assign a task to a non collaborator user of the concerned project
++ UX: onPress other form field focus it on one press not two
 
 -> Add tasks timeslots verification on check submit show popup with tasks conflicts
 

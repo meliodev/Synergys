@@ -19,10 +19,11 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
     while (loopHandler) {
 
         //0. Initialize process with 1st phase/1st step
-        if (_.isEmpty(process)) {
-            console.log('0. Initialisation')
+        if (Object.keys(process).length === 1) {
             process = initProcess(processModel, process, projectSecondPhase)
         }
+
+        console.log('PROCESS', process)
 
         var { currentPhaseId, currentStepId } = getCurrentStep(process)
         let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
@@ -91,16 +92,17 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
     return process
 }
 
+
 //#PROCESS TASKS:
 //Task 1. Init
 const initProcess = (processModel, process, projectSecondPhase) => {
+
     if (projectSecondPhase === 'init') {
         projectSecondPhase = getSecondPhaseId(processModel)
     }
 
     //Init project with first phase/first step
     let firstPhaseId = getFirstPhaseIdFromModel(processModel)
-    console.log('0.1 Première phase du modèle:', firstPhaseId)
     process = projectNextPhaseInit(processModel, process, firstPhaseId)
 
     //Set "nextPhase" dynamiclly for last action of last step
@@ -111,6 +113,22 @@ const initProcess = (processModel, process, projectSecondPhase) => {
     })
 
     return process
+}
+
+export const getLatestProcessModelVersion = (processModels) => {
+    let maxNumber = 0
+    let number = 0
+    for (const version in processModels) {
+        const numberStr = version.replace("version", "")
+        number = Number(numberStr)
+
+        if (number > maxNumber) {
+            maxNumber = number
+        }
+    }
+    const latestVersion = `version${maxNumber}`
+
+    return latestVersion
 }
 
 const getSecondPhaseId = (processModel) => {

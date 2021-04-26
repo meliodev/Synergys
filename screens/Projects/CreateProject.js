@@ -25,7 +25,7 @@ import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions
 
 import { fetchDocs, getResponsableByRole } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
-import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
+import { processMain, getCurrentStep, getCurrentAction, getPhaseId, getLatestProcessModelVersion } from '../../core/process'
 
 import { connect } from 'react-redux'
 
@@ -231,7 +231,7 @@ class CreateProject extends Component {
                 name: name.value,
                 client,
                 subscribers,
-                step
+                step,
             }
 
             this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, bill, color, process, processFetched: true, isBlockedUpdates }, async () => {
@@ -404,7 +404,9 @@ class CreateProject extends Component {
         if (!this.isEdit) {
             project.createdAt = moment().format()
             project.createdBy = currentUser
-            project.process = {}
+            project.process = {
+                version: getLatestProcessModelVersion(this.props.processModels)
+            }
         }
 
         if (isConnected) {
@@ -661,7 +663,7 @@ class CreateProject extends Component {
                     :
                     <ScrollView style={styles.dataContainer}>
 
-                        {this.isEdit ?
+                        {this.isEdit ? 
                             (processFetched ?
                                 <View>
                                     <ProcessAction
@@ -988,6 +990,7 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
+        processModels: state.process.processModels
         //fcmToken: state.fcmtoken
     }
 }
