@@ -6,6 +6,7 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import * as theme from '../../core/theme'
 
 export default function StepProgress({ progress, style }) {
+  console.log('66666666666', progress)
   return (
     <AnimatedCircularProgress
       size={27}

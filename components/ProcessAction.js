@@ -10,12 +10,11 @@ import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-sol
 import { withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
 
-import FormSection from './FormSection'
+import CommentDialog from './CommentDialog'
 import ModalOptions from './ModalOptions'
-import Button from './Button'
 import CustomIcon from './CustomIcon'
-import Loading from './Loading'
 import StepProgress from './process/StepProgress'
+import Loading from './Loading'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler, getLatestProcessModel } from '../core/process'
 import { enableProcessAction } from '../core/privileges'
@@ -25,37 +24,6 @@ import { constants } from "../core/constants"
 import ProcessContainer from "../screens/src/container/ProcessContainer"
 
 //component
-const CommentDialog = ({ title, inputLabel, showDialog, loadingDialog, dialogTitle, dialogDescription, keyboardType = "default", onSubmitComment, hideDialog, currentAction, operation, nextStep, nextPhase }) => {
-
-    const [comment, setComment] = useState('')
-    const clearComment = () => setComment('')
-
-
-    if (loadingDialog)
-        return (
-            <Dialog.Container visible={showDialog}>
-                <Dialog.Title style={[theme.customFontMSregular.header, { marginBottom: 5 }]}>Traitement en cours...</Dialog.Title>
-                <ActivityIndicator color={theme.colors.primary} size='small' />
-            </Dialog.Container>
-        )
-
-    else return (
-        <Dialog.Container visible={showDialog}>
-            <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{dialogTitle}</Dialog.Title>
-            <Dialog.Input
-                label={dialogDescription}
-                returnKeyType="done"
-                value={comment}
-                onChangeText={comment => setComment(comment)}
-                autoFocus={showDialog}
-                keyboardType={keyboardType} />
-
-            <Dialog.Button label="Annuler" onPress={hideDialog} style={{ color: theme.colors.error }} />
-            <Dialog.Button label="Valider" onPress={() => onSubmitComment(comment, currentAction, operation, nextStep, nextPhase, clearComment)} style={{ color: theme.colors.primary }} />
-        </Dialog.Container>
-    )
-}
-
 class ProcessAction extends Component {
 
     constructor(props) {
@@ -77,7 +45,6 @@ class ProcessAction extends Component {
             dialogDescription: '',
             loadingDialog: false,
             loadingModal: false,
-            processUpdated: false,
 
             process: this.props.initialProcess,
             choice: null,
@@ -219,12 +186,14 @@ class ProcessAction extends Component {
     }
 
     //func
-    onSubmitComment = async (comment, currentAction, operation, nextStep, nextPhase, clearComment) => {
+    onSubmitComment = async (comment, clearComment) => {
+        const { currentAction, choice, nextStep, nextPhase } = this.state
+        const operation = choice && choice.operation || currentAction.operation || null
+
         if (!comment) return //show error message
         this.setState({ loadingDialog: true })
 
-        if (operation)
-            operation.value = comment
+        if (operation) operation.value = comment
         await this.runChoiceOperation(operation, currentAction)
         await this.validateAction(comment, null, false, nextStep, nextPhase)
 
@@ -451,24 +420,24 @@ class ProcessAction extends Component {
         }
     }
 
-    //renderer
+    //renderers
     renderAction = (canUpdate, action) => {
 
-        const currentAction = action ? action : this.state.currentAction
+        const currentAction = action || this.state.currentAction
+        if (!currentAction) return null
 
-        const { showModal, showDialog, loadingDialog, dialogTitle, dialogDescription, nextStep, nextPhase, loadingModal, choice, loading } = this.state
+        const { loading } = this.state
         const loadingMessage = action ? "Chargement de l'action..." : "Chargement de l'action à faire..."
 
-        if (currentAction) {
-            var { title, status, verificationType } = currentAction
-            var noComment = currentAction.comment === '' || typeof (currentAction.comment) === 'undefined'
-        }
+        var { title, status, verificationType, choices } = currentAction
+        var isComment = typeof (currentAction.comment) !== 'undefined' && currentAction.comment !== ''
+        const isDialog = choices || verificationType === 'comment'
 
         return (
             <View style={styles.action}>
                 <TouchableOpacity onPress={() => this.onPressAction(canUpdate, currentAction)} style={styles.actionTouchable}>
                     <View style={styles.actionTitleContainer}>
-                        {currentAction && !loading &&
+                        {!loading &&
                             <CustomIcon
                                 style={{ marginRight: 5 }}
                                 icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary}
@@ -483,8 +452,8 @@ class ProcessAction extends Component {
                             <ActivityIndicator size='small' color={theme.colors.primary} />
                         </View>
                         :
-                        <View style={[styles.actionIconsContainer, { justifyContent: (currentAction && !noComment) ? 'space-between' : 'flex-end' }]}>
-                            {currentAction && !noComment &&
+                        <View style={[styles.actionIconsContainer, { justifyContent: isComment ? 'space-between' : 'flex-end' }]}>
+                            {isComment &&
                                 <CustomIcon
                                     icon={faExclamationCircle}
                                     size={16}
@@ -492,33 +461,33 @@ class ProcessAction extends Component {
                                     onPress={() => Alert.alert('Commentaire', currentAction.comment)}
                                 />
                             }
-                            {currentAction &&
-                                <CustomIcon
-                                    icon={faInfoCircle}
-                                    size={16}
-                                    color={theme.colors.gray_dark}
-                                    onPress={() => Alert.alert('Instructions', currentAction.instructions)}
-                                />
-                            }
+                            <CustomIcon
+                                icon={faInfoCircle}
+                                size={16}
+                                color={theme.colors.gray_dark}
+                                onPress={() => Alert.alert('Instructions', currentAction.instructions)}
+                            />
                         </View>
                     }
 
-                    {(currentAction && currentAction.choices || verificationType === 'comment') && (
-                        <CommentDialog
-                            showDialog={showDialog}
-                            dialogTitle={dialogTitle}
-                            dialogDescription={dialogDescription}
-                            loadingDialog={loadingDialog}
-                            keyboardType={currentAction.formSettings && currentAction.formSettings.keyboardType}
-                            hideDialog={() => this.setState({ showDialog: false })}
-                            onSubmitComment={this.onSubmitComment}
-                            currentAction={currentAction}
-                            operation={choice && choice.operation || currentAction.operation || null}
-                            nextStep={nextStep}
-                            nextPhase={nextPhase} />
-                    )}
+                    {isDialog && this.renderDialog(currentAction.formSettings)}
                 </TouchableOpacity>
             </View>
+        )
+    }
+
+    renderDialog = (formSettings) => {
+        const { showDialog, dialogTitle, dialogDescription, loadingDialog, loading } = this.state
+        return (
+            <CommentDialog
+                isVisible={showDialog}
+                title={dialogTitle}
+                description={dialogDescription}
+                keyboardType={formSettings && formSettings.keyboardType}
+                onSubmit={this.onSubmitComment}
+                onCancel={() => this.setState({ showDialog: false })}
+                loading={loadingDialog}
+            />
         )
     }
 
@@ -527,7 +496,6 @@ class ProcessAction extends Component {
 
         if (currentAction) {
             var { title, choices } = currentAction
-            var noComment = currentAction.comment === '' || typeof (currentAction.comment) === 'undefined'
 
             if (choices) {
                 var elements = choices.map((choice) => configChoiceIcon(choice))
@@ -557,30 +525,73 @@ class ProcessAction extends Component {
         this.props.navigation.navigate('Progression', navParams)
     }
 
-    render() {
-        const { process, currentPhase, currentStep, currentPhaseId, currentStepId, currentAction, pressedAction, processUpdated, expanded, loading } = this.state
+    renderHeaderBar() {
+        return (
+            <View style={styles.headerBarContainer}>
+                <Text style={[theme.customFontMSregular.body, styles.headerBarText]}>Suivi du projet</Text>
+                <TouchableOpacity style={styles.progressionLink}>
+                    <CustomIcon
+                        onPress={() => this.navigateToProgression(process)}
+                        icon={faEye}
+                        color={theme.colors.white}
+                    />
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+    renderAccordion(canUpdate) {
+        const { expanded, currentPhase, currentStep } = this.state
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
+        const doneActions = currentStep && currentStep.actions.filter((action) => action.status === 'done') || []
+        const totalActions = currentStep && currentStep.actions.length || 0
+        console.log('...........')
+        var progress = (doneActions.length / totalActions) * 100
+        const borderBottomWidth = expanded ? StyleSheet.hairlineWidth * 2 : 0
+
+        return (
+            <List.Accordion
+                showArrow
+                style={[styles.accordion, { borderBottomWidth }]}
+                title={currentPhase.title || "Chargement de la phase..."}
+                description={stepTitle}
+                titleNumberOfLines={1}
+                descriptionNumberOfLines={1}
+                left={props => <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} />}
+                expanded={expanded}
+                titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
+                descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
+                onPress={() => this.setState({ expanded: !expanded })}>
+
+                {this.renderAction(canUpdate, null)}
+
+            </List.Accordion >
+        )
+    }
+
+    renderProcessContainer(canUpdate) {
+        const { process, currentPage, phaseLabels, phaseStatuses, stepsData } = this.state
+        return (
+            <ProcessContainer
+                process={process}
+                currentPage={currentPage}
+                phaseLabels={phaseLabels}
+                phaseStatuses={phaseStatuses}
+                stepsData={stepsData}
+                canUpdate={canUpdate}
+                renderAction={this.renderAction}
+            />
+        )
+    }
+
+    render() {
+        const { pressedAction } = this.state
         const { canUpdate, isAllProcess } = this.props
 
-        if (currentStep) {
-            const doneActions = currentStep.actions.filter((action) => action.status === 'done')
-            var progress = (doneActions.length / currentStep.actions.length) * 100
-        }
-
         if (isAllProcess) {
-            const { process, currentPage, phaseLabels, phaseStatuses, stepsData } = this.state
-            const { project, clientId, step, canUpdate, role } = this.props
             return (
                 <View style={{ flex: 1 }}>
-                    <ProcessContainer
-                        process={process}
-                        currentPage={currentPage}
-                        phaseLabels={phaseLabels}
-                        phaseStatuses={phaseStatuses}
-                        stepsData={stepsData}
-                        canUpdate={canUpdate}
-                        renderAction={this.renderAction}
-                    />
+                    {this.renderProcessContainer(canUpdate)}
                     {pressedAction && pressedAction.choices && this.renderModal()}
                 </View>
             )
@@ -588,37 +599,9 @@ class ProcessAction extends Component {
 
         else return (
             <View style={styles.container}>
-
-                <View style={{ backgroundColor: theme.colors.primary, borderTopRightRadius: 5, borderTopLeftRadius: 5, paddingVertical: 5 }}>
-                    <Text style={[theme.customFontMSregular.body, { color: theme.colors.white, textAlign: 'center' }]}>Suivi du projet</Text>
-                    <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: 2, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
-                        <CustomIcon
-                            onPress={() => this.navigateToProgression(process)}
-                            icon={faEye}
-                            color={theme.colors.white}
-                        />
-                    </TouchableOpacity>
-                </View>
-
-                <List.Accordion
-                    showArrow
-                    style={{ paddingVertical: 10, paddingHorizontal: 13, marginLeft: 0, borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}
-                    title={currentPhase.title || "Chargement de la phase..."}
-                    description={stepTitle}
-                    titleNumberOfLines={1}
-                    descriptionNumberOfLines={1}
-                    left={props => currentAction && <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} />}
-                    expanded={expanded}
-                    titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
-                    descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
-                    onPress={() => this.setState({ expanded: !expanded })}>
-
-                    {this.renderAction(canUpdate, null)}
-
-                </List.Accordion>
-
+                {this.renderHeaderBar()}
+                {this.renderAccordion(canUpdate)}
                 {pressedAction && pressedAction.choices && this.renderModal()}
-
             </View>
         )
     }
@@ -632,6 +615,30 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: theme.colors.white,
         margin: 15,
+    },
+    headerBarContainer: {
+        backgroundColor: theme.colors.primary,
+        borderTopRightRadius: 5,
+        borderTopLeftRadius: 5,
+        paddingVertical: 5
+    },
+    headerBarText: {
+        color: theme.colors.white,
+        textAlign: 'center'
+    },
+    progressionLink: {
+        zIndex: 1,
+        position: 'absolute',
+        top: 2,
+        right: theme.padding,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    accordion: {
+        paddingVertical: 10,
+        paddingHorizontal: 13,
+        marginLeft: 0,
+        borderBottomColor: theme.colors.gray_light
     },
     action: {
         height: 50,
