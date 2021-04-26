@@ -42,8 +42,7 @@ const CommentDialog = ({
             />
             <Dialog.Button
                 label="Valider"
-                onPress={() => onSubmitComment(comment, clearComment)}
-                // onPress={() => onSubmitComment(comment, currentAction, operation, nextStep, nextPhase, clearComment)}
+                onPress={() => onSubmit(comment, clearComment)}
                 style={{ color: theme.colors.primary }}
             />
         </Dialog.Container>

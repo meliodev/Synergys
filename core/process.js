@@ -23,22 +23,19 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
             process = initProcess(processModel, process, projectSecondPhase)
         }
 
-        console.log('PROCESS', process)
-
         var { currentPhaseId, currentStepId } = getCurrentStep(process)
         let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
         let allActionsValid = true
         let nextStep = ''
         let nextPhase = ''
 
+        //Verify/Update actions status
         if (actions.length > 0) {
 
-            console.log('1. Configure actions...')
             actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
 
             //Handle cloud function
             if (actions[0].cloudFunction) {
-                console.log('Handling cloud function...')
                 const sendEmail = functions.httpsCallable('sendEmail')
                 const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
                 const html = `<b>${subject} du projet ${attributes.project.name}</b>`
@@ -52,23 +49,12 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
                 //else return error and handle it on UI (MAKE SURE NOT UPDATE PROCESS BY ERROR)
             }
 
-            console.log('2. verify actions...')
             var verif_res = await verifyActions(actions, attributes, process)
 
             actions = verif_res.verifiedActions
             allActionsValid = verif_res.allActionsValid
             nextStep = verif_res.nextStep
             nextPhase = verif_res.nextPhase
-
-            // console.log('3. verification result:')
-            // console.log('allActionsValid:', allActionsValid)
-            // console.log('nextStep:', nextStep)
-            // console.log('nextPhase:', nextPhase)
-
-            // console.log('4. verified actions:')
-            // actions.forEach((action) => {
-            //     console.log(action.id, action.actionOrder, action.status)
-            // })
 
             process[currentPhaseId].steps[currentStepId].actions = actions
         }
@@ -84,9 +70,7 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
         }
 
         //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
-        else {
-            loopHandler = false
-        }
+        else loopHandler = false
     }
 
     return process
@@ -154,34 +138,49 @@ const configureActions = async (actions, attributes, process) => {
 
     for (let action of actions) {
 
+        const { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
+
         //1. Complete missing params
-        if (action.screenParams) {
-            for (let item in action.screenParams) {
-                if (item === 'project') action.screenParams.project = attributes.project //#task : make it dynamic (screenparams field name should be same as attributes field name)
+        if (collection && documentId) {
+            if (collection === 'Projects') documentId = attributes.project.id
+            else if (collection === 'Clients') documentId = attributes.clientId
+        }
+
+        if (screenParams) {
+            for (let item in screenParams) {
+                if (item === 'project') screenParams.project = attributes.project
+                if (item === 'userId') screenParams.userId = attributes.clientId
             }
         }
 
-        if (action.cloudFunction) {
-            const { params, queryAttachmentsUrls } = action.cloudFunction
+        if (queryFilters) {
+            for (let item of queryFilters) {
+                if (item.filter === 'project.id') item.value = attributes.project.id
+            }
+        }
 
-            if (action.collection === 'Projects')
-                action.documentId = attributes.project.id
+        if (queryFiltersUpdateNav) {
+            for (let item of queryFiltersUpdateNav) {
+                if (item.filter === 'project.id') item.value = attributes.project.id
+            }
+        }
+
+        if (cloudFunction) {
+            const { params, queryAttachmentsUrls } = cloudFunction
 
             for (let item in params) {
-                if (item === 'projectId') {
-                    params.projectId = attributes.project.id
-                }
+                if (item === 'projectId') params.projectId = attributes.project.id
             }
 
+            //set attachments
             for (let attachmentKey in queryAttachmentsUrls) {
 
                 for (let item of queryAttachmentsUrls[attachmentKey]) {
-                    if (item.filter === 'project.id')
-                        item.value = attributes.project.id
+                    if (item.filter === 'project.id') item.value = attributes.project.id
                 }
 
                 query = db.collection('Documents')
-                queryAttachmentsUrls[attachmentKey].forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+                queryAttachmentsUrls[attachmentKey].forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
 
                 await query.get().then((querysnapshot) => {
 
@@ -198,99 +197,35 @@ const configureActions = async (actions, attributes, process) => {
             }
         }
 
-        if (action.queryFilters) {
-            for (let item of action.queryFilters) {
-                if (item.filter === 'project.id') {
-                    item.value = attributes.project.id
-                }
-            }
-        }
+        const selectedQueryFilters = queryFiltersUpdateNav || queryFilters || null
 
-        //Agenda, Documents
-        if (action.verificationType === 'doc-creation') {
+        if (collection && collection !== '' && selectedQueryFilters && selectedQueryFilters.length > 0) {
 
-            if (action.queryFiltersUpdateNav) {
-                for (let item of action.queryFiltersUpdateNav) {
-                    if (item.filter === 'project.id')
-                        item.value = attributes.project.id
-                }
+            query = db.collection(collection)
+            selectedQueryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+            await query.get().then((querysnapshot) => {
 
-                query = db.collection(action.collection)
-                action.queryFiltersUpdateNav.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
-
-                await query.get().then((querysnapshot) => {
-
-                    if (!querysnapshot.empty) {
-                        if (action.collection === 'Agenda') {
-                            action.screenParams.TaskId = querysnapshot.docs[0].id
-                        }
-
-                        if (action.collection === 'Documents')
-                            action.screenParams.DocumentId = querysnapshot.docs[0].id
+                if (querysnapshot.empty && queryFiltersUpdateNav) {
+                    if (collection === 'Agenda') {
+                        screenParams.TaskId = ''
                     }
 
-                    //Reinitialize nav params in case document was deleted
-                    else {
-                        if (action.collection === 'Agenda') {
-                            action.screenParams.TaskId = ''
-                        }
+                    if (collection === 'Documents')
+                        screenParams.DocumentId = ''
+                }
 
-                        if (action.collection === 'Documents')
-                            action.screenParams.DocumentId = ''
-                    }
-                })
-            }
+                //Reinitialize nav params in case document was deleted
+                else {
+                    if (collection === 'Agenda')
+                        screenParams.TaskId = querysnapshot.docs[0].id
 
-        }
+                    if (collection === 'Documents')
+                        screenParams.DocumentId = querysnapshot.docs[0].id
 
-        //Agenda, Clients
-        else if (action.verificationType === 'data-fill') {
-
-            if (action.collection === 'Clients') { //CASE 1: doc id already exists once project is created..
-                action.documentId = attributes.clientId
-                action.screenParams.userId = attributes.clientId
-            }
-
-            else { //CASE2: doc id is created later on after project is created.. (so we have to retrieve doc id using a query) #task: force user to overwrite existing task to avoid same task duplicates
-                query = db.collection(action.collection)
-                action.queryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
-                await query.get().then((querysnapshot) => {
-
-                    if (querysnapshot.empty) return
-
-                    if (action.collection === 'Agenda')
-                        action.screenParams.TaskId = querysnapshot.docs[0].id
-
-                    else if (action.collection === 'Documents')
-                        action.screenParams.DocumentId = querysnapshot.docs[0].id
-
-                    action.documentId = querysnapshot.docs[0].id
-                })
-            }
-        }
-
-        else if (action.verificationType === 'multiple-choices') {
-
-            if (action.collection) {
-                query = db.collection(action.collection)
-                action.queryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
-                await query.get().then((querysnapshot) => {
-                    if (querysnapshot.empty) return
-
-                    if (action.collection === 'Agenda')
-                        action.screenParams.TaskId = querysnapshot.docs[0].id
-
-                    else if (action.collection === 'Documents')
-                        action.screenParams.DocumentId = querysnapshot.docs[0].id
-
-                    action.documentId = querysnapshot.docs[0].id
-                })
-            }
-        }
-
-        else if (action.verificationType === 'comment') {
-            if (action.collection === 'Projects')
-                action.documentId = attributes.project.id
+                    if (documentId)
+                        documentId = querysnapshot.docs[0].id
+                }
+            })
         }
     }
 
@@ -424,50 +359,45 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     return { verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase }
 }
 
+//Verify actions for each document
 const verifyActions_docCreation = async (actions) => {
-    console.log('VERIFYING...................')
-
-    //Verify actions for each document
     let allActionsValid_docCreation = true
     let nextStep = ''
     let nextPhase = ''
 
     for (let action of actions) {
 
-        const collection = action.collection
+        const { collection, queryFilters, events, status } = action
 
         let query = db.collection(collection)
-        action.queryFilters.forEach(({ filter, operation, value }) => {
+        queryFilters.forEach(({ filter, operation, value }) => {
             query = query.where(filter, operation, value) //exp: db.collection(collection).where('project.id', '==', projectId).where('type', '==', x)
         })
 
-        console.log(collection, action.queryFilters)
         await query.get().then((querysnapshot) => {
 
             if (querysnapshot.empty) {
-                console.log('NO DOCUMENT FOUND...................')
-                if (action.events && action.events.onDocNotFound) {  //CASE1: Conditional transition (2 options) depending on doc found or not
-                    nextStep = action.events.onDocNotFound.nextStep
-                    nextPhase = action.events.onDocNotFound.nextPhase
+                if (events && events.onDocNotFound) {  //CASE1: Conditional transition (2 options) depending on doc found or not
+                    nextStep = events.onDocNotFound.nextStep
+                    nextPhase = events.onDocNotFound.nextPhase
                 }
 
-                action.status = 'pending' //CASE2: No transition if doc not found
+                status = 'pending' //CASE2: No transition if doc not found
                 allActionsValid_docCreation = false
             }
 
             else {
-                if (action.events && action.events.onDocFound) { //CASE1: Conditional transition (2 options) depending on doc found or not
-                    nextStep = action.events.onDocFound.nextStep
-                    nextPhase = action.events.onDocFound.nextPhase
+                if (events && events.onDocFound) { //CASE1: Conditional transition (2 options) depending on doc found or not
+                    nextStep = events.onDocFound.nextStep
+                    nextPhase = events.onDocFound.nextPhase
                 }
 
-                action.status = 'done' //CASE2: Transition only on doc found
+                status = 'done' //CASE2: Transition only on doc found
                 nextStep = stringifyUndefined(action.nextStep)
                 nextPhase = stringifyUndefined(action.nextPhase)
             }
         })
     }
-
 
     const verifiedActions_docCreation = actions
     return { allActionsValid_docCreation, verifiedActions_docCreation, nextStep, nextPhase }
@@ -707,261 +637,3 @@ const groupBy = (arr, property) => {
 }
 
 
-
-
-
-//Remarques:
-//Maintanability:
-// if the process model is changed.. for example we remove an intermediary step. The step(s) which points toward it will be broken..
-
-
-
-
-/*
-Documentation:
-Verification types:
-A. Automatic
-1. doc-creation:
-1.1. Verify existence of a document by Id
-
-1.2 Verify existence of a document by query
-Params: collection, queryFilters
-collection: The collection name of the document we want to verify
-queryFilters: the query fields to fiter on using "WHERE" (example: query.where('project.id', '==', 'abcd'))
-
-2. data-fill
-2.1 Verify if a field of a document is empty (get document by Id or by query)
-Params: collection, documentId, properties
-collection: The collection name of the document we want to verify
-documentId: The Id of the document we want to verify
-properties: The nested key of the field we want to check if empty (example: client.id)
-
-
-B. Manual
-1. Comment
-1.1 Verify if comment has been added
-Params: comment
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
-// const getFirstStepIdFromModel = () => {
-//     const firstPhaseId = getFirstPhaseIdFromModel()
-//     let firstStepId
-//     Object.keys(processModel[firstPhaseId].steps).forEach(stepId => {
-//         if (processModel[firstPhaseId].steps[stepId].stepOrder === 1) firstStepId = stepId
-//     })
-//     return { firstPhaseId, firstStepId }
-// }
-
-
-
-// const verifyActions_docUpdate = async (actions) => {
-//     //Verify actions for each document
-//     let allActionsValid_docCreation = true
-
-//     for (let action of actions) {
-//         const collection = action.collection //Agenda
-//         const documentId = action.documentId
-
-//         await db.collection(collection).doc(documentId).get().then((doc) => {
-//             const data = doc.data()
-
-//             const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
-//             if (nestedVal) action.status = 'done' //Exp: nestedVal = startDate
-//         })
-//     }
-
-//     const verifiedActions_docCreation = actions
-//     return { allActionsValid_docCreation, verifiedActions_docCreation }
-// }
-
-
-
-//#idea put icon/tag on action defining role responsable for action
-//assign to each role a representative icon/color to help users recognize each role
-
-
-
-
-
-
-// if (querysnapshot.empty) {
-//     console.log('0000000000000')
-//     if (action.events && action.events.onDocNotFound && action.events.onDocNotFound.screenParams) {
-//         console.log('0000000000000-...............')
-//           action.screenParams.project = attributes.project
-//           console.log('screen params', action.screenParams)
-//     }
-// }
-
-// else {
-//     console.log('11111111111111111111')
-
-//     if (action.events && action.events.onDocFound && action.events.onDocFound.screenParams) {
-//         console.log('11111111111111111111-......................')
-//         action.screenParams.DocumentId = querysnapshot.docs[0].id
-//     }
-
-//     else action.screenParams.DocumentId = querysnapshot.docs[0].id
-// }
-
-
-
-
-
-
-
-
-
-
-// validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
-//     const { process, currentPhaseId, currentStepId, currentAction } = this.state
-//     const { project } = this.props
-
-//     //Update action fields
-//     let processTemp = _.cloneDeep(process)
-//     // let actionTemp
-
-//     processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-//         // actionTemp = action
-
-//         if (action.id === currentAction.id) {
-//             //Update comment
-//             if (comment)
-//                 action.comment = comment
-
-//             //Update selected choice (selected = true -> UI displays it green colored)
-//             if (choices)
-//                 action.choices = choices
-
-//             //Update action status
-//             if (!stay) {
-//                 action.status = "done"
-//                 action.isAnimation = false
-//                 //  actionTemp.isAnimation = true
-//             }
-//         }
-//     })
-
-//     processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-//         console.log(action.id, action.actionOrder, action.status, action.isAnimation)
-//     })
-
-
-//     this.setState({
-//         loadingModal: false, showModal: false,
-//         //currentAction: actionTemp
-//     })  //isAnimation = true
-
-//     // console.log('Do animation now !')
-
-//     // await this.countDown(1000)
-
-//     if (nextStep || nextPhase) {
-//         const transitionRes = handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
-//         processTemp = transitionRes.process
-//     }
-
-//     this.updatePhaseStepAction(processTemp)
-
-//     await db.collection('Projects').doc(project.id).update({ process: processTemp })
-// }
-
-
-//TESTS
-// 'signQuote': {
-//     title: 'Signature',
-//     instructions: 'Lorem ipsum dolor',
-//     phaseOrder: 1,
-//     steps: { //One step
-//         'signQuote': {
-//             title: 'Signer le devis',
-//             instructions: 'Lorem ipsum dolor',
-//             stepOrder: 1,
-//             actions: [
-//                 {
-//                     id: 'quoteCreation',
-//                     title: 'Créer un devis',
-//                     instructions: 'Lorem ipsum dolor',
-//                     actionOrder: 1,
-//                     collection: 'Documents',
-//                     //Verification
-//                     queryFilters: [
-//                         { filter: 'project.id', operation: '==', value: '' },
-//                         { filter: 'type', operation: '==', value: 'Devis' },
-//                     //    { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-//                     ],
-//                     //Navigation
-//                     queryFiltersUpdateNav: [
-//                         { filter: 'project.id', operation: '==', value: '' },
-//                         { filter: 'type', operation: '==', value: 'Devis' },
-//                     ],
-//                     properties: [],
-//                     documentId: '',
-//                     screenName: 'UploadDocument', //creation
-//                     screenParams: { documentType: 'Devis', project: null },
-//                     type: 'auto',
-//                     responsable: '',
-//                     status: 'pending',
-//                     verificationType: 'doc-creation',
-//                 },
-//                 {
-//                     id: 'signedQuoteCreation', //#task: check if devis is still existing..
-//                     title: 'Signer le devis',
-//                     instructions: 'Lorem ipsum dolor',
-//                     actionOrder: 2,
-//                     collection: 'Documents',
-//                     queryFilters: [ //VERIFICATION: verify if signed quote exists
-//                         { filter: 'project.id', operation: '==', value: '' },
-//                         { filter: 'type', operation: '==', value: 'Devis' },
-//                         { filter: 'attachmentSource', operation: '==', value: 'signature' }
-//                     ],
-//                     queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
-//                         { filter: 'project.id', operation: '==', value: '' },
-//                         { filter: 'type', operation: '==', value: 'Devis' },
-//                     ],
-//                     //properties: [],
-//                     //documentId: '',
-//                     screenName: 'UploadDocument',
-//                     screenParams: { DocumentId: '', onSignaturePop: 2 }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
-//                     type: 'auto',
-//                     choices: [
-//                         { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-//                         { label: 'Signer le devis', id: 'sign', onSelectType: 'navigation' },
-//                     ],
-//                     responsable: '',
-//                     status: 'pending',
-//                     verificationType: 'doc-creation',
-//                 },
-//                 {
-//                     id: 'quoteValidation',
-//                     title: "Finaliser le test", //#task allow adv to view devis before validating (multi-choice: voir/valider)
-//                     instructions: "",
-//                     actionOrder: 3,
-//                     collection: '',
-//                     documentId: '', // depending on the concerned project
-//                     properties: [],
-//                     screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-//                     screenParams: null,
-//                     type: 'manual',
-//                     responsable: { id: 'GS-US-xQ6s' }, //ADV is the responsable
-//                     status: 'pending',
-//                     comment: '',
-//                     verificationType: 'validation',
-//                     nextPhase: 'technicalVisitManagement',
-//                 },
-//             ]
-//         }
-//     }
-// }

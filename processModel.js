@@ -11,40 +11,44 @@ export const processModel = {
                 stepOrder: 1,
                 actions: [
                     {
-                        //General data
+                        //General
                         id: 'nom',
                         title: 'Nom',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
-                        //Verification params
+                        //Verification
                         collection: 'Clients',
                         documentId: '', //#dynamic
                         properties: ['nom'],
-                        //Navigation (Update) params
-                        screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true, isProcess: true }, //#dynamic
-                        responsable: 'Commercial',
-                        status: 'pending',
-                        //Verification type
+                        //Navigation
+                        screenName: 'Profile',
+                        screenParams: { userId: '', isClient: true }, //#dynamic
+                        //Verification
                         type: 'auto',
                         verificationType: 'data-fill',
-                        verificationValue: ''
+                        verificationValue: '',
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
+                        //General
                         id: 'prenom',
                         title: 'Prénom',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
+                        //Verification
                         collection: 'Clients',
                         documentId: '',
                         properties: ['prenom'],
+                        //Navigation
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true, isProcess: true },
+                        screenParams: { userId: '', isClient: true },
+                        //Verification
                         type: 'auto',
+                        verificationType: 'data-fill',
+                        verificationValue: '',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'data-fill',
-                        verificationValue: ''
                     },
                     {
                         id: 'address',
@@ -52,15 +56,15 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 3,
                         collection: 'Clients',
-                        documentId: '', // depending on the concerned project
+                        documentId: '', //dynamic
                         properties: ['address', 'description'],
                         screenName: 'Profile',
-                        screenParams: { userId: '', isClient: true, isProcess: true },
+                        screenParams: { userId: '', isClient: true },
                         type: 'auto',
+                        verificationType: 'data-fill',
+                        verificationValue: '',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'data-fill',
-                        verificationValue: ''
                     },
                     {
                         id: 'phone',
@@ -68,10 +72,10 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 4,
                         collection: 'Clients',
-                        documentId: '', // depending on the concerned project
+                        documentId: '', // dynamic
                         properties: ['phone'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true, isProcess: true },
+                        screenParams: { userId: '', isClient: true },
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -84,10 +88,10 @@ export const processModel = {
                         instructions: 'Appuyez sur le bouton "Convertir en client"',
                         actionOrder: 5,
                         collection: 'Clients',
-                        documentId: '', // depending on the concerned project
+                        documentId: '', // dynamic
                         properties: ['isProspect'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true, isProcess: true },
+                        screenParams: { userId: '', isClient: true },
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -99,16 +103,11 @@ export const processModel = {
                         title: 'Commentaire',
                         instructions: "Veuillez renseigner des informations utiles (exp: Informations sur l'habitation)",
                         actionOrder: 6,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
+                        verificationType: 'comment',
+                        comment: '',
                         responsable: 'Commercial',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'comment',
                         nextPhase: '' //#dynamic
                     },
                 ]
@@ -136,14 +135,12 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique préalable' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'address',
@@ -158,7 +155,7 @@ export const processModel = {
                         documentId: '', //#dynamic
                         properties: ['address', 'description'],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true }, //#dynamic
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true }, //#dynamic
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -171,23 +168,22 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 3,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique préalable' }
                         ],
-                        documentId: '',
-                        //properties: [],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true },
                         type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Reporter', id: 'postpone', onSelectType: 'navigation', },
                             { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                 ]
             },
@@ -206,14 +202,12 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Rendez-vous N' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'housingActionFile'
                     }
                 ]
@@ -242,35 +236,27 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Fiche EEB' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Fiche EEB', value: 'Fiche EEB', selected: false }, dynamicType: true, isProcess: true, },
+                        screenParams: { project: null, documentType: { label: 'Fiche EEB', value: 'Fiche EEB', selected: false }, dynamicType: true, },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'eebFileChoice',
                         title: 'Le client est-il eligible au dossier action logement ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
-                        collection: '',
-                        queryFilters: [],
-                        documentId: '',
-                        //properties: [], 
-                        screenName: '',
-                        screenParams: null,
                         type: 'manual',
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'NON', id: 'cancel', nextStep: 'aidFile', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextPhase: 'technicalVisitManagement', onSelectType: 'transition', operation: null },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                 ]
             },
@@ -298,35 +284,27 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Dossier aide' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { project: null, documentType: { label: 'Dossier aide', value: 'Dossier aide', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Dossier aide', value: 'Dossier aide', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'quoteCreationChoice',
                         title: 'Voulez-vous continuer la procédure du projet ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
-                        collection: '',
-                        queryFilters: [], //not used by choices
-                        documentId: '',
-                        //properties: [], 
-                        screenName: '',
-                        screenParams: null,
-                        type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
+                        type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Créer un devis', id: 'confirm', nextStep: 'quoteCreation', onSelectType: 'transition' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                 ]
             },
@@ -354,35 +332,27 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Devis' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'primeCEEChoice',
                         title: 'Ce projet est il éligible à la prime cee ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
-                        collection: '',
-                        queryFilters: [],  //not used by choices
-                        documentId: '',
-                        //properties: [], 
-                        screenName: '',
-                        screenParams: null,
                         type: 'manual',
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'NON', id: 'cancel', nextPhase: 'rdn', onSelectType: 'transition', commentRequired: true },
                             { label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                 ]
             },
@@ -410,14 +380,12 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Dossier CEE' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextPhase: 'rdn',
                     }
                 ]
@@ -446,14 +414,12 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Rendez-vous N' },
                             { filter: 'status', operation: '!=', value: 'Annulé' } //Check if there is an active RDN
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'rdnChoice',
                     }
                 ]
@@ -469,24 +435,21 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Rendez-vous N' },
-                            { filter: 'status', operation: '!=', value: 'Annulé' } //Get id of active RDN (all old RDN are inactive)
+                            { filter: 'status', operation: '!=', value: 'Annulé' } //Get id of active RDN (all old/canceled RDN are inactive)
                         ],
-                        documentId: '',
-                        //properties: [],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', isProcess: true },
-                        type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
+                        type: 'manual',
                         verificationType: 'multiple-choices',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Reporter', id: 'postpone', nextStep: 'rdnCreation', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Confirmer', id: 'confirm', nextStep: 'signature', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     }
                 ]
             },
@@ -506,13 +469,11 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Rendez-vous N' },
                             { filter: 'status', operation: '!=', value: 'Annulé' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
-                        status: 'pending',
                         verificationType: 'doc-creation',
+                        status: 'pending',
                         nextStep: 'rdnChoice',
                     }
                 ]
@@ -528,128 +489,104 @@ export const processModel = {
                         title: "Pièce d'identité 1",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual',
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'idCard2',
                         title: "Pièce d'identité 2 (optionnel)",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'proofOfAddress',
                         title: "Justificatif de domicile",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 3,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'iban',
                         title: 'RIB',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 4,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'paySlip',
                         title: "Bulletin de salaire",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 5,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'accountStatement',
                         title: "Relevé de compte",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 6,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false }, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'quoteCreation', //Verify if quote exists
@@ -670,14 +607,12 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Devis' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'signedQuoteCreation', //#task: check if devis is still existing..
@@ -696,10 +631,8 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Devis' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -714,16 +647,11 @@ export const processModel = {
                         title: 'Commentaire',
                         instructions: "Veuillez renseigner des informations utiles (exp: disponibilité du client, accessibilité....)",
                         actionOrder: 9,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
+                        verificationType: 'comment',
+                        comment: '',
                         responsable: 'Commercial',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'comment',
                         nextStep: 'technicalVisitCreation',
                     },
                 ]
@@ -743,14 +671,12 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'payModeValidation',
                     }
                 ]
@@ -765,36 +691,26 @@ export const processModel = {
                         title: 'Modalité de paiement',
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
-                        responsable: 'Commercial',
-                        status: 'pending',
                         comment: '',
                         verificationType: 'multiple-choices',
                         choices: [
                             { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker' },
                             { label: 'Financement', id: 'financing', onSelectType: 'commentPicker' },
-                        ]
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'quoteValidation',
                         title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
                         instructions: "",
                         actionOrder: 2,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
+                        verificationType: 'validation',
+                        comment: '',
                         responsable: 'ADV',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'validation',
                         nextPhase: 'technicalVisitManagement',
                     },
                 ]
@@ -822,10 +738,8 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',
                         responsable: 'Poseur',
                         status: 'pending',
@@ -841,19 +755,17 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
                         type: 'manual',
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'technicalVisitChoice', },
                             { label: 'Modifier la date', id: 'edit', onSelectType: 'navigation' },
                         ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                 ]
             },
@@ -868,23 +780,22 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' },
                         ],
-                        documentId: '',
-                        //properties: [],
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', isProcess: true },
-                        type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
+                        screenParams: { TaskId: '' },
+                        type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Confirmer', id: 'confirm', nextStep: 'poseurAffectation', onSelectType: 'transition' },
                         ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                 ]
             },
@@ -903,19 +814,17 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
                         type: 'manual',
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '',
                         choices: [
                             { label: 'Valider le poseur', id: 'confirm', nextStep: 'technicalVisitChoice2', onSelectType: 'transition' },
                             { label: 'Modifier le poseur', id: 'edit', onSelectType: 'navigation' }, //#ask: isn't the poseur already predefined with project as technical contact ?
                         ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                 ]
             },
@@ -930,23 +839,20 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' },
                         ],
-                        documentId: '',
-                        //properties: [],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Oui', id: 'confirm', nextPhase: 'installation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     }
                 ]
             },
@@ -973,10 +879,10 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' }
                         ],
-                        //properties: [],
-                        //documentId: '',
+
+
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',
                         responsable: 'Poseur',
                         status: 'pending',
@@ -992,18 +898,16 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { TaskId: '', taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true },
                         type: 'manual',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '',
                         choices: [
                             { label: 'Valider le poseur', id: 'confirm', onSelectType: 'transition', nextStep: 'installationChoice' },
                             { label: "Modifier le poseur", id: 'edit', onSelectType: 'navigation' },
                         ],
+                        status: 'pending',
                     },
                 ]
             },
@@ -1018,23 +922,20 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' },
                         ],
-                        documentId: '',
-                        //properties: [],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', isProcess: true },
                         type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Bloquée', id: 'block', onSelectType: 'validation', commentRequired: true, operation: { type: 'update', field: 'status', value: 'En attente' } },
                             { label: 'Finalisée', id: 'confirm', nextStep: 'pvCreation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'installationChoice2',
@@ -1042,15 +943,12 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' },
                         ],
-                        documentId: '',
-                        //properties: [],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', isProcess: true },
-                        type: 'manual', //Check manually
+                        type: 'manual',
                         responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'multiple-choices',
@@ -1086,14 +984,12 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'PV réception' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'PV réception', value: 'PV réception', selected: false }, dynamicType: true, isProcess: true, },
+                        screenParams: { project: null, documentType: { label: 'PV réception', value: 'PV réception', selected: false }, dynamicType: true, },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'reserve',
                     }
                 ]
@@ -1108,21 +1004,15 @@ export const processModel = {
                         title: 'Êtes-vous satisfait de notre travail ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
-                        collection: '', //Because manual
-                        queryFilters: [],
-                        documentId: '',
-                        //properties: [], 
-                        screenName: '',
-                        screenParams: null, //Because manual
-                        type: 'manual', //Check manually
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        comment: '', //#task: comments are joined (separated by ;)
+                        choices: [
+                            { label: 'NON', id: 'comment', nextStep: 'catchupCreation', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'OUI', id: 'confirm', nextStep: 'poseurValidation', onSelectType: 'transition' },
+                        ],
                         responsable: 'Client',
                         status: 'pending',
-                        verificationType: 'multiple-choices',
-                        comment: '', //comments are joined (separated by ;)
-                        choices: [
-                            { label: 'NON', id: 'comment', nextStep: 'catchupCreation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                            { label: 'OUI', id: 'confirm', nextStep: 'poseurValidation', onSelectType: 'transition', operation: null },
-                        ]
                     },
                 ]
             },
@@ -1134,7 +1024,6 @@ export const processModel = {
                     {
                         id: 'catchupCreation', //1. verify if RD2 exists
                         title: 'Créer une tâche rattrapage',
-                        // instructions: 'Créer une tâche rattrapage. Ensuite, changer le statut en "Terminé" après avoir finalisé la tâche.',
                         instructions: 'Créer une tâche rattrapage.',
                         actionOrder: 1,
                         collection: 'Agenda',
@@ -1143,10 +1032,8 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Rattrapage' },
                             { filter: 'status', operation: '==', value: 'En cours' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',
                         responsable: 'Poseur',
                         status: 'pending',
@@ -1158,22 +1045,19 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 3,
                         collection: 'Agenda',
+                        documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Rattrapage' },
                             { filter: 'status', operation: '==', value: 'En cours' }
                         ],
-                        documentId: '',
-                        //properties: [],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', isProcess: true },
-                        type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
+                        type: 'manual',
                         verificationType: 'multiple-choices',
                         choices: [
                             { label: 'Finaliser', id: 'finish', nextStep: 'reserve', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminer' } },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                 ]
             },
@@ -1187,37 +1071,26 @@ export const processModel = {
                         title: "Valider l'absence de réserve",
                         instructions: "",
                         actionOrder: 1,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
+                        verificationType: 'validation',
+                        comment: '',
                         responsable: 'Poseur',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'validation',
                     },
                     {
                         id: 'maintainanceContractChoice',
                         title: 'Voulez-vous initier le contrat de maintenance ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
-                        collection: '', //Because manual
-                        queryFilters: [],
-                        documentId: '',
-                        //properties: [], 
-                        screenName: '',
-                        screenParams: null,
                         type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Décidez plus tard', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                            { label: 'OUI', id: 'confirm', nextStep: 'maintainanceContract', onSelectType: 'transition', operation: null },
-                        ]
+                            { label: 'Décidez plus tard', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'OUI', id: 'confirm', nextStep: 'maintainanceContract', onSelectType: 'transition' },
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                 ]
             },
@@ -1231,21 +1104,15 @@ export const processModel = {
                         title: "Accepter la proposition commerciale",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
-                        screenName: '', //creation
-                        screenParams: {},
                         type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'mandatSepaCreation',
@@ -1266,19 +1133,17 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true },
                         type: 'auto', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'signedSEPACreation',
@@ -1297,18 +1162,16 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'contratCreation',
@@ -1329,10 +1192,8 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true },
                         type: 'auto',
                         responsable: 'Poseur',
                         status: 'pending',
@@ -1360,18 +1221,16 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         choices: [
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'quoteVerification'
                     },
                     //#task: Add last action multi-choice (contrat "en cours" or "terminé")
@@ -1396,14 +1255,11 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachmentSource', operation: '==', value: 'generation' }
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
-                        //  responsable: '',
-                        status: 'pending',
                         verificationType: 'doc-creation',
+                        status: 'pending',
                         events: { onDocFound: { nextStep: '' }, onDocNotFound: { nextStep: 'facturationOption1' } }
                     },
                     { //Doc found
@@ -1411,21 +1267,15 @@ export const processModel = {
                         title: "Voulez-vous créer la facture à partir du devis existant de ce projet ?",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
-                        collection: '', //Because manual
-                        queryFilters: [],
-                        documentId: '',
-                        //properties: [], 
-                        screenName: '',
-                        screenParams: null, //Because manual
-                        type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
+                        type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'NON', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextStep: 'facturationOption2', onSelectType: 'transition', operation: null },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                 ]
             },
@@ -1454,14 +1304,12 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Facture' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'doc-creation',
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'signedBillCreation', //#task: check if devis is still existing..
@@ -1480,18 +1328,16 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Facture' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'paymentStatus'
                     },
                 ]
@@ -1518,10 +1364,8 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Devis' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { DocumentId: '', documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1548,18 +1392,16 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Facture' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'paymentStatus',
                     },
                 ]
@@ -1575,38 +1417,28 @@ export const processModel = {
                         title: 'Modifier le statut du paiement',
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
-                        responsable: 'Poseur',
-                        status: 'pending',
-                        comment: '',
                         verificationType: 'multiple-choices',
+                        comment: '',
                         choices: [
                             { label: 'Attente paiement client', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Attente paiement financement', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Attente paiement aide', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Payé', id: 'confirm', onSelectType: 'commentPicker', selected: false, stay: false },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'advValidation',
                         title: "Validation de la facture par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
                         instructions: "",
                         actionOrder: 2,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
+                        verificationType: 'validation',
+                        comment: '',
                         responsable: 'ADV',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'validation',
                     },
                     {
                         id: 'billAmount',
@@ -1615,20 +1447,17 @@ export const processModel = {
                         actionOrder: 3,
                         collection: 'Projects',
                         documentId: '',
-                        properties: [],
-                        screenName: '',
-                        screenParams: null,
+                        operation: { type: 'update', field: 'bill.amount' },
                         type: 'manual',
-                        responsable: 'ADV',
-                        status: 'pending',
+                        verificationType: 'comment',
                         comment: '',
                         formSettings: {
                             label: 'Montant de la facture',
                             description: 'Veuillez renseigner le montant total de la facture de ce projet.',
                             keyboardType: 'Numeric'
                         },
-                        operation: { type: 'update', field: 'bill.amount' },
-                        verificationType: 'comment',
+                        responsable: 'ADV',
+                        status: 'pending',
                     },
                     {
                         id: 'attestationCreation',
@@ -1649,14 +1478,12 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Attestation fluide' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Attestation fluide', value: 'Attestation fluide', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Attestation fluide', value: 'Attestation fluide', selected: false }, dynamicType: true },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                         nextStep: 'emailBill'
                     },
                 ]
@@ -1674,10 +1501,10 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
                         collection: 'Projects',
+                        documentId: '', //#dynamic
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                         ],
-                        documentId: '', //#dynamic
                         properties: ['finalBillSentViaEmail'],
                         status: 'pending',
                         verificationType: 'data-fill',
@@ -1718,16 +1545,10 @@ export const processModel = {
                         title: 'Êtes-vous satisfait de notre service ?',
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
-                        status: 'pending',
-                        comment: '',
                         verificationType: 'multiple-choices',
                         isReview: true,
+                        comment: '',
                         choices: [
                             { label: '1', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
                             { label: '2', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
@@ -1740,6 +1561,7 @@ export const processModel = {
                             { label: '9', onSelectType: 'commentPicker', selected: false, saty: false, nextPhase: 'maintainance' },
                             { label: '10', onSelectType: 'commentPicker', selected: false, stay: false, nextPhase: 'maintainance' },
                         ],
+                        status: 'pending',
                     }
                 ]
             }
@@ -1762,20 +1584,14 @@ export const processModel = {
                         title: "Accepter la proposition commerciale",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
-                        collection: '',
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        //properties: [],
-                        //documentId: '',
-                        screenName: '', //creation
-                        screenParams: {},
                         type: 'manual', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'mandatSepaCreation',
@@ -1796,18 +1612,16 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true },
                         type: 'auto', //Check manually
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'signedSEPACreation',
@@ -1826,10 +1640,8 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Mandat SEPA' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
@@ -1857,18 +1669,18 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
+
+
                         screenName: 'UploadDocument',
-                        screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true },
+                        screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true },
                         type: 'auto',
-                        responsable: 'Poseur',
-                        status: 'pending',
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
-                        ]
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
                     },
                     {
                         id: 'signedContractCreation',
@@ -1887,33 +1699,26 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        //properties: [],
-                        //documentId: '',
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isProcess: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
+                        verificationType: 'doc-creation',
                         choices: [
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
-                        verificationType: 'doc-creation',
                     },
                     {
                         id: 'endProject',
                         title: "Finaliser le projet",
                         instructions: "",
                         actionOrder: 6,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
+                        verificationType: 'validation',
+                        comment: '',
                         responsable: 'ADV',
                         status: 'pending',
-                        comment: '',
-                        verificationType: 'validation',
                         nextPhase: 'endProject',
                     },
                 ]
@@ -1936,16 +1741,10 @@ export const processModel = {
                         title: 'Le process du projet est terminé.',
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
-                        //responsable: '',
-                        status: 'pending',
-                        comment: '',
                         verificationType: 'no-verification',
+                        comment: '',
+                        status: 'pending',
                     },
                 ]
             },
@@ -1967,16 +1766,10 @@ export const processModel = {
                         title: 'Le projet a été annulé', //#task put: "Voulez-vous reprendre le projet ?""
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
-                        collection: '',
-                        documentId: '', // depending on the concerned project
-                        properties: [],
-                        screenName: '', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: null,
                         type: 'manual',
-                        //responsable: '',
-                        status: 'pending',
-                        comment: '',
                         verificationType: 'no-verification', //#task: put rollback
+                        comment: '',
+                        status: 'pending',
                     },
                 ]
             },

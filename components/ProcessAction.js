@@ -29,13 +29,12 @@ class ProcessAction extends Component {
     constructor(props) {
         super(props)
 
-        this.refreshProcessHistory = this.refreshProcessHistory.bind(this)
-        this.runProcessHandler = this.runProcessHandler.bind(this)
         this.validateAction = this.validateAction.bind(this)
         this.undoPreviousAction = this.undoPreviousAction.bind(this)
+        this.runProcessHandler = this.runProcessHandler.bind(this)
         this.updateProcess = this.updateProcess.bind(this)
         this.refreshProcess = this.refreshProcess.bind(this)
-        this.navigateToProgression = this.navigateToProgression.bind(this)
+        this.refreshProcessHistory = this.refreshProcessHistory.bind(this)
 
         this.state = {
             showModal: false,
@@ -51,8 +50,8 @@ class ProcessAction extends Component {
             nextStep: '',
             nextPhase: '',
 
-            currentPhase: '',
-            currentStep: '',
+            currentPhase: null,
+            currentStep: null,
             currentPhaseId: '',
             currentStepId: '',
 
@@ -69,7 +68,7 @@ class ProcessAction extends Component {
     async componentDidMount() {
 
         let { process } = this.state
-        const { processModels, initialProcess, project, isAllProcess, canUpdate } = this.props
+        const { processModels, initialProcess } = this.props
         const { version } = initialProcess
         this.processModel = processModels[version].process
 
@@ -83,33 +82,10 @@ class ProcessAction extends Component {
             load(this, false)
         })
 
-        this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
-            if (doc.exists) {
-                //#Task should runProcessHandler in case another user submits the last action
-                const updatedProcess = doc.data().process
-                this.refreshProcess(updatedProcess)
-
-                if (isAllProcess) {
-                    this.refreshProcessHistory(updatedProcess)
-                }
-            }
-        })
+        this.processListener()
     }
 
-    sortPhases(process) {
-        const procesTemp = Object.entries(process).sort(([keyA, valueA], [keyB, valueB]) => {
-            return (valueA.phaseOrder > valueB.phaseOrder ? 1 : -1)
-        })
-        process = Object.fromEntries(procesTemp)
-        return process
-    }
-
-    componentWillUnmount() {
-        //this.focusListener()
-        // if (this.unsubscribeProcessListener)
-        //     this.unsubscribeProcessListener()
-    }
-
+    //1. Get/Update process
     async runProcessHandler(process) {
 
         const { project, clientId, step } = this.props
@@ -132,6 +108,38 @@ class ProcessAction extends Component {
         await db.collection('Projects').doc(project.id).update({ process: updatedProcess })
     }
 
+    //2. Realtime fetch latest process from db
+    processListener() {
+        const { project, isAllProcess } = this.props
+
+        this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
+            if (doc.exists) {
+                const updatedProcess = doc.data().process
+                this.refreshProcess(updatedProcess)
+
+                if (isAllProcess) {
+                    this.refreshProcessHistory(updatedProcess)
+                }
+            }
+        })
+    }
+
+    //3. Refresh latest process locally
+    refreshProcess(updatedProcess) {
+        const { currentPhaseId, currentStepId } = getCurrentStep(updatedProcess)
+        const currentPhase = updatedProcess[currentPhaseId]
+        const currentStep = updatedProcess[currentPhaseId].steps[currentStepId]
+        const currentAction = getCurrentAction(updatedProcess)
+
+        this.setState({
+            process: updatedProcess,
+            currentPhase, currentStep, currentPhaseId, currentStepId,
+            currentAction,
+            nextStep: '', nextPhase: ''
+        })
+    }
+
+    //3. Refresh Process History locally
     refreshProcessHistory(process) {
         let phaseLabels = []
         let phaseStatuses = []
@@ -171,47 +179,66 @@ class ProcessAction extends Component {
         this.setState({ process, phaseLabels, phaseStatuses, stepsData: steps })
     }
 
-    refreshProcess(updatedProcess) {
-        const { currentPhaseId, currentStepId } = getCurrentStep(updatedProcess)
-        const currentPhase = updatedProcess[currentPhaseId]
-        const currentStep = updatedProcess[currentPhaseId].steps[currentStepId]
-        const currentAction = getCurrentAction(updatedProcess)
+    //func1
+    onPressAction = async (canUpdate, currentAction) => {
+        if (!canUpdate) return
 
-        this.setState({
-            process: updatedProcess,
-            currentPhase, currentStep, currentPhaseId, currentStepId,
-            currentAction,
-            nextStep: '', nextPhase: ''
-        })
+        this.setState({ pressedAction: currentAction })
+        const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
+        const { currentPhase } = this.state
+        const currentUserId = firebase.auth().currentUser.uid
+        const currentUserRole = this.props.role.value
+
+        const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
+        if (!enableAction) {
+            Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+            return
+        }
+
+        if (type === 'auto') {
+            //Modal
+            if (currentAction.choices) {
+                this.setState({ showModal: true })
+            }
+
+            //Navigation
+            else {
+                screenParams.isProcess = true
+                this.props.navigation.navigate(screenName, screenParams)
+            }
+        }
+
+        else if (type === 'manual') {
+            //Dialog
+            if (verificationType === 'comment') {
+                this.setNextStepOrPhase(nextStep, nextPhase) //To use later it onSubmit comment
+                const dialogTitle = formSettings && formSettings.label || 'Commentaire'
+                const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
+                this.setState({ dialogTitle, dialogDescription, showDialog: true })
+            }
+
+            //Modal
+            else if (verificationType === 'multiple-choices') {
+                this.setState({ showModal: true })
+            }
+
+            //Direct
+            else if (verificationType === 'validation') {
+                await this.validateAction(null, null, false, nextStep, nextPhase)
+            }
+        }
     }
 
-    //func
-    onSubmitComment = async (comment, clearComment) => {
-        const { currentAction, choice, nextStep, nextPhase } = this.state
-        const operation = choice && choice.operation || currentAction.operation || null
-
-        if (!comment) return //show error message
-        this.setState({ loadingDialog: true })
-
-        if (operation) operation.value = comment
-        await this.runChoiceOperation(operation, currentAction)
-        await this.validateAction(comment, null, false, nextStep, nextPhase)
-
-        this.setState({ loadingDialog: false, showDialog: false })
-        clearComment()
-    }
-
-    //func
+    //func2
     onSelectChoice = async (choice) => {
         this.setState({ choice })  //used in case of comment
 
-        const { currentAction } = this.state
-        const { screenName, screenParams, choices } = currentAction
+        const { pressedAction } = this.state
+        const { screenName, screenParams, choices } = pressedAction
         const { onSelectType, commentRequired, operation } = choice
-        var { nextStep, nextPhase } = choice
+        const { nextStep, nextPhase } = choice
 
-        this.configNextStepOrPhase(nextStep, nextPhase) //used in case of comment
-
+        //Highlight selected choice
         if (typeof (choice.selected) === 'boolean') {
             choices.forEach((item) => {
                 if (item.label === choice.label) item.selected = true
@@ -220,18 +247,9 @@ class ProcessAction extends Component {
         }
 
         if (commentRequired) {
-            const configDialogLabels = (choiceId) => {
-                switch (choiceId) {
-                    case 'postpone': return { title: "Motif du repport", inputLabel: "Expliquez brièvemment la raison du report." }; break;
-                    case 'cancel': return { title: "Motif de l'annulation", inputLabel: "Expliquez brièvemment la raison de l'annulation." }; break
-                    case 'block': return { title: "Motif du bloquage", inputLabel: "Expliquez brièvemment la raison de ce blocage." }; break
-                    case 'comment': return { title: "Commentaire", inputLabel: "Veuillez saisir votre commentaire." }; break
-                    default: return { title: "Commentaire", inputLabel: "Veuillez saisir votre commentaire." }; break
-                }
-            }
-
-            const dialogTitle = configDialogLabels(choice.id).title
-            const dialogDescription = configDialogLabels(choice.id).inputLabel
+            this.setNextStepOrPhase(nextStep, nextPhase) //used in case of comment
+            const dialogTitle = this.configDialogLabels(choice.id).title
+            const dialogDescription = this.configDialogLabels(choice.id).description
             this.setState({ dialogTitle, dialogDescription, showModal: false, showDialog: true })
             return
         }
@@ -249,17 +267,17 @@ class ProcessAction extends Component {
             }
 
             else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                await this.runChoiceOperation(operation, currentAction)
+                await this.runChoiceOperation(operation, pressedAction)
                 await this.validateAction(null, null, false, nextStep, nextPhase)
             }
 
             else if (onSelectType === 'validation') {
-                await this.runChoiceOperation(operation, currentAction)
+                await this.runChoiceOperation(operation, pressedAction)
                 await this.validateAction(null, null, false, null, null, true)
             }
 
             else if (onSelectType === 'commentPicker') {
-                await this.runChoiceOperation(operation, currentAction)
+                await this.runChoiceOperation(operation, pressedAction)
                 await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
             }
 
@@ -268,25 +286,27 @@ class ProcessAction extends Component {
         return
     }
 
-    //func
-    configNextStepOrPhase = (nextStep, nextPhase) => {
-        //Set next step or phase
-        if (nextStep) {
-            this.setState({ nextStep, nextPhase: '' })
-        }
+    //func3
+    onSubmitComment = async (comment, clearComment) => {
+        if (!comment) return //show error message
+        this.setState({ loadingDialog: true })
 
-        else if (nextPhase) {
-            this.setState({ nextStep: '', nextPhase })
-        }
+        const { pressedAction, choice, nextStep, nextPhase } = this.state
+        const operation = choice && choice.operation || pressedAction.operation || null
+        if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
 
-        else return
+        await this.runChoiceOperation(operation, pressedAction)
+        await this.validateAction(comment, null, false, nextStep, nextPhase)
+
+        this.setState({ loadingDialog: false, showDialog: false })
+        clearComment()
     }
 
-    //func
-    runChoiceOperation = async (operation, currentAction) => {
+    //func4
+    runChoiceOperation = async (operation, action) => {
         if (!operation) return
 
-        const { collection, documentId } = currentAction
+        const { collection, documentId } = action
         const { type, field, value } = operation
 
         if (type === 'update') {
@@ -296,39 +316,27 @@ class ProcessAction extends Component {
         }
     }
 
-    //func
-    countDown = async (ms) => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve(ms)
-            }, ms)
-        })
-    }
-
-    //func
+    //func5
     validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
-        const { process, currentPhaseId, currentStepId, currentAction } = this.state
+        const { process, currentPhaseId, currentStepId, pressedAction } = this.state
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
-        //let actionTemp
 
         processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-            //  actionTemp = action
 
-            if (action.id === currentAction.id) {
+            if (action.id === pressedAction.id) {
                 //Update comment
                 if (comment)
                     action.comment = comment
 
-                //Update selected choice (selected = true -> UI displays it green colored)
+                //Update selected choice (selected = true -> Display it green)
                 if (choices)
                     action.choices = choices
 
                 //Update action status
                 if (!stay) {
                     action.status = "done"
-                    //  actionTemp.isAnimation = true
                 }
             }
 
@@ -349,98 +357,92 @@ class ProcessAction extends Component {
             processTemp = transitionRes.process
         }
 
-        // await this.updateProcess(processTemp) //#test: removed this as it seems useless (runProcessHandler calls it after runProcessHandler returns updatedProcess)
         await this.runProcessHandler(processTemp)
     }
 
-    //func
+    //func6
     undoPreviousAction = async () => {
-        const { process, currentPhaseId, currentStepId, currentAction } = this.state
+        const { process, currentPhaseId, currentStepId, pressedAction } = this.state
 
-        const previousActionOrder = currentAction.actionOrder - 1
+        const previousActionOrder = pressedAction.actionOrder - 1
 
         let processTemp = _.cloneDeep(process)
         processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
             if (action.actionOrder === previousActionOrder) {
-                //undo action
                 action.status = "pending"
             }
         })
 
         await this.updateProcess(processTemp)
-        //await this.runProcessHandler(processTemp)
     }
 
-    //func
-    onPressAction = async (canUpdate, currentAction) => {
-        if (!canUpdate) return
-
-        const { currentPhase } = this.state
-        const { responsable, verificationType, type, screenName, screenParams } = currentAction
-        const currentUserId = firebase.auth().currentUser.uid
-        const currentUserRole = this.props.role.value
-
-        const enabledAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
-        if (!enabledAction) {
-            Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
-            return
+    //helper1
+    setNextStepOrPhase = (nextStep, nextPhase) => {
+        //Set next step or phase
+        if (nextStep) {
+            this.setState({ nextStep, nextPhase: '' })
         }
 
-        if (type === 'auto') {
-            if (currentAction.choices) {
-                this.setState({ showModal: true, pressedAction: currentAction })
-            }
-
-            else {
-                screenParams.isProcess = true
-                this.props.navigation.navigate(screenName, screenParams)
-            }
+        else if (nextPhase) {
+            this.setState({ nextStep: '', nextPhase })
         }
 
-        else if (type === 'manual') {
-            if (verificationType === 'comment') {
-                const { nextStep, nextPhase, formSettings } = currentAction
+        else return
+    }
 
-                this.configNextStepOrPhase(nextStep, nextPhase)
-
-                const dialogTitle = formSettings && formSettings.label || 'Commentaire'
-                const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
-                this.setState({ dialogTitle, dialogDescription })
-                this.setState({ showDialog: true })
-            }
-
-            else if (verificationType === 'multiple-choices') {
-                this.setState({ showModal: true, pressedAction: currentAction })
-            }
-
-            else if (verificationType === 'validation') {
-                const { nextStep, nextPhase } = currentAction
-                await this.validateAction(null, null, false, nextStep, nextPhase)
-            }
+    //helper2
+    configDialogLabels = (choiceId) => {
+        switch (choiceId) {
+            case 'postpone': return { title: "Motif du repport", description: "Expliquez brièvemment la raison du report." }; break;
+            case 'cancel': return { title: "Motif de l'annulation", description: "Expliquez brièvemment la raison de l'annulation." }; break
+            case 'block': return { title: "Motif du bloquage", description: "Expliquez brièvemment la raison de ce blocage." }; break
+            case 'comment': return { title: "Commentaire", description: "Veuillez saisir votre commentaire." }; break
+            default: return { title: "Commentaire", description: "Veuillez saisir votre commentaire." }; break
         }
+    }
+
+    //helper3
+    countDown = async (ms) => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(ms)
+            }, ms)
+        })
+    }
+
+    //helper4
+    sortPhases(process) {
+        const procesTemp = Object.entries(process).sort(([keyA, valueA], [keyB, valueB]) => {
+            return (valueA.phaseOrder > valueB.phaseOrder ? 1 : -1)
+        })
+        process = Object.fromEntries(procesTemp)
+        return process
     }
 
     //renderers
     renderAction = (canUpdate, action) => {
 
-        const currentAction = action || this.state.currentAction
-        if (!currentAction) return null
+        if (!action) return null
 
         const { loading } = this.state
-        const loadingMessage = action ? "Chargement de l'action..." : "Chargement de l'action à faire..."
+        const loadingMessage = "Chargement de l'action..."
 
-        var { title, status, verificationType, choices } = currentAction
-        var isComment = typeof (currentAction.comment) !== 'undefined' && currentAction.comment !== ''
+        var { title, status, verificationType, choices } = action
+        var isComment = typeof (action.comment) !== 'undefined' && action.comment !== ''
         const isDialog = choices || verificationType === 'comment'
+        const leftIcon = action.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle
+        const leftIconColor = action.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary
 
         return (
             <View style={styles.action}>
-                <TouchableOpacity onPress={() => this.onPressAction(canUpdate, currentAction)} style={styles.actionTouchable}>
+                <TouchableOpacity onPress={() => this.onPressAction(canUpdate, action)} style={styles.actionTouchable}>
                     <View style={styles.actionTitleContainer}>
                         {!loading &&
                             <CustomIcon
                                 style={{ marginRight: 5 }}
-                                icon={currentAction.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle} size={19} color={currentAction.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary}
+                                icon={leftIcon}
+                                size={19}
+                                color={leftIconColor}
                             />
                         }
                         <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? loadingMessage : title}</Text>
@@ -458,19 +460,19 @@ class ProcessAction extends Component {
                                     icon={faExclamationCircle}
                                     size={16}
                                     color={theme.colors.gray_dark}
-                                    onPress={() => Alert.alert('Commentaire', currentAction.comment)}
+                                    onPress={() => Alert.alert('Commentaire', action.comment)}
                                 />
                             }
                             <CustomIcon
                                 icon={faInfoCircle}
                                 size={16}
                                 color={theme.colors.gray_dark}
-                                onPress={() => Alert.alert('Instructions', currentAction.instructions)}
+                                onPress={() => Alert.alert('Instructions', action.instructions)}
                             />
                         </View>
                     }
 
-                    {isDialog && this.renderDialog(currentAction.formSettings)}
+                    {isDialog && this.renderDialog(action.formSettings)}
                 </TouchableOpacity>
             </View>
         )
@@ -492,46 +494,40 @@ class ProcessAction extends Component {
     }
 
     renderModal = () => {
-        const { pressedAction: currentAction, showModal, loadingModal } = this.state
-
-        if (currentAction) {
-            var { title, choices } = currentAction
-
-            if (choices) {
-                var elements = choices.map((choice) => configChoiceIcon(choice))
-            }
-        }
+        const { pressedAction, showModal, loadingModal } = this.state
+        const { title, choices } = pressedAction
+        const elements = choices.map((choice) => configChoiceIcon(choice)) || []
 
         return (
             <ModalOptions
+                isVisible={showModal}
                 title={title}
                 columns={choices.length}
-                isVisible={showModal}
                 isLoading={loadingModal}
                 toggleModal={() => this.setState({ showModal: !showModal })}
                 handleCancel={() => console.log('cancel')}
                 handleConfirm={() => console.log('confirm')}
                 elements={elements}
-                isReview={currentAction.isReview}
+                isReview={pressedAction.isReview}
                 autoValidation={true}
                 handleSelectElement={(element, index) => this.onSelectChoice(element)}
             />
         )
     }
 
-    navigateToProgression(process) {
+    renderHeaderBar() {
+
+        const { process } = this.state
         const { project, clientId, step, canUpdate, role } = this.props
         const navParams = { process, project, clientId, step, canUpdate, role }
-        this.props.navigation.navigate('Progression', navParams)
-    }
+        const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
 
-    renderHeaderBar() {
         return (
             <View style={styles.headerBarContainer}>
                 <Text style={[theme.customFontMSregular.body, styles.headerBarText]}>Suivi du projet</Text>
                 <TouchableOpacity style={styles.progressionLink}>
                     <CustomIcon
-                        onPress={() => this.navigateToProgression(process)}
+                        onPress={onPressEye}
                         icon={faEye}
                         color={theme.colors.white}
                     />
@@ -540,36 +536,37 @@ class ProcessAction extends Component {
         )
     }
 
+
     renderAccordion(canUpdate) {
-        const { expanded, currentPhase, currentStep } = this.state
+
+        const { expanded, currentPhase, currentStep, currentAction } = this.state
+        const phaseTitle = currentPhase ? currentPhase.title : "Chargement de la phase..."
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
-        const doneActions = currentStep && currentStep.actions.filter((action) => action.status === 'done') || []
-        const totalActions = currentStep && currentStep.actions.length || 0
-        console.log('...........')
-        var progress = (doneActions.length / totalActions) * 100
-        const borderBottomWidth = expanded ? StyleSheet.hairlineWidth * 2 : 0
+        const doneActions = currentStep ? currentStep.actions.filter((action) => action.status === 'done').length : undefined
+        const totalActions = currentStep ? currentStep.actions.length : undefined
+        var progress = totalActions ? (doneActions / totalActions) * 100 : undefined
 
         return (
             <List.Accordion
                 showArrow
-                style={[styles.accordion, { borderBottomWidth }]}
-                title={currentPhase.title || "Chargement de la phase..."}
+                style={[styles.accordion, { borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0 }]}
+                title={phaseTitle}
                 description={stepTitle}
                 titleNumberOfLines={1}
                 descriptionNumberOfLines={1}
-                left={props => <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} />}
+                left={props => totalActions && <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} />}
                 expanded={expanded}
                 titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
                 descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
                 onPress={() => this.setState({ expanded: !expanded })}>
 
-                {this.renderAction(canUpdate, null)}
+                {this.renderAction(canUpdate, currentAction)}
 
             </List.Accordion >
         )
     }
 
-    renderProcessContainer(canUpdate) {
+    renderProcessHistoryContainer(canUpdate) {
         const { process, currentPage, phaseLabels, phaseStatuses, stepsData } = this.state
         return (
             <ProcessContainer
@@ -585,13 +582,13 @@ class ProcessAction extends Component {
     }
 
     render() {
-        const { pressedAction } = this.state
+        const { pressedAction, currentPhase, currentStep } = this.state
         const { canUpdate, isAllProcess } = this.props
 
         if (isAllProcess) {
             return (
                 <View style={{ flex: 1 }}>
-                    {this.renderProcessContainer(canUpdate)}
+                    {this.renderProcessHistoryContainer(canUpdate)}
                     {pressedAction && pressedAction.choices && this.renderModal()}
                 </View>
             )

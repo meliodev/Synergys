@@ -6,7 +6,10 @@ import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import * as theme from '../../core/theme'
 
 export default function StepProgress({ progress, style }) {
-  console.log('66666666666', progress)
+
+  console.log('3333333333', progress)
+
+
   return (
     <AnimatedCircularProgress
       size={27}
@@ -17,7 +20,8 @@ export default function StepProgress({ progress, style }) {
       // onAnimationComplete={() => console.log('onAnimationComplete')}
       backgroundColor="#D8D8D8"
       rotation={0}>
-      {(fill) => (
+      {(fill) => {
+      return(
         <Text
           style={[
             styles.percentText,
@@ -25,7 +29,8 @@ export default function StepProgress({ progress, style }) {
           ]}>
           {parseInt(fill)}%
         </Text>
-      )}
+      )
+      }}
     </AnimatedCircularProgress>
   );
 }
