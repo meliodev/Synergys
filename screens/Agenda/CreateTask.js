@@ -334,12 +334,12 @@ class CreateTask extends Component {
         }
 
         //6. Handle conflicts
-        const overlappingTasks = await this.checkTasksConflicts(tasks)
-        if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
-            load(this, false)
-            this.handleConflicts(overlappingTasks, task)
-            return
-        }
+        // const overlappingTasks = await this.checkTasksConflicts(tasks)
+        // if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+        //     load(this, false)
+        //     this.handleConflicts(overlappingTasks, task)
+        //     return
+        // }
 
         //7. Persist task(s)
         await this.persistTasks(tasks)

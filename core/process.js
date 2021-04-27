@@ -138,35 +138,35 @@ const configureActions = async (actions, attributes, process) => {
 
     for (let action of actions) {
 
-        const { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
+        let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
 
         //1. Complete missing params
-        if (collection && documentId) {
-            if (collection === 'Projects') documentId = attributes.project.id
-            else if (collection === 'Clients') documentId = attributes.clientId
+        if (collection && documentId === '') {
+            if (collection === 'Projects') action.documentId = attributes.project.id
+            else if (collection === 'Clients') action.documentId = attributes.clientId
         }
 
         if (screenParams) {
             for (let item in screenParams) {
-                if (item === 'project') screenParams.project = attributes.project
-                if (item === 'userId') screenParams.userId = attributes.clientId
+                if (item === 'project') action.screenParams.project = attributes.project
+                if (item === 'userId') action.screenParams.userId = attributes.clientId
             }
         }
 
         if (queryFilters) {
-            for (let item of queryFilters) {
+            for (let item of action.queryFilters) {
                 if (item.filter === 'project.id') item.value = attributes.project.id
             }
         }
 
         if (queryFiltersUpdateNav) {
-            for (let item of queryFiltersUpdateNav) {
+            for (let item of action.queryFiltersUpdateNav) {
                 if (item.filter === 'project.id') item.value = attributes.project.id
             }
         }
 
         if (cloudFunction) {
-            const { params, queryAttachmentsUrls } = cloudFunction
+            const { params, queryAttachmentsUrls } = action.cloudFunction
 
             for (let item in params) {
                 if (item === 'projectId') params.projectId = attributes.project.id
@@ -205,28 +205,34 @@ const configureActions = async (actions, attributes, process) => {
             selectedQueryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
             await query.get().then((querysnapshot) => {
 
-                if (querysnapshot.empty && queryFiltersUpdateNav) {
-                    if (collection === 'Agenda') {
-                        screenParams.TaskId = ''
-                    }
+                if (querysnapshot.empty) {
+                    if (queryFiltersUpdateNav) {
+                        if (collection === 'Agenda') {
+                            action.screenParams.TaskId = ''
+                        }
 
-                    if (collection === 'Documents')
-                        screenParams.DocumentId = ''
+                        if (collection === 'Documents')
+                            action.screenParams.DocumentId = ''
+                    }
                 }
 
                 //Reinitialize nav params in case document was deleted
                 else {
-                    if (collection === 'Agenda')
-                        screenParams.TaskId = querysnapshot.docs[0].id
+                    if (action.screenParams) {
+                        if (collection === 'Agenda')
+                            action.screenParams.TaskId = querysnapshot.docs[0].id
 
-                    if (collection === 'Documents')
-                        screenParams.DocumentId = querysnapshot.docs[0].id
+                        if (collection === 'Documents')
+                            action.screenParams.DocumentId = querysnapshot.docs[0].id
+                    }
 
-                    if (documentId)
-                        documentId = querysnapshot.docs[0].id
+                    if (documentId === '') {
+                        action.documentId = querysnapshot.docs[0].id
+                    }
                 }
             })
         }
+
     }
 
     return actions
@@ -325,11 +331,14 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         for (let action of actionsSameDoc) {
 
             if (!doc.exists) {
+
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }
 
             else {
+
+
                 const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
 
                 if (typeof (nestedVal) === 'undefined') {
@@ -367,13 +376,10 @@ const verifyActions_docCreation = async (actions) => {
 
     for (let action of actions) {
 
-        const { collection, queryFilters, events, status } = action
+        const { collection, queryFilters, events } = action
 
         let query = db.collection(collection)
-        queryFilters.forEach(({ filter, operation, value }) => {
-            query = query.where(filter, operation, value) //exp: db.collection(collection).where('project.id', '==', projectId).where('type', '==', x)
-        })
-
+        queryFilters.forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
         await query.get().then((querysnapshot) => {
 
             if (querysnapshot.empty) {
@@ -382,7 +388,7 @@ const verifyActions_docCreation = async (actions) => {
                     nextPhase = events.onDocNotFound.nextPhase
                 }
 
-                status = 'pending' //CASE2: No transition if doc not found
+                action.status = 'pending' //CASE2: No transition if doc not found
                 allActionsValid_docCreation = false
             }
 
@@ -392,7 +398,7 @@ const verifyActions_docCreation = async (actions) => {
                     nextPhase = events.onDocFound.nextPhase
                 }
 
-                status = 'done' //CASE2: Transition only on doc found
+                action.status = 'done' //CASE2: Transition only on doc found
                 nextStep = stringifyUndefined(action.nextStep)
                 nextPhase = stringifyUndefined(action.nextPhase)
             }

@@ -7,9 +7,6 @@ import * as theme from '../../core/theme'
 
 export default function StepProgress({ progress, style }) {
 
-  console.log('3333333333', progress)
-
-
   return (
     <AnimatedCircularProgress
       size={27}

@@ -148,19 +148,19 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 2,
                         collection: 'Agenda',
+                        documentId: '', //#dynamic
+                        properties: ['address', 'description'],
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique préalable' }
                         ],
-                        documentId: '', //#dynamic
-                        properties: ['address', 'description'],
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true }, //#dynamic
                         type: 'auto',
-                        responsable: 'Commercial',
-                        status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: '',
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                     {
                         id: 'rd1Choice',

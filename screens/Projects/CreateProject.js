@@ -663,7 +663,7 @@ class CreateProject extends Component {
                     :
                     <ScrollView style={styles.dataContainer}>
 
-                        {this.isEdit ? 
+                        {this.isEdit ?
                             (processFetched ?
                                 <View>
                                     <ProcessAction

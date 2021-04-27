@@ -554,7 +554,7 @@ class ProcessAction extends Component {
                 description={stepTitle}
                 titleNumberOfLines={1}
                 descriptionNumberOfLines={1}
-                left={props => totalActions && <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} />}
+                left={props => totalActions ? <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} /> : null}
                 expanded={expanded}
                 titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
                 descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
