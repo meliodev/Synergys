@@ -18,7 +18,7 @@ import Loading from './Loading'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler, getLatestProcessModel } from '../core/process'
 import { enableProcessAction } from '../core/privileges'
-import { configChoiceIcon, load } from '../core/utils'
+import { configChoiceIcon, countDown, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
 import ProcessContainer from "../screens/src/container/ProcessContainer"
@@ -146,6 +146,7 @@ class ProcessAction extends Component {
         let steps = []
 
         process = this.sortPhases(process)
+        delete process.version
 
         for (let phaseId in process) {
             const processData = process[phaseId]
@@ -164,7 +165,8 @@ class ProcessAction extends Component {
                 step.actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
 
                 //Step & Phase progress
-                step.progress = actionsDoneCount / step.actions.length * 100
+                step.progress = step.actions.length === 0 ? 100 : actionsDoneCount / step.actions.length * 100
+
                 if (step.progress < 100)
                     phaseStatus = 'pending'
 
@@ -172,7 +174,8 @@ class ProcessAction extends Component {
             }
 
             phaseStatuses.push(phaseStatus)
-            phaseSteps.sort((a, b) => (a.stepOrder > b.stepOrder) ? 1 : -1)
+
+            phaseSteps.sort((a, b) => (a.stepOrder < b.stepOrder) ? 1 : -1)
             steps.push(phaseSteps)
         }
 
@@ -402,15 +405,6 @@ class ProcessAction extends Component {
     }
 
     //helper3
-    countDown = async (ms) => {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                resolve(ms)
-            }, ms)
-        })
-    }
-
-    //helper4
     sortPhases(process) {
         const procesTemp = Object.entries(process).sort(([keyA, valueA], [keyB, valueB]) => {
             return (valueA.phaseOrder > valueB.phaseOrder ? 1 : -1)

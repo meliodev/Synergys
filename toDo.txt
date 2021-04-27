@@ -1,4 +1,12 @@
 TO DO:
+
++ PROCESS HISTORY: 
+- Installation: 
++ Vérification automatique de...
++ Mise à jour du statut de l'inst...
+- Add grayed not done phases
+- Add lines linking Steps Progresses
+
 + PROFILE: Refresh goals onGoBack
 + Ordre decroissant etapes / phases text show / dash between Steps.
 + PROCESS: Cancel annulation (rollback: delete 'cancelProcess' phase && undo latest action of latest step)

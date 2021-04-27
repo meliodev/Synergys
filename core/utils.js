@@ -195,6 +195,15 @@ export const checkPlural = (arrayLength, string) => {
   return str
 }
 
+export const countDown = async (ms) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(ms)
+    }, ms)
+  })
+}
+
+
 export const setAttachmentIcon = (type) => {
 
   switch (type) {

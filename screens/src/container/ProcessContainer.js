@@ -36,10 +36,11 @@ class ProcessContainer extends Component {
         )
         }
 
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginTop: 15 }}>
           <ScrollView >
             {stepsData.length > 0 && stepsData[currentPage].map((item, index) => {
 
+console.log(item.progress, '555555555')
               const isLastPhase = currentPage === stepsData.length - 1
               const isLastStep = index === stepsData[currentPage].length - 1
               const isLastStepOfLastPhase = isLastPhase && isLastStep

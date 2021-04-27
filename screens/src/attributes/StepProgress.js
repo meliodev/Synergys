@@ -18,7 +18,7 @@ export default function StepProgress({ progress }) {
       rotation={0}>
       {(fill) => (
         <Text style={[theme.customFontMSmedium.extraSmall, { color, textAlign: 'center' },]}>
-          {parseInt(fill)}%
+          {parseInt(progress)}%
         </Text>
       )}
     </AnimatedCircularProgress>

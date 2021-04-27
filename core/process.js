@@ -61,6 +61,9 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
 
         //3'. Found nextStep/nextPhase -> All actions valid -> Transition
         if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
+
+            process[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
+
             console.log('transition...')
             const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
             process = transitionRes.process
@@ -76,6 +79,14 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
     return process
 }
 
+
+const checkForcedValidations = (actions) => {
+    for (let action of actions) {
+        if (action.forcedValidation)
+            action.status = 'done'
+    }
+    return actions
+}
 
 //#PROCESS TASKS:
 //Task 1. Init
