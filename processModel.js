@@ -139,7 +139,7 @@ export const processModel = {
                         screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
-                        responsable: 'Commercial',
+                        responsable: 'Commercial', //#task: add operation = add intervenant to project if different than contact commercial
                         status: 'pending',
                     },
                     {
@@ -180,7 +180,7 @@ export const processModel = {
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Reporter', id: 'postpone', onSelectType: 'navigation', },
-                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
+                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },  //#task: add operation = empty intervenant from project
                         ],
                         responsable: 'Commercial',
                         status: 'pending',

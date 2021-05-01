@@ -4,6 +4,10 @@ DONE:
 +++ automatic fill task/document
 
 TO DO:
+++ Add intervenant field to project
+++ On submit task: check if assignedTo is subscriber: if not.. add assignedTo as intervenant on the project
+++ Responsable of a commercial action is intervenant || contactCom (just to display responsable the name on instruction)
+++ Notify assignedTo to do action (trigger CF)
 
 FEATURES:
 +++ PROCESS MODEL UPDATE: Prompt user to reset process object onUpdateProcessModel event.
