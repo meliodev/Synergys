@@ -3,9 +3,9 @@ import React, { useState, useEffect, Component } from "react"
 import { View, StyleSheet, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
 import { List } from 'react-native-paper'
 import Dialog from 'react-native-dialog'
-import firebase, { db } from '../firebase'
+import firebase, { db, auth } from '../firebase'
 import _ from 'lodash'
-import { faCheckCircle, faExclamationCircle, faInfoCircle, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
+import { faCheckCircle, faExclamationCircle, faInfoCircle, faRedo, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
 import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-solid-svg-icons'
 import { withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
@@ -16,7 +16,7 @@ import CustomIcon from './CustomIcon'
 import StepProgress from './process/StepProgress'
 import Loading from './Loading'
 
-import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler, getLatestProcessModel, checkForcedValidations } from '../core/process'
+import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, getLatestProcessModel, checkForcedValidations } from '../core/process'
 import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, load } from '../core/utils'
 import * as theme from "../core/theme"
@@ -29,23 +29,20 @@ class ProcessAction extends Component {
     constructor(props) {
         super(props)
 
-        this.validateAction = this.validateAction.bind(this)
-        this.undoPreviousAction = this.undoPreviousAction.bind(this)
+        this.refresh = this.refresh.bind(this)
+        this.mainHandler = this.mainHandler.bind(this)
         this.runProcessHandler = this.runProcessHandler.bind(this)
         this.updateProcess = this.updateProcess.bind(this)
         this.refreshProcess = this.refreshProcess.bind(this)
         this.refreshProcessHistory = this.refreshProcessHistory.bind(this)
+        this.validateAction = this.validateAction.bind(this)
+        this.undoPreviousAction = this.undoPreviousAction.bind(this)
+
+        this.processModel = this.setProcessModel()
 
         this.state = {
-            showModal: false,
-            showDialog: false,
-            expanded: true,
-            dialogTitle: '',
-            dialogDescription: '',
-            loadingDialog: false,
-            loadingModal: false,
 
-            process: this.props.initialProcess,
+            process: {},
             choice: null,
             nextStep: '',
             nextPhase: '',
@@ -61,80 +58,80 @@ class ProcessAction extends Component {
 
             currentAction: null,
             pressedAction: null,
-            loading: false
+
+            showModal: false,
+            showDialog: false,
+            expanded: true,
+            dialogTitle: '',
+            dialogDescription: '',
+            loadingDialog: false,
+            loadingModal: false,
+            loading: true
         }
     }
 
-    async componentDidMount() {
-
-        let { process } = this.state
-        const { processModels, initialProcess } = this.props
+    setProcessModel() {
+        const { initialProcess, processModels } = this.props
         const { version } = initialProcess
-        this.processModel = processModels[version].process
-
-        load(this, true)
-        await this.runProcessHandler(process)
-        load(this, false)
-
-        this.focusListener = this.props.navigation.addListener('willFocus', async () => { //#task do conditional verification (skip it if user just pressed go back)
-            load(this, true)
-            await this.runProcessHandler(this.state.process)
-            load(this, false)
-        })
-
-        this.processListener()
+        const processModel = processModels[version].process
+        return processModel
     }
 
-    //1. Get/Update process
-    async runProcessHandler(process) {
+    async componentDidMount() {
+        await this.refresh()
+    }
 
-        const { project, clientId, step } = this.props
-        const secondPhaseId = getPhaseId(step)
-        const copyProcessModel = _.cloneDeep(this.processModel)
+    async refresh() {
+        const process = await this.fetchProcess()
+        await this.mainHandler(process)
+    }
 
-        var updatedProcess = await projectProcessHandler(copyProcessModel, process, secondPhaseId, clientId, project)
-
-        //if (!_.isEqual(process, updatedProcess)) {
-        await this.updateProcess(updatedProcess)
-        // }
-
-        // else { //#task: use this for writes optimization
-        //     console.log('PROCESS SAME...')
-        //     this.refreshProcess(updatedProcess)
-        // }
+    async fetchProcess() {
+        return db
+            .collection('Projects')
+            .doc(this.props.project.id)
+            .get()
+            .then((doc) => { return doc.data().process })
     }
 
     async updateProcess(updatedProcess) {
-        const { project } = this.props
-        await db.collection('Projects').doc(project.id).update({ process: updatedProcess })
+        await db
+            .collection('Projects')
+            .doc(this.props.project.id)
+            .update({ process: updatedProcess })
     }
 
-    //2. Realtime fetch latest process from db
-    processListener() {
-        const { project, isAllProcess } = this.props
+    async mainHandler(process) {
+        load(this, true)
+        const { isAllProcess } = this.props
+        const updatedProcess = await this.runProcessHandler(process)
+        await this.updateProcess(updatedProcess)
+        this.refreshProcess(updatedProcess)
+        if (isAllProcess) {
+            this.refreshProcessHistory(updatedProcess)
+        } 
+        load(this, false)
+    }
 
-        this.unsubscribeProcessListener = db.collection('Projects').doc(project.id).onSnapshot((doc) => {
-            if (doc.exists) {
-                const updatedProcess = doc.data().process
-                this.refreshProcess(updatedProcess)
-
-                if (isAllProcess) {
-                    this.refreshProcessHistory(updatedProcess)
-                }
-            }
-        })
+    async runProcessHandler(process) {
+        const { project, clientId, step } = this.props
+        const secondPhaseId = getPhaseId(step)
+        const copyProcessModel = _.cloneDeep(this.processModel)
+        var updatedProcess = await processHandler(copyProcessModel, process, secondPhaseId, clientId, project)
+        return updatedProcess
     }
 
     //3. Refresh latest process locally
-    refreshProcess(updatedProcess) {
-        const { currentPhaseId, currentStepId } = getCurrentStep(updatedProcess)
-        const currentPhase = updatedProcess[currentPhaseId]
-        const currentStep = updatedProcess[currentPhaseId].steps[currentStepId]
-        const currentAction = getCurrentAction(updatedProcess)
+    refreshProcess(process) {
+        const { currentPhaseId, currentStepId } = getCurrentStep(process)
+        const currentPhase = process[currentPhaseId]
+        const currentStep = process[currentPhaseId].steps[currentStepId]
+        const currentAction = getCurrentAction(process)
 
         this.setState({
-            process: updatedProcess,
-            currentPhase, currentStep, currentPhaseId, currentStepId,
+            process,
+            currentPhase, currentStep,
+            currentPhaseId, currentStepId,
             currentAction,
             nextStep: '', nextPhase: ''
         })
@@ -185,7 +182,6 @@ class ProcessAction extends Component {
             }
 
             phaseStatuses.push(phaseStatus)
-
             phaseSteps.sort((a, b) => (a.stepOrder < b.stepOrder) ? 1 : -1)
             steps.push(phaseSteps)
         }
@@ -199,8 +195,8 @@ class ProcessAction extends Component {
 
         this.setState({ pressedAction: currentAction })
         const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
-        const { currentPhase } = this.state
-        const currentUserId = firebase.auth().currentUser.uid
+        const { process, currentPhase } = this.state
+        const currentUserId = auth.currentUser.uid
         const currentUserRole = this.props.role.value
 
         const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
@@ -218,6 +214,7 @@ class ProcessAction extends Component {
             //Navigation
             else {
                 screenParams.isProcess = true
+                screenParams.onGoBack = () => this.mainHandler(process)
                 this.props.navigation.navigate(screenName, screenParams)
             }
         }
@@ -274,7 +271,7 @@ class ProcessAction extends Component {
     onSelectChoice = async (choice) => {
         this.setState({ choice })  //used in case of comment
 
-        const { pressedAction } = this.state
+        const { process, pressedAction } = this.state
         const { screenName, screenParams, choices } = pressedAction
         const { onSelectType, commentRequired, operation } = choice
         const { nextStep, nextPhase } = choice
@@ -300,6 +297,7 @@ class ProcessAction extends Component {
 
             if (onSelectType === 'navigation') {
                 screenParams.isProcess = true
+                screenParams.onGoBack = () => this.mainHandler(process)
                 this.props.navigation.navigate(screenName, screenParams)
             }
 
@@ -395,13 +393,12 @@ class ProcessAction extends Component {
         await countDown(1000)
 
         if (nextStep || nextPhase) {
-            console.log(nextStep, '8888888888888888')
             processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
             const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
             processTemp = transitionRes.process
         }
 
-        await this.runProcessHandler(processTemp)
+        await this.mainHandler(processTemp)
     }
 
     //func6
@@ -563,13 +560,24 @@ class ProcessAction extends Component {
         return (
             <View style={styles.headerBarContainer}>
                 <Text style={[theme.customFontMSregular.body, styles.headerBarText]}>Suivi du projet</Text>
-                <TouchableOpacity style={styles.progressionLink}>
-                    <CustomIcon
-                        onPress={onPressEye}
-                        icon={faEye}
-                        color={theme.colors.white}
-                    />
-                </TouchableOpacity>
+                <View style={styles.progressionLinks}>
+                    <TouchableOpacity>
+                        <CustomIcon
+                            onPress={this.refresh}
+                            icon={faRedo}
+                            size={16}
+                            color={theme.colors.white}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                        <CustomIcon
+                            onPress={onPressEye}
+                            icon={faEye}
+                            size={18}
+                            color={theme.colors.white}
+                        />
+                    </TouchableOpacity>
+                </View>
             </View>
         )
     }
@@ -661,13 +669,15 @@ const styles = StyleSheet.create({
         color: theme.colors.white,
         textAlign: 'center'
     },
-    progressionLink: {
+    progressionLinks: {
+        flexDirection: 'row',
         zIndex: 1,
         position: 'absolute',
-        top: 2,
-        right: theme.padding,
-        justifyContent: 'center',
-        alignItems: 'center'
+        top: 5,
+        right: theme.padding / 2,
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: 50
     },
     accordion: {
         paddingVertical: 10,
@@ -698,7 +708,7 @@ const styles = StyleSheet.create({
         flex: 0.8,
         flexDirection: 'row',
         alignItems: 'center',
-      //  backgroundColor: 'brown'
+        //  backgroundColor: 'brown'
     },
     actionIconsContainer: {
         flex: 0.1,

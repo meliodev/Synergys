@@ -151,7 +151,7 @@ class CreateTask extends Component {
         if (this.project && this.taskType) {
 
             const { subscribers, address } = this.project
-            
+
             const name = `${this.taskType.value} - ${this.project.id}`
 
             let assignedTo = {}
@@ -160,7 +160,7 @@ class CreateTask extends Component {
                 assignedTo = comContact
             }
             if (_.isEqual(this.taskType.natures, ['tech'])) {
-                var techContact = subscribers.filter((sub) => sub.role === 'Poseur')[0] 
+                var techContact = subscribers.filter((sub) => sub.role === 'Poseur')[0]
                 assignedTo = comContact
             }
 
@@ -324,7 +324,7 @@ class CreateTask extends Component {
 
         //3.3 "ASSIGNED TO" VERIFICATION (if he is one of the project's collaborators)
         if (project && project.subscribersIds) {
-            const collaborators = project.subscribersIds 
+            const collaborators = project.subscribersIds
             if (!collaborators.includes(assignedTo.id)) {
                 this.alertCollaborator()
                 load(this, false)
@@ -333,8 +333,8 @@ class CreateTask extends Component {
         }
 
         //4. Building task(s)
-        const currentUser = { 
-            id: auth.currentUser.uid, 
+        const currentUser = {
+            id: auth.currentUser.uid,
             fullName: auth.currentUser.displayName,
             email: auth.currentUser.email,
             role: this.props.role.value,
@@ -390,10 +390,10 @@ class CreateTask extends Component {
         await this.persistTasks(tasks)
 
         //8. Go back
-        if (this.prevScreen === 'Agenda') {
-            const refreshAgenda = true
-            this.props.navigation.state.params.onGoBack(refreshAgenda)
-        }
+        //if (this.prevScreen === 'Agenda') {
+        const refreshAgenda = true
+        this.props.navigation.state.params.onGoBack(refreshAgenda)
+        //}
 
         this.props.navigation.goBack()
     }

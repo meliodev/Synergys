@@ -4,7 +4,7 @@ import { Text, Alert } from 'react-native'
 import { stringifyUndefined } from './utils'
 
 //#PROCESS ALGORITHM/LOGIC
-export const projectProcessHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
+export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
 
     if (!processModel || typeof (processModel) === 'undefined') {
         Alert.alert('Erreur inattendue', "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application.")
@@ -18,6 +18,7 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
 
     while (loopHandler) {
         //0. Initialize process with 1st phase/1st step
+        console.log('process:::::', process)
         if (Object.keys(process).length === 1) {
             process = initProcess(processModel, process, projectSecondPhase)
         }

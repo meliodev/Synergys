@@ -805,7 +805,7 @@ class CreateProject extends Component {
                                         error={!!comContact.error}
                                         errorText={comContact.error}
                                         editable={canWrite}
-                                        style={{ marginTop: theme.padding }}
+                                        style={{ }}
                                     />
                                     <ItemPicker
                                         onPress={() => navigateToScreen(this, 'ListEmployees', {

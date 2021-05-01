@@ -329,6 +329,8 @@ class UploadDocument extends Component {
 
         //4. Go back if we came here from process action
         if (this.documentType) {
+            if (this.props.navigation.state.params.onGoBack)
+                this.props.navigation.state.params.onGoBack()
             this.props.navigation.goBack()
         }
     }
@@ -747,7 +749,7 @@ class UploadDocument extends Component {
 
                                 <ItemPicker
                                     onPress={() => {
-                                        if (this.project || this.isEdit) return //pre-defined project
+                                        if (this.project || this.isEdit || loading) return //pre-defined project
                                         navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
                                     }}
                                     label="Projet concerné *"
@@ -821,7 +823,7 @@ class UploadDocument extends Component {
                                     error={!!name.error}
                                     errorText={name.error}
                                     multiline={true}
-                                    editable={canWrite}
+                                    editable={canWrite && !loading}
                                 />
 
                                 <MyInput
@@ -832,7 +834,7 @@ class UploadDocument extends Component {
                                     error={!!description.error}
                                     errorText={description.error}
                                     multiline={true}
-                                    editable={canWrite}
+                                    editable={canWrite && !loading}
                                 />
 
                                 <Picker
@@ -844,7 +846,7 @@ class UploadDocument extends Component {
                                     onValueChange={(state) => this.setState({ state })}
                                     title="Etat"
                                     elements={states}
-                                    enabled={canWrite}
+                                    enabled={canWrite && !loading}
                                     containerStyle={{ marginBottom: 0 }}
                                 />
 
@@ -857,7 +859,7 @@ class UploadDocument extends Component {
                                 createdAt={createdAt}
                                 editedBy={editedBy}
                                 editedAt={editedAt}
-                                navigation= {this.props.navigation}
+                                navigation={this.props.navigation}
                             />
                         }
 

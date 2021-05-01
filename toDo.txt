@@ -3,10 +3,7 @@ DONE:
 +++ Autofill address fields
 +++ automatic fill task/document
 
-
 TO DO:
-OPTIMIZATION:
-+++ Get process from listener not from parent initially on ProcessAction component
 
 FEATURES:
 +++ PROCESS MODEL UPDATE: Prompt user to reset process object onUpdateProcessModel event.
@@ -58,6 +55,11 @@ Design done:
 - BE: add collaborators to email receivers projects events
 - SETTINGS: activate double authentication verify Twilio
 - Replace attachment pickers by Squares
+
+
+DONE: (01/05/2021)
+OPTIMIZATION:
++++ Optimize process fetch/update
 
 DONE: (05/04/2021)
 + CHATS: Navigate to user profile onPress avatar
