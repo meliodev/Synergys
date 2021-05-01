@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native';
 import { Title, Switch } from 'react-native-paper'
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar, faTimes } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
@@ -23,7 +23,7 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants, adminId } from "../../core/constants"
-import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo } from "../../core/utils"
+import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { connect } from 'react-redux'
@@ -51,6 +51,7 @@ class CreateTask extends Component {
         this.refreshAddress = refreshAddress.bind(this)
         this.refreshAssignedTo = refreshAssignedTo.bind(this)
         this.refreshProject = refreshProject.bind(this)
+        this.setAddress = setAddress.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.validateInputs = this.validateInputs.bind(this)
@@ -78,29 +79,30 @@ class CreateTask extends Component {
 
         const currentRole = this.props.role.id
         this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
+        const defaultState = this.setDefaultState()
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "Task 2", error: '' },
-            description: { value: "", error: '' },
+            name: { value: defaultState.name || "" },
+            description: { value: "" },
 
             //PICKERS
-            type: (this.taskType && this.taskType.value) || 'Normale',
+            type: defaultState.type || 'Normale',
             priority: 'Moyenne',
             status: 'En cours',
             color: theme.colors.primary,
 
             //Screens
-            assignedTo: { id: 'GS-US-xQ6s', fullName: 'ole Lyoussi', error: '' },
-            project: this.project || { id: '', name: '', error: '' },
-            address: { description: '', place_id: '', error: '' },
+            assignedTo: defaultState.assignedTo || { id: '', fullName: '' },
+            project: defaultState.project || { id: '', name: '' },
+            address: defaultState.address || { description: '', place_id: '' },
 
             //Schedule
             isAllDay: true,
-            startDate: { value: moment().format(), error: '' },
-            endDate: { value: moment().format(), error: '' },
-            startHour: { value: moment().format('HH:mm'), error: '' },
-            dueHour: { value: moment().format('HH:mm'), error: '' },
+            startDate: { value: moment().format() },
+            endDate: { value: moment().format() },
+            startHour: { value: moment().format('HH:mm') },
+            dueHour: { value: moment().format('HH:mm') },
 
             //Conflicts
             showTasksConflicts: false,
@@ -141,6 +143,43 @@ class CreateTask extends Component {
 
         load(this, false)
     }
+
+    setDefaultState() {
+
+        let defaultState = {}
+
+        if (this.project && this.taskType) {
+
+            const { subscribers, address } = this.project
+            
+            const name = `${this.taskType.value} - ${this.project.id}`
+
+            let assignedTo = {}
+            if (_.isEqual(this.taskType.natures, ['com'])) {
+                var comContact = subscribers.filter((sub) => sub.role === 'Commercial')[0]
+                assignedTo = comContact
+            }
+            if (_.isEqual(this.taskType.natures, ['tech'])) {
+                var techContact = subscribers.filter((sub) => sub.role === 'Poseur')[0] 
+                assignedTo = comContact
+            }
+
+            const project = this.project
+
+            console.log('project', project.subscribersIds)
+
+            defaultState = {
+                name,
+                type: this.taskType.value,
+                assignedTo,
+                project,
+                address
+            }
+        }
+
+        return defaultState
+    }
+
 
     async fetchTask() {
         await db.collection('Agenda').doc(this.TaskId).get().then((doc) => {
@@ -284,8 +323,8 @@ class CreateTask extends Component {
         }
 
         //3.3 "ASSIGNED TO" VERIFICATION (if he is one of the project's collaborators)
-        if (project && project.subscribers) {
-            const collaborators = project.subscribers.map((sub) => sub.id)
+        if (project && project.subscribersIds) {
+            const collaborators = project.subscribersIds 
             if (!collaborators.includes(assignedTo.id)) {
                 this.alertCollaborator()
                 load(this, false)
@@ -294,21 +333,27 @@ class CreateTask extends Component {
         }
 
         //4. Building task(s)
-        const currentUser = { id: firebase.auth().currentUser.uid, fullName: firebase.auth().currentUser.displayName }
+        const currentUser = { 
+            id: auth.currentUser.uid, 
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
+
         let natures
         this.types.forEach((t) => { if (t.value === type) natures = t.natures })
 
         let task = {
             id: this.TaskId,
             name: name.value,
-            assignedTo: { id: assignedTo.id, fullName: assignedTo.fullName },
+            assignedTo,
             description: description.value,
             project,
             type,
             natures,
             priority,
             status,
-            address: { description: address.description, place_id: address.place_id },
+            address,
             isAllDay,
             date: moment(startDate.value).format('YYYY-MM-DD'),
             startHour: isAllDay ? undefined : startHour.value,
@@ -333,7 +378,7 @@ class CreateTask extends Component {
             return
         }
 
-        //6. Handle conflicts
+        ////6. Handle conflicts
         // const overlappingTasks = await this.checkTasksConflicts(tasks)
         // if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
         //     load(this, false)
@@ -465,7 +510,7 @@ class CreateTask extends Component {
     }
 
     limitTasks(tasksLength) {
-        if (tasksLength > 25) {
+        if (tasksLength > 7) {
             Alert.alert('Limite dépassée', "Impossible d'ajouter plus de 25 tâches en une seule fois.")
             return true
         }
@@ -695,7 +740,7 @@ class CreateTask extends Component {
                                         error={!!name.error}
                                         errorText={name.error}
                                         editable={canWrite}
-                                        autoFocus={!this.isEdit}
+                                    // autoFocus={!this.isEdit}
                                     />
 
                                     <ItemPicker
@@ -725,6 +770,17 @@ class CreateTask extends Component {
                                         showAvatarText={false}
                                         editable={canWrite}
                                     />
+
+                                    <AddressInput
+                                        label='Adresse postale'
+                                        offLine={!isConnected}
+                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                        onChangeText={this.setAddress}
+                                        clearAddress={() => this.setAddress('')}
+                                        address={address}
+                                        addressError={address.error}
+                                        editable={canWrite}
+                                        isEdit={this.isEdit} />
 
                                     <Picker
                                         label="Type *"
@@ -773,19 +829,11 @@ class CreateTask extends Component {
                                         returnKeyType="done"
                                         value={description.value}
                                         onChangeText={text => updateField(this, description, text)}
+                                        multiline={true}
                                         error={!!description.error}
                                         errorText={description.error}
                                         editable={canWrite}
                                     />
-
-                                    <AddressInput
-                                        label='Adresse postale'
-                                        offLine={!isConnected}
-                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                                        address={address}
-                                        addressError={address.error}
-                                        editable={canWrite}
-                                        isEdit={this.isEdit} />
 
                                     <ColorPicker
                                         label='Couleur de la tâche'

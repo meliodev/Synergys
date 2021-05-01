@@ -17,10 +17,10 @@ moment.locale('fr')
 
 import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading, EmptyList } from '../../components'
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, adminId } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact } from "../../core/utils";
+import { constants, adminId, highRoles } from "../../core/constants";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, setAddress } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs, getResponsableByRole } from "../../api/firestore-api";
@@ -28,6 +28,7 @@ import { uploadFiles } from "../../api/storage-api";
 import { processMain, getCurrentStep, getCurrentAction, getPhaseId, getLatestProcessModelVersion } from '../../core/process'
 
 import { connect } from 'react-redux'
+import { ActivitySection } from '../../containers/ActivitySection';
 
 const states = [
     { label: 'En attente', value: 'En attente' },
@@ -62,6 +63,7 @@ class CreateProject extends Component {
         this.refreshComContact = refreshComContact.bind(this)
         this.refreshTechContact = refreshTechContact.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
+        this.setAddress = setAddress.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDeleteProject = this.handleDeleteProject.bind(this)
@@ -76,6 +78,7 @@ class CreateProject extends Component {
         this.initialState = {}
         this.isInit = true
         this.currentUser = firebase.auth().currentUser
+        this.isCurrentHighRole = highRoles.includes(this.props.role.id)
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
         this.isEdit = this.ProjectId ? true : false
@@ -103,7 +106,7 @@ class CreateProject extends Component {
             techContact: { id: '', fullName: '', email: '', role: '' },
 
             //Billing
-            bill: null,
+            bill: { amount: '' },
 
             color: theme.colors.primary,
 
@@ -159,13 +162,14 @@ class CreateProject extends Component {
 
         else this.initialState = _.cloneDeep(this.state)
 
-        this.fetchSuggestions()
         load(this, false)
     }
 
     componentWillUnmount() {
         if (this.isEdit) {
-            this.unsubscribeDocuments()
+            if (this.unsubscribeDocuments)
+                this.unsubscribeDocuments()
+
             this.unsubscribeTasks()
         }
     }
@@ -194,7 +198,7 @@ class CreateProject extends Component {
             subscribers = project.subscribers
             comContact = project.subscribers.filter((sub) => sub.role === 'Commercial')[0]
             techContact = project.subscribers.filter((sub) => sub.role === 'Poseur')[0]
-            bill = project.bill
+            bill = project.bill || {}
             color = project.color
 
             //َActivity
@@ -230,8 +234,10 @@ class CreateProject extends Component {
                 id: this.ProjectId,
                 name: name.value,
                 client,
-                subscribers,
                 step,
+                subscribersIds: subscribers.map((sub) => sub.id),
+                subscribers,
+                address
             }
 
             this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, bill, color, process, processFetched: true, isBlockedUpdates }, async () => {
@@ -241,6 +247,16 @@ class CreateProject extends Component {
             })
         })
     }
+
+
+    // processListener() {
+    //     this.unsubscribeProcessListener = db.collection('Projects').doc(this.ProjectId).onSnapshot((doc) => {
+    //         if (doc.exists) {
+    //             const process = doc.data()
+    //             this.setState({ process })
+    //         }
+    //     })
+    // }
 
     blockRoleUpdateOnPhase(role, phase) {
         let isBlockedUpdates = false
@@ -292,11 +308,6 @@ class CreateProject extends Component {
         })
     }
 
-    fetchSuggestions() {
-        const query = db.collection('Users')
-        this.fetchDocs(query, 'suggestions', '', () => { })
-    }
-
     refreshAddress(address) {
         this.setState({ address })
     }
@@ -343,6 +354,12 @@ class CreateProject extends Component {
         if (!isValid) return
 
         let { client, name, description, note, address, state, step, comContact, techContact, bill, color } = this.state
+        const currentUser = {
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
 
         //1. UPLOADING FILES (ONLINE ONLY)
         if (isConnected) {
@@ -359,20 +376,14 @@ class CreateProject extends Component {
         }
 
         //2. Set project
-        const currentSub = {
-            id: this.currentUser.uid,
-            fullName: this.currentUser.displayName,
-            email: this.currentUser.email,
-            role: this.props.role.value
-        }
-
         let adminSub = await getResponsableByRole('Admin')
         let dcSub = await getResponsableByRole('Directeur commercial')
         let rtSub = await getResponsableByRole('Responsable technique')
         if (!adminSub || !dcSub || !rtSub) return
 
-        var subscribers = [adminSub, dcSub, rtSub, comContact, techContact, currentSub]
+        let subscribers = [adminSub, dcSub, rtSub, comContact, techContact, currentUser]
 
+        //remove duplicates
         subscribers = subscribers.reduce((unique, o) => {
             if (!unique.some(obj => obj.id === o.id && obj.email === o.email && obj.fullName === o.fullName && obj.role === o.role)) {
                 unique.push(o)
@@ -380,10 +391,7 @@ class CreateProject extends Component {
             return unique
         }, [])
 
-        const currentUser = {
-            id: this.currentUser.uid,
-            fullName: this.currentUser.displayName
-        }
+        const subscribersIds = subscribers.map((sub) => sub.id)
 
         let project = {
             client,
@@ -396,6 +404,7 @@ class CreateProject extends Component {
             editedAt: moment().format(),
             editedBy: currentUser,
             subscribers,
+            subscribersIds,
             bill,
             color: color,
             deleted: false,
@@ -585,7 +594,7 @@ class CreateProject extends Component {
                         }
 
                         {!loading &&
-                            <View style={{ flex: 1, backgroundColor: 'yellow', justifyContent: 'center', alignItems: 'center' }}>
+                            <View style={{ flex: 1, marginTop: 15, justifyContent: 'center', alignItems: 'center' }}>
                                 {imagesCarousel.length > 0 &&
                                     <SliderBox
                                         images={imagesCarousel}
@@ -629,10 +638,11 @@ class CreateProject extends Component {
         )
     }
 
+
     render() {
         let { client, name, description, note, address, state, step, bill, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
-        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, suggestions, comContact, techContact } = this.state
+        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, comContact, techContact } = this.state
         let { error, loading, docNotFound, toastMessage, toastType } = this.state
         const { process, processFetched } = this.state
         const { isBlockedUpdates } = this.state
@@ -643,6 +653,7 @@ class CreateProject extends Component {
 
         const canCreateDocument = this.props.permissions.documents.canCreate
         const canReadTasks = this.props.permissions.tasks.canRead
+        const showBillSection = this.isEdit && (this.isCurrentHighRole || bill)
 
         const { isConnected } = this.props.network
 
@@ -725,6 +736,8 @@ class CreateProject extends Component {
                                     <AddressInput
                                         offLine={!isConnected}
                                         onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                        onChangeText={this.setAddress}
+                                        clearAddress={() => this.setAddress('')}
                                         address={address}
                                         addressError={address.error}
                                         editable={canWrite}
@@ -812,7 +825,7 @@ class CreateProject extends Component {
                                 </View>
                             } />
 
-                        {this.isEdit && bill && < FormSection
+                        {showBillSection && < FormSection
                             sectionTitle='Facturation'
                             sectionIcon={faEuroSign}
                             form={
@@ -821,7 +834,7 @@ class CreateProject extends Component {
                                         label="Montant facturé (€)*"
                                         returnKeyType="done"
                                         keyboardType='numeric'
-                                        value={bill.amount}
+                                        value={bill && bill.amount || ''}
                                         onChangeText={amount => {
                                             bill.amount = amount
                                             this.setState({ bill })
@@ -928,47 +941,12 @@ class CreateProject extends Component {
                         {canWrite && isConnected && <AddAttachment onPress={this.pickImage} style={{ marginLeft: theme.padding, marginBottom: theme.padding }} />}
 
                         {this.isEdit &&
-                            <FormSection
-                                sectionTitle='Activité'
-                                sectionIcon={faFileAlt}
-                                form={
-                                    <View style={{ flex: 1 }}>
-                                        <MyInput
-                                            label="Date de création"
-                                            returnKeyType="done"
-                                            value={createdAt}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity>
-                                            <MyInput
-                                                label="Crée par"
-                                                returnKeyType="done"
-                                                value={createdBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                        <MyInput
-                                            label="Dernière mise à jour"
-                                            returnKeyType="done"
-                                            value={editedAt}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity>
-                                            <MyInput
-                                                label="Dernier intervenant"
-                                                returnKeyType="done"
-                                                value={editedBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                    </View>
-                                }
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation= {this.props.navigation}
                             />
                         }
                     </ScrollView>

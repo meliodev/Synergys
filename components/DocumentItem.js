@@ -93,7 +93,7 @@ const DocumentItem = ({ document, options, functions, navigation, ...props }) =>
                             <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, textAlign: 'left' }]}>Envoyé par {document.createdBy.fullName}</Text>
                         </View>
                         <View style={{ flex: 0.25 }}>
-                            <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, textAlign: 'right' }]}>{moment(document.createdAt, 'lll').format('DD MMM')}</Text>
+                            <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, textAlign: 'right' }]}>{moment(document.createdAt).format('DD MMM')}</Text>
                         </View>
                     </View>
                 </View>

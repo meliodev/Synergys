@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, Dimensions, ScrollView } from 'react-native'
 import { connect } from 'react-redux'
 import { LineChart } from 'react-native-chart-kit'
+//#task: try react-native-responsive-linechart
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -29,7 +30,6 @@ class Analytics extends Component {
         const role = this.props.role
         const roleId = role.id
         this.queries = analyticsQueriesBasedOnRole(roleId, auth.currentUser.uid)
-        this.initialTurnoverObjects = initTurnoverObjects()
 
         this.state = {
             totalIncome: 0,
@@ -60,7 +60,8 @@ class Analytics extends Component {
         //     "11-2020": { "current": 200, "id": "2020", "isCurrent": true, "month": "Nov.", "monthYear": "11-2020", "target": undefined, "year": "2020" },
         // }
 
-        let turnoverObjects = this.initialTurnoverObjects
+        const initialTurnoverObjects = initTurnoverObjects()
+        let turnoverObjects = initialTurnoverObjects
 
         // turnoverObjects["03-2021"] = { "current": 5000, "id": "2021", "isCurrent": true, "month": "Mars", "monthYear": "03-2021", "target": undefined, "year": "2021" }
         // turnoverObjects["02-2021"] = { "current": 4000, "id": "2021", "isCurrent": true, "month": "Févr.", "monthYear": "02-2021", "target": undefined, "year": "2021" }
@@ -94,11 +95,13 @@ class Analytics extends Component {
     filterSemesterTurnover(turnoverArr) {
 
         const sixMmonthsAgo = moment().subtract('5', 'months').format('YYYY-MM')
+        const now = moment().format('YYYY-MM')
 
         turnoverArr = turnoverArr.filter((turnover) => {
             const monthYear = moment(turnover.monthYear, 'MM-YYYY').format('YYYY-MM')
-            const isLastSemester = moment(monthYear).isSameOrAfter(sixMmonthsAgo, 'month')
-            if (isLastSemester) return turnover
+            const isAfterSixMonthAgo = moment(monthYear).isSameOrAfter(sixMmonthsAgo, 'month')
+            const isBeforeNow = moment(monthYear).isSameOrBefore(now, 'month')
+            if (isAfterSixMonthAgo && isBeforeNow) return turnover
         })
 
         return turnoverArr
@@ -235,6 +238,7 @@ class Analytics extends Component {
                     yAxisLabel="€"
                     yAxisSuffix=""
                     yAxisInterval={1} // optional, defaults to 1
+                    paddingTop={"15"}
                     chartConfig={{
                         backgroundColor: "#e26a00",
                         backgroundGradientFrom: "#fb8c00",
@@ -243,23 +247,30 @@ class Analytics extends Component {
                         color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                         labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                         style: {
-                            borderRadius: 16
+                            borderRadius: 16,
                         },
                         propsForDots: {
                             r: "6",
                             strokeWidth: "2",
                             stroke: "#ffa726"
-                        }
+                        },
+                        propsForHorizontalLabels: {
+                            fontSize: "10",
+                            x: "52"
+                        },
                     }}
                     onDataPointClick={(data) => console.log(data)}
                     bezier
                     style={{
-                        marginTop: 5,
+                        marginTop: 0,
+                        //backgroundColor: 'pink',
                         marginBottom: 25,
-                        borderRadius: 16
+                        borderRadius: 16,
+                        paddingTop: 20
                     }}
                 />
             </View>
+
         )
     }
 
@@ -285,7 +296,8 @@ class Analytics extends Component {
     }
 
     async refreshMonthlyGoals() {
-        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, this.initialTurnoverObjects, auth.currentUser.uid)
+        const initialTurnoverObjects = initTurnoverObjects()
+        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, auth.currentUser.uid)
         const turnoverArr = setTurnoverArr(turnoverObjects)
         const monthlyGoals = setMonthlyGoals(turnoverArr)
         this.setState({ monthlyGoals })

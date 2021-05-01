@@ -17,7 +17,6 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
     let loopHandler = true
 
     while (loopHandler) {
-
         //0. Initialize process with 1st phase/1st step
         if (Object.keys(process).length === 1) {
             process = initProcess(processModel, process, projectSecondPhase)
@@ -62,8 +61,6 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
         //3'. Found nextStep/nextPhase -> All actions valid -> Transition
         if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
 
-            process[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
-
             console.log('transition...')
             const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
             process = transitionRes.process
@@ -80,10 +77,11 @@ export const projectProcessHandler = async (processModel, currentProcess, projec
 }
 
 
-const checkForcedValidations = (actions) => {
+export const checkForcedValidations = (actions) => {
     for (let action of actions) {
-        if (action.forcedValidation)
+        if (action.forceValidation) {
             action.status = 'done'
+        }
     }
     return actions
 }
@@ -266,7 +264,6 @@ const verifyActions = async (actions, attributes, process) => {
 
     if (actions_dataFill.length > 0) {
         var res1 = await verifyActions_dataFill(actions_dataFill)
-
         allActionsValid_dataFill = res1.allActionsValid_dataFill
         actions_dataFill = res1.verifiedActions_dataFill
         nextStep = res1.nextStep
@@ -290,7 +287,8 @@ const verifyActions = async (actions, attributes, process) => {
     let actions_multipleChoices = actions_groupedByVerificationType['multiple-choices'] || []
     let actions_comment = actions_groupedByVerificationType['comment'] || []
     let actions_validation = actions_groupedByVerificationType['validation'] || []
-    let actions_manual = actions_multipleChoices.concat(actions_comment, actions_validation)
+    let actions_phaseRollback = actions_groupedByVerificationType['phaseRollback'] || []
+    let actions_manual = actions_multipleChoices.concat(actions_comment, actions_validation, actions_phaseRollback)
     let allActionsValid_manual = true
 
     if (actions_manual.length > 0) {
@@ -450,7 +448,7 @@ export const handleTransition = (processModel, process, currentPhaseId, currentS
         //Update project (status/step)
         if (nextPhaseId === 'cancelProject') {
             cancelProject(ProjectId)
-            processEnded = true
+           // processEnded = true
         }
 
         else if (nextPhaseId === 'endProject') {
@@ -486,6 +484,7 @@ export const projectNextStepInit = (processModel, process, currentPhaseId, curre
     //0. Handle rollback (report rdn loop)
     if (nextStepId) {
         const currentStepOrder = processModel[currentPhaseId].steps[currentStepId].stepOrder
+        console.log('éééééééééééééé', currentPhaseId, nextStepId)
         const nextStepOrder = processModel[currentPhaseId].steps[nextStepId].stepOrder
         if (nextStepOrder < currentStepOrder) {
             delete process[currentPhaseId].steps[currentStepId]
@@ -514,6 +513,7 @@ export const getNextPhaseId = (process, currentPhaseId, currentStepId) => {
 export const projectNextPhaseInit = (processModel, process, nextPhaseId) => {
     //1. Get next Phase from process model
     const nextPhaseModel = _.cloneDeep(processModel[nextPhaseId])
+
 
     //2. Keep only first step (stepOrder = 1)
     const firstStep = getPhaseFirstStep(nextPhaseModel.steps)

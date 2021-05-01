@@ -28,7 +28,7 @@ import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
 import { resetState, setNetwork } from '../../core/redux'
 import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient } from '../../api/firestore-api'
-import { sortMonths, navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast, formatRow, generateId } from "../../core/utils"
+import { sortMonths, navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress } from "../../core/utils"
 import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
@@ -48,33 +48,31 @@ class Profile extends Component {
         this.handleReauthenticateError = this.handleReauthenticateError.bind(this)
         this.fetchDocs = fetchDocs.bind(this)
         this.validateClientInputs = validateClientInputs.bind(this)
+        this.refreshMonthlyGoals = this.refreshMonthlyGoals.bind(this)
+        this.refreshAddress = refreshAddress.bind(this)
+        this.setAddress = setAddress.bind(this)
 
         this.roleId = this.props.role.id
         this.userParam = this.props.navigation.getParam('user', { id: firebase.auth().currentUser.uid, roleId: this.roleId })
-        this.isClient = this.props.navigation.getParam('isClient', false)
-        this.isClient = this.isClient || this.roleId === 'client'
+        this.isClient = this.userParam.roleId === 'client'
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
         this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.initialState = {}
 
         if (this.userParam.roleId === 'com') {
             this.queries = analyticsQueriesBasedOnRole('com', this.userParam.id)
-            this.initialTurnoverObjects = initTurnoverObjects()
         }
 
         this.state = {
             id: this.userParam.id, //Not editable
-            currentUser: firebase.auth().currentUser,
-
+            currentUser: auth.currentUser,
             isPro: false,
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
             nom: { value: '', error: '' },
             prenom: { value: '', error: '' },
             isProspect: false,
-
             role: '',
-
             email: { value: '', error: '' },
             phone: { value: '', error: '' },
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
@@ -98,16 +96,17 @@ class Profile extends Component {
     }
 
     async componentDidMount() {
+
         await this.fetchUserData()
         if (this.isClient) await this.fetchClientProjects()
 
         // DC can view/add Coms goals
         if (this.userParam.roleId === 'com') {
-            const turnoverObjects = await fetchTurnoverData(this.queries.turnover, this.initialTurnoverObjects, this.userParam.id)
+            const initialTurnoverObjects = initTurnoverObjects()
+            const turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, this.userParam.id)
             let turnoverArr = setTurnoverArr(turnoverObjects)
             turnoverArr = sortMonths(turnoverArr)
             const monthlyGoals = setMonthlyGoals(turnoverArr)
-            console.log('MONTHLY GOALS...........', monthlyGoals)
             this.setState({ monthlyGoals })
         }
 
@@ -226,11 +225,12 @@ class Profile extends Component {
 
         //Format data
         let userData = []
-        let { isPro, nom, prenom, denom, phone } = this.state
+        let { isPro, nom, prenom, denom, phone, address } = this.state
         const { isConnected } = this.props.network
 
         let user = {
-            phone: phone.value
+            phone: phone.value,
+            address
         }
 
         if (isConnected) {
@@ -375,14 +375,15 @@ class Profile extends Component {
     }
 
     //##Renderers
-    renderAvatar(deleted) {
+    renderAvatar() {
+        const { deleted } = this.state
         const icon = deleted ? faUserSlash : faUser
         const iconColor = deleted ? theme.colors.error : theme.colors.primary
 
         return (
             <View style={styles.avatar} >
                 <CustomIcon icon={icon} color={iconColor} size={30} />
-                {deleted && <Text style={[theme.customFontMSregular.small, { position: 'absolute', bottom: 5, color: theme.colors.gray_dark, textAlign: 'center' }]}>Utilisateur supprimé</Text>}
+                {deleted && <Text style={[theme.customFontMSregular.extraSmall, { position: 'absolute', bottom: 15, color: theme.colors.gray_dark, textAlign: 'center' }]}>Utilisateur supprimé</Text>}
             </View>
         )
     }
@@ -493,7 +494,8 @@ class Profile extends Component {
     }
 
     async refreshMonthlyGoals() {
-        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, this.initialTurnoverObjects, this.userParam.id)
+        const initialTurnoverObjects = initTurnoverObjects()
+        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, this.userParam.id)
         const turnoverArr = setTurnoverArr(turnoverObjects)
         const monthlyGoals = setMonthlyGoals(turnoverArr)
         this.setState({ monthlyGoals })
@@ -515,7 +517,7 @@ class Profile extends Component {
     }
 
     render() {
-        let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, monthlyGoals, isProspect, userNotFound, deleted } = this.state
+        let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, monthlyGoals, isProspect, userNotFound } = this.state
         const { isConnected } = this.props.network
 
         const { currentUser } = firebase.auth()
@@ -542,7 +544,7 @@ class Profile extends Component {
                             {!loading ?
                                 <View style={{ paddingHorizontal: theme.padding }}>
                                     <View style={{ height: 130, flexDirection: 'row', alignItems: 'center', marginVertical: 30 }}>
-                                        {this.renderAvatar(deleted)}
+                                        {this.renderAvatar()}
                                         {this.renderMetadata(canUpdate, isConnected)}
                                     </View>
 
@@ -622,8 +624,10 @@ class Profile extends Component {
 
                                         <AddressInput
                                             offLine={!isConnected}
-                                            onPress={() => navigateToScreen(this, 'Address', { prevScreen: 'Profile', userId: this.userParam.id, collection: this.isClient ? 'Clients' : 'Users', currentAddress: this.state.address })}
+                                            onPress={() => navigateToScreen(this, 'Address', { currentAddress: this.state.address, onGoBack: this.refreshAddress })}
                                             address={address}
+                                            onChangeText={this.setAddress}
+                                            clearAddress={() => this.setAddress('')}
                                             addressError={addressError}
                                             editable={canUpdate || this.isProcess}
                                             isEdit={true}

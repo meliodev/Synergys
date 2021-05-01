@@ -6,7 +6,7 @@ import { List, Headline } from 'react-native-paper'
 import { faArrowAltToBottom, faReply, faShare } from '@fortawesome/pro-solid-svg-icons'
 import Entypo from 'react-native-vector-icons/Entypo'
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, functions } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { downloadFile, setToast, load } from '../../core/utils'
@@ -34,9 +34,7 @@ export default class ViewMessage extends Component {
             messagesList: [],
             messagesCount: 0,
             expandedId: '',
-
             showOldMessages: false,
-
             toastMessage: '',
             toastType: '',
             loading: true
@@ -44,9 +42,15 @@ export default class ViewMessage extends Component {
     }
 
     componentDidMount() {
+
         //Static query
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
-        const query = db.collection('Messages').doc(this.message.id).collection('AllMessages').where('speakers', 'array-contains', currentUser).orderBy('sentAt', 'DESC')
+        const query = db
+            .collection('Messages')
+            .doc(this.message.id)
+            .collection('AllMessages')
+            .where('speakersIds', 'array-contains', this.currentUser.uid)
+            .orderBy('sentAt', 'desc')
+
         this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })
     }
 
@@ -55,22 +59,36 @@ export default class ViewMessage extends Component {
     }
 
     goToReply(sender, messagesRendered) {
-        let tagSelected = [sender]
+        const tagsSelected = [sender]
         this.setState({ expandedId: '' })
-        this.props.navigation.navigate('NewMessage', { isReply: true, messageGroupeId: this.message.id, tagsSelected: tagSelected, subject: this.message.mainSubject, oldMessages: messagesRendered, subscribers: this.message.subscribers })
+        this.props.navigation.navigate('NewMessage', {
+            isReply: true,
+            messageGroupeId: this.message.id,
+            tagsSelected,
+            subject: `RE: ${this.message.mainSubject}`,
+            oldMessages: messagesRendered,
+            subscribers: this.message.subscribers
+        })
     }
 
     goToReplyAll(speakers, messagesRendered) {
-        let allTagsSelected = speakers.filter((subscriber) => subscriber.id !== this.currentUser.uid)
+        const allSpeakers = speakers.filter((subscriber) => subscriber.id !== this.currentUser.uid)
         this.setState({ expandedId: '' })
-        this.props.navigation.navigate('NewMessage', { isReply: true, messageGroupeId: this.message.id, tagsSelected: allTagsSelected, subject: this.message.mainSubject, oldMessages: messagesRendered, subscribers: this.message.subscribers })
+        this.props.navigation.navigate('NewMessage', {
+            isReply: true,
+            messageGroupeId: this.message.id,
+            tagsSelected: allSpeakers,
+            subject: `RE: ${this.message.mainSubject}`,
+            oldMessages: messagesRendered,
+            subscribers: this.message.subscribers
+        })
     }
 
+    //renderers
     renderMessage(selectedMessage) {
         const { sender, message, sentAt, oldMessages } = selectedMessage
-        let { showOldMessages } = this.state
-
-        let messagesRendered = [{ sender, message, sentAt }].concat(oldMessages)
+        const { showOldMessages } = this.state
+        const messagesRendered = [{ sender, message, sentAt }].concat(oldMessages)
         const showHideText = showOldMessages ? 'Masquer le texte des messages précédents' : 'Afficher le texte des messages précédents'
 
         return (
@@ -88,12 +106,14 @@ export default class ViewMessage extends Component {
                                     <View>
                                         <Text style={[theme.customFontMSregular.body, { marginBottom: 20 }]}>{msg.message}</Text>
                                         {messagesRendered.length > 1 && <Text style={[theme.customFontMSregular.caption, { marginBottom: 5, color: theme.colors.primary }]} onPress={showOldMessages => this.setState({ showOldMessages: !this.state.showOldMessages })}>{showHideText}</Text>}
-                                    </View>}
+                                    </View>
+                                }
                                 {key > 0 && showOldMessages &&
                                     <View>
                                         <Text style={theme.customFontMSregular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }}>Le <Text style={theme.customFontMSregular.body}>{sentAtDate}</Text> à <Text style={theme.customFontMSregular.body}>{sentAtTime}</Text>, <Text style={theme.customFontMSregular.body}>{msg.sender.fullName}</Text> a écrit:</Text>
                                         <Text style={[theme.customFontMSregular.body, { marginBottom: 15 }]}>{msg.message}</Text>
-                                    </View>}
+                                    </View>
+                                }
                             </View>
                         )
                     })}
@@ -201,12 +221,12 @@ export default class ViewMessage extends Component {
     }
 
     render() {
-        let { toastMessage, toastType } = this.state
+        const { toastMessage, toastType } = this.state
 
         return (
-            <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+            <View style={styles.container}>
                 <Appbar back title titleText='File des messages' />
-                <View style={{ flex: 1, padding: 5, paddingTop: 20 }}>
+                <View style={styles.container}>
                     <Headline style={[theme.customFontMSmedium.h3, { paddingLeft: constants.ScreenWidth * 0.038, marginBottom: 5 }]}>{this.message.mainSubject}</Headline>
                     <ScrollView style={styles.container} >
                         {this.renderMessages()}
@@ -228,60 +248,9 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.background
     },
-    box: {
-        padding: 20,
-        marginBottom: 5,
-        backgroundColor: 'white',
-        flexDirection: 'row',
-    },
-    boxContent: {
+    content: {
         flex: 1,
-        //flexDirection: 'column',
-        //alignItems: 'flex-start',
-        marginLeft: 10,
+        padding: 5,
+        paddingTop: 20
     },
-    description: {
-        fontSize: 15,
-        color: "#646464",
-    },
-    title: {
-        fontSize: 18,
-        color: "#151515",
-    },
-    fab: {
-        flex: 1,
-        backgroundColor: theme.colors.primary,
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        margin: 16,
-        right: 0,
-        bottom: 0,
-        width: 50,
-        height: 50,
-        borderRadius: 100,
-    }
-});
-
-
-
-/* <List.Accordion
-title="Accordion 1"
-id='team1'
-title="Team 1"
-theme={{ colors: { primary: '#333' } }}
-titleStyle={theme.customFontMSsemibold.header}>
-{this.renderMembers()}
-</List.Accordion> */
-
-
-// {this.state.teamsList.map((team, key) => {
-//     <List.Accordion
-//         id={team.id}
-//         title={team.name}
-//         theme={{ colors: { primary: '#333' } }}
-//         titleStyle={theme.customFontMSsemibold.header}>
-//         {this.renderMembers()}
-//     </List.Accordion>
-// })
-// }
+})

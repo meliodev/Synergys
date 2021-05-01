@@ -20,14 +20,15 @@ import MyFAB from "../../components/MyFAB";
 import EmptyList from "../../components/EmptyList";
 import Loading from "../../components/Loading";
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, setAddress } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
 import CreateProject from './CreateProject';
+import { ActivitySection } from '../../containers/ActivitySection';
 
 const departments = [
     { label: 'Commercial', value: 'Commercial' },
@@ -41,13 +42,14 @@ class CreateRequest extends Component {
         super(props)
         this.refreshClient = refreshClient.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
+        this.setAddress = setAddress.bind(this)
+        this.autoFillClient = this.autoFillClient.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.myAlert = myAlert.bind(this)
 
         this.initialState = {}
         this.isInit = true
-        this.currentUser = firebase.auth().currentUser
         this.requestType = this.props.requestType
         this.isTicket = this.requestType === 'ticket' ? true : false
         //this.isProject = false
@@ -61,7 +63,7 @@ class CreateRequest extends Component {
             RequestId: '', //Not editable
             client: { id: '', fullName: '' },
 
-            department: 'Incident', //ticket
+            department: 'Commercial', //ticket
             address: { description: '', place_id: '' }, //project
 
             subject: { value: "", error: '' },
@@ -103,10 +105,12 @@ class CreateRequest extends Component {
     }
 
     autoFillClient() {
-        const { currentUser } = firebase.auth()
+        const { currentUser } = auth
         const client = {
             id: currentUser.uid,
-            fullName: currentUser.displayName
+            fullName: currentUser.displayName,
+            email: currentUser.email,
+            role: this.props.role.value
         }
         return client
     }
@@ -121,7 +125,7 @@ class CreateRequest extends Component {
             }
 
             let { RequestId, department, client, subject, state, description, address } = this.state
-            let { createdAt, createdBy, editedAt, editedBy } = this.state
+            const { createdAt, createdBy, editedAt, editedBy } = this.state
 
             const request = doc.data()
             //General info
@@ -222,7 +226,12 @@ class CreateRequest extends Component {
 
         //2. ADDING REQUEST DOCUMENT
         const { RequestId, client, department, subject, description, address, state } = this.state
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const currentUser = {
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
 
         let request = {
             client: client,
@@ -357,6 +366,8 @@ class CreateRequest extends Component {
                                         offLine={!isConnected}
                                         onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
                                         address={address}
+                                        onChangeText={this.setAddress}
+                                        clearAddress={() => this.setAddress('')}
                                         addressError={addressError}
                                         editable={canWrite}
                                         isEdit={this.isEdit} />
@@ -386,35 +397,13 @@ class CreateRequest extends Component {
                         </Card>
 
                         {this.isEdit &&
-                            <Card>
-                                <Card.Content>
-                                    <Title>Activité</Title>
-                                    <MyInput
-                                        label="Date de création"
-                                        returnKeyType="done"
-                                        value={createdAt}
-                                        editable={false}
-                                    />
-                                    <MyInput
-                                        label="Auteur"
-                                        returnKeyType="done"
-                                        value={createdBy.fullName}
-                                        editable={false}
-                                    />
-                                    <MyInput
-                                        label="Dernière mise à jour"
-                                        returnKeyType="done"
-                                        value={editedAt}
-                                        editable={false}
-                                    />
-                                    <MyInput
-                                        label="Dernier intervenant"
-                                        returnKeyType="done"
-                                        value={editedBy.fullName}
-                                        editable={false}
-                                    />
-                                </Card.Content>
-                            </Card>
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation={this.props.navigation}
+                            />
                         }
                     </ScrollView>
                 }

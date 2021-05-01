@@ -12,6 +12,7 @@ import { constants, highRoles } from '../../core/constants'
 import { db, auth } from '../../firebase'
 
 import { Section, EmptyList } from '../../components'
+import { sortMonths } from '../../core/utils';
 
 const viewMoreLink = (navigation, navScreen, navParams) => {
     const customStyle = { textAlign: 'center', color: theme.colors.primary, marginTop: 15 }
@@ -106,9 +107,12 @@ export const setMonthlyGoals = (turnoverArr) => {
     let monthlyGoals = []
 
     for (const turnover of turnoverArr) {
-        if (turnover.target)
+        if (turnover.target) {
             monthlyGoals.push(turnover)
+        }
     }
+
+    monthlyGoals = sortMonths(monthlyGoals)
 
     return monthlyGoals
 }

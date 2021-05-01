@@ -22,6 +22,7 @@ import { uploadFiles } from "../../api/storage-api";
 import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
 
 import { connect } from 'react-redux'
+import { ActivitySection } from '../../containers/ActivitySection';
 
 class AddGoal extends Component {
     constructor(props) {
@@ -34,7 +35,6 @@ class AddGoal extends Component {
 
         this.initialState = {}
         this.isInit = true
-        this.currentUser = firebase.auth().currentUser
 
         this.userId = this.props.navigation.getParam('userId', auth.currentUser.uid)
         this.GoalId = this.props.navigation.getParam('GoalId', '')
@@ -156,8 +156,10 @@ class AddGoal extends Component {
         let { GoalId, monthYear, target, description } = this.state
 
         const currentUser = {
-            id: this.currentUser.uid,
-            fullName: this.currentUser.displayName
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
         }
 
         const formatedMonthYear = moment(monthYear).format('MM-YYYY')
@@ -204,7 +206,6 @@ class AddGoal extends Component {
 
     goalOverview() {
         const { GoalId, target, current, monthYear } = this.initialState
-        console.log('.....', moment(monthYear, 'X').format('lll'))
         const monthTemp = moment(monthYear).format('MMMM')
         const month = monthTemp.charAt(0).toUpperCase() + monthTemp.slice(1)
 
@@ -223,6 +224,7 @@ class AddGoal extends Component {
                     index={0}
                     onPress={() => console.log('No action...')}
                     isList={false}
+                    style={{ width: undefined }}
                 />
             </View>
         )
@@ -346,47 +348,12 @@ class AddGoal extends Component {
                         {this.isEdit && this.incomeSources.length > 0 && this.renderIncomeSources()}
 
                         {this.isEdit &&
-                            <FormSection
-                                sectionTitle='Activité'
-                                sectionIcon={faFileAlt}
-                                form={
-                                    <View style={{ flex: 1 }}>
-                                        <MyInput
-                                            label="Date de création"
-                                            returnKeyType="done"
-                                            value={moment(createdAt).format('ll')}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity>
-                                            <MyInput
-                                                label="Crée par"
-                                                returnKeyType="done"
-                                                value={createdBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                        <MyInput
-                                            label="Dernière mise à jour"
-                                            returnKeyType="done"
-                                            value={moment(editedAt).format('ll')}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity>
-                                            <MyInput
-                                                label="Dernier intervenant"
-                                                returnKeyType="done"
-                                                value={editedBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                    </View>
-                                }
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation= {this.props.navigation}
                             />
                         }
                     </ScrollView>

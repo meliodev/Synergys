@@ -39,9 +39,6 @@ class ListMessages extends Component {
             const query = configureQuery('Messages', queryFilters, params)
             this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
         }
-
-        //  const query = db.collection('Messages').where('subscribers', 'array-contains', this.currentUser.uid).orderBy('sentAt', 'desc')
-        // this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
     }
 
 
@@ -76,7 +73,7 @@ class ListMessages extends Component {
 
         return (
             <Background style={styles.container}>
-                <ListSubHeader>{messagesCount} message{s}</ListSubHeader>
+                <ListSubHeader>{messagesCount} sujet{s}</ListSubHeader>
 
                 {messagesCount > 0 ?
                     < FlatList

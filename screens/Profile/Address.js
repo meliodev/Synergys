@@ -10,6 +10,7 @@ import Loading from "../../components/Loading"
 import { db } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants } from '../../core/constants'
+import { load } from '../../core/utils';
 
 Geocoder.init("AIzaSyDKYloIbFHpaNh5QWGa7CWjKr8v-3aiu80", { language: "fr" })
 
@@ -29,11 +30,7 @@ class MarkerTypes extends React.Component {
         this.onRegionChange = this.onRegionChange.bind(this)
         this.onChangePosition = this.onChangePosition.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-
-        this.prevScreen = this.props.navigation.getParam('prevScreen', '')
-        this.userId = this.props.navigation.getParam('userId', '')
-        this.currentAddress = this.props.navigation.getParam('currentAddress', '')
-        this.collection = this.props.navigation.getParam('collection', 'Users')
+        this.currentAddress = this.props.navigation.getParam('currentAddress', {})
 
         this.state = {
             region: {
@@ -58,7 +55,7 @@ class MarkerTypes extends React.Component {
     }
 
     getCurrentPosition() {
-        if (this.currentAddress.description) {
+        if (this.currentAddress && this.currentAddress.marker.latitude !== '' && this.currentAddress.marker.longitude !== '') { //Not manual
             let marker = {
                 latitude: this.currentAddress.marker.latitude,
                 longitude: this.currentAddress.marker.longitude
@@ -81,33 +78,21 @@ class MarkerTypes extends React.Component {
     handleSubmit() {
         if (this.state.loading) return
 
-        const { address, marker } = this.state
+        load(this, true)
 
-        address.marker = marker
+        const { address, marker } = this.state
 
         if (address.description === '') {
             Alert.alert('Veuillez choisir une adresse correcte.')
             return
         }
 
-        this.setState({ loading: true })
+        address.marker = marker
 
-        if (this.prevScreen === 'Profile') {
-            if (address.description !== this.currentAddress.description)
-                db.collection(this.collection).doc(this.userId).update({ address: address })
-                    .then(() => this.props.navigation.goBack())
-                    .catch((e) => Alert.alert(e))
-                    .finally(() => this.setState({ loading: false }))
+        this.props.navigation.state.params.onGoBack(address)
+        this.props.navigation.goBack()
 
-            else Alert.alert("Veuillez modifier votre adresse actuelle avant de valider.")
-        }
-
-        else {
-            this.props.navigation.state.params.onGoBack(address)
-            this.props.navigation.goBack()
-        }
-
-        this.setState({ loading: false })
+        load(this, false)
     }
 
     onChangePosition(e) {

@@ -91,12 +91,19 @@ export default class CreateTeam extends Component {
         //2. ADDING TEAM DOCUMENT
         let { teamId, name, description } = this.state
 
+        const currentUser = {
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
+
         let team = {
             name: name.value,
             description: description.value,
             members: [],
             editedAt: moment().format(),
-            editedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },
+            editedBy: currentUser,
             deleted: false
         }
 
@@ -106,7 +113,7 @@ export default class CreateTeam extends Component {
 
         if (!this.isEdit) {
             team.createdAt = moment().format()
-            team.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+            team.createdBy = currentUser
         }
 
         console.log('Ready to set team...')
@@ -170,7 +177,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.background
     },
     formContainer: {
-        paddingHorizontal: theme.padding*1.2,
+        paddingHorizontal: theme.padding * 1.2,
         paddingBottom: constants.ScreenWidth * 0.10,
         paddingTop: 25,
         marginBottom: constants.ScreenHeight * 0.025,

@@ -63,7 +63,7 @@ class ListUsers extends Component {
         batch.update(teamRef, { members: firebase.firestore.FieldValue.arrayRemove(user.id) })
       }
 
-      //2. Update User (deleted = false)
+      //2. Update User (deleted = true)
       const userRef = db.collection('Users').doc(user.id)
       batch.update(userRef, { deleted: true, hasTeam: false })
     }
@@ -81,15 +81,6 @@ class ListUsers extends Component {
   }
 
   renderUser = (user) => {
-
-    const onPressUser = (item) => {
-      const { isPro, id, denom, nom, prenom, role, email } = item
-
-      if (isPro)
-        this.props.onPress(isPro, id, denom, '', role, email)
-      else
-        this.props.onPress(isPro, id, nom, prenom, role, email)
-    }
 
     const { userType, permissions, offLine } = this.props
     const { canRead, canUpdate, canDelete } = permissions
@@ -123,13 +114,12 @@ class ListUsers extends Component {
       <UserItem
         userType={this.props.userType}
         item={user}
-        onPress={() => onPressUser(user)}
+        onPress={() => this.props.onPress(user)}
         options={options}
         functions={functions}
       />
     )
   }
-
 
   onPressFAB() {
     const { prevScreen, userType, onGoBack } = this.props
@@ -156,7 +146,7 @@ class ListUsers extends Component {
           <View style={styles.container}>
 
             {usersCount > 0 && <ListSubHeader style={{ backgroundColor: theme.colors.background }}>{usersCount} {userType}{s}</ListSubHeader>}
-            {usersCount > 0 ? 
+            {usersCount > 0 ?
               <FlatList
                 enableEmptySections={true}
                 data={filteredUsers}

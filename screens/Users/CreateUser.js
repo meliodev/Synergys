@@ -20,7 +20,7 @@ import LoadDialog from "../../components/LoadDialog"
 import firebase, { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, roles as allRoles } from "../../core/constants";
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load } from "../../core/utils"
+import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, setAddress } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
 const rolesPicker = {
@@ -46,6 +46,7 @@ class CreateUser extends Component {
     // this.isUserArchived = this.isUserArchived.bind(this)
     this.addUser = this.addUser.bind(this)
     this.refreshAddress = this.refreshAddress.bind(this)
+    this.setAddress = setAddress.bind(this)
 
     this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
     this.title = 'Créer un utilisateur'
@@ -53,7 +54,7 @@ class CreateUser extends Component {
 
     this.state = {
       userId: '', //Not editable
-      role: 'Client',
+      role: 'Admin',
 
       checked: 'first', //professional/Particular
       isPro: false,
@@ -152,10 +153,6 @@ class CreateUser extends Component {
     return true
   }
 
-  //#task
-  //check commented code on bottom of this page
-  //should handle the following case: adding a user which has been previously deleted.
-  //users are not deleted but only deleted field is set to false
   addUser = async (uid, overWrite) => {
     let { role, isPro, error, loading } = this.state
     let { userId, nom, prenom, address, phone, email, password } = this.state
@@ -167,14 +164,6 @@ class CreateUser extends Component {
     const isValid = await this.validateInputs()
     if (!isValid) return
 
-    // if (overWrite) {
-    //   var accountDeleted = await this.deleteUserAccount(uid)
-    //   if (!accountDeleted) {
-    //     setToast(this, 'e', "Erreur lors de l'écrasement de l'ancien utilisateur...")
-    //     return
-    //   }
-    // }
-
     this.setState({ loadingDialog: true })
 
     //2. ADDING USER DOCUMENT
@@ -185,7 +174,12 @@ class CreateUser extends Component {
       role,
       password: password.value,
       userType: 'utilisateur',
-      createdBy: { id: auth.currentUser.uid, fullName: auth.currentUser.displayName },
+      createdBy: {
+        id: auth.currentUser.uid,
+        fullName: auth.currentUser.displayName,
+        email: auth.currentUser.email,
+        role: this.props.role.value,
+      },
       createdAt: moment().format(),
     }
 
@@ -298,6 +292,8 @@ class CreateUser extends Component {
               offLine={!isConnected}
               onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
               address={address}
+              onChangeText={this.setAddress}
+              clearAddress={() => this.setAddress('')}
               addressError={addressError}
               isEdit={false}
             />

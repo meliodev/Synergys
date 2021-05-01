@@ -16,7 +16,7 @@ import CustomIcon from './CustomIcon'
 import StepProgress from './process/StepProgress'
 import Loading from './Loading'
 
-import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler, getLatestProcessModel } from '../core/process'
+import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, projectProcessHandler, getLatestProcessModel, checkForcedValidations } from '../core/process'
 import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, load } from '../core/utils'
 import * as theme from "../core/theme"
@@ -91,7 +91,8 @@ class ProcessAction extends Component {
         const { project, clientId, step } = this.props
         const secondPhaseId = getPhaseId(step)
         const copyProcessModel = _.cloneDeep(this.processModel)
-        const updatedProcess = await projectProcessHandler(copyProcessModel, process, secondPhaseId, clientId, project)
+
+        var updatedProcess = await projectProcessHandler(copyProcessModel, process, secondPhaseId, clientId, project)
 
         //if (!_.isEqual(process, updatedProcess)) {
         await this.updateProcess(updatedProcess)
@@ -141,19 +142,29 @@ class ProcessAction extends Component {
 
     //3. Refresh Process History locally
     refreshProcessHistory(process) {
+
+        delete process.version
+
         let phaseLabels = []
         let phaseStatuses = []
         let steps = []
 
+        for (const phaseId in this.processModel) {
+            if (!process[phaseId] && phaseId !== 'cancelProject' && phaseId !== 'endProject') {
+                let phase = _.cloneDeep(this.processModel[phaseId])
+                delete phase.steps
+                process[phaseId] = phase
+            }
+        }
+
         process = this.sortPhases(process)
-        delete process.version
 
         for (let phaseId in process) {
             const processData = process[phaseId]
             phaseLabels.push(processData.title)
 
             let phaseSteps = []
-            let phaseStatus = 'done'
+            let phaseStatus = processData.steps ? 'done' : 'grayed'
             for (let stepId in processData.steps) {
                 let step = processData.steps[stepId]
 
@@ -179,7 +190,7 @@ class ProcessAction extends Component {
             steps.push(phaseSteps)
         }
 
-        this.setState({ process, phaseLabels, phaseStatuses, stepsData: steps })
+        this.setState({ phaseLabels, phaseStatuses, stepsData: steps })
     }
 
     //func1
@@ -229,7 +240,34 @@ class ProcessAction extends Component {
             else if (verificationType === 'validation') {
                 await this.validateAction(null, null, false, nextStep, nextPhase)
             }
+
+            else if (verificationType === 'phaseRollback') {
+                await this.runOperation(currentAction.operation, currentAction) //Exp: update project status back to 'En cours'
+                await this.phaseRollback()
+            }
         }
+    }
+
+    async phaseRollback() {
+        const { process, currentPhaseId } = this.state
+        let processTemp = _.cloneDeep(process)
+        delete processTemp[currentPhaseId]
+        await this.updateProcess(processTemp)
+    }
+
+    undoPreviousAction = async () => {
+        const { process, currentPhaseId, currentStepId, pressedAction } = this.state
+
+        const previousActionOrder = pressedAction.actionOrder - 1
+
+        let processTemp = _.cloneDeep(process)
+        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+            if (action.actionOrder === previousActionOrder) {
+                action.status = "pending"
+            }
+        })
+
+        await this.updateProcess(processTemp)
     }
 
     //func2
@@ -270,21 +308,21 @@ class ProcessAction extends Component {
             }
 
             else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                await this.runChoiceOperation(operation, pressedAction)
+                await this.runOperation(operation, pressedAction)
                 await this.validateAction(null, null, false, nextStep, nextPhase)
             }
 
             else if (onSelectType === 'validation') {
-                await this.runChoiceOperation(operation, pressedAction)
+                await this.runOperation(operation, pressedAction)
                 await this.validateAction(null, null, false, null, null, true)
             }
 
             else if (onSelectType === 'commentPicker') {
-                await this.runChoiceOperation(operation, pressedAction)
+                await this.runOperation(operation, pressedAction)
                 await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
             }
 
-            this.setState({ showModal: false, loadingModal: false })
+            this.setState({ loadingModal: false, showModal: false })
         }
         return
     }
@@ -298,7 +336,7 @@ class ProcessAction extends Component {
         const operation = choice && choice.operation || pressedAction.operation || null
         if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
 
-        await this.runChoiceOperation(operation, pressedAction)
+        await this.runOperation(operation, pressedAction)
         await this.validateAction(comment, null, false, nextStep, nextPhase)
 
         this.setState({ loadingDialog: false, showDialog: false })
@@ -306,7 +344,7 @@ class ProcessAction extends Component {
     }
 
     //func4
-    runChoiceOperation = async (operation, action) => {
+    runOperation = async (operation, action) => {
         if (!operation) return
 
         const { collection, documentId } = action
@@ -325,8 +363,9 @@ class ProcessAction extends Component {
 
         //Update action fields
         let processTemp = _.cloneDeep(process)
+        const { actions } = processTemp[currentPhaseId].steps[currentStepId]
 
-        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+        actions.forEach((action) => {
 
             if (action.id === pressedAction.id) {
                 //Update comment
@@ -338,7 +377,7 @@ class ProcessAction extends Component {
                     action.choices = choices
 
                 //Update action status
-                if (!stay) {
+                if (!stay && nextPhase !== 'cancelProject') {
                     action.status = "done"
                 }
             }
@@ -353,9 +392,11 @@ class ProcessAction extends Component {
 
         // console.log('Do animation now !')
 
-        await this.countDown(1000)
+        await countDown(1000)
 
         if (nextStep || nextPhase) {
+            console.log(nextStep, '8888888888888888')
+            processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
             const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
             processTemp = transitionRes.process
         }
@@ -430,16 +471,18 @@ class ProcessAction extends Component {
         return (
             <View style={styles.action}>
                 <TouchableOpacity onPress={() => this.onPressAction(canUpdate, action)} style={styles.actionTouchable}>
+                    <View style={styles.actionEmptySpace} />
                     <View style={styles.actionTitleContainer}>
                         {!loading &&
                             <CustomIcon
-                                style={{ marginRight: 5 }}
                                 icon={leftIcon}
                                 size={19}
                                 color={leftIconColor}
                             />
                         }
-                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 7 }]}>{loading ? loadingMessage : title}</Text>
+                        <View style={{ flex: 0.95, marginLeft: 10 }}>
+                            <Text style={[theme.customFontMSregular.caption]}>{loading ? loadingMessage : title}</Text>
+                        </View>
                     </View>
 
                     {loading ?
@@ -492,6 +535,7 @@ class ProcessAction extends Component {
         const { title, choices } = pressedAction
         const elements = choices.map((choice) => configChoiceIcon(choice)) || []
 
+        console.log(choices, pressedAction.actionOrder)
         return (
             <ModalOptions
                 isVisible={showModal}
@@ -635,28 +679,33 @@ const styles = StyleSheet.create({
         height: 50,
         paddingLeft: 0,
         paddingRight: 0,
-        marginHorizontal: 5
+        //marginHorizontal: 5,
+        // backgroundColor: 'green'
     },
     actionTouchable: {
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 10,
+        //  paddingHorizontal: 10,
         //backgroundColor: 'pink'
         //paddingHorizontal: 5
     },
+    actionEmptySpace: {
+        flex: 0.1,
+    },
     actionTitleContainer: {
-        flex: 0.9,
+        flex: 0.8,
         flexDirection: 'row',
         alignItems: 'center',
-        // backgroundColor: 'brown'
+      //  backgroundColor: 'brown'
     },
     actionIconsContainer: {
         flex: 0.1,
         flexDirection: 'row',
         justifyContent: 'flex-end',
-        //  backgroundColor: 'green'
+        marginRight: 10,
+        //   backgroundColor: 'blue'
     }
 })
 

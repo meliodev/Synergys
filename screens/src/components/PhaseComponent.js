@@ -12,13 +12,13 @@ const secondIndicatorStyles = {
   currentStepIndicatorSize: 30,
   separatorStrokeWidth: 2,
   currentStepStrokeWidth: 2,
-  stepStrokeCurrentColor: PRIMARY_COLOR,
+  stepStrokeCurrentColor: theme.colors.primary,
   stepStrokeWidth: 2,
   separatorStrokeFinishedWidth: 2,
-  stepStrokeFinishedColor: PRIMARY_COLOR,
-  stepStrokeUnFinishedColor: PRIMARY_COLOR,
-  separatorFinishedColor: '#707070',
-  separatorUnFinishedColor: '#E8E8E8',
+  stepStrokeFinishedColor: theme.colors.primary,
+  stepStrokeUnFinishedColor: theme.colors.primary,
+  separatorFinishedColor: theme.colors.primary,
+  separatorUnFinishedColor: theme.colors.gray_light,
   stepIndicatorFinishedColor: '#ffffff',
   stepIndicatorUnFinishedColor: '#ffffff',
   stepIndicatorCurrentColor: '#ffffff',
@@ -35,7 +35,8 @@ const secondIndicatorStyles = {
 export default function PhaseComponent({ labels, status, currentPage, setCurrentPage }) {
 
   const onStepPress = (position) => {
-    setCurrentPage(position)
+    if (status[position] !== 'grayed')
+      setCurrentPage(position)
   }
 
   const renderStepIndicator = (params) => (
@@ -43,15 +44,13 @@ export default function PhaseComponent({ labels, status, currentPage, setCurrent
   )
 
   const renderLabel = ({ position, label, currentPosition }) => {
+
+    const color = position === currentPosition ? theme.colors.primary : status[position] === 'grayed' ? theme.colors.gray_dark : theme.colors.secondary
+
     return (
-      <PhaseTitle
-        title={label}
-        selected={
-          position === currentPosition
-            ? styles.stepLabelSelected
-            : styles.stepLabel
-        }
-      />
+      <View style={{ flex: 1 }}>
+        <Text style={[theme.customFontMSregular.extraSmall, { textAlign: 'center', color }]}>{label}</Text>
+      </View>
     )
   }
 
@@ -72,7 +71,8 @@ export default function PhaseComponent({ labels, status, currentPage, setCurrent
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 20,
+    marginTop: 20,
+    marginBottom: 35
   },
   stepLabelSelected: {
     color: '#25D366'

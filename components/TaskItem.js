@@ -13,6 +13,7 @@ const TaskItem = ({ task, onPress, style }) => {
     const { id, name, status, isAllDay, color, date, startHour, dueHour } = task
     const TaskId = id
     const done = status === 'Terminé'
+    const canceled = status === 'Annulé'
     const timerange = isAllDay ? 'Toute la journée' : `${startHour} - ${dueHour}`
 
     //Check if task is not done on time.
@@ -22,12 +23,14 @@ const TaskItem = ({ task, onPress, style }) => {
     const isNowAfterTime = moment(now, 'hh:mm').isAfter(moment(dueHour, 'hh:mm'), 'hour')
     const isToday = today === date
     const isCurrentAfterTaskDate = isAllDay ? isTodayAfterDate : isToday && isNowAfterTime
-    const isLate = !done && isCurrentAfterTaskDate
+    const isLate = !done && isCurrentAfterTaskDate && !canceled
 
     const taskColor = isLate ? theme.colors.white : color
     const textColor = isLate ? theme.colors.error : theme.colors.white
     const borderWidth = isLate ? StyleSheet.hairlineWidth : 0
     const opacity = done ? 0.5 : 1
+
+    console.log(task.date, task.status)
 
     return (
         <TouchableOpacity style={[styles.item, { backgroundColor: taskColor, opacity, borderColor: theme.colors.error, borderWidth }, style]} onPress={onPress} >

@@ -37,11 +37,13 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
         }
     }
 
+    const netPrice = order.total - order.primeRenov - order.primeCEE
+
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{order.id}</Text>
-                <Text style={theme.customFontMSmedium.header}>€ {order.total}</Text>
+                <Text style={theme.customFontMSmedium.header}>€ {netPrice}</Text>
             </View>
 
             <View style={{ marginBottom: 15, marginTop: 3 }}>

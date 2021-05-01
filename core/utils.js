@@ -241,8 +241,9 @@ export const setAttachmentIcon = (type) => {
 
 export const sortMonths = (monthYearArray) => {
 
-  const months = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai.', 'Juin.', 'Juil.', 'Août.', 'Sept.', 'Oct.', 'Nov.', 'Déc.']
-  // const months = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
+  const months = ['Janv.', 'Févr.', 'Mars', 'Avr.', 'Mai', 'Juin', 'Juil.', 'Août', 'Sept.', 'Oct.', 'Nov.', 'Déc.']
+  //  const months2 = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
+
   const sorter = (a, b) => {
     if (a.year !== b.year) {
       return a.year - b.year
@@ -361,8 +362,9 @@ export const downloadFile = async (main, fileName, url) => { //#task configure f
           //Showing alert after successful downloading
           console.log('res -> ', JSON.stringify(res))
           main.title = ''
+          return true
         })
-        .catch((e) => console.error(e))
+        .catch((e) => { return false })
       // .catch(() => setToast(main, 'e', 'Erreur lors du téléchargement du fichier, veuillez réessayer.'))
       //.finally(() => load(main, false))
     }
@@ -684,42 +686,52 @@ export const handleFilterTasks = (inputList, fields, KEYS_TO_FILTERS) => {
 
 
 //## Refresh inputs
-export function refreshClient(isPro, id, nom, prenom, role, email) {
-  const client = refreshUser(isPro, id, nom, prenom, role, email)
-  this.setState({ client })
+export function refreshClient(user) {
+  const client = refreshUser(user)
+  const address = user.address
+  this.setState({ client, address })
 }
 
-export function refreshComContact(isPro, id, nom, prenom, role, email) {
-  const comContact = refreshUser(isPro, id, nom, prenom, role, email)
+export function refreshComContact(user) {
+  const comContact = refreshUser(user)
   this.setState({ comContact })
 }
 
-export function refreshTechContact(isPro, id, nom, prenom, role, email) {
-  const techContact = refreshUser(isPro, id, nom, prenom, role, email)
+export function refreshTechContact(user) {
+  const techContact = refreshUser(user)
   this.setState({ techContact })
 }
 
-const refreshUser = (isPro, id, nom, prenom, role, email) => {
+export function refreshAssignedTo(user) {
+  const assignedTo = refreshUser(user)
+  this.setState({ assignedTo })
+}
+
+const refreshUser = (user) => {
+  const { isPro, id, denom, nom, prenom, role, email } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
-  const user = { id, fullName, email, role }
-  return user
+  const userObject = { id, fullName, email, role }
+  return userObject
 }
 
 export function refreshAddress(address) {
   this.setState({ address })
 }
 
-export function refreshProject(project) {
-  this.setState({ project })
+export function setAddress(description) {
+  const address = {
+    description,
+    marker: { latitude: '', longitude: '' },
+    place_id: ''
+  }
+  this.setState({ address })
 }
 
-export function refreshAssignedTo(isPro, id, nom, prenom, role, email) {
-  const fullName = isPro ? nom : `${prenom} ${nom}`
-  const assignedTo = { id, fullName, role, email }
-  console.log(assignedTo)
-  this.setState({ assignedTo })
+export function refreshProject(projectObject) {
+  const { id, name, client, step, subscribersIds, address } = projectObject
+  const project = { id, name, client, step, address, subscribersIds }
+  this.setState({ project, address })
 }
-
 
 
 

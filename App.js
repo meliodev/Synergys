@@ -21,9 +21,10 @@ import firebase, { db } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
-import Wrapper from './Wrapper' 
+import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
 import { processModel } from './processModel'
+import RNFetchBlob from 'rn-fetch-blob';
 
 
 const paperTheme = {
@@ -44,6 +45,10 @@ const paperTheme = {
 class App extends Component {
 
   async componentDidMount() {
+
+    const Dir = RNFetchBlob.fs.dirs.DownloadDir
+    const path = `${Dir}/Synergys/Documents/Tessst`
+
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
@@ -98,129 +103,3 @@ export default App
 
 
 
-
-
-
-
-
-
-
-
-// import { createAppContainer } from "react-navigation";
-// import { createStackNavigator } from "react-navigation-stack";
-
-// export default createAppContainer(Router);
-
-// console.disableYellowBox = true;
-
- //Token: 1/871957774648702:7cbeb89d7d0f667a2c52d8f2b499fec9
-    //id client: 1189147966277746
-    //secret du client: bd601cb4bb2de75b18a8848cde7aa12c
-    //Octroyer un code d’autorisation: https://app.asana.com/-/oauth_authorize?response_type=code&client_id=1189147966277746&redirect_uri=urn%3Aietf%3Awg%3Aoauth%3A2.0%3Aoob&state=<STATE_PARAM>
-
-
-  // fetch("https://app.asana.com/api/1.0/workspaces/855356051669655/projects", {
-    //   body: '{"data": {"name": "PRIMERA TAREA", "team": "1170903365365273"}}',
-
-    //   headers: {
-    //     Accept: "application/json",
-    //     Authorization: "Bearer 1/871957774648702:7cbeb89d7d0f667a2c52d8f2b499fec9",..
-    //     "Content-Type": "application/json"
-    //   },
-    //   method: "POST"
-    // }).then(response => response.json())
-    //   .then((responseJson) => {
-    //     console.log(responseJson)
-    //   })
-    //   .catch(error => console.log(error))
-
-
-
-
-
-
-
-    // 'prenom': {
-    //   id: 'prenom',
-    //   title: 'Prénom',
-    //   instructions: 'Lorem ipsum dolor',
-    //   screenName: 'Profile',
-    //   screenParams: { userId: '', isClient: true },
-    //   type: 'auto',
-    //   responsable: '',
-    // }, ##PROJECT.CLIENT
-    // 'address': {
-    //   id: 'address',
-    //   title: 'Adresse postale',
-    //   instructions: 'Lorem ipsum dolor',
-    //   screenName: 'Profile',
-    //   screenParams: { userId: '', isClient: true },
-    //   type: 'auto',
-    //   responsable: '',
-    // }, ##PROJECT.CLIENT
-    // 'phone': {
-    //   id: 'phone',
-    //   title: 'Numéro de téléphone',
-    //   instructions: 'Lorem ipsum dolor',
-    //   screenName: 'Profile',
-    //   screenParams: { userId: '', isClient: true },
-    //   type: 'auto',
-    //   responsable: '',
-    // }, ##PROJECT.CLIENT
-    // 'comment': {
-    //   id: 'comment',
-    //   title: 'Commentaire',
-    //   instructions: 'Lorem ipsum dolor',
-    //   screenName: 'Profile',
-    //   screenParams: { userId: '', isClient: true },
-    //   type: 'auto',
-    //   responsable: '',
-    // }, ##PROJECT.NOTE
-
-
-
-      //   const clients = {
-  //     canCreate: false,
-  //     canRead: false,
-  //     canUpdate: false,
-  //     canDelete: false
-  //   }
-
-  //   // //documents
-  //   // const queryFilters = [
-  //   //   { filterOrder: 1, clause: 'where', filter: 'project.subscribers', operation: 'array-contains', value: { id: '', fullName: '', email: '', role: '' }, valueSource: 'currentUser' },
-  //   //   { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
-  //   // ]
-
-  //   // //client
-  //   // const queryFilters = [
-  //   //   { filterOrder: 1, clause: 'where', filter: 'client.id', operation: '==', value: '', valueSource: 'currentUser' },
-  //   //   { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
-  //   // ]
-
-  //   // const queryFilters = [
-  //   //   { filterOrder: 1, clause: 'where', filter: 'client.id', operation: '==', value: '', valueSource: '' },
-  //   //   { filterOrder: 2, clause: 'where', filter: 'type', operation: '==', value: '', valueSource: 'type' },
-  //   //   { filterOrder: 3, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
-  //   // ]
-
-
-  //   // //messages
-  //   // const queryFilters = [
-  //   //   { filterOrder: 1, clause: 'where', filter: 'subscribers', operation: 'array-contains', value: '', valueSource: 'currentUser' },
-  //   //   { filterOrder: 2, clause: 'orderBy', field: 'sentAt', sort: 'desc' },
-  //   // ]
-
-
-  //   //Tasks
-  //   // const queryFilters = [
-  //   //   { filterOrder: 1, clause: 'where', filter: 'natures', operation: 'array-contains', value: 'tech' },
-  //   //   { filterOrder: 2, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
-  //   // ]
-
-  //   // //orderBy only
-  //   // const queryFilters = [
-  //   //   { filterOrder: 1, clause: 'orderBy', field: 'createdAt', sort: 'desc' },
-  //   // ]
-
-  // //  db.collection('Permissions').doc('Client').update({ 'requests.queryFilters': queryFilters })

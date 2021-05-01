@@ -119,8 +119,7 @@ class ListProjects extends Component {
             this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
 
         else {
-            const { id, name, client, subscribers, step } = project
-            this.props.navigation.state.params.onGoBack({ id, name, client, subscribers, step })
+            this.props.navigation.state.params.onGoBack(project)
             this.props.navigation.goBack()
         }
     }

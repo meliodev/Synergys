@@ -136,22 +136,25 @@ class Signature extends Component {
         let read = false
 
         //Download file
-        if (!fileExist) {
-            this.setState({ loadingMessage: 'Téléchargement du document...' })
-            downloaded = await this.downloadFile(filePath, this.sourceUrl)
+        // if (!fileExist) {
+        this.setState({ loadingMessage: 'Téléchargement du document...' })
+        downloaded = await this.downloadFile(filePath, this.sourceUrl)
+        console.log('downloaded', downloaded)
 
-            if (downloaded)
-                fileExist = true
+        if (downloaded)
+            fileExist = true
 
-            else {
-                loadLog(this, false, '')
-                setToast(this, 'e', "Erreur lors du téléchargement du document, connection internet interrompue ou espace de stockage insuffisant")
-                return
-            }
+        else {
+            loadLog(this, false, '')
+            setToast(this, 'e', "Erreur lors du téléchargement du document, connection internet interrompue ou espace de stockage insuffisant")
+            return
         }
+        //  }
 
         //Read file
         if (fileExist) {
+            console.log('downloaded', downloaded)
+
             this.setState({ fileDownloaded: true, loadingMessage: 'Initialisation du document...' })
             read = await this.readFile(filePath)
 
@@ -161,22 +164,21 @@ class Signature extends Component {
         }
     }
 
-    async downloadFile(filePath, sourceUrl) {
+    async downloadFile(path, sourceUrl) {
 
-        const { config } = RNFetchBlob;
+        let downloadProgress = 0
 
-        const options = {
-            fileCache: true,
-            addAndroidDownloads: {
-                useDownloadManager: true,
-                notification: true,
-                path: filePath,
-                description: 'Image',
-            },
-        }
-
-        return config(options).fetch('GET', sourceUrl)
-            .then(res => { return true })
+        return RNFetchBlob
+            .config({
+                path,
+                fileCache: true,
+            })
+            .fetch('GET', sourceUrl, {})
+            .progress((received, total) => {
+                downloadProgress = Math.round((received / total) * 100)
+                this.setState({ loadingMessage: `Téléchargement en cours... ${downloadProgress.toString()}%` })
+            })
+            .then((res) => { return true })
             .catch((e) => { return false })
     }
 
@@ -492,7 +494,12 @@ class Signature extends Component {
 
         const newDocument = _.cloneDeep(document)
         newDocument.createdAt = moment().format()
-        newDocument.createdBy = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        newDocument.createdBy = {
+            id: this.currentUser.uid,
+            fullName: this.currentUser.displayName,
+            email: this.currentUser.email,
+            role: this.props.role.value
+        }
 
         await db.collection('Documents').doc(this.DocumentId).set(document, { merge: true })
         await db.collection('Documents').doc(this.DocumentId).collection('AttachmentHistory').add(newDocument)
@@ -625,7 +632,7 @@ class Signature extends Component {
                 {showTerms &&
                     <TermsConditions
                         showTerms={showTerms}
-                        //toggleTerms={this.toggleTerms}
+                        toggleTerms={this.toggleTerms}
                         acceptTerms={this.verifyUser}
                         //acceptTerms={this.startSignature}
                         dowloadPdf={() => {

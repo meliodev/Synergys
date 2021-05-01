@@ -225,7 +225,13 @@ class CreateProduct extends Component {
 
         //2. ADDING product to firestore
         let { ProductId, type, category, tagsSelected, name, description, price, taxe } = this.state
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        
+        const currentUser = {
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
 
         let product = {
             type: type,

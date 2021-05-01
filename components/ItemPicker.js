@@ -57,11 +57,11 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                                     <AvatarText text={avatarText} />
                                 </View>
                             }
-                            <View style={{ flex: showAvatarText ? 0.8 : 0.89, flexDirection: 'row' }}>
+                            <View style={{ flex: 0.9, flexDirection: 'row' }}>
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{value}</Text>
                             </View>
 
-                            <View style={{ flex: 0.11 }}>
+                            <View style={{ flex: 0.1, alignItems: 'center' }}>
                                 <CustomIcon icon={icon} color={theme.colors.inpuIcon} style={{ marginLeft: 5 }} />
                             </View>
                         </View>
@@ -69,10 +69,10 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                     :
                     <View style={{ height: 45, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
 
-                        <View style= {{flex: 0.905}}>
+                        <View style={{ flex: 0.905 }}>
                             {renderLabel(theme.customFontMSregular.body, true)}
                         </View>
-                        <View style={{ flex: 0.095 }}>
+                        <View style={{ flex: 0.095, alignItems: 'center' }}>
                             <CustomIcon icon={icon} color={theme.colors.inpuIcon} />
                         </View>
                     </View>
@@ -89,15 +89,14 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
 const styles = StyleSheet.create({
     container: {
         //flex: 1,
-        //backgroundColor: 'green',
+        //    backgroundColor: 'green',
     },
     pickerContainer: {
         borderBottomWidth: StyleSheet.hairlineWidth * 3,
         //  backgroundColor: 'purple'
     },
     left: {
-        flex: 0.09,
-        // marginRight: 7,
+        marginRight: 10,
         //justifyContent: 'center',
         // backgroundColor: 'blue'
     },

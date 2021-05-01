@@ -6,6 +6,8 @@ import { withNavigation } from 'react-navigation'
 import PhaseComponent from '../components/PhaseComponent';
 import StepComponent from '../components/StepComponent';
 import ProcessAction from '../../../components/ProcessAction';
+import { constants } from '../../../core/constants';
+import * as theme from '../../../core/theme';
 //import processModel from '../processModel.json';
 
 class ProcessContainer extends Component {
@@ -18,6 +20,17 @@ class ProcessContainer extends Component {
     }
   }
 
+  // componentDidMount() {
+  //   //fill empty phases
+  //   for (const phaseId in this.processModel) {
+  //     if (!process[phaseId] && phaseId !== 'cancelProject' && phaseId !== 'endProject') {
+  //       let phase = _.cloneDeep(this.processModel[phaseId])
+  //       delete phase.steps
+  //       process[phaseId] = phase
+  //     }
+  //   }
+  // }
+
   render() {
 
     const { phaseLabels, phaseStatuses, stepsData } = this.props
@@ -26,21 +39,19 @@ class ProcessContainer extends Component {
 
     return (
       <View style={{ flex: 1 }}>
-        {phaseLabels.length > 0 && (
+        {phaseLabels.length > 0 &&
           <PhaseComponent
             labels={phaseLabels}
             status={phaseStatuses}
             currentPage={currentPage}
             setCurrentPage={(currentPage) => this.setState({ currentPage })}
           />
-        )
         }
 
-        <View style={{ flex: 1, marginTop: 15 }}>
+        <View style={{ flex: 1 }}>
           <ScrollView >
             {stepsData.length > 0 && stepsData[currentPage].map((item, index) => {
 
-console.log(item.progress, '555555555')
               const isLastPhase = currentPage === stepsData.length - 1
               const isLastStep = index === stepsData[currentPage].length - 1
               const isLastStepOfLastPhase = isLastPhase && isLastStep
@@ -52,15 +63,19 @@ console.log(item.progress, '555555555')
                     title={item.title}
                     progress={item.progress}
                     instructions={item.instructions}
+                    children={
+                      <View style={{ marginLeft: constants.ScreenWidth * 0.035, paddingBottom: 15, borderLeftWidth: index !== stepsData[currentPage].length - 1 ? 2 : 0, borderLeftColor: theme.colors.gray_light }}>
+                        {item.actions.map((action, index) => {
+                          const isFirstAction = index === 0
+                          const isPreviousActionDone = index > 0 && item.actions[index - 1].status === 'done'
+                          const isActionPending = action.status === 'pending'
+                          const canUpdateAction = canUpdateStep && (isFirstAction || isPreviousActionDone) && isActionPending
+                          return this.props.renderAction(false, action)
+                        })
+                        }
+                      </View>
+                    }
                   />
-                  {item.actions.map((action, index) => {
-                    const isFirstAction = index === 0
-                    const isPreviousActionDone = index > 0 && item.actions[index - 1].status === 'done' 
-                    const isActionPending = action.status === 'pending'
-                    const canUpdateAction = canUpdateStep && (isFirstAction || isPreviousActionDone) && isActionPending
-                    return this.props.renderAction(canUpdateAction, action)
-                  })
-                  }
                 </View>
               )
             })

@@ -21,12 +21,13 @@ import Toast from "../../components/Toast"
 import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'
 import { handleFirestoreError } from '../../core/exceptions'
+import { ActivitySection } from '../../containers/ActivitySection';
 
 const states = [
     { label: 'Terminé', value: 'Terminé' },
@@ -51,7 +52,6 @@ class CreateOrder extends Component {
 
         this.initialState = {}
         this.isInit = true
-        this.currentUser = firebase.auth().currentUser
 
         //Generate pdf
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false)
@@ -263,7 +263,12 @@ class CreateOrder extends Component {
 
         // 1. ADDING document to firestore
         const { OrderId, project, state, orderLines, subTotal, taxes, primeCEE, primeRenov, total } = this.state
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const currentUser = {
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
 
         let order = {
             project,
@@ -676,46 +681,13 @@ class CreateOrder extends Component {
                             }
 
                             {this.isEdit && !this.autoGenPdf &&
-                                <Card style={{ margin: 5 }}>
-                                    <Card.Content>
-                                        <Title style={{ marginBottom: 15 }}>Activité</Title>
-
-                                        <MyInput
-                                            label="Date de création"
-                                            returnKeyType="done"
-                                            value={createdAt}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity>
-                                            <MyInput
-                                                label="Crée par"
-                                                returnKeyType="done"
-                                                value={createdBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                        <MyInput
-                                            label="Dernière mise à jour"
-                                            returnKeyType="done"
-                                            value={editedAt}
-                                            editable={false}
-                                        />
-
-                                        <TouchableOpacity>
-                                            <MyInput
-                                                label="Dernier intervenant"
-                                                returnKeyType="done"
-                                                value={editedBy.fullName}
-                                                editable={false}
-                                                link
-                                            />
-                                        </TouchableOpacity>
-
-                                    </Card.Content>
-                                </Card>
+                                <ActivitySection
+                                    createdBy={createdBy}
+                                    createdAt={createdAt}
+                                    editedBy={editedBy}
+                                    editedAt={editedAt}
+                                    navigation= {this.props.navigation}
+                                />
                             }
 
                         </ScrollView>

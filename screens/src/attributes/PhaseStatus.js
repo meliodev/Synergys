@@ -1,25 +1,25 @@
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { PRIMARY_COLOR } from '../utils/color';
+import { faCheck, faTimes } from '@fortawesome/pro-light-svg-icons';
+
+import { CustomIcon } from '../../../components';
+import * as theme from '../../../core/theme'
 
 export default function PhaseStatus({ params, status }) {
-  const getStepIndicatorIconConfig = ({ position, stepStatus }) => {
-
-    const iconConfig = {
-      name: 'check',
-      color: PRIMARY_COLOR,
-      size: 20,
-    }
-
-    return iconConfig
-  }
 
   if (status === 'pending') {
-    return <ActivityIndicator color={PRIMARY_COLOR} />;
-  } 
-  
-  else {
-    return <MaterialIcons {...getStepIndicatorIconConfig(params)} />;
+    return <ActivityIndicator color={theme.colors.primary} />
   }
+
+  else if (status === 'done') {
+    return (
+      <CustomIcon
+        icon={faCheck}
+        color={theme.colors.primary}
+        size={20}
+      />
+    )
+  }
+
+  else return null
 }

@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Alert, Keyboard } from 'react-native';
-import { List, ProgressBar } from 'react-native-paper';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
+import { List } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import RNFS from 'react-native-fs'
 import { connect } from 'react-redux'
+import { faTimes } from '@fortawesome/pro-light-svg-icons';
+
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
 
 import Appbar from '../../components/Appbar'
 import CustomIcon from '../../components/CustomIcon'
@@ -14,52 +17,48 @@ import AutoCompleteUsers from '../../components/AutoCompleteUsers'
 import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 
-import { db } from '../../firebase'
+import { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { load, setToast, updateField, setAttachmentIcon, nameValidator, uuidGenerator, pickDocs } from '../../core/utils'
+import { load, setToast, updateField, nameValidator, uuidGenerator, pickDocs } from '../../core/utils'
 
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFiles } from '../../api/storage-api';
 
-import moment from 'moment';
-import 'moment/locale/fr'
-moment.locale('fr')
-
-import DocumentPicker from 'react-native-document-picker';
-import { faTimes } from '@fortawesome/pro-light-svg-icons';
-
 class NewMessage extends Component {
     constructor(props) {
         super(props)
-        this.currentUser = firebase.auth().currentUser
-        this.title = ''
+        this.currentUser = auth.currentUser
+
+        //Navigation params
         this.isReply = this.props.navigation.getParam('isReply', false)
+        this.title = this.isReply ? 'Répondre' : 'Nouveau message'
         this.messageGroupeId = this.props.navigation.getParam('messageGroupeId', false)
+        this.subject = this.props.navigation.getParam('subject', '')
         this.tagsSelected = this.props.navigation.getParam('tagsSelected', [])
+        this.oldMessages = this.props.navigation.getParam('oldMessages', [])
+        this.subscribers = this.props.navigation.getParam('subscribers', [])
 
         this.fetchDocs = fetchDocs.bind(this)
         this.uploadFiles = uploadFiles.bind(this)
 
-        if (this.isReply)
-            this.title = 'Répondre'
-        else
-            this.title = 'Nouveau message'
-
         this.state = {
-            tagsSelected: [],
-            suggestions: [],
-            subject: { value: "", error: "" },
+            //payload
+            tagsSelected: this.tagsSelected,
+            subject: { value: this.subject, error: "" },
             message: { value: "", error: "" },
+            previousSubscribers: this.subscribers,
+            attachments: [], //attachments picked
             messagesCount: 0,
 
-            oldMessages: [],
-            previousSubscribers: [],
+            //old messages
             accordionExpanded: true,
+            oldMessages: this.oldMessages,
 
-            attachments: [], //attachments picked
+            //db
+            suggestions: [],
 
-            loading: false,
+            loading: true,
             error: "",
             toastType: '',
             toastMessage: ''
@@ -67,60 +66,12 @@ class NewMessage extends Component {
     }
 
     async componentDidMount() {
-        if (this.isReply)
-            await this.replyInitializaton()
-
         this.fetchSuggestions()
     }
 
     fetchSuggestions() {
         const query = db.collection('Users')
-        this.fetchDocs(query, 'suggestions', '', () => { })
-    }
-
-    replyInitializaton() {
-        let { tagsSelected, subject, oldMessages, previousSubscribers } = this.state
-        tagsSelected = this.tagsSelected
-        subject.value = 'RE: ' + this.props.navigation.getParam('subject', '')
-        oldMessages = this.props.navigation.getParam('oldMessages', [])
-        previousSubscribers = this.props.navigation.getParam('subscribers', [])
-        this.setState({ tagsSelected, subject, oldMessages, previousSubscribers })
-    }
-
-    renderOldMessages() {
-        let { oldMessages, loading } = this.state
-
-        return (
-            <View style={{ marginBottom: 15, marginLeft: constants.ScreenWidth * 0.045 }}>
-                <View>
-                    {oldMessages.map((msg, key) => {
-                        let sentAtDate = moment(msg.sentAt).format('ll')
-                        let sentAtTime = moment(msg.sentAt).format('LT')
-                        let sender = msg.sender.fullName
-                        let message = msg.message
-
-                        return (
-                            <View style={{ borderLeftWidth: 1, borderLeftColor: theme.colors.gray2, marginLeft: key * 5, marginBottom: 5 }}>
-                                <MessageInput
-                                    style={styles.messageInput}
-                                    underlineColor="transparent"
-                                    returnKeyType="done"
-                                    value={'Le ' + sentAtDate + ' à ' + sentAtTime + ' \n ' + sender + ' a écrit : ' + '\n ' + message}
-                                    onChangeText={text => {
-                                        oldMessages.splice(key, 1)
-                                        this.setState({ oldMessages })
-                                    }}
-                                    multiline={true}
-                                    theme={{ colors: { primary: '#fff', text: '#333' } }}
-                                    selectionColor='#333'
-                                    editable={!loading}
-                                />
-                            </View>
-                        )
-                    })}
-                </View>
-            </View>
-        )
+        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
     }
 
     //PICKER
@@ -130,31 +81,7 @@ class NewMessage extends Component {
         this.setState({ attachments: newAttachments })
     }
 
-    renderAttachments() {
-        let { attachments, loading } = this.state
-
-        const onPressRightIcon = (key) => {
-            attachments.splice(key, 1)
-            this.setState({ attachments })
-        }
-
-        const rightIconStyle = { flex: 0.15, justifyContent: 'center', alignItems: 'center' }
-
-        return attachments.map((document, key) => {
-            return (
-                <UploadProgress
-                    attachment={document}
-                    showRightIcon
-                    rightIcon={
-                        <TouchableOpacity style={rightIconStyle} onPress={() => onPressRightIcon(key)}>
-                            {!loading && <CustomIcon icon={faTimes} color={theme.colors.gray_dark} />}
-                        </TouchableOpacity>
-                    }
-                />
-            )
-        })
-    }
-
+    //SUBMIT
     validateInputs() {
         let { tagsSelected, subject, message } = this.state
 
@@ -189,11 +116,13 @@ class NewMessage extends Component {
         this.title = 'Envoie du message...'
 
         //2. UPLOADING FILES #Online 
+        let uploadedAttachments = []
         if (isConnected && attachments.length > 0) {
             const storageRefPath = '/Inbox/Messages/'
-            const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath)
+            uploadedAttachments = await this.uploadFiles(attachments, storageRefPath)
 
             if (!uploadedAttachments) {
+                uploadedAttachments = []
                 this.title = this.isReply ? 'Répondre' : 'Nouveau message'
                 return
             }
@@ -204,59 +133,71 @@ class NewMessage extends Component {
         //3. ADDING MESSAGE DOCUMENT
         let { tagsSelected, subject, message, messagesCount, oldMessages, previousSubscribers } = this.state
 
-        //Sender of this message
-        let sender = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        //Sender
+        const sender = {
+            id: this.currentUser.uid,
+            fullName: this.currentUser.displayName,
+            email: this.currentUser.email,
+            role: this.props.role.value
+        }
+        const senderId = this.currentUser.uid
 
-        //Receivers of this message
+        //Receivers
         const receivers = tagsSelected.map((tag) => {
-            return { id: tag.id, fullName: tag.fullName }
+            const { id, fullName, email, role } = tag
+            const receiver = {
+                id,
+                fullName,
+                email,
+                role,
+            }
+            return receiver
         })
+        const receiversIds = receivers.map((receiver) => receiver.id)
 
-        //Speakers: Sender & receivers of this message
-        let speakers = receivers.concat([{ id: this.currentUser.uid, fullName: this.currentUser.displayName }])
+        //Speakers = Sender + Receivers
+        const speakers = receivers.concat([sender])
+        const speakersIds = receiversIds.concat([senderId])
 
-        //UNION: concat previous subscribers and new subscribers (if there is new ones)
+        //Subscribers: previous subscribers + new subscribers (Receivers + nonReceivers) --> accumulation: ALL users involved in the discussion
         let subscribers = speakers.map(speaker => speaker.id)
         subscribers = subscribers.concat(previousSubscribers)
         subscribers = [...new Set([...subscribers, ...previousSubscribers])]
 
-        //Initialize haveRead list: currentUser + subscribers who will not receive this message
-        const receiversId = receivers.map((receiver) => receiver.id)
-        let nonReceivers = subscribers.filter(f => !receiversId.includes(f))
-        let haveRead = [this.currentUser.uid]
-        haveRead = haveRead.concat(nonReceivers)
+        //haveRead = [SenderId, nonReceivers]
+        const nonReceiversIds = subscribers.filter(id => !receiversIds.includes(id))
+        let haveRead = nonReceiversIds
+        haveRead.push(senderId)
 
-        //set oldMessages
+        //format oldMessages
         oldMessages = oldMessages.filter((msg) => msg !== '')
 
         const latestMessage = {
-            sender: sender,
-            receivers: receivers, // receivers of the last message
-            //speakers: speakers, //sender + receivers
-            subscribers: subscribers, //sender + receivers IDs // accumulation: ALL users involved in the discussion
+            sender,
+            receivers, // receivers of the last message
+            receiversIds,
+            nonReceiversIds,
+            speakers,
+            speakersIds,
+            subscribers,
             mainSubject: subject.value,
             message: message.value,
             sentAt: moment().format(),
             messagesCount: messagesCount + 1,
-            haveRead: haveRead //Add subscribers who are not receivers of this message (subscribers - receivers)
+            haveRead
         }
-
-        // if (!this.isReply)
-        //     latestMessage.mainSubject = subject.value
 
         const msg = {
-            sender: sender,
-            receivers: receivers,
-            speakers: speakers, //sender + receivers of the current message
-            //subscribers: subscribers, //sender + receivers IDs
+            sender,
+            receivers,
+            receiversIds,
+            speakers,
+            speakersIds,
             subject: subject.value,
             message: message.value,
+            attachments: uploadedAttachments,
             sentAt: moment().format(),
-            oldMessages: oldMessages,
-        }
-
-        if (isConnected) {
-            msg.attachments = attachments
+            oldMessages,
         }
 
         console.log('Ready to send message...')
@@ -272,38 +213,86 @@ class NewMessage extends Component {
 
     //#OOS
     async sendNewMessage(latestMessage, msg) {
-
         const messageId = await uuidGenerator()
-
         const batch = db.batch()
         const messagesRef = db.collection('Messages').doc(messageId)
         const allMessagesRef = messagesRef.collection('AllMessages').doc()
         batch.set(messagesRef, latestMessage)
         batch.set(allMessagesRef, msg)
         batch.commit()
-
-        // const docRef = await db.collection('Messages').add(latestMessage)
-        // await db.collection('Messages').doc(docRef.id).collection('AllMessages').add(msg)
-        // load(this, false)
-        // setToast(this, 'i', 'Message envoyé !')
     }
 
     //#OOS
     async sendReply(latestMessage, msg) {
-
         const batch = db.batch()
         const messagesRef = db.collection('Messages').doc(this.messageGroupeId)
         const allMessagesRef = messagesRef.collection('AllMessages').doc()
         batch.set(messagesRef, latestMessage, { merge: true })
         batch.set(allMessagesRef, msg)
         batch.commit()
-
-        // await db.collection('Messages').doc(this.messageGroupeId).collection('AllMessages').add(msg)
-        // await db.collection('Messages').doc(this.messageGroupeId).set(latestMessage, { merge: true })
-        // load(this, false)
-        // setToast(this, 'i', 'Message envoyé !')
     }
 
+    //Renderers
+    renderAttachments() {
+        let { attachments, loading } = this.state
+
+        const onPressRightIcon = (key) => {
+            attachments.splice(key, 1)
+            this.setState({ attachments })
+        }
+
+        const rightIconStyle = { flex: 0.15, justifyContent: 'center', alignItems: 'center' }
+
+        return attachments.map((document, key) => {
+            return (
+                <UploadProgress
+                    attachment={document}
+                    showRightIcon
+                    rightIcon={
+                        <TouchableOpacity style={rightIconStyle} onPress={() => onPressRightIcon(key)}>
+                            {!loading && <CustomIcon icon={faTimes} color={theme.colors.gray_dark} />}
+                        </TouchableOpacity>
+                    }
+                />
+            )
+        })
+    }
+
+    renderOldMessages() {
+        let { oldMessages, loading } = this.state
+
+        return (
+            <View style={{ marginBottom: 15, marginLeft: constants.ScreenWidth * 0.045 }}>
+                <View>
+                    {oldMessages.map((msg, key) => {
+                        const sentAtDate = moment(msg.sentAt).format('ll')
+                        const sentAtTime = moment(msg.sentAt).format('LT')
+                        const sender = msg.sender.fullName
+                        const message = msg.message
+
+                        return (
+                            <View style={{ borderLeftWidth: 1, borderLeftColor: theme.colors.gray2, marginLeft: key * 5, marginBottom: 5 }}>
+                                <MessageInput
+                                    style={styles.messageInput}
+                                    underlineColor="transparent"
+                                    returnKeyType="done"
+                                    value={'Le ' + sentAtDate + ' à ' + sentAtTime + ' \n ' + sender + ' a écrit : ' + '\n ' + message}
+                                    onChangeText={text => {
+                                        oldMessages.splice(key, 1)
+                                        this.setState({ oldMessages })
+                                    }}
+                                    multiline={true}
+                                    theme={{ colors: { primary: '#fff', text: '#333' } }}
+                                    selectionColor='#333'
+                                    editable={!loading}
+                                />
+                            </View>
+                        )
+                    })}
+                </View>
+            </View>
+        )
+    }
 
     render() {
         let { tagsSelected, subject, message, suggestions, accordionExpanded, oldMessages, loading, toastType, toastMessage } = this.state
@@ -329,7 +318,7 @@ class NewMessage extends Component {
                             tagsSelected={tagsSelected}
                             main={this}
                             placeholder="Ajouter un destinataire"
-                            autoFocus={true}
+                            // autoFocus={true}
                             showInput={true}
                             suggestionsBellow={true}
                             editable={!loading}

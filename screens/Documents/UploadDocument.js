@@ -24,7 +24,7 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes } from "../../core/utils";
@@ -33,6 +33,7 @@ import { constants } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { handleFirestoreError } from '../../core/exceptions';
 import CustomIcon from '../../components/CustomIcon';
+import { ActivitySection } from '../../containers/ActivitySection';
 
 const states = [
     { label: 'A faire', value: 'A faire' },
@@ -84,7 +85,6 @@ class UploadDocument extends Component {
         this.fetchDocument = this.fetchDocument.bind(this)
         this.initialState = {}
         this.isInit = true
-        this.currentUser = firebase.auth().currentUser
 
         //Params
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
@@ -104,9 +104,11 @@ class UploadDocument extends Component {
         this.docSources = docSources
         this.genSources = genSources
 
+        const defaultState = this.setDefaultState()
+
         this.state = {
             //TEXTINPUTS
-            name: { value: "", error: '' },
+            name: { value: defaultState.name || "", error: '' },
             description: { value: "", error: '' },
 
             //Screens
@@ -141,6 +143,21 @@ class UploadDocument extends Component {
             toastType: '',
             toastMessage: ''
         }
+    }
+
+    setDefaultState() {
+        let defaultState = {}
+
+        if (this.project && this.documentType) {
+
+            const name = `${this.documentType.value} - ${this.project.id}`
+
+            defaultState = {
+                name
+            }
+        }
+
+        return defaultState
     }
 
     async componentDidMount() {
@@ -335,7 +352,12 @@ class UploadDocument extends Component {
     async persistDocument(isConversion, DocumentId) {
         //1. ADDING document to firestore
         const { project, name, description, type, state, attachment, attachmentSource, order } = this.state
-        const currentUser = { id: this.currentUser.uid, fullName: this.currentUser.displayName }
+        const currentUser = {
+            id: auth.currentUser.uid,
+            fullName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            role: this.props.role.value,
+        }
 
         if (!_.isEqual(attachment, this.initialState.attachment))
             attachment.pending = true
@@ -830,48 +852,13 @@ class UploadDocument extends Component {
                         </Card>
 
                         {this.isEdit &&
-                            <Card style={{ margin: 5 }}>
-                                <Card.Content>
-                                    <Title style={{ marginBottom: 15 }}>Activité</Title>
-
-                                    {signatures !== [] && this.renderSignees()}
-
-                                    <MyInput
-                                        label="Date de création"
-                                        returnKeyType="done"
-                                        value={createdAt}
-                                        editable={false}
-                                    />
-
-                                    <TouchableOpacity>
-                                        <MyInput
-                                            label="Crée par"
-                                            returnKeyType="done"
-                                            value={createdBy.fullName}
-                                            editable={false}
-                                            link
-                                        />
-                                    </TouchableOpacity>
-
-                                    <MyInput
-                                        label="Dernière mise à jour"
-                                        returnKeyType="done"
-                                        value={editedAt}
-                                        editable={false}
-                                    />
-
-                                    <TouchableOpacity>
-                                        <MyInput
-                                            label="Dernier intervenant"
-                                            returnKeyType="done"
-                                            value={editedBy.fullName}
-                                            editable={false}
-                                            link
-                                        />
-                                    </TouchableOpacity>
-
-                                </Card.Content>
-                            </Card>
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation= {this.props.navigation}
+                            />
                         }
 
                     </ScrollView>

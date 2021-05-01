@@ -23,7 +23,7 @@ import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 import Loading from '../../components/Loading'
 
-import { uuidGenerator, setAttachmentIcon, downloadFile } from '../../core/utils'
+import { uuidGenerator, setAttachmentIcon, downloadFile, getRoleIdFromValue } from '../../core/utils'
 
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
@@ -88,7 +88,14 @@ class Chat extends Component {
     fetchMessages() {
         this.messagesListener = db.collection('Chats').doc(this.chatId).collection('ChatMessages').orderBy('createdAt', 'desc')
             .onSnapshot(querySnapshot => {
-                const messages = querySnapshot.docs.map(doc => { return doc.data() })
+                let messages = querySnapshot.docs.map(doc => {
+                    const message = doc.data()
+                    if (!message.system) {
+                        message.user._id = message.user.id
+                        message.user.name = message.user.fullName
+                    }
+                    return message
+                })
                 this.setState({ messages })
             })
     }
@@ -151,7 +158,6 @@ class Chat extends Component {
         }
 
         catch (err) {
-            console.error(err)
             if (DocumentPicker.isCancel(err)) console.log('User has canceled picker')
             else Alert.alert("Erreur lors de l'exportation du fichier")
         }
@@ -197,9 +203,9 @@ class Chat extends Component {
             text,
             createdAt: new Date().getTime(),
             user: {
-                _id: this.currentUser.uid,
+                id: this.currentUser.uid,
                 email: this.currentUser.email,
-                name: this.currentUser.displayName
+                fullName: this.currentUser.displayName
             },
             sent: true,
             received: true,
@@ -238,11 +244,11 @@ class Chat extends Component {
         batch.set(messagesRef, msg)
         batch.commit()
 
-        // await db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId).set(msg)
-        // await db.collection('Chats').doc(this.chatId).set(latestMsg, { merge: true })
         this.setState({ imageSource: '', videoSource: '', file: {} })
     }
 
+
+    //Renderers
     renderDay(props) {
         return
         <View style={{ flex: 1, backgroundColor: 'green', width: 500, height: 500 }}>
@@ -451,8 +457,7 @@ class Chat extends Component {
     }
 
     navigateToProfile(user) {
-        console.log(user)
-        //  this.props.navigation.navigate('Profile', {})
+        this.props.navigation.navigate('Profile', { user: { id: user.id, roleId: getRoleIdFromValue(user.role) } })
     }
 
     render() {

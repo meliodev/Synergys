@@ -73,13 +73,13 @@ class EditRole extends Component {
     }
 
     render() {
-        let { newEmail, loading } = this.state
+        let { loading } = this.state
 
         return (
             <View style={{ flex: 1, backgroundColor: '#fff' }}>
                 <Appbar back={!loading} title titleText="Changer le rôle" check={!loading} handleSubmit={this.handleSubmit} />
 
-                {loading ?
+               {loading ?
                     <Loading size='large' />
                     :
                     <View style={{ flex: 1, padding: 20 }}>
@@ -95,7 +95,7 @@ class EditRole extends Component {
                     </View>
                 }
 
-                <Toast
+                 <Toast
                     containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
                     message={this.state.toastMessage}
                     type={this.state.toastType}

@@ -1,24 +1,26 @@
 import React, { useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, Text } from 'react-native'
 import StepProgress from '../attributes/StepProgress'
 import StepTitle from '../attributes/StepTitle'
 import StepInstruction from '../attributes/StepInstruction'
 
-export default function StepComponent({ title, progress, instructions }) {
+export default function StepComponent({ title, progress, instructions, children }) {
 
   return (
     <View style={styles.container}>
-      <StepProgress progress={progress} />
-      <StepTitle title={title} />
-      <StepInstruction instructions={instructions} />
+      <View style={{ flexDirection: 'row', alignItems: 'center'}}>
+        <StepProgress progress={progress} />
+        <StepTitle title={title} />
+        <StepInstruction instructions={instructions} />
+      </View>
+      {children}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
+    marginLeft: 10,
+    // backgroundColor: 'green'
   },
 })

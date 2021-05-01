@@ -77,7 +77,6 @@ class Agenda2 extends Component {
     constructor(props) {
         super(props)
         this.isAgenda = this.props.navigation.getParam('isAgenda', false) //#task: set it to true
-        console.log('IS AGENDA', this.isAgenda)
         this.isRoot = this.props.navigation.getParam('isRoot', true) //#task: set it to true
         this.loadItems = this.loadItems.bind(this)
         this.refreshItems = this.refreshItems.bind(this)
@@ -145,18 +144,6 @@ class Agenda2 extends Component {
                 return query
             }
         }
-
-        // else if (roleId === 'dircom')
-        //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'com')
-
-        // else if (roleId === 'tech')
-        //     query = agendaRef.collection('Tasks').where('assignedTo.role', '==', 'poseur')
-
-        // else if (roleId === 'com')
-        //     query = agendaRef.collection('Tasks').where('project.subscribers', 'array-contains', currentUser.id)
-
-        // else if (roleId === 'poseur')
-        //     query = agendaRef.collection('Tasks').where('project.subscribers', 'array-contains', currentUser.id)
 
         return query
     }

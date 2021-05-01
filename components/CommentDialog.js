@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { StyleSheet, ActivityIndicator } from "react-native"
 import Dialog from 'react-native-dialog'
 import * as theme from "../core/theme";

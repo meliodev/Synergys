@@ -1055,7 +1055,7 @@ export const processModel = {
                         type: 'manual',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'Finaliser', id: 'finish', nextStep: 'reserve', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminer' } },
+                            { label: 'Finaliser', id: 'finish', nextStep: 'reserve', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
@@ -1087,7 +1087,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Décidez plus tard', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'Décidez plus tard', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextStep: 'maintainanceContract', onSelectType: 'transition' },
                         ],
                         responsable: 'Poseur',
@@ -1109,7 +1109,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
                         ],
                         responsable: 'Poseur',
@@ -1140,7 +1140,7 @@ export const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
@@ -1168,14 +1168,14 @@ export const processModel = {
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'quoteVerification', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
                     },
                     {
-                        id: 'contratCreation',
+                        id: 'contractCreation',
                         title: "Créer/Importer un contrat",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 4,
@@ -1201,7 +1201,7 @@ export const processModel = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'quoteVerification', onSelectType: 'transition' },
+                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1283,7 +1283,7 @@ export const processModel = {
             'facturationOption1': { //no conversion
                 title: "Facturation",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 9,
+                stepOrder: 8,
                 nextStep: '',
                 actions: [
                     {
@@ -1753,23 +1753,25 @@ export const processModel = {
     },
     'cancelProject': {
         title: 'Annulation',
-        instructions: 'Lorem ipsum dolor',
+        instructions: 'Annulation du projet',
         phaseOrder: 7,
         followers: ['Admin', 'Directeur commercial', 'Commercial', 'Responsable technique', 'Poseur'],
         steps: {
-            'cancelProject': {
-                title: "Projet annulé",
+            'resumeProject': {
+                title: "Reprendre le projet",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 1,
                 actions: [
                     {
-                        id: 'cancelProject',  //#task: rollback (Resume project)
-                        title: 'Le projet a été annulé', //#task put: "Voulez-vous reprendre le projet ?""
+                        id: 'resumeProject',  //#task: rollback (Resume project)
+                        title: 'Appuyez ici pour reprendre le projet',
                         instructions: "Lorem ipsum dolor",
                         actionOrder: 1,
+                        collection: 'Projects',
+                        documentId: '',
                         type: 'manual',
-                        verificationType: 'no-verification', //#task: put rollback
-                        comment: '',
+                        verificationType: 'phaseRollback',
+                        operation: { type: 'update', field: 'state', value: 'En cours' },
                         status: 'pending',
                     },
                 ]

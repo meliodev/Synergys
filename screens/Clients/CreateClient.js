@@ -18,7 +18,7 @@ import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { createClient, validateClientInputs } from "../../api/firestore-api";
-import { generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../../core/utils"
+import { generateId, updateField, setToast, load, myAlert, navigateToScreen, setAddress } from "../../core/utils"
 import { handleFirestoreError } from "../../core/exceptions";
 
 class CreateClient extends Component {
@@ -27,6 +27,7 @@ class CreateClient extends Component {
         super(props)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
+        this.setAddress = setAddress.bind(this)
         this.myAlert = myAlert.bind(this)
         this.createClient = createClient.bind(this)
         this.validateClientInputs = validateClientInputs.bind(this)
@@ -69,7 +70,7 @@ class CreateClient extends Component {
         const { error, loading } = this.state
         const { isPro, nom, prenom, denom, siret, address, phone, email, password } = this.state
 
-        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password }
+        let userData = { isPro, nom, prenom, denom, siret, address, phone, email, password }
         const eventHandlers = { error, loading }
         const { isConnected } = this.props.network
 
@@ -87,8 +88,19 @@ class CreateClient extends Component {
         else {
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
                 this.setState({ loadingDialog: false })
-                if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack)
-                    this.props.navigation.state.params.onGoBack(isPro, this.ClientId, isPro ? denom.value : nom.value, isPro ? '' : prenom.value)
+                if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
+                    const user = {
+                        isPro,
+                        id: this.ClientId,
+                        denom: denom.value,
+                        nom: nom.value,
+                        prenom: prenom.value,
+                        role: 'Client',
+                        email: email.value,
+                        address
+                    }
+                    this.props.navigation.state.params.onGoBack(user)
+                }
                 this.props.navigation.navigate(this.prevScreen)
             }, 6000) //We can reduce this timeout later on...
         }
@@ -164,6 +176,8 @@ class CreateClient extends Component {
                         <AddressInput
                             offLine={!isConnected}
                             onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                            onChangeText={this.setAddress}
+                            clearAddress={() => this.setAddress('')}
                             address={address}
                             addressError={addressError}
                         />

@@ -33,8 +33,8 @@ class ListClients extends Component {
         }
     }
 
-    getClient(isPro, id, nom, prenom, role, email) {
-        this.props.navigation.state.params.onGoBack(isPro, id, nom, prenom, role, email)
+    getClient(user) {
+        this.props.navigation.state.params.onGoBack(user)
         this.props.navigation.goBack()
     }
 
@@ -73,7 +73,7 @@ class ListClients extends Component {
             </View>
         )
     }
-}
+} 
 
 const mapStateToProps = (state) => {
     return {
