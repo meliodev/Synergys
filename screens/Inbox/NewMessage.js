@@ -57,8 +57,9 @@ class NewMessage extends Component {
 
             //db
             suggestions: [],
+            suggestionsCount: 0,
 
-            loading: true,
+            loading: false,
             error: "",
             toastType: '',
             toastMessage: ''
@@ -71,7 +72,7 @@ class NewMessage extends Component {
 
     fetchSuggestions() {
         const query = db.collection('Users')
-        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
+        this.fetchDocs(query, 'suggestions', 'suggestionsCount', () => { load(this, false) })
     }
 
     //PICKER

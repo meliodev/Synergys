@@ -16,7 +16,7 @@ import OrderItem from '../../components/OrderItem' //#add
 import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
 
-import { db } from '../../firebase'
+import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
@@ -74,6 +74,10 @@ class ListOrders extends Component {
             this.setState({ project: this.project }) //#task: change filter to QueryFilter
     }
 
+    // componentWillUnmount() {
+    //     this.unsubscribe()
+    // }
+
     async fetchOrders() {
 
         const { queryFilters } = this.props.permissions.orders
@@ -83,26 +87,28 @@ class ListOrders extends Component {
             var query = configureQuery('Orders', queryFilters, params)
 
             this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
-
-                //Fetch client dynamiclly
-                let { ordersList } = this.state
-                if (ordersList.length > 0) {
-                    for (let i = 0; i < ordersList.length; i++) {
-                        await db.collection('Projects').doc(ordersList[i].project.id).get().then((doc) => {
-                            if (doc.exists)
-                                ordersList[i].client = doc.data().client
-                        })
-                    }
-                    this.setState({ ordersList, filteredOrders: ordersList })
-                }
-
+                //let ordersList = await this.fetchExtraOrders()
                 load(this, false)
             })
         }
     }
 
-    // componentWillUnmount() {
-    //     this.unsubscribe()
+    // async fetchExtraOrders() {
+    //     let { ordersList, ordersCount } = this.state
+    //     await db
+    //         .collection('Orders')
+    //         .where('project.intervenant.id', '==', auth.currentUser.uid)
+    //         .get().then((snapshot) => {
+    //             ordersCount = ordersCount + snapshot.docs.length
+    //             for (const doc of snapshot.docs) {
+    //                 let order = doc.data()
+    //                 order.id = doc.id
+    //                 ordersList.push(order)
+    //             }
+    //         })
+
+    //     this.setState({ ordersList, ordersCount })
+    //     return ordersList
     // }
 
     renderOrder(order) { //#edit
@@ -156,7 +162,11 @@ class ListOrders extends Component {
         const { canCreate } = this.props.permissions.orders
         const { isConnected } = this.props.network
 
-        const fields = [{ label: 'state', value: state }, { label: 'client.id', value: client.id }, { label: 'project.id', value: project.id }]
+        const fields = [
+            { label: 'state', value: state },
+            { label: 'client.id', value: client.id },
+            { label: 'project.id', value: project.id }
+        ]
         this.filteredOrders = handleFilter(ordersList, this.filteredOrders, fields, searchInput, KEYS_TO_FILTERS)
 
         const filterCount = this.filteredOrders.length

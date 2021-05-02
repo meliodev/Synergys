@@ -17,7 +17,7 @@ import StepProgress from './process/StepProgress'
 import Loading from './Loading'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, getLatestProcessModel, checkForcedValidations } from '../core/process'
-import { enableProcessAction } from '../core/privileges'
+import { enableProcessAction, checkTechContact } from '../core/privileges'
 import { configChoiceIcon, countDown, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
@@ -38,7 +38,7 @@ class ProcessAction extends Component {
         this.validateAction = this.validateAction.bind(this)
         this.undoPreviousAction = this.undoPreviousAction.bind(this)
 
-        this.processModel = this.setProcessModel()
+        this.initialLoadingMessage = "Chargement de l'action..."
 
         this.state = {
 
@@ -66,13 +66,14 @@ class ProcessAction extends Component {
             dialogDescription: '',
             loadingDialog: false,
             loadingModal: false,
-            loading: true
+            loading: true,
+            loadingMessage: this.initialLoadingMessage
         }
     }
 
-    setProcessModel() {
-        const { initialProcess, processModels } = this.props
-        const { version } = initialProcess
+    setProcessModel(process) {
+        const { processModels } = this.props
+        const { version } = process
         const processModel = processModels[version].process
         return processModel
     }
@@ -83,6 +84,7 @@ class ProcessAction extends Component {
 
     async refresh() {
         const process = await this.fetchProcess()
+        this.processModel = this.setProcessModel(process)
         await this.mainHandler(process)
     }
 
@@ -109,7 +111,7 @@ class ProcessAction extends Component {
         this.refreshProcess(updatedProcess)
         if (isAllProcess) {
             this.refreshProcessHistory(updatedProcess)
-        } 
+        }
         load(this, false)
     }
 
@@ -193,7 +195,13 @@ class ProcessAction extends Component {
     onPressAction = async (canUpdate, currentAction) => {
         if (!canUpdate) return
 
-        this.setState({ pressedAction: currentAction })
+        const loadingMessage = "Traitement en cours..."
+        this.setState({ loading: true, loadingMessage, pressedAction: currentAction })
+
+      await  countDown(500)
+        
+        const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
+
         const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
         const { process, currentPhase } = this.state
         const currentUserId = auth.currentUser.uid
@@ -201,11 +209,14 @@ class ProcessAction extends Component {
 
         const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
         if (!enableAction) {
+            disableLoading()
             Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
             return
         }
 
         if (type === 'auto') {
+            disableLoading()
+
             //Modal
             if (currentAction.choices) {
                 this.setState({ showModal: true })
@@ -213,8 +224,10 @@ class ProcessAction extends Component {
 
             //Navigation
             else {
-                screenParams.isProcess = true
-                screenParams.onGoBack = () => this.mainHandler(process)
+                if (screenParams) {
+                    screenParams.isProcess = true
+                    screenParams.onGoBack = () => this.mainHandler(process)
+                }
                 this.props.navigation.navigate(screenName, screenParams)
             }
         }
@@ -225,22 +238,26 @@ class ProcessAction extends Component {
                 this.setNextStepOrPhase(nextStep, nextPhase) //To use later it onSubmit comment
                 const dialogTitle = formSettings && formSettings.label || 'Commentaire'
                 const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
+                disableLoading()
                 this.setState({ dialogTitle, dialogDescription, showDialog: true })
             }
 
             //Modal
             else if (verificationType === 'multiple-choices') {
+                disableLoading()
                 this.setState({ showModal: true })
             }
 
             //Direct
             else if (verificationType === 'validation') {
                 await this.validateAction(null, null, false, nextStep, nextPhase)
+                disableLoading()
             }
 
             else if (verificationType === 'phaseRollback') {
                 await this.runOperation(currentAction.operation, currentAction) //Exp: update project status back to 'En cours'
                 await this.phaseRollback()
+                disableLoading()
             }
         }
     }
@@ -249,7 +266,7 @@ class ProcessAction extends Component {
         const { process, currentPhaseId } = this.state
         let processTemp = _.cloneDeep(process)
         delete processTemp[currentPhaseId]
-        await this.updateProcess(processTemp)
+        await this.mainHandler(processTemp)
     }
 
     undoPreviousAction = async () => {
@@ -264,12 +281,13 @@ class ProcessAction extends Component {
             }
         })
 
-        await this.updateProcess(processTemp)
+        await this.mainHandler(processTemp)
     }
 
     //func2
     onSelectChoice = async (choice) => {
-        this.setState({ choice })  //used in case of comment
+
+        this.setState({ loadingModal: true, choice })  //used in case of comment
 
         const { process, pressedAction } = this.state
         const { screenName, screenParams, choices } = pressedAction
@@ -288,16 +306,16 @@ class ProcessAction extends Component {
             this.setNextStepOrPhase(nextStep, nextPhase) //used in case of comment
             const dialogTitle = this.configDialogLabels(choice.id).title
             const dialogDescription = this.configDialogLabels(choice.id).description
-            this.setState({ dialogTitle, dialogDescription, showModal: false, showDialog: true })
+            this.setState({ dialogTitle, dialogDescription, showModal: false, loadingModal: false, showDialog: true })
             return
         }
 
         else {
-            this.setState({ loadingModal: true })
-
             if (onSelectType === 'navigation') {
-                screenParams.isProcess = true
-                screenParams.onGoBack = () => this.mainHandler(process)
+                if (screenParams) {
+                    screenParams.isProcess = true
+                    screenParams.onGoBack = () => this.mainHandler(process)
+                }
                 this.props.navigation.navigate(screenName, screenParams)
             }
 
@@ -414,7 +432,7 @@ class ProcessAction extends Component {
             }
         })
 
-        await this.updateProcess(processTemp)
+        await this.mainHandler(processTemp)
     }
 
     //helper1
@@ -456,8 +474,7 @@ class ProcessAction extends Component {
 
         if (!action) return null
 
-        const { loading } = this.state
-        const loadingMessage = "Chargement de l'action..."
+        const { loading, loadingMessage } = this.state
 
         var { title, status, verificationType, choices } = action
         var isComment = typeof (action.comment) !== 'undefined' && action.comment !== ''

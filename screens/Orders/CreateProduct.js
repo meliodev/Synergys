@@ -28,7 +28,7 @@ import AutoCompleteBrands from "../../components/AutoCompleteBrands"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
@@ -55,7 +55,6 @@ class CreateProduct extends Component {
 
         this.initialState = {}
         this.isInit = true
-        this.currentUser = firebase.auth().currentUser
 
         this.ProductId = this.props.navigation.getParam('ProductId', '')
         this.isEdit = this.ProductId ? true : false
@@ -85,13 +84,13 @@ class CreateProduct extends Component {
             newBrand: { name: '', logo: { path: '' } }, //New brand
 
             //logs
-            createdBy: { id: '', fullName: '' },
+            createdBy: { id: '', fullName: '', email: '', role: '' },
             createdAt: '',
-            editedBy: { id: '', fullName: '' },
+            editedBy: { id: '', fullName: '', email: '', role: '' },
             editededAt: '',
 
             error: '',
-            loading: false,
+            loading: true,
             loadingDialog: false,
             toastType: '',
             toastMessage: '',
@@ -100,6 +99,10 @@ class CreateProduct extends Component {
     }
 
     async componentDidMount() {
+
+        this.fetchCategories()
+        this.fetchSuggestions()
+
         if (this.isEdit) {
             await this.fetchProduct()
         }
@@ -109,8 +112,7 @@ class CreateProduct extends Component {
             this.setState({ ProductId }, () => this.initialState = _.cloneDeep(this.state))
         }
 
-        this.fetchCategories()
-        this.fetchSuggestions()
+        load(this, false)
     }
 
     componentWillUnmount() {
@@ -141,7 +143,7 @@ class CreateProduct extends Component {
     //Brands suggestions
     fetchSuggestions() {
         const query = db.collection('Brands')
-        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
+        this.fetchDocs(query, 'suggestions', '', () => { })
     }
 
     //on Edit
@@ -202,7 +204,6 @@ class CreateProduct extends Component {
         const priceError = priceValidator(price.value)
 
         if (categoryError || brandError || nameError || priceError) {
-            Keyboard.dismiss()
             category.error = categoryError
             name.error = nameError
             price.error = priceError
@@ -214,6 +215,8 @@ class CreateProduct extends Component {
     }
 
     async handleSubmit() {
+        Keyboard.dismiss()
+
         //Handle Loading or No edit done
         if (this.state.loading || _.isEqual(this.state, this.initialState)) return
 
@@ -225,7 +228,7 @@ class CreateProduct extends Component {
 
         //2. ADDING product to firestore
         let { ProductId, type, category, tagsSelected, name, description, price, taxe } = this.state
-        
+
         const currentUser = {
             id: auth.currentUser.uid,
             fullName: auth.currentUser.displayName,
@@ -287,7 +290,7 @@ class CreateProduct extends Component {
             )
 
         else return (
-            < View style={styles.dialogContainer} >
+            <View style={styles.dialogContainer} >
                 <Dialog.Container visible={showDialog}>
                     {!isCategory ?
                         newBrand.logo.path ?
@@ -367,9 +370,6 @@ class CreateProduct extends Component {
         const name = newBrand.name
 
         tagsSelected.push(newBrand)
-
-        console.log('tagsSelected', tagsSelected)
-        console.log('logo', logo)
 
         db.collection('Brands').doc().set({ name, logo })
         setTimeout(() => this.setState({ tagsSelected, newBrand: { name: '', logo: {} }, loadingDialog: false, showDialog: false }), 1000)
@@ -472,7 +472,6 @@ class CreateProduct extends Component {
         const { error, loading, toastType, toastMessage } = this.state
         const { isImageViewVisible } = this.state
 
-        console.log('SUG', suggestions)
         return (
             <View style={styles.container}>
                 <Appbar close={!loading} title titleText={this.title} check={true} loading={loading} handleSubmit={this.handleSubmit} del={this.isEdit && !loading} handleDelete={this.showAlert} />

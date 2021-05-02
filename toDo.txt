@@ -4,9 +4,14 @@ DONE:
 +++ automatic fill task/document
 
 TO DO:
++++ Set ongoback=mainHandler from signature to processAction
++++ BUG: sometimes menu is empty
+--> Try to do privilleges/role setting on redux after navigating from authlistener
+--> make an intermediary logical component that handles those init operations before redirecting to Home screen
 ++ Add intervenant field to project
 ++ On submit task: check if assignedTo is subscriber: if not.. add assignedTo as intervenant on the project
 ++ Responsable of a commercial action is intervenant || contactCom (just to display responsable the name on instruction)
+++ Display projects where intervant.id === currentUser.id (concat to listprojects, orders, documents)
 ++ Notify assignedTo to do action (trigger CF)
 
 FEATURES:

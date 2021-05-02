@@ -76,6 +76,7 @@ class CreateTask extends Component {
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined)
         this.enableTypePicker = !this.isEdit && !this.taskType
+        this.isProcess = this.props.navigation.getParam('isProcess', false)
 
         const currentRole = this.props.role.id
         this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
@@ -150,23 +151,20 @@ class CreateTask extends Component {
 
         if (this.project && this.taskType) {
 
-            const { subscribers, address } = this.project
+            const { comContact, techContact, address } = this.project
 
             const name = `${this.taskType.value} - ${this.project.id}`
 
             let assignedTo = {}
             if (_.isEqual(this.taskType.natures, ['com'])) {
-                var comContact = subscribers.filter((sub) => sub.role === 'Commercial')[0]
                 assignedTo = comContact
             }
             if (_.isEqual(this.taskType.natures, ['tech'])) {
-                var techContact = subscribers.filter((sub) => sub.role === 'Poseur')[0]
-                assignedTo = comContact
+                assignedTo = techContact
             }
 
             const project = this.project
 
-            console.log('project', project.subscribersIds)
 
             defaultState = {
                 name,
@@ -322,13 +320,11 @@ class CreateTask extends Component {
             return
         }
 
-        //3.3 "ASSIGNED TO" VERIFICATION (if he is one of the project's collaborators)
-        if (project && project.subscribersIds) {
-            const collaborators = project.subscribersIds
-            if (!collaborators.includes(assignedTo.id)) {
-                this.alertCollaborator()
-                load(this, false)
-                return
+        //3.3 ADD INTERVENANT IF "ASSIGNED TO" IS NOT ONE OF PROJECT CONTACTS
+        if (this.isProcess && assignedTo.role === 'Commercial' || assignedTo.role === 'Poseur') {
+            const isIntervenant = assignedTo.id !== project.comContact.id && assignedTo.id !== project.techContact.id
+            if (isIntervenant) {
+                db.collection('Projects').doc(project.id).update({ intervenant: assignedTo })
             }
         }
 

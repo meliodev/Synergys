@@ -26,11 +26,11 @@ const SPACE = 0.01
 class MarkerTypes extends React.Component {
     constructor(props) {
         super(props)
-        this.getCurrentPosition = this.getCurrentPosition.bind(this)
+        //this.getCurrentPosition = this.getCurrentPosition.bind(this)
         this.onRegionChange = this.onRegionChange.bind(this)
         this.onChangePosition = this.onChangePosition.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
-        this.currentAddress = this.props.navigation.getParam('currentAddress', {})
+        this.currentAddress = this.props.navigation.getParam('currentAddress', null)
 
         this.state = {
             region: {
@@ -51,24 +51,30 @@ class MarkerTypes extends React.Component {
     }
 
     componentDidMount() {
-        this.getCurrentPosition()
+        if (this.currentAddress)
+            this.getCurrentPosition()
     }
 
     getCurrentPosition() {
-        if (this.currentAddress && this.currentAddress.marker.latitude !== '' && this.currentAddress.marker.longitude !== '') { //Not manual
-            let marker = {
-                latitude: this.currentAddress.marker.latitude,
-                longitude: this.currentAddress.marker.longitude
-            }
+    
+        if (this.currentAddress.marker === '' || this.currentAddress.marker.longitude === '') return
 
-            let region = marker
-            region.latitudeDelta = 0.0143
-            region.longitudeDelta = 0.0134
-
-            const address = { description: this.currentAddress.description, place_id: this.currentAddress.place_id }
-
-            this.setState({ region, marker, address })
+        const marker = {
+            latitude: Number(this.currentAddress.marker.latitude),
+            longitude: Number(this.currentAddress.marker.longitude)
         }
+
+        let region = marker
+        region.latitudeDelta = 0.0143
+        region.longitudeDelta = 0.0134
+
+        const address = {
+            description: this.currentAddress.description,
+            place_id: this.currentAddress.place_id,
+            marker
+        }
+
+        this.setState({ region, marker, address })
     }
 
     onRegionChange(region) {
@@ -83,16 +89,16 @@ class MarkerTypes extends React.Component {
         const { address, marker } = this.state
 
         if (address.description === '') {
+            load(this, false)
             Alert.alert('Veuillez choisir une adresse correcte.')
             return
         }
 
         address.marker = marker
 
+        load(this, false)
         this.props.navigation.state.params.onGoBack(address)
         this.props.navigation.goBack()
-
-        load(this, false)
     }
 
     onChangePosition(e) {

@@ -22,6 +22,7 @@ import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefi
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { configureQuery } from '../../core/privileges'
 import { fetchDocs } from '../../api/firestore-api';
+import { db, auth } from '../../firebase'
 
 import { withNavigation } from 'react-navigation'
 
@@ -91,8 +92,33 @@ class ListProjects extends Component {
         else {
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
-            this.fetchDocs(query, 'projectsList', 'projectsCount', () => load(this, false))
+            this.fetchDocs(query, 'projectsList', 'projectsCount', async () => {
+                await this.fetchExtraProjects() //Intervenant
+                load(this, false)
+            })
         }
+    }
+
+    async fetchExtraProjects() {
+        let { projectsList, projectsCount } = this.state
+        let extraProjects = []
+
+        await db
+            .collection('Projects')
+            .where('intervenant.id', '==', auth.currentUser.uid)
+            .get().then((snapshot) => {
+                projectsCount = projectsCount + snapshot.docs.length
+                for (const doc of snapshot.docs) {
+                    let project = doc.data()
+                    project.id = doc.id
+                    extraProjects.push(project)
+                }
+            })
+
+        if (extraProjects.length > 0)
+            projectsList = projectsList.concat(extraProjects)
+
+        this.setState({ projectsList, projectsCount })
     }
 
     componentWillUnmount() {
@@ -179,10 +205,12 @@ class ListProjects extends Component {
         this.filteredProjects = handleFilter(projectsList, this.filteredProjects, fields, searchInput, KEYS_TO_FILTERS)
 
         const filterCount = this.filteredProjects.length
+
         const filterActivated = filterCount < projectsCount
 
         const s = filterCount > 1 ? 's' : ''
         const isList = view === 'list'
+
 
         return (
             <View style={{ flex: 1 }}>

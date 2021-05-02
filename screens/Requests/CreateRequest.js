@@ -125,7 +125,7 @@ class CreateRequest extends Component {
             }
 
             let { RequestId, department, client, subject, state, description, address } = this.state
-            const { createdAt, createdBy, editedAt, editedBy } = this.state
+            let { createdAt, createdBy, editedAt, editedBy } = this.state
 
             const request = doc.data()
             //General info

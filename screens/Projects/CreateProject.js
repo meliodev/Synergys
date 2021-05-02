@@ -25,7 +25,7 @@ import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions
 
 import { fetchDocs, getResponsableByRole } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
-import { processMain, getCurrentStep, getCurrentAction, getPhaseId, getLatestProcessModelVersion } from '../../core/process'
+import { getLatestProcessModelVersion } from '../../core/process'
 
 import { connect } from 'react-redux'
 import { ActivitySection } from '../../containers/ActivitySection';
@@ -45,6 +45,9 @@ const steps = [
     { label: 'Installation', value: 'Installation' },
     { label: 'Maintenance', value: 'Maintenance' },
 ]
+
+const comSteps = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 
 const imagePickerOptions = {
     title: 'Selectionner une image',
@@ -85,6 +88,7 @@ class CreateProject extends Component {
         this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-PR-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
         this.isClient = this.props.role.id === 'client'
+        this.storageRefPath = `/Projects/${this.ProjectId}/Images/`
 
         this.state = {
             //TEXTINPUTS
@@ -100,10 +104,9 @@ class CreateProject extends Component {
             state: 'En cours',
             step: 'Initialisation',
 
-            //Subscribers (collaborators)
-            subscribers: [],
             comContact: { id: '', fullName: '', email: '', role: '' },
             techContact: { id: '', fullName: '', email: '', role: '' },
+            intervenant: null,
 
             //Billing
             bill: { amount: '' },
@@ -134,10 +137,6 @@ class CreateProject extends Component {
             taskTypes: [],
             expandedTaskId: '',
 
-            //Process
-            process: null,
-            processFetched: false,
-
             error: '',
             loading: true,
             docNotFound: false,
@@ -148,82 +147,90 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
-
         if (this.isEdit) {
-            const docNotFound = await this.fetchProject() //Get current process
-            if (docNotFound) {
-                load(this, false)
-                return
-            }
-            this.fetchDocuments()
-            this.fetchTasks()
-            this.initialState = _.cloneDeep(this.state)
+            await this.initEditMode()
+            await this.runListeners()
         }
-
         else this.initialState = _.cloneDeep(this.state)
-
         load(this, false)
     }
 
     componentWillUnmount() {
         if (this.isEdit) {
-            if (this.unsubscribeDocuments)
-                this.unsubscribeDocuments()
-
-            this.unsubscribeTasks()
+            this.unsubscribeDocuments && this.unsubscribeDocuments()
+            this.unsubscribeTasks && this.unsubscribeTasks()
         }
     }
 
+    async initEditMode() {
+        const result = await this.fetchProject()
+        const { project, docNotfound } = result
+        if (docNotfound) {
+            load(this, false)
+            return
+        }
+        await this.setProject(project, true)
+        this.initialState = _.cloneDeep(this.state)
+    }
+
+    async runListeners() {
+        await this.fetchDocuments()
+        await this.fetchTasks()
+    }
 
     //FETCHES: #edit
     async fetchProject() {
-        await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
-            if (!doc.exists) {
-                this.setState({ docNotFound: true })
-                return true
-            }
+        const result = await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
+            const docNotfound = !doc.exists
+            const project = doc.data()
+            return { project, docNotfound }
+        })
+        return result
+    }
 
-            let { client, name, description, note, address, state, step, subscribers, comContact, techContact, bill, color } = this.state
-            let { createdAt, createdBy, editedAt, editedBy, attachedImages, process } = this.state
-            let { error, loading } = this.state
-            var imagesView = []
-            var imagesCarousel = []
+    setProject(project, init) {
+
+        const promise = new Promise((resolve, reject) => {
+
+            let { client, name, description, note, address, state, step, color, comContact, techContact, intervenant, bill, attachedImages } = this.state
+            let { createdAt, createdBy, editedAt, editedBy } = this.state
+            let imagesView = []
+            let imagesCarousel = []
 
             //General info
-            const project = doc.data()
             client = project.client
             name.value = project.name
             description.value = project.description
             note.value = project.note
-            subscribers = project.subscribers
-            comContact = project.subscribers.filter((sub) => sub.role === 'Commercial')[0]
-            techContact = project.subscribers.filter((sub) => sub.role === 'Poseur')[0]
-            bill = project.bill || {}
             color = project.color
+            address = project.address
+            state = project.state
+            step = project.step
+
+            //Contacts
+            comContact = project.comContact
+            techContact = project.techContact
+            intervenant = project.intervenant //No need to display on UI
+
+            //Billing
+            bill = project.bill
 
             //َActivity
-            createdAt = project.createdAt
-            createdBy = project.createdBy
+            if (init) {
+                createdAt = project.createdAt
+                createdBy = project.createdBy
+            }
+
             editedAt = project.editedAt
             editedBy = project.editedBy
 
-            process = project.process
-
             //Images
             attachedImages = project.attachments || []
-
             if (attachedImages) {
                 attachedImages = attachedImages.filter((image) => !image.deleted)
                 imagesView = attachedImages.map((image) => { return ({ source: { uri: image.downloadURL } }) })
                 imagesCarousel = attachedImages.map((image) => image.downloadURL)
             }
-
-            //State
-            state = project.state
-            step = project.step
-
-            //Address
-            address = project.address
 
             //IMPORTANT FOR UI PRIVILLEGES
             const currentRole = this.props.role.id
@@ -235,28 +242,24 @@ class CreateProject extends Component {
                 name: name.value,
                 client,
                 step,
-                subscribersIds: subscribers.map((sub) => sub.id),
-                subscribers,
+                comContact,
+                techContact,
+                intervenant,
                 address
             }
 
-            this.setState({ createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, subscribers, comContact, techContact, bill, color, process, processFetched: true, isBlockedUpdates }, async () => {
+            const update = { createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, comContact, techContact, bill, color, isBlockedUpdates }
+
+            this.setState(update, async () => {
                 //if (this.isInit)
                 this.initialState = _.cloneDeep(this.state)
                 //this.isInit = false
+                resolve(true)
             })
         })
+
+        return promise
     }
-
-
-    // processListener() {
-    //     this.unsubscribeProcessListener = db.collection('Projects').doc(this.ProjectId).onSnapshot((doc) => {
-    //         if (doc.exists) {
-    //             const process = doc.data()
-    //             this.setState({ process })
-    //         }
-    //     })
-    // }
 
     blockRoleUpdateOnPhase(role, phase) {
         let isBlockedUpdates = false
@@ -272,40 +275,60 @@ class CreateProject extends Component {
     }
 
     fetchDocuments() {
-        this.unsubscribeDocuments = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
-            if (querysnapshot.empty) return
+        //console.log('A')
+        const promise = new Promise((resolve, reject) => {
+            this.unsubscribeDocuments = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
 
-            let documentsList = []
-            let documentTypes = []
-            querysnapshot.forEach((doc) => {
-                const document = doc.data()
-                document.id = doc.id
-                documentsList.push(document)
-                documentTypes.push(document.type)
+                if (querysnapshot.empty) {
+                    resolve(true)
+                    return
+                }
+
+                let documentsList = []
+                let documentTypes = []
+                querysnapshot.forEach((doc) => {
+                    const document = doc.data()
+                    document.id = doc.id
+                    documentsList.push(document)
+                    documentTypes.push(document.type)
+                })
+                documentTypes = [...new Set(documentTypes)]
+
+                this.setState({ documentsList, documentTypes }, () => resolve(true))
             })
-            documentTypes = [...new Set(documentTypes)]
-            this.setState({ documentsList, documentTypes })
         })
+
+        //console.log('B')
+        return promise
     }
 
     fetchTasks() {
-        this.unsubscribeTasks = db.collection('Agenda').where('project.id', '==', this.ProjectId).onSnapshot((agendaSnapshot) => {
-            if (agendaSnapshot.empty) return
+        //console.log('C')
+        const promise = new Promise((resolve, reject) => {
+            this.unsubscribeTasks = db.collection('Agenda').where('project.id', '==', this.ProjectId).onSnapshot((agendaSnapshot) => {
 
-            let tasksList = []
-            let taskTypes = []
+                if (agendaSnapshot.empty) {
+                    resolve(true)
+                    return
+                }
 
-            agendaSnapshot.forEach(async (taskDoc) => {
-                const task = taskDoc.data()
-                task.id = taskDoc.id
-                task.date = taskDoc.dateKey
-                tasksList.push(task)
-                taskTypes.push(task.type)
+                let tasksList = []
+                let taskTypes = []
 
-                taskTypes = [...new Set(taskTypes)]
-                this.setState({ tasksList, taskTypes })
+                agendaSnapshot.forEach(async (taskDoc) => {
+                    const task = taskDoc.data()
+                    task.id = taskDoc.id
+                    task.date = taskDoc.dateKey
+                    tasksList.push(task)
+                    taskTypes.push(task.type)
+
+                    taskTypes = [...new Set(taskTypes)]
+                    this.setState({ tasksList, taskTypes }, () => resolve(true))
+                })
             })
         })
+        //console.log('D')
+        return promise
     }
 
     refreshAddress(address) {
@@ -314,13 +337,15 @@ class CreateProject extends Component {
 
     //Inputs validation
     validateInputs(isConnected) {
-        let { client, name, address, comContact, techContact } = this.state
+        let { client, name, address, comContact, techContact, step } = this.state
 
-        let clientError = nameValidator(client.fullName, '"Client"')
-        let nameError = nameValidator(name.value, '"Nom du projet"')
-        let comContactError = nameValidator(comContact.id, '"Contact commercial"')
-        let techContactError = nameValidator(techContact.id, '"Contact technique"')
-        let addressError = '' //Address optional on offline mode
+        const isStepTech = techSteps.includes(step)
+
+        const clientError = nameValidator(client.fullName, '"Client"')
+        const nameError = nameValidator(name.value, '"Nom du projet"')
+        const comContactError = nameValidator(comContact.id, '"Contact commercial"')
+        const techContactError = isStepTech ? nameValidator(techContact.id, '"Contact technique"') : ''
+        const addressError = '' //Address optional on offline mode
         //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
 
         if (clientError || nameError || addressError || comContactError || techContactError) {
@@ -329,7 +354,6 @@ class CreateProject extends Component {
             comContact.error = comContactError
             techContact.error = techContactError
             address.error = addressError
-            Keyboard.dismiss()
             this.setState({ client, name, address, comContact, techContact, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
@@ -340,77 +364,73 @@ class CreateProject extends Component {
 
     //#OOS
     async handleSubmit() {
-        const { isConnected } = this.props.network
-        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
-        if (isEditOffLine) return
+        Keyboard.dismiss()
 
-        //Handle Loading or No edit done
-        let { loading, attachments } = this.state
-        if (loading || _.isEqual(this.state, this.initialState)) return
-
+        if (this.state.loading || _.isEqual(this.state, this.initialState)) return
         load(this, true)
 
-        const isValid = this.validateInputs(isConnected)
-        if (!isValid) return
+        const { isConnected } = this.props.network
+        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+        if (isEditOffLine) {
+            load(this, false)
+            return
+        }
 
-        let { client, name, description, note, address, state, step, comContact, techContact, bill, color } = this.state
+        const isValid = this.validateInputs(isConnected)
+        if (!isValid) {
+            load(this, false)
+            return
+        }
+
+        let { name, description, client, note, address, state, step, color, comContact, techContact, intervenant, bill, attachments } = this.state
         const currentUser = {
             id: auth.currentUser.uid,
             fullName: auth.currentUser.displayName,
             email: auth.currentUser.email,
             role: this.props.role.value,
         }
+        const previousAttachedImages = this.initialState.attachedImages
+        let attachedImages = previousAttachedImages
 
         //1. UPLOADING FILES (ONLINE ONLY)
         if (isConnected) {
             if (attachments.length > 0) {
                 this.title = 'Exportation des images...'
-                const storageRefPath = `/Projects/${this.ProjectId}/Images/`
-                const uploadedImages = await this.uploadFiles(attachments, storageRefPath)
+                const uploadedImages = await this.uploadFiles(attachments, this.storageRefPath)
                 if (uploadedImages) {
-                    const previousAttachedImages = this.initialState.attachedImages
-                    var attachedImages = previousAttachedImages.concat(uploadedImages)
-                    this.setState({ attachedImages })
+                    attachedImages = attachedImages.concat(uploadedImages)
+                    this.setState({ attachedImages, attachments: [] })
                 }
             }
         }
 
         //2. Set project
-        let adminSub = await getResponsableByRole('Admin')
-        let dcSub = await getResponsableByRole('Directeur commercial')
-        let rtSub = await getResponsableByRole('Responsable technique')
-        if (!adminSub || !dcSub || !rtSub) return
-
-        let subscribers = [adminSub, dcSub, rtSub, comContact, techContact, currentUser]
-
-        //remove duplicates
-        subscribers = subscribers.reduce((unique, o) => {
-            if (!unique.some(obj => obj.id === o.id && obj.email === o.email && obj.fullName === o.fullName && obj.role === o.role)) {
-                unique.push(o)
-            }
-            return unique
-        }, [])
-
-        const subscribersIds = subscribers.map((sub) => sub.id)
-
         let project = {
-            client,
             name: name.value,
             description: description.value,
+            client,
             note: note.value,
             state,
             step,
             address,
+            color: color,
+
+            bill,
+            attachments: attachedImages,
+
+            comContact,
+            techContact,
+            intervenant,
+
             editedAt: moment().format(),
             editedBy: currentUser,
-            subscribers,
-            subscribersIds,
-            bill,
-            color: color,
+
             deleted: false,
         }
 
+        let toastMessage = 'Le projet a été modifié'
         if (!this.isEdit) {
+            toastMessage = 'Le projet a été crée.'
             project.createdAt = moment().format()
             project.createdBy = currentUser
             project.process = {
@@ -418,12 +438,19 @@ class CreateProject extends Component {
             }
         }
 
-        if (isConnected) {
-            project.attachments = attachedImages
-        }
+        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        await this.handlePostSubmit(project, toastMessage)
+    }
 
-        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true }) //Nothing to wait for -> data persisted to local cache
-        this.props.navigation.goBack()
+    async handlePostSubmit(project, toastMessage) {
+        if (this.isEdit) await this.setProject(project, false)
+        else {
+            this.isEdit = true
+            await this.setProject(project, false)
+            await this.runListeners()
+        }
+        load(this, false)
+        setToast(this, 's', toastMessage)
     }
 
     showAlert() {
@@ -446,46 +473,20 @@ class CreateProject extends Component {
         newAttachments[currentImage].deleted = true
 
         db.collection('Projects').doc(this.ProjectId).update({ attachments: newAttachments })
-        setTimeout(() => {
-            this.fetchProject()
+        setTimeout(async () => {
             this.setState({ isImageViewVisible: false })
+            load(this, true)
+            await this.initEditMode()
+            load(this, false)
             //await this.deleteAttachments(allImages, currentImage)
         }, 1000)
     }
-
-    //Delete Images from STORAGE //#RULE: NEVER DELETE FILES
-    // async deleteAttachments(allImages, currentImage) {
-    //     let urls = []
-
-    //     if (allImages)
-    //         urls = this.initialState.attachedImages.map(image => image.downloadURL) //Delete all images
-
-    //     else
-    //         urls = [this.initialState.attachedImages[currentImage].downloadURL] //Delete single image
-
-    //     const promises = []
-    //     for (let i = 0; i < urls.length; i++) {
-    //         const deletion = firebase.storage().refFromURL(urls[i]).delete()
-    //         promises.push(deletion)
-    //     }
-
-    //     await Promise.all(promises)
-    //         .then(() => console.log('All images were deleted from STORAGE'))
-    //         .catch(e => Alert.alert(e))
-
-    //     if (allImages)
-    //         this.props.navigation.goBack()
-
-    //     // else
-    //     //     this.fetchProject()
-    // }
 
     async pickImage() {
         let { attachments } = this.state
         attachments = await pickImage(attachments)
         this.setState({ attachments })
     }
-
 
     renderAttachments(attachments, type, isUpload) {
         let { loading } = this.state
@@ -541,7 +542,6 @@ class CreateProject extends Component {
         )
 
     }
-
 
     renderTasks(tasksList) {
 
@@ -644,7 +644,6 @@ class CreateProject extends Component {
         let { createdAt, createdBy, editedAt, editedBy } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, comContact, techContact } = this.state
         let { error, loading, docNotFound, toastMessage, toastType } = this.state
-        const { process, processFetched } = this.state
         const { isBlockedUpdates } = this.state
 
         //Privilleges
@@ -674,31 +673,28 @@ class CreateProject extends Component {
                     :
                     <ScrollView style={styles.dataContainer}>
 
-                        {this.isEdit ?
-                            (processFetched ?
-                                <View>
-                                    <ProcessAction
-                                        initialProcess={process}
-                                        project={this.project}
-                                        clientId={client.id}
-                                        step={step}
-                                        canUpdate={canWrite && !this.isClient}
-                                        isAllProcess={false}
-                                        role={this.props.role}
-                                    />
-                                </View>
-                                :
-                                <Loading style={{ paddingVertical: 50 }} />
-                            )
-                            : null
+                        {this.isEdit && this.project &&
+                            <View>
+                                <ProcessAction
+                                    project={this.project}
+                                    clientId={client.id}
+                                    step={step}
+                                    canUpdate={canWrite && !this.isClient}
+                                    isAllProcess={false}
+                                    role={this.props.role}
+                                />
+                            </View>
                         }
 
                         <FormSection
                             sectionTitle='Informations générales'
                             sectionIcon={this.isEdit ? faRedo : faInfoCircle}
-                            onPressIcon={() => {
+                            isLoading={loading}
+                            onPressIcon={async () => {
                                 if (!this.isEdit) return
-                                this.fetchProject()
+                                load(this, true)
+                                await this.initEditMode()
+                                load(this, false)
                             }}
                             iconColor={this.isEdit ? theme.colors.primary : theme.colors.gray_dark}
                             form={
@@ -720,7 +716,7 @@ class CreateProject extends Component {
                                         errorText={name.error}
                                         multiline={true}
                                         editable={canWrite}
-                                        autoFocus={!this.isEdit}
+                                    // autoFocus={!this.isEdit}
                                     />
 
                                     {!this.isClient &&
@@ -729,7 +725,7 @@ class CreateProject extends Component {
                                             label='Client concerné *'
                                             value={client.fullName}
                                             errorText={client.error}
-                                            editable={canWrite}
+                                            editable={canWrite && !this.isEdit}
                                         />
                                     }
 
@@ -801,11 +797,11 @@ class CreateProject extends Component {
                                         })
                                         }
                                         label="Contact commercial *"
-                                        value={comContact.fullName}
+                                        value={comContact.fullName || ''}
                                         error={!!comContact.error}
                                         errorText={comContact.error}
                                         editable={canWrite}
-                                        style={{ }}
+                                        style={{}}
                                     />
                                     <ItemPicker
                                         onPress={() => navigateToScreen(this, 'ListEmployees', {
@@ -816,8 +812,8 @@ class CreateProject extends Component {
                                             query: db.collection('Users').where('role', '==', 'Poseur').where('deleted', '==', false)
                                         })
                                         }
-                                        label="Contact technique *"
-                                        value={techContact.fullName}
+                                        label="Contact technique"
+                                        value={techContact.fullName || ''}
                                         error={!!techContact.error}
                                         errorText={techContact.error}
                                         editable={canWrite}
@@ -912,7 +908,7 @@ class CreateProject extends Component {
                                     <View style={{ flex: 1 }}>
                                         {canCreateDocument && canWrite &&
                                             <Text
-                                                onPress={() => this.props.navigation.navigate('UploadDocument', { project: { id: this.ProjectId, name: this.initialState.name.value, client: this.initialState.client, subscribers: this.initialState.subscribers } })}
+                                                onPress={() => this.props.navigation.navigate('UploadDocument', { project: this.project })}
                                                 style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 10 }]}>+ Ajouter un document</Text>}
 
                                         <List.AccordionGroup
@@ -946,7 +942,7 @@ class CreateProject extends Component {
                                 createdAt={createdAt}
                                 editedBy={editedBy}
                                 editedAt={editedAt}
-                                navigation= {this.props.navigation}
+                                navigation={this.props.navigation}
                             />
                         }
                     </ScrollView>
@@ -1035,3 +1031,32 @@ const styles = StyleSheet.create({
     },
 })
 
+
+
+
+    //Delete Images from STORAGE //#RULE: NEVER DELETE FILES
+    // async deleteAttachments(allImages, currentImage) {
+    //     let urls = []
+
+    //     if (allImages)
+    //         urls = this.initialState.attachedImages.map(image => image.downloadURL) //Delete all images
+
+    //     else
+    //         urls = [this.initialState.attachedImages[currentImage].downloadURL] //Delete single image
+
+    //     const promises = []
+    //     for (let i = 0; i < urls.length; i++) {
+    //         const deletion = firebase.storage().refFromURL(urls[i]).delete()
+    //         promises.push(deletion)
+    //     }
+
+    //     await Promise.all(promises)
+    //         .then(() => console.log('All images were deleted from STORAGE'))
+    //         .catch(e => Alert.alert(e))
+
+    //     if (allImages)
+    //         this.props.navigation.goBack()
+
+    //     // else
+    //     //     this.fetchProject()
+    // }

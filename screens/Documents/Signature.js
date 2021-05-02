@@ -136,20 +136,20 @@ class Signature extends Component {
         let read = false
 
         //Download file
-        // if (!fileExist) {
-        this.setState({ loadingMessage: 'Téléchargement du document...' })
-        downloaded = await this.downloadFile(filePath, this.sourceUrl)
-        console.log('downloaded', downloaded)
+        if (!fileExist) {
+            this.setState({ loadingMessage: 'Téléchargement du document...' })
+            downloaded = await this.downloadFile(filePath, this.sourceUrl)
+            console.log('downloaded', downloaded)
 
-        if (downloaded)
-            fileExist = true
+            if (downloaded)
+                fileExist = true
 
-        else {
-            loadLog(this, false, '')
-            setToast(this, 'e', "Erreur lors du téléchargement du document, connection internet interrompue ou espace de stockage insuffisant")
-            return
+            else {
+                loadLog(this, false, '')
+                setToast(this, 'e', "Erreur lors du téléchargement du document, connection internet interrompue ou espace de stockage insuffisant")
+                return
+            }
         }
-        //  }
 
         //Read file
         if (fileExist) {
@@ -633,8 +633,8 @@ class Signature extends Component {
                     <TermsConditions
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
-                        acceptTerms={this.verifyUser}
-                        //acceptTerms={this.startSignature}
+                        //acceptTerms={this.verifyUser}
+                        acceptTerms={this.startSignature}
                         dowloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
                             this.downloadFile(this.termsPath, this.termsURL)

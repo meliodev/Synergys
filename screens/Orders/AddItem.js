@@ -35,6 +35,7 @@ class AddItem extends Component {
             price: { value: '', error: '' },
             taxe: { name: '', rate: '', value: '' },
 
+            loading: false,
             tagsSelected: [],
             suggestions: [],
         }
@@ -42,7 +43,6 @@ class AddItem extends Component {
 
     async componentDidMount() {
         if (this.isEdit) {
-            console.log('order line:', this.orderLine)
             let { description, quantity, price, taxe, tagsSelected } = this.state
             description.value = this.orderLine.description
             quantity.value = this.orderLine.quantity
@@ -53,7 +53,7 @@ class AddItem extends Component {
             this.setState({ description, quantity, price, taxe, tagsSelected })
         }
 
-        load(this, true)
+        load(this, false)
         this.fetchSuggestions()
     }
 
@@ -122,6 +122,7 @@ class AddItem extends Component {
 
         const { isConnected } = this.props.network
 
+        console.log('loading...', loading)
         return (
             <View style={styles.container}>
                 <Appbar back={!loading} title titleText='Ligne de commande' check={!loading} handleSubmit={this.handleSubmit} />

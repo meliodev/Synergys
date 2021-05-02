@@ -27,12 +27,12 @@ export function fetchDocs(query, MyList, MyCount, MyCallBack) {
 
     const update1 = {}
     update1[MyList] = List
-    this.setState(update1, () => MyCallBack())
+    this.setState(update1)
 
     if (MyCount) {
       const update2 = {}
       update2[MyCount] = Count
-      this.setState(update2)
+      this.setState(update2, () => MyCallBack())
     }
   })
 }

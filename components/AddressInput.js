@@ -60,6 +60,7 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
     }
 
     const onPressCheck = () => {
+        if(!editable) return
         setChecked(!checked)
         clearAddress()
     }

@@ -48,7 +48,7 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
 
             <View style={{ marginBottom: 15, marginTop: 3 }}>
                 {order.project && <Text numberOfLines={1} style={[theme.customFontMSmedium.body, { marginBottom: 5 }]}>{order.project.name}</Text>}
-                {order.client && <Text><Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>chez</Text> <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.gray_dark }]}>{order.client.fullName}</Text></Text>}
+                {order.project && order.project.client && <Text><Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>chez</Text> <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.gray_dark }]}>{order.project.client.fullName}</Text></Text>}
             </View>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

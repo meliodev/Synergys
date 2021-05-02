@@ -26,8 +26,9 @@ class ClientsManagement extends React.Component {
     }
 
 
-    viewProfile(isPro, id, nom, prenom) {
-        this.props.navigation.navigate('Profile', { user: { id, roleId: 'client' }, isClient: true })
+    viewProfile(user) {
+        const { id } = user
+        this.props.navigation.navigate('Profile', { user: { id, roleId: 'client' } })
     }
 
     render() {

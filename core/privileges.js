@@ -1,5 +1,6 @@
 import { Alert } from 'react-native'
 import firebase, { db } from '../firebase'
+import { techSteps, highRolesValues } from './constants'
 
 export const configureQuery = (collection, queryFilters, params) => {
 
@@ -86,25 +87,27 @@ export const blockRoleUpdateOnPhase = (role, phase) => {
 
 export const enableProcessAction = (responsable, currentUserId, currentUserRole, currentPhase) => {
 
+    const isHighRole = highRolesValues.includes(currentUserRole)
+    const isCurrentRoleResponsable = responsable === currentUserRole
+
     let enabledAction = false
-
-    if (responsable === currentUserRole)
+    if (isHighRole || isCurrentRoleResponsable)
         enabledAction = true
-
-    const comPhases = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
-    const techPhases = ['Visite technique', 'Installation', 'Maintenance']
-    const isComPhase = comPhases.includes(currentPhase)
-    const isTechPhase = techPhases.includes(currentPhase)
-
-    const respRoles = ['Admin', 'Back office']
-    if (isComPhase) respRoles.push(['Directeur commercial', 'Commercial'])
-    else if (isTechPhase) respRoles.push(['Responsable technique', 'Poseur'])
-
-    if (respRoles.includes(currentUserRole)) {
-        enabledAction = true
-    }
 
     return enabledAction
+}
+
+export const checkTechContact = (step, subscribers) => {
+    const isStepTech = techSteps.includes()
+
+    if (!isStepTech) return true
+    else {
+        const techContact = subscribers.filter((sub) => sub.role === 'Commercial')
+        if (techContact.length > 0)
+            return true
+
+        else return false
+    }
 }
 
 

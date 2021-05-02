@@ -22,7 +22,7 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import firebase, { db, auth } from '../../firebase'
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline } from "../../core/utils"
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'
@@ -42,7 +42,7 @@ class CreateOrder extends Component {
         super(props)
         this.fetchOrder = this.fetchOrder.bind(this)
         this.refreshOrderLine = this.refreshOrderLine.bind(this)
-        this.refreshProject = this.refreshProject.bind(this)
+        this.refreshProject = refreshProject.bind(this)
         this.calculateSubTotal = this.calculateSubTotal.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.generatePdf = this.generatePdf.bind(this)
@@ -218,17 +218,17 @@ class CreateOrder extends Component {
     }
 
     validateInputs() {
-        let { orderLines } = this.state
+        let { orderLines, project } = this.state
 
-        //let projectError = nameValidator(project.id, '"Projet"')
+        let projectError = nameValidator(project.id, '"Projet"')
         let orderLinesError = this.validateOrderLines()
 
-        // if (projectError) {
-        //     Keyboard.dismiss()
-        //     project.error = projectError
-        //     this.setState({ project, loading: false })
-        //     return false
-        // }
+        if (projectError) {
+            Keyboard.dismiss()
+            project.error = projectError
+            this.setState({ project, loading: false })
+            return false
+        }
 
         if (orderLinesError) {
             this.setState({ loading: false })
@@ -302,13 +302,6 @@ class CreateOrder extends Component {
     //Handle Pdf generation flow
     generatePdf(order, docType) {
         this.props.navigation.navigate('PdfGeneration', { order, docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), popCount: this.popCount, onGoBack: this.props.navigation.getParam('onGoBack', null) })
-    }
-
-    //refresh inputs
-    refreshProject(project) {
-        project.error = ''
-        this.setState({ project })
-        this.fetchClient(project.id)
     }
 
     refreshOrderLine(orderLine, overwriteIndex) {
@@ -686,7 +679,7 @@ class CreateOrder extends Component {
                                     createdAt={createdAt}
                                     editedBy={editedBy}
                                     editedAt={editedAt}
-                                    navigation= {this.props.navigation}
+                                    navigation={this.props.navigation}
                                 />
                             }
 

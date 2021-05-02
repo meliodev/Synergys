@@ -639,7 +639,6 @@ export const toggleFilter = (main) => {
 }
 
 export const handleFilter = (inputList, outputList, fields, searchInput, KEYS_TO_FILTERS) => {
-
   outputList = inputList
 
   for (const field of fields) {
@@ -647,6 +646,7 @@ export const handleFilter = (inputList, outputList, fields, searchInput, KEYS_TO
   }
 
   outputList = outputList.filter(createFilter(searchInput, KEYS_TO_FILTERS))
+
   return outputList
 }
 
@@ -728,8 +728,8 @@ export function setAddress(description) {
 }
 
 export function refreshProject(projectObject) {
-  const { id, name, client, step, subscribersIds, address } = projectObject
-  const project = { id, name, client, step, address, subscribersIds }
+  const { id, name, client, step, address, comContact, techContact, intervenant } = projectObject
+  const project = { id, name, client, step, address, comContact, techContact, intervenant }
   this.setState({ project, address })
 }
 

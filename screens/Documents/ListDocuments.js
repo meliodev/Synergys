@@ -20,7 +20,7 @@ import { myAlert, downloadFile, loadLog, load, toggleFilter, setFilter, handleFi
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFileNew } from "../../api/storage-api";
 
-import { db } from '../../firebase'
+import { auth, db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 
@@ -38,7 +38,7 @@ let types = [
     { label: 'Bon de commande', value: 'Bon de commande' },
     { label: 'Devis', value: 'Devis' },
     { label: 'Facture', value: 'Facture' },
-    { label: 'Dossier CEE', value: 'Dossier CEE' }, 
+    { label: 'Dossier CEE', value: 'Dossier CEE' },
     { label: 'Fiche EEB', value: 'Fiche EEB' },
     { label: 'Dossier aide', value: 'Dossier aide' },
     { label: 'Prime de rénovation', value: 'Prime de rénovation' },
@@ -85,12 +85,39 @@ class ListDocuments extends Component {
         const role = this.props.role.id
 
         const { queryFilters } = this.props.permissions.documents
-        if (queryFilters === []) this.setState({ documentsList: [], documentsCount: 0 })
+        if (queryFilters === [])
+            this.setState({ documentsList: [], documentsCount: 0 })
+
         else {
             const params = { role: this.props.role.value }
             var query = configureQuery('Documents', queryFilters, params)
-            this.fetchDocs(query, 'documentsList', 'documentsCount', () => load(this, false))
+            this.fetchDocs(query, 'documentsList', 'documentsCount', async () => {
+                await this.fetchExtraDocuments() //Intervenant
+                load(this, false)
+            })
         }
+    }
+
+    async fetchExtraDocuments() {
+        let { documentsList, documentsCount } = this.state
+        let extraDocuments = []
+
+        await db
+            .collection('Documents')
+            .where('project.intervenant.id', '==', auth.currentUser.uid)
+            .get().then((snapshot) => {
+                documentsCount = documentsCount + snapshot.docs.length
+                for (const doc of snapshot.docs) {
+                    let document = doc.data()
+                    document.id = doc.id
+                    extraDocuments.push(document)
+                }
+            })
+
+        if (extraDocuments.length > 0)
+            documentsList = documentsList.concat(extraDocuments)
+
+        this.setState({ documentsList, documentsCount })
     }
 
     bootstrapUploads() {

@@ -62,6 +62,7 @@ export default class ViewTeam extends Component {
         let members = []
         for (const memberId of membersId) {
             await db.collection('Users').doc(memberId).get().then((doc) => {
+                if (!doc.exists) return
                 let member = doc.data()
                 member.id = doc.id
                 members.push(member)

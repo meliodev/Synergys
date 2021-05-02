@@ -159,7 +159,7 @@ const configureActions = async (actions, attributes, process) => {
         if (screenParams) {
             for (let item in screenParams) {
                 if (item === 'project') action.screenParams.project = attributes.project
-                if (item === 'userId') action.screenParams.userId = attributes.clientId
+                if (item === 'user') action.screenParams.user.id = attributes.clientId
             }
         }
 
@@ -341,14 +341,11 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         for (let action of actionsSameDoc) {
 
             if (!doc.exists) {
-
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }
 
             else {
-
-
                 const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
 
                 if (typeof (nestedVal) === 'undefined') {

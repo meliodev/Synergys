@@ -4,7 +4,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { getStatusBarHeight } from "react-native-status-bar-height";
 import * as theme from "../core/theme";
 
-const Toast = ({ type = "error", duration = 2000, containerStyle, message, onDismiss }) => {
+const Toast = ({ type = "error", duration = 1500, containerStyle, message, onDismiss }) => {
 
   const setBackgroundColor = () => {
        if (type === 'error')

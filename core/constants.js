@@ -18,4 +18,8 @@ export const roles = [
 ]
 
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
+export const highRolesValues = ['Admin', 'Back office', 'Directeur commercial', 'Responsable technique']
+
+export const comSteps = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+export const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 

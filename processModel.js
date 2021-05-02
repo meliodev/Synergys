@@ -22,7 +22,7 @@ export const processModel = {
                         properties: ['nom'],
                         //Navigation
                         screenName: 'Profile',
-                        screenParams: { userId: '', isClient: true }, //#dynamic
+                        screenParams: { user: { id: '', roleId: 'client' } },
                         //Verification
                         type: 'auto',
                         verificationType: 'data-fill',
@@ -42,7 +42,7 @@ export const processModel = {
                         properties: ['prenom'],
                         //Navigation
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { user: { id: '', roleId: 'client' } },
                         //Verification
                         type: 'auto',
                         verificationType: 'data-fill',
@@ -59,7 +59,7 @@ export const processModel = {
                         documentId: '', //dynamic
                         properties: ['address', 'description'],
                         screenName: 'Profile',
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { user: { id: '', roleId: 'client' } },
                         type: 'auto',
                         verificationType: 'data-fill',
                         verificationValue: '',
@@ -75,7 +75,7 @@ export const processModel = {
                         documentId: '', // dynamic
                         properties: ['phone'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { user: { id: '', roleId: 'client' } },
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -91,7 +91,7 @@ export const processModel = {
                         documentId: '', // dynamic
                         properties: ['isProspect'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { userId: '', isClient: true },
+                        screenParams: { user: { id: '', roleId: 'client' } },
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -661,11 +661,29 @@ export const processModel = {
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 5,
                 actions: [
+                    //Check 
+                    {
+                        //General
+                        id: 'checkTechContact',
+                        title: 'Renseigner un contact technique pour le projet',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        //Verification
+                        collection: 'Projects',
+                        documentId: '', //#dynamic
+                        properties: ['techContact', 'id'],
+                        //Verification
+                        type: 'auto',
+                        verificationType: 'data-fill',
+                        verificationValue: '',
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
                     {
                         id: 'technicalVisitCreation', //1. verify if RD2 exists
                         title: 'Créer une visite technique',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
+                        actionOrder: 2,
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
@@ -1455,7 +1473,7 @@ export const processModel = {
                         formSettings: {
                             label: 'Montant de la facture',
                             description: 'Veuillez renseigner le montant total de la facture de ce projet.',
-                            keyboardType: 'Numeric'
+                            keyboardType: 'numeric'
                         },
                         responsable: 'ADV',
                         status: 'pending',
@@ -1670,8 +1688,6 @@ export const processModel = {
                             { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-
-
                         screenName: 'UploadDocument',
                         screenParams: { project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true },
                         type: 'auto',

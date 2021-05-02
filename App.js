@@ -45,10 +45,7 @@ const paperTheme = {
 class App extends Component {
 
   async componentDidMount() {
-
-    const Dir = RNFetchBlob.fs.dirs.DownloadDir
-    const path = `${Dir}/Synergys/Documents/Tessst`
-
+    
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',

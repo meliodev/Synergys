@@ -27,7 +27,7 @@ import LoadDialog from "../../components/LoadDialog"
 import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
@@ -56,7 +56,7 @@ class UploadDocument extends Component {
         super(props)
 
         //Inputs
-        this.refreshProject = this.refreshProject.bind(this)
+        this.refreshProject = refreshProject.bind(this)
 
         //Attachment handlers
         this.pickDoc = this.pickDoc.bind(this)
@@ -98,6 +98,7 @@ class UploadDocument extends Component {
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined) //Not editable
+        this.onGoBack = this.props.navigation.getParam('onGoBack', undefined) //Not editable
 
         const currentRole = this.props.role.id
         this.types = setPickerDocTypes(currentRole, this.dynamicType, this.documentType)
@@ -437,10 +438,6 @@ class UploadDocument extends Component {
         })
     }
 
-    refreshProject(project) {
-        this.setState({ project, projectError: '' })
-    }
-
     //Attachment component handlers
     onPressAttachment(canWrite) {
 
@@ -635,8 +632,13 @@ class UploadDocument extends Component {
 
         const { project, type, attachment } = this.initialState
 
+        const onGoBack = () => {
+            if (this.onGoBack) this.onGoBack()
+            else this.fetchDocument(this.DocumentId)
+        }
+
         var params = {
-            onGoBack: () => this.fetchDocument(this.DocumentId),
+            onGoBack,
             ProjectId: project.id,
             DocumentId: this.DocumentId,
             DocumentType: type,

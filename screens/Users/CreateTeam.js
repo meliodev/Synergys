@@ -3,7 +3,7 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, Keyboard } from 'react-native'
 import _ from 'lodash'
-
+import { connect } from 'react-redux'
 import moment from 'moment'
 import 'moment/locale/fr'  // without this line it didn't work
 moment.locale('fr')
@@ -13,13 +13,13 @@ import MyInput from '../../components/TextInput'
 import Toast from "../../components/Toast"
 import Loading from '../../components/Loading'
 
-import firebase, { db } from '../../firebase'
+import firebase, { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { nameValidator, updateField, generateId, setToast, load } from "../../core/utils"
 import { handleFirestoreError } from '../../core/exceptions'
 
-export default class CreateTeam extends Component {
+class CreateTeam extends Component {
 
     constructor(props) {
         super(props);
@@ -33,7 +33,6 @@ export default class CreateTeam extends Component {
         this.description = this.props.navigation.getParam('description', '')
 
         this.title = this.props.navigation.getParam('title', 'Créer une équipe')
-        this.currentUser = firebase.auth().currentUser
         this.initialState = {}
 
         this.state = {
@@ -170,6 +169,17 @@ export default class CreateTeam extends Component {
         )
     }
 }
+
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        // permissions: state.permissions,
+        // network: state.network,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(CreateTeam)
 
 const styles = StyleSheet.create({
     container: {

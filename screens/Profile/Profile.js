@@ -119,6 +119,8 @@ class Profile extends Component {
     }
 
     fetchUserData() {
+
+        console.log(this.userParam.id, '5555555555555555555555')
         this.unsubscribe = db.collection(this.dataCollection).doc(this.userParam.id).onSnapshot((doc) => {
 
             if (!doc.exists) {
@@ -554,8 +556,6 @@ class Profile extends Component {
                                             returnKeyType="done"
                                             value={id}
                                             onChangeText={text => console.log(text)}
-                                            error={!!id.error}
-                                            errorText={id.error}
                                             autoCapitalize="none"
                                             editable={false}
                                             disabled
@@ -620,7 +620,8 @@ class Profile extends Component {
                                                     {...props}
                                                     mask="+[00] [0] [00] [00] [00] [00]"
                                                 />
-                                            } />
+                                            }
+                                        />
 
                                         <AddressInput
                                             offLine={!isConnected}

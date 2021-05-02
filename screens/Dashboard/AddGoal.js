@@ -14,7 +14,7 @@ import MyInput from '../../components/TextInput'
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, priceValidator } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs, getResponsableByRole } from "../../api/firestore-api";
