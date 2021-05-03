@@ -86,6 +86,7 @@ class Chat extends Component {
     }
 
     fetchMessages() {
+        console.log(this.chatId)
         this.messagesListener = db.collection('Chats').doc(this.chatId).collection('ChatMessages').orderBy('createdAt', 'desc')
             .onSnapshot(querySnapshot => {
                 let messages = querySnapshot.docs.map(doc => {

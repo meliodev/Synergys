@@ -1,7 +1,11 @@
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import { db, functions } from '../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
-import { stringifyUndefined } from './utils'
+import { stringifyUndefined, getMinObjectProp, getMaxObjectProp } from './utils'
 
 //#PROCESS ALGORITHM/LOGIC
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
@@ -18,7 +22,6 @@ export const processHandler = async (processModel, currentProcess, projectSecond
 
     while (loopHandler) {
         //0. Initialize process with 1st phase/1st step
-        console.log('process:::::', process)
         if (Object.keys(process).length === 1) {
             process = initProcess(processModel, process, projectSecondPhase)
         }
@@ -55,6 +58,8 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             allActionsValid = verif_res.allActionsValid
             nextStep = verif_res.nextStep
             nextPhase = verif_res.nextPhase
+
+            actions = setActionTimeLog(actions)
 
             process[currentPhaseId].steps[currentStepId].actions = actions
         }
@@ -428,6 +433,32 @@ const verifyActions_manual = async (actions) => {
     return { allActionsValid_manual, verifiedActions_manual }
 }
 
+const setActionTimeLog = (actions) => {
+
+    const pendingActions = actions.filter((action) => action.status === 'pending')
+    if (pendingActions.length > 0) {
+        var minPending = getMinObjectProp(pendingActions, 'actionOrder')
+        var index1 = actions.findIndex(action => action.actionOrder === minPending)
+        if (!actions[index1].startAt)
+            actions[index1].startAt = moment().format()
+    }
+
+    const doneActions = actions.filter((action) => action.status === 'done')
+    if (doneActions.length > 0) {
+        for (const act of doneActions) {
+            var index2 = actions.findIndex(action => action.id === act.id)
+
+            if (!actions[index2].startAt)
+                actions[index2].startAt = moment().format()
+
+            if (!actions[index2].doneAt)
+                actions[index2].doneAt = moment().format()
+        }
+    }
+
+    return actions
+}
+
 //Task 4. Phase/Step transition
 export const handleTransition = (processModel, process, currentPhaseId, currentStepId, nextStepId, nextPhaseId, ProjectId) => {
 
@@ -446,7 +477,7 @@ export const handleTransition = (processModel, process, currentPhaseId, currentS
         //Update project (status/step)
         if (nextPhaseId === 'cancelProject') {
             cancelProject(ProjectId)
-           // processEnded = true
+            // processEnded = true
         }
 
         else if (nextPhaseId === 'endProject') {
@@ -482,7 +513,6 @@ export const projectNextStepInit = (processModel, process, currentPhaseId, curre
     //0. Handle rollback (report rdn loop)
     if (nextStepId) {
         const currentStepOrder = processModel[currentPhaseId].steps[currentStepId].stepOrder
-        console.log('éééééééééééééé', currentPhaseId, nextStepId)
         const nextStepOrder = processModel[currentPhaseId].steps[nextStepId].stepOrder
         if (nextStepOrder < currentStepOrder) {
             delete process[currentPhaseId].steps[currentStepId]

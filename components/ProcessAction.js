@@ -10,6 +10,10 @@ import { faCheckCircle as faSolidCheckCircle, faEye } from '@fortawesome/pro-sol
 import { withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
 
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import CommentDialog from './CommentDialog'
 import ModalOptions from './ModalOptions'
 import CustomIcon from './CustomIcon'
@@ -198,8 +202,8 @@ class ProcessAction extends Component {
         const loadingMessage = "Traitement en cours..."
         this.setState({ loading: true, loadingMessage, pressedAction: currentAction })
 
-      await  countDown(500)
-        
+        await countDown(500)
+
         const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
 
         const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
@@ -395,6 +399,12 @@ class ProcessAction extends Component {
                 //Update action status
                 if (!stay && nextPhase !== 'cancelProject') {
                     action.status = "done"
+                    action.doneAt = moment().format()
+
+                    //set start time of next action
+                    var index = actions.findIndex(action => action.actionOrder === action.actionOrder + 1)
+                    if (index !== -1 && !actions[index].startAt)
+                        actions[index].startAt = moment().format()
                 }
             }
 

@@ -126,6 +126,15 @@ export const navigateToScreen = (main, screen, params) => {
 }
 
 //##HELPERS
+
+export const getMinObjectProp = (arrObjects, property) => {
+  return arrObjects.reduce((min, object) => object[property] < min ? object[property] : min, arrObjects[0][property])
+}
+
+export const getMaxObjectProp = (arrObjects, property) => {
+  return arrObjects.reduce((max, object) => object[property] > max ? object[property] : max, arrObjects[0][property])
+}
+
 export const formatRow = (active, data, numColumns) => { //Format rows to display 3 columns grid
   if (!active) return data
   const numberOfFullRows = Math.floor(data.length / numColumns)
@@ -735,83 +744,3 @@ export function refreshProject(projectObject) {
 
 
 
-
-
-// //File Picker
-// export const pickDocs = async (attachments, type = [DocumentPicker.types.allFiles]) => {
-
-//   try {
-//     const results = await DocumentPicker.pickMultiple({ type: type })
-
-//     for (const res of results) {
-//       var fileMoved = false
-//       var i = 0
-
-//       if (res.uri.startsWith('content://')) {
-
-//         const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-//         const destFolder = `${Dir}/Synergys/Documents`
-//         await RNFS.mkdir(destFolder) //create directory if it doesn't exist
-//         const destPath = `${destFolder}/${res.name}` //#diff
-
-//         fileMoved = await RNFS.moveFile(res.uri, destPath)
-//           .then(() => { return true })
-
-//         if (!fileMoved) throw 'Erreur lors de la séléction du fichier. Veuillez réessayer.'
-
-//         const attachment = {
-//           path: destPath,
-//           type: res.type,
-//           name: res.name,
-//           size: res.size,
-//           progress: 0
-//         }
-
-//         attachments.push(attachment)
-//       }
-
-//       fileMoved = false
-//       i = i + 1
-//     }
-
-//     return attachments
-//   }
-
-//   catch (err) {
-//     console.error(err)
-//     return { error: err }
-//     if (DocumentPicker.isCancel(err))
-//       console.log('User has canceled picker')
-//     else
-//       Alert.alert('Erreur lors de la séléction de fichier(s)')
-//   }
-// }
-
-
-
-
-
-
-
-
-  //Process case
-  // if (isProcess) {
-  //   if (highRoles.includes(currentRole)) {
-  //     types = allTypes
-  //     docSources = [uploadSource]
-  //     if (enableGeneration) {
-  //       docSources.push(generateSource)
-  //     }
-  //   }
-
-  //   else {
-  //     types = publicTypes
-  //     docSources = [uploadSource]
-
-  //     if (dynamicType) {
-  //       types.push(documentType)
-  //       if (enableGeneration)
-  //         docSources.push(generateSource)
-  //     }
-  //   }
-  // }

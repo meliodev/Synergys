@@ -28,8 +28,8 @@ class AuthLoadingScreen extends Component {
 
     this.state = {
       initialNotification: false,
-      screen: '',
-      params: {}
+      routeName: '',
+      routeParams: {}
     }
   }
 
@@ -50,16 +50,16 @@ class AuthLoadingScreen extends Component {
     if (initialNotification) {
 
       const { data } = initialNotification.notification
-      const screen = data['screen']
+      const routeName = data['screen']
       delete data.screen //keep only params
-      const params = data
+      const routeParams = data
 
       Object.entries(params).forEach(([key, value]) => {
         if (value === 'true') params[key] = true
         if (value === 'false') params[key] = false
       })
 
-      this.setState({ initialNotification: true, screen, params })
+      this.setState({ initialNotification: true, routeName, routeParams })
     }
 
     return initialNotification
@@ -95,7 +95,7 @@ class AuthLoadingScreen extends Component {
       switch (type) {
         case EventType.PRESS:
           //console.log('NOTIFICATION PRESSED !')
-          this.props.navigation.navigate(screen, data)
+          this.props.navigation.navigate(screen, params)
           await notifee.cancelNotification(notification.id)
           break
       }
@@ -143,17 +143,18 @@ class AuthLoadingScreen extends Component {
 
         //Dynamic link (email)
         if (params && params.routeName) {
-          const { routeName, ...routeParams } = params;
-          this.props.navigation.navigate(routeName, routeParams)
+          var { routeName, ...routeParams } = params
         }
 
         //Notification link
         else if (initialNotification) {
-          const { screen, params } = this.state
-          this.props.navigation.navigate(screen, params)
+          var { routeName, routeParams } = this.state
         }
 
-        else this.props.navigation.navigate("DashboardStack")
+        else {
+          var routeName = "App"
+          var routeParams = {}
+        }
       }
 
       else {
@@ -161,9 +162,16 @@ class AuthLoadingScreen extends Component {
         const { type, isConnected } = await NetInfo.fetch()
         const network = { type, isConnected }
         setNetwork(this, network)
-
-        this.props.navigation.navigate("LoginScreen")
+        var routeName = "LoginScreen"
+        var routeParams = {}
       }
+
+      if (this.props.role.id !== '' && this.props.permissions.active) {
+        console.log('Navigating..............')
+        this.props.navigation.navigate(routeName, routeParams)
+      }
+
+      else console.log('NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo')
     })
   }
 

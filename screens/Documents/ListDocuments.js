@@ -22,7 +22,7 @@ import { uploadFileNew } from "../../api/storage-api";
 
 import { auth, db } from '../../firebase'
 import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import { constants, highRoles } from '../../core/constants';
 
 const KEYS_TO_FILTERS = ['id', 'name', 'state', 'type',]
 
@@ -92,7 +92,8 @@ class ListDocuments extends Component {
             const params = { role: this.props.role.value }
             var query = configureQuery('Documents', queryFilters, params)
             this.fetchDocs(query, 'documentsList', 'documentsCount', async () => {
-                await this.fetchExtraDocuments() //Intervenant
+                if (!highRoles.includes(this.props.role.id))
+                    await this.fetchExtraDocuments() //Intervenant
                 load(this, false)
             })
         }

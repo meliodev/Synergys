@@ -17,7 +17,7 @@ import Background from '../../components/NewBackground'
 import CustomIcon from '../../components/CustomIcon'
 
 import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import { constants, highRoles } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { configureQuery } from '../../core/privileges'
@@ -93,7 +93,8 @@ class ListProjects extends Component {
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
             this.fetchDocs(query, 'projectsList', 'projectsCount', async () => {
-                await this.fetchExtraProjects() //Intervenant
+                if (!highRoles.includes(this.props.role.id))
+                    await this.fetchExtraProjects() //Intervenant
                 load(this, false)
             })
         }
@@ -122,7 +123,7 @@ class ListProjects extends Component {
     }
 
     componentWillUnmount() {
-        this.unsubscribe()
+        this.unsubscribe && this.unsubscribe()
     }
 
     renderProject(project) {

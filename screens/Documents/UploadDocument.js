@@ -141,6 +141,7 @@ class UploadDocument extends Component {
             loading: true,
             docNotFound: false,
             loadingConversion: false,
+            modalLoading: false,
             toastType: '',
             toastMessage: ''
         }
@@ -678,7 +679,7 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment, order } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { error, loading, docNotFound, loadingConversion, toastType, toastMessage, projectError } = this.state
+        let { error, loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError } = this.state
         const { checked, modalContent, showModal, attachmentSource } = this.state
         const { isConnected } = this.props.network
 
@@ -776,19 +777,21 @@ class UploadDocument extends Component {
                                 <ModalOptions
                                     title={title}
                                     columns={columns}
-                                    //modalStyle={{ marginTop: constants.ScreenHeight * 0.5 }}
+                                    isLoading={modalLoading}
                                     modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
                                     isVisible={showModal}
                                     toggleModal={() => {
                                         this.toggleModal()
                                         this.resetModalOptions()
                                     }}
-                                    //  handleCancel={this.handleCancelGen}
+                                    // handleCancel={this.handleCancelGen}
                                     // handleConfirm={this.handleConfirmModal}
                                     elements={elements}
                                     autoValidation={true}
 
                                     handleSelectElement={(elements, index) => {
+
+                                        this.setState({ modalLoading: true })
 
                                         if (modalContent === 'docTypes') {
                                             const type = this.types[index].value
@@ -808,12 +811,19 @@ class UploadDocument extends Component {
                                                 this.toggleModal()
                                                 this.pickDoc()
                                             }
-                                            else this.setState({ modalContent: 'genSources' })
+                                            else {
+                                                if (this.state.type === 'Facture')
+                                                    this.setState({ modalContent: 'genSources' })
+                                                else if (this.state.type === 'Devis')
+                                                    this.startGenPdf(1)
+                                            }
                                         }
 
                                         else if (modalContent === 'genSources') {
                                             this.startGenPdf(index)
                                         }
+
+                                        this.setState({ modalLoading: false })
                                     }}
                                 />
 

@@ -139,7 +139,7 @@ export const processModel = {
                         screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
-                        responsable: 'Commercial', //#task: add operation = add intervenant to project if different than contact commercial
+                        responsable: 'Commercial', 
                         status: 'pending',
                     },
                     {
@@ -180,7 +180,7 @@ export const processModel = {
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Reporter', id: 'postpone', onSelectType: 'navigation', },
-                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },  //#task: add operation = empty intervenant from project
+                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },  
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
@@ -212,7 +212,7 @@ export const processModel = {
                     }
                 ]
             },
-            'housingActionFile': { //##ask can be optional (skipable) depending on the client accepts it or rejects it
+            'housingActionFile': { 
                 title: 'Dossier action logement',
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
@@ -897,8 +897,6 @@ export const processModel = {
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' }
                         ],
-
-
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',

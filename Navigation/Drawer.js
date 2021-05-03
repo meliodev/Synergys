@@ -151,7 +151,7 @@ class DrawerMenu extends React.Component {
     }
 
     render() {
-        const { role } = this.props
+        const { role, fcmToken } = this.props
         const { currentUser } = firebase.auth()
 
         return (
@@ -176,7 +176,7 @@ const mapStateToProps = (state) => {
 
     return {
         role: state.roles.role,
-        //fcmToken: state.fcmtoken
+        fcmToken: state.fcmtoken
     }
 }
 

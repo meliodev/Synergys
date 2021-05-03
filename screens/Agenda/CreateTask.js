@@ -367,9 +367,18 @@ class CreateTask extends Component {
 
         let tasks = this.isEdit ? [task] : this.setTasks(task, startDate, endDate)
 
-        //5. Limit number of tasks created
+        //5.1
+        const isThisWeek = this.isTasksThisWeek(tasks)
+        if (!isThisWeek) {
+            Alert.alert('Limite dépassée', "Impossible de planifier une tâche avant 7 jours. Veuiller définir une autre date de début.")
+            load(this, false)
+            return
+        }
+
+        //5.2 Limit number of tasks created
         const isOverLimit = this.limitTasks(tasks.length)
         if (isOverLimit) {
+            Alert.alert('Limite dépassée', "Impossible d'ajouter plus de 25 tâches en une seule fois.")
             load(this, false)
             return
         }
@@ -392,6 +401,19 @@ class CreateTask extends Component {
         //}
 
         this.props.navigation.goBack()
+    }
+
+    isTasksThisWeek(tasks) {
+        const filterDate = (task) => {
+            const taskDate = moment(task.date, 'YYYY-MM-DD')
+            const endWeek = moment().add(7, 'days').format('YYYY-MM-DD')
+            const isThisWeek = moment(taskDate).isSameOrBefore(endWeek)
+            return isThisWeek
+        }
+
+        var index = tasks.findIndex(filterDate)
+        const isThisWeek = index !== -1
+        return isThisWeek
     }
 
     //Conflicts handlers
@@ -506,11 +528,8 @@ class CreateTask extends Component {
     }
 
     limitTasks(tasksLength) {
-        if (tasksLength > 7) {
-            Alert.alert('Limite dépassée', "Impossible d'ajouter plus de 25 tâches en une seule fois.")
-            return true
-        }
-        else return false
+        const isOverLimit = tasksLength > 7
+        return isOverLimit
     }
 
     //Delete task
