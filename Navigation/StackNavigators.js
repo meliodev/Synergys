@@ -186,6 +186,10 @@ const DashboardStack = createStackNavigator({
         screen: Agenda,
         navigationOptions: hideHeader
     },
+    Chat: {
+        screen: Chat,
+        navigationOptions: hideHeader
+    },
 })
 
 const ProfileStack = createStackNavigator({

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog } from '@fortawesome/pro-light-svg-icons'
+import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog, faCommentDots } from '@fortawesome/pro-light-svg-icons'
 import firebase, { db } from '../firebase'
 import { connect } from 'react-redux'
 import NetInfo from "@react-native-community/netinfo"
@@ -78,20 +78,22 @@ class DrawerMenu extends React.Component {
 
     renderHeader(currentUser, role) {
         const { displayName } = currentUser
+        const showChatIcon = role !== "Client" && role !== ""
 
         return (
-            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isClient: role.id === 'client' })}>
+            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
                     <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>
 
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
-                    <View style={{ flex: 0.8 }}>
+                    <View style={{ flex: 0.73 }}>
                         <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{displayName}</Text>
                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role.value}</Text>
                     </View>
-                    <View style={{ flex: 0.2, justifyContent: 'center', alignItems: 'center' }}>
+                    <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                         <CustomIcon icon={faCog} color={theme.colors.gray_dark} />
+                        {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.gray_dark} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
                     </View>
                 </View>
             </TouchableOpacity>
@@ -146,8 +148,8 @@ class DrawerMenu extends React.Component {
         firebase.auth().signOut()
     }
 
-    navigateToScreen(navScreen) {
-        this.props.navigation.navigate(navScreen)
+    navigateToScreen(screenName, screenParams) {
+        this.props.navigation.navigate(screenName, screenParams)
     }
 
     render() {
