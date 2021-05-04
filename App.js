@@ -136,8 +136,6 @@ export default class App extends Component {
       else {
 
         const path = Platform.OS === 'android' ? response.path : response.uri //try without file://
-
-        console.log(response.width, response.height)
         
         this.setState({
           path,
@@ -153,6 +151,9 @@ export default class App extends Component {
 
   updateImage(image, newCoordinates) {
     image = `data:image/jpeg;base64,${image}`
+    Image.getSize(image, ()=> {
+      
+    })
     this.setState({
       image,
       rectangleCoordinates: newCoordinates
@@ -175,7 +176,7 @@ export default class App extends Component {
           //rectangleCoordinates={this.state.rectangleCoordinates}
           initialImage={this.state.image}
           path={this.state.path}
-          height={5000}
+          height={this.state.imageHeight}
           width={this.state.imageWidth}
           ref={ref => (this.customCrop = ref)}
           overlayColor="rgba(18,190,210, 1)"
