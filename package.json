@@ -71,6 +71,7 @@
     "react-native-paper": "^4.0.1",
     "react-native-paper-dates": "^0.3.2",
     "react-native-pdf": "^6.2.2",
+    "react-native-perspective-image-cropper": "^0.4.4",
     "react-native-photo-view": "github:shoutem/react-native-photo-view#0ffa1481f6b6cb8663cb291b7db1d6644440584d",
     "react-native-popup-menu": "^0.15.9",
     "react-native-reanimated": "^1.13.0",
