@@ -184,9 +184,7 @@ export default class App extends Component {
           handlerColor="rgba(20,150,160, 1)"
           enablePanStrict={false}
         />
-        <TouchableOpacity onPress={this.crop.bind(this)} style={{ marginTop: 50 }}>
-          <Text>CROP IMAGE</Text>
-        </TouchableOpacity>
+       
       </View>
     )
   }
