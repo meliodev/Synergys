@@ -436,9 +436,8 @@ export const uint8ToBase64 = (u8Arr) => {
 }
 
 //##IMAGE PICKER
-export const pickImage = async (previousAttachments) => {
-
-  const imagePickerOptions = {
+export const pickImage = (previousAttachments, isCamera = false, addPathSuffix = true) => {
+  const options = {
     title: 'Selectionner une image',
     takePhotoButtonTitle: 'Prendre une photo',
     chooseFromLibraryButtonTitle: 'Choisir de la librairie',
@@ -446,40 +445,41 @@ export const pickImage = async (previousAttachments) => {
     noData: true,
   }
 
-  return new Promise(((resolve, reject) => {
+  const imagePickerHandler = (response, resolve, reject) => {
 
-    ImagePicker.showImagePicker(imagePickerOptions, response => {
+    if (response.didCancel) reject('User cancelled image picker')
+    else if (response.error) reject('ImagePicker Error: ', response.error)
+    else if (response.customButton) reject('User tapped custom button: ', response.camera)
 
-      if (response.didCancel) reject('User cancelled image picker')
-      else if (response.error) reject('ImagePicker Error: ', response.error);
-      else if (response.customButton) reject('User tapped custom button: ', response.camera);
+    else {
 
-      else {
-        let attachments = previousAttachments
-
-        const image = {
-          type: response.type,
-          name: response.fileName,
-          size: response.fileSize,
-          local: true,
-          progress: 0,
-        }
-
-        let { path, uri } = response
-
-        if (Platform.OS === 'android') {
-          path = 'file://' + path
-          image.path = path
-        }
-
-        else image.uri = uri
-
-        attachments.push(image)
-        resolve(attachments)
+      const image = {
+        type: response.type,
+        name: response.fileName,
+        size: response.fileSize,
+        local: true,
+        progress: 0,
       }
 
-    })
+      let { path, uri } = response
 
+      if (Platform.OS === 'android') {
+        const pathSuffix = addPathSuffix ? 'file://' : ''
+        path = pathSuffix + path
+        image.path = path
+      }
+
+      else image.uri = uri
+
+      let attachments = previousAttachments
+      attachments.push(image)
+      resolve(attachments)
+    }
+  }
+
+  return new Promise(((resolve, reject) => {
+    if (isCamera) ImagePicker.launchCamera(options, (response) => imagePickerHandler(response, resolve, reject))
+    else ImagePicker.showImagePicker(options, (response) => imagePickerHandler(response, resolve, reject))
   }))
 }
 
@@ -549,6 +549,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
       if (!fileMoved) throw 'Erreur lors de la séléction du fichier. Veuillez réessayer.'
 
       const attachment = {
+        //path: res.uri,
         path: destPath,
         type: res.type,
         name: attachmentName,

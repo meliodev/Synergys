@@ -3,8 +3,9 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, 
 import { Card, Title, TextInput } from 'react-native-paper'
 import { connect } from 'react-redux'
 import DocumentPicker from 'react-native-document-picker';
+import RNImageToPdf from 'react-native-image-to-pdf';
 import RNFS from 'react-native-fs'
-import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal } from '@fortawesome/pro-light-svg-icons'
+import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 
 import moment from 'moment';
@@ -27,7 +28,7 @@ import LoadDialog from "../../components/LoadDialog"
 import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
@@ -44,6 +45,11 @@ const states = [
 const docSources = [
     { label: 'Importer', value: 'upload', icon: faCloudUploadAlt },
     { label: 'Générer', value: 'generate', icon: faMagic }
+]
+
+const imageSources = [
+    { label: 'Caméra', value: 'upload', icon: faCamera },
+    { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
 
 const genSources = [
@@ -103,6 +109,7 @@ class UploadDocument extends Component {
         const currentRole = this.props.role.id
         this.types = setPickerDocTypes(currentRole, this.dynamicType, this.documentType)
         this.docSources = docSources
+        this.imageSources = imageSources
         this.genSources = genSources
 
         const defaultState = this.setDefaultState()
@@ -405,15 +412,8 @@ class UploadDocument extends Component {
 
     async uploadFile(isConversion, DocumentId) {
         var { project, type, attachment } = this.state
-
-        // if (this.isEdit && !isConversion && attachment && attachment.pending) { //creation + not conversion
-        //     console.log('................')
-        //     return //User tries to update Document data while an attachment is still pending..
-        // }
-
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
-
         return fileUploaded
     }
 
@@ -440,7 +440,7 @@ class UploadDocument extends Component {
     }
 
     //Attachment component handlers
-    onPressAttachment(canWrite) {
+    async onPressAttachment(canWrite) {
 
         if (!canWrite) return
 
@@ -450,9 +450,8 @@ class UploadDocument extends Component {
         else {
             const type = this.isEdit ? this.state.type : this.documentType.value //this.isEdit || !this.isEdit && this.documentType
             let isQuoteOrBill = type === 'Devis' || type === 'Facture'
-            if (isQuoteOrBill)
-                this.setState({ modalContent: 'docSources', showModal: true })
-            else this.pickDoc()
+            if (isQuoteOrBill) this.setState({ modalContent: 'docSources', showModal: true })
+            else await this.setAttachment()
         }
 
         return
@@ -541,6 +540,14 @@ class UploadDocument extends Component {
             }
         }
 
+        else if (modalContent === 'imageSources') {
+            return {
+                title: `Source`,
+                columns: 2,
+                elements: this.imageSources,
+            }
+        }
+
         else if (modalContent === 'genSources') {
             return {
                 title: `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`,
@@ -556,15 +563,40 @@ class UploadDocument extends Component {
     }
 
     async pickDoc() {
-        const attachment = await pickDoc(true, [DocumentPicker.types.pdf])
+        let attachment = await pickDoc(true, [DocumentPicker.types.pdf, DocumentPicker.types.images])
 
         if (attachment.hasCanceled) {
-            const { attachment, type } = this.initialState
+            attachment = this.initialState.attachment
+            const type = this.initialState.type
             this.setState({ attachment, type })
             return
         }
 
-        this.setState({ attachment, order: null }) //order: Form fields to generate a pdf 
+        return attachment
+    }
+
+    async handleImageToPdfConversion(attachment) {
+        const isImage = attachment.type.includes('image/')
+        if (!isImage) return attachment
+
+        try {
+            const name = "Scan-" + moment().format('DD-MM-YYYY-HHmmss') + ".pdf"
+            const options = {
+                imagePaths: [attachment.path],
+                name,
+                quality: .7, // optional compression parameter
+            }
+            console.log('FIRST PATH:', attachment.path)
+            const pdf = await RNImageToPdf.createPDFbyImages(options)
+            console.log('PATH::::::', pdf.filePath)
+            attachment.name = name
+            attachment.path = pdf.filePath
+            return attachment
+        }
+        catch (e) {
+            Alert.alert('', "Erreur lors de la conversion de l'image en pdf.")
+            return null
+        }
     }
 
     startGenPdf(index) {
@@ -674,6 +706,65 @@ class UploadDocument extends Component {
                 </View>
             )
         })
+    }
+
+    async setAttachment(isCam) {
+        this.toggleModal()
+        let attachment = null
+        if (isCam) {
+            const attachments = await pickImage([], true, false)
+            attachment = attachments[0]
+        }
+        else attachment = await this.pickDoc()
+        attachment = await this.handleImageToPdfConversion(attachment)
+        this.setState({ attachment, order: null })
+    }
+
+    async configDocTypes(index) {
+        const type = this.types[index].value
+        this.setState({ type })
+        const isQuoteOrBill = type === 'Devis' || type === 'Facture'
+        if (isQuoteOrBill) this.setState({ modalContent: 'docSources' })
+        else await this.setState({ modalContent: 'imageSources' })
+    }
+
+    async configDocSources(index) {
+        const attachmentSource = index === 0 ? 'upload' : 'generation'
+        this.setState({ attachmentSource })
+        if (attachmentSource === 'upload')
+            await this.setAttachment()
+        else {
+            if (this.state.type === 'Facture')
+                this.setState({ modalContent: 'genSources' })
+            else if (this.state.type === 'Devis')
+                this.startGenPdf(1)
+        }
+    }
+
+    async configImageSources(index) {
+        const isCamera = index === 0
+        await this.setAttachment(isCamera)
+    }
+
+    async configDocument(elements, index) {
+
+        this.setState({ modalLoading: true })
+
+        const { modalContent } = this.state
+
+        if (modalContent === 'docTypes')
+            await this.configDocTypes(index)
+
+        else if (modalContent === 'docSources')
+            await this.configDocSources(index)
+
+        else if (modalContent === 'imageSources')
+            await this.configImageSources(index)
+
+        else if (modalContent === 'genSources')
+            this.startGenPdf(index)
+
+        this.setState({ modalLoading: false })
     }
 
     render() {
@@ -789,42 +880,7 @@ class UploadDocument extends Component {
                                     elements={elements}
                                     autoValidation={true}
 
-                                    handleSelectElement={(elements, index) => {
-
-                                        this.setState({ modalLoading: true })
-
-                                        if (modalContent === 'docTypes') {
-                                            const type = this.types[index].value
-                                            this.setState({ type })
-                                            let isQuoteOrBill = type === 'Devis' || type === 'Facture'
-                                            if (isQuoteOrBill) this.setState({ modalContent: 'docSources' })
-                                            else {
-                                                this.toggleModal()
-                                                this.pickDoc()
-                                            }
-                                        }
-
-                                        else if (modalContent === 'docSources') {
-                                            const attachmentSource = index === 0 ? 'upload' : 'generation'
-                                            this.setState({ attachmentSource })
-                                            if (attachmentSource === 'upload') {
-                                                this.toggleModal()
-                                                this.pickDoc()
-                                            }
-                                            else {
-                                                if (this.state.type === 'Facture')
-                                                    this.setState({ modalContent: 'genSources' })
-                                                else if (this.state.type === 'Devis')
-                                                    this.startGenPdf(1)
-                                            }
-                                        }
-
-                                        else if (modalContent === 'genSources') {
-                                            this.startGenPdf(index)
-                                        }
-
-                                        this.setState({ modalLoading: false })
-                                    }}
+                                    handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
                                 />
 
                                 <MyInput
@@ -1015,63 +1071,6 @@ const modalStyles2 = StyleSheet.create({
     }
 })
 
-
-
-//OLD
-
-// async pickDoc() {
-//     try {
-//         const res = await DocumentPicker.pick({
-//             type: [DocumentPicker.types.pdf],
-//         })
-
-//         // const attachment = {
-//         //     path: res.uri,
-//         //     type: 'application/pdf',
-//         //     name: `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`,
-//         //     size: res.size,
-//         //     progress: 0
-//         // }
-
-//       //  this.setState({ attachment })
-
-//         //Android only
-//         if (res.uri.startsWith('content://')) {
-//             //const uriComponents = res.uri.split('/')
-//             //const fileNameAndExtension = uriComponents[uriComponents.length - 1]
-//             // this.cachePath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}`
-
-//             const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-//             const destFolder = `${Dir}/Synergys/Documents`
-//             await RNFS.mkdir(destFolder)
-//             //this.cachePath = `${destFolder}/${'temporaryDoc'}${Date.now()}`
-//             this.cachePath = `${destFolder}/test.pdf`
-//             await RNFS.moveFile(res.uri, this.cachePath)
-
-//                 // await RNFS.copyFile(res.uri, this.cachePath) //copy file to get access to the relative path. DocumentPicker (with android) provides only absolute path which cannot be used with firebase storage
-//                 .then(() => {
-//                     const attachment = {
-//                         //originalPath: res.uri,
-//                         path: this.cachePath,
-//                         type: 'application/pdf',
-//                         name: `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`,
-//                         size: res.size,
-//                         progress: 0
-//                     }
-
-//                     RNFS.exists(this.cachePath).then(() => console.log('File exist !'))
-
-//                     this.setState({ attachment })
-//                 })
-//                 .catch((e) => Alert.alert(e))
-//         }
-//     }
-
-//     catch (err) {
-//         if (DocumentPicker.isCancel(err)) return
-//         else Alert.alert(err)
-//     }
-// }
 
 
 //OLD

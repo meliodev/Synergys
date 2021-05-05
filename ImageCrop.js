@@ -3,7 +3,7 @@
 import CustomCrop from "react-native-perspective-image-cropper";
 import ImagePicker from 'react-native-image-picker'
 
-class App extends Component {
+export default class App extends Component {
 
   constructor(props) {
     super(props)
@@ -38,10 +38,10 @@ class App extends Component {
       else if (response.error) console.log('ImagePicker Error: ', response.error);
       else if (response.customButton) console.log('User tapped custom button: ', response.camera);
 
-      else {
+      else { 
 
         const path = Platform.OS === 'android' ? response.path : response.uri //try without file://
-
+        
         this.setState({
           path,
           imageWidth: response.width,
@@ -56,8 +56,8 @@ class App extends Component {
 
   updateImage(image, newCoordinates) {
     image = `data:image/jpeg;base64,${image}`
-    Image.getSize(image, () => {
-
+    Image.getSize(image, ()=> {
+      
     })
     this.setState({
       image,
@@ -89,6 +89,7 @@ class App extends Component {
           handlerColor="rgba(20,150,160, 1)"
           enablePanStrict={false}
         />
+       
       </View>
     )
   }
