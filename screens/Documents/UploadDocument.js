@@ -28,7 +28,7 @@ import LoadDialog from "../../components/LoadDialog"
 import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, savePdf, convertImageToPdf } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
@@ -563,15 +563,7 @@ class UploadDocument extends Component {
     }
 
     async pickDoc() {
-        let attachment = await pickDoc(true, [DocumentPicker.types.pdf, DocumentPicker.types.images])
-
-        if (attachment.hasCanceled) {
-            attachment = this.initialState.attachment
-            const type = this.initialState.type
-            this.setState({ attachment, type })
-            return
-        }
-
+        const attachment = await pickDoc(true, [DocumentPicker.types.pdf, DocumentPicker.types.images])
         return attachment
     }
 
@@ -580,20 +572,17 @@ class UploadDocument extends Component {
         if (!isImage) return attachment
 
         try {
-            const name = "Scan-" + moment().format('DD-MM-YYYY-HHmmss') + ".pdf"
-            const options = {
-                imagePaths: [attachment.path],
-                name,
-                quality: .7, // optional compression parameter
-            }
-            console.log('FIRST PATH:', attachment.path)
-            const pdf = await RNImageToPdf.createPDFbyImages(options)
-            console.log('PATH::::::', pdf.filePath)
-            attachment.name = name
-            attachment.path = pdf.filePath
+            const pdfBase64 = await convertImageToPdf(attachment)
+            if (!pdfBase64) return null
+            const fileName = `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`
+            const destPath = await savePdf(pdfBase64, fileName, 'base64')
+            if (!pdfBase64) return null
+            attachment.path = destPath
+            attachment.name = fileName
             return attachment
         }
         catch (e) {
+            console.error(e)
             Alert.alert('', "Erreur lors de la conversion de l'image en pdf.")
             return null
         }
@@ -617,8 +606,6 @@ class UploadDocument extends Component {
             navParams.popCount = 2
             this.props.navigation.navigate('CreateOrder', navParams)
         }
-
-        return
     }
 
     getGenPdf(genPdf) {
@@ -708,15 +695,20 @@ class UploadDocument extends Component {
         })
     }
 
-    async setAttachment(isCam) {
+    async setAttachment(isCamera) {
         this.toggleModal()
         let attachment = null
-        if (isCam) {
+        if (isCamera) {
             const attachments = await pickImage([], true, false)
+            if (attachments.length === 0) return
             attachment = attachments[0]
         }
-        else attachment = await this.pickDoc()
+        else {
+            attachment = await this.pickDoc()
+            if (!attachment) return
+        }
         attachment = await this.handleImageToPdfConversion(attachment)
+        if (!attachment) return
         this.setState({ attachment, order: null })
     }
 
@@ -725,7 +717,7 @@ class UploadDocument extends Component {
         this.setState({ type })
         const isQuoteOrBill = type === 'Devis' || type === 'Facture'
         if (isQuoteOrBill) this.setState({ modalContent: 'docSources' })
-        else await this.setState({ modalContent: 'imageSources' })
+        else this.setState({ modalContent: 'imageSources' })
     }
 
     async configDocSources(index) {

@@ -18,10 +18,11 @@ moment.locale('fr')
 // import { fetchAsset, writePdf } from './assets'
 import { logoBase64 } from '../../assets/logoBase64'
 import { termsBase64 } from '../../assets/termsAndConditionsBase64'
-import { uint8ToBase64, base64ToArrayBuffer, articles_fr, setToast } from '../../core/utils'
+import { uint8ToBase64, base64ToArrayBuffer, articles_fr, setToast, savePdf } from '../../core/utils'
 import { sizes } from '../../core/theme'
 import * as theme from '../../core/theme'
 import { constants } from "../../core/constants"
+import { Alert } from "react-native"
 
 //urls
 const urlForm = "https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/Templates%2Fdod_character.pdf?alt=media&token=b2c00766-4377-4d31-ad38-fad84eac5376"
@@ -42,7 +43,7 @@ export default class PdfGeneration extends Component {
 
     constructor(props) {
         super(props)
-        this.savePdf = this.savePdf.bind(this)
+        this.savePdfBase64 = this.savePdfBase64.bind(this)
         this.order = this.props.navigation.getParam('order', '')
         this.docType = this.props.navigation.getParam('docType', '') //Devis ou Facture (Proposal or Bill)
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
@@ -1096,28 +1097,23 @@ export default class PdfGeneration extends Component {
         this.setState({ source, pdfBase64 }, () => this.setState({ loading: false }))
     }
 
-    async savePdf() {
-        const { pdfBase64 } = this.state
-
-        const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-        const destFolder = `${Dir}/Synergys/Documents`
-        await RNFS.mkdir(destFolder) //create directory if it doesn't exist
+    async savePdfBase64(pdfBase64) {
         const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
-        const destPath = `${destFolder}/${pdfName}`
+        const destPath = await savePdf(pdfBase64, pdfName, 'base64')
+        if (!destPath) return
 
-        RNFS.writeFile(destPath, pdfBase64, "base64")
-            .then(() => {
-                this.props.navigation.state.params.onGoBack({ pdfBase64Path: destPath, pdfName, order: this.order, isConversion: this.isConversion, DocumentId: this.DocumentId })
-                this.props.navigation.pop(this.popCount)
-            })
-            .catch((err) => {
-                console.error(err)
-                setToast(this, 'e', 'Erreur inattendue, veuillez réessayer.')
-            })
+        this.props.navigation.state.params.onGoBack({
+            pdfBase64Path: destPath,
+            pdfName,
+            order: this.order,
+            isConversion: this.isConversion,
+            DocumentId: this.DocumentId
+        })
+        this.props.navigation.pop(this.popCount)
     }
 
     render() {
-        const { source, loading } = this.state
+        const { source, pdfBase64, loading } = this.state
 
         if (loading)
             return (
@@ -1153,7 +1149,7 @@ export default class PdfGeneration extends Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button mode="contained" onPress={this.savePdf} style={{ width: constants.ScreenWidth * 0.8, backgroundColor: theme.colors.primary }} >
+                    <Button mode="contained" onPress={() => this.savePdfBase64(pdfBase64)} style={{ width: constants.ScreenWidth * 0.8, backgroundColor: theme.colors.primary }} >
                         Valider
                     </Button>
                 </View>
