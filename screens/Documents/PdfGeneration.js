@@ -18,7 +18,7 @@ moment.locale('fr')
 // import { fetchAsset, writePdf } from './assets'
 import { logoBase64 } from '../../assets/logoBase64'
 import { termsBase64 } from '../../assets/termsAndConditionsBase64'
-import { uint8ToBase64, base64ToArrayBuffer, articles_fr, setToast, savePdf } from '../../core/utils'
+import { uint8ToBase64, base64ToArrayBuffer, articles_fr, setToast, saveFile } from '../../core/utils'
 import { sizes } from '../../core/theme'
 import * as theme from '../../core/theme'
 import { constants } from "../../core/constants"
@@ -1099,7 +1099,7 @@ export default class PdfGeneration extends Component {
 
     async savePdfBase64(pdfBase64) {
         const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
-        const destPath = await savePdf(pdfBase64, pdfName, 'base64')
+        const destPath = await saveFile(pdfBase64, pdfName, 'base64')
         if (!destPath) return
 
         this.props.navigation.state.params.onGoBack({

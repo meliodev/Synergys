@@ -8,7 +8,7 @@ import MyInput from '../components/TextInput'
 import * as theme from "../core/theme";
 import { getRoleIdFromValue } from "../core/utils";
 
-export const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navigation, ...props }) => {
+const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navigation, ...props }) => {
 
     navigateToProfile = (user) => navigation.navigate('Profile', { user: { id: user.id, roleId: getRoleIdFromValue(user.role) } })
 
@@ -56,4 +56,7 @@ export const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navi
     )
 
 }
+
+export default ActivitySection
+
 

@@ -123,10 +123,7 @@ class ListDocuments extends Component {
 
     bootstrapUploads() {
         const { newAttachments } = this.props.documents //Documents uploads
-        console.log('1. Pending attachments.....', newAttachments)
-
         if (newAttachments === {}) return
-
         Object.entries(newAttachments).forEach(([DocumentId, attachment]) => {
             this.uploadOfflineBeta(attachment, DocumentId)
         })

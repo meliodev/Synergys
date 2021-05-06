@@ -22,7 +22,7 @@ import { uploadFiles } from "../../api/storage-api";
 import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
 
 import { connect } from 'react-redux'
-import { ActivitySection } from '../../containers/ActivitySection';
+import ActivitySection from '../../containers/ActivitySection';
 
 class AddGoal extends Component {
     constructor(props) {
@@ -353,7 +353,7 @@ class AddGoal extends Component {
                                 createdAt={createdAt}
                                 editedBy={editedBy}
                                 editedAt={editedAt}
-                                navigation= {this.props.navigation}
+                                navigation={this.props.navigation}
                             />
                         }
                     </ScrollView>

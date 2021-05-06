@@ -8,7 +8,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-
+import ActivitySection from '../../containers/ActivitySection';
 import Appbar from '../../components/Appbar'
 import Picker from "../../components/Picker";
 import AddressInput from '../../components/AddressInput'
@@ -28,7 +28,6 @@ import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuid
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
 import CreateProject from './CreateProject';
-import { ActivitySection } from '../../containers/ActivitySection';
 
 const departments = [
     { label: 'Commercial', value: 'Commercial' },

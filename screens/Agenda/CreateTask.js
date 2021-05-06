@@ -163,14 +163,11 @@ class CreateTask extends Component {
                 assignedTo = techContact
             }
 
-            const project = this.project
-
-
             defaultState = {
                 name,
                 type: this.taskType.value,
                 assignedTo,
-                project,
+                project: this.project,
                 address
             }
         }

@@ -118,20 +118,14 @@ export async function uploadFiles(files, storageRefPath, isChat, chatId) {
 //Used by: CreateDocument.js
 export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehydrated) { //#task: add showProgress as param
 
-    // console.log('3. uploadOfflineBeta')
-    // console.log('3.1 attachment', attachment)
-    // console.log('3.2 storageRefPath', storageRefPath)
-    // console.log('3.3 DocumentId', DocumentId)
-    // console.log('3.4 rehydrated', rehydrated)
-
     const promise = new Promise(async (resolve, reject) => {
 
         const storageRef = firebase.storage().ref(storageRefPath)
         const uploadTask = storageRef.putFile(attachment.path)
 
         var payload = { ...attachment }
-        payload.DocumentId = DocumentId
         payload.storageRefPath = storageRefPath
+        payload.DocumentId = DocumentId
 
         if (!rehydrated) {
             await onUploadProgressStart(this, payload)
@@ -141,32 +135,25 @@ export async function uploadFileNew(attachment, storageRefPath, DocumentId, rehy
             .on('state_changed', async function (tasksnapshot) {
                 var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
                 console.log('Upload attachment ' + progress + '% done')
-
-                //dispatch action to update attachment progress with id = DocumentId
                 payload.progress = progress / 100
-                onUploadProgressChange(this, payload)
-
+                onUploadProgressChange(this, payload) //dispatch action to update attachment progress with id = DocumentId
             }.bind(this))
 
         uploadTask
             .then(async (res) => {
                 console.log('UPLOAD COMPLETED !')
-
                 attachment.downloadURL = await storageRef.getDownloadURL()
                 attachment.generation = 'upload'
                 attachment.pending = false
                 delete attachment.progress
 
-                db.collection('Documents').doc(DocumentId).update({ attachment })
+                db.collection('Documents').doc(DocumentId).update({ attachment }).then(() => console.log('FILE UPLOADED TO FIREBASE !'))
                 onUploadProgressEnd(this, payload)
                 resolve(true)
             })
             .catch((e) => {
                 console.error('upload error', e)
-
-                //Rollback: Remove failed attachment
-                db.collection('Documents').doc(DocumentId).update({ attachment: null })
-
+                db.collection('Documents').doc(DocumentId).update({ attachment: null }) //Rollback: Remove failed attachment
                 onUploadProgressEnd(this, payload)
                 reject(false)
             })

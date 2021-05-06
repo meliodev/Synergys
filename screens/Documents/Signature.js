@@ -473,7 +473,13 @@ class Signature extends Component {
                 //Code sent
                 codeSent: this.state.codeSent,
                 //User identity     
-                signedBy: { id: this.currentUser.uid, fullName: this.currentUser.displayName },//only when signGenerated = true
+                signedBy: {
+                    id: this.currentUser.uid,
+                    fullName: this.currentUser.displayName,
+                    email: this.currentUser.email,
+                    role: this.props.role.value
+                },
+                //only when signGenerated = true
                 //Timestamp
                 signedAt: moment().format(),//only when signGenerated = true
                 //Device data
@@ -633,8 +639,8 @@ class Signature extends Component {
                     <TermsConditions
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
-                        acceptTerms={this.verifyUser}
-                        //acceptTerms={this.startSignature}
+                        //acceptTerms={this.verifyUser}
+                        acceptTerms={this.startSignature}
                         dowloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
                             this.downloadFile(this.termsPath, this.termsURL)

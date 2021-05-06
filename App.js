@@ -83,5 +83,3 @@ class App extends Component {
 LogBox.ignoreAllLogs(true)
 
 export default App
-
-

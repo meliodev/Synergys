@@ -4,6 +4,9 @@ DONE:
 +++ automatic fill task/document
 
 TO DO:
++ uninstall react-native-image-to-pdf
++ Test denormalization updates
+
 +++ Set ongoback=mainHandler from signature to processAction
 +++ BUG: sometimes menu is empty
 --> Try to do privilleges/role setting on redux after navigating from authlistener

@@ -11,6 +11,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import ActivitySection from '../../containers/ActivitySection';
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
@@ -27,7 +28,6 @@ import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'
 import { handleFirestoreError } from '../../core/exceptions'
-import { ActivitySection } from '../../containers/ActivitySection';
 
 const states = [
     { label: 'Terminé', value: 'Terminé' },

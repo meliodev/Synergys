@@ -213,7 +213,6 @@ export const countDown = async (ms) => {
   })
 }
 
-
 export const setAttachmentIcon = (type) => {
 
   switch (type) {
@@ -282,25 +281,7 @@ export const isEditOffline = (isEdit, isConnected) => {
     return true
   }
   return false
-};
-
-
-// export const generateId = async (main, projectRequestId, docId, field, suffix) => {
-//   main.unsubscribe = await firebase.firestore().collection('IdCounter').doc(docId).onSnapshot((doc) => {
-//     let increment = 0
-
-//     if (doc.exists)
-//       increment = doc.data()[field] + 1
-
-
-//     else
-//       increment = 1
-
-//     let id = projectRequestId
-//     projectRequestId.value = suffix + increment
-//     main.setState({ projectRequestId, idCount: increment })
-//   })
-// }
+}
 
 export const generateId = (suffix, length = 4) => {
   const options = { length }
@@ -333,20 +314,21 @@ export const myAlert = function myAlert(title, message, handleConfirm, handleCan
   )
 }
 
-export const downloadFile = async (main, fileName, url) => { //#task configure for ios
+export const displayError = (error) => {
+  const showError = error && error.message !== "ignore"
+  if (showError) Alert.alert('', result.error.message)
+}
+
+export const downloadFile = async (main, fileName, url) => {
 
   try {
-    const { config, fs } = RNFetchBlob
-    const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
-    const path = `${Dir}/Synergys/Documents/${fileName}`
-
-    let fileExist = await RNFetchBlob.fs.exists(path)
+    const path = await setDestPath(fileName)
+    const fileExist = await RNFetchBlob.fs.exists(path)
 
     //Open file...
     if (fileExist) {
       FileViewer.open(path, { showOpenWithDialog: true })
-        .then(() => console.log('OPENING FILE...'))
-        .catch(e => console.log(e))
+      return true
     }
 
     //Download file...
@@ -355,11 +337,11 @@ export const downloadFile = async (main, fileName, url) => { //#task configure f
 
       let options = {
         fileCache: true,
-        //path: path, //#ios
+        //path, //#ios
         addAndroidDownloads: {
           useDownloadManager: true,
           notification: true,
-          path: path,
+          path,
           description: 'Image',
         },
       }
@@ -370,11 +352,11 @@ export const downloadFile = async (main, fileName, url) => { //#task configure f
           main.title = ''
           return true
         })
-        .catch((e) => { return false })
     }
   }
 
   catch (error) {
+    return false
     console.error(error)
   }
 }
@@ -399,6 +381,7 @@ export const loadLog = (main, bool, message) => {
   main.setState({ loading: bool, loadingMessage: message })
 }
 
+//##PDF
 export const base64ToArrayBuffer = (base64) => {
   const binary_string = atob(base64);
   const len = binary_string.length;
@@ -425,59 +408,73 @@ export const uint8ToBase64 = (u8Arr) => {
 
 export const convertImageToPdf = async (attachment) => {
 
-  const isPng = attachment.type === 'image/png'
-  const isJpeg = attachment.type === 'image/jpeg'
-  if (!isPng && !isJpeg) {
-    Alert.alert("Format non compatible pour une conversion en pdf. Veuillez importer un fichier PNG ou JPEG")
-    return null
+  let errorMessage = null
+
+  try {
+    const isPng = attachment.type === 'image/png'
+    const isJpeg = attachment.type === 'image/jpeg'
+    if (!isPng && !isJpeg) {
+      errorMessage = "Format non compatible pour une conversion en pdf. Veuillez importer un fichier PNG ou JPEG"
+      throw new Error(errorMessage)
+    }
+
+    const path = attachment.path
+    const imageBytes = await RNFS.readFile(path, 'base64')
+    const pdfDoc = await PDFDocument.create()
+    const image = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
+    const page = pdfDoc.addPage(PageSizes.A4)
+
+    const scaleToFit_x = page.getWidth()
+    const scaleToFit_y = page.getHeight()
+    const jpgDims = image.scaleToFit(scaleToFit_x, scaleToFit_y)
+    const image_dx = - jpgDims.width / 2
+    const image_dy = - jpgDims.height / 2
+
+    page.drawImage(image, {
+      x: page.getWidth() / 2 + image_dx,
+      y: page.getHeight() / 2 + image_dy,
+      width: jpgDims.width,
+      height: jpgDims.height,
+    })
+
+    const pdfBytes = await pdfDoc.save()
+    const pdfBase64 = uint8ToBase64(pdfBytes)
+    return pdfBase64
   }
 
-  const path = attachment.path
-  const imageBytes = await RNFS.readFile(path, 'base64')
-  const pdfDoc = await PDFDocument.create()
-  const image = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
-  const page = pdfDoc.addPage(PageSizes.A4)
-
-  const scaleToFit_x = attachment.originalRotation ? page.getHeight() : page.getWidth()
-  const scaleToFit_y = attachment.originalRotation ? page.getHeight() : page.getWidth()
-  const jpgDims = image.scaleToFit(scaleToFit_x, scaleToFit_y)
-  const image_dx = attachment.originalRotation ? - jpgDims.height / 2 : - jpgDims.width / 2
-  const image_dy = attachment.originalRotation ? jpgDims.width / 2 : - jpgDims.height / 2
-  const rotation = attachment.originalRotation ? -90 : 0
-
-  page.drawImage(image, {
-    x: page.getWidth() / 2 + image_dx,
-    y: page.getHeight() / 2 + image_dy,
-    width: jpgDims.width,
-    height: jpgDims.height,
-    rotate: degrees(rotation),
-  })
-
-  const pdfBytes = await pdfDoc.save()
-  const pdfBase64 = uint8ToBase64(pdfBytes)
-  return pdfBase64
+  catch (e) {
+    throw new Error(errorMessage || "Erreur lors de la conversion de l'image en pdf.")
+  }
 }
 
-export const savePdf = async (pdf, pdfName, encoding) => {
-  const destPath = await setDestPath(pdfName)
-  return RNFS.writeFile(destPath, pdf, encoding)
-    .then(() => { return destPath })
-    .catch((e) => {
-      console.log(e)
-      Alert.alert("Erreur lors de l'enregistrement du document")
-      return null
-    })
+//##File system
+export const setDestPath = async (fileName) => {
+  try {
+    const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
+    const destFolder = `${Dir}/Synergys/Documents`
+    await RNFS.mkdir(destFolder)
+    const destPath = `${destFolder}/${fileName}`
+    return destPath
+  }
+
+  catch (e) {
+    throw new Error('RNFS mkdir error has occured.')
+  }
+}
+
+export const saveFile = async (file, fileName, encoding) => {
+  try {
+    const destPath = await setDestPath(fileName)
+    await RNFS.writeFile(destPath, file, encoding)
+    return destPath
+  }
+  catch (e) {
+    const errorMessage = "Erreur lors de l'enregistrement du document"
+    throw new Error(errorMessage)
+  }
 }
 
 //##IMAGE PICKER
-export const setDestPath = async (fileName) => {
-  const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-  const destFolder = `${Dir}/Synergys/Documents`
-  await RNFS.mkdir(destFolder) //create directory if it doesn't exist
-  const destPath = `${destFolder}/${fileName}` //#diff
-  return destPath
-}
-
 export const pickImage = (previousAttachments, isCamera = false, addPathSuffix = true) => {
   const options = {
     title: 'Selectionner une image',
@@ -488,13 +485,16 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
   }
 
   const imagePickerHandler = (response, resolve, reject) => {
+    console.log(response)
+
+    let errorMessage = null
 
     if (response.didCancel) {
-      resolve(previousAttachments)
+      reject(new Error("ignore"))
     }
     else if (response.error) {
-      Alert.alert("", "Erreur lors de la sélection du fichier. Veuillez réessayer.")
-      resolve(previousAttachments)
+      errorMessage = "Erreur lors de la sélection du fichier. Veuillez réessayer."
+      reject(new Error(errorMessage))
     }
 
     else {
@@ -508,13 +508,11 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
       }
 
       let { path, uri } = response
-
       if (Platform.OS === 'android') {
         const pathSuffix = addPathSuffix ? 'file://' : ''
         path = pathSuffix + path
         image.path = path
       }
-
       else image.uri = uri
 
       let attachments = previousAttachments
@@ -534,16 +532,13 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
 
   try {
     const results = await DocumentPicker.pickMultiple({ type })
-
     for (const res of results) {
       var fileMoved = false
       var i = 0
-
       if (res.uri.startsWith('content://')) {
-
         const destPath = await setDestPath(res.name)
         fileMoved = await RNFS.moveFile(res.uri, destPath).then(() => { return true })
-        if (!fileMoved) throw 'Erreur lors de la séléction du fichier. Veuillez réessayer.'
+        if (!fileMoved) throw new Error('')
 
         const attachment = {
           path: destPath,
@@ -552,38 +547,32 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
           size: res.size,
           progress: 0
         }
-
         attachments.push(attachment)
       }
-
       fileMoved = false
       i = i + 1
     }
-
     return attachments
   }
 
   catch (error) {
-    if (DocumentPicker.isCancel(error)) return
-    return { error }
+    let errorMessage = 'Erreur lors de la sélection du fichier. Veuillez réessayer.'
+    if (DocumentPicker.isCancel(error))
+      errorMessage = 'ignore'
+    throw new Error(errorMessage)
   }
 }
 
 export const pickDoc = async (genName = false, type = [DocumentPicker.types.allFiles]) => {
-
   try {
     const res = await DocumentPicker.pick({ type })
-
     //Android only
-    if (res.uri.startsWith('content://')) { //#task: remove this condition (useless..)
-
+    if (res.uri.startsWith('content://')) {
       const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
       const destPath = await setDestPath(attachmentName)
       const fileMoved = await RNFS.moveFile(res.uri, destPath).then(() => { return true })
-      if (!fileMoved) {
-        Alert.alert('Erreur lors de la sélection du fichier. Veuillez réessayer.')
-        return null
-      }
+
+      if (!fileMoved) throw new Error('')
 
       const attachment = {
         path: destPath,
@@ -593,14 +582,15 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
         progress: 0,
         downloadURL: ''
       }
-
       return attachment
     }
   }
 
   catch (error) {
+    let errorMessage = 'Erreur lors de la sélection du fichier. Veuillez réessayer.'
     if (DocumentPicker.isCancel(error))
-      return null
+      errorMessage = 'ignore'
+    throw new Error('ignore')
   }
 }
 

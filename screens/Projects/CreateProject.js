@@ -15,6 +15,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import ActivitySection from '../../containers/ActivitySection';
 import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading, EmptyList } from '../../components'
 
 import firebase, { db, auth } from '../../firebase'
@@ -28,7 +29,6 @@ import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process'
 
 import { connect } from 'react-redux'
-import { ActivitySection } from '../../containers/ActivitySection';
 
 const states = [
     { label: 'En attente', value: 'En attente' },
@@ -169,7 +169,7 @@ class CreateProject extends Component {
             load(this, false)
             return
         }
-        await this.setProject(project, true)
+        await this.setProjectData(project, true)
         this.initialState = _.cloneDeep(this.state)
     }
 
@@ -188,7 +188,7 @@ class CreateProject extends Component {
         return result
     }
 
-    setProject(project, init) {
+    setProjectData(project, init) {
 
         const promise = new Promise((resolve, reject) => {
 
@@ -443,10 +443,10 @@ class CreateProject extends Component {
     }
 
     async handlePostSubmit(project, toastMessage) {
-        if (this.isEdit) await this.setProject(project, false)
+        if (this.isEdit) await this.setProjectData(project, false)
         else {
             this.isEdit = true
-            await this.setProject(project, false)
+            await this.setProjectData(project, false)
             await this.runListeners()
         }
         load(this, false)
