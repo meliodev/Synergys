@@ -459,6 +459,7 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
         size: response.fileSize,
         local: true,
         progress: 0,
+        originalRotation: response.originalRotation
       }
 
       let { path, uri } = response

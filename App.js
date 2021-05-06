@@ -124,18 +124,7 @@ class App extends Component {
     // Add a blank page to the document
     const page = pdfDoc.addPage(PageSizes.A4)
 
-    if (jpgImage.width < jpgImage.height) {
-      const jpgDims = jpgImage.scaleToFit(page.getWidth(), page.getHeight())
-
-      page.drawImage(jpgImage, {
-        x: page.getWidth() / 2 - jpgDims.width / 2,
-        y: page.getHeight() / 2 - jpgDims.height / 2,
-        width: jpgDims.width,
-        height: jpgDims.height,
-      })
-    }
-
-    else {
+    if (attachment.originalRotation) {
       const jpgDims = jpgImage.scaleToFit(page.getHeight(), page.getWidth())
 
       page.drawImage(jpgImage, {
@@ -145,7 +134,17 @@ class App extends Component {
         height: jpgDims.height,
         rotate: degrees(-90),
       })
+    }
 
+    else {
+      const jpgDims = jpgImage.scaleToFit(page.getWidth(), page.getHeight())
+
+      page.drawImage(jpgImage, {
+        x: page.getWidth() / 2 - jpgDims.width / 2,
+        y: page.getHeight() / 2 - jpgDims.height / 2,
+        width: jpgDims.width,
+        height: jpgDims.height,
+      })
     }
 
     // Serialize the PDFDocument to bytes (a Uint8Array)
