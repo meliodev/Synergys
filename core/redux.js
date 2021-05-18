@@ -1,3 +1,9 @@
+//CurrentUser
+export const setCurrentUser = (main, user) => {
+    const action = { type: "CURRENTUSER", value: user }
+    main.props.dispatch(action)
+}
+
 //Role
 export const setRole = (main, role) => {
     const action = { type: "ROLE", value: role }

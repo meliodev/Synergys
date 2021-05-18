@@ -84,7 +84,6 @@ export const blockRoleUpdateOnPhase = (role, phase) => {
     return isBlockedUpdates
 }
 
-
 export const enableProcessAction = (responsable, currentUserId, currentUserRole, currentPhase) => {
 
     const isHighRole = highRolesValues.includes(currentUserRole)

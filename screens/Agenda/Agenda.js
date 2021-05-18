@@ -410,7 +410,7 @@ class Agenda2 extends Component {
                             agendaDayNumColor: theme.colors.agendaLight,
                             agendaTodayColor: theme.colors.primary,
                             textDayFontFamily: '-Regular',
-                            backgroundColor: '#F1F1F8',
+                            //backgroundColor: '#F1F1F8',
                             'stylesheet.agenda.list': {
                                 container: {
                                     flexDirection: 'row',
@@ -428,6 +428,12 @@ class Agenda2 extends Component {
                                 dayText: styles.dayText,
                                 day: styles.day,
                             },
+                            'stylesheet.agenda.main': {
+                                reservations: {
+                                    flex: 1,
+                                    marginTop: 124,
+                                },
+                            }
                         }}
                         renderDay={this.renderDay}
                     />

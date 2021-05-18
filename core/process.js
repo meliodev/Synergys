@@ -10,7 +10,7 @@ import { stringifyUndefined, getMinObjectProp, getMaxObjectProp } from './utils'
 //#PROCESS ALGORITHM/LOGIC
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
 
-    if (!processModel || typeof (processModel) === 'undefined') {
+    if (!processModel || typeof (processModel) === 'undefined' || typeof (currentProcess) === 'undefined') {
         Alert.alert('Erreur inattendue', "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application.")
         return currentProcess
     }

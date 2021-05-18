@@ -127,10 +127,7 @@ class Tasks extends Component {
                 {loading ?
                     <Loading />
                     :
-                    <View>
-                        {/* {this.tasksSummary()} */}
-                        {this.tasksSection(isConnected)}
-                    </View>
+                    this.tasksSection(isConnected)
                 }
             </View>
         )

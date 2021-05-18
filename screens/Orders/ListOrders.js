@@ -197,7 +197,12 @@ class ListOrders extends Component {
                                 style={{ zIndex: 1 }}
                                 contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
                             :
-                            <EmptyList icon={faFileInvoice} header='Aucune commande' description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.' offLine={!isConnected} />
+                            <EmptyList
+                                icon={faFileInvoice}
+                                header='Aucune commande'
+                                description='Gérez vos commandes. Appuyez sur le boutton "+" pour en créer une nouvelle.'
+                                offLine={!isConnected}
+                            />
                         }
 
                         {canCreate && this.showFAB &&

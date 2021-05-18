@@ -37,6 +37,28 @@ export function fetchDocs(query, MyList, MyCount, MyCallBack) {
   })
 }
 
+export function fetchDocuments(query) {
+  return query.get().then((querySnapshot) => {
+    let documents = []
+    for (const doc of querySnapshot.docs) {
+      let data = doc.data()
+      data.id = doc.id
+    }
+    return documents
+  })
+}
+
+export function fetchDocument(collection, id, subCollection, subId) {
+  let query = db.collection(collection).doc(id)
+  if (subCollection) query = query.collection(subCollection).doc(subId)
+  return query.get().then((doc) => {
+    if (!doc.exists) return null
+    let data = doc.data()
+    data.id = doc.id
+    return data
+  })
+}
+
 //#TEAMS
 export const deleteTeam = async (team) => {
   // Get a new write batch
@@ -74,7 +96,7 @@ export const validateClientInputs = function validateClientInputs(userData, chec
   let nomError = ''
   let prenomError = ''
 
-  let { isPro, denom, siret, nom, prenom, phone, email, password } = userData
+  let { isPro, denom, siret, nom, prenom, phone, email, password, address } = userData
 
   if (isPro) {
     denomError = nameValidator(denom.value, '"Dénomination sociale"')
@@ -87,11 +109,11 @@ export const validateClientInputs = function validateClientInputs(userData, chec
   }
 
   const phoneError = nameValidator(phone.value, '"Téléphone"')
-  // const addressError = nameValidator(address.description, '"Adresse"')
   const emailError = emailValidator(email.value)
   const passwordError = checkPassord ? passwordValidator(password.value) : ""
+  const addressError = nameValidator(address.description, '"Adresse"')
 
-  if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError) {
+  if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError || addressError) {
 
     phone.error = phoneError
     email.error = emailError
@@ -100,28 +122,24 @@ export const validateClientInputs = function validateClientInputs(userData, chec
     if (isPro) {
       denom.error = denomError
       siret.error = siretError
-      this.setState({ denom, siret, phone, email, password, loading: false })
+      this.setState({ denom, siret, phone, email, password, addressError, loading: false })
     }
 
     else {
       nom.error = nomError
       prenom.error = prenomError
-      this.setState({ nom, prenom, phone, email, password, loading: false })
+      this.setState({ nom, prenom, phone, email, password, addressError, loading: false })
     }
 
-    Keyboard.dismiss()
-
     setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
-
     return false
   }
 
   return true
 }
 
-export const createClient = async function createClient(userData, eventHandlers, ClientId, isConnected, isConversion, isProspect) {
+export const createClient = async function createClient(userData, ClientId, isConnected, isConversion, isProspect) {
   let { isPro, nom, prenom, denom, siret, address, phone, email, password } = userData
-  let { error, loading } = eventHandlers
 
   //2. ADDING USER DOCUMENT
   let client = {
@@ -153,6 +171,7 @@ export const createClient = async function createClient(userData, eventHandlers,
   //3'. CREATE CLIENT or CONVERT PROSPECT TO CLIENT (account + document)
   if (!isProspect || isConversion) {
 
+    console.log("isConnected", isConnected)
     if (!isConnected) {
       return { error: { title: "Pas de connection internet", message: "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur." } }
     }

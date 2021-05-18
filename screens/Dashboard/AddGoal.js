@@ -14,31 +14,30 @@ import MyInput from '../../components/TextInput'
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator, formatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
-import { fetchDocs, getResponsableByRole } from "../../api/firestore-api";
+import { fetchDocs, fetchDocument, getResponsableByRole } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
 import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
 
 import { connect } from 'react-redux'
 import ActivitySection from '../../containers/ActivitySection';
 
+const properties = ["target", "description", "createdAt", "createdBy", "editedAt", "editedBy"]
+
 class AddGoal extends Component {
     constructor(props) {
         super(props)
-        this.fetchGoal = this.fetchGoal.bind(this)
-
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDeleteGoal = this.handleDeleteGoal.bind(this)
         this.myAlert = myAlert.bind(this)
+        this.showAlert = this.showAlert.bind(this)
 
         this.initialState = {}
-        this.isInit = true
-
         this.userId = this.props.navigation.getParam('userId', auth.currentUser.uid)
         this.GoalId = this.props.navigation.getParam('GoalId', '')
-        this.currentTurnover = this.props.navigation.getParam('currentTurnover', '')
+        this.currentTurnover = this.props.navigation.getParam('currentTurnover', 0)
         this.incomeSources = this.props.navigation.getParam('incomeSources', [])
         this.isEdit = this.GoalId ? true : false
         this.GoalId = this.isEdit ? this.GoalId : moment().format('YYYY')
@@ -49,8 +48,9 @@ class AddGoal extends Component {
             //ID
             GoalId: this.GoalId,
             //TEXTINPUTS
-            target: { value: 0, error: '' },
-            current: 0,
+            target: 0,
+            targetError: '',
+            current: this.currentTurnover,
             description: '',
 
             //Pickers
@@ -69,116 +69,78 @@ class AddGoal extends Component {
         }
     }
 
+
+
+    //##GET
     async componentDidMount() {
-
-        if (this.isEdit) {
-            const docNotFound = await this.fetchGoal() //Get current process
-            if (docNotFound) {
-                load(this, false)
-                return
-            }
-
-            this.initialState = _.cloneDeep(this.state)
-        }
-
-        else this.initialState = _.cloneDeep(this.state)
-
+        if (this.isEdit) await this.initEditMode()
+        this.initialState = _.cloneDeep(this.state)
         load(this, false)
     }
 
-    //FETCHES: #edit
-    async fetchGoal() {
-        await db.collection('Users').doc(this.userId).collection('Turnover').doc(this.GoalId).get().then((doc) => {
-            if (!doc.exists) {
-                this.setState({ docNotFound: true })
-                return true
-            }
-
-            let { monthYear, target, description } = this.state
-            let { createdAt, createdBy, editedAt, editedBy } = this.state
-            let { error, loading } = this.state
-
-            //General info
-            let monthsTurnovers = doc.data()
-            const goal = monthsTurnovers[this.monthYear]
-            monthYear = moment(goal.monthYear, 'MM-YYYY').toDate()
-            target.value = goal.target
-            description = goal.description
-            const current = this.currentTurnover
-
-            //َActivity
-            createdAt = goal.createdAt
-            createdBy = goal.createdBy
-            editedAt = goal.editedAt
-            editedBy = goal.editedBy
-
-            this.setState({ monthYear, target, current, description, createdAt, createdBy, editedAt, editedBy }, async () => {
-                //if (this.isInit)
-
-                this.initialState = _.cloneDeep(this.state)
-                //this.isInit = false
-            })
-        })
+    async initEditMode() {
+        const goals = await fetchDocument('Users', this.userId, 'Turnover', this.GoalId)
+        let goal = goals[this.monthYear]
+        goal = await this.setGoal(goal)
+        if (!goal) return
     }
 
-    //Inputs validation
+    async setGoal(goal) {
+        if (!goal)
+            this.setState({ docNotFound: true })
+        else {
+            goal = formatDocument(goal, properties, [])
+            goal.monthYear = moment(this.monthYear, 'MM-YYYY').toDate()
+            this.setState(goal)
+        }
+        return goal
+    }
+
+    //##VALIDATE
     validateInputs() {
-        let { target } = this.state
-
-        let targetError = priceValidator(target.value, `"Chiffre d'affaire cible"`)
-
+        const { target } = this.state
+        const targetError = priceValidator(target, `"Chiffre d'affaire cible"`)
         if (targetError) {
-            target.error = targetError
             Keyboard.dismiss()
             this.setState({ targetError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
-
         return true
     }
 
-    //#OOS
+    //
+    unformatDocument(thisState, properties, currentUser, isEdit) {
+        let goal = _.pick(thisState, properties)
+        goal.editedAt = moment().format()
+        goal.editedBy = currentUser
+        goal.deleted = false
+        if (!isEdit) {
+            goal.createdAt = moment().format()
+            goal.createdBy = currentUser
+        }
+        return goal
+    }
+
+    //##POST
     async handleSubmit() {
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
         if (isEditOffLine) return
 
-        //Handle Loading or No edit done
         let { loading } = this.state
         if (loading || _.isEqual(this.state, this.initialState)) return
-
         load(this, true)
 
         const isValid = this.validateInputs(isConnected)
         if (!isValid) return
 
-        let { GoalId, monthYear, target, description } = this.state
-
-        const currentUser = {
-            id: auth.currentUser.uid,
-            fullName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            role: this.props.role.value,
-        }
-
+        const { monthYear, GoalId } = this.state
         const formatedMonthYear = moment(monthYear).format('MM-YYYY')
-
-        let monthlyGoal = {
-            monthYear: formatedMonthYear,
-            target: target.value,
-            description,
-            editedAt: moment().format(),
-            editedBy: currentUser,
-            lastMonthEdited: formatedMonthYear,
-            deleted: false,
-        }
-
-        if (!this.isEdit) {
-            monthlyGoal.createdAt = moment().format()
-            monthlyGoal.createdBy = currentUser
-        }
-
+        const props = ["target", "description"]
+        let monthlyGoal = this.unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
+        monthlyGoal.monthYear = formatedMonthYear
+        monthlyGoal.lastMonthEdited = formatedMonthYear
         let payload = {}
         payload[formatedMonthYear] = monthlyGoal
 
@@ -187,6 +149,7 @@ class AddGoal extends Component {
         this.props.navigation.goBack()
     }
 
+    //##DELETE
     showAlert() {
         const title = "Supprimer l'ojectif"
         const message = 'Êtes-vous sûr de vouloir supprimer cet objectif ?'
@@ -194,16 +157,19 @@ class AddGoal extends Component {
         this.myAlert(title, message, handleConfirm)
     }
 
-    //#OOS
     handleDeleteGoal() {
         load(this, true)
-        db.collection('Users').doc(this.userId).collection('Turnover').doc(this.state.GoalId).update({ deleted: true })
+        var update = {}
+        update[`${this.monthYear}.target`] = null
+        db.collection('Users').doc(this.userId).collection('Turnover').doc(this.state.GoalId).update(update)
         setTimeout(() => {
             load(this, false)
+            this.props.navigation.state.params.onGoBack()
             this.props.navigation.goBack(), 1000
         })
     }
 
+    //##RENDERERS
     goalOverview() {
         const { GoalId, target, current, monthYear } = this.initialState
         const monthTemp = moment(monthYear).format('MMMM')
@@ -213,7 +179,7 @@ class AddGoal extends Component {
             id: GoalId,
             month,
             year: GoalId,
-            target: target.value,
+            target,
             current
         }
 
@@ -266,7 +232,7 @@ class AddGoal extends Component {
     render() {
         let { monthYear, target, description } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
-        let { showMonthPicker, error, loading, docNotFound, toastMessage, toastType } = this.state
+        let { showMonthPicker, targetError, loading, docNotFound, toastMessage, toastType } = this.state
 
         //Privilleges
         let { canCreate, canUpdate, canDelete } = this.props.permissions.users
@@ -278,7 +244,12 @@ class AddGoal extends Component {
             return (
                 <View style={styles.mainContainer}>
                     <Appbar close title titleText={this.title} />
-                    <EmptyList icon={faTimes} header='Objectif introuvable' description="L'objectif est introuvable dans la base de données. Il se peut qu'il ait été supprimé." offLine={!isConnected} />
+                    <EmptyList
+                        icon={faTimes}
+                        header='Objectif introuvable'
+                        description="L'objectif est introuvable dans la base de données. Il se peut qu'il ait été supprimé."
+                        offLine={!isConnected}
+                    />
                 </View>
             )
 
@@ -289,7 +260,7 @@ class AddGoal extends Component {
                 {loading ?
                     <Loading />
                     :
-                    <ScrollView style={styles.dataContainer}>
+                    <ScrollView keyboardShouldPersistTaps="always" style={styles.dataContainer}>
                         {this.isEdit && this.goalOverview()}
                         <FormSection
                             sectionTitle='Détails'
@@ -306,7 +277,7 @@ class AddGoal extends Component {
                                                 this.setState({ monthYear: selectedDate, GoalId, showMonthPicker: false })
                                             }}
                                             value={monthYear}
-                                            minimumDate={new Date()}
+                                            //minimumDate={new Date()}
                                             maximumDate={new Date(2030, 5)}
                                             locale="fr"
                                             cancelButton="Annuler"
@@ -318,7 +289,7 @@ class AddGoal extends Component {
                                         onPress={() => this.setState({ showMonthPicker: !showMonthPicker })}
                                         label={'Mois *'}
                                         value={moment(monthYear).format('MMMM YYYY').charAt(0).toUpperCase() + moment(monthYear).format('MMMM YYYY').slice(1)}
-                                        editable={canWrite}
+                                        editable={canWrite && !this.isEdit}
                                         showAvatarText={false}
                                         icon={faCalendarPlus}
                                     />
@@ -327,10 +298,10 @@ class AddGoal extends Component {
                                         label="Chiffre d'affaire cible (€) *"
                                         returnKeyType="done"
                                         keyboardType='numeric'
-                                        value={target.value}
-                                        onChangeText={text => updateField(this, target, text)}
-                                        error={!!target.error}
-                                        errorText={target.error}
+                                        value={target}
+                                        onChangeText={target => this.setState({ target, targetError: '' })}
+                                        error={!!targetError}
+                                        errorText={targetError}
                                     />
 
                                     <MyInput
@@ -375,6 +346,7 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }

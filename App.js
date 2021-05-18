@@ -1,24 +1,23 @@
 import React, { Component } from 'react'
-import { LogBox, Text, View, StyleSheet, Dimensions } from 'react-native'
-import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-native-paper';
-import Pdf from "react-native-pdf"
+import { LogBox } from 'react-native'
 
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import { persistStore } from 'redux-persist'
-import { PersistGate } from 'redux-persist/es/integration/react'
+
 import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/es/integration/react'
+import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-native-paper';
 import { MenuProvider } from 'react-native-popup-menu';
-import RNFS from 'react-native-fs'
+
+
+import Wrapper from './Wrapper'
+import RootController from './Navigation/DrawerNavigator'
 
 import firebase from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
-import Wrapper from './Wrapper'
-import RootController from './Navigation/DrawerNavigator'
-import { processModel } from './processModel'
-import { convertImageToPdf, pickImage, uint8ToBase64 } from './core/utils'
 
 const paperTheme = {
   ...DefaultTheme,

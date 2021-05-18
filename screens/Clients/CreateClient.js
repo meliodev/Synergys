@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Keyboard } from "react-native";
+import { View, Text, StyleSheet, Alert, ScrollView, Keyboard } from "react-native";
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
@@ -14,12 +14,10 @@ import AddressInput from "../../components/AddressInput"
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
 
-import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { createClient, validateClientInputs } from "../../api/firestore-api";
-import { generateId, updateField, setToast, load, myAlert, navigateToScreen, setAddress } from "../../core/utils"
-import { handleFirestoreError } from "../../core/exceptions";
+import { generateId, updateField, load, navigateToScreen, setAddress } from "../../core/utils"
 
 class CreateClient extends Component {
 
@@ -28,9 +26,8 @@ class CreateClient extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
-        this.myAlert = myAlert.bind(this)
-        this.createClient = createClient.bind(this)
         this.validateClientInputs = validateClientInputs.bind(this)
+        this.createClient = createClient.bind(this)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
         this.ClientId = generateId('GS-CL-')
@@ -56,7 +53,6 @@ class CreateClient extends Component {
 
             loading: true,
             loadingDialog: false,
-            error: "",
         }
     }
 
@@ -66,12 +62,11 @@ class CreateClient extends Component {
     }
 
     handleSubmit = async (isConversion) => {
+        Keyboard.dismiss()
 
-        const { error, loading } = this.state
-        const { isPro, nom, prenom, denom, siret, address, phone, email, password } = this.state
+        const { isPro, nom, prenom, denom, siret, address, phone, email, password, loading } = this.state
 
         let userData = { isPro, nom, prenom, denom, siret, address, phone, email, password }
-        const eventHandlers = { error, loading }
         const { isConnected } = this.props.network
 
         const isValid = this.validateClientInputs(userData)
@@ -79,10 +74,11 @@ class CreateClient extends Component {
 
         this.setState({ loadingDialog: true })
 
-        const response = await createClient(userData, eventHandlers, this.ClientId, isConnected, isConversion, this.isProspect)
+        const response = await createClient(userData, this.ClientId, isConnected, isConversion, this.isProspect)
         if (response && response.error) {
             this.setState({ loadingDialog: false })
-            Alert.alert(response.error.title, response.error.message)
+            const { title, message } = response.error
+            Alert.alert(title, message)
         }
 
         else {
@@ -90,10 +86,10 @@ class CreateClient extends Component {
                 this.setState({ loadingDialog: false })
                 if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
                     const user = {
-                        isPro,
                         id: this.ClientId,
+                        isPro,
                         denom: denom.value,
-                        nom: nom.value,
+                        nom: nom.value, 
                         prenom: prenom.value,
                         role: 'Client',
                         email: email.value,
@@ -102,7 +98,7 @@ class CreateClient extends Component {
                     this.props.navigation.state.params.onGoBack(user)
                 }
                 this.props.navigation.navigate(this.prevScreen)
-            }, 6000) //We can reduce this timeout later on...
+            }, 6000)
         }
     }
 
@@ -124,7 +120,7 @@ class CreateClient extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <ScrollView style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
+                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
                         <MyInput
                             label="Identifiant client"
                             value={this.ClientId}

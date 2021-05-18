@@ -4,7 +4,7 @@ import { StyleSheet, View, Alert } from 'react-native'
 import NetInfo from "@react-native-community/netinfo"
 import { connect } from 'react-redux'
 import _ from 'lodash'
-import { processModel } from './processModel'
+import { processModel } from './core/processModel'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -25,7 +25,7 @@ class Wrapper extends Component {
 
     componentDidMount() {
         this.networkListener()
-       //this.persistProcessModel()
+        //this.persistProcessModel()
     }
 
     networkListener() {

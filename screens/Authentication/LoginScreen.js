@@ -20,6 +20,7 @@ class LoginScreen extends Component {
   constructor(props) {
     super(props)
     this.handleLogin = this.handleLogin.bind(this)
+    this.forgotPassword = this.forgotPassword.bind(this)
 
     this.state = {
       email: { value: "", error: "" },
@@ -57,9 +58,7 @@ class LoginScreen extends Component {
 
   handleLogin = async () => {
     let { loading, email, password, error } = this.state
-
     if (loading) return
-
     load(this, true)
 
     //Inputs validation
@@ -73,6 +72,11 @@ class LoginScreen extends Component {
     if (response.error) {
       this.setState({ loading: false, error: response.error })
     }
+  }
+
+  forgotPassword() {
+    if (this.state.loading) return
+    this.props.navigation.navigate("ForgotPasswordScreen")
   }
 
   render() {
@@ -101,6 +105,7 @@ class LoginScreen extends Component {
             autoCompleteType="email"
             textContentType="emailAddress"
             keyboardType="email-address"
+            editable={!loading}
           />
 
           <TextInput
@@ -113,7 +118,7 @@ class LoginScreen extends Component {
             errorText={password.error}
             secureTextEntry={!password.show}
             autoCapitalize="none"
-
+            editable={!loading}
             right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
               password.show = !password.show
               this.setState({ password })
@@ -121,7 +126,7 @@ class LoginScreen extends Component {
           />
 
           <View style={styles.forgotPassword}>
-            <TouchableOpacity onPress={() => this.props.navigation.navigate("ForgotPasswordScreen")}>
+            <TouchableOpacity onPress={this.forgotPassword}>
               <Text style={[theme.customFontMSregular.body, styles.forgetPasswordLink]}>Mot de passe oublié ?</Text>
             </TouchableOpacity>
           </View>

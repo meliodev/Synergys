@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, Keyboard } from "react-native";
+import { View, Text, StyleSheet, Alert, ScrollView, Keyboard } from "react-native";
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
@@ -17,11 +17,10 @@ import MyInput from "../../components/TextInput"
 import Toast from "../../components/Toast"
 import LoadDialog from "../../components/LoadDialog"
 
-import firebase, { auth, db } from '../../firebase'
+import { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, roles as allRoles } from "../../core/constants";
-import { nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, setAddress } from "../../core/utils"
-import { handleFirestoreError } from "../../core/exceptions";
+import { nameValidator, emailValidator, passwordValidator, generateId, updateField, setToast, load, setAddress } from "../../core/utils"
 
 const rolesPicker = {
   3: [
@@ -43,7 +42,7 @@ const rolesPicker = {
 class CreateUser extends Component {
   constructor(props) {
     super(props)
-    // this.isUserArchived = this.isUserArchived.bind(this)
+
     this.addUser = this.addUser.bind(this)
     this.refreshAddress = this.refreshAddress.bind(this)
     this.setAddress = setAddress.bind(this)
@@ -51,23 +50,20 @@ class CreateUser extends Component {
     this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
     this.title = 'Créer un utilisateur'
     this.role = this.props.role.id
+    this.userId = generateId('GS-US-')
 
     this.state = {
-      userId: '', //Not editable
       role: 'Admin',
-
       checked: 'first', //professional/Particular
       isPro: false,
       nom: { value: '', error: '' },
       prenom: { value: '', error: '' },
       denom: { value: "", error: "" },
       siret: { value: "", error: "" },
-
       address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
       addressError: '',
       email: { value: "", error: "" },
       phone: { value: "", error: '' },
-
       password: { value: '', error: '', show: false },
 
       loading: false,
@@ -78,33 +74,9 @@ class CreateUser extends Component {
     }
   }
 
-  async componentDidMount() {
-    this.setRoleBasedPermissions()
-    const userId = generateId('GS-US-')
-    this.setState({ userId })
-  }
-
-  //#PERMISSIONS:  (exp: isAdmin = true, isDirCom = false, isCom = false, isTech = false, isPoseur = false)
-  setRoleBasedPermissions() {
-    allRoles.forEach((role, key) => {
-      const update = {}
-
-      if (role.id === this.role)
-        update[role.bool] = true
-
-      else
-        update[role.bool] = false
-
-      this.setState(update)
-    })
-  }
-
-  //#PERMISSIONS: config role picker items (depending on user's role)
-
-  async validateInputs() {
+  validateInputs() {
     let denomError = ''
     let siretError = ''
-
     let nomError = ''
     let prenomError = ''
 
@@ -126,7 +98,6 @@ class CreateUser extends Component {
     const passwordError = passwordValidator(password.value)
 
     if (denomError || siretError || nomError || prenomError || phoneError || addressError || emailError || passwordError) {
-      console.log(denomError, siretError, nomError, prenomError, phoneError, addressError, emailError, passwordError)
       phone.error = phoneError
       email.error = emailError
       password.error = passwordError
@@ -134,31 +105,33 @@ class CreateUser extends Component {
       if (isPro) {
         denom.error = denomError
         siret.error = siretError
-        this.setState({ denom, siret, phone, addressError, email, password, loading: false })
+        this.setState({ denom, siret, phone, email, password, addressError, loading: false })
       }
 
       else {
         nom.error = nomError
         prenom.error = prenomError
-        this.setState({ nom, prenom, phone, addressError, email, password, loading: false })
+        this.setState({ nom, prenom, phone, email, password, addressError, loading: false })
       }
-
-      Keyboard.dismiss()
-
       setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
-
       return false
     }
 
     return true
   }
 
-  addUser = async (uid, overWrite) => {
-    let { role, isPro, error, loading } = this.state
-    let { userId, nom, prenom, address, phone, email, password } = this.state
-    let { denom, siret } = this.state
+  async addUser(uid, overWrite) {
+    Keyboard.dismiss()
 
     const { isConnected } = this.props.network
+    if (!isConnected) {
+      Alert.alert('Pas de connection internet', "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur.")
+      return
+    }
+
+    let { role, isPro, error, loading } = this.state
+    let { nom, prenom, address, phone, email, password } = this.state
+    let { denom, siret } = this.state
 
     //1. Validate inputs
     const isValid = await this.validateInputs()
@@ -174,12 +147,7 @@ class CreateUser extends Component {
       role,
       password: password.value,
       userType: 'utilisateur',
-      createdBy: {
-        id: auth.currentUser.uid,
-        fullName: auth.currentUser.displayName,
-        email: auth.currentUser.email,
-        role: this.props.role.value,
-      },
+      createdBy: this.props.currentUser,
       createdAt: moment().format(),
     }
 
@@ -202,12 +170,11 @@ class CreateUser extends Component {
       return
     }
 
-    await db.collection('newUsers').doc(userId).set(user).catch(e => handleFirestoreError(e))
+    await db.collection('newUsers').doc(this.userId).set(user)
     setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
       this.setState({ loadingDialog: false })
       this.props.navigation.navigate(this.prevScreen)
-    }
-      , 6000) //We can reduce this timeout later on...
+    }, 6000)
   }
 
   refreshAddress(address) {
@@ -216,7 +183,7 @@ class CreateUser extends Component {
 
   render() {
     let { role, isPro, error, loading, loadingDialog, toastType, toastMessage } = this.state
-    let { userId, nom, prenom, address, addressError, phone, email, password } = this.state
+    let { nom, prenom, address, addressError, phone, email, password } = this.state
     let { denom, siret } = this.state
     const { isConnected } = this.props.network
 
@@ -231,10 +198,10 @@ class CreateUser extends Component {
         {loading ?
           <Loading size='large' />
           :
-          <ScrollView style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
+          <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
             <MyInput
               label="Identifiant utilisateur"
-              value={userId}
+              value={this.userId}
               editable={false}
               disabled
             />
@@ -368,7 +335,8 @@ const mapStateToProps = (state) => {
 
   return {
     role: state.roles.role,
-    network: state.network
+    network: state.network,
+    currentUser: state.currentUser
     //fcmToken: state.fcmtoken
   }
 }
@@ -379,60 +347,3 @@ const styles = StyleSheet.create({
 })
 
 
-
-  //#BETA
-  // async isUserArchived() {
-  //   const { email } = this.state
-  //   let userId = ''
-  //   const query = db.collection('DeletedUsers').where('email', '==', email.value)
-  //   const userExists = await query.get().then((querysnapshot) => {
-  //     if (querysnapshot.empty) {
-  //       return false
-  //     }
-
-  //     else {
-  //       querysnapshot.forEach((doc) => { userId = doc.id })
-  //       return true
-  //     }
-  //   })
-
-  //   if (userExists) {
-  //     Alert.alert(
-  //       "Restauration d'un utilisateur",
-  //       `Un utilisateur associé à l'adresse email ${email.value} existe déjà parmi les utilisateurs supprimés (archivés). Voulez vous réactiver son compte ou bien créer un nouvel utilisateur ?`,
-  //       [
-  //         { text: "Créer un nouvel utilisateur", onPress: () => this.addUser(userId, true) }, //addUser(userId, overwrite)
-  //         { text: "Restaurer l'ancien utilisateur", onPress: () => this.restoreUser(userId) },
-  //         { text: 'Annuler', style: 'cancel' },
-  //       ],
-  //     )
-
-  //     return true
-  //   }
-
-  //   else this.addUser('', false)
-  // }
-
-  // async deleteUserAccount(userId) {
-  //   const deleteUserAccount = functions.httpsCallable('deleteUserAccount')
-  //   const result = await deleteUserAccount({ userId: userId })
-  //   if (result.err) return false
-  //   return true
-  // }
-
-  // async restoreUser(userId) {
-  //   load(this, true)
-
-  //   const batch = db.batch()
-
-  //   //2. Update User
-  //   const userRef = db.collection('Users').doc(userId)
-  //   batch.update(userRef, { deleted: false }) //handle user reactivation..
-
-  //   //3. Set Deleted user
-  //   const dltUserRef = db.collection('DeletedUsers').doc(userId)
-  //   batch.delete(dltUserRef)
-
-  //   await batch.commit()
-  //   this.props.navigation.navigate(this.prevScreen)
-  // }

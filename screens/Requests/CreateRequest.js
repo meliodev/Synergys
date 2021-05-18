@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard } from 'react-native';
-import { Card, Title } from 'react-native-paper'
-import { faCommentDots, faTimes } from '@fortawesome/pro-light-svg-icons'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, FlatList, TextInput } from 'react-native'
+import { Card, Title, Checkbox } from 'react-native-paper'
+import { faCommentDots, faInfoCircle, faLightbulbSlash, faPen, faRetweet, faTimes } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
+import Modal from 'react-native-modal'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -10,10 +11,13 @@ moment.locale('fr')
 
 import ActivitySection from '../../containers/ActivitySection';
 import Appbar from '../../components/Appbar'
+import FormSection from '../../components/FormSection';
+import SquarePlus from "../../components/SquarePlus";
 import Picker from "../../components/Picker";
 import AddressInput from '../../components/AddressInput'
 import ItemPicker from '../../components/ItemPicker'
 import MyInput from '../../components/TextInput'
+import Button from '../../components/Button'
 import RequestState from "../../components/RequestState";
 import Toast from "../../components/Toast";
 import MyFAB from "../../components/MyFAB";
@@ -23,11 +27,13 @@ import Loading from "../../components/Loading";
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, setAddress } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, refreshProject, refreshAddress, setAddress, removeDuplicateObjects, formatDocument } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
 import CreateProject from './CreateProject';
+import { fetchDocs, fetchDocument, fetchDocuments } from '../../api/firestore-api';
+import CustomIcon from '../../components/CustomIcon';
 
 const departments = [
     { label: 'Commercial', value: 'Commercial' },
@@ -35,14 +41,20 @@ const departments = [
     { label: 'Conseil technique', value: 'Conseil technique' },
     { label: 'Incident', value: 'Incident' },
 ]
+const properties = ["project", "department", "subject", "state", "description", "address", "selectedProducts", "chatId", "createdAt", "createdBy", "editedAt", "editedBy"]
 
 class CreateRequest extends Component {
     constructor(props) {
         super(props)
+        this.refreshProject = refreshProject.bind(this)
         this.refreshClient = refreshClient.bind(this)
-        this.refreshAddress = this.refreshAddress.bind(this)
+        this.refreshAddress = refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
-        this.autoFillClient = this.autoFillClient.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
+        this.onPressProjectCallBack = this.onPressProjectCallBack.bind(this)
+        this.setProducts = this.setProducts.bind(this)
+        this.toggleModal = this.toggleModal.bind(this)
+        this.renderModalItem = this.renderModalItem.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.myAlert = myAlert.bind(this)
@@ -51,28 +63,34 @@ class CreateRequest extends Component {
         this.isInit = true
         this.requestType = this.props.requestType
         this.isTicket = this.requestType === 'ticket' ? true : false
-        //this.isProject = false
 
         this.RequestId = this.props.navigation.getParam('RequestId', '')
-        this.isEdit = this.RequestId ? true : false
+        this.isEdit = this.RequestId !== ''
+        this.RequestId = this.isEdit ? this.RequestId : this.isTicket ? generateId('GS-DTC-') : generateId('GS-DPR-')
+
         this.isClient = this.props.role.id === 'client'
 
         this.state = {
-            idCount: 0,
-            RequestId: '', //Not editable
-            client: { id: '', fullName: '' },
-
+            project: { id: '', name: '' },
+            projectError: '',
             department: 'Commercial', //ticket
             address: { description: '', place_id: '' }, //project
-
-            subject: { value: "", error: '' },
-            description: { value: "", error: '' },
+            addressError: '',
+            subject: "",
+            subjectError: '',
+            description: "",
             state: 'En attente',
 
             createdAt: '',
             createdBy: { id: '', fullName: '' },
             editedAt: '',
             editedBy: { id: '', fullName: '' },
+
+            productsList: [],
+            productsFetched: false,
+            selectedProducts: [],
+            otherProducts: "",
+            isModalVisible: false,
 
             error: '',
             loading: true,
@@ -82,106 +100,67 @@ class CreateRequest extends Component {
         }
     }
 
+    //GET
     async componentDidMount() {
-        //Edition
-        if (this.isEdit) {
-            const docNotFound = await this.fetchRequest()
-            if (docNotFound) {
-                load(this, false)
-                return
-            }
-        }
-
-        //Creation
-        else {
-            const RequestId = this.isTicket ? generateId('GS-DTC-') : generateId('GS-DPR-')
-            var client = { id: '', fullName: '' }
-            if (this.isClient) client = this.autoFillClient()
-            this.setState({ RequestId, client }, () => this.initialState = _.cloneDeep(this.state))
-        }
-
+        if (this.isEdit) await this.initEditMode()
+        this.initialState = _.cloneDeep(this.state)
         load(this, false)
     }
 
-    autoFillClient() {
-        const { currentUser } = auth
-        const client = {
-            id: currentUser.uid,
-            fullName: currentUser.displayName,
-            email: currentUser.email,
-            role: this.props.role.value
+    async initEditMode() {
+        let request = await fetchDocument('Requests', this.RequestId)
+        request = await this.setRequest(request)
+        if (!request) return
+        const { project } = this.state
+        let productsList = await this.setProducts(project.id)
+        this.refreshModalData(productsList)
+    }
+
+    setRequest(request) {
+        if (!request)
+            this.setState({ docNotFound: true })
+        else {
+            request = formatDocument(request, properties, [])
+            this.setState(request)
         }
-        return client
+        return request
     }
 
-
-    async fetchRequest() {
-        await db.collection('Requests').doc(this.RequestId).get().then((doc) => {
-
-            if (!doc.exists) {
-                this.setState({ docNotFound: true })
-                return true
-            }
-
-            let { RequestId, department, client, subject, state, description, address } = this.state
-            let { createdAt, createdBy, editedAt, editedBy } = this.state
-
-            const request = doc.data()
-            //General info
-            RequestId = doc.id
-            client = request.client
-            subject.value = request.subject
-            description.value = request.description
-            this.chatId = request.chatId
-
-            //َActivity
-            createdAt = request.createdAt
-            createdBy = request.createdBy
-            editedAt = request.editedAt
-            editedBy = request.editedBy
-
-            //State
-            state = request.state
-
-            if (this.isTicket)
-                department = request.department
-
-            else
-                address = request.address
-
-            this.setState({ createdAt, createdBy, editedAt, editedBy })
-            this.setState({ RequestId, client, department, subject, description, address, state }, () => {
-                if (this.isInit)
-                    this.initialState = _.cloneDeep(this.state)
-
-                this.isInit = false
+    refreshModalData(productsList) {
+        const { selectedProducts } = this.state
+        if (productsList.length > 0) {
+            const selectedProductsIds = selectedProducts.map((product) => product.id)
+            productsList.forEach((product) => {
+                if (selectedProductsIds.includes(product.id))
+                    product.selected = true
             })
-        })
+        }
+        let otherProducts = selectedProducts.filter((product) => product.manual)
+        otherProducts = otherProducts.map((product) => product.name)
+        otherProducts = otherProducts.join(';')
+        this.setState({ productsList, otherProducts })
     }
 
-    refreshAddress(address) {
-        this.setState({ address })
-    }
-
+    //VALIDATE
     validateInputs() {
-        let { client, subject } = this.state
-
-        let clientError = nameValidator(client.fullName, '"Client"')
-        let subjectError = nameValidator(subject.value, '"Sujet"')
+        let { project, subject } = this.state
+        const subjectError = nameValidator(subject, '"Sujet"')
+        const projectError = nameValidator(project.id, '"Projet"')
         //let addressError = nameValidator(address.description, '"Adresse postale"')
-
-        if (clientError || subjectError) {
-            subject.error = subjectError
-            Keyboard.dismiss()
-            this.setState({ clientError, subject, loading: false })
+        if (projectError || subjectError) {
+            this.setState({ subjectError, projectError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
-
         return true
     }
 
-    async AddRequestAndChatRoom(RequestId, request) {
+    //POST
+    async AddRequestAndChatRoom(request) {
+        if (this.isEdit) {
+            db.collection('Requests').doc(this.RequestId).set(request, { merge: true })
+            return
+        }
 
         const messageId = await uuidGenerator()
         const systemMessage = {
@@ -190,27 +169,23 @@ class CreateRequest extends Component {
             createdAt: new Date().getTime(),
             system: true
         }
+        const chatId = await uuidGenerator()
+        request.chatId = chatId
 
         //Batch write
         const batch = db.batch()
-        const chatId = await uuidGenerator()
-        request.chatId = chatId
-        const requestsRef = db.collection('Requests').doc(RequestId)
+        const requestsRef = db.collection('Requests').doc(this.RequestId)
         const chatRef = db.collection('Chats').doc(chatId)
         const messagesRef = chatRef.collection('ChatMessages').doc(messageId)
-
         batch.set(requestsRef, request)
         batch.set(chatRef, systemMessage)
         batch.set(messagesRef, systemMessage)
         batch.commit()
-
-        // .catch((e) => {
-        //     setToast(this, 'e', 'Erreur lors de la création de la demande, veuillez réessayer.')
-        //     load(this, false)
-        // })
     }
 
     async handleSubmit() {
+        Keyboard.dismiss()
+
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
         if (isEditOffLine) return
@@ -223,49 +198,28 @@ class CreateRequest extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        //2. ADDING REQUEST DOCUMENT
-        const { RequestId, client, department, subject, description, address, state } = this.state
-        const currentUser = {
-            id: auth.currentUser.uid,
-            fullName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            role: this.props.role.value,
-        }
+        let properties = ["subject", "description", "state", "selectedProducts"]
+        if (this.isTicket) properties = [...properties, ...["project", "department"]]
+        else properties = [...properties, ...["address"]]
+        let request = this.unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
+        request.type = this.isTicket ? 'ticket' : 'project'
 
-        let request = {
-            client: client,
-            subject: subject.value,
-            description: description.value,
-            state: state,
-            editedAt: moment().format(),
-            editedBy: currentUser
-        }
-
-        if (this.isTicket) {
-            request.department = department
-            request.type = 'ticket'
-        }
-
-        else {
-            request.address = address
-            request.type = 'projet'
-        }
-
-        if (!this.isEdit) {
-            request.createdAt = moment().format()
-            request.createdBy = currentUser
-        }
-
-        console.log('Ready to add request...')
-
-        if (this.isEdit)
-            db.collection('Requests').doc(RequestId).set(request, { merge: true })
-
-        else
-            this.AddRequestAndChatRoom(RequestId, request)
+        this.AddRequestAndChatRoom(request, this.isEdit)
 
         load(this, false)
         this.props.navigation.goBack()
+    }
+
+    unformatDocument(thisState, properties, currentUser, isEdit) {
+        let request = _.pick(thisState, properties)
+        request.editedAt = moment().format()
+        request.editedBy = currentUser
+        request.deleted = false
+        if (!isEdit) {
+            request.createdAt = moment().format()
+            request.createdBy = currentUser
+        }
+        return request
     }
 
     renderStateToggle(currentState, canWrite) {
@@ -275,26 +229,182 @@ class CreateRequest extends Component {
 
     alertUpdateRequestState(nextState, label, canWrite) {
         if (nextState === this.state.state || !canWrite) return
-
         const title = "Mettre à jour le " + label
         const message = "Etes-vous sûr de vouloir changer l'état de ce " + label + ' ?'
         const handleConfirm = () => this.updateRequestState(nextState)
-
         this.myAlert(title, message, handleConfirm)
     }
 
-    updateRequestState(nextState) {
-        db.collection('Requests').doc(this.RequestId).update({ state: nextState })
-            .then(() => {
-                this.setState({ state: nextState })
-                // this.fetchRequest()
-            })
-            .catch((e) => setToast(this, 'e', "Erreur lors de la mise à jour de l'état de la demande"))
+    updateRequestState(state) {
+        db.collection('Requests').doc(this.RequestId).update({ state })
+        this.setState({ state })
+    }
+
+    async onPressProjectCallBack(projectObject) {
+        const { id, name, client, step, address, comContact, techContact, intervenant, bill } = projectObject
+        const project = { id, name, client, step, address, comContact, techContact, intervenant }
+        this.setState({ project })
+        const isClientCharged = bill.amount !== ''
+        if (isClientCharged) await this.setProducts(project.id)
+        else this.setState({ productsFetched: true })
+    }
+
+    async setProducts(projectId) {
+        let productsList = []
+        const query = db.collection('Orders').where('project.id', '==', projectId).where('deleted', '==', false)
+        let ordersList = await fetchDocuments(query)
+        if (ordersList.length === 0) {
+            this.setState({ productsFetched: true })
+            return productsList
+        }
+        ordersList = removeDuplicateObjects(ordersList)
+        const noGeneratedBill = ordersList.length === 0
+        if (noGeneratedBill) return productsList
+        for (const order of ordersList) {
+            const products = order.orderLines.map((orderLine) => { return { ...orderLine.product, selected: false } })
+            productsList = [...productsList, ...products]
+        }
+        this.setState({ productsList, productsFetched: true })
+        return productsList
+    }
+
+    renderProducts() {
+        let { selectedProducts, otherProducts, productsFetched } = this.state
+        if (!productsFetched) return null
+        const textStyle = theme.customFontMSregular.body
+        const anyProductSelected = selectedProducts.length === 0 && otherProducts === ""
+
+        const onPressProduct = (product) => {
+            if (product.manual) return
+            this.props.navigation.navigate('CreateProduct', { ProductId: product.id })
+        }
+
+        if (anyProductSelected)
+            return (
+                <View style={{ marginTop: 15 }}>
+                    <Text style={[textStyle, { marginBottom: 15 }]}>Articles concernés</Text>
+                    <SquarePlus onPress={this.toggleModal} />
+                </View>
+            )
+
+        else return (
+            <View style={styles.productsListContainer}>
+                <TouchableOpacity style={styles.productsListHeader} onPress={this.toggleModal}>
+                    <Text style={[textStyle]}>Articles concernés</Text>
+                    <CustomIcon icon={faPen} color={theme.colors.secondary} size={21} />
+                </TouchableOpacity>
+                {selectedProducts.map((product, index) => {
+                    const color = product.manual ? theme.colors.secondary : theme.colors.primary
+                    return (
+                        <TouchableOpacity
+                            onPress={onPressProduct.bind(this, product)}
+                            style={styles.productsListRow}>
+                            <Text style={[textStyle, { color }]}>{product.name}</Text>
+                        </TouchableOpacity>
+                    )
+                })}
+            </View>
+        )
+    }
+
+    toggleModal() {
+        const { isModalVisible } = this.state
+        this.setState({ isModalVisible: !isModalVisible })
+    }
+
+    renderModalItem(product, key) {
+
+        let { productsList } = this.state
+
+        return (
+            <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.gray_light }}>
+                <Checkbox
+                    status={productsList[key].selected ? 'checked' : 'unchecked'}
+                    color={theme.colors.primary}
+                    onPress={() => {
+                        productsList[key].selected = !productsList[key].selected
+                        this.setState({ productsList })
+                    }}
+                />
+                <Text style={[theme.customFontMSregular.body, { marginLeft: 15, flex: 1 }]}>{product.name}</Text>
+            </View>
+        )
+    }
+
+    handleConfirmModal(productsList, otherProducts) {
+        let selectedProducts = productsList.filter((product) => product.selected)
+        if (otherProducts !== "") {
+            otherProducts = otherProducts.split(';').map(item => item.trim())
+            otherProducts = otherProducts.filter((product) => product !== "")
+            otherProducts = otherProducts.map((productName) => { return { id: productName, name: productName, manual: true } })
+            selectedProducts = [...selectedProducts, ...otherProducts]
+        }
+        this.setState({ selectedProducts }, () => this.toggleModal())
+    }
+
+    renderProductsModal(isConnected) {
+        let { isModalVisible, productsList, otherProducts } = this.state
+        const header = (text) => <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{text}</Text>
+
+        return (
+            <Modal
+                isVisible={isModalVisible}
+                style={modalStyles.modal}
+                onBackdropPress={this.toggleModal}>
+                <View style={modalStyles.container}>
+                    <TouchableOpacity style={modalStyles.closeIcon}>
+                        <CustomIcon
+                            icon={faTimes}
+                            color={theme.colors.gray_dark}
+                            size={21}
+                            onPress={this.toggleModal}
+                        />
+                    </TouchableOpacity>
+
+                    <View style={{ flex: 0.7, paddingBottom: 15 }}>
+                        {header("Suggestion d'articles")}
+                        {productsList.length > 0 ?
+                            <FlatList
+                                data={productsList}
+                                keyExtractor={item => item.id}
+                                renderItem={({ item, index }) => this.renderModalItem(item, index)}
+                            />
+                            :
+                            <EmptyList icon={faLightbulbSlash} header='Aucune suggestion' description="Veuillez saisir manuellement, ci-dessous, les articles concernés." offLine={!isConnected} />
+                        }
+                    </View>
+
+                    <View style={{ flex: 0.3, justifyContent: 'space-around' }}>
+                        {header("Autres articles")}
+                        <TextInput
+                            underlineColorAndroid="transparent"
+                            placeholder="Saisissez les désignations des articles séparés par des points virgules. Exp: Article 1; Article 2; Article 3; etc."
+                            placeholderTextColor={theme.colors.gray_medium}
+                            numberOfLines={7}
+                            multiline={true}
+                            onChangeText={otherProducts => this.setState({ otherProducts })}
+                            value={otherProducts}
+                            autoCapitalize='sentences'
+                            style={modalStyles.productsTextArea}
+                        />
+                    </View>
+
+                    <View>
+                        <Button
+                            mode="contained"
+                            onPress={() => this.handleConfirmModal(productsList, otherProducts)}
+                            style={modalStyles.confirmButton}>
+                            Confirmer
+                    </Button>
+                    </View>
+                </View>
+            </Modal >
+        )
     }
 
     render() {
-        const { RequestId, client, department, subject, state, description, address } = this.state
-        const { createdAt, createdBy, editedAt, editedBy, loading, docNotFound, toastMessage, toastType, clientError, addressError } = this.state
+        const { project, department, subject, state, description, address } = this.state
+        const { createdAt, createdBy, editedAt, editedBy, loading, docNotFound, toastMessage, toastType, subjectError, projectError, addressError } = this.state
         const { requestType } = this.props
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.requests
@@ -304,6 +414,7 @@ class CreateRequest extends Component {
 
         const title = ' Demande de ' + requestType
         const prevScreen = requestType === 'ticket' ? 'CreateTicketReq' : 'CreateProjectReq'
+        const showClient = this.isTicket && !this.isClient && project.client && project.client.id
 
         if (docNotFound)
             return (
@@ -320,80 +431,102 @@ class CreateRequest extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <ScrollView style={styles.container} contentContainerStyle={{
-                        backgroundColor: '#fff',
-                        padding: constants.ScreenWidth * 0.02,
-                        // paddingBottom: 80
-                    }}>
+                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
+                        <FormSection
+                            sectionTitle='Informations générales'
+                            sectionIcon={faInfoCircle}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    <MyInput
+                                        label="Numéro de la demande"
+                                        returnKeyType="done"
+                                        value={this.RequestId}
+                                        editable={false}
+                                    />
 
-                        <Card style={{ marginBottom: 20 }}>
-                            <Card.Content>
-                                <Title>Informations générales</Title>
-                                <MyInput
-                                    label="Numéro de la demande"
-                                    returnKeyType="done"
-                                    value={RequestId}
-                                    editable={false}
-                                />
+                                    {this.isTicket ?
+                                        <Picker
+                                            label="Département *"
+                                            returnKeyType="next"
+                                            value={department}
+                                            selectedValue={department}
+                                            onValueChange={(department) => this.setState({ department })}
+                                            title="Département"
+                                            elements={departments}
+                                            enabled={canWrite}
+                                        />
+                                        :
+                                        <AddressInput
+                                            label='Adresse postale'
+                                            offLine={!isConnected}
+                                            onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
+                                            address={address}
+                                            onChangeText={this.setAddress}
+                                            clearAddress={() => this.setAddress('')}
+                                            addressError={addressError}
+                                            editable={canWrite}
+                                            isEdit={this.isEdit} />
+                                    }
 
-                                {!this.isClient &&
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, userType: 'client', prevScreen: prevScreen, isRoot: false, titleText: 'Choisir un client' })}
-                                        label="Client *"
-                                        value={client.fullName}
-                                        error={!!clientError}
-                                        errorText={clientError}
+                                    <MyInput
+                                        label="Sujet *"
+                                        returnKeyType="done"
+                                        value={subject}
+                                        onChangeText={subject => this.setState({ subject })}
+                                        error={!!subjectError}
+                                        errorText={subjectError}
                                         editable={canWrite}
                                     />
-                                }
 
-
-                                {this.isTicket ?
-                                    <Picker
-                                        label="Département *"
-                                        returnKeyType="next"
-                                        value={department}
-                                        selectedValue={department}
-                                        onValueChange={(department) => this.setState({ department })}
-                                        title="Département"
-                                        elements={departments}
-                                        enabled={canWrite}
-                                    />
-                                    :
-                                    <AddressInput
-                                        label='Adresse postale'
-                                        offLine={!isConnected}
-                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress })}
-                                        address={address}
-                                        onChangeText={this.setAddress}
-                                        clearAddress={() => this.setAddress('')}
-                                        addressError={addressError}
+                                    <MyInput
+                                        label="Description de la demande"
+                                        returnKeyType="done"
+                                        value={description}
+                                        onChangeText={description => this.setState({ description })}
+                                        // error={!!description.error}
+                                        // errorText={description.error}
                                         editable={canWrite}
-                                        isEdit={this.isEdit} />
-                                }
+                                    />
+                                </View>
+                            }
+                        />
 
-                                <MyInput
-                                    label="Sujet *"
-                                    returnKeyType="done"
-                                    value={subject.value}
-                                    onChangeText={text => updateField(this, subject, text)}
-                                    error={!!subject.error}
-                                    errorText={subject.error}
-                                    editable={canWrite}
-                                />
+                        <FormSection
+                            sectionTitle='Références'
+                            sectionIcon={faRetweet}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    {this.isTicket &&
+                                        <ItemPicker
+                                            onPress={() => {
+                                                if (this.project || this.isEdit) return //pre-defined project
+                                                navigateToScreen(this, 'ListProjects', { onGoBack: this.onPressProjectCallBack, prevScreen: 'CreateRequest', isRoot: false, titleText: 'Choix du projet', showFAB: false })
+                                            }}
+                                            label="Projet concerné"
+                                            value={project.name}
+                                            error={!!projectError}
+                                            errorText={projectError}
+                                            showAvatarText={false}
+                                            editable={canWrite}
+                                        />
+                                    }
 
-                                <MyInput
-                                    label="Description"
-                                    returnKeyType="done"
-                                    value={description.value}
-                                    onChangeText={text => updateField(this, description, text)}
-                                    error={!!description.error}
-                                    errorText={description.error}
-                                    editable={canWrite}
-                                />
+                                    {showClient &&
+                                        <ItemPicker
+                                            onPress={() => console.log('No action...')}
+                                            label="Client *"
+                                            value={project.client.fullName}
+                                            // error={!!clientError}
+                                            // errorText={clientError}
+                                            editable={false}
+                                        />
+                                    }
 
-                            </Card.Content>
-                        </Card>
+                                    {this.renderProducts()}
+                                    {this.renderProductsModal(isConnected)}
+                                </View>
+                            }
+                        />
 
                         {this.isEdit &&
                             <ActivitySection
@@ -404,7 +537,7 @@ class CreateRequest extends Component {
                                 navigation={this.props.navigation}
                             />
                         }
-                    </ScrollView>
+                    </ScrollView >
                 }
 
                 <Toast
@@ -416,12 +549,13 @@ class CreateRequest extends Component {
                 {this.isEdit &&
                     <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, paddingRight: 15, backgroundColor: theme.colors.surface, elevation: 5 }}>
                         <MyFAB
-                            onPress={() => this.props.navigation.navigate('Chat', { chatId: this.chatId })}
+                            onPress={() => this.props.navigation.navigate('Chat', { chatId: this.state.chatId })}
                             icon={faCommentDots}
                             style={styles.fab} />
                         {this.renderStateToggle(state, canWrite)}
-                    </View>}
-            </View>
+                    </View>
+                }
+            </View >
         );
     }
 }
@@ -431,6 +565,7 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }
@@ -445,6 +580,66 @@ const styles = StyleSheet.create({
     fab: {
         width: constants.ScreenWidth * 0.14,
         height: constants.ScreenWidth * 0.14,
+    },
+    productsListContainer: {
+        flex: 1,
+        backgroundColor: theme.colors.white,
+        borderRadius: 20,
+        marginTop: 15,
+        elevation: 3,
+    },
+    productsListHeader: {
+        flexDirection: 'row',
+        padding: theme.padding,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+        justifyContent: 'space-between',
+        backgroundColor: '#EAF7F1'
+    },
+    productsListRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        padding: theme.padding,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_light,
     }
-});
+})
+
+const modalStyles = StyleSheet.create({
+    modal: {
+        flex: 1,
+        maxHeight: constants.ScreenHeight,
+        margin: 15,
+    },
+    container: {
+        flex: 1,
+        backgroundColor: theme.colors.white,
+        padding: theme.padding
+    },
+    closeIcon: {
+        zIndex: 1,
+        position: 'absolute',
+        top: theme.padding,
+        right: theme.padding,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    productsTextArea: {
+        alignSelf: 'center',
+        textAlignVertical: 'top',
+        backgroundColor: '#ffffff',
+        borderRadius: 5,
+        paddingTop: 15,
+        paddingHorizontal: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.32,
+        shadowRadius: 5.46,
+        elevation: 2,
+    },
+    confirmButton: {
+        alignSelf: 'center',
+        backgroundColor: theme.colors.primary
+    }
+})
 

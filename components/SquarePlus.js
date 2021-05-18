@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import { faPlus } from '@fortawesome/pro-light-svg-icons'
 
 import * as theme from "../core/theme";
@@ -7,9 +7,12 @@ import { constants } from "../core/constants";
 
 import CustomIcon from "./CustomIcon";
 
-const AddAttachment = ({ style, onPress, icon, ...props }) => (
+const SquarePlus = ({ style, onPress, icon, title = '', ...props }) => (
     <TouchableOpacity style={[styles.imagesBox, style]} onPress={onPress}>
-        <CustomIcon icon={faPlus}  color= {theme.colors.gray_dark} />
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <CustomIcon icon={faPlus} color={theme.colors.gray_dark} size= {21}/>
+            {title !== '' && <Text style={[theme.customFontMSregular.caption, { marginLeft: 5, color: theme.colors.gray_dark }]}>{title}</Text>}
+        </View>
     </TouchableOpacity>
 )
 
@@ -27,4 +30,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default AddAttachment
+export default SquarePlus

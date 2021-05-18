@@ -4,6 +4,10 @@ DONE:
 +++ automatic fill task/document
 
 TO DO:
++++ Reactive Twilio verify
+++ Test utils functions that handle exceptions (pickdoc, saveFile...) on all screens
++++ ondelete order -> this.setState is not a function on fetchDocs()
++++ Commercial/poseur can only see his clients --> To not view other commercials projects from client's profile
 + uninstall react-native-image-to-pdf
 + Test denormalization updates
 

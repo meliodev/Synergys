@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList } from 'react-native';
 import { Appbar, CustomIcon, NewBackground, EmptyList } from '../../components'
 import { constants } from '../../core/constants';
-import { faLayerPlus, faChartLine, faArrowAltToRight } from '@fortawesome/pro-duotone-svg-icons'
+import { faAnalytics, faArrowAltToRight, faBell, faTasks } from '@fortawesome/pro-duotone-svg-icons'
+import _ from 'lodash'
 
 import * as theme from '../../core/theme'
-import { faAbacus, faBell, faTasks } from '@fortawesome/pro-light-svg-icons'
 
 import Analytics from './Analytics'
 import Tasks from './Tasks'
@@ -19,7 +19,7 @@ const colors4 = { primary: '#df8ad6', secondary: '#faebf7' }
 
 const menuItems = [
     {
-        icon: faChartLine,
+        icon: faAnalytics,
         colors: colors1,
         label: 'Analytiques',
         content: 'analytics',

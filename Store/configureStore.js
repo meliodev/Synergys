@@ -4,6 +4,7 @@ import { createStore, combineReducers } from 'redux';
 import { persistCombineReducers } from 'redux-persist'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import userReducer from './Reducers/userReducer'
 import rolesReducer from './Reducers/rolesReducer'
 import permissionsReducer from './Reducers/permissionsReducer'
 import fcmtokenReducer from './Reducers/fcmtokenReducer'
@@ -18,6 +19,7 @@ const rootPersistConfig = {
 }
 
 const appReducer = persistCombineReducers(rootPersistConfig, {
+    currentUser: userReducer,
     roles: rolesReducer,
     permissions: permissionsReducer,
     fcmtoken: fcmtokenReducer,
@@ -25,8 +27,6 @@ const appReducer = persistCombineReducers(rootPersistConfig, {
     documents: documentsReducer,
     process: processReducer
 })
-
-//const rootReducer = combineReducers({ roles: rolesReducer, fcmtoken: fcmtokenReducer, network: networkReducer, documents: documentsReducer })
 
 const rootReducer = (state, action) => {
     if (action.type === 'USER_LOGOUT') {

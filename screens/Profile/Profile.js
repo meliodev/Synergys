@@ -7,10 +7,10 @@ import _ from 'lodash'
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 import { faBullseyeArrow, faConstruction } from '@fortawesome/pro-light-svg-icons'
 
+import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
 import Appbar from '../../components/Appbar'
 import CustomIcon from '../../components/CustomIcon'
 import FormSection from '../../components/FormSection'
-import AvatarText from '../../components/AvatarText'
 import MyInput from '../../components/TextInput'
 import AddressInput from '../../components/AddressInput'
 import Button from "../../components/Button"
@@ -21,18 +21,14 @@ import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
 import EmptyList from "../../components/EmptyList"
 
-import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
-
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
-import { resetState, setNetwork } from '../../core/redux'
-import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient } from '../../api/firestore-api'
-import { sortMonths, navigateToScreen, nameValidator, emailValidator, passwordValidator, phoneValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress } from "../../core/utils"
-import { handleFirestoreError, handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
+import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient, fetchDocument } from '../../api/firestore-api'
+import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress } from "../../core/utils"
+import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { connect } from 'react-redux'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
-
 
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
 
@@ -95,9 +91,12 @@ class Profile extends Component {
         }
     }
 
+    //##GET
     async componentDidMount() {
+        let user = await fetchDocument(this.dataCollection, this.userParam.id)
+        user = this.setUser(user)
+        if (!user) return
 
-        await this.fetchUserData()
         if (this.isClient) await this.fetchClientProjects()
 
         // DC can view/add Coms goals
@@ -109,71 +108,64 @@ class Profile extends Component {
             const monthlyGoals = setMonthlyGoals(turnoverArr)
             this.setState({ monthlyGoals })
         }
-
+        this.initialState = _.cloneDeep(this.state)
         load(this, false)
     }
 
-
     componentWillUnmount() {
-        this.unsubscribe()
+        if (this.unsubscribe) this.unsubscribe()
     }
 
-    fetchUserData() {
+    async setUser(user) {
+        if (!user)
+            this.setState({ docNotFound: true })
+        else {
+            user = this.formatUser(user)
+            this.setState(user)
+        }
+        return user
+    }
 
-        console.log(this.userParam.id, '5555555555555555555555')
-        this.unsubscribe = db.collection(this.dataCollection).doc(this.userParam.id).onSnapshot((doc) => {
+    formatUser(user) {
+        if (this.isClient)
+            var isProspect = user.isProspect
 
-            if (!doc.exists) {
-                this.setState({ userNotFound: true })
-                return
-            }
+        const email = { value: user.email, error: '' }
+        const phone = { value: user.phone, error: '' }
+        const { role, address, isPro, deleted } = user
+        const formatedUser = { isPro, role, email, phone, address, isProspect, deleted }
 
-            const user = doc.data()
-
-            let denom = ''
-            let siret = ''
-            let nom = ''
-            let prenom = ''
-
-            if (user.isPro) {
-                denom = { value: user.denom, error: "" }
-                siret = { value: user.siret, error: "" }
-            }
-
-            else {
-                nom = { value: user.nom, error: '' }
-                prenom = { value: user.prenom, error: '' }
-            }
-
-            if (this.isClient) {
-                var isProspect = user.isProspect
-            }
-
-            const email = { value: user.email, error: '' }
-            const phone = { value: user.phone, error: '' }
-            const role = user.role
-            const address = user.address
-            const isPro = user.isPro
-            const deleted = user.deleted
-
-            this.setState({ isPro, denom, siret, nom, prenom, role, email, phone, address, isProspect, deleted }, () => {
-                this.initialState = _.cloneDeep(this.state) //keep the initial state to compare changes
-            })
-        })
+        if (user.isPro) {
+            var denom = { value: user.denom, error: "" }
+            var siret = { value: user.siret, error: "" }
+            formatedUser.denom = denom
+            formatedUser.siret = siret
+        }
+        else {
+            var nom = { value: user.nom, error: '' }
+            var prenom = { value: user.prenom, error: '' }
+            formatedUser.nom = nom
+            formatedUser.prenom = prenom
+        }
+        return formatedUser
     }
 
     fetchClientProjects() {
-        var query = db.collection('Projects').where('client.id', '==', this.userParam.id).where('deleted', '==', false).orderBy('createdAt', 'DESC')
-        this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => load(this, false))
+        var query = db
+            .collection('Projects')
+            .where('client.id', '==', this.userParam.id)
+            .where('deleted', '==', false)
+            .orderBy('createdAt', 'DESC')
+        this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => { })
     }
 
-    //##Submit
+    //##VALIDATE
     validateInputs() {
         let denomError = ''
         let nomError = ''
         let prenomError = ''
 
-        const { isPro, denom, nom, prenom, phone, email, isProspect } = this.state
+        const { isPro, denom, nom, prenom, phone, email, address, isProspect } = this.state
 
         if (isPro)
             denomError = nameValidator(denom.value, '"Dénomination sociale"')
@@ -184,10 +176,10 @@ class Profile extends Component {
         }
 
         const phoneError = nameValidator(phone.value, '"Téléphone"')
-        // const addressError = nameValidator(address.description, '"Adresse"')
+        const addressError = nameValidator(address.description, '"Adresse"')
         const emailError = isProspect ? '' : nameValidator(email.value, '"Email"')
 
-        if (denomError || nomError || prenomError || phoneError || emailError) {
+        if (denomError || nomError || prenomError || phoneError || emailError || addressError) {
 
             phone.error = phoneError
             email.error = emailError
@@ -203,8 +195,7 @@ class Profile extends Component {
                 this.setState({ nom, prenom })
             }
 
-            this.setState({ phone, email, loading: false })
-            Keyboard.dismiss()
+            this.setState({ phone, email, addressError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -212,13 +203,11 @@ class Profile extends Component {
         return true
     }
 
+    //##POST
     async handleSubmit() {
 
         Keyboard.dismiss()
-
-        //Handle Loading or No edit done
         if (this.state.loading || _.isEqual(this.state, this.initialState)) return
-
         load(this, true)
 
         //Validation
@@ -261,19 +250,8 @@ class Profile extends Component {
         //A cloud function updating firebase auth displayName is triggered -> give it some time to finish...
         if (nomChanged || prenomChanged || denomChanged) {
             setTimeout(async () => {
-                await firebase.auth().currentUser.reload().then(() => console.log('CURRENT USER'))
+                await firebase.auth().currentUser.reload()
                 const currentUser = firebase.auth().currentUser
-                // const idTokenResult = await currentUser.getIdTokenResult()
-
-                // if (idTokenResult) {
-                //   for (const role of roles) {
-                //     if (idTokenResult.claims[role.id]) {
-                //       setRole(this, role)
-                //       var roleValue = role.value
-                //     }
-                //   }
-                // }
-
                 this.setState({ currentUser })
             }, 5000)
         }
@@ -282,28 +260,28 @@ class Profile extends Component {
         this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
     }
 
-    //##Conversion Prospect -> client
+    //##CONVERT PROSPECT TO CLIENT
     async clientConversion() {
 
         const resp = await this.handleSubmit()
         if (resp && resp.error) return
 
-        const { error, loading } = this.state
+        const { loading } = this.state
         const { isPro, nom, prenom, denom, siret, address, phone, email } = this.state
         const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password: { value: '' } }
         //autogen password
         userData.password.value = generateId('', 7) //#task: generate it backend side
-        const eventHandlers = { error, loading }
         const { isConnected } = this.props.network
 
         const isValid = this.validateClientInputs(userData, false)
         if (!isValid) return
 
         this.setState({ loadingDialog: true })
-        const response = await createClient(userData, eventHandlers, this.userParam.id, isConnected, true, true)
+        const response = await createClient(userData, this.userParam.id, isConnected, true, true)
         if (response && response.error) {
             this.setState({ loadingDialog: false })
-            Alert.alert(response.error.title, response.error.message)
+            const { title, message } = response.error
+            Alert.alert(title, message)
         }
 
         else {
@@ -314,7 +292,7 @@ class Profile extends Component {
         }
     }
 
-    //##Password change
+    //##PASSWORD CHANGE
     passwordValidation() {
         const { currentPass, newPass } = this.state
         const currentPassError = passwordValidator(currentPass.value)
@@ -370,13 +348,13 @@ class Profile extends Component {
         this.setState({ toastType, toastMessage })
     }
 
-    //##Signout handler
+    //##SIGNOUT
     handleSignout() {
         this.setState({ loadingSignOut: true })
         firebase.auth().signOut()
     }
 
-    //##Renderers
+    //##RENDERERS
     renderAvatar() {
         const { deleted } = this.state
         const icon = deleted ? faUserSlash : faUser
@@ -458,7 +436,6 @@ class Profile extends Component {
         this.props.navigation.navigate('CreateProject', { ProjectId })
     }
 
-    //Client Projects
     renderClientProjects() {
         const { clientProjectsList } = this.state
         const isProfileOwner = this.userParam.id === firebase.auth().currentUser.uid
@@ -478,7 +455,6 @@ class Profile extends Component {
         )
     }
 
-    //Goals
     onPressNewGoal() {
         this.props.navigation.navigate('AddGoal', { userId: this.userParam.id, onGoBack: this.refreshMonthlyGoals })
     }
@@ -647,9 +623,9 @@ class Profile extends Component {
 
                                         {isProfileOwner &&
                                             <View>
-                                                <View style={{ paddingTop: 30, paddingBottom: 3 }}>
-                                                    <Text style={[theme.customFontMSsemibold.body, { marginBottom: 5 }]}>MODIFICATION DU MOT DE PASSE</Text>
-                                                    <Text style={[theme.customFontMSregular, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
+                                                <View style={{ paddingTop: 15, paddingBottom: 3 }}>
+                                                    <Text style={[theme.customFontMSmedium.body, { marginBottom: 5 }]}>MODIFICATION DU MOT DE PASSE</Text>
+                                                    <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
                                                 </View>
 
                                                 <MyInput

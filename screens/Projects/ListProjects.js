@@ -82,7 +82,7 @@ class ListProjects extends Component {
 
 
     async componentDidMount() {
-
+        console.log(this.props.currentUser)
         Keyboard.dismiss()
         requestWESPermission()
         requestRESPermission()
@@ -235,7 +235,7 @@ class ListProjects extends Component {
                             <FlatList
                                 enableEmptySections={true}
                                 data={formatRow(this.state.view === 'list' ? false : true, this.filteredProjects, columnCount)}
-                                keyExtractor={item => item.id.toString()}
+                                keyExtractor={item => item.id}
                                 renderItem={({ item }) => this.renderProject(item)}
                                 style={{ zIndex: 1 }}
                                 numColumns={columnCount}
@@ -279,6 +279,7 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }

@@ -20,7 +20,7 @@ export async function uploadFile(attachment, storageRefPath, showProgress, metad
 
                 if (showProgress) {
                     attachment.progress = progress / 100
-                    this.setState({ attachment })
+                    this.setState({ attachment }, () => console.log('8888888888', this.state.newBrandLogo))
                 }
 
             }.bind(this))

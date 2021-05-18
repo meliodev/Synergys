@@ -274,6 +274,29 @@ export const getRoleIdFromValue = (roleValue) => {
   }
 }
 
+export const formatDocument = (document, properties, validate) => {
+  if (!document) return null
+  let formatedDocument = _.pick(document, properties)
+  for (const property of validate) {
+    formatedDocument[property] = {}
+    formatedDocument[property].value = document[property]
+  }
+  return formatedDocument
+}
+
+
+export const removeDuplicateObjects = (arr) => {
+  const seen = new Set()
+
+  const filteredArr = arr.filter(object => {
+    const duplicate = seen.has(object.id)
+    seen.add(object.id)
+    return !duplicate
+  })
+
+  return filteredArr
+}
+
 //##WARNINGS
 export const isEditOffline = (isEdit, isConnected) => {
   if (!isConnected && isEdit) {
@@ -482,15 +505,15 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
     chooseFromLibraryButtonTitle: 'Choisir de la librairie',
     cancelButtonTitle: 'Annuler',
     noData: true,
+    rotation: 360
   }
 
   const imagePickerHandler = (response, resolve, reject) => {
-    console.log(response)
 
     let errorMessage = null
 
     if (response.didCancel) {
-      reject(new Error("ignore"))
+      resolve(previousAttachments)
     }
     else if (response.error) {
       errorMessage = "Erreur lors de la sélection du fichier. Veuillez réessayer."
@@ -558,7 +581,7 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
   catch (error) {
     let errorMessage = 'Erreur lors de la sélection du fichier. Veuillez réessayer.'
     if (DocumentPicker.isCancel(error))
-      errorMessage = 'ignore'
+      return attachments
     throw new Error(errorMessage)
   }
 }
@@ -589,8 +612,8 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
   catch (error) {
     let errorMessage = 'Erreur lors de la sélection du fichier. Veuillez réessayer.'
     if (DocumentPicker.isCancel(error))
-      errorMessage = 'ignore'
-    throw new Error('ignore')
+      return null
+    throw new Error(errorMessage)
   }
 }
 
@@ -737,13 +760,13 @@ export function refreshTechContact(user) {
   const techContact = refreshUser(user)
   this.setState({ techContact })
 }
-
+ 
 export function refreshAssignedTo(user) {
   const assignedTo = refreshUser(user)
-  this.setState({ assignedTo })
+  this.setState({ assignedTo, assignedToError: "" })
 }
 
-const refreshUser = (user) => {
+export const refreshUser = (user) => {
   const { isPro, id, denom, nom, prenom, role, email } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role }
@@ -763,11 +786,13 @@ export function setAddress(description) {
   this.setState({ address })
 }
 
-export function refreshProject(projectObject) {
+export function refreshProject(projectObject, setState = true) {
   const { id, name, client, step, address, comContact, techContact, intervenant } = projectObject
   const project = { id, name, client, step, address, comContact, techContact, intervenant }
-  this.setState({ project, address })
+  if (setState) this.setState({ project, address, client, projectError: '', addressError: '' })
+  return project
 }
+
 
 
 

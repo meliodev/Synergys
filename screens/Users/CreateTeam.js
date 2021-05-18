@@ -26,61 +26,38 @@ class CreateTeam extends Component {
         this.validateInputs = this.validateInputs.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
-        this.isEdit = this.props.navigation.getParam('isEdit', false)
         this.teamId = this.props.navigation.getParam('teamId', '')
+        this.isEdit = this.teamId ? true : false
+        this.teamId = this.isEdit ? this.teamId : generateId('GS-EQ-')
+
         this.existingMembers = this.props.navigation.getParam('existingMembers', '')
         this.name = this.props.navigation.getParam('nom', '')
         this.description = this.props.navigation.getParam('description', '')
-
         this.title = this.props.navigation.getParam('title', 'Créer une équipe')
-        this.initialState = {}
 
         this.state = {
-            teamId: '', //Not editable
-            name: { value: '', error: '' },
-            description: { value: '', error: '' },
-
+            name: { value: this.name, error: '' },
+            description: { value: this.description, error: '' },
             loading: false,
-            error: ''
-        }
-    }
-
-    async componentDidMount() {
-        if (!this.isEdit) {
-            const teamId = generateId('GS-EQ-')
-            this.setState({ teamId })
         }
 
-        else {
-            const teamId = this.teamId
-            const name = { value: this.name, error: '' }
-            const description = { value: this.description, error: '' }
-            this.setState({ teamId, name, description }, () => this.initialState = _.cloneDeep(this.state))
-        }
+        this.initialState = _.cloneDeep(this.state)
     }
-
-    componentWillUnmount() {
-        Keyboard.dismiss()
-    }
-
+    
     validateInputs() {
         let { name } = this.state
-
-        let nameError = nameValidator(name.value, `Nom de l'équipe`)
-
+        const nameError = nameValidator(name.value, `Nom de l'équipe`)
         if (nameError) {
             name.error = nameError
             Keyboard.dismiss()
             this.setState({ name, loading: false })
             return false
         }
-
         return true
     }
 
     handleSubmit() {
         if (this.state.loading || _.isEqual(this.state, this.initialState)) return
-
         load(this, true)
 
         //1. INPUTS VALIDATION
@@ -88,14 +65,8 @@ class CreateTeam extends Component {
         if (!isValid) return
 
         //2. ADDING TEAM DOCUMENT
-        let { teamId, name, description } = this.state
-
-        const currentUser = {
-            id: auth.currentUser.uid,
-            fullName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            role: this.props.role.value,
-        }
+        const { name, description } = this.state
+        const { currentUser } = this.props
 
         let team = {
             name: name.value,
@@ -110,23 +81,22 @@ class CreateTeam extends Component {
             team.members = this.existingMembers
         }
 
-        if (!this.isEdit) {
+        else {
             team.createdAt = moment().format()
             team.createdBy = currentUser
         }
 
-        console.log('Ready to set team...')
-        db.collection('Teams').doc(teamId).set(team, { merge: true })
+        db.collection('Teams').doc(this.teamId).set(team, { merge: true })
 
         if (this.isEdit)
             this.props.navigation.navigate('ViewTeam', { teamId: this.teamId, prevScreen: 'CreateTeam' })
         else
-            this.props.navigation.navigate('AddMembers', { teamId: teamId, isCreation: true })
+            this.props.navigation.navigate('AddMembers', { teamId: this.teamId, isCreation: true })
     }
 
 
     render() {
-        let { teamId, name, description, members, loading, error } = this.state
+        const { name, description, members, loading, error } = this.state
 
         return (
             <View style={styles.container}>
@@ -137,7 +107,7 @@ class CreateTeam extends Component {
                     <View style={styles.formContainer}>
                         <MyInput
                             label="Identifiant de l'équipe"
-                            value={teamId}
+                            value={this.teamId}
                             editable={false}
                             disabled
                         />
@@ -173,6 +143,7 @@ class CreateTeam extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        currentUser: state.currentUser
         // permissions: state.permissions,
         // network: state.network,
         //fcmToken: state.fcmtoken
@@ -211,27 +182,4 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         bottom: 0
     }
-});
-
-
-
-/* <List.Accordion
-title="Accordion 1"
-id='team1'
-title="Team 1"
-theme={{ colors: { primary: '#333' } }}
-titleStyle={theme.customFontMSsemibold.header}>
-{this.renderMembers()}
-</List.Accordion> */
-
-
-// {this.state.teamsList.map((team, key) => {
-//     <List.Accordion
-//         id={team.id}
-//         title={team.name}
-//         theme={{ colors: { primary: '#333' } }}
-//         titleStyle={theme.customFontMSsemibold.header}>
-//         {this.renderMembers()}
-//     </List.Accordion>
-// })
-// }
+})

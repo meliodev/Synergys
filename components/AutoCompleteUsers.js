@@ -100,7 +100,6 @@ export default class AutoCompleteUsers extends React.Component {
                 renderSuggestion={this.customRenderSuggestion}
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
-                createTagOnSpace
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
                 editable={this.props.editable}
@@ -108,7 +107,7 @@ export default class AutoCompleteUsers extends React.Component {
                 createTagOnSpace={false}
                 inputContainerStyle={styles.inputContainerStyle}
                 containerStyle={styles.containerStyle}
-               // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+            // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }
@@ -120,7 +119,7 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         alignItems: "flex-start",
         backgroundColor: "#fff",
-       //paddingTop: 10,
+        //paddingTop: 10,
         marginLeft: -5,
         width: 300
     },

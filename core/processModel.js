@@ -521,7 +521,7 @@ export const processModel = {
                     },
                     {
                         id: 'proofOfAddress',
-                        title: "Justificatif de domicile",
+                        title: "Justificatif de domicile (moins de 3 mois)",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 3,
                         screenName: 'UploadDocument', //creation
@@ -555,7 +555,7 @@ export const processModel = {
                     },
                     {
                         id: 'paySlip',
-                        title: "Bulletin de salaire",
+                        title: "Dernier bulletin de salaire",
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 5,
                         screenName: 'UploadDocument', //creation

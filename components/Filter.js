@@ -14,45 +14,40 @@ import { SystemMessage } from 'react-native-gifted-chat';
 
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
+import { refreshClient, refreshProject, refreshUser } from '../core/utils';
 
 const { SlideInMenu } = renderers
 
 const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, functions, menuStyle, isAppBar = false, ...props }) => {
-
-    //Screen filters: refresh selected value
-    const refreshClient = (isPro, id, nom, prenom, role, email) => {
-        toggleFilter()
-        const fullName = isPro ? nom : `${prenom} ${nom}`
-        const client = { id, fullName }
-        main.setState({ client })
-    }
-
-    const refreshProject = (project) => {
-        toggleFilter()
-        main.setState({ project })
-    }
-
-    const refreshEmployee = (isPro, id, prenom, nom) => {
-        toggleFilter()
-        const assignedTo = { id, fullName: `${prenom} ${nom}` }
-        main.setState({ assignedTo })
-    }
 
     const onPressScreenPicker = (option) => {
         if (option.disabled) return
 
         toggleFilter()
 
-        let refresh
-
         if (option.screen === 'ListClients')
-            refresh = refreshClient
+            var callback = (client) => {
+                client = refreshUser(client)
+                return { client }
+            }
 
         else if (option.screen === 'ListProjects')
-            refresh = refreshProject
+            var callback = (project) => {
+                project = refreshProject(project, false)
+                return { project }
+            }
 
         else if (option.screen === 'ListEmployees')
-            refresh = refreshEmployee
+            var callback = (assignedTo) => {
+                assignedTo = refreshUser(assignedTo)
+                return { assignedTo }
+            }
+
+        const refresh = (filter) => {
+           // toggleFilter()
+            const obj = callback(filter)
+            main.setState(obj)
+        }
 
         const navParams = { isRoot: false, titleText: option.titleText, showButton: false, onGoBack: refresh }
         props.navigation.push(option.screen, navParams)
@@ -156,56 +151,3 @@ const styles = StyleSheet.create({
 
 export default withNavigation(Filter)
 
-
-
-
-// shouldComponentUpdate(nextProps, nextState) {
-//     console.log('shouldComponentUpdate..')
-//     console.log(this.state.status)
-//     console.log(nextState.status)
-
-//     const { items, filteredItems, type, status, priority, assignedTo, project, filterOpened } = this.state
-//     const changeItems = items !== nextState.items
-//     const changeFilteredItems = items !== nextState.filteredItems
-//     const changeType = type !== nextState.type
-//     const changeStatus = status !== nextState.status
-//     const changePriority = priority !== nextState.priority
-//     const changeAssignedTo = assignedTo !== nextState.assignedTo
-//     const changeProject = project !== nextState.project
-//     const changeFilterOpened = filterOpened !== nextState.filterOpened
-
-//     if (changeItems) console.log('Items changed')
-//     if (changeFilteredItems) console.log('Filtered Items changed')
-//     if (changeType) console.log('Type changed')
-//     if (changeStatus) console.log('Status changed')
-//     if (changePriority) console.log('Priority changed')
-//     if (changeAssignedTo) console.log('AssignedTo changed')
-//     if (changeProject) console.log('Project changed')
-//     if (changeFilterOpened) console.log('FilterOpened changed')
-
-//     const predicate0 = (changeItems)
-//     const predicate1 = (changeFilteredItems || changeFilterOpened)
-//     const predicate2 = (changeType || changeStatus || changePriority || changeAssignedTo || changeProject)
-
-//     const predicate = (changeItems || changeType || changeStatus || changePriority || changeAssignedTo || changeProject || changeFilterOpened)
-//     if (predicate) {
-//         // if(!changeFilterOpened)
-//         let filteredItems = []
-//         const fields = [{ label: 'type', value: type }, { label: 'status', value: status }, { label: 'priority', value: priority }, { label: 'project.id', value: project.id }, { label: 'assignedTo.id', value: assignedTo.id }]
-//         filteredItems = handleFilter(items, this.state.filteredItems, fields, KEYS_TO_FILTERS)
-//         this.setState({ filteredItems }, () => console.log('filtered items', this.state.filteredItems))
-//         return true
-//     }
-
-//     if(filteredItems !== nextState.filteredItems) return true
-// }
-
-// applyFilter() {
-//     toggleFilter(this)
-
-//     const { items, type, status, priority, assignedTo, project, filterOpened } = this.state
-//     let filteredItems = []
-//     const fields = [{ label: 'type', value: type }, { label: 'status', value: status }, { label: 'priority', value: priority }, { label: 'project.id', value: project.id }, { label: 'assignedTo.id', value: assignedTo.id }]
-//     filteredItems = handleFilter(items, filteredItems, fields, KEYS_TO_FILTERS)
-//     this.setState({ filteredItems })
-// }

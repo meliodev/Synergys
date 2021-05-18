@@ -7,7 +7,7 @@ import { createAppContainer, createSwitchNavigator, NavigationEvents } from 'rea
 import { createStackNavigator } from 'react-navigation-stack';
 
 //Auth screens
-import { HomeScreen, LoginScreen, ForgotPasswordScreen, AuthLoadingScreen } from "../screens/Authentication";
+import { LoginScreen, ForgotPasswordScreen, AuthLoadingScreen } from "../screens/Authentication";
 
 //SCREENS
 
@@ -43,7 +43,7 @@ import ListNotifications from '../screens/Inbox/ListNotifications';
 import Agenda from '../screens/Agenda/Agenda'
 import CreateTask from '../screens/Agenda/CreateTask'
 import ListEmployees from '../screens/Agenda/ListEmployees'
-import DatePicker from '../screens/DatePicker/DatePicker'
+import DatePicker from '../screens/Helpers/DatePicker'
 
 //Projects
 import ListProjects from '../screens/Projects/ListProjects'
@@ -331,6 +331,10 @@ const RequestsManagementStack = createStackNavigator({
         screen: CreateTicketReq,
         navigationOptions: hideHeader
     },
+    ListProjects: {
+        screen: ListProjects,
+        navigationOptions: hideHeader
+    },
     ListClients: {
         screen: ListClients,
         navigationOptions: hideHeader
@@ -344,6 +348,10 @@ const RequestsManagementStack = createStackNavigator({
         screen: VideoPlayer,
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
+    },
+    CreateProduct: {
+        screen: CreateProduct,
+        navigationOptions: hideHeader
     },
     //Profile screens
     Profile: {

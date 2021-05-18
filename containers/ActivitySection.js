@@ -1,8 +1,13 @@
-
-import React from "react";
-import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import React from "react"
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native"
 import { Card, Title } from 'react-native-paper'
+import { faChartLine, faRetweet } from "@fortawesome/pro-light-svg-icons"
 
+import moment from 'moment'
+import 'moment/locale/fr'
+moment.locale('fr')
+
+import FormSection from '../components/FormSection'
 import MyInput from '../components/TextInput'
 
 import * as theme from "../core/theme";
@@ -11,48 +16,55 @@ import { getRoleIdFromValue } from "../core/utils";
 const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navigation, ...props }) => {
 
     navigateToProfile = (user) => navigation.navigate('Profile', { user: { id: user.id, roleId: getRoleIdFromValue(user.role) } })
+    const showEditedAt = editedAt !== '' && editedAt !== undefined
+    const showEditedBy = editedBy.id !== '' && editedBy.id !== undefined
 
     return (
-        <Card style={{ margin: 5 }}>
-            <Card.Content>
-                <Title style={{ marginBottom: 15 }}>Activité</Title>
-
-                <MyInput
-                    label="Date de création"
-                    returnKeyType="done"
-                    value={createdAt}
-                    editable={false}
-                />
-
-                <TouchableOpacity onPress={() => navigateToProfile(createdBy)}>
+        <FormSection
+            sectionTitle='Activité'
+            sectionIcon={faChartLine}
+            form={
+                <View style={{ flex: 1 }}>
                     <MyInput
-                        label="Crée par"
+                        label="Date de création"
                         returnKeyType="done"
-                        value={createdBy.fullName}
+                        value={moment(createdAt).format('lll')}
                         editable={false}
-                        link
                     />
-                </TouchableOpacity>
 
-                <MyInput
-                    label="Dernière mise à jour"
-                    returnKeyType="done"
-                    value={editedAt}
-                    editable={false}
-                />
+                    <TouchableOpacity onPress={() => navigateToProfile(createdBy)}>
+                        <MyInput
+                            label="Crée par"
+                            returnKeyType="done"
+                            value={createdBy.fullName}
+                            editable={false}
+                            link
+                        />
+                    </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigateToProfile(editedBy)}>
-                    <MyInput
-                        label="Dernier intervenant"
-                        returnKeyType="done"
-                        value={editedBy.fullName}
-                        editable={false}
-                        link
-                    />
-                </TouchableOpacity>
+                    {showEditedAt &&
+                        <MyInput
+                            label="Dernière mise à jour"
+                            returnKeyType="done"
+                            value={moment(editedAt).format('lll')}
+                            editable={false}
+                        />
+                    }
 
-            </Card.Content>
-        </Card>
+                    {showEditedBy &&
+                        <TouchableOpacity onPress={() => navigateToProfile(editedBy)}>
+                            <MyInput
+                                label="Dernier intervenant"
+                                returnKeyType="done"
+                                value={editedBy.fullName}
+                                editable={false}
+                                link
+                            />
+                        </TouchableOpacity>
+                    }
+                </View>
+            }
+        />
     )
 
 }

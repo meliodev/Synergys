@@ -16,15 +16,16 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import ActivitySection from '../../containers/ActivitySection';
-import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, AddAttachment, Toast, Loading, EmptyList } from '../../components'
+import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, SquarePlus, Toast, Loading, EmptyList } from '../../components'
 
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, adminId, highRoles } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, setAddress } from "../../core/utils";
+import { blockRoleUpdateOnPhase } from '../../core/privileges';
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
-import { fetchDocs, getResponsableByRole } from "../../api/firestore-api";
+import { fetchDocs, fetchDocument, getResponsableByRole } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process'
 
@@ -57,15 +58,17 @@ const imagePickerOptions = {
     noData: true,
 }
 
+const properties = ["client", "name", "description", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
+const validate = ["name"]
+
 class CreateProject extends Component {
     constructor(props) {
         super(props)
-        this.fetchProject = this.fetchProject.bind(this)
         this.fetchDocs = fetchDocs.bind(this)
         this.refreshClient = refreshClient.bind(this)
         this.refreshComContact = refreshComContact.bind(this)
         this.refreshTechContact = refreshTechContact.bind(this)
-        this.refreshAddress = this.refreshAddress.bind(this)
+        this.refreshAddress = refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
@@ -93,8 +96,8 @@ class CreateProject extends Component {
         this.state = {
             //TEXTINPUTS
             name: { value: "", error: '' },
-            description: { value: "", error: '' },
-            note: { value: "", error: '' },
+            description: "",
+            note: "",
 
             //Screens
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' },
@@ -103,15 +106,14 @@ class CreateProject extends Component {
             //Pickers
             state: 'En cours',
             step: 'Initialisation',
+            color: theme.colors.primary,
 
             comContact: { id: '', fullName: '', email: '', role: '' },
             techContact: { id: '', fullName: '', email: '', role: '' },
             intervenant: null,
 
             //Billing
-            bill: { amount: '' },
-
-            color: theme.colors.primary,
+            bill: { amount: '', closedAt: '', closedBy: { id: '', fullName: '', email: '', role: '' } },
 
             //logs (Auto-Gen)
             createdAt: '',
@@ -120,8 +122,8 @@ class CreateProject extends Component {
             editedBy: { id: '', fullName: '' },
 
             //Images
+            newAttachments: [],
             attachments: [],
-            attachedImages: [],
             isImageViewVisible: false,
             imageIndex: 0,
             imagesView: [],
@@ -146,14 +148,6 @@ class CreateProject extends Component {
         }
     }
 
-    async componentDidMount() {
-        if (this.isEdit) {
-            await this.initEditMode()
-            await this.runListeners()
-        }
-        else this.initialState = _.cloneDeep(this.state)
-        load(this, false)
-    }
 
     componentWillUnmount() {
         if (this.isEdit) {
@@ -162,15 +156,44 @@ class CreateProject extends Component {
         }
     }
 
-    async initEditMode() {
-        const result = await this.fetchProject()
-        const { project, docNotfound } = result
-        if (docNotfound) {
-            load(this, false)
-            return
-        }
-        await this.setProjectData(project, true)
+    async componentDidMount() {
+        if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
+        load(this, false)
+    }
+
+    async initEditMode() {
+        let project = await fetchDocument('Projects', this.ProjectId)
+        this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+        project = await this.setProject(project)
+        if (!project) return
+        this.setImageCarousel(project.attachments)
+        this.setUserAccess(project.step)
+        await this.runListeners()
+    }
+
+    async setProject(project) {
+        if (!project)
+            this.setState({ docNotFound: true })
+        else {
+            project = formatDocument(project, properties, validate)
+            this.setState(project)
+        }
+        return project
+    }
+
+    setImageCarousel(attachments) {
+        if (typeof (attachments) === 'undefined' || attachments && attachments.length === 0) return
+        attachments = attachments.filter((image) => !image.deleted)
+        const imagesView = attachments.map((image) => { return ({ source: { uri: image.downloadURL } }) })
+        const imagesCarousel = attachments.map((image) => image.downloadURL)
+        this.setState({ imagesView, imagesCarousel })
+    }
+
+    setUserAccess(step) {
+        const currentRole = this.props.role.id
+        const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, step)
+        this.setState({ isBlockedUpdates })
     }
 
     async runListeners() {
@@ -178,161 +201,45 @@ class CreateProject extends Component {
         await this.fetchTasks()
     }
 
-    //FETCHES: #edit
-    async fetchProject() {
-        const result = await db.collection('Projects').doc(this.ProjectId).get().then((doc) => {
-            const docNotfound = !doc.exists
-            const project = doc.data()
-            return { project, docNotfound }
-        })
-        return result
-    }
-
-    setProjectData(project, init) {
-
-        const promise = new Promise((resolve, reject) => {
-
-            let { client, name, description, note, address, state, step, color, comContact, techContact, intervenant, bill, attachedImages } = this.state
-            let { createdAt, createdBy, editedAt, editedBy } = this.state
-            let imagesView = []
-            let imagesCarousel = []
-
-            //General info
-            client = project.client
-            name.value = project.name
-            description.value = project.description
-            note.value = project.note
-            color = project.color
-            address = project.address
-            state = project.state
-            step = project.step
-
-            //Contacts
-            comContact = project.comContact
-            techContact = project.techContact
-            intervenant = project.intervenant //No need to display on UI
-
-            //Billing
-            bill = project.bill
-
-            //َActivity
-            if (init) {
-                createdAt = project.createdAt
-                createdBy = project.createdBy
-            }
-
-            editedAt = project.editedAt
-            editedBy = project.editedBy
-
-            //Images
-            attachedImages = project.attachments || []
-            if (attachedImages) {
-                attachedImages = attachedImages.filter((image) => !image.deleted)
-                imagesView = attachedImages.map((image) => { return ({ source: { uri: image.downloadURL } }) })
-                imagesCarousel = attachedImages.map((image) => image.downloadURL)
-            }
-
-            //IMPORTANT FOR UI PRIVILLEGES
-            const currentRole = this.props.role.id
-            const isBlockedUpdates = this.blockRoleUpdateOnPhase(currentRole, step)
-
-            //PROCESS ACTION PROJECT DATA
-            this.project = {
-                id: this.ProjectId,
-                name: name.value,
-                client,
-                step,
-                comContact,
-                techContact,
-                intervenant,
-                address
-            }
-
-            const update = { createdAt, createdBy, editedAt, editedBy, attachedImages, imagesView, imagesCarousel, client, name, description, note, address, state, step, comContact, techContact, bill, color, isBlockedUpdates }
-
-            this.setState(update, async () => {
-                //if (this.isInit)
-                this.initialState = _.cloneDeep(this.state)
-                //this.isInit = false
-                resolve(true)
-            })
-        })
-
-        return promise
-    }
-
-    blockRoleUpdateOnPhase(role, phase) {
-        let isBlockedUpdates = false
-        const comPhases = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
-        const techPhases = ['Visite technique', 'Installation', 'Maintenance']
-        const isComPhase = comPhases.includes(phase)
-        const isTechPhase = techPhases.includes(phase)
-
-        if (role === 'com' && isTechPhase || role === 'poseur' && isComPhase)
-            isBlockedUpdates = true
-
-        return isBlockedUpdates
-    }
-
     fetchDocuments() {
-        //console.log('A')
-        const promise = new Promise((resolve, reject) => {
-            this.unsubscribeDocuments = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC').onSnapshot((querysnapshot) => {
-
-                if (querysnapshot.empty) {
+        return new Promise((resolve, reject) => {
+            const query = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC')
+            this.unsubscribeDocuments = query.onSnapshot((querysnapshot) => {
+                if (querysnapshot.empty)
                     resolve(true)
-                    return
-                }
-
                 let documentsList = []
                 let documentTypes = []
                 querysnapshot.forEach((doc) => {
-                    const document = doc.data()
+                    let document = doc.data()
                     document.id = doc.id
                     documentsList.push(document)
                     documentTypes.push(document.type)
                 })
                 documentTypes = [...new Set(documentTypes)]
-
                 this.setState({ documentsList, documentTypes }, () => resolve(true))
             })
         })
-
-        //console.log('B')
-        return promise
     }
 
     fetchTasks() {
-        //console.log('C')
-        const promise = new Promise((resolve, reject) => {
-            this.unsubscribeTasks = db.collection('Agenda').where('project.id', '==', this.ProjectId).onSnapshot((agendaSnapshot) => {
-
-                if (agendaSnapshot.empty) {
+        return new Promise((resolve, reject) => {
+            const query = db.collection('Agenda').where('project.id', '==', this.ProjectId)
+            this.unsubscribeTasks = query.onSnapshot((agendaSnapshot) => {
+                if (agendaSnapshot.empty)
                     resolve(true)
-                    return
-                }
-
                 let tasksList = []
                 let taskTypes = []
-
                 agendaSnapshot.forEach(async (taskDoc) => {
                     const task = taskDoc.data()
                     task.id = taskDoc.id
                     task.date = taskDoc.dateKey
                     tasksList.push(task)
                     taskTypes.push(task.type)
-
                     taskTypes = [...new Set(taskTypes)]
                     this.setState({ tasksList, taskTypes }, () => resolve(true))
                 })
             })
         })
-        //console.log('D')
-        return promise
-    }
-
-    refreshAddress(address) {
-        this.setState({ address })
     }
 
     //Inputs validation
@@ -382,55 +289,56 @@ class CreateProject extends Component {
             return
         }
 
-        let { name, description, client, note, address, state, step, color, comContact, techContact, intervenant, bill, attachments } = this.state
+        let attachments = this.initialState.attachments
+        //1. UPLOADING FILES (ONLINE ONLY)
+        if (isConnected) {
+            const { newAttachments } = this.state
+            if (newAttachments.length > 0) {
+                this.title = 'Exportation des images...'
+                const uploadedImages = await this.uploadFiles(newAttachments, this.storageRefPath)
+                if (uploadedImages) {
+                    attachments = attachments.concat(uploadedImages)
+                    this.setState({ attachments, newAttachments: [] })
+                }
+                else setToast(this, 'e', "Les images n'ont pas pu être importées. Veuillez réessayer.")
+            }
+        }
+
+        const project = this.unFormatProject()
+        project.attachments = attachments
+        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        this.refreshState(project)
+    }
+
+    unFormatProject() {
+        let { name, description, client, note, address, state, step, color, comContact, techContact, intervenant, bill } = this.state
         const currentUser = {
             id: auth.currentUser.uid,
             fullName: auth.currentUser.displayName,
             email: auth.currentUser.email,
             role: this.props.role.value,
         }
-        const previousAttachedImages = this.initialState.attachedImages
-        let attachedImages = previousAttachedImages
-
-        //1. UPLOADING FILES (ONLINE ONLY)
-        if (isConnected) {
-            if (attachments.length > 0) {
-                this.title = 'Exportation des images...'
-                const uploadedImages = await this.uploadFiles(attachments, this.storageRefPath)
-                if (uploadedImages) {
-                    attachedImages = attachedImages.concat(uploadedImages)
-                    this.setState({ attachedImages, attachments: [] })
-                }
-            }
-        }
 
         //2. Set project
         let project = {
             name: name.value,
-            description: description.value,
+            description,
             client,
-            note: note.value,
+            note,
             state,
             step,
             address,
-            color: color,
-
+            color,
             bill,
-            attachments: attachedImages,
-
             comContact,
             techContact,
             intervenant,
-
             editedAt: moment().format(),
             editedBy: currentUser,
-
             deleted: false,
         }
 
-        let toastMessage = 'Le projet a été modifié'
         if (!this.isEdit) {
-            toastMessage = 'Le projet a été crée.'
             project.createdAt = moment().format()
             project.createdBy = currentUser
             project.process = {
@@ -438,19 +346,28 @@ class CreateProject extends Component {
             }
         }
 
-        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        await this.handlePostSubmit(project, toastMessage)
+        return project
     }
 
-    async handlePostSubmit(project, toastMessage) {
-        if (this.isEdit) await this.setProjectData(project, false)
-        else {
-            this.isEdit = true
-            await this.setProjectData(project, false)
-            await this.runListeners()
+    async refreshState(project) {
+        const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
+
+        if (!this.isEdit) {
+            const { createdAt, createdBy } = project
+            this.setState({ createdAt, createdBy }, async () => {
+                this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+                this.project.id = this.ProjectId
+                this.setState({ process: project.process })
+                this.setImageCarousel(project.attachments)
+                this.setUserAccess(project.step)
+                await this.runListeners()
+                this.title = 'Modifier le projet'
+                this.isEdit = true
+            })
         }
         load(this, false)
         setToast(this, 's', toastMessage)
+        this.initialState = _.cloneDeep(this.state)
     }
 
     showAlert() {
@@ -469,26 +386,19 @@ class CreateProject extends Component {
 
     //Delete URLs from FIRESTORE 
     async handleDeleteImage(allImages, currentImage) {
-        const newAttachments = this.state.attachedImages
-        newAttachments[currentImage].deleted = true
-
-        db.collection('Projects').doc(this.ProjectId).update({ attachments: newAttachments })
-        setTimeout(async () => {
-            this.setState({ isImageViewVisible: false })
-            load(this, true)
-            await this.initEditMode()
-            load(this, false)
-            //await this.deleteAttachments(allImages, currentImage)
-        }, 1000)
+        let { attachments } = this.state
+        attachments[currentImage].deleted = true
+        db.collection('Projects').doc(this.ProjectId).update({ attachments })
+        this.setState({ attachments, isImageViewVisible: false })
     }
 
     async pickImage() {
-        let { attachments } = this.state
-        attachments = await pickImage(attachments)
-        this.setState({ attachments })
+        let { newAttachments } = this.state
+        newAttachments = await pickImage(newAttachments)
+        this.setState({ newAttachments })
     }
 
-    renderAttachments(attachments, type, isUpload) {
+    renderAttachments(newAttachments, type, isUpload) {
         let { loading } = this.state
 
         const onPressAttachment = (isUpload, DocumentId) => {
@@ -497,41 +407,36 @@ class CreateProject extends Component {
         }
 
         const setRightIcon = (key) => {
-            const rightIconName = isUpload ? faTimes : faChevronRight
+            const rightIconStyle = { flex: 0.15, justifyContent: 'center', alignItems: 'center' }
             return (
-                <TouchableOpacity style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }} onPress={() => onPressRightIcon(key)}>
-                    {!loading &&
-                        <CustomIcon
-                            icon={rightIconName}
-                            style={{ color: theme.colors.gray_dark }}
-                            size={19}
-                        />}
+                <TouchableOpacity style={rightIconStyle} onPress={() => onPressRightIcon(key)}>
+                    <CustomIcon
+                        icon={isUpload ? faTimes : faChevronRight}
+                        style={{ color: theme.colors.gray_dark }}
+                        size={19}
+                    />
                 </TouchableOpacity>
             )
         }
 
         const onPressRightIcon = (key) => {
-            if (isUpload) {
-                attachments.splice(key, 1)
-                this.setState({ attachments })
-            }
+            if (!isUpload) return
+            newAttachments.splice(key, 1)
+            this.setState({ newAttachments })
         }
 
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                {attachments.map((attachment, key) => {
+            <View style={styles.attachmentsContainer}>
+                {newAttachments.map((attachment, key) => {
                     if (!isUpload) {
                         var DocumentId = attachment.id
                         attachment = attachment.attachment
                     }
-
-                    const rightIcon = setRightIcon(key)
-
                     return (
                         <UploadProgress
                             attachment={attachment}
-                            showRightIcon
-                            rightIcon={rightIcon}
+                            showRightIcon={!loading}
+                            rightIcon={setRightIcon(key)}
                             onPress={() => onPressAttachment(isUpload, DocumentId)}
                             showProgress={isUpload}
                         />
@@ -566,7 +471,7 @@ class CreateProject extends Component {
 
     renderPlacePictures(canWrite) {
 
-        const { isImageViewVisible, imageIndex, imagesView, imagesCarousel, attachments, loading } = this.state
+        const { isImageViewVisible, imageIndex, imagesView, imagesCarousel, newAttachments, loading } = this.state
 
         return (
             <FormSection
@@ -632,12 +537,11 @@ class CreateProject extends Component {
                             </View>
                         }
 
-                        {this.renderAttachments(attachments, 'image', true)}
+                        {this.renderAttachments(newAttachments, 'image', true)}
                     </View>
                 } />
         )
     }
-
 
     render() {
         let { client, name, description, note, address, state, step, bill, color } = this.state
@@ -646,21 +550,28 @@ class CreateProject extends Component {
         let { error, loading, docNotFound, toastMessage, toastType } = this.state
         const { isBlockedUpdates } = this.state
 
+        console.log('CREATEDBY', createdBy)
+
         //Privilleges
         let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
         const canWrite = (canUpdate && this.isEdit && !isBlockedUpdates || canCreate && !this.isEdit && !isBlockedUpdates)
-
         const canCreateDocument = this.props.permissions.documents.canCreate
         const canReadTasks = this.props.permissions.tasks.canRead
-        const showBillSection = this.isEdit && (this.isCurrentHighRole || bill)
 
+        const showBillSection = this.isEdit && (this.isCurrentHighRole || bill)
+        const showProcessAction = this.isEdit && this.project && process
         const { isConnected } = this.props.network
 
         if (docNotFound)
             return (
                 <View style={styles.mainContainer}>
                     <Appbar close title titleText={this.title} />
-                    <EmptyList icon={faTimes} header='Projet introuvable' description="Le projet est introuvable dans la base de données. Il se peut qu'il ait été supprimé." offLine={!isConnected} />
+                    <EmptyList
+                        icon={faTimes}
+                        header='Projet introuvable'
+                        description="Le projet est introuvable dans la base de données. Il se peut qu'il ait été supprimé."
+                        offLine={!isConnected}
+                    />
                 </View>
             )
 
@@ -671,11 +582,12 @@ class CreateProject extends Component {
                 {loading ?
                     this.renderPlacePictures(canWrite)
                     :
-                    <ScrollView style={styles.dataContainer}>
+                    <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="always">
 
-                        {this.isEdit && this.project &&
+                        {showProcessAction &&
                             <View>
                                 <ProcessAction
+                                    process={this.state.process}
                                     project={this.project}
                                     clientId={client.id}
                                     step={step}
@@ -765,10 +677,10 @@ class CreateProject extends Component {
                                     <MyInput
                                         label="Description"
                                         returnKeyType="done"
-                                        value={description.value}
+                                        value={description}
                                         onChangeText={text => updateField(this, description, text)}
-                                        error={!!description.error}
-                                        errorText={description.error}
+                                        // error={!!description.error}
+                                        // errorText={description.error}
                                         multiline={true}
                                         editable={canWrite}
                                     />
@@ -830,7 +742,7 @@ class CreateProject extends Component {
                                         label="Montant facturé (€)*"
                                         returnKeyType="done"
                                         keyboardType='numeric'
-                                        value={bill && bill.amount || ''}
+                                        value={bill.amount}
                                         onChangeText={amount => {
                                             bill.amount = amount
                                             this.setState({ bill })
@@ -854,8 +766,8 @@ class CreateProject extends Component {
                                         placeholderTextColor={theme.colors.gray_dark}
                                         numberOfLines={7}
                                         multiline={true}
-                                        onChangeText={text => updateField(this, note, text)}
-                                        value={note.value}
+                                        onChangeText={note => this.setState({ note })}
+                                        value={note}
                                         style={styles.note}
                                         autoCapitalize='sentences'
                                         editable={canWrite} />
@@ -934,7 +846,7 @@ class CreateProject extends Component {
                         }
 
                         {this.renderPlacePictures(canWrite)}
-                        {canWrite && isConnected && <AddAttachment onPress={this.pickImage} style={{ marginLeft: theme.padding, marginBottom: theme.padding }} />}
+                        {canWrite && isConnected && <SquarePlus onPress={this.pickImage} style={{ marginLeft: theme.padding, marginBottom: theme.padding }} />}
 
                         {this.isEdit &&
                             <ActivitySection
@@ -1008,6 +920,11 @@ const styles = StyleSheet.create({
         shadowRadius: 5.46,
         elevation: 2,
     },
+    attachmentsContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
     attachment: {
         // flex: 1,
         elevation: 1,
@@ -1039,10 +956,10 @@ const styles = StyleSheet.create({
     //     let urls = []
 
     //     if (allImages)
-    //         urls = this.initialState.attachedImages.map(image => image.downloadURL) //Delete all images
+    //         urls = this.initialState.attachments.map(image => image.downloadURL) //Delete all images
 
     //     else
-    //         urls = [this.initialState.attachedImages[currentImage].downloadURL] //Delete single image
+    //         urls = [this.initialState.attachments[currentImage].downloadURL] //Delete single image
 
     //     const promises = []
     //     for (let i = 0; i < urls.length; i++) {

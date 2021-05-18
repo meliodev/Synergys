@@ -1099,17 +1099,21 @@ export default class PdfGeneration extends Component {
 
     async savePdfBase64(pdfBase64) {
         const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
-        const destPath = await saveFile(pdfBase64, pdfName, 'base64')
-        if (!destPath) return
-
-        this.props.navigation.state.params.onGoBack({
-            pdfBase64Path: destPath,
-            pdfName,
-            order: this.order,
-            isConversion: this.isConversion,
-            DocumentId: this.DocumentId
-        })
-        this.props.navigation.pop(this.popCount)
+        saveFile(pdfBase64, pdfName, 'base64')
+            .then((destPath) => {
+                this.props.navigation.state.params.onGoBack({
+                    pdfBase64Path: destPath,
+                    pdfName,
+                    order: this.order,
+                    isConversion: this.isConversion,
+                    DocumentId: this.DocumentId
+                })
+                this.props.navigation.pop(this.popCount)
+            })
+            .catch((e) => {
+                Alert.alert('', e.message)
+                return
+            })
     }
 
     render() {
@@ -1130,20 +1134,20 @@ export default class PdfGeneration extends Component {
                     {source !== '' &&
                         <Pdf
                             source={source}
-                            onLoadComplete={(numberOfPages, filePath, { width, height }) => {
-                                console.log(`number of pages: ${numberOfPages}`)
-                                console.log(`width: ${width}`)
-                                console.log(`height: ${height}`)
-                            }}
-                            onPageChanged={(page, numberOfPages) => {
-                                console.log(`current page: ${page}`)
-                            }}
-                            onError={(error) => {
-                                console.log(error)
-                            }}
-                            onPressLink={(uri) => {
-                                console.log(`Link presse: ${uri}`)
-                            }}
+                            // onLoadComplete={(numberOfPages, filePath, { width, height }) => {
+                            //     console.log(`number of pages: ${numberOfPages}`)
+                            //     console.log(`width: ${width}`)
+                            //     console.log(`height: ${height}`)
+                            // }}
+                            // onPageChanged={(page, numberOfPages) => {
+                            //     console.log(`current page: ${page}`)
+                            // }}
+                            // onError={(error) => {
+                            //     console.log(error)
+                            // }}
+                            // onPressLink={(uri) => {
+                            //     console.log(`Link presse: ${uri}`)
+                            // }}
                             style={styles.pdf} />
                     }
                 </View>

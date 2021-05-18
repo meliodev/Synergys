@@ -87,17 +87,9 @@ class ProcessAction extends Component {
     }
 
     async refresh() {
-        const process = await this.fetchProcess()
+        const { process } = this.props
         this.processModel = this.setProcessModel(process)
         await this.mainHandler(process)
-    }
-
-    async fetchProcess() {
-        return db
-            .collection('Projects')
-            .doc(this.props.project.id)
-            .get()
-            .then((doc) => { return doc.data().process })
     }
 
     async updateProcess(updatedProcess) {
@@ -201,9 +193,7 @@ class ProcessAction extends Component {
 
         const loadingMessage = "Traitement en cours..."
         this.setState({ loading: true, loadingMessage, pressedAction: currentAction })
-
         await countDown(500)
-
         const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
 
         const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction

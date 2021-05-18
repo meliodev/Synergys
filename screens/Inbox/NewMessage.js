@@ -302,7 +302,7 @@ class NewMessage extends Component {
         return (
             <View style={styles.container}>
                 <Appbar close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} loading={loading} />
-                <ScrollView style={styles.form}>
+                <ScrollView keyboardShouldPersistTaps="always" style={styles.form}>
 
                     <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>
                         <View style={{ flexDirection: 'row' }}>
@@ -342,7 +342,7 @@ class NewMessage extends Component {
                         <MessageInput
                             // label="Message"
                             ref={ref => { this.messageInputRef = ref }}
-                            placeholder='Rédigez votre message'
+                            placeholder='Rédigez votre message...'
                             underlineColor="transparent"
                             returnKeyType="done"
                             value={message.value}

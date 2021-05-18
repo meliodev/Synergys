@@ -159,7 +159,7 @@ class Chat extends Component {
         }
 
         catch (err) {
-            if (DocumentPicker.isCancel(err)) console.log('User has canceled picker')
+            if (DocumentPicker.isCancel(err)) return null
             else Alert.alert("Erreur lors de l'exportation du fichier")
         }
     }
@@ -167,6 +167,7 @@ class Chat extends Component {
     async handleUpload() {
         //  let attachments = []
         const attachments = await this.pickFilesAndSendMessage()
+        if (!attachments) return
 
         //UPLOAD FILES 
         const storageRefPath = `/Chat/${this.chatId}/`

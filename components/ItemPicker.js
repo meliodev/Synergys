@@ -53,22 +53,21 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                         {renderLabel(theme.customFontMSregular.caption, false)}
                         <View style={{ flexDirection: 'row', paddingTop: 10 }}>
                             {showAvatarText &&
-                                <View style={styles.left}>
+                                <View style={{ flex: 0.08 }}>
                                     <AvatarText text={avatarText} />
                                 </View>
                             }
-                            <View style={{ flex: 0.9, flexDirection: 'row' }}>
+                            <View style={{ flex: showAvatarText ? 0.825 : 0.905 }}>
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{value}</Text>
                             </View>
 
-                            <View style={{ flex: 0.1, alignItems: 'center' }}>
-                                <CustomIcon icon={icon} color={theme.colors.inpuIcon} style={{ marginLeft: 5 }} />
+                            <View style={{ flex: 0.095, alignItems: 'center' }}>
+                                <CustomIcon icon={icon} color={theme.colors.inpuIcon} />
                             </View>
                         </View>
                     </View>
                     :
                     <View style={{ height: 45, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-
                         <View style={{ flex: 0.905 }}>
                             {renderLabel(theme.customFontMSregular.body, true)}
                         </View>
@@ -94,11 +93,6 @@ const styles = StyleSheet.create({
     pickerContainer: {
         borderBottomWidth: StyleSheet.hairlineWidth * 3,
         //  backgroundColor: 'purple'
-    },
-    left: {
-        marginRight: 10,
-        //justifyContent: 'center',
-        // backgroundColor: 'blue'
     },
     error: {
         paddingTop: 10,

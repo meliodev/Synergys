@@ -1,5 +1,5 @@
 export { default as ActiveFilter } from './ActiveFilter';
-export { default as AddAttachment } from './AddAttachment';
+export { default as SquarePlus } from './SquarePlus';
 export { default as AddressInput } from './AddressInput';
 export { default as Appbar } from './Appbar';
 export { default as AutoComplete } from './AutoComplete';

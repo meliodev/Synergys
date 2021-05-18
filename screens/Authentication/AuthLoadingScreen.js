@@ -13,7 +13,7 @@ import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
-import { setRole, setPermissions, userLoggedOut, resetState, setNetwork, setProcessModel } from '../../core/redux'
+import { setRole, setPermissions, userLoggedOut, resetState, setCurrentUser, setNetwork, setProcessModel } from '../../core/redux'
 
 const roles = [{ id: 'admin', value: 'Admin', level: 3 }, { id: 'backoffice', value: 'Back office', level: 3 }, { id: 'dircom', value: 'Directeur commercial', level: 2 }, { id: 'com', value: 'Commercial', level: 1 }, { id: 'poseur', value: 'Poseur', level: 1 }, { id: 'tech', value: 'Responsable technique', level: 2 }, { id: 'client', value: 'Client', level: 0 }]
 
@@ -132,7 +132,16 @@ class AuthLoadingScreen extends Component {
           //3. Set processModel
           await this.fetchProcessModels()
 
-          //4. Set fcm token
+          //4. Set currentUser
+          const currUser = {
+            id: user.uid,
+            fullName: user.displayName,
+            email: user.email,
+            role: roleValue,
+          }
+          setCurrentUser(this, currUser)
+
+          //5. Set fcm token
           await this.requestUserPermission() //iOS only
           await this.configureFcmToken()
         }
@@ -166,12 +175,8 @@ class AuthLoadingScreen extends Component {
         var routeParams = {}
       }
 
-      if (this.props.role.id !== '' && this.props.permissions.active) {
-        console.log('Navigating..............')
-        this.props.navigation.navigate(routeName, routeParams)
-      }
-
-      else console.log('NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo')
+      let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
+      if (startApp) this.props.navigation.navigate(routeName, routeParams)
     })
   }
 

@@ -61,25 +61,19 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
             <Card.Content style={styles.content}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
-                    <Title style={[theme.customFontMSregular.body]} numberOfLines={1}>{name}</Title>
-                    {description !== '' && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 10 }]} numberOfLines={1}>{description}</Text>}
-
+                    <Title style={[theme.customFontMSmedium.body]} numberOfLines={1}>{name}</Title>                  
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
-                        {address.description !== '' && <Text numberOfLines={2} style={theme.customFontMSregular.body}>à {address.description}</Text>}
+                        {address.description !== '' && <Text numberOfLines={2} style={theme.customFontMSregular.caption}>à {address.description}</Text>}
                         <Text numberOfLines={1} style={theme.customFontMSregular.caption}>chez <Text style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={viewClientProfile}>{client.fullName}</Text></Text>
                     </View>
-
-                    {/* <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]}>Modifié par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]} onPress={() => navigation.navigate('Profile', { userId: editedBy.id })}>{editedBy.fullName}</Text></Text> */}
-
                     <View style={styles.footer}>
                         <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]} >{lastUpdate}</Text>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(state), padding: 5, elevation: 2 }}>
+                        <View style={{ width: constants.ScreenWidth * 0.23, borderRadius: 50, backgroundColor: setStateColor(state), padding: 5, elevation: 2 }}>
                             <Text style={[theme.customFontMSregular.caption, { color: theme.colors.secondary, textAlign: 'center' }]}>{state}</Text>
                         </View>
                     </View>
                 </View>
             </Card.Content>
-
         </Card>
     )
 

@@ -36,6 +36,7 @@ import { generateId, myAlert, updateField, pickImage, renderImages, nameValidato
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
+import SquarePlus from '../../components/SquarePlus';
 
 class CreateProduct extends Component {
     constructor(props) {
@@ -81,7 +82,8 @@ class CreateProduct extends Component {
             suggestions: [], //Brands suggestions
             tagsSelected: [], //Selected brand
             brandError: '',
-            newBrand: { name: '', logo: { path: '' } }, //New brand
+            newBrandName: '',
+            newBrandLogo: { path: '' },
 
             //logs
             createdBy: { id: '', fullName: '', email: '', role: '' },
@@ -263,10 +265,10 @@ class CreateProduct extends Component {
 
     //Logo brand
     async pickNewBrandLogo() {
-        let { newBrand } = this.state
+        let { newBrandLogo } = this.state
         const attachments = await pickImage([])
-        newBrand.logo = attachments[0]
-        this.setState({ newBrand })
+        newBrandLogo = attachments[0]
+        this.setState({ newBrandLogo })
     }
 
     //Add new category
@@ -275,47 +277,49 @@ class CreateProduct extends Component {
     }
 
     renderDialog(type) { //Category & Brand
-        const { showDialog, newCategory, newBrand, logo, loadingDialog } = this.state
+        let { showDialog, newCategory, newBrandName, newBrandLogo, loadingDialog } = this.state
         const isCategory = type === 'category'
         const label = isCategory ? 'catégorie' : 'marque'
 
-        if (loadingDialog)
+        if (loadingDialog) {
+            const progression = isCategory ? '' : this.state.newBrandLogo.progress * 100
+            const title = `Ajout de la ${label} en cours... ${progression}%`
             return (
                 <View style={styles.dialogContainer} >
                     <Dialog.Container visible={showDialog}>
-                        <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>Ajout de la {label} en cours...</Dialog.Title>
+                        <Dialog.Title style={[theme.customFontMSsemibold.body, { marginBottom: 5 }]}>{title}</Dialog.Title>
                         <ActivityIndicator color={theme.colors.primary} size='small' />
                     </Dialog.Container>
                 </View >
             )
+        }
 
         else return (
             <View style={styles.dialogContainer} >
                 <Dialog.Container visible={showDialog}>
-                    {!isCategory ?
-                        newBrand.logo.path ?
-                            <TouchableOpacity style={{ marginBottom: 20 }} onPress={this.pickNewBrandLogo}>
-                                <Image source={{ uri: newBrand.logo.path }} style={{ width: 90, height: 90 }} />
-                            </TouchableOpacity>
-                            :
-                            <TouchableOpacity style={styles.imagesBox} onPress={this.pickNewBrandLogo}>
-                                <Text style={[theme.customFontMSsemibold.caption, { color: '#333' }]}>+ Logo de</Text>
-                                <Text style={[theme.customFontMSsemibold.caption, { color: '#333' }]}>la marque</Text>
-                            </TouchableOpacity>
-                        : null
+                    {!isCategory &&
+                        <View style={{ marginBottom: 20 }}>
+                            {newBrandLogo.path ?
+                                <TouchableOpacity onPress={this.pickNewBrandLogo}>
+                                    <Image source={{ uri: newBrandLogo.path }} style={{ width: 90, height: 90 }} />
+                                </TouchableOpacity>
+                                :
+                                <SquarePlus onPress={this.pickNewBrandLogo} title='LOGO' />
+                            }
+                        </View>
                     }
 
                     <Dialog.Input
                         label={`Nom de la ${label}`}
                         returnKeyType="done"
-                        value={isCategory ? newCategory : newBrand}
+                        value={isCategory ? newCategory : newBrandName}
                         onChangeText={text => {
                             if (isCategory)
                                 this.setState({ newCategory: text })
 
                             else {
-                                newBrand.name = text
-                                this.setState({ newBrand })
+                                newBrandName = text
+                                this.setState({ newBrandName })
                             }
                         }}
                         autoFocus={showDialog}
@@ -331,13 +335,12 @@ class CreateProduct extends Component {
                         }
 
                         else {
-                            const { name, logo } = this.state.newBrand
-                            if (!name) return
+                            if (!newBrandName) return
                             this.setState({ loadingDialog: true })
 
                             //upload logo
-                            const storageRefPath = `/Brands/${name}/logo`
-                            const response = await this.uploadFile(logo, storageRefPath, false)
+                            const storageRefPath = `/Brands/${newBrandName}/logo`
+                            const response = await this.uploadFile(newBrandLogo, storageRefPath, true)
 
                             if (response === 'failure') {
                                 this.setState({ loadingDialog: false })
@@ -357,29 +360,26 @@ class CreateProduct extends Component {
     async addNewCategory() {
         const { newCategory } = this.state
         db.collection('ProductCategories').doc().set({ name: newCategory })
-        setTimeout(() => this.setState({ category: { value: newCategory, error: '' }, newCategory: '', loadingDialog: false, showDialog: false }), 1000)
+        this.setState({ category: { value: newCategory, error: '' }, newCategory: '', loadingDialog: false, showDialog: false })
     }
 
     async addNewBrand() {
-        const { newBrand, tagsSelected } = this.state
-
-        let logo = newBrand.logo
-        delete logo.progress
-        delete logo.local
-
-        const name = newBrand.name
-
+        let { newBrandName, newBrandLogo, tagsSelected } = this.state
+        delete newBrandLogo.progress
+        delete newBrandLogo.local
+        const name = newBrandName
+        const logo = newBrandLogo
+        const newBrand = { name, logo }
         tagsSelected.push(newBrand)
-
-        db.collection('Brands').doc().set({ name, logo })
-        setTimeout(() => this.setState({ tagsSelected, newBrand: { name: '', logo: {} }, loadingDialog: false, showDialog: false }), 1000)
+        db.collection('Brands').doc().set(newBrand)
+        this.setState({ tagsSelected, newBrandName: '', newBrandLogo: { path: '' }, loadingDialog: false, showDialog: false })
     }
 
     //Renderers
     renderTypeAndLogo() {
         const { checked, tagsSelected } = this.state
-        const isLogoSelected = tagsSelected.length > 0 && tagsSelected[0].logo && tagsSelected[0].logo.downloadURL
-        const logoUrl = isLogoSelected ? tagsSelected[0].logo && tagsSelected[0].logo.downloadURL : ''
+        const isLogo = tagsSelected.length > 0 && tagsSelected[0].logo && tagsSelected[0].logo.downloadURL
+        const logoUrl = isLogo ? tagsSelected[0].logo && tagsSelected[0].logo.downloadURL : ''
 
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -395,15 +395,8 @@ class CreateProduct extends Component {
                         textRight={true}
                         isRow={false} />
                 </View>
-
-                <TouchableOpacity>
-                    {isLogoSelected &&
-                        <Image source={{ uri: logoUrl }} style={{ width: 90, height: 90 }} />
-                    }
-                </TouchableOpacity>
-
+                {isLogo && <Image source={{ uri: logoUrl }} style={{ width: 90, height: 90 }} />}
             </View>
-
         )
     }
 

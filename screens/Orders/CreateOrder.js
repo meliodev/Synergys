@@ -5,12 +5,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Dialog from "react-native-dialog"
 import { connect } from 'react-redux'
 import _ from 'lodash'
-import { faTimes } from '@fortawesome/pro-light-svg-icons'
+import { faCashRegister, faHandsUsd, faInfoCircle, faTimes } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+import FormSection from '../../components/FormSection';
 import ActivitySection from '../../containers/ActivitySection';
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
@@ -23,24 +24,24 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import firebase, { db, auth } from '../../firebase'
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject } from "../../core/utils"
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject, formatDocument } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'
 import { handleFirestoreError } from '../../core/exceptions'
+import { fetchDocument } from '../../api/firestore-api';
 
 const states = [
     { label: 'Terminé', value: 'Terminé' },
     { label: 'En cours', value: 'En cours' },
     { label: 'Annulé', value: 'Annulé' },
 ]
-
+const properties = ["project", "state", "orderLines", "taxes", "primeCEE", "primeRenov", "createdAt", "createdBy", "editedAt", "editedBy"]
 const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
 
 class CreateOrder extends Component {
     constructor(props) {
         super(props)
-        this.fetchOrder = this.fetchOrder.bind(this)
         this.refreshOrderLine = this.refreshOrderLine.bind(this)
         this.refreshProject = refreshProject.bind(this)
         this.calculateSubTotal = this.calculateSubTotal.bind(this)
@@ -62,6 +63,7 @@ class CreateOrder extends Component {
 
         this.OrderId = this.props.navigation.getParam('OrderId', '')
         this.isEdit = this.OrderId ? true : false
+        this.OrderId = this.isEdit ? this.OrderId : generateId('GS-CO-')
 
         this.titleText = `Création ${articles_fr('du', masculins, this.docType)} ${this.docType}`
         this.title = this.autoGenPdf ? this.titleText : this.OrderId ? 'Modifier la commande' : 'Nouvelle commande'
@@ -70,11 +72,9 @@ class CreateOrder extends Component {
         this.project = this.props.navigation.getParam('project', undefined)
 
         this.state = {
-            //AUTO-GENERATED
-            OrderId: '', //Not editable
-
             //Screens
-            project: this.project || { id: '', name: '', error: '' },
+            project: this.project || { id: '', name: '' },
+            projectError: '',
             client: { id: '', fullName: '' },
 
             //Pickers
@@ -96,7 +96,6 @@ class CreateOrder extends Component {
             editedBy: { id: '', fullName: '' },
             editededAt: '',
 
-            error: '',
             loading: true,
             docNotFound: false,
             toastType: '',
@@ -109,88 +108,33 @@ class CreateOrder extends Component {
         }
     }
 
+    //GET
     async componentDidMount() {
-
-        if (this.isEdit) {
-            const docNotFound = await this.fetchOrder()
-            if (docNotFound) {
-                load(this, false)
-                return
-            }
-        }
-
-        else {
-            const OrderId = generateId('GS-CO-')
-            this.setState({ OrderId }, () => {
-                this.initialState = _.cloneDeep(this.state)
-            })
-        }
-
-        if (this.project) {
-            const client = await this.fetchClient(this.project.id)
-            this.project.client = client
-            this.setState({ project: this.project })
-        }
-
+        if (this.isEdit) await this.initEditMode()
+        this.initialState = _.cloneDeep(this.state)
         load(this, false)
     }
 
-    //on Edit: fetch data
-    async fetchOrder() {
-        await db.collection('Orders').doc(this.OrderId).get().then((doc) => {
-
-            if (!doc.exists) {
-                this.setState({ docNotFound: true })
-                return true
-            }
-
-            let { OrderId, project, state, orderLines, taxes, primeCEE, primeRenov } = this.state
-            let { createdAt, createdBy, editedAt, editedBy } = this.state
-            let { error, loading } = this.state
-
-            const order = doc.data()
-            //General info
-            OrderId = this.OrderId
-            project = order.project
-            orderLines = order.orderLines
-            taxes = order.taxes
-            primeCEE = order.primeCEE
-            primeRenov = order.primeRenov
-
-            this.fetchClient(project.id)
-
-            //َActivity
-            createdAt = order.createdAt
-            createdBy = order.createdBy
-            editedAt = order.editedAt
-            editedBy = order.editedBy
-
-            //State
-            state = order.state
-
-            this.setState({ OrderId, project, state, orderLines, taxes, primeCEE, primeRenov, createdAt, createdBy, editedAt, editedBy, order }, () => {
-                if (this.isInit)
-                    this.initialState = _.cloneDeep(this.state)
-
-                this.isInit = false
-
-                const subTotal = this.calculateSubTotal()
-                this.setState({ subTotal }, () => this.calculateTotal())
-            })
-        })
+    async initEditMode() {
+        let order = await fetchDocument('Orders', this.OrderId)
+        this.setState({ order }) //For pdf generation
+        order = await this.setOrder(order)
+        if (!order) return
+        const subTotal = this.calculateSubTotal()
+        this.setState({ subTotal }, () => this.calculateTotal())
     }
 
-    async fetchClient(projectId) {
-        const client = await db.collection('Projects').doc(projectId).get().then((doc) => {
-            if (!doc.exists) return
-            const client = doc.data().client
-            this.setState({ client })
-            return client
-        })
-        return client
+    setOrder(order) {
+        if (!order)
+            this.setState({ docNotFound: true })
+        else {
+            order = formatDocument(order, properties, [])
+            this.setState(order)
+        }
+        return order
     }
 
-    //delete order
+    //DELETE
     showAlert() {
         const title = "Supprimer la commande"
         const message = 'Etes-vous sûr de vouloir supprimer cette commande ? Cette opération est irreversible.'
@@ -205,7 +149,7 @@ class CreateOrder extends Component {
         this.props.navigation.goBack()
     }
 
-    //inputs validation & submit
+    //VALIDATE
     validateOrderLines() {
         if (this.state.orderLines.length === 0) {
             const errorTitle = 'Erreur de saisie'
@@ -218,15 +162,14 @@ class CreateOrder extends Component {
     }
 
     validateInputs() {
-        let { orderLines, project } = this.state
+        let { orderLines, project, errors } = this.state
 
-        let projectError = nameValidator(project.id, '"Projet"')
-        let orderLinesError = this.validateOrderLines()
+        const projectError = nameValidator(project.id, '"Projet"')
+        const orderLinesError = this.validateOrderLines()
 
         if (projectError) {
             Keyboard.dismiss()
-            project.error = projectError
-            this.setState({ project, loading: false })
+            this.setState({ projectError, loading: false })
             return false
         }
 
@@ -238,6 +181,20 @@ class CreateOrder extends Component {
         return true
     }
 
+    //UNFORMAT
+    unformatDocument(thisState, properties, currentUser, isEdit) {
+        let order = _.pick(thisState, properties)
+        order.editedAt = moment().format()
+        order.editedBy = currentUser
+        order.deleted = false
+        if (!isEdit) {
+            order.createdAt = moment().format()
+            order.createdBy = currentUser
+        }
+        return order
+    }
+
+    //POST
     async handleSubmit() {
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
@@ -253,44 +210,18 @@ class CreateOrder extends Component {
         if (!isValid) return
 
         // //POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
-        // const currentRole = this.props.role.id
-        // const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
-        // if (isBlockedUpdates) {
-        //     Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
-        //     load(this, false)
-        //     return
-        // }
-
-        // 1. ADDING document to firestore
-        const { OrderId, project, state, orderLines, subTotal, taxes, primeCEE, primeRenov, total } = this.state
-        const currentUser = {
-            id: auth.currentUser.uid,
-            fullName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            role: this.props.role.value,
+        const currentRole = this.props.role.id
+        const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
+        if (isBlockedUpdates) {
+            Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
+            load(this, false)
+            return
         }
 
-        let order = {
-            project,
-            state,
-            orderLines,
-            subTotal,
-            taxes,
-            total,
-            primeCEE,
-            primeRenov,
-            editedAt: moment().format(),
-            editedBy: currentUser,
-            deleted: false,
-        }
-
-        if (!this.isEdit) {
-            order.createdAt = moment().format()
-            order.createdBy = currentUser
-        }
-
-        console.log('Ready to add order...')
-        db.collection('Orders').doc(OrderId).set(order, { merge: true })
+        const properties = ["project", "state", "orderLines", "subTotal", "taxes", "primeCEE", "primeRenov", "total"]
+        const order = this.unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
+        
+        db.collection('Orders').doc(this.OrderId).set(order, { merge: true })
 
         if (!this.autoGenPdf)
             this.props.navigation.goBack()
@@ -299,11 +230,19 @@ class CreateOrder extends Component {
         else this.setState({ order, loading: false }, () => this.generatePdf(order, this.state.docType))
     }
 
-    //Handle Pdf generation flow
+    //PDF GEN
     generatePdf(order, docType) {
-        this.props.navigation.navigate('PdfGeneration', { order, docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), popCount: this.popCount, onGoBack: this.props.navigation.getParam('onGoBack', null) })
+        const navParams = {
+            order,
+            docType,
+            DocumentId: this.props.navigation.getParam('DocumentId', ''),
+            popCount: this.popCount,
+            onGoBack: this.props.navigation.getParam('onGoBack', null)
+        }
+        this.props.navigation.navigate('PdfGeneration', navParams)
     }
 
+    //Helpers
     refreshOrderLine(orderLine, overwriteIndex) {
         let { orderLines } = this.state
 
@@ -320,9 +259,7 @@ class CreateOrder extends Component {
 
             this.setState({ subTotal }, () => {
                 const taxes = this.setTaxes(orderLines)
-                this.setState({ taxes }, () => {
-                    this.calculateTotal()
-                })
+                this.setState({ taxes }, () => this.calculateTotal())
             })
         })
     }
@@ -362,7 +299,6 @@ class CreateOrder extends Component {
         })
     }
 
-    //helpers
     calculateSubTotal() {
         const { orderLines } = this.state
 
@@ -389,7 +325,7 @@ class CreateOrder extends Component {
         this.setState({ total })
     }
 
-    //renderers
+    //RENDERERS
     renderOrderLines(canWrite) {
         const { orderLines } = this.state
 
@@ -530,12 +466,11 @@ class CreateOrder extends Component {
     }
 
     render() {
-        let { OrderId, project, state, client } = this.state
-        let { orderLines, subTotal, taxes, total, primeCEE, primeRenov, order, docType } = this.state
-        let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { error, loading, docNotFound, toastType, toastMessage } = this.state
+        const { project, state, client, orderLines, subTotal, taxes, total, primeCEE, primeRenov, order, docType } = this.state
+        const { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
+        const { projectError, loading, docNotFound, toastType, toastMessage } = this.state
 
-        let { canCreate, canUpdate, canDelete } = this.props.permissions.orders
+        const { canCreate, canUpdate, canDelete } = this.props.permissions.orders
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
@@ -561,79 +496,92 @@ class CreateOrder extends Component {
                     :
                     <View style={{ flex: 1 }}>
 
-                        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
+                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
 
-                            <Card style={{ margin: 5 }}>
-                                <Card.Content>
-                                    <Title>Détails de la commande</Title>
+                            <FormSection
+                                sectionTitle='Informations générales'
+                                sectionIcon={faInfoCircle}
+                                form={
+                                    <View style={{ flex: 1 }}>
+                                        <MyInput
+                                            label="Numéro de la commande"
+                                            returnKeyType="done"
+                                            value={this.OrderId}
+                                            editable={false}
+                                            disabled
+                                        />
 
-                                    <MyInput
-                                        label="Numéro de la commande"
-                                        returnKeyType="done"
-                                        value={OrderId}
-                                        editable={false}
-                                        disabled
-                                    />
+                                        <ItemPicker
+                                            onPress={() => {
+                                                if (this.project || this.isEdit) return //pre-defined project
+                                                navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })
+                                            }}
+                                            label="Projet concerné *"
+                                            value={project.name}
+                                            error={!!projectError}
+                                            errorText={projectError}
+                                            editable={canWrite}
+                                            showAvatarText={false}
+                                        />
 
-                                    <ItemPicker
-                                        onPress={() => {
-                                            if (this.project || this.isEdit) return //pre-defined project
-                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'CreateOrder', titleText: 'Choix du projet', showFAB: false })
-                                        }}
-                                        label="Projet concerné *"
-                                        value={project.name}
-                                        error={!!project.error}
-                                        errorText={project.error}
-                                        editable={canWrite}
-                                        showAvatarText={false}
-                                    />
-
-                                    {client.fullName !== '' &&
-                                        <TouchableOpacity >
-                                            <MyInput
+                                        {client.fullName !== '' &&
+                                            <ItemPicker
+                                                onPress={() => {
+                                                    if (this.project || this.isEdit) return
+                                                    this.setState({ project: { id: '', name: '' }, client: { id: '', fullName: '' } })
+                                                }}
                                                 label="Client concerné *"
                                                 value={client.fullName}
                                                 editable={false}
-                                                right={client.fullName !== '' && canWrite && <PaperInput.Icon name='close' size={18} color={theme.colors.placeholder} onPress={() => {
-                                                    if (this.project || this.isEdit) return
-                                                    this.setState({ project: { id: '', name: '', error: '' }, client: { id: '', fullName: '' } })
-                                                }} />} />
-                                        </TouchableOpacity>
-                                    }
+                                                showAvatarText={true}
+                                                icon={faTimes}
+                                            />
+                                        }
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={state}
-                                        error={!!state.error}
-                                        errorText={state.error}
-                                        selectedValue={state}
-                                        onValueChange={(state) => this.setState({ state })}
-                                        title="Etat *"
-                                        elements={states}
-                                        enabled={canWrite}
-                                    />
+                                        <Picker
+                                            returnKeyType="next"
+                                            value={state}
+                                            error={!!state.error}
+                                            errorText={state.error}
+                                            selectedValue={state}
+                                            onValueChange={(state) => this.setState({ state })}
+                                            title="État de la commande *"
+                                            elements={states}
+                                            enabled={canWrite}
+                                        />
+                                    </View>
+                                }
+                            />
 
-                                    <MyInput
-                                        label="Prime CEE (€)"
-                                        returnKeyType="done"
-                                        keyboardType='numeric'
-                                        value={primeCEE}
-                                        onChangeText={primeCEE => this.setState({ primeCEE })}
-                                    />
+                            <FormSection
+                                sectionTitle='Primes'
+                                sectionIcon={faHandsUsd}
+                                form={
+                                    <View style={{ flex: 1 }}>
+                                        <MyInput
+                                            label="Prime CEE (€)"
+                                            returnKeyType="done"
+                                            keyboardType='numeric'
+                                            value={primeCEE}
+                                            onChangeText={primeCEE => this.setState({ primeCEE })}
+                                        />
 
-                                    <MyInput
-                                        label="Prime Renov (€)"
-                                        returnKeyType="done"
-                                        keyboardType='numeric'
-                                        value={primeRenov}
-                                        onChangeText={primeRenov => this.setState({ primeRenov })}
-                                    />
-                                </Card.Content>
-                            </Card>
+                                        <MyInput
+                                            label="Prime Renov (€)"
+                                            returnKeyType="done"
+                                            keyboardType='numeric'
+                                            value={primeRenov}
+                                            onChangeText={primeRenov => this.setState({ primeRenov })}
+                                        />
+                                    </View>
+                                }
+                            />
 
-                            {orderLines.length > 0 ?
-                                <Card style={{ margin: 5, paddingBottom: 10 }}>
-                                    <Card.Content>
+                            <FormSection
+                                sectionTitle='Lignes de commandes'
+                                sectionIcon={faCashRegister}
+                                form={
+                                    <View style={{ flex: 1, paddingTop: 10 }}>
                                         <Button icon="plus-circle" loading={loading} mode="outlined"
                                             onPress={() => {
                                                 if (!canWrite) return
@@ -643,35 +591,26 @@ class CreateOrder extends Component {
                                             <Text style={theme.customFontMSmedium.caption}>Ajouter une ligne de commande</Text>
                                         </Button>
 
-                                        <View style={{ flexDirection: 'row', paddingBottom: 10, paddingTop: 25, justifyContent: 'space-between', alignItems: 'center', borderBottomColor: '#E0E0E0', borderBottomWidth: 1 }}>
-                                            <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder }]}>Articles</Text>
-                                            <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
-                                        </View>
+                                        {orderLines.length > 0 &&
+                                            <View>
+                                                <View style={{ flexDirection: 'row', paddingBottom: 10, paddingTop: 25, justifyContent: 'space-between', alignItems: 'center', borderBottomColor: '#E0E0E0', borderBottomWidth: 1 }}>
+                                                    <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder }]}>Articles</Text>
+                                                    <Text style={[theme.customFontMSmedium.body, { color: theme.colors.placeholder }]}>Prix HT</Text>
+                                                </View>
 
-                                        {this.renderOrderLines(canWrite)}
-                                        {this.renderSubTotal()}
-                                        {taxes.length > 0 && this.renderTaxes()}
-                                        {this.renderTotal()}
-                                        {primeCEE > 0 && this.renderPrimeCee()}
-                                        {primeRenov > 0 && this.renderPrimeRenov()}
-                                        {this.renderTotalNet()}
+                                                {this.renderOrderLines(canWrite)}
+                                                {this.renderSubTotal()}
+                                                {taxes.length > 0 && this.renderTaxes()}
+                                                {this.renderTotal()}
+                                                {primeCEE > 0 && this.renderPrimeCee()}
+                                                {primeRenov > 0 && this.renderPrimeRenov()}
+                                                {this.renderTotalNet()}
+                                            </View>
+                                        }
+                                    </View>
+                                }
+                            />
 
-                                    </Card.Content>
-                                </Card>
-                                :
-                                <Card style={{ margin: 5, paddingBottom: 10, paddingHorizontal: 5 }}>
-                                    <Card.Content>
-                                        <Button icon="plus-circle" loading={loading} mode="outlined"
-                                            onPress={() => {
-                                                if (!canWrite) return
-                                                navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
-                                            }}
-                                            style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
-                                            <Text style={theme.customFontMSsemibold.caption}>Ajouter une ligne de commande</Text>
-                                        </Button>
-                                    </Card.Content>
-                                </Card>
-                            }
 
                             {this.isEdit && !this.autoGenPdf &&
                                 <ActivitySection
@@ -699,7 +638,6 @@ class CreateOrder extends Component {
                 }
 
             </View>
-
         )
     }
 }
@@ -708,7 +646,8 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         permissions: state.permissions,
-        network: state.network
+        network: state.network,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }
@@ -718,6 +657,7 @@ export default connect(mapStateToProps)(CreateOrder)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.background
     },
     fab: {
         //flex: 1,
