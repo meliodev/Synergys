@@ -30,7 +30,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                 client = refreshUser(client)
                 return { client }
             }
-
+ 
         else if (option.screen === 'ListProjects')
             var callback = (project) => {
                 project = refreshProject(project, false)

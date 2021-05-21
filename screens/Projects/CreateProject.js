@@ -4,7 +4,7 @@ import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from
 import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign, faRetweet } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 
 import ImagePicker from 'react-native-image-picker'
@@ -22,7 +22,7 @@ import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, adminId, highRoles } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs, fetchDocument, getResponsableByRole } from "../../api/firestore-api";
@@ -59,7 +59,6 @@ const imagePickerOptions = {
 }
 
 const properties = ["client", "name", "description", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
-const validate = ["name"]
 
 class CreateProject extends Component {
     constructor(props) {
@@ -74,6 +73,7 @@ class CreateProject extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDeleteProject = this.handleDeleteProject.bind(this)
         this.handleDeleteImage = this.handleDeleteImage.bind(this)
+        this.handleRefresh = this.handleRefresh.bind(this)
         //this.deleteAttachments = this.deleteAttachments.bind(this)
 
         this.myAlert = myAlert.bind(this)
@@ -95,7 +95,8 @@ class CreateProject extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: "", error: '' },
+            name: "",
+            nameError: "",
             description: "",
             note: "",
 
@@ -176,7 +177,7 @@ class CreateProject extends Component {
         if (!project)
             this.setState({ docNotFound: true })
         else {
-            project = formatDocument(project, properties, validate)
+            project = formatDocument(project, properties, [])
             this.setState(project)
         }
         return project
@@ -247,21 +248,19 @@ class CreateProject extends Component {
         let { client, name, address, comContact, techContact, step } = this.state
 
         const isStepTech = techSteps.includes(step)
-
         const clientError = nameValidator(client.fullName, '"Client"')
-        const nameError = nameValidator(name.value, '"Nom du projet"')
+        const nameError = nameValidator(name, '"Nom du projet"')
         const comContactError = nameValidator(comContact.id, '"Contact commercial"')
         const techContactError = isStepTech ? nameValidator(techContact.id, '"Contact technique"') : ''
         const addressError = '' //Address optional on offline mode
         //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
 
         if (clientError || nameError || addressError || comContactError || techContactError) {
-            name.error = nameError
             client.error = clientError
             comContact.error = comContactError
             techContact.error = techContactError
             address.error = addressError
-            this.setState({ client, name, address, comContact, techContact, loading: false })
+            this.setState({ client, nameError, address, comContact, techContact, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -296,57 +295,25 @@ class CreateProject extends Component {
             if (newAttachments.length > 0) {
                 this.title = 'Exportation des images...'
                 const uploadedImages = await this.uploadFiles(newAttachments, this.storageRefPath)
+                this.title = this.isEdit ? "Modifier le projet" : "Nouveau projet"
                 if (uploadedImages) {
                     attachments = attachments.concat(uploadedImages)
+                    this.setImageCarousel(attachments)
                     this.setState({ attachments, newAttachments: [] })
                 }
                 else setToast(this, 'e', "Les images n'ont pas pu être importées. Veuillez réessayer.")
             }
         }
 
-        const project = this.unFormatProject()
+        const props = ["name", "description", "client", "note", "state", "step", "address", "color", "bill", "comContact", "techContact", "intervenant"]
+        let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
+        project.process = {
+            version: getLatestProcessModelVersion(this.props.processModels)
+        }
+
         db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
         this.refreshState(project)
-    }
-
-    unFormatProject() {
-        let { name, description, client, note, address, state, step, color, comContact, techContact, intervenant, bill } = this.state
-        const currentUser = {
-            id: auth.currentUser.uid,
-            fullName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            role: this.props.role.value,
-        }
-
-        //2. Set project
-        let project = {
-            name: name.value,
-            description,
-            client,
-            note,
-            state,
-            step,
-            address,
-            color,
-            bill,
-            comContact,
-            techContact,
-            intervenant,
-            editedAt: moment().format(),
-            editedBy: currentUser,
-            deleted: false,
-        }
-
-        if (!this.isEdit) {
-            project.createdAt = moment().format()
-            project.createdBy = currentUser
-            project.process = {
-                version: getLatestProcessModelVersion(this.props.processModels)
-            }
-        }
-
-        return project
     }
 
     async refreshState(project) {
@@ -389,7 +356,7 @@ class CreateProject extends Component {
         let { attachments } = this.state
         attachments[currentImage].deleted = true
         db.collection('Projects').doc(this.ProjectId).update({ attachments })
-        this.setState({ attachments, isImageViewVisible: false })
+        this.setState({ attachments, isImageViewVisible: false }, () => console.log(this.state.attachments))
     }
 
     async pickImage() {
@@ -413,7 +380,7 @@ class CreateProject extends Component {
                     <CustomIcon
                         icon={isUpload ? faTimes : faChevronRight}
                         style={{ color: theme.colors.gray_dark }}
-                        size={19}
+                        size={16}
                     />
                 </TouchableOpacity>
             )
@@ -469,7 +436,7 @@ class CreateProject extends Component {
         })
     }
 
-    renderPlacePictures(canWrite) {
+    renderPlacePictures(canWrite, isConnected) {
 
         const { isImageViewVisible, imageIndex, imagesView, imagesCarousel, newAttachments, loading } = this.state
 
@@ -508,7 +475,6 @@ class CreateProject extends Component {
                                         dotColor={theme.colors.secondary}
                                         inactiveDotColor="gray"
                                         paginationBoxVerticalPadding={20}
-                                        //autoplay
                                         circleLoop
                                         resizeMethod={'resize'}
                                         resizeMode={'cover'}
@@ -533,24 +499,29 @@ class CreateProject extends Component {
                                         ImageComponentStyle={{ borderRadius: 10, width: '95%', marginTop: 5 }}
                                         imageLoadingColor="#2196F3"
                                     //onPressDelete={(currentImage) => this.handleDeleteImage(false, currentImage)}
-                                    />}
+                                    />
+                                }
                             </View>
                         }
-
                         {this.renderAttachments(newAttachments, 'image', true)}
+                        {canWrite && isConnected && !loading && <SquarePlus onPress={this.pickImage} style={{ marginTop: 8 }} />}
                     </View>
                 } />
         )
+    }
+
+    async handleRefresh() {
+        load(this, true)
+        await this.initEditMode()
+        load(this, false)
     }
 
     render() {
         let { client, name, description, note, address, state, step, bill, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
         let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, comContact, techContact } = this.state
-        let { error, loading, docNotFound, toastMessage, toastType } = this.state
+        const { nameError, loading, docNotFound, toastMessage, toastType } = this.state
         const { isBlockedUpdates } = this.state
-
-        console.log('CREATEDBY', createdBy)
 
         //Privilleges
         let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
@@ -577,10 +548,20 @@ class CreateProject extends Component {
 
         else return (
             <View style={styles.mainContainer}>
-                <Appbar close title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={this.handleSubmit} del={canDelete && this.isEdit && !loading} handleDelete={this.showAlert} loading={loading} />
+                <Appbar
+                    close
+                    title
+                    titleText={this.title}
+                    check={this.isEdit ? canWrite && !loading : !loading}
+                    handleSubmit={this.handleSubmit}
+                    del={canDelete && this.isEdit && !loading}
+                    handleDelete={this.showAlert} loading={loading}
+                    refresh={this.isEdit && !loading}
+                    handleRefresh={this.handleRefresh}
+                />
 
                 {loading ?
-                    this.renderPlacePictures(canWrite)
+                    this.renderPlacePictures(canWrite, isConnected)
                     :
                     <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="always">
 
@@ -600,15 +581,8 @@ class CreateProject extends Component {
 
                         <FormSection
                             sectionTitle='Informations générales'
-                            sectionIcon={this.isEdit ? faRedo : faInfoCircle}
+                            sectionIcon={faInfoCircle}
                             isLoading={loading}
-                            onPressIcon={async () => {
-                                if (!this.isEdit) return
-                                load(this, true)
-                                await this.initEditMode()
-                                load(this, false)
-                            }}
-                            iconColor={this.isEdit ? theme.colors.primary : theme.colors.gray_dark}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <MyInput
@@ -622,15 +596,63 @@ class CreateProject extends Component {
                                     <MyInput
                                         label="Nom du projet *"
                                         returnKeyType="done"
-                                        value={name.value}
-                                        onChangeText={text => updateField(this, name, text)}
-                                        error={name.error}
-                                        errorText={name.error}
+                                        value={name}
+                                        onChangeText={name => this.setState({ name, nameError: '' })}
+                                        error={nameError}
+                                        errorText={nameError}
                                         multiline={true}
-                                        editable={canWrite}
+                                        editable={canWrite && !this.isClient}
                                     // autoFocus={!this.isEdit}
                                     />
 
+
+                                    <MyInput
+                                        label="Description"
+                                        returnKeyType="done"
+                                        value={description}
+                                        onChangeText={description => this.setState({ description })}
+                                        // error={!!description.error}
+                                        // errorText={description.error}
+                                        multiline={true}
+                                        editable={canWrite && !this.isClient}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={step}
+                                        error={!!step.error}
+                                        errorText={step.error}
+                                        selectedValue={step}
+                                        onValueChange={(step) => this.setState({ step })}
+                                        title="Phase *"
+                                        elements={steps}
+                                        enabled={canWrite && !this.isClient}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={state}
+                                        selectedValue={state}
+                                        onValueChange={(state) => this.setState({ state })}
+                                        title="État *"
+                                        elements={states}
+                                        enabled={canWrite && !this.isClient}
+                                    />
+
+                                    <ColorPicker
+                                        label='Couleur du projet'
+                                        selectedColor={color}
+                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+                                        editable={canWrite}
+                                    />
+                                </View>
+                            } />
+
+                        <FormSection
+                            sectionTitle='Références'
+                            sectionIcon={faRetweet}
+                            form={
+                                <View style={{ flex: 1 }}>
                                     {!this.isClient &&
                                         <ItemPicker
                                             onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false })}
@@ -651,48 +673,9 @@ class CreateProject extends Component {
                                         editable={canWrite}
                                         isEdit={this.isEdit}
                                     />
-
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={step}
-                                        error={!!step.error}
-                                        errorText={step.error}
-                                        selectedValue={step}
-                                        onValueChange={(step) => this.setState({ step })}
-                                        title="Phase *"
-                                        elements={steps}
-                                        enabled={canWrite}
-                                    />
-
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={state}
-                                        selectedValue={state}
-                                        onValueChange={(state) => this.setState({ state })}
-                                        title="État *"
-                                        elements={states}
-                                        enabled={canWrite}
-                                    />
-
-                                    <MyInput
-                                        label="Description"
-                                        returnKeyType="done"
-                                        value={description}
-                                        onChangeText={text => updateField(this, description, text)}
-                                        // error={!!description.error}
-                                        // errorText={description.error}
-                                        multiline={true}
-                                        editable={canWrite}
-                                    />
-
-                                    <ColorPicker
-                                        label='Couleur du projet'
-                                        selectedColor={color}
-                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite}
-                                    />
                                 </View>
-                            } />
+                            }
+                        />
 
                         <FormSection
                             sectionTitle='Contacts'
@@ -712,7 +695,7 @@ class CreateProject extends Component {
                                         value={comContact.fullName || ''}
                                         error={!!comContact.error}
                                         errorText={comContact.error}
-                                        editable={canWrite}
+                                        editable={canWrite && !this.isClient}
                                         style={{}}
                                     />
                                     <ItemPicker
@@ -728,7 +711,7 @@ class CreateProject extends Component {
                                         value={techContact.fullName || ''}
                                         error={!!techContact.error}
                                         errorText={techContact.error}
-                                        editable={canWrite}
+                                        editable={canWrite && !this.isClient}
                                     />
                                 </View>
                             } />
@@ -747,6 +730,7 @@ class CreateProject extends Component {
                                             bill.amount = amount
                                             this.setState({ bill })
                                         }}
+                                        editable={canWrite && !this.isClient}
                                     // error={!!price.error}
                                     // errorText={price.error}
                                     />
@@ -792,12 +776,9 @@ class CreateProject extends Component {
 
                                         <List.AccordionGroup
                                             expandedId={expandedTaskId}
-                                            onAccordionPress={(expandedId) => {
-                                                if (expandedTaskId === expandedId)
-                                                    this.setState({ expandedTaskId: '' })
-                                                else
-                                                    this.setState({ expandedTaskId: expandedId })
-                                            }}>
+                                            onAccordionPress={(expandedId) =>
+                                                this.setState({ expandedTaskId: expandedTaskId === expandedId ? '' : expandedId })
+                                            }>
                                             {taskTypes.map((type) => {
                                                 let filteredTasks = tasksList.filter((task) => task.type === type)
 
@@ -821,7 +802,8 @@ class CreateProject extends Component {
                                         {canCreateDocument && canWrite &&
                                             <Text
                                                 onPress={() => this.props.navigation.navigate('UploadDocument', { project: this.project })}
-                                                style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 10 }]}>+ Ajouter un document</Text>}
+                                                style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 16 }]}>+ Ajouter un document</Text>
+                                        }
 
                                         <List.AccordionGroup
                                             expandedId={this.state.expandedId}
@@ -845,8 +827,7 @@ class CreateProject extends Component {
                                 } />
                         }
 
-                        {this.renderPlacePictures(canWrite)}
-                        {canWrite && isConnected && <SquarePlus onPress={this.pickImage} style={{ marginLeft: theme.padding, marginBottom: theme.padding }} />}
+                        {this.renderPlacePictures(canWrite, isConnected)}
 
                         {this.isEdit &&
                             <ActivitySection
@@ -876,7 +857,8 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
-        processModels: state.process.processModels
+        processModels: state.process.processModels,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }

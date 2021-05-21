@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert } from 'react-native';
 import { Card, Title, TextInput } from 'react-native-paper'
 import DocumentPicker from 'react-native-document-picker';
-import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages } from '@fortawesome/pro-light-svg-icons'
+import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages, faInfoCircle } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 
@@ -12,6 +12,7 @@ moment.locale('fr')
 
 import ActivitySection from '../../containers/ActivitySection'
 import Appbar from '../../components/Appbar'
+import FormSection from '../../components/FormSection'
 import SquarePlus from '../../components/SquarePlus'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
@@ -27,7 +28,7 @@ import LoadDialog from "../../components/LoadDialog"
 import firebase, { db, auth } from '../../firebase'
 import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
@@ -55,8 +56,7 @@ const genSources = [
     { label: 'Une nouvelle commande', value: 'newOrder', icon: faFilePlus },
 ]
 
-const properties = ["project", "type", "state", "attachment", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
-const validate = ["name", "description"]
+const properties = ["project", "name", "type", "state", "attachment", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
 
 class UploadDocument extends Component {
 
@@ -110,8 +110,9 @@ class UploadDocument extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: { value: defaultState.name || "", error: '' },
-            description: { value: "", error: '' },
+            name: defaultState.name || "",
+            nameError: "",
+            description: "",
 
             //Screens
             project: defaultState.project || { id: '', name: '' },
@@ -148,14 +149,19 @@ class UploadDocument extends Component {
 
     setDefaultState() {
         let defaultState = {}
+
         if (this.project && this.documentType) {
             const name = `${this.documentType.value} - ${this.project.id}`
             defaultState = {
                 name,
                 type: this.documentType.value,
-                project: this.project
             }
         }
+
+        if (this.project) {
+            defaultState.project = this.project
+        }
+
         return defaultState
     }
 
@@ -182,7 +188,7 @@ class UploadDocument extends Component {
         if (!document)
             this.setState({ docNotFound: true })
         else {
-            document = formatDocument(document, properties, validate)
+            document = formatDocument(document, properties)
             this.setState(document)
         }
         return document
@@ -223,11 +229,10 @@ class UploadDocument extends Component {
     validateInputs() {
         let { project, name, attachment } = this.state
         let projectError = nameValidator(project.id, '"Projet"')
-        let nameError = nameValidator(name.value, '"Nom du document"')
+        let nameError = nameValidator(name, '"Nom du document"')
 
         if (projectError || nameError) {
-            name.error = nameError
-            this.setState({ projectError, name, loading: false, loadingConversion: false })
+            this.setState({ projectError, nameError, loading: false, loadingConversion: false })
             return false
         }
         return true
@@ -259,7 +264,20 @@ class UploadDocument extends Component {
         if (!isValid) return
 
         //4. Persist
-        const document = this.unFormatDocument(isConversion)
+        const props = ["project", "name", "description", "type", "state", "attachment", "attachmentSource", "orderData"]
+        let document = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
+
+        if (!_.isEqual(attachment, this.initialState.attachment))
+            document.attachment.pending = true
+            
+        if (isConversion) {
+            document.createdAt = moment().format()
+            document.createdBy = this.props.currentUser
+            document.name = `${document.name} (Facture générée)`
+            document.type = 'Facture'
+            document.attachmentSource = 'conversion'
+            document.conversionSource = this.DocumentId //Id of the current "Devis"
+        }
         await this.persistDocument(document, DocumentId)
         this.documentListener()
         this.refreshState(document, DocumentId, isConversion)
@@ -280,47 +298,6 @@ class UploadDocument extends Component {
     }
 
     //1. Persist
-    unFormatDocument(isConversion) {
-        const { project, name, description, type, state, attachment, attachmentSource, orderData } = this.state
-        const currentUser = {
-            id: auth.currentUser.uid,
-            fullName: auth.currentUser.displayName,
-            email: auth.currentUser.email,
-            role: this.props.role.value,
-        }
-
-        if (!_.isEqual(attachment, this.initialState.attachment))
-            attachment.pending = true
-
-        let document = {
-            project,
-            name: name.value,
-            description: description.value,
-            type,
-            state,
-            attachment, //To Keep track of last attached file
-            attachmentSource,
-            editedAt: moment().format(),
-            editedBy: currentUser,
-            orderData,
-            deleted: false,
-        }
-
-        if (!this.isEdit || isConversion) {
-            document.createdAt = moment().format()
-            document.createdBy = currentUser
-        }
-
-        if (isConversion) {
-            document.name = `${document.name} (Facture générée)`
-            document.type = 'Facture'
-            document.attachmentSource = 'conversion'
-            document.conversionSource = this.DocumentId //Id of the current "Devis"
-        }
-
-        return document
-    }
-
     persistDocument(document, DocumentId) {
         return new Promise((resolve, reject) => {
             const batch = db.batch()
@@ -335,11 +312,10 @@ class UploadDocument extends Component {
 
     //2. Refresh locally
     refreshState(document, DocumentId, isConversion) {
-
         if (isConversion) {
             const { name } = this.state
             const { type, attachmentSource, conversionSource } = document
-            name.value = document.name
+            name = document.name
             this.DocumentId = DocumentId
             this.setState({ name, type, attachmentSource, conversionSource })
         }
@@ -731,7 +707,7 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment, orderData } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError } = this.state
+        let { loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError, nameError } = this.state
         const { checked, modalContent, showModal, attachmentSource } = this.state
         const { isConnected } = this.props.network
 
@@ -750,6 +726,8 @@ class UploadDocument extends Component {
         const isGeneratedQuote = type === 'Devis' && orderData
         const allowConversion = isGeneratedQuote
         const allowSign = canUpdate || this.props.role.id === 'client'
+
+        // console.log('name', name)
 
         if (docNotFound)
             return (
@@ -785,93 +763,94 @@ class UploadDocument extends Component {
                         </Button>
                     }
 
-                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
+                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: constants.ScreenWidth * 0.02 }}>
 
-                        <Card style={{ margin: 5 }}>
-                            <Card.Content>
-                                <Title>Informations générales</Title>
-
-                                <MyInput
-                                    label="Numéro du document"
-                                    returnKeyType="done"
-                                    value={this.DocumentId}
-                                    editable={false}
-                                    disabled
-                                />
-
-                                <ItemPicker
-                                    onPress={() => {
-                                        if (this.project || this.isEdit || loading) return //pre-defined project
-                                        navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
-                                    }}
-                                    label="Projet concerné *"
-                                    value={project.name}
-                                    error={!!projectError}
-                                    errorText={projectError}
-                                    editable={canWrite}
-                                    showAvatarText={false}
-                                />
-
-                                {this.renderAttachment(canWrite)}
-
-                                {type !== '' &&
+                        <FormSection
+                            sectionTitle='Informations générales'
+                            sectionIcon={faInfoCircle}
+                            form={
+                                <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
                                     <MyInput
-                                        label="Type *"
+                                        label="Numéro du document"
                                         returnKeyType="done"
-                                        value={type}
+                                        value={this.DocumentId}
                                         editable={false}
                                         disabled
-                                    />}
+                                    />
 
-                                <ModalOptions
-                                    title={title}
-                                    columns={columns}
-                                    isLoading={modalLoading}
-                                    modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
-                                    isVisible={showModal}
-                                    toggleModal={() => this.toggleModal(true)}
-                                    elements={elements}
-                                    autoValidation={true}
-                                    handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
-                                />
+                                    <ItemPicker
+                                        onPress={() => {
+                                            if (this.project || this.isEdit || loading) return //pre-defined project
+                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
+                                        }}
+                                        label="Projet concerné *"
+                                        value={project.name}
+                                        error={!!projectError}
+                                        errorText={projectError}
+                                        editable={canWrite}
+                                        showAvatarText={false}
+                                    />
 
-                                <MyInput
-                                    label="Nom du document *"
-                                    returnKeyType="done"
-                                    value={name.value}
-                                    onChangeText={text => updateField(this, name, text)}
-                                    error={!!name.error}
-                                    errorText={name.error}
-                                    multiline={true}
-                                    editable={canWrite}
-                                />
+                                    {this.renderAttachment(canWrite)}
 
-                                <MyInput
-                                    label="Description"
-                                    returnKeyType="done"
-                                    value={description.value}
-                                    onChangeText={text => updateField(this, description, text)}
-                                    error={!!description.error}
-                                    errorText={description.error}
-                                    multiline={true}
-                                    editable={canWrite}
-                                />
+                                    {type !== '' &&
+                                        <MyInput
+                                            label="Type *"
+                                            returnKeyType="done"
+                                            value={type}
+                                            editable={false}
+                                            disabled
+                                        />}
 
-                                <Picker
-                                    returnKeyType="next"
-                                    value={state}
-                                    error={!!state.error}
-                                    errorText={state.error}
-                                    selectedValue={state}
-                                    onValueChange={(state) => this.setState({ state })}
-                                    title="Etat"
-                                    elements={states}
-                                    enabled={canWrite}
-                                    containerStyle={{ marginBottom: 0 }}
-                                />
+                                    <ModalOptions
+                                        title={title}
+                                        columns={columns}
+                                        isLoading={modalLoading}
+                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                                        isVisible={showModal}
+                                        toggleModal={() => this.toggleModal(true)}
+                                        elements={elements}
+                                        autoValidation={true}
+                                        handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                                    />
 
-                            </Card.Content>
-                        </Card>
+                                    <MyInput
+                                        label="Nom du document *"
+                                        returnKeyType="done"
+                                        value={name}
+                                        onChangeText={name => this.setState({ name, nameError })}
+                                        error={!!nameError}
+                                        errorText={nameError}
+                                        multiline={true}
+                                        editable={canWrite}
+                                    />
+
+                                    <MyInput
+                                        label="Description"
+                                        returnKeyType="done"
+                                        value={description}
+                                        onChangeText={description => this.setState({ description })}
+                                        // error={!!description.error}
+                                        // errorText={description.error}
+                                        multiline={true}
+                                        editable={canWrite}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={state}
+                                        error={!!state.error}
+                                        errorText={state.error}
+                                        selectedValue={state}
+                                        onValueChange={(state) => this.setState({ state })}
+                                        title="Etat"
+                                        elements={states}
+                                        enabled={canWrite}
+                                        containerStyle={{ marginBottom: 0 }}
+                                    />
+                                </View>
+                            }
+                        />
 
                         {showSignatures &&
                             <Card style={{ margin: 5 }}>
@@ -934,7 +913,8 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
-        documents: state.documents
+        documents: state.documents,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }

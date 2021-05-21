@@ -1,9 +1,11 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native';
+import React, { Component } from 'react'
+import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native'
 import { Title, Switch } from 'react-native-paper'
 import firebase, { db, auth } from '../../firebase'
-import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar, faTimes } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faFileAlt, faCalendarPlus, faClock, faCalendar, faTimes, faRetweet } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
+import { connect } from 'react-redux'
+import { getSystemAvailableFeatures } from 'react-native-device-info'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -25,11 +27,9 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants, adminId } from "../../core/constants"
-import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress, formatDocument } from "../../core/utils"
+import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress, formatDocument, unformatDocument } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
-import { connect } from 'react-redux'
-import { getSystemAvailableFeatures } from 'react-native-device-info'
 import { fetchDocument } from '../../api/firestore-api';
 
 const priorities = [
@@ -239,18 +239,6 @@ class CreateTask extends Component {
         return isValid
     }
 
-    unformatDocument(thisState, properties, currentUser, isEdit) {
-        let task = _.pick(thisState, properties)
-        task.editedAt = moment().format()
-        task.editedBy = currentUser
-        task.deleted = false
-        if (!isEdit) {
-            task.createdAt = moment().format()
-            task.createdBy = currentUser
-        }
-        return task
-    }
-
     //##CONFLICTS VERIFICATION
     async checkTasksConflicts(tasks) {
         let overlappingTasks = {}
@@ -367,7 +355,7 @@ class CreateTask extends Component {
 
         //4. Building task(s)
         const properties = ["name", "assignedTo", "description", "project", "type", "priority", "status", "address", "color", "isAllDay", "startDate", "startHour", "dueHour"]
-        let task = this.unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
+        let task = unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
         //specific
         task.id = this.TaskId
         task.date = moment(task.startDate).format('YYYY-MM-DD')
@@ -406,8 +394,10 @@ class CreateTask extends Component {
 
         //8. Go back
         //if (this.prevScreen === 'Agenda') {
-        const refreshAgenda = true
-        this.props.navigation.state.params.onGoBack(refreshAgenda)
+        if (this.props.navigation.state.params.onGoBack) {
+            const refreshAgenda = true
+            this.props.navigation.state.params.onGoBack(refreshAgenda)
+        }
         //}
 
         this.props.navigation.goBack()
@@ -665,7 +655,6 @@ class CreateTask extends Component {
                             sectionIcon={faInfoCircle}
                             form={
                                 <View style={{ flex: 1 }}>
-
                                     <MyInput
                                         label="Numéro de la tâche"
                                         returnKeyType="done"
@@ -700,72 +689,6 @@ class CreateTask extends Component {
                                         editable={canWrite}
                                     />
 
-                                    <ItemPicker
-                                        onPress={() => {
-                                            if (this.project || this.isEdit) return //pre-defined project
-                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
-                                        }}
-                                        label="Projet concerné"
-                                        value={project.name}
-                                        error={!!project.error}
-                                        errorText={project.error}
-                                        showAvatarText={false}
-                                        editable={canWrite}
-                                    />
-
-                                    <AddressInput
-                                        label='Adresse postale'
-                                        offLine={!isConnected}
-                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                                        onChangeText={this.setAddress}
-                                        clearAddress={() => this.setAddress('')}
-                                        address={address}
-                                        addressError={address.error}
-                                        editable={canWrite}
-                                        isEdit={this.isEdit} />
-
-                                    <Picker
-                                        label="Type *"
-                                        returnKeyType="next"
-                                        value={type}
-                                        error={!!type.error}
-                                        errorText={type.error}
-                                        selectedValue={type}
-                                        onValueChange={(type) => this.setState({ type })}
-                                        title="Type"
-                                        elements={this.types}
-                                        enabled={canWrite && this.enableTypePicker} //pre-defined task type
-                                        containerStyle={{ marginBottom: 10 }}
-                                    />
-
-                                    <Picker
-                                        label="État *"
-                                        returnKeyType="next"
-                                        value={status}
-                                        error={!!status.error}
-                                        errorText={status.error}
-                                        selectedValue={status}
-                                        onValueChange={(status) => this.setState({ status })}
-                                        title="État"
-                                        elements={statuses}
-                                        enabled={canWrite}
-                                        containerStyle={{ marginBottom: 10 }}
-                                    />
-
-                                    <Picker
-                                        label="Priorité *"
-                                        returnKeyType="next"
-                                        value={priority}
-                                        error={!!priority.error}
-                                        errorText={priority.error}
-                                        selectedValue={priority}
-                                        onValueChange={(priority) => this.setState({ priority })}
-                                        title="Priorité"
-                                        elements={priorities}
-                                        enabled={canWrite}
-                                        containerStyle={{ marginBottom: 10 }}
-                                    />
-
                                     <MyInput
                                         label="Description"
                                         returnKeyType="done"
@@ -775,6 +698,45 @@ class CreateTask extends Component {
                                         // error={!!description.error}
                                         // errorText={description.error}
                                         editable={canWrite}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={type}
+                                        error={!!type.error}
+                                        errorText={type.error}
+                                        selectedValue={type}
+                                        onValueChange={(type) => this.setState({ type })}
+                                        title="Type *"
+                                        elements={this.types}
+                                        enabled={canWrite && this.enableTypePicker} //pre-defined task type
+                                        containerStyle={{ marginBottom: 10 }}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={priority}
+                                        error={!!priority.error}
+                                        errorText={priority.error}
+                                        selectedValue={priority}
+                                        onValueChange={(priority) => this.setState({ priority })}
+                                        title="Priorité *"
+                                        elements={priorities}
+                                        enabled={canWrite}
+                                        containerStyle={{ marginBottom: 10 }}
+                                    />
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={status}
+                                        error={!!status.error}
+                                        errorText={status.error}
+                                        selectedValue={status}
+                                        onValueChange={(status) => this.setState({ status })}
+                                        title="État *"
+                                        elements={statuses}
+                                        enabled={canWrite}
+                                        containerStyle={{ marginBottom: 10 }}
                                     />
 
                                     <ColorPicker
@@ -791,6 +753,37 @@ class CreateTask extends Component {
                             sectionIcon={faCalendar}
                             form={this.renderTimeForm(canWrite)}
                         />}
+
+                        <FormSection
+                            sectionTitle='Références'
+                            sectionIcon={faRetweet}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    <ItemPicker
+                                        onPress={() => {
+                                            if (this.project || this.isEdit) return //pre-defined project
+                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
+                                        }}
+                                        label="Projet concerné"
+                                        value={project.name}
+                                        error={!!project.error}
+                                        errorText={project.error}
+                                        showAvatarText={false}
+                                        editable={canWrite}
+                                    />
+                                    <AddressInput
+                                        label='Adresse postale'
+                                        offLine={!isConnected}
+                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                        onChangeText={this.setAddress}
+                                        clearAddress={() => this.setAddress('')}
+                                        address={address}
+                                        addressError={address.error}
+                                        editable={canWrite}
+                                        isEdit={this.isEdit} />
+                                </View>
+                            }
+                        />
 
                         {this.isEdit &&
                             <ActivitySection

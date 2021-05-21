@@ -274,16 +274,23 @@ export const getRoleIdFromValue = (roleValue) => {
   }
 }
 
-export const formatDocument = (document, properties, validate) => {
+export const formatDocument = (document, properties) => {
   if (!document) return null
   let formatedDocument = _.pick(document, properties)
-  for (const property of validate) {
-    formatedDocument[property] = {}
-    formatedDocument[property].value = document[property]
-  }
   return formatedDocument
 }
 
+export const unformatDocument = (thisState, properties, currentUser, isEdit) => {
+  let doc = _.pick(thisState, properties)
+  doc.editedAt = moment().format()
+  doc.editedBy = currentUser
+  doc.deleted = false
+  if (!isEdit) {
+    doc.createdAt = moment().format()
+    doc.createdBy = currentUser
+  }
+  return doc
+}
 
 export const removeDuplicateObjects = (arr) => {
   const seen = new Set()
@@ -689,7 +696,6 @@ const setPickerTypes = (currentRole, dynamicType, documentType, publicTypes, all
 export const setFilter = (main, field, value) => {
   const update = {}
   update[field] = value
-  console.log('update', update)
   main.setState(update)
 }
 
@@ -699,13 +705,12 @@ export const toggleFilter = (main) => {
 
 export const handleFilter = (inputList, outputList, fields, searchInput, KEYS_TO_FILTERS) => {
   outputList = inputList
-
   for (const field of fields) {
-    outputList = outputList.filter(createFilter(field.value, field.label))
+    if (field.value !== "") {
+      outputList = outputList.filter(createFilter(field.value, [field.label]))
+    }
   }
-
   outputList = outputList.filter(createFilter(searchInput, KEYS_TO_FILTERS))
-
   return outputList
 }
 
@@ -760,7 +765,7 @@ export function refreshTechContact(user) {
   const techContact = refreshUser(user)
   this.setState({ techContact })
 }
- 
+
 export function refreshAssignedTo(user) {
   const assignedTo = refreshUser(user)
   this.setState({ assignedTo, assignedToError: "" })

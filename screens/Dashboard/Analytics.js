@@ -247,7 +247,7 @@ class Analytics extends Component {
                         color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                         labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                         style: {
-                            borderRadius: 16,
+                            borderRadius: 8,
                         },
                         propsForDots: {
                             r: "6",
@@ -265,8 +265,8 @@ class Analytics extends Component {
                         marginTop: 0,
                         //backgroundColor: 'pink',
                         marginBottom: 25,
-                        borderRadius: 16,
-                        paddingTop: 20
+                        borderRadius: 8,
+                        //paddingTop: 20
                     }}
                 />
             </View>
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
         elevation: 4,
         height: constants.ScreenHeight * 0.1,
         width: constants.ScreenWidth * 0.275,
-        borderRadius: 16,
+        borderRadius: 8,
     },
     summaryLabelContainer: {
         flex: 0.45,
@@ -387,7 +387,8 @@ const styles = StyleSheet.create({
     chartHeader: {
         flexDirection: 'row',
         alignItems: 'flex-end',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        marginBottom: 5
     }
 })
 

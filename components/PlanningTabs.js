@@ -13,7 +13,7 @@ const PlanningTabs = ({ isAgenda, onPress1, onPress2, ...props }) => {
     const tabWidth = constants.ScreenWidth * 0.125
 
     const Tab = ({ label, icon, active, onPress }) => {
-        const backgroundColor = active ? theme.colors.white : theme.colors.gray_light
+        const backgroundColor = active ? theme.colors.white : theme.colors.tabs
         const textColor = active ? theme.colors.secondary : theme.colors.gray_dark
         const tabStyle = { flexDirection: 'row', padding: theme.padding, width: constants.ScreenWidth * 0.45, justifyContent: 'center', backgroundColor: backgroundColor, borderRadius: 10 }
 
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         paddingVertical: 15,
-        backgroundColor: theme.colors.gray_light
+        backgroundColor: theme.colors.tabs
     },
     stateStyle: {
         //elevation: 3,

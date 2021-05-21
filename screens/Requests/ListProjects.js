@@ -7,7 +7,7 @@ class ListProjects extends Component {
         return (
             <ListRequests
                 searchInput={this.props.searchInput}
-                requestType='projet'
+                requestType='project'
                 creationScreen='CreateProjectReq'
                 offLine={this.props.offLine}
                 permissions={this.props.permissions} 

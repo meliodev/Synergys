@@ -21,7 +21,7 @@ const menuPrivilleges = {
     com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'news', 'logout'],
     tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'news', 'logout'],
     poseur: ['home', 'inbox', 'projects', 'planning', 'requests', 'news', 'logout'],
-    client: ['home', 'inbox', 'projects', 'requests', 'documents', 'news', 'logout']
+    client: ['projects', 'inbox', 'requests', 'documents', 'news', 'logout']
 }
 
 const menuItems = [
@@ -81,7 +81,7 @@ class DrawerMenu extends React.Component {
         const showChatIcon = role !== "Client" && role !== ""
 
         return (
-            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile')}>
+            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isRoot: true })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
                     <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>
@@ -93,7 +93,7 @@ class DrawerMenu extends React.Component {
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                         <CustomIcon icon={faCog} color={theme.colors.gray_dark} />
-                        {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.secondary} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
+                        {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.gray_dark} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
                     </View>
                 </View>
             </TouchableOpacity>
@@ -167,7 +167,7 @@ class DrawerMenu extends React.Component {
                 </View>
 
                 <View style={[styles.footerContainer, { bottom: 5 }]}>
-                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.1.85</Text>
+                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.1.93</Text>
                 </View>
             </SafeAreaView>
         )

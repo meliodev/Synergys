@@ -39,9 +39,7 @@ const SearchBar = ({
         <appbar.Header style={[{ backgroundColor: theme.colors.appBar, elevation: 0 }, style]}>
 
             {renderLeftIcon()}
-
             {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]} />}
-
             {showBar &&
                 <Searchbar
                     placeholder={placeholder}

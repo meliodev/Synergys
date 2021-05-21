@@ -125,7 +125,6 @@ class Agenda2 extends Component {
         const roleId = this.props.role.id
         const { isAgenda } = this.state
         const { currentUser } = firebase.auth()
-
         let query = null
 
         //AGENDA (static)
@@ -164,20 +163,17 @@ class Agenda2 extends Component {
                     if (tasksSnapshot === null || tasksSnapshot.empty) return
 
                     for (const taskDoc of tasksSnapshot.docs) { //#task: Initialize with empty array
-
                         const task = taskDoc.data()
                         const date = task.date //exp: 2021-01-07
-
                         if (!items[date])
                             items[date] = []
-
                         const startDate = moment(task.startDate).format('YYYY-MM-DD')
                         const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
 
                         items[date].push({
                             id: taskDoc.id,
                             name: task.name,
-                            date: date,
+                            date,
                             isAllDay: task.isAllDay,
                             startHour: task.startHour,
                             dueHour: task.dueHour,
@@ -188,28 +184,22 @@ class Agenda2 extends Component {
                             assignedTo: task.assignedTo,
                             color: task.color,
                         })
-
                     }
                 })
-
                 this.setState({ items }, () => {
                     const taskItems = this.setTaskItems()
                     this.setState({ taskItems, refreshing: false }, () => this.handleFilter(false))
                 })
-
             }
-
         }, 1000)
     }
 
     renderTaskStatusController(item) {
         const { id, date, status } = item
-
         const changeStatus = (status) => {
             db.collection('Agenda').doc(id).update({ status })
             this.refreshItems(true)
         }
-
         let iconObject = null
 
         switch (status) {
@@ -232,7 +222,6 @@ class Agenda2 extends Component {
             default:
                 return null
         }
-
         return (
             <CustomIcon
                 icon={iconObject.icon}
@@ -245,7 +234,6 @@ class Agenda2 extends Component {
 
     handleFilter(toggle) {
         if (toggle) toggleFilter(this)
-
         const { items, taskItems, type, status, priority, assignedTo, project, filterOpened } = this.state
         const fields = [
             { label: 'type', value: type },
@@ -254,7 +242,6 @@ class Agenda2 extends Component {
             { label: 'project.id', value: project.id },
             { label: 'assignedTo.id', value: assignedTo.id }
         ]
-
         let filteredItems = {}
         filteredItems = applyFilterAgenda(items, filteredItems, fields, KEYS_TO_FILTERS)
         this.setState({ filteredItems })
@@ -301,17 +288,13 @@ class Agenda2 extends Component {
         this.setState({ selectedDay })
     }
 
-
     renderDay(dateObject, item) {
-
         if (dateObject) {
             const date = moment(dateObject.dateString, 'YYYY-MM-DD').format()
             const dayNum = moment(date).format('D')
             let dayName = moment(date).format('ddd').toUpperCase()
             dayName = dayName.slice(0, -1)
-
             const today = moment(date).isSame(moment().format()) ? { color: theme.colors.primary } : undefined;
-
             return (
                 <View style={styles.day}>
                     <Text allowFontScaling={false} style={[styles.dayNum, today]}>{dayNum}</Text>
@@ -319,7 +302,6 @@ class Agenda2 extends Component {
                 </View>
             )
         }
-
         else {
             return (
                 <View style={styles.day}>
@@ -331,17 +313,28 @@ class Agenda2 extends Component {
     }
 
     renderItem(item) {
-
         const onPressItem = () => {
-            this.props.navigation.navigate('CreateTask', { prevScreen: 'Agenda', onGoBack: this.refreshItems, TaskId: item.id })
+            const navParams = { prevScreen: 'Agenda', onGoBack: this.refreshItems, TaskId: item.id }
+            this.props.navigation.navigate('CreateTask', navParams)
         }
-
-        return <TaskItem task={item} onPress={onPressItem} style={{ width: constants.ScreenWidth * 0.8 }} />
+        return (
+            <TaskItem
+                task={item}
+                onPress={onPressItem}
+                style={{ width: constants.ScreenWidth * 0.8 }}
+            />
+        )
     }
 
     renderEmptyData() {
         const { isConnected } = this.props.network
-        return (<ActivityIndicator size='large' color={theme.colors.primary} style={{ marginTop: constants.ScreenHeight * 0.3 }} />)
+        return (
+            <ActivityIndicator
+                size='large'
+                color={theme.colors.primary}
+                style={{ marginTop: constants.ScreenHeight * 0.3 }}
+            />
+        )
     }
 
     renderEmptyDate() {
@@ -352,19 +345,20 @@ class Agenda2 extends Component {
         )
     }
 
-    render() {
+    rowHasChanged(r1, r2) {
+        return r1.status !== r2.status
+    }
 
+    render() {
         const roleId = this.props.role.id
         const { canCreate } = this.props.permissions.tasks
-
-        let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state //items and filter fields
+        let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state
         const filterActivated = !_.isEqual(items, filteredItems)
         const isHighrole = highRoles.includes(this.props.role.id)
 
         return (
             <View style={{ flex: 1 }}>
-
-                { isHighrole ?
+                {isHighrole ?
                     <PickerBar
                         main={this}
                         menu={this.isRoot}
@@ -400,7 +394,7 @@ class Agenda2 extends Component {
                         renderEmptyDate={this.renderEmptyDate.bind(this)}
                         rowHasChanged={this.rowHasChanged.bind(this)}
                         displayLoadingIndicator={true}
-                        // style= {{paddingBottom: 65}}
+                        style={{ backgroundColor: theme.colors.white }}
                         //onRefresh={() => this.refreshItems(true)} <-- #bug: this line disables zIndex which is used to put background below flatlist items (issue is followed up on react-native github repository)
                         theme={{
                             dotColor: theme.colors.agendaLight,
@@ -410,7 +404,7 @@ class Agenda2 extends Component {
                             agendaDayNumColor: theme.colors.agendaLight,
                             agendaTodayColor: theme.colors.primary,
                             textDayFontFamily: '-Regular',
-                            //backgroundColor: '#F1F1F8',
+                            // backgroundColor: 'green',
                             'stylesheet.agenda.list': {
                                 container: {
                                     flexDirection: 'row',
@@ -431,7 +425,7 @@ class Agenda2 extends Component {
                             'stylesheet.agenda.main': {
                                 reservations: {
                                     flex: 1,
-                                    marginTop: 124,
+                                    marginTop: 110,
                                 },
                             }
                         }}
@@ -441,10 +435,6 @@ class Agenda2 extends Component {
                 {canCreate && this.isRoot && <MyFAB onPress={() => this.props.navigation.navigate('CreateTask', { prevScreen: 'Agenda', onGoBack: this.refreshItems })} />}
             </View>
         )
-    }
-
-    rowHasChanged(r1, r2) {
-        return r1.status !== r2.status
     }
 }
 

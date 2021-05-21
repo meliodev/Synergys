@@ -20,9 +20,8 @@ export default class Progression extends Component {
     return (
       <View style={styles.container} >
         <Appbar back title titleText='Progression' />
-
         <ProcessAction
-          initialProcess={this.process}
+          process={this.process}
           project={this.project}
           clientId={this.clientId}
           step={this.step}

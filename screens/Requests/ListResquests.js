@@ -37,9 +37,6 @@ class ListRequests extends Component {
         const { currentUser } = firebase.auth()
         const isClient = (role === 'client')
 
-        // if (isClient)
-        //     var query = db.collection('Requests').where('client.id', '==', "GS-US-POqM").where('type', '==', this.props.requestType).orderBy('createdAt', 'DESC')
-
         const { queryFilters } = this.props.permissions
         if (queryFilters === []) this.setState({ requestsList: [], requestsCount: 0 })
         else {

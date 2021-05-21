@@ -82,7 +82,6 @@ class ListProjects extends Component {
 
 
     async componentDidMount() {
-        console.log(this.props.currentUser)
         Keyboard.dismiss()
         requestWESPermission()
         requestRESPermission()
@@ -204,14 +203,10 @@ class ListProjects extends Component {
 
         const fields = [{ label: 'step', value: step }, { label: 'state', value: state }, { label: 'client.id', value: client.id }]
         this.filteredProjects = handleFilter(projectsList, this.filteredProjects, fields, searchInput, KEYS_TO_FILTERS)
-
         const filterCount = this.filteredProjects.length
-
         const filterActivated = filterCount < projectsCount
-
         const s = filterCount > 1 ? 's' : ''
         const isList = view === 'list'
-
 
         return (
             <View style={{ flex: 1 }}>

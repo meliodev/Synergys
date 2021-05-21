@@ -24,18 +24,17 @@ export default class TabView extends React.Component {
       }
     }
 
-
     return (
       <Tabview
         renderScene={renderScene}
         initialLayout={initialLayout}
         renderTabBar={props => <TabBar {...props}
-          indicatorStyle={{ backgroundColor: theme.colors.gray_light }}
-          style={{ backgroundColor: theme.colors.gray_light, paddingVertical: 10, paddingHorizontal: 5 }}
+          indicatorStyle={{ backgroundColor: theme.colors.tabs }}
+          style={{ backgroundColor: theme.colors.tabs, paddingVertical: 10, paddingHorizontal: 5 }}
           renderLabel={({ route, focused, color }) => {
 
             const isFirstRoute = route.key === 'first'
-            const backgroundColor = focused ? theme.colors.white : theme.colors.gray_light
+            const backgroundColor = focused ? theme.colors.white : theme.colors.tabs
             const textColor = focused ? theme.colors.secondary : theme.colors.gray_dark
 
             let titleLowerCase = route.title.toLowerCase()

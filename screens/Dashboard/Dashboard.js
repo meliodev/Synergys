@@ -4,6 +4,7 @@ import { Appbar, CustomIcon, NewBackground, EmptyList } from '../../components'
 import { constants } from '../../core/constants';
 import { faAnalytics, faArrowAltToRight, faBell, faTasks } from '@fortawesome/pro-duotone-svg-icons'
 import _ from 'lodash'
+import { connect } from 'react-redux'
 
 import * as theme from '../../core/theme'
 
@@ -44,12 +45,14 @@ const menuItems = [
     },
 ]
 
-export default class Dashboard extends Component {
+class Dashboard extends Component {
     constructor(props) {
         super(props)
         this.state = {
             content: 'analytics'
         }
+        if (props.role.id === 'client')
+            props.navigation.navigate('ListProjects')
     }
 
     renderMenuItem(item, index) {
@@ -120,6 +123,15 @@ export default class Dashboard extends Component {
     }
 }
 
+const mapStateToProps = (state) => {
+    return {
+        role: state.roles.role,
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(Dashboard)
+
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
@@ -146,8 +158,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         // backgroundColor: 'pink',
-        padding: theme.padding,
-        paddingTop: theme.padding * 1.25
+        paddingHorizontal: theme.padding,
+        paddingTop: theme.padding
     }
 })
 

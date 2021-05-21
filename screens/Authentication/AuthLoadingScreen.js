@@ -107,7 +107,6 @@ class AuthLoadingScreen extends Component {
 
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
-
         const { currentUser } = firebase.auth()
         const { isConnected } = this.props.network
 
@@ -161,7 +160,7 @@ class AuthLoadingScreen extends Component {
         }
 
         else {
-          var routeName = "App"
+          var routeName = roleValue !== 'Client' ? "App" : "ProjectsStack"
           var routeParams = {}
         }
       }

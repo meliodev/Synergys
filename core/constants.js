@@ -14,7 +14,8 @@ export const roles = [
     { id: 'dircom', label: 'Directeur commercial', value: 'Directeur commercial', bool: 'isDirCom', level: 2 },
     { id: 'com', label: 'Commercial', value: 'Commercial', bool: 'isCom', level: 1 },
     { id: 'tech', label: 'Responsable technique', value: 'Responsable technique', bool: 'isTech', level: 1 },
-    { id: 'poseur', label: 'Poseur', value: 'Poseur', bool: 'isPoseur', level: 0 }
+    { id: 'poseur', label: 'Poseur', value: 'Poseur', bool: 'isPoseur', level: 0 },
+    { id: 'client', label: 'Client', value: 'Client', bool: 'isClient', level: -1 }
 ]
 
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']

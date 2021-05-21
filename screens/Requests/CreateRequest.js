@@ -27,7 +27,7 @@ import Loading from "../../components/Loading";
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, refreshProject, refreshAddress, setAddress, removeDuplicateObjects, formatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, refreshProject, refreshAddress, setAddress, removeDuplicateObjects, formatDocument, unformatDocument } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -41,7 +41,7 @@ const departments = [
     { label: 'Conseil technique', value: 'Conseil technique' },
     { label: 'Incident', value: 'Incident' },
 ]
-const properties = ["project", "department", "subject", "state", "description", "address", "selectedProducts", "chatId", "createdAt", "createdBy", "editedAt", "editedBy"]
+const properties = ["project", "client", "department", "subject", "state", "description", "address", "selectedProducts", "chatId", "createdAt", "createdBy", "editedAt", "editedBy"]
 
 class CreateRequest extends Component {
     constructor(props) {
@@ -62,7 +62,7 @@ class CreateRequest extends Component {
         this.initialState = {}
         this.isInit = true
         this.requestType = this.props.requestType
-        this.isTicket = this.requestType === 'ticket' ? true : false
+        this.isTicket = this.requestType === 'ticket'
 
         this.RequestId = this.props.navigation.getParam('RequestId', '')
         this.isEdit = this.RequestId !== ''
@@ -72,6 +72,7 @@ class CreateRequest extends Component {
 
         this.state = {
             project: { id: '', name: '' },
+            client: this.autoFillClient(),
             projectError: '',
             department: 'Commercial', //ticket
             address: { description: '', place_id: '' }, //project
@@ -98,6 +99,14 @@ class CreateRequest extends Component {
             toastMessage: '',
             toastType: ''
         }
+    }
+
+    autoFillClient() {
+        let client = { id: '', fullName: '' }
+        if (this.props.role.id === "client") {
+            client = this.props.currentUser
+        }
+        return client
     }
 
     //GET
@@ -145,7 +154,7 @@ class CreateRequest extends Component {
     validateInputs() {
         let { project, subject } = this.state
         const subjectError = nameValidator(subject, '"Sujet"')
-        const projectError = nameValidator(project.id, '"Projet"')
+        const projectError = this.isTicket ? nameValidator(project.id, '"Projet"') : ""
         //let addressError = nameValidator(address.description, '"Adresse postale"')
         if (projectError || subjectError) {
             this.setState({ subjectError, projectError, loading: false })
@@ -198,28 +207,16 @@ class CreateRequest extends Component {
         const isValid = this.validateInputs()
         if (!isValid) return
 
-        let properties = ["subject", "description", "state", "selectedProducts"]
-        if (this.isTicket) properties = [...properties, ...["project", "department"]]
-        else properties = [...properties, ...["address"]]
-        let request = this.unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
+        let props = ["client", "subject", "description", "state", "selectedProducts"]
+        if (this.isTicket) props = [...props, ...["project", "department"]]
+        else props = [...props, ...["address"]]
+        let request = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         request.type = this.isTicket ? 'ticket' : 'project'
 
         this.AddRequestAndChatRoom(request, this.isEdit)
 
         load(this, false)
         this.props.navigation.goBack()
-    }
-
-    unformatDocument(thisState, properties, currentUser, isEdit) {
-        let request = _.pick(thisState, properties)
-        request.editedAt = moment().format()
-        request.editedBy = currentUser
-        request.deleted = false
-        if (!isEdit) {
-            request.createdAt = moment().format()
-            request.createdBy = currentUser
-        }
-        return request
     }
 
     renderStateToggle(currentState, canWrite) {
@@ -243,7 +240,7 @@ class CreateRequest extends Component {
     async onPressProjectCallBack(projectObject) {
         const { id, name, client, step, address, comContact, techContact, intervenant, bill } = projectObject
         const project = { id, name, client, step, address, comContact, techContact, intervenant }
-        this.setState({ project })
+        this.setState({ project, client })
         const isClientCharged = bill.amount !== ''
         if (isClientCharged) await this.setProducts(project.id)
         else this.setState({ productsFetched: true })
@@ -403,7 +400,7 @@ class CreateRequest extends Component {
     }
 
     render() {
-        const { project, department, subject, state, description, address } = this.state
+        const { project, client, department, subject, state, description, address } = this.state
         const { createdAt, createdBy, editedAt, editedBy, loading, docNotFound, toastMessage, toastType, subjectError, projectError, addressError } = this.state
         const { requestType } = this.props
 
@@ -414,7 +411,7 @@ class CreateRequest extends Component {
 
         const title = ' Demande de ' + requestType
         const prevScreen = requestType === 'ticket' ? 'CreateTicketReq' : 'CreateProjectReq'
-        const showClient = this.isTicket && !this.isClient && project.client && project.client.id
+        const showClient = !this.isClient && (project.client && project.client.id || !this.isTicket)
 
         if (docNotFound)
             return (
@@ -491,12 +488,12 @@ class CreateRequest extends Component {
                             }
                         />
 
-                        <FormSection
-                            sectionTitle='Références'
-                            sectionIcon={faRetweet}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    {this.isTicket &&
+                        {this.isTicket &&
+                            <FormSection
+                                sectionTitle='Références'
+                                sectionIcon={faRetweet}
+                                form={
+                                    <View style={{ flex: 1 }}>
                                         <ItemPicker
                                             onPress={() => {
                                                 if (this.project || this.isEdit) return //pre-defined project
@@ -509,24 +506,24 @@ class CreateRequest extends Component {
                                             showAvatarText={false}
                                             editable={canWrite}
                                         />
-                                    }
 
-                                    {showClient &&
-                                        <ItemPicker
-                                            onPress={() => console.log('No action...')}
-                                            label="Client *"
-                                            value={project.client.fullName}
-                                            // error={!!clientError}
-                                            // errorText={clientError}
-                                            editable={false}
-                                        />
-                                    }
+                                        {showClient &&
+                                            <ItemPicker
+                                                onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateRequest', isRoot: false })}
+                                                label="Client *"
+                                                value={client.fullName}
+                                                error={!!client.error}
+                                                errorText={client.error}
+                                                editable={!this.isTicket}
+                                            />
+                                        }
 
-                                    {this.renderProducts()}
-                                    {this.renderProductsModal(isConnected)}
-                                </View>
-                            }
-                        />
+                                        {this.renderProducts()}
+                                        {this.renderProductsModal(isConnected)}
+                                    </View>
+                                }
+                            />
+                        }
 
                         {this.isEdit &&
                             <ActivitySection
@@ -584,15 +581,15 @@ const styles = StyleSheet.create({
     productsListContainer: {
         flex: 1,
         backgroundColor: theme.colors.white,
-        borderRadius: 20,
+        borderRadius: 8,
         marginTop: 15,
         elevation: 3,
     },
     productsListHeader: {
         flexDirection: 'row',
         padding: theme.padding,
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
         justifyContent: 'space-between',
         backgroundColor: '#EAF7F1'
     },
@@ -628,7 +625,7 @@ const modalStyles = StyleSheet.create({
         alignSelf: 'center',
         textAlignVertical: 'top',
         backgroundColor: '#ffffff',
-        borderRadius: 5,
+        borderRadius: 8,
         paddingTop: 15,
         paddingHorizontal: 10,
         shadowColor: "#000",

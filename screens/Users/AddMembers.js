@@ -67,12 +67,10 @@ export default class AddMembers extends Component {
     }
 
     getFreeUsers() {
-        console.log('Getting free users...')
         const query = db.collection('Users').where('hasTeam', '==', false).where('deleted', '==', false)
         this.unsubscribe = query.onSnapshot((querysnapshot) => {
             let members = []
             let membersCount = 0
-
             querysnapshot.forEach((doc) => {
                 let user = {}
                 user.isPro = doc.data().isPro
@@ -82,11 +80,9 @@ export default class AddMembers extends Component {
                 user.denom = doc.data().denom
                 user.id = doc.id
                 user.checked = false
-
                 members.push(user)
                 membersCount = membersCount + 1
             })
-
             this.setState({ members, membersCount, loading: false })
         })
     }
@@ -103,6 +99,7 @@ export default class AddMembers extends Component {
             <UserItem
                 item={member}
                 onPress={check.bind(this, key)}
+                userType= 'utilisateur'
                 controller={
                     <Checkbox
                         status={members[key].checked ? 'checked' : 'unchecked'}

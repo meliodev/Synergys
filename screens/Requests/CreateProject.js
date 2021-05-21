@@ -4,7 +4,7 @@ import CreateRequest from './CreateRequest'
 class CreateProject extends Component {
 
     render() {
-        return <CreateRequest requestType='projet' navigation={this.props.navigation} />
+        return <CreateRequest requestType='project' navigation={this.props.navigation} />
     }
 }
 

@@ -20,19 +20,7 @@ class ProcessContainer extends Component {
     }
   }
 
-  // componentDidMount() {
-  //   //fill empty phases
-  //   for (const phaseId in this.processModel) {
-  //     if (!process[phaseId] && phaseId !== 'cancelProject' && phaseId !== 'endProject') {
-  //       let phase = _.cloneDeep(this.processModel[phaseId])
-  //       delete phase.steps
-  //       process[phaseId] = phase
-  //     }
-  //   }
-  // }
-
   render() {
-
     const { phaseLabels, phaseStatuses, stepsData } = this.props
     let { canUpdate } = this.props
     const { currentPage } = this.state
@@ -66,7 +54,6 @@ class ProcessContainer extends Component {
                     children={
                       <View style={{ marginLeft: constants.ScreenWidth * 0.035, paddingBottom: 15, borderLeftWidth: index !== stepsData[currentPage].length - 1 ? 2 : 0, borderLeftColor: theme.colors.gray_light }}>
                         {item.actions.map((action, index) => {
-                          console.log(action.id, action.startAt, action.doneAt)
                           const isFirstAction = index === 0
                           const isPreviousActionDone = index > 0 && item.actions[index - 1].status === 'done'
                           const isActionPending = action.status === 'pending'

@@ -15,7 +15,6 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
 
     return (
         <TouchableOpacity onPress={onPress} style={[styles.container, containerStyle]}>
-
             <View style={{ flex: 0.9, flexDirection: 'row', alignItems: 'center' }}>
                 <View style={{ flex: 0.17, justifyContent: 'center', alignItems: 'center' }}>
                     <MaterialCommunityIcons name={name} size={24} color={color} />
@@ -24,11 +23,11 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
                 <View style={{ flex: showRightIcon ? 0.68 : 0.83, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
                     <View>
                         <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{attachment.name}</Text>
-                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
+                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.gray_dark }]}>{readableSize} KB</Text>
                     </View>
 
                     {pending &&
-                        <View style={{ paddingRight: 15, }}>
+                        <View style={{ paddingRight: 15 }}>
                             <MaterialCommunityIcons name='clock' size={18} color={'#000'} />
                         </View>
                     }
@@ -42,7 +41,6 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
                     <ProgressBar progress={attachment.progress} color={theme.colors.primary} visible={true} />
                 </View>
             }
-
         </TouchableOpacity>
     )
 }
@@ -50,12 +48,12 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
 const styles = StyleSheet.create({
     container: {
         elevation: 1,
-        backgroundColor: theme.colors.gray50,
+        backgroundColor: theme.colors.attachment,
         width: '100%',
-        height: 60,
+        height: 64,
         alignSelf: 'center',
-        borderRadius: 5,
-        marginVertical: 10
+        borderRadius: 8,
+        marginVertical: 8
     },
 })
 

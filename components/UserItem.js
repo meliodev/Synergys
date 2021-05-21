@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         height: 70,
-        backgroundColor: '#F5F5F5',
+        backgroundColor: theme.colors.section,
         borderRadius: 20,
         marginVertical: 5
     },

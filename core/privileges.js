@@ -25,13 +25,6 @@ export const configureQuery = (collection, queryFilters, params) => {
                 query = query.orderBy(field, sort)
             }
         })
-
-
-        // if (params.role) console.log(`Query filters of role "${params.role}" for collection "${collection}"`)
-        // else console.log(`Query filters for collection: ${collection}`)
-        // queryFilters.forEach((item) => {
-        //     console.log(item)
-        // })
     }
 
     return query

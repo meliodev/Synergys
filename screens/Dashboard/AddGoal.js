@@ -14,7 +14,7 @@ import MyInput from '../../components/TextInput'
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator, formatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator, formatDocument, unformatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs, fetchDocument, getResponsableByRole } from "../../api/firestore-api";
@@ -109,19 +109,6 @@ class AddGoal extends Component {
         return true
     }
 
-    //
-    unformatDocument(thisState, properties, currentUser, isEdit) {
-        let goal = _.pick(thisState, properties)
-        goal.editedAt = moment().format()
-        goal.editedBy = currentUser
-        goal.deleted = false
-        if (!isEdit) {
-            goal.createdAt = moment().format()
-            goal.createdBy = currentUser
-        }
-        return goal
-    }
-
     //##POST
     async handleSubmit() {
         const { isConnected } = this.props.network
@@ -138,7 +125,7 @@ class AddGoal extends Component {
         const { monthYear, GoalId } = this.state
         const formatedMonthYear = moment(monthYear).format('MM-YYYY')
         const props = ["target", "description"]
-        let monthlyGoal = this.unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
+        let monthlyGoal = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         monthlyGoal.monthYear = formatedMonthYear
         monthlyGoal.lastMonthEdited = formatedMonthYear
         let payload = {}
@@ -364,15 +351,15 @@ const styles = StyleSheet.create({
     incSourcesContainer: {
         flex: 1,
         backgroundColor: theme.colors.white,
-        borderRadius: 25,
+        borderRadius: 8,
         elevation: 3,
         marginTop: 12
     },
     incSourcesHeader: {
         flexDirection: 'row',
         padding: theme.padding,
-        borderTopLeftRadius: 25,
-        borderTopRightRadius: 25,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
         justifyContent: 'space-between',
         backgroundColor: '#EAF7F1'
     },

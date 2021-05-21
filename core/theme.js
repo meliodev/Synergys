@@ -2,13 +2,20 @@
 import { DefaultTheme } from 'react-native-paper'
 import { constants } from './constants'
 
+const baseColors = {
+  gray1: "#F1F2F7"
+}
+
 const colors = {
   statusbar: "#013220",
   background: '#ffffff', //new
   primary: "#25D366", //new
   secondary: "#1B2331",
   surface: '#F5F5F5',
-  appBar: '#F8F8F9',
+  appBar: '#FFFFFF',
+  section: baseColors.gray1,
+  tabs: baseColors.gray1,
+  attachment: baseColors.gray1,
   appBarIcon: "#1B2331",
   //tertiary: "#4CAF50",
   //tertiary: "#7ab600",

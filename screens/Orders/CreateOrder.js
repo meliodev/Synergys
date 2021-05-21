@@ -24,7 +24,7 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import firebase, { db, auth } from '../../firebase'
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject, formatDocument } from "../../core/utils"
+import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject, formatDocument, unformatDocument } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'
@@ -181,19 +181,6 @@ class CreateOrder extends Component {
         return true
     }
 
-    //UNFORMAT
-    unformatDocument(thisState, properties, currentUser, isEdit) {
-        let order = _.pick(thisState, properties)
-        order.editedAt = moment().format()
-        order.editedBy = currentUser
-        order.deleted = false
-        if (!isEdit) {
-            order.createdAt = moment().format()
-            order.createdBy = currentUser
-        }
-        return order
-    }
-
     //POST
     async handleSubmit() {
         const { isConnected } = this.props.network
@@ -219,7 +206,7 @@ class CreateOrder extends Component {
         }
 
         const properties = ["project", "state", "orderLines", "subTotal", "taxes", "primeCEE", "primeRenov", "total"]
-        const order = this.unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
+        const order = unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
         
         db.collection('Orders').doc(this.OrderId).set(order, { merge: true })
 

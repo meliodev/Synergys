@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         flex: 1,
-        paddingBottom: 25,
+        paddingBottom: 16,
         paddingHorizontal: theme.padding,
     }
 })

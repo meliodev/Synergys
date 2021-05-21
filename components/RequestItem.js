@@ -24,7 +24,7 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
     let nextScreen = ''
     let params = {}
 
-    if (requestType === 'projet') {
+    if (requestType === 'project') {
         nextScreen = 'CreateProjectReq'
         params = { RequestId: request.id }
     }
