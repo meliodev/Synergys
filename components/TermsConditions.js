@@ -27,7 +27,7 @@ export default class TermsConditions extends Component {
                 isVisible={this.props.showTerms}
                 style={{ maxHeight: constants.ScreenHeight * 0.8, backgroundColor: '#fff', }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }} onPress={this.props.dowloadPdf}>
+                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }} onPress={this.props.downloadPdf}>
                         <MaterialCommunityIcons name='download' size={24} color={theme.colors.primary} style={{ padding: 15 }} />
                         <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary }]}>Télécharger</Text>
                     </TouchableOpacity>

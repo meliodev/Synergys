@@ -22,9 +22,9 @@ import Loading from './Loading'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, getLatestProcessModel, checkForcedValidations } from '../core/process'
 import { enableProcessAction, checkTechContact } from '../core/privileges'
-import { configChoiceIcon, countDown, load } from '../core/utils'
+import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
-import { constants } from "../core/constants"
+import { constants, errorMessages } from "../core/constants"
 import ProcessContainer from "../screens/src/container/ProcessContainer"
 
 //component
@@ -32,8 +32,6 @@ class ProcessAction extends Component {
 
     constructor(props) {
         super(props)
-
-        this.refresh = this.refresh.bind(this)
         this.mainHandler = this.mainHandler.bind(this)
         this.runProcessHandler = this.runProcessHandler.bind(this)
         this.updateProcess = this.updateProcess.bind(this)
@@ -45,8 +43,7 @@ class ProcessAction extends Component {
         this.initialLoadingMessage = "Chargement de l'action..."
 
         this.state = {
-
-            process: {},
+            process: this.props.process,
             choice: null,
             nextStep: '',
             nextPhase: '',
@@ -73,6 +70,8 @@ class ProcessAction extends Component {
             loading: true,
             loadingMessage: this.initialLoadingMessage
         }
+
+        this.processModel = this.setProcessModel(this.props.process)
     }
 
     setProcessModel(process) {
@@ -83,40 +82,42 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
-        await this.refresh()
+        await this.mainHandler()
+            .catch((e) => displayError({ message: e.message }))
     }
 
-    async refresh() {
-        const { process } = this.props
-        this.processModel = this.setProcessModel(process)
-        await this.mainHandler(process)
-    }
-
-    async updateProcess(updatedProcess) {
-        await db
-            .collection('Projects')
-            .doc(this.props.project.id)
-            .update({ process: updatedProcess })
-    }
-
-    async mainHandler(process) {
-        load(this, true)
-        const { isAllProcess } = this.props
-        const updatedProcess = await this.runProcessHandler(process)
-        await this.updateProcess(updatedProcess)
-        this.refreshProcess(updatedProcess)
-        if (isAllProcess) {
-            this.refreshProcessHistory(updatedProcess)
+    async mainHandler() {
+        try {
+            load(this, true)
+            const { process } = this.state
+            const { isAllProcess } = this.props
+            const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
+            await this.updateProcess(updatedProcess)
+            this.refreshProcess(updatedProcess)
+            if (isAllProcess) {
+                this.refreshProcessHistory(updatedProcess)
+            }
+            load(this, false)
         }
-        load(this, false)
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     async runProcessHandler(process) {
         const { project, clientId, step } = this.props
         const secondPhaseId = getPhaseId(step)
-        const copyProcessModel = _.cloneDeep(this.processModel)
-        var updatedProcess = await processHandler(copyProcessModel, process, secondPhaseId, clientId, project)
+        const processModel = _.cloneDeep(this.processModel)
+        var updatedProcess = await processHandler(processModel, process, secondPhaseId, clientId, project)
         return updatedProcess
+    }
+
+    updateProcess(updatedProcess) {
+        return db
+            .collection('Projects')
+            .doc(this.props.project.id)
+            .update({ process: updatedProcess })
+            .catch((e) => { throw new Error(errorMessages.firestore.update) })
     }
 
     //3. Refresh latest process locally
@@ -137,9 +138,7 @@ class ProcessAction extends Component {
 
     //3. Refresh Process History locally
     refreshProcessHistory(process) {
-
         delete process.version
-
         let phaseLabels = []
         let phaseStatuses = []
         let steps = []
@@ -189,174 +188,193 @@ class ProcessAction extends Component {
 
     //func1
     onPressAction = async (canUpdate, currentAction) => {
-        if (!canUpdate) return
 
-        const loadingMessage = "Traitement en cours..."
-        this.setState({ loading: true, loadingMessage, pressedAction: currentAction })
-        await countDown(500)
-        const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
+        try {
+            if (!canUpdate) return
+            const loadingMessage = "Traitement en cours..."
+            this.setState({ loading: true, loadingMessage, pressedAction: currentAction })
+            await countDown(500) //#task: why this ???
+            const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
 
-        const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
-        const { process, currentPhase } = this.state
-        const currentUserId = auth.currentUser.uid
-        const currentUserRole = this.props.role.value
+            const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
+            const { process, currentPhase } = this.state
 
-        const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
-        if (!enableAction) {
-            disableLoading()
-            Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
-            return
-        }
-
-        if (type === 'auto') {
-            disableLoading()
-
-            //Modal
-            if (currentAction.choices) {
-                this.setState({ showModal: true })
+            const currentUserId = auth.currentUser.uid
+            const currentUserRole = this.props.role.value
+            const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
+            if (!enableAction) {
+                disableLoading()
+                Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+                return
             }
 
-            //Navigation
-            else {
-                if (screenParams) {
-                    screenParams.isProcess = true
-                    screenParams.onGoBack = () => this.mainHandler(process)
+            if (type === 'auto') {
+                disableLoading()
+
+                //Modal
+                if (currentAction.choices) {
+                    this.setState({ showModal: true })
                 }
-                this.props.navigation.navigate(screenName, screenParams)
+
+                //Navigation
+                else {
+                    if (screenParams) {
+                        screenParams.isProcess = true
+                        screenParams.onGoBack = () => this.mainHandler(process)
+                    }
+                    this.props.navigation.navigate(screenName, screenParams)
+                }
+            }
+
+            else if (type === 'manual') {
+                //Dialog
+                if (verificationType === 'comment') {
+                    this.setNextStepOrPhase(nextStep, nextPhase) //To use later it onSubmit comment
+                    const dialogTitle = formSettings && formSettings.label || 'Commentaire'
+                    const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
+                    disableLoading()
+                    this.setState({ dialogTitle, dialogDescription, showDialog: true })
+                }
+                //Modal
+                else if (verificationType === 'multiple-choices') {
+                    disableLoading()
+                    this.setState({ showModal: true })
+                }
+                //Direct
+                else if (verificationType === 'validation') {
+                    await this.validateAction(null, null, false, nextStep, nextPhase)
+                    disableLoading()
+                }
+                else if (verificationType === 'phaseRollback') {
+                    await this.runOperation(currentAction.operation, currentAction) //Exp: update project status back to 'En cours'
+                    await this.phaseRollback()
+                    disableLoading()
+                }
             }
         }
 
-        else if (type === 'manual') {
-            //Dialog
-            if (verificationType === 'comment') {
-                this.setNextStepOrPhase(nextStep, nextPhase) //To use later it onSubmit comment
-                const dialogTitle = formSettings && formSettings.label || 'Commentaire'
-                const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
-                disableLoading()
-                this.setState({ dialogTitle, dialogDescription, showDialog: true })
-            }
-
-            //Modal
-            else if (verificationType === 'multiple-choices') {
-                disableLoading()
-                this.setState({ showModal: true })
-            }
-
-            //Direct
-            else if (verificationType === 'validation') {
-                await this.validateAction(null, null, false, nextStep, nextPhase)
-                disableLoading()
-            }
-
-            else if (verificationType === 'phaseRollback') {
-                await this.runOperation(currentAction.operation, currentAction) //Exp: update project status back to 'En cours'
-                await this.phaseRollback()
-                disableLoading()
-            }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
         }
     }
 
     async phaseRollback() {
-        const { process, currentPhaseId } = this.state
-        let processTemp = _.cloneDeep(process)
-        delete processTemp[currentPhaseId]
-        await this.mainHandler(processTemp)
+        try {
+            const { process, currentPhaseId } = this.state
+            let processTemp = _.cloneDeep(process)
+            delete processTemp[currentPhaseId]
+            await this.mainHandler(processTemp)
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     undoPreviousAction = async () => {
-        const { process, currentPhaseId, currentStepId, pressedAction } = this.state
-
-        const previousActionOrder = pressedAction.actionOrder - 1
-
-        let processTemp = _.cloneDeep(process)
-        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-            if (action.actionOrder === previousActionOrder) {
-                action.status = "pending"
-            }
-        })
-
-        await this.mainHandler(processTemp)
+        try {
+            const { process, currentPhaseId, currentStepId, pressedAction } = this.state
+            const previousActionOrder = pressedAction.actionOrder - 1
+            let processTemp = _.cloneDeep(process)
+            processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+                if (action.actionOrder === previousActionOrder) {
+                    action.status = "pending"
+                }
+            })
+            await this.mainHandler(processTemp)
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     //func2
     onSelectChoice = async (choice) => {
+        try {
+            this.setState({ loadingModal: true, choice })  //used in case of comment
+            const { process, pressedAction } = this.state
+            const { screenName, screenParams, choices } = pressedAction
+            const { onSelectType, commentRequired, operation } = choice
+            const { nextStep, nextPhase } = choice
 
-        this.setState({ loadingModal: true, choice })  //used in case of comment
+            //Highlight selected choice
+            if (typeof (choice.selected) === 'boolean') {
+                choices.forEach((item) => {
+                    if (item.label === choice.label) item.selected = true
+                    else item.selected = false
+                })
+            }
 
-        const { process, pressedAction } = this.state
-        const { screenName, screenParams, choices } = pressedAction
-        const { onSelectType, commentRequired, operation } = choice
-        const { nextStep, nextPhase } = choice
+            if (commentRequired) {
+                this.setNextStepOrPhase(nextStep, nextPhase) //used in case of comment
+                const dialogTitle = this.configDialogLabels(choice.id).title
+                const dialogDescription = this.configDialogLabels(choice.id).description
+                this.setState({ dialogTitle, dialogDescription, showModal: false, loadingModal: false, showDialog: true })
+                return
+            }
 
-        //Highlight selected choice
-        if (typeof (choice.selected) === 'boolean') {
-            choices.forEach((item) => {
-                if (item.label === choice.label) item.selected = true
-                else item.selected = false
-            })
-        }
-
-        if (commentRequired) {
-            this.setNextStepOrPhase(nextStep, nextPhase) //used in case of comment
-            const dialogTitle = this.configDialogLabels(choice.id).title
-            const dialogDescription = this.configDialogLabels(choice.id).description
-            this.setState({ dialogTitle, dialogDescription, showModal: false, loadingModal: false, showDialog: true })
-            return
-        }
-
-        else {
-            if (onSelectType === 'navigation') {
-                if (screenParams) {
-                    screenParams.isProcess = true
-                    screenParams.onGoBack = () => this.mainHandler(process)
+            else {
+                if (onSelectType === 'navigation') {
+                    if (screenParams) {
+                        screenParams.isProcess = true
+                        screenParams.onGoBack = () => this.mainHandler(process)
+                    }
+                    this.props.navigation.navigate(screenName, screenParams)
                 }
-                this.props.navigation.navigate(screenName, screenParams)
-            }
 
-            else if (onSelectType === 'actionRollBack') { //roll back to previous action (update its status to "pending")
-                await this.undoPreviousAction()
-            }
+                else if (onSelectType === 'actionRollBack') { //roll back to previous action (update its status to "pending")
+                    await this.undoPreviousAction()
+                }
 
-            else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                await this.runOperation(operation, pressedAction)
-                await this.validateAction(null, null, false, nextStep, nextPhase)
-            }
+                else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
+                    await this.runOperation(operation, pressedAction)
+                    await this.validateAction(null, null, false, nextStep, nextPhase)
+                }
 
-            else if (onSelectType === 'validation') {
-                await this.runOperation(operation, pressedAction)
-                await this.validateAction(null, null, false, null, null, true)
-            }
+                else if (onSelectType === 'validation') {
+                    await this.runOperation(operation, pressedAction)
+                    await this.validateAction(null, null, false, null, null, true)
+                }
 
-            else if (onSelectType === 'commentPicker') {
-                await this.runOperation(operation, pressedAction)
-                await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
-            }
+                else if (onSelectType === 'commentPicker') {
+                    await this.runOperation(operation, pressedAction)
+                    await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
+                }
 
-            this.setState({ loadingModal: false, showModal: false })
+                this.setState({ loadingModal: false, showModal: false })
+            }
         }
-        return
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     //func3
     onSubmitComment = async (comment, clearComment) => {
-        if (!comment) return //show error message
-        this.setState({ loadingDialog: true })
+        try {
+            if (!comment) return //show error message
+            this.setState({ loadingDialog: true })
 
-        const { pressedAction, choice, nextStep, nextPhase } = this.state
-        const operation = choice && choice.operation || pressedAction.operation || null
-        if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
+            const { pressedAction, choice, nextStep, nextPhase } = this.state
+            const operation = choice && choice.operation || pressedAction.operation || null
+            if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
 
-        await this.runOperation(operation, pressedAction)
-        await this.validateAction(comment, null, false, nextStep, nextPhase)
+            await this.runOperation(operation, pressedAction)
+            await this.validateAction(comment, null, false, nextStep, nextPhase)
 
-        this.setState({ loadingDialog: false, showDialog: false })
-        clearComment()
+            this.setState({ loadingDialog: false, showDialog: false })
+            clearComment()
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     //func4
     runOperation = async (operation, action) => {
         if (!operation) return
-
         const { collection, documentId } = action
         const { type, field, value } = operation
 
@@ -369,70 +387,70 @@ class ProcessAction extends Component {
 
     //func5
     validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
-        const { process, currentPhaseId, currentStepId, pressedAction } = this.state
 
-        //Update action fields
-        let processTemp = _.cloneDeep(process)
-        const { actions } = processTemp[currentPhaseId].steps[currentStepId]
+        try {
+            const { process, currentPhaseId, currentStepId, pressedAction } = this.state
 
-        actions.forEach((action) => {
+            //Update action fields
+            let processTemp = _.cloneDeep(process)
+            const { actions } = processTemp[currentPhaseId].steps[currentStepId]
 
-            if (action.id === pressedAction.id) {
-                //Update comment
-                if (comment)
-                    action.comment = comment
-
-                //Update selected choice (selected = true -> Display it green)
-                if (choices)
-                    action.choices = choices
-
-                //Update action status
-                if (!stay && nextPhase !== 'cancelProject') {
-                    action.status = "done"
-                    action.doneAt = moment().format()
-
-                    //set start time of next action
-                    var index = actions.findIndex(action => action.actionOrder === action.actionOrder + 1)
-                    if (index !== -1 && !actions[index].startAt)
-                        actions[index].startAt = moment().format()
+            actions.forEach((action) => {
+                if (action.id === pressedAction.id) {
+                    //Update comment
+                    if (comment)
+                        action.comment = comment
+                    //Update selected choice (selected = true -> Display it green)
+                    if (choices)
+                        action.choices = choices
+                    //Update action status
+                    if (!stay && nextPhase !== 'cancelProject') {
+                        action.status = "done"
+                        action.doneAt = moment().format()
+                        //set start time of next action
+                        var index = actions.findIndex(action => action.actionOrder === action.actionOrder + 1)
+                        if (index !== -1 && !actions[index].startAt)
+                            actions[index].startAt = moment().format()
+                    }
                 }
+            })
+
+            this.setState({
+                currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
+            })
+
+            await countDown(1000)
+
+            if (nextStep || nextPhase) {
+                processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
+                const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
+                processTemp = transitionRes.process
             }
 
-        })
-
-        this.setState({
-            // loadingModal: false,
-            // currentAction: actionTemp, //for check animation
-            currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
-        })
-
-        // console.log('Do animation now !')
-
-        await countDown(1000)
-
-        if (nextStep || nextPhase) {
-            processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
-            const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
-            processTemp = transitionRes.process
+            await this.mainHandler(processTemp)
         }
 
-        await this.mainHandler(processTemp)
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     //func6
     undoPreviousAction = async () => {
-        const { process, currentPhaseId, currentStepId, pressedAction } = this.state
-
-        const previousActionOrder = pressedAction.actionOrder - 1
-
-        let processTemp = _.cloneDeep(process)
-        processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
-            if (action.actionOrder === previousActionOrder) {
-                action.status = "pending"
-            }
-        })
-
-        await this.mainHandler(processTemp)
+        try {
+            const { process, currentPhaseId, currentStepId, pressedAction } = this.state
+            const previousActionOrder = pressedAction.actionOrder - 1
+            let processTemp = _.cloneDeep(process)
+            processTemp[currentPhaseId].steps[currentStepId].actions.forEach((action) => {
+                if (action.actionOrder === previousActionOrder) {
+                    action.status = "pending"
+                }
+            })
+            await this.mainHandler(processTemp)
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     //helper1
@@ -471,11 +489,8 @@ class ProcessAction extends Component {
 
     //renderers
     renderAction = (canUpdate, action) => {
-
         if (!action) return null
-
         const { loading, loadingMessage } = this.state
-
         var { title, status, verificationType, choices } = action
         var isComment = typeof (action.comment) !== 'undefined' && action.comment !== ''
         const isDialog = choices || verificationType === 'comment'
@@ -522,7 +537,6 @@ class ProcessAction extends Component {
                             />
                         </View>
                     }
-
                     {isDialog && this.renderDialog(action.formSettings)}
                 </TouchableOpacity>
             </View>
@@ -548,8 +562,6 @@ class ProcessAction extends Component {
         const { pressedAction, showModal, loadingModal } = this.state
         const { title, choices } = pressedAction
         const elements = choices.map((choice) => configChoiceIcon(choice)) || []
-
-        console.log(choices, pressedAction.actionOrder)
         return (
             <ModalOptions
                 isVisible={showModal}
@@ -568,19 +580,17 @@ class ProcessAction extends Component {
     }
 
     renderHeaderBar() {
-
         const { process } = this.state
         const { project, clientId, step, canUpdate, role } = this.props
         const navParams = { process, project, clientId, step, canUpdate, role }
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
-
         return (
             <View style={styles.headerBarContainer}>
                 <Text style={[theme.customFontMSregular.body, styles.headerBarText]}>Suivi du projet</Text>
                 <View style={styles.progressionLinks}>
                     <TouchableOpacity>
                         <CustomIcon
-                            onPress={this.refresh}
+                            onPress={this.mainHandler}
                             icon={faRedo}
                             size={16}
                             color={theme.colors.white}
@@ -601,14 +611,12 @@ class ProcessAction extends Component {
 
 
     renderAccordion(canUpdate) {
-
         const { expanded, currentPhase, currentStep, currentAction } = this.state
         const phaseTitle = currentPhase ? currentPhase.title : "Chargement de la phase..."
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
         const doneActions = currentStep ? currentStep.actions.filter((action) => action.status === 'done').length : undefined
         const totalActions = currentStep ? currentStep.actions.length : undefined
         var progress = totalActions ? (doneActions / totalActions) * 100 : undefined
-
         return (
             <List.Accordion
                 showArrow
@@ -622,9 +630,7 @@ class ProcessAction extends Component {
                 titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
                 descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
                 onPress={() => this.setState({ expanded: !expanded })}>
-
                 {this.renderAction(canUpdate, currentAction)}
-
             </List.Accordion >
         )
     }

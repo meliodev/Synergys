@@ -2,6 +2,7 @@
 import React, { Component } from 'react'
 import { StyleSheet, View, ActivityIndicator } from 'react-native'
 import Dialog from "react-native-dialog"
+import { connect } from 'react-redux'
 
 import Appbar from '../../components/Appbar'
 import AddressSearch from '../../components/AddressSearch'
@@ -9,13 +10,15 @@ import MyInput from '../../components/TextInput'
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
-import { db } from '../../firebase'
+import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme"
-import { constants } from '../../core/constants'
-import { emailValidator, updateField, load, setToast } from "../../core/utils"
+import { constants, errorMessages } from '../../core/constants'
+import { emailValidator, updateField, load, setToast, displayError } from "../../core/utils"
 import { handleReauthenticateError, handleUpdateEmailError } from "../../core/exceptions"
+import { Alert } from 'react-native'
+import { setCurrentUser } from '../../core/redux'
 
-export default class Address extends Component {
+class EditEmail extends Component {
 
     constructor(props) {
         super(props)
@@ -23,7 +26,6 @@ export default class Address extends Component {
         this.renderDialog = this.renderDialog.bind(this)
 
         this.userId = this.props.navigation.getParam('userId', '')
-        this.currentUser = firebase.auth().currentUser //only owner can change his email
 
         this.state = {
             newEmail: { value: '', error: '' },
@@ -31,9 +33,7 @@ export default class Address extends Component {
 
             toastType: '',
             toastMessage: '',
-
             showDialog: false,
-
             loading: false,
             statusLabel: "Confirmation de l'identité..."
         }
@@ -91,46 +91,47 @@ export default class Address extends Component {
     }
 
     async changeEmail() {
+        try {
+            load(this, true)
+            const { currentUser } = firebase.auth()
+            const { newEmail, password } = this.state
+            if (!newEmail.value || !password.value) return
+            const emailCred = firebase.auth.EmailAuthProvider.credential(currentUser.email, password.value)
 
-        let { newEmail, password } = this.state
-        if (!newEmail.value || !password.value) return
+            //Re-authenticate user (for security)
+            await currentUser.reauthenticateWithCredential(emailCred)
+                .catch(e => { throw new Error(handleReauthenticateError(e)) })
 
-        let emailCred = firebase.auth.EmailAuthProvider.credential(this.currentUser.email, password.value)
+            this.setState({ statusLabel: "Modification de l'adresse email..." })
+            await currentUser.updateEmail(newEmail.value)
+                .catch(e => { throw new Error(handleUpdateEmailError(e)) })
 
-        load(this, true)
+            await db.collection('Users').doc(this.userId).update({ email: newEmail.value })
+                .catch((e) => { throw new Error(errorMessages.firestore.update) })
 
-        const userCredential = await this.currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
-        if (!userCredential) {
-            load(this, false)
-            return
-        }
+            //update redux
+            let currUser = this.props.currentUser
+            currUser.email = newEmail.value
+            setCurrentUser(this, currUser)
 
-        this.setState({ statusLabel: "Modification de l'adresse email..." })
-        const emailUpdated = await this.currentUser.updateEmail(newEmail.value)
-            .then(() => { return true })
-            .catch(e => {
-                this.handleUpdateEmailError(e)
-                return false
-            })
-
-        if (!emailUpdated) {
-            load(this, false)
-            return
-        }
-
-        await db.collection('Users').doc(this.userId).update({ email: newEmail.value })
-        newEmail = { value: '', error: '' }
-        this.setState({ newEmail, showDialog: false }, () => {
             this.props.navigation.state.params.onGoBack('success', 'Adresse email modifiée avec succès')
             this.props.navigation.goBack()
-        })
+        }
 
-        this.setState({ loading: false, statusLabel: "Confirmation de l'identité..." })
-    }
+        catch (e) {
+            displayError({ message: errorMessages.profile.emailUpdate })
+        }
 
-    handleReauthenticateError(e) {
-        handleReauthenticateError(e)
-        this.setState({ loading: false, password: { value: '', error: '' } })
+        finally {
+            const init = { value: '', error: '' }
+            this.setState({
+                newEmail: init,
+                password: init,
+                showDialog: false,
+                loading: false,
+                statusLabel: "Confirmation de l'identité..."
+            })
+        }
     }
 
     handleUpdateEmailError(e) {
@@ -170,6 +171,18 @@ export default class Address extends Component {
     }
 }
 
+const mapStateToProps = (state) => {
+
+    return {
+        role: state.roles.role,
+        permissions: state.permissions,
+        network: state.network,
+        currentUser: state.currentUser
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(EditEmail)
 
 const styles = StyleSheet.create({
     dialogContainer: {

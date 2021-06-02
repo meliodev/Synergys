@@ -29,24 +29,8 @@ class CustomList extends Component {
 
     async componentDidMount() {
         const query = this.props.query
-
-        // if (this.props.isMessage)
-        //     //await fetchDocs(this, query, 'List', '', () => {})
-        //     // await fetchDocs(this, query, 'List', '', this.filterMessages)
-        // else
         this.fetchDocs(query, 'List', 'Count', () => { })
     }
-
-    //Never display message to the sender if he just sent the first message and there is not yet a reply.
-    // filterMessages() {
-    //     console.log('Filtering..')
-    //     let List = this.state.List
-    //     List = List.filter((message) => {
-    //         return ((message.messagesCount === 1 && message.sender.id !== firebase.auth().currentUser.uid) || message.messagesCount > 1)
-    //     })
-
-    //     this.setState({ List })
-    // }
 
     render() {
         let { Count } = this.state

@@ -60,7 +60,13 @@ class DrawerMenu extends React.Component {
     }
 
     setNotificationBadge(uid) {
-        const query = db.collection('Users').doc(uid).collection('Notifications').where('deleted', '==', false).where('read', '==', false)
+        const query = db
+            .collection('Users')
+            .doc(uid)
+            .collection('Notifications')
+            .where('deleted', '==', false)
+            .where('read', '==', false)
+
         this.unsubscribenotifications = query.onSnapshot((querysnapshot) => {
             if (querysnapshot.empty) return
             const notificationCount = querysnapshot.docs.length
@@ -76,19 +82,20 @@ class DrawerMenu extends React.Component {
         }
     }
 
-    renderHeader(currentUser, role) {
-        const { displayName } = currentUser
+    renderHeader() {
+        const { currentUser } = this.props
+        const { fullName, role } = currentUser
         const showChatIcon = role !== "Client" && role !== ""
 
         return (
             <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isRoot: true })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
-                    <AvatarText size={45} label={displayName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
+                    <AvatarText size={45} label={fullName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>
 
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
                     <View style={{ flex: 0.73 }}>
-                        <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{displayName}</Text>
+                        <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{fullName}</Text>
                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role.value}</Text>
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
@@ -160,7 +167,7 @@ class DrawerMenu extends React.Component {
             <SafeAreaView style={styles.container}>
                 <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
 
-                {currentUser && this.renderHeader(currentUser, role)}
+                {currentUser && this.renderHeader()}
 
                 <View style={styles.menuContainer}>
                     {currentUser && this.renderMenu()}
@@ -178,7 +185,8 @@ const mapStateToProps = (state) => {
 
     return {
         role: state.roles.role,
-        fcmToken: state.fcmtoken
+        fcmToken: state.fcmtoken,
+        currentUser: state.currentUser
     }
 }
 

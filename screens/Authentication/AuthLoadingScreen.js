@@ -14,8 +14,18 @@ import Loading from "../../components/Loading"
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState, setCurrentUser, setNetwork, setProcessModel } from '../../core/redux'
+import { errorMessages } from "../../core/constants"
+import { displayError } from "../../core/utils"
 
-const roles = [{ id: 'admin', value: 'Admin', level: 3 }, { id: 'backoffice', value: 'Back office', level: 3 }, { id: 'dircom', value: 'Directeur commercial', level: 2 }, { id: 'com', value: 'Commercial', level: 1 }, { id: 'poseur', value: 'Poseur', level: 1 }, { id: 'tech', value: 'Responsable technique', level: 2 }, { id: 'client', value: 'Client', level: 0 }]
+const roles = [
+  { id: 'admin', value: 'Admin', level: 3 },
+  { id: 'backoffice', value: 'Back office', level: 3 },
+  { id: 'dircom', value: 'Directeur commercial', level: 2 },
+  { id: 'com', value: 'Commercial', level: 1 },
+  { id: 'poseur', value: 'Poseur', level: 1 },
+  { id: 'tech', value: 'Responsable technique', level: 2 },
+  { id: 'client', value: 'Client', level: 0 }
+]
 
 class AuthLoadingScreen extends Component {
 
@@ -38,7 +48,6 @@ class AuthLoadingScreen extends Component {
     await this.bootstrapNotifications()
     this.forgroundNotificationListener()
     this.backgroundNotificationListener()
-
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
   }
@@ -48,17 +57,14 @@ class AuthLoadingScreen extends Component {
     const initialNotification = await notifee.getInitialNotification()
 
     if (initialNotification) {
-
       const { data } = initialNotification.notification
       const routeName = data['screen']
       delete data.screen //keep only params
       const routeParams = data
-
-      Object.entries(params).forEach(([key, value]) => {
-        if (value === 'true') params[key] = true
-        if (value === 'false') params[key] = false
+      Object.entries(routeParams).forEach(([key, value]) => {
+        if (value === 'true') routeParams[key] = true
+        if (value === 'false') routeParams[key] = false
       })
-
       this.setState({ initialNotification: true, routeName, routeParams })
     }
 
@@ -81,6 +87,7 @@ class AuthLoadingScreen extends Component {
   backgroundNotificationListener() {
     notifee.onBackgroundEvent(async ({ type, detail }) => {
       //const { pressAction } = notification.android
+      const { currentUser } = firebase.auth()
       const { notification } = detail
       const { data } = notification
       const screen = data['screen']
@@ -94,8 +101,9 @@ class AuthLoadingScreen extends Component {
 
       switch (type) {
         case EventType.PRESS:
-          //console.log('NOTIFICATION PRESSED !')
-          this.props.navigation.navigate(screen, params)
+          if (currentUser)
+            this.props.navigation.navigate(screen, params)
+          else this.props.navigation.navigate("LoginScreen")
           await notifee.cancelNotification(notification.id)
           break
       }
@@ -114,22 +122,34 @@ class AuthLoadingScreen extends Component {
           //1. Set role
           const idTokenResult = await currentUser.getIdTokenResult()
 
-          if (idTokenResult) {
-            for (const role of roles) {
-              if (idTokenResult.claims[role.id]) {
-                setRole(this, role)
-                var roleValue = role.value
-              }
+          if (!idTokenResult) {
+            displayError({ message: errorMessages.appInit })
+            return
+          }
+
+          for (const role of roles) {
+            if (idTokenResult.claims[role.id]) {
+              setRole(this, role)
+              var roleValue = role.value
             }
           }
 
           //2. Set privilleges
           const remotePermissions = await this.configurePrivileges(roleValue)
+          if (!remotePermissions) {
+            displayError({ message: errorMessages.appInit })
+            return
+          }
           const action = { type: "SET_PERMISSIONS", value: remotePermissions }
           this.props.dispatch(action)
 
           //3. Set processModel
-          await this.fetchProcessModels()
+          const processModels = await this.fetchProcessModels()
+          if (!processModels) {
+            displayError({ message: errorMessages.appInit })
+            return
+          }
+          setProcessModel(this, processModels)
 
           //4. Set currentUser
           const currUser = {
@@ -141,8 +161,12 @@ class AuthLoadingScreen extends Component {
           setCurrentUser(this, currUser)
 
           //5. Set fcm token
-          await this.requestUserPermission() //iOS only
-          await this.configureFcmToken()
+          const enabled = await this.requestUserPermission() //iOS only
+          const res = await this.configureFcmToken()
+          if (!res) {
+            displayError({ message: errorMessages.appInit })
+            return
+          }
         }
 
         //4. Navigation
@@ -180,107 +204,97 @@ class AuthLoadingScreen extends Component {
   }
 
   async fetchProcessModels() {
-    const processModels = await db.collection('Process').orderBy('createdAt', 'desc').get().then((querySnapshot) => {
+    const query = db.collection('Process').orderBy('createdAt', 'desc')
+    return query.get().then((querySnapshot) => {
       let processModels = {}
-
       if (querySnapshot.empty) {
         return undefined
       }
-
       for (const doc of querySnapshot.docs) {
         const version = doc.id
         const model = doc.data()
         processModels[version] = model
       }
-
       return processModels
     })
-
-    setProcessModel(this, processModels)
   }
 
   async configurePrivileges(role) {
-    //A. Compare & Update permissions config
-    //A.1. Get permissions config from server
-    // const remotePermissions = (await this.fetchPermissionsConfig()).data
-    const remotePermissions = await db.collection('Permissions').doc(role).get().then((doc) => {
+    const query = db.collection('Permissions').doc(role)
+    return query.get().then((doc) => {
       return doc.data()
     })
-    // const localPermissions = this.props.permissions
-    // //A.2. Compare local permissions config & server permissions config
-    // const permissionsChanged = JSON.stringify(remotePermissions) !== JSON.stringify(localPermissions)
-    // //A.3 Update local config if different from server config
-    // if (permissionsChanged)
-    //  console.log('READY TO SET PERMISSONS...', remotePermissions)
-    return remotePermissions
   }
 
   //FCM token configuration
   async requestUserPermission() {
     const authStatus = await firebase.messaging().requestPermission();
     const enabled = authStatus === firebase.messaging.AuthorizationStatus.AUTHORIZED || authStatus === firebase.messaging.AuthorizationStatus.PROVISIONAL
+    return enabled
   }
 
   async configureFcmToken() {
-    //Register the device with FCM (iOS only)
-    await firebase.messaging().registerDeviceForRemoteMessages()
+    try {
+      //Register the device with FCM 
+      await firebase.messaging().registerDeviceForRemoteMessages() //iOS only
 
-    //Get the token
-    const token = await firebase.messaging().getToken()
+      //Get the token
+      const token = await firebase.messaging().getToken()
 
-    //Save the token
-    const currentUserId = firebase.auth().currentUser.uid //user B
-    const fcmTokensRef = db.collection('FcmTokens')
-
-    fcmTokensRef.where('tokens', 'array-contains', token).get().then(async (querysnapshot) => {
-      //Old token: already belongs to a user
-      if (!querysnapshot.empty) {
-        // console.log(`Token already belongs to a user`)
-
-        const doc = querysnapshot.docs[0]
-
-        //This device/token was used by user A
-        if (doc.id !== currentUserId) {
-          // console.log(`Token does not belong to current user`)
-
-          //1. remove this token from user A
-          const tokens = doc.data().tokens
-          const index = tokens.indexOf(token)
-          tokens.splice(index, 1)
-
-          //2. update user A tokens
-          await doc.ref.update({ tokens })
-          // console.log(`Token removed from other user tokens`)
-
-          //3. add this token to current user     
-          await this.addTokenToCurrentUser(token)
+      //Save the token
+      const { uid } = firebase.auth().currentUser //user B
+      const fcmTokensRef = db.collection('FcmTokens')
+      const queryTokens = fcmTokensRef.where('tokens', 'array-contains', token)
+      await queryTokens.get().then(async (querysnapshot) => {
+        try {
+          //OLD TOKEN: already belongs to a user
+          if (!querysnapshot.empty) {
+            const doc = querysnapshot.docs[0]
+            //This device/token was used by user A
+            if (doc.id !== uid) {
+              //1. remove this token from user A
+              const tokens = doc.data().tokens
+              const index = tokens.indexOf(token)
+              tokens.splice(index, 1)
+              //2. update user A tokens
+              await doc.ref.update({ tokens })
+              //3. add this token to current user  
+              await this.addTokenToCurrentUser(token, uid)
+            }
+          }
+          //NEW TOKEN: add it to the current user
+          else {
+            await this.addTokenToCurrentUser(token, uid)
+          }
         }
 
-        //This token is already registred with current user
-        //else console.log(`Token ${token} already belongs to the current user ${currentUserId}`)
-      }
+        catch (e) {
+          throw new Error('Error when handling tokens...')
+        }
+      })
 
-      //New token: add it to the current user
-      else await this.addTokenToCurrentUser(token)
-    })
-  }
-
-  async addTokenToCurrentUser(token) {
-    const fcmTokensRef = db.collection('FcmTokens')
-    const { uid } = firebase.auth().currentUser
-    var tokens = []
-
-    const userDoc = await fcmTokensRef.doc(uid).get()
-    if (userDoc.exists) {
-      tokens = userDoc.data().tokens
-      // console.log(`Current user tokens fetched`)
+      return true
     }
 
-    tokens.push(token)
-    // console.log(`Current user tokens ${tokens} ready to be posted`)
+    catch (e) {
+      return false
+    }
+  }
 
-    await fcmTokensRef.doc(uid).set({ tokens }, { merge: true })
-    // console.log(`Current user tokens posted !`)
+  async addTokenToCurrentUser(token, uid) {
+    try {
+      var tokens = []
+      const fcmTokensRef = db.collection('FcmTokens')
+      const userDoc = await fcmTokensRef.doc(uid).get()
+      if (userDoc.exists) {
+        tokens = userDoc.data().tokens
+      }
+      tokens.push(token)
+      await fcmTokensRef.doc(uid).set({ tokens }, { merge: true })
+    }
+    catch (e) {
+      throw new Error("Error while adding token to current user...")
+    }
   }
 
   render() {
@@ -297,7 +311,6 @@ class AuthLoadingScreen extends Component {
 }
 
 const mapStateToProps = (state) => {
-
   return {
     role: state.roles.role,
     permissions: state.permissions,
@@ -333,14 +346,3 @@ const styles = StyleSheet.create({
 })
 
 export default connect(mapStateToProps)(AuthLoadingScreen)
-
-
-
-
-  //OLD
-  // async fetchPermissionsConfig() {
-  //   console.log('fetching permissions config...')
-  //   const fetchPermissionsConfig = firebase.functions().httpsCallable('fetchPermissionsConfig')
-  //   const permissions = await fetchPermissionsConfig({})
-  //   return permissions
-  // }

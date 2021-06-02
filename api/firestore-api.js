@@ -38,14 +38,17 @@ export function fetchDocs(query, MyList, MyCount, MyCallBack) {
 }
 
 export function fetchDocuments(query) {
-  return query.get().then((querySnapshot) => {
-    let documents = []
-    for (const doc of querySnapshot.docs) {
-      let data = doc.data()
-      data.id = doc.id
-    }
-    return documents
-  })
+  return query.get()
+    .then((querySnapshot) => {
+      let documents = []
+      if (querySnapshot.empty) return documents
+      for (const doc of querySnapshot.docs) {
+        let data = doc.data()
+        data.id = doc.id
+      }
+      return documents
+    })
+    .catch((e) => { throw new Error(e) })
 }
 
 export function fetchDocument(collection, id, subCollection, subId) {
@@ -75,18 +78,8 @@ export const deleteTeam = async (team) => {
   const teamRef = db.collection('Teams').doc(team.id)
   batch.update(teamRef, { deleted: true })
 
-  // //2. Set Deleted team
-  // const dltTeamRef = db.collection('DeletedTeams').doc(team.id)
-  // batch.set(dltTeamRef, team)
-
-  // //3. Delete the Team
-  // const teamRef = db.collection('Teams').doc(team.id)
-  // batch.delete(teamRef)
-
   // Commit the batch
   return await batch.commit()
-  // .then(() => console.log('Batch succeeded !'))
-  // .catch(e => console.error(e))
 }
 
 //#CLIENTS 
@@ -171,7 +164,6 @@ export const createClient = async function createClient(userData, ClientId, isCo
   //3'. CREATE CLIENT or CONVERT PROSPECT TO CLIENT (account + document)
   if (!isProspect || isConversion) {
 
-    console.log("isConnected", isConnected)
     if (!isConnected) {
       return { error: { title: "Pas de connection internet", message: "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur." } }
     }
@@ -197,22 +189,19 @@ export const createClient = async function createClient(userData, ClientId, isCo
 }
 
 export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects, userId) {
+  try {
+    let turnoverdata = []
+    let chartDataObjects = []
+    let chartDataSets = []
+    const currentMonth = moment().format('MM-YYYY')
 
-  let turnoverdata = []
-
-  let chartDataObjects = []
-  let chartDataSets = []
-  const currentMonth = moment().format('MM-YYYY')
-
-  await query.get().then((querySnapshot) => {
-
+    const querySnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
     for (const doc of querySnapshot.docs) {
       const monthsTurnovers = doc.data()
       delete monthsTurnovers.target
       delete monthsTurnovers.current
 
       for (const month in monthsTurnovers) {
-
         //Update user income for "month"
         let currentIncome = turnoverObjects[month] && turnoverObjects[month].current || 0
         const projectsIncome = monthsTurnovers[month].projectsIncome || {}
@@ -248,42 +237,29 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
         turnoverObjects[month] = monthTurnover
       }
     }
-  })
+    catch (e) {
+      throw new Error(e)
+    }
+  }
+
 
   //Each user has his target (DC's monthly target is the global turnover of month) (Com's monthly target is his own turnover)
-  await db
+  const querySnapshotUsers = await db
     .collection('Users')
     .doc(userId)
     .collection('Turnover')
     .get()
-    .then((querySnapshot) => {
-      for (const doc of querySnapshot.docs) {
-        const monthsTurnovers = doc.data()
-        delete monthsTurnovers.target
-        delete monthsTurnovers.current
+    .catch((e) => { throw new Error(errorMessages.firestore.get) })
 
-        for (const month in monthsTurnovers) {
-          turnoverObjects[month].target = monthsTurnovers[month].target
-        }
-      }
-    })
+  for (const doc of querySnapshot.docs) {
+    const monthsTurnovers = doc.data()
+    delete monthsTurnovers.target
+    delete monthsTurnovers.current
 
+    for (const month in monthsTurnovers) {
+      turnoverObjects[month].target = monthsTurnovers[month].target
+    }
+  }
 
   return turnoverObjects
-}
-
-
-//READ
-export const getResponsableByRole = async (role) => {
-  const user = await db.collection('Users').where('role', '==', role).get()
-    .then((querySnapshot) => {
-      if (querySnapshot.empty) return null
-      const doc = querySnapshot.docs[0]
-      const id = doc.id
-      const { fullName, email, role } = doc.data()
-      userObject = { id, fullName, email, role }
-      return userObject
-    })
-    .catch((err) => { return null })
-  return user
 }

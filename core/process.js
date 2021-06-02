@@ -5,81 +5,82 @@ moment.locale('fr')
 import { db, functions } from '../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
-import { stringifyUndefined, getMinObjectProp, getMaxObjectProp } from './utils'
+import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from './utils'
+import { errorMessages } from './constants';
 
 //#PROCESS ALGORITHM/LOGIC
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
 
-    if (!processModel || typeof (processModel) === 'undefined' || typeof (currentProcess) === 'undefined') {
-        Alert.alert('Erreur inattendue', "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application.")
+    try {
+        if (!processModel || typeof (processModel) === 'undefined' || typeof (currentProcess) === 'undefined') {
+            Alert.alert('Erreur inattendue', "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application.")
+            return currentProcess
+        }
+
+        const attributes = { clientId, project }
+        let process = _.cloneDeep(currentProcess)
+
+        let loopHandler = true
+        while (loopHandler) {
+            //0. Initialize process with 1st phase/1st step
+            if (Object.keys(process).length === 1) {
+                process = initProcess(processModel, process, projectSecondPhase)
+            }
+
+            var { currentPhaseId, currentStepId } = getCurrentStep(process)
+            let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
+            let allActionsValid = true
+            let nextStep = ''
+            let nextPhase = ''
+
+            //Verify/Update actions status
+            if (actions.length > 0) {
+
+                actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
+
+                if (actions[0].cloudFunction) {
+                    const sendEmail = functions.httpsCallable('sendEmail')
+                    const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
+                    const html = `<b>${subject} du projet ${attributes.project.name}</b>`
+                    const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
+                    if (isSent.data)
+                        await db.collection(actions[0].collection).doc(projectId).update({ finalBillSentViaEmail: true })
+                    else {
+                        throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
+                        return currentProcess
+                    }
+                }
+
+                var verif_res = await verifyActions(actions, attributes, process)
+                actions = verif_res.verifiedActions
+                allActionsValid = verif_res.allActionsValid
+                nextStep = verif_res.nextStep
+                nextPhase = verif_res.nextPhase
+                actions = setActionTimeLog(actions)
+                process[currentPhaseId].steps[currentStepId].actions = actions
+            }
+
+            //3'. Found nextStep/nextPhase -> All actions valid -> Transition
+            if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
+                const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
+                process = transitionRes.process
+                const { processEnded } = transitionRes
+                if (processEnded) loopHandler = false
+            }
+
+            //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
+            else loopHandler = false
+        }
+
+        return process || currentProcess
+    }
+
+    catch (e) {
+        const { message } = e
+        displayError({ message })
         return currentProcess
     }
 
-    const attributes = { clientId, project }
-    let process = _.cloneDeep(currentProcess)
-
-    let loopHandler = true
-
-    while (loopHandler) {
-        //0. Initialize process with 1st phase/1st step
-        if (Object.keys(process).length === 1) {
-            process = initProcess(processModel, process, projectSecondPhase)
-        }
-
-        var { currentPhaseId, currentStepId } = getCurrentStep(process)
-        let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
-        let allActionsValid = true
-        let nextStep = ''
-        let nextPhase = ''
-
-        //Verify/Update actions status
-        if (actions.length > 0) {
-
-            actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
-
-            //Handle cloud function
-            if (actions[0].cloudFunction) {
-                const sendEmail = functions.httpsCallable('sendEmail')
-                const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
-                const html = `<b>${subject} du projet ${attributes.project.name}</b>`
-
-                const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
-
-                if (isSent.data)
-                    await db.collection(actions[0].collection).doc(projectId).update({ finalBillSentViaEmail: true }).then(() => console.log('FINAL BILL SENT !!!!'))
-
-                else console.log('Email was not sent......................')
-                //else return error and handle it on UI (MAKE SURE NOT UPDATE PROCESS BY ERROR)
-            }
-
-            var verif_res = await verifyActions(actions, attributes, process)
-
-            actions = verif_res.verifiedActions
-            allActionsValid = verif_res.allActionsValid
-            nextStep = verif_res.nextStep
-            nextPhase = verif_res.nextPhase
-
-            actions = setActionTimeLog(actions)
-
-            process[currentPhaseId].steps[currentStepId].actions = actions
-        }
-
-        //3'. Found nextStep/nextPhase -> All actions valid -> Transition
-        if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
-
-            console.log('transition...')
-            const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
-            process = transitionRes.process
-            const { processEnded } = transitionRes
-            if (processEnded) loopHandler = false
-            else console.log('LOOP...')
-        }
-
-        //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
-        else loopHandler = false
-    }
-
-    return process
 }
 
 
@@ -149,56 +150,56 @@ const getFirstPhaseIdFromModel = (processModel) => {
 //Task 2. Configure actions
 const configureActions = async (actions, attributes, process) => {
 
-    let query
+    try {
+        let query
 
-    for (let action of actions) {
+        for (let action of actions) {
 
-        let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
+            let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
 
-        //1. Complete missing params
-        if (collection && documentId === '') {
-            if (collection === 'Projects') action.documentId = attributes.project.id
-            else if (collection === 'Clients') action.documentId = attributes.clientId
-        }
-
-        if (screenParams) {
-            for (let item in screenParams) {
-                if (item === 'project') action.screenParams.project = attributes.project
-                if (item === 'user') action.screenParams.user.id = attributes.clientId
-            }
-        }
-
-        if (queryFilters) {
-            for (let item of action.queryFilters) {
-                if (item.filter === 'project.id') item.value = attributes.project.id
-            }
-        }
-
-        if (queryFiltersUpdateNav) {
-            for (let item of action.queryFiltersUpdateNav) {
-                if (item.filter === 'project.id') item.value = attributes.project.id
-            }
-        }
-
-        if (cloudFunction) {
-            const { params, queryAttachmentsUrls } = action.cloudFunction
-
-            for (let item in params) {
-                if (item === 'projectId') params.projectId = attributes.project.id
+            //1. Complete missing params
+            if (collection && documentId === '') {
+                if (collection === 'Projects') action.documentId = attributes.project.id
+                else if (collection === 'Clients') action.documentId = attributes.clientId
             }
 
-            //set attachments
-            for (let attachmentKey in queryAttachmentsUrls) {
+            if (screenParams) {
+                for (let item in screenParams) {
+                    if (item === 'project') action.screenParams.project = attributes.project
+                    if (item === 'user') action.screenParams.user.id = attributes.clientId
+                }
+            }
 
-                for (let item of queryAttachmentsUrls[attachmentKey]) {
+            if (queryFilters) {
+                for (let item of action.queryFilters) {
                     if (item.filter === 'project.id') item.value = attributes.project.id
                 }
+            }
 
-                query = db.collection('Documents')
-                queryAttachmentsUrls[attachmentKey].forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
+            if (queryFiltersUpdateNav) {
+                for (let item of action.queryFiltersUpdateNav) {
+                    if (item.filter === 'project.id') item.value = attributes.project.id
+                }
+            }
 
-                await query.get().then((querysnapshot) => {
+            if (cloudFunction) {
+                const { params, queryAttachmentsUrls } = action.cloudFunction
 
+                for (let item in params) {
+                    if (item === 'projectId') params.projectId = attributes.project.id
+                }
+
+                //set attachments
+                for (let attachmentKey in queryAttachmentsUrls) {
+
+                    for (let item of queryAttachmentsUrls[attachmentKey]) {
+                        if (item.filter === 'project.id') item.value = attributes.project.id
+                    }
+
+                    query = db.collection('Documents')
+                    queryAttachmentsUrls[attachmentKey].forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
+
+                    const querysnapshot = await query.get().catch((e) => { throw new Error("Erreur lors du chargement de la facture et/ou de l'atestation fluide. Veuillez réessayer.") })
                     if (!querysnapshot.empty) {
                         const document = querysnapshot.docs[0].data()
                         const attachment = {
@@ -207,140 +208,153 @@ const configureActions = async (actions, attributes, process) => {
                         }
                         params.attachments.push(attachment)
                     }
-
-                })
+                    else {
+                        throw new Error("Facture ou attestation fluide introuvable pour ce projet. Veuillez vérifier l'existence de ces documents.")
+                    }
+                }
             }
-        }
 
-        const selectedQueryFilters = queryFiltersUpdateNav || queryFilters || null
+            const selectedQueryFilters = queryFiltersUpdateNav || queryFilters || null
 
-        if (collection && collection !== '' && selectedQueryFilters && selectedQueryFilters.length > 0) {
+            if (collection && collection !== '' && selectedQueryFilters && selectedQueryFilters.length > 0) {
 
-            query = db.collection(collection)
-            selectedQueryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
-            await query.get().then((querysnapshot) => {
+                query = db.collection(collection)
+                selectedQueryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+                const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
 
+                //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
                     if (queryFiltersUpdateNav) {
-                        if (collection === 'Agenda') {
+                        if (collection === 'Agenda')
                             action.screenParams.TaskId = ''
-                        }
-
                         if (collection === 'Documents')
                             action.screenParams.DocumentId = ''
                     }
                 }
 
-                //Reinitialize nav params in case document was deleted
                 else {
                     if (action.screenParams) {
                         if (collection === 'Agenda')
                             action.screenParams.TaskId = querysnapshot.docs[0].id
-
                         if (collection === 'Documents')
                             action.screenParams.DocumentId = querysnapshot.docs[0].id
                     }
-
                     if (documentId === '') {
                         action.documentId = querysnapshot.docs[0].id
                     }
                 }
-            })
+            }
         }
-
+        return actions
     }
 
-    return actions
+    catch (e) {
+        throw new Error(e)
+    }
 }
 
 //Task 3. Verifications & Status Update
 const verifyActions = async (actions, attributes, process) => {
-    let allActionsValid = true
-    let verifiedActions = []
-    let nextStep = ''
-    let nextPhase = ''
+    try {
+        let allActionsValid = true
+        let verifiedActions = []
+        let nextStep = ''
+        let nextPhase = ''
 
-    //1. Split actions to 4 groups based on "verificationType" property
-    const actions_groupedByVerificationType = groupBy(actions, "verificationType")
+        //1. Split actions to 4 groups based on "verificationType" property
+        const actions_groupedByVerificationType = groupBy(actions, "verificationType")
 
-    //AUTO
-    //VERIFICATION TYPE 1: data-fill
-    let actions_dataFill = actions_groupedByVerificationType['data-fill'] || []
-    let allActionsValid_dataFill = true
+        //AUTO
+        //VERIFICATION TYPE 1: data-fill
+        let actions_dataFill = actions_groupedByVerificationType['data-fill'] || []
+        let allActionsValid_dataFill = true
 
-    if (actions_dataFill.length > 0) {
-        var res1 = await verifyActions_dataFill(actions_dataFill)
-        allActionsValid_dataFill = res1.allActionsValid_dataFill
-        actions_dataFill = res1.verifiedActions_dataFill
-        nextStep = res1.nextStep
-        nextPhase = res1.nextPhase
+        if (actions_dataFill.length > 0) {
+            var res1 = await verifyActions_dataFill(actions_dataFill)
+            allActionsValid_dataFill = res1.allActionsValid_dataFill
+            actions_dataFill = res1.verifiedActions_dataFill
+            nextStep = res1.nextStep
+            nextPhase = res1.nextPhase
+        }
+
+        //VERIFICATION TYPE 2: doc-creation
+        let actions_docCreation = actions_groupedByVerificationType['doc-creation'] || []
+        let allActionsValid_docCreation = true
+
+        if (actions_docCreation.length > 0) {
+            var res2 = await verifyActions_docCreation(actions_docCreation)
+            allActionsValid_docCreation = res2.allActionsValid_docCreation
+            actions_docCreation = res2.verifiedActions_docCreation
+            nextStep = res2.nextStep
+            nextPhase = res2.nextPhase
+        }
+
+        //MANUAL
+        //VERIFICATION TYPE 3: 
+        let actions_multipleChoices = actions_groupedByVerificationType['multiple-choices'] || []
+        let actions_comment = actions_groupedByVerificationType['comment'] || []
+        let actions_validation = actions_groupedByVerificationType['validation'] || []
+        let actions_phaseRollback = actions_groupedByVerificationType['phaseRollback'] || []
+        let actions_manual = actions_multipleChoices.concat(actions_comment, actions_validation, actions_phaseRollback)
+        let allActionsValid_manual = true
+
+        if (actions_manual.length > 0) {
+            var res3 = verifyActions_manual(actions_manual)
+            allActionsValid_manual = res3.allActionsValid_manual
+            actions_manual = res3.verifiedActions_manual
+        }
+
+        allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_manual
+        verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_manual)
+
+        return { allActionsValid, verifiedActions, nextStep, nextPhase }
     }
 
-    //VERIFICATION TYPE 2: doc-creation
-    let actions_docCreation = actions_groupedByVerificationType['doc-creation'] || []
-    let allActionsValid_docCreation = true
-
-    if (actions_docCreation.length > 0) {
-        var res2 = await verifyActions_docCreation(actions_docCreation)
-        allActionsValid_docCreation = res2.allActionsValid_docCreation
-        actions_docCreation = res2.verifiedActions_docCreation
-        nextStep = res2.nextStep
-        nextPhase = res2.nextPhase
+    catch (e) {
+        throw new Error(e)
     }
-
-    //MANUAL
-    //VERIFICATION TYPE 3: 
-    let actions_multipleChoices = actions_groupedByVerificationType['multiple-choices'] || []
-    let actions_comment = actions_groupedByVerificationType['comment'] || []
-    let actions_validation = actions_groupedByVerificationType['validation'] || []
-    let actions_phaseRollback = actions_groupedByVerificationType['phaseRollback'] || []
-    let actions_manual = actions_multipleChoices.concat(actions_comment, actions_validation, actions_phaseRollback)
-    let allActionsValid_manual = true
-
-    if (actions_manual.length > 0) {
-        var res3 = await verifyActions_manual(actions_manual)
-        allActionsValid_manual = res3.allActionsValid_manual
-        actions_manual = res3.verifiedActions_manual
-    }
-
-    allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_manual
-    verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_manual)
-
-    return { allActionsValid, verifiedActions, nextStep, nextPhase }
 }
 
 const verifyActions_dataFill = async (actions) => {
 
-    //Issue: cannot access same document same collection multiple times in a very short delay
-    //Solution: Sort by 'Document-Id' to access and verify one time all actions concerning same document (use verifyActions_dataFill_sameDoc).
-    const formatedActions = groupBy(actions, "documentId")
+    try {
+        //Issue: cannot access same document same collection multiple times in a very short delay
+        //Solution: Sort by 'Document-Id' to access and verify one time all actions concerning same document (use verifyActions_dataFill_sameDoc).
+        const formatedActions = groupBy(actions, "documentId")
 
-    //Verify actions for each document
-    let allActionsValid_dataFill = true
-    let verifiedActions_dataFill = []
-    let nextStep = ''
-    let nextPhase = ''
+        //Verify actions for each document
+        let allActionsValid_dataFill = true
+        let verifiedActions_dataFill = []
+        let nextStep = ''
+        let nextPhase = ''
 
-    for (const documentId in formatedActions) {
-        let res = await verifyActions_dataFill_sameDoc(formatedActions[documentId])
-        allActionsValid_dataFill = allActionsValid_dataFill && res.allActionsSameDocValid
-        verifiedActions_dataFill = verifiedActions_dataFill.concat(res.verifiedActionsSameDoc)
-        nextStep = res.nextStep
-        nextPhase = res.nextPhase
+        for (const documentId in formatedActions) {
+            let res = await verifyActions_dataFill_sameDoc(formatedActions[documentId])
+            allActionsValid_dataFill = allActionsValid_dataFill && res.allActionsSameDocValid
+            verifiedActions_dataFill = verifiedActions_dataFill.concat(res.verifiedActionsSameDoc)
+            nextStep = res.nextStep
+            nextPhase = res.nextPhase
+        }
+
+        return { allActionsValid_dataFill, verifiedActions_dataFill, nextStep, nextPhase }
     }
 
-    return { allActionsValid_dataFill, verifiedActions_dataFill, nextStep, nextPhase }
+    catch (e) {
+        throw new Error(e)
+    }
+
 }
 
 const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
-    const collection = actionsSameDoc[0]['collection']
-    const documentId = actionsSameDoc[0]['documentId']
-    let allActionsSameDocValid = true
-    let nextStep = ''
-    let nextPhase = ''
 
-    const verifiedActionsSameDoc = await db.collection(collection).doc(documentId).get().then((doc) => {
+    try {
+        const collection = actionsSameDoc[0]['collection']
+        const documentId = actionsSameDoc[0]['documentId']
+        let allActionsSameDocValid = true
+        let nextStep = ''
+        let nextPhase = ''
 
+        const doc = await db.collection(collection).doc(documentId).get()
         const data = doc.data()
 
         for (let action of actionsSameDoc) {
@@ -371,35 +385,36 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
                     }
                 }
             }
-
         }
+        const verifiedActionsSameDoc = actionsSameDoc
 
-        return actionsSameDoc
-    })
+        return { verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase }
+    }
 
-    return { verifiedActionsSameDoc, allActionsSameDocValid, nextStep, nextPhase }
+    catch (e) {
+        throw new Error(errorMessages.firestore.get)
+    }
 }
 
 //Verify actions for each document
 const verifyActions_docCreation = async (actions) => {
-    let allActionsValid_docCreation = true
-    let nextStep = ''
-    let nextPhase = ''
+    try {
+        let allActionsValid_docCreation = true
+        let nextStep = ''
+        let nextPhase = ''
 
-    for (let action of actions) {
+        for (let action of actions) {
 
-        const { collection, queryFilters, events } = action
-
-        let query = db.collection(collection)
-        queryFilters.forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
-        await query.get().then((querysnapshot) => {
+            const { collection, queryFilters, events } = action
+            let query = db.collection(collection)
+            queryFilters.forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
+            const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
 
             if (querysnapshot.empty) {
                 if (events && events.onDocNotFound) {  //CASE1: Conditional transition (2 options) depending on doc found or not
                     nextStep = events.onDocNotFound.nextStep
                     nextPhase = events.onDocNotFound.nextPhase
                 }
-
                 action.status = 'pending' //CASE2: No transition if doc not found
                 allActionsValid_docCreation = false
             }
@@ -409,16 +424,19 @@ const verifyActions_docCreation = async (actions) => {
                     nextStep = events.onDocFound.nextStep
                     nextPhase = events.onDocFound.nextPhase
                 }
-
                 action.status = 'done' //CASE2: Transition only on doc found
                 nextStep = stringifyUndefined(action.nextStep)
                 nextPhase = stringifyUndefined(action.nextPhase)
             }
-        })
+        }
+
+        const verifiedActions_docCreation = actions
+        return { allActionsValid_docCreation, verifiedActions_docCreation, nextStep, nextPhase }
     }
 
-    const verifiedActions_docCreation = actions
-    return { allActionsValid_docCreation, verifiedActions_docCreation, nextStep, nextPhase }
+    catch (e) {
+        throw new Error(e)
+    }
 }
 
 const verifyActions_manual = async (actions) => {

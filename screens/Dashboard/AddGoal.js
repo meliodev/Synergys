@@ -17,7 +17,7 @@ import { constants } from "../../core/constants";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator, formatDocument, unformatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
-import { fetchDocs, fetchDocument, getResponsableByRole } from "../../api/firestore-api";
+import { fetchDocs, fetchDocument } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
 import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
 
@@ -79,13 +79,13 @@ class AddGoal extends Component {
     }
 
     async initEditMode() {
-        const goals = await fetchDocument('Users', this.userId, 'Turnover', this.GoalId)
+        const goals = await fetchDocument('Users', this.userId, 'Turnover', this.GoalId) 
         let goal = goals[this.monthYear]
-        goal = await this.setGoal(goal)
+        goal = this.setGoal(goal)
         if (!goal) return
     }
 
-    async setGoal(goal) {
+    setGoal(goal) {
         if (!goal)
             this.setState({ docNotFound: true })
         else {

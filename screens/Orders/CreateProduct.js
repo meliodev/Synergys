@@ -32,7 +32,7 @@ import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
-import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load } from "../../core/utils";
+import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load, displayError } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -107,6 +107,7 @@ class CreateProduct extends Component {
 
         if (this.isEdit) {
             await this.fetchProduct()
+                .catch((e) => displayError({ message: e.message }))
         }
 
         else {
@@ -150,7 +151,9 @@ class CreateProduct extends Component {
 
     //on Edit
     async fetchProduct() {
-        await db.collection('Products').doc(this.ProductId).get().then((doc) => {
+        try {
+            const query = db.collection('Products').doc(this.ProductId)
+            const doc = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
             let { ProductId, type, category, name, tagsSelected, description, price, taxe } = this.state
             let { createdAt, createdBy, editedAt, editedBy } = this.state
             let { error, loading } = this.state
@@ -174,10 +177,12 @@ class CreateProduct extends Component {
             this.setState({ ProductId, category, name, tagsSelected, description, price, taxe, createdAt, createdBy, editedAt, editedBy }, () => {
                 if (this.isInit)
                     this.initialState = _.cloneDeep(this.state)
-
                 this.isInit = false
             })
-        })
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     showAlert() {
@@ -255,8 +260,6 @@ class CreateProduct extends Component {
             product.createdAt = moment().format()
             product.createdBy = currentUser
         }
-
-        console.log('Ready to add product...')
 
         db.collection('Products').doc(ProductId).set(product, { merge: true })
         this.props.navigation.state.params.onGoBack(product)

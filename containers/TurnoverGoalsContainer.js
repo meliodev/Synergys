@@ -11,7 +11,7 @@ import { db, auth } from '../firebase'
 import * as theme from '../core/theme'
 import { constants, highRoles } from '../core/constants'
 import { load, sortMonths } from '../core/utils'
-import { fetchDocs, fetchTurnoverData } from '../api/firestore-api'
+import { fetchDocs } from '../api/firestore-api'
 import { setTurnoverArr, setMonthlyGoals } from '../screens/Dashboard/helpers'
 
 import { TurnoverGoal } from '../components'

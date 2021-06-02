@@ -149,7 +149,7 @@ export const handleReauthenticateError = (e) => {
             break
     }
 
-    Alert.alert(title, errorMessage, [{ text: 'OK', style: 'cancel' }], { cancelable: false })
+    return errorMessage
 }
 
 //Firebase auth: update password
@@ -175,7 +175,7 @@ export const handleUpdatePasswordError = (e) => {
             break
     }
 
-    Alert.alert(title, errorMessage, [{ text: 'OK', style: 'cancel' }], { cancelable: false })
+    return errorMessage
 }
 
 //Firebase auth: update email

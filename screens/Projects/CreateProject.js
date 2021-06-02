@@ -22,10 +22,10 @@ import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, adminId, highRoles } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
-import { fetchDocs, fetchDocument, getResponsableByRole } from "../../api/firestore-api";
+import { fetchDocs, fetchDocument } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process'
 
@@ -166,14 +166,14 @@ class CreateProject extends Component {
     async initEditMode() {
         let project = await fetchDocument('Projects', this.ProjectId)
         this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
-        project = await this.setProject(project)
+        project = this.setProject(project)
         if (!project) return
         this.setImageCarousel(project.attachments)
         this.setUserAccess(project.step)
         await this.runListeners()
     }
 
-    async setProject(project) {
+    setProject(project) {
         if (!project)
             this.setState({ docNotFound: true })
         else {
@@ -198,8 +198,14 @@ class CreateProject extends Component {
     }
 
     async runListeners() {
-        await this.fetchDocuments()
-        await this.fetchTasks()
+        const errorMessage = "Erreur lors du chargement de la section "
+        try {
+            await this.fetchDocuments().catch((e) => { throw new Error(errorMessage + "Documents") })
+            await this.fetchTasks().catch((e) => { throw new Error(errorMessage + "Tâches") })
+        }
+        catch (e) {
+            setToast(this, 'e', e.message)
+        }
     }
 
     fetchDocuments() {
@@ -218,7 +224,7 @@ class CreateProject extends Component {
                 })
                 documentTypes = [...new Set(documentTypes)]
                 this.setState({ documentsList, documentTypes }, () => resolve(true))
-            })
+            }, onerror((event) => reject(false)))
         })
     }
 
@@ -238,7 +244,7 @@ class CreateProject extends Component {
                     taskTypes.push(task.type)
                     taskTypes = [...new Set(taskTypes)]
                     this.setState({ tasksList, taskTypes }, () => resolve(true))
-                })
+                }, onerror((event) => reject(false)))
             })
         })
     }
@@ -266,6 +272,11 @@ class CreateProject extends Component {
         }
 
         return true
+    }
+
+    catch(e) {
+        const { message } = e
+        displayError({ message })
     }
 
     //#OOS
@@ -317,24 +328,29 @@ class CreateProject extends Component {
     }
 
     async refreshState(project) {
-        const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
-
-        if (!this.isEdit) {
-            const { createdAt, createdBy } = project
-            this.setState({ createdAt, createdBy }, async () => {
-                this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
-                this.project.id = this.ProjectId
-                this.setState({ process: project.process })
-                this.setImageCarousel(project.attachments)
-                this.setUserAccess(project.step)
-                await this.runListeners()
-                this.title = 'Modifier le projet'
-                this.isEdit = true
-            })
+        try {
+            const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
+            if (!this.isEdit) {
+                const { createdAt, createdBy } = project
+                this.setState({ createdAt, createdBy }, async () => {
+                    this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+                    this.project.id = this.ProjectId
+                    this.setState({ process: project.process })
+                    this.setImageCarousel(project.attachments)
+                    this.setUserAccess(project.step)
+                    await this.runListeners()
+                    this.title = 'Modifier le projet'
+                    this.isEdit = true
+                })
+            }
+            load(this, false)
+            setToast(this, 's', toastMessage)
+            this.initialState = _.cloneDeep(this.state)
         }
-        load(this, false)
-        setToast(this, 's', toastMessage)
-        this.initialState = _.cloneDeep(this.state)
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     showAlert() {

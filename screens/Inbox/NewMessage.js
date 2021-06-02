@@ -201,8 +201,6 @@ class NewMessage extends Component {
             oldMessages,
         }
 
-        console.log('Ready to send message...')
-
         if (this.isReply)
             await this.sendReply(latestMessage, msg)
 

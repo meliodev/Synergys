@@ -1,12 +1,15 @@
-
 import React, { Component } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Platform, PixelRatio, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Platform, ActivityIndicator, Alert } from "react-native";
 import { ProgressBar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
 import firebase, { db, functions } from '../../firebase'
 import Dialog from "react-native-dialog"
 import _ from 'lodash'
+import { connect } from 'react-redux'
+import DeviceInfo from 'react-native-device-info';
+import { NetworkInfo } from "react-native-network-info";
+import SmsRetriever from 'react-native-sms-retriever'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -15,13 +18,12 @@ moment.locale('fr')
 import Pdf from "react-native-pdf";
 import RNFS from 'react-native-fs'
 import RNFetchBlob from 'rn-fetch-blob'
-import { PDFDocument, StandardFontEmbedder, rgb } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 
 import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
-import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator } from '../../core/utils'
+import { constants, downloadDir, errorMessages, termsDir, termsUrl } from '../../core/constants'
+import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator, displayError } from '../../core/utils'
 import { uploadFile } from "../../api/storage-api";
-
 import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
 
 import Appbar from '../../components/Appbar'
@@ -29,12 +31,6 @@ import Button from '../../components/Button'
 import LoadDialog from '../../components/LoadDialog'
 import Toast from '../../components/Toast'
 import TermsConditions from "../../components/TermsConditions";
-
-import { connect } from 'react-redux'
-import DeviceInfo from 'react-native-device-info';
-import { NetworkInfo } from "react-native-network-info";
-
-const Dir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
 
 class Signature extends Component {
 
@@ -47,16 +43,12 @@ class Signature extends Component {
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.DocumentType = this.props.navigation.getParam('DocumentType', '')
-
         this.fileName = this.props.navigation.getParam('fileName', '')
         this.sourceUrl = this.props.navigation.getParam('url', '')
-        this.originalFilePath = `${Dir}/Synergys/Documents/${this.fileName}`
+        this.originalFilePath = `${downloadDir}/Synergys/Documents/${this.fileName}`
 
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', '') //Navigation pop times when  signature is done
         this.canSign = this.props.navigation.getParam('canSign', false)
-
-        this.termsPath = `${Dir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
-        this.termsURL = 'https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/CONDITIONS%20G%C3%89N%C3%89RALES%20DE%20VENTE%20ET%20DE%20TRAVAUX.pdf?alt=media&token=3bf07ac2-6d9e-439a-91d8-f9908003488f'
 
         this.tick = this.tick.bind(this)
         this.readFile = this.readFile.bind(this)
@@ -109,11 +101,10 @@ class Signature extends Component {
             approvalMessage: '',
             code: '',
 
-            phoneNumber: '+212621581718',
+            phoneNumber: '',
             timeLeft: 60,
 
             //Data of proofs
-            codeSent: 0,
             signee: '',
             ref: '',
             motif: '',
@@ -121,161 +112,140 @@ class Signature extends Component {
     }
 
     async componentDidMount() {
-        loadLog(this, true, 'Initialisation de la page...')
-        await this.loadOriginalFile(this.originalFilePath)
+        await this.init()
+    }
 
-        if (this.initMode === 'sign')
-            this.toggleTerms()
+    async init() {
+        try {
+            loadLog(this, true, 'Initialisation de la page...')
+            await this.loadOriginalFile(this.originalFilePath)
+            if (this.initMode === 'sign')
+                this.toggleTerms()
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
+        finally {
+            loadLog(this, false, '')
+        }
     }
 
     //1. Download, Read & Load file
     async loadOriginalFile(filePath) {
-        const { config, fs } = RNFetchBlob;
-        let fileExist = await RNFetchBlob.fs.exists(filePath)
-        let downloaded = false
-        let read = false
-
-        //Download file
-        if (!fileExist) {
-            this.setState({ loadingMessage: 'Téléchargement du document...' })
-            downloaded = await this.downloadFile(filePath, this.sourceUrl)
-            console.log('downloaded', downloaded)
-
-            if (downloaded)
-                fileExist = true
-
-            else {
-                loadLog(this, false, '')
-                setToast(this, 'e', "Erreur lors du téléchargement du document, connection internet interrompue ou espace de stockage insuffisant")
-                return
+        try {
+            const { config, fs } = RNFetchBlob
+            const fileExist = await RNFetchBlob.fs.exists(filePath)
+            //Download file
+            if (!fileExist) {
+                this.setState({ loadingMessage: 'Téléchargement du document...' })
+                await this.downloadFile(filePath, this.sourceUrl)
             }
-        }
-
-        //Read file
-        if (fileExist) {
-            console.log('downloaded', downloaded)
-
+            //Read file
             this.setState({ fileDownloaded: true, loadingMessage: 'Initialisation du document...' })
-            read = await this.readFile(filePath)
-
-            if (!read) {
-                setToast(this, 'e', 'Erreur lors du chargement du document, veuillez réessayer...')
-            }
+            await this.readFile(filePath)
+        }
+        catch (e) {
+            throw new Error("Erreur lors du chargement du document, veuillez réessayer plus tard.")
         }
     }
 
-    async downloadFile(path, sourceUrl) {
-
+    downloadFile(path, sourceUrl) {
         let downloadProgress = 0
-
         return RNFetchBlob
-            .config({
-                path,
-                fileCache: true,
-            })
+            .config({ path, fileCache: true })
             .fetch('GET', sourceUrl, {})
             .progress((received, total) => {
                 downloadProgress = Math.round((received / total) * 100)
-                this.setState({ loadingMessage: `Téléchargement en cours... ${downloadProgress.toString()}%` })
+                const loadingMessage = `Téléchargement en cours... ${downloadProgress.toString()}%`
+                this.setState({ loadingMessage })
             })
-            .then((res) => { return true })
-            .catch((e) => { return false })
     }
 
-    async readFile(filePath) {
-        return await RNFS.readFile(filePath, "base64")
-            .then((contents) => {
-                this.setState({ pdfBase64: contents, pdfArrayBuffer: base64ToArrayBuffer(contents) })
-                return true
+    readFile(filePath) {
+        return RNFS.readFile(filePath, "base64")
+            .then((pdfBase64) => {
+                const pdfArrayBuffer = base64ToArrayBuffer(pdfBase64)
+                this.setState({ pdfBase64, pdfArrayBuffer })
             })
-            .catch(() => { return false })
-            .finally(() => loadLog(this, false, ''))
     }
 
     //2. Show/hide terms
     toggleTerms() {
-        this.setState({ showTerms: !this.state.showTerms })
+        const { showTerms } = this.state
+        this.setState({ showTerms: !showTerms })
     }
 
     //3. OTP verification + Email send
     async verifyUser() {
-        this.setState({ showTerms: false, showDialog: true })
-
-        if (this.state.timeLeft > 0 && this.state.timeLeft < 60) return
-
-        this.setState({ timeLeft: 60, status: true, statusMessage: "Génération d'un code secure..." })
-        const codeSent = await this.sendCode()
-        const emailSent = this.sendEmail()
-        this.setState({ status: false, statusMessage: "" })
-
-        if (codeSent) {
-            this.setState({ codeSent })
+        try {
+            this.setState({ showTerms: false, showDialog: true })
+            const { timeLeft } = this.state
+            if (timeLeft > 0 && timeLeft < 60) return
+            this.setState({ timeLeft: 60, status: true, statusMessage: "Génération d'un code secure..." })
+            await this.sendCode()
             this.tick()
+            this.sendEmail()
+            this.setState({ status: false, statusMessage: "" })
         }
-
-        else {
-            this.setState({ showDialog: false })
+        catch (e) {
             setToast(this, 'e', "Erreur lors de l'envoie du code, veuillez réessayer...")
+            this.setState({ showDialog: false })
         }
     }
 
     async sendCode() {
-        const user = await db.collection('Users').doc(firebase.auth().currentUser.uid).get()
-        const phoneNumber = user.data().phone
-        this.setState({ phoneNumber })
-
-        const sendCode = functions.httpsCallable('sendCode')
-        return await sendCode({ phoneNumber: phoneNumber })
-            .then((resp) => {
-                if (resp.data.status === 'pending')
-                    return true
-            })
-            .catch((err) => console.error(err)) //use onCall instead of onRequest
+        const errorMessage = "Erreur lors de l'envoi du code. Veuillez réessayer plus tard"
+        try {
+            const user = await db.collection('Users').doc(firebase.auth().currentUser.uid).get() //#task: not needed when using SMS RETRIEVER
+            const phoneNumber = user.data().phone
+            this.setState({ phoneNumber })
+            const sendCode = functions.httpsCallable('sendCode')
+            const resp = await sendCode({ phoneNumber: phoneNumber })
+            if (resp.data.status !== 'pending')
+                throw new Error(errorMessage)
+        }
+        catch (e) {
+            throw new Error(errorMessage)
+        }
     }
 
     async verifyCode() {
         this.setState({ status: true, statusMessage: 'Vérification du code...' })
-
-        const phoneNumber = this.state.phoneNumber
+        const { phoneNumber } = this.state
         const verifyCode = functions.httpsCallable('verifyCode')
+        const resp = await verifyCode({ phoneNumber: phoneNumber, code: this.state.code })
+        if (resp.data.status === 'pending') {
+            this.setState({ status: false, statusMessage: '' })
+            Alert.alert('', 'Le code que vous avez saisi est incorrecte.', [{ text: 'OK', style: 'cancel' }], { cancelable: false })
+            return
+        }
 
-        await verifyCode({ phoneNumber: phoneNumber, code: this.state.code })
-            .then((resp) => {
-                console.log(resp)
-                if (resp.data.status === 'pending') {
-                    this.setState({ status: false, statusMessage: '' })
-                    Alert.alert('Code non valide', 'Vous avez saisi un code incorrecte.', [{ text: 'OK', style: 'cancel' }], { cancelable: false })
-                }
+        else if (resp.data.error) {
+            Alert.alert('', 'Erreur inattendue lors de la vérification du code', [{ text: 'OK', style: 'cancel' }], { cancelable: false })
+            return
+        }
 
-                //UX security
-                else if (resp.data.status === 'approved') { //Can a hacker compromise this value and get access to confirmSign function ?
-                    setTimeout(() => this.setState({ codeApproved: true, approvalMessage: 'Code approuvé...' }), 0)
-                    setTimeout(() => this.setState({ approvalMessage: 'Signature autorisée...' }), 2000)
-                    setTimeout(() => this.setState({ showDialog: false }), 4000)
-                    setTimeout(() => this.startSignature(), 4200)
-                }
-
-                if (resp.data.error)
-                    console.error(resp.data.error)
-            })
+        //UX security
+        else if (resp.data.status === 'approved') {
+            setTimeout(() => this.setState({ codeApproved: true, approvalMessage: 'Code approuvé...' }), 0)
+            setTimeout(() => this.setState({ approvalMessage: 'Signature autorisée...' }), 2000)
+            setTimeout(() => this.setState({ showDialog: false }), 4000)
+            setTimeout(() => this.startSignature(), 4200)
+        }
     }
 
-    async sendEmail() {
+    sendEmail() {
         const html = emailTemplate(this.sourceUrl)
         const sendMail = functions.httpsCallable('sendEmail')
-        const isSent = await sendMail({ receivers: this.currentUser.email, subject: "Vous avez un document à signer.", html, attachments: [] })
-        return isSent
+        return sendMail({ receivers: this.currentUser.email, subject: "Vous avez un document à signer.", html, attachments: [] })
     }
 
     tick() {
         this.countDown = setInterval(() => {
-
-            let timeLeft = this.state.timeLeft
-            // console.log('timeLeft: ' + timeLeft)
-
+            let { timeLeft } = this.state
             if (timeLeft === 1)
                 clearInterval(this.countDown)
-
             timeLeft -= 1
             this.setState({ timeLeft })
         }, 1000)
@@ -305,7 +275,6 @@ class Signature extends Component {
                         returnKeyType="done"
                         value={this.state.code}
                         onChangeText={code => this.setState({ code: Number(code) })}
-                        //secureTextEntry
                         autoFocus={showDialog} />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 15, paddingHorizontal: constants.ScreenWidth * 0.03 }}>
                         <TouchableOpacity disabled={disableResend} onPress={this.verifyUser}>
@@ -313,7 +282,6 @@ class Signature extends Component {
                         </TouchableOpacity>
                         <Text style={{ color: theme.colors.placeholder }}>00:{timeLeft < 10 && 0}{timeLeft}</Text>
                     </View>
-
                     <Dialog.Button label="Annuler" onPress={() => this.setState({ showDialog: false })} style={{ color: theme.colors.error }} />
                     <Dialog.Button label="Valider" onPress={async () => await this.verifyCode()} style={{ color: theme.colors.primary }} />
                 </Dialog.Container>
@@ -323,99 +291,80 @@ class Signature extends Component {
 
     //4. Signature process
     startSignature() {
-        this.setState({ showTerms: false, pdfEditMode: true, toastType: 'info', toastMessage: "Touchez à l'endroit où vous voulez placer la signature." })
+        this.setState({
+            showTerms: false,
+            pdfEditMode: true,
+            toastType: 'info',
+            toastMessage: "Touchez à l'endroit où vous voulez placer la signature."
+        })
     }
 
-    async calculatePaddingTop() {
+    calculatePaddingTop(pdfDoc) {
         const screenWidth = constants.ScreenWidth
         const screenHeight = constants.ScreenHeight
-
-        const pdfDoc = await PDFDocument.load(this.state.pdfArrayBuffer)
         const pages = pdfDoc.getPages()
         const firstPage = pages[0]
-
         const ratio = firstPage.getHeight() / firstPage.getWidth()
-
         const pageWidth = screenWidth
         const pageHeight = pageWidth * ratio
-
         const paddingTop = (screenHeight - pageHeight) / 2
-
         return paddingTop
     }
 
     handleSingleTap = async (page, x, y) => {
-
-        if (this.state.pdfEditMode)
-            loadLog(this, true, 'Début du processus de signature...')
+        const { pdfEditMode } = this.state
+        if (!pdfEditMode) return
+        loadLog(this, true, 'Début du processus de signature...')
 
         setTimeout(async () => {
-            if (this.state.pdfEditMode) {
-                const paddingTop = await this.calculatePaddingTop()
-
-                this.setState({ filePath: null, pdfEditMode: false, loadingMessage: 'Insertion de la signature...' })
-
+            try {
                 //Getting tapped page
                 const pdfDoc = await PDFDocument.load(this.state.pdfArrayBuffer)
                 const pages = pdfDoc.getPages()
                 const firstPage = pages[page - 1]
 
-                // The meat
-                //const signatureImage = await pdfDoc.embedPng(this.state.signatureArrayBuffer)
+                //Adjust paddingTop
+                const paddingTop = this.calculatePaddingTop(pdfDoc)
+                this.setState({ filePath: null, pdfEditMode: false, loadingMessage: 'Insertion de la signature...' })
 
-                //constants
+                //Constants
                 const signee = firebase.auth().currentUser.displayName
                 const ref = await uuidGenerator()
                 const motif = 'Acceptation des conditions'
                 const signedAt = moment().format('Do/MM/YYYY, HH:mm')
-
                 this.setState({ signee, signedAt, ref, motif })
 
                 if (Platform.OS == 'android') {
-                    // firstPage.drawImage(signatureImage, {
-                    //     x: (firstPage.getWidth() * x) / (this.state.pageWidth) - (firstPage.getWidth() * 0.25) / 2,
-                    //     y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop,
-                    //     width: firstPage.getWidth() * 0.25,
-                    //     height: firstPage.getWidth() * 0.25 * 0.56,
-                    // })
-
                     firstPage.drawText(` Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`, {
                         x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
                         y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight * 0.005,
                         size: 10,
                         lineHeight: 10,
-                        //font: helveticaFont,
                         color: rgb(0, 0, 0),
                     })
                 }
 
                 else {
-                    // firstPage.drawImage(signatureImage, {
-                    //     x: ((pageWidth * (x - 12)) / constants.ScreenWidth),
-                    //     y: pageHeight - ((pageHeight * (y + 12)) / 540),
-                    //     width: firstPage.getWidth() * 0.1,
-                    //     height: firstPage.getHeight() * 0.1,
-                    // })
-
                     firstPage.drawText(`APPROUVÉ LE ${moment().format()} \n Signé electroniquement par: Synergys`, {
                         x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
                         y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 16 * 2,
                         size: 12,
-                        //font: helveticaFont,
                         color: rgb(0.95, 0.1, 0.1),
                     })
                 }
 
                 this.setState({ loadingMessage: 'Génération du document signé...' })
                 const pdfBytes = await pdfDoc.save()
-                const pdfBase64 = uint8ToBase64(pdfBytes);
-                const path = `${Dir}/Synergys/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
-
+                const pdfBase64 = uint8ToBase64(pdfBytes)
+                const path = `${downloadDir}/Synergys/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
                 this.setState({ loadingMessage: 'Enregistrement du document signé...' })
                 RNFS.writeFile(path, pdfBase64, "base64")
-                    .then((success) => this.setState({ newPdfSaved: true, newPdfPath: path, pdfBase64: pdfBase64, pdfArrayBuffer: base64ToArrayBuffer(pdfBase64), filePath: path }))
+                    .then((success) => this.setState({ newPdfSaved: true, newPdfPath: path, pdfBase64, pdfArrayBuffer: base64ToArrayBuffer(pdfBase64), filePath: path }))
                     .catch((err) => setToast(this, 'e', 'Erreur inattendue, veuillez réessayer.'))
                     .finally(() => loadLog(this, false, ''))
+            }
+            catch (e) {
+                displayError({ message: errorMessages.pdfGen })
             }
         }, 1000)
 
@@ -423,129 +372,127 @@ class Signature extends Component {
 
     //5.1 Retry sign
     async retrySign() {
-        //Delete new generated signed pdf from device
-        loadLog(this, true, 'Réinitialisation du processus de signature...')
-        await this.deleteFileFromLocal(this.state.newPdfPath)
-        this.setState({ loadingMessage: 'Chargement du document original...' })
-        //Reset original file
-        this.setState({ filePath: this.originalFilePath, newPdfPath: null }, async () => {
+        try {
+            //Delete new generated signed pdf from device
+            loadLog(this, true, 'Réinitialisation du processus de signature...')
+            await this.deleteFileFromLocal(this.state.newPdfPath)
+            this.setState({ loadingMessage: 'Chargement du document original...' })
+            //Reset original file
+            this.setState({ filePath: this.originalFilePath, newPdfPath: null })
             await this.loadOriginalFile(this.originalFilePath)
-        })
-        //start signature
-        this.startSignature()
+            //start signature
+            this.startSignature()
+        }
+        catch (e) {
+            Alert.alert('Erreur inattendue. Veuillez réessayer.')
+        }
     }
 
-    async deleteFileFromLocal(filePath) {
-
-        await RNFS.exists(filePath).then((result) => {
-            if (result)
-                return RNFS.unlink(filePath).catch((e) => console.error(e))
-        })
-            .catch((e) => console.error(e.message))
+    deleteFileFromLocal(filePath) {
+        return RNFS.exists(filePath)
+            .then((result) => {
+                return RNFS.unlink(filePath)
+            })
     }
 
     //5.2 Confirm sign
     async confirmSign() {
-
-        const result = await this.uploadSignedFile()
-
-        if (result === 'failure') {
-            this.setState({ uploading: false })
-            setToast(this, 'e', "Erreur lors de l'exportation du document signé, veuillez réessayer.")
-            return
-        }
-
-        //Data of proofs
-        const ipLocalAddress = await NetworkInfo.getIPAddress()
-        const ipV4Address = await NetworkInfo.getIPV4Address()
-        const macAddress = await DeviceInfo.getMacAddress()
-        const android_id = await DeviceInfo.getAndroidId()
-        const app_name = await DeviceInfo.getApplicationName()
-        const device = await DeviceInfo.getDevice()
-        const device_id = await DeviceInfo.getDeviceId()
-
-        //store max of data (Audit) about the signee
-        const document = {
-            attachment: this.state.signedAttachment,
-            attachmentSource: 'signature',
+        try {
+            await this.uploadSignedFile()
             //Data of proofs
-            sign_proofs_data: {
-                //Code sent
-                codeSent: this.state.codeSent,
-                //User identity     
-                signedBy: {
-                    id: this.currentUser.uid,
-                    fullName: this.currentUser.displayName,
-                    email: this.currentUser.email,
-                    role: this.props.role.value
-                },
-                //only when signGenerated = true
-                //Timestamp
-                signedAt: moment().format(),//only when signGenerated = true
-                //Device data
-                phoneNumber: this.state.phoneNumber,//only when signGenerated = true
-                ipLocalAddress: ipLocalAddress,
-                ipV4Address: ipV4Address,
-                macAddress: macAddress,
-                android_id: android_id,
-                app_name: app_name,
-                device: device,
-                device_id: device_id,
-                //Signature reference
-                ref: this.state.ref,
-                //Other data
-                motif: this.state.motif,
+            const ipLocalAddress = await NetworkInfo.getIPAddress()
+            const ipV4Address = await NetworkInfo.getIPV4Address()
+            const macAddress = await DeviceInfo.getMacAddress()
+            const android_id = await DeviceInfo.getAndroidId()
+            const app_name = await DeviceInfo.getApplicationName()
+            const device = await DeviceInfo.getDevice()
+            const device_id = await DeviceInfo.getDeviceId()
+
+            //store max of data (Audit) about the signee
+            const document = {
+                attachment: this.state.signedAttachment,
+                attachmentSource: 'signature',
+                //Data of proofs
+                sign_proofs_data: {
+                    //User identity     
+                    signedBy: {
+                        id: this.currentUser.uid,
+                        fullName: this.currentUser.displayName,
+                        email: this.currentUser.email,
+                        role: this.props.role.value
+                    },
+                    //only when signGenerated = true
+                    //Timestamp
+                    signedAt: moment().format(),//only when signGenerated = true
+                    //Device data
+                    phoneNumber: this.state.phoneNumber,//only when signGenerated = true
+                    ipLocalAddress: ipLocalAddress,
+                    ipV4Address: ipV4Address,
+                    macAddress: macAddress,
+                    android_id: android_id,
+                    app_name: app_name,
+                    device: device,
+                    device_id: device_id,
+                    //Signature reference
+                    ref: this.state.ref,
+                    //Other data
+                    motif: this.state.motif,
+                }
             }
+
+            const newDocument = _.cloneDeep(document)
+            newDocument.createdAt = moment().format()
+            newDocument.createdBy = {
+                id: this.currentUser.uid,
+                fullName: this.currentUser.displayName,
+                email: this.currentUser.email,
+                role: this.props.role.value
+            }
+
+            await db.collection('Documents').doc(this.DocumentId).set(document, { merge: true })
+            await db.collection('Documents').doc(this.DocumentId).collection('AttachmentHistory').add(newDocument)
+            this.props.navigation.state.params.onGoBack && this.props.navigation.state.params.onGoBack() //refresh document to get url of new signed document
+            this.props.navigation.pop(this.onSignaturePop)
         }
 
-        const newDocument = _.cloneDeep(document)
-        newDocument.createdAt = moment().format()
-        newDocument.createdBy = {
-            id: this.currentUser.uid,
-            fullName: this.currentUser.displayName,
-            email: this.currentUser.email,
-            role: this.props.role.value
+        catch (e) {
+            setToast(this, 'e', "Erreur lors de l'exportation du document signé, veuillez réessayer.")
         }
 
-        await db.collection('Documents').doc(this.DocumentId).set(document, { merge: true })
-        await db.collection('Documents').doc(this.DocumentId).collection('AttachmentHistory').add(newDocument)
-            .finally(() => {
-                this.setState({ uploading: false, showDialog: false })
-                this.props.navigation.state.params.onGoBack() //refresh document to get url of new signed document
-                this.props.navigation.pop(this.onSignaturePop)
-            })
+        finally {
+            this.setState({ uploading: false })
+        }
     }
 
     async uploadSignedFile() {
-        this.setState({ uploading: true })
-
-        const stats = await RNFetchBlob.fs.stat(this.state.newPdfPath)
-
-        let signedAttachment = {
-            path: this.state.newPdfPath,
-            type: 'application/pdf',
-            name: stats.filename,
-            size: stats.size,
-            progress: 0
+        try {
+            this.setState({ uploading: true })
+            const stats = await RNFetchBlob.fs.stat(this.state.newPdfPath)
+            let signedAttachment = {
+                path: this.state.newPdfPath,
+                type: 'application/pdf',
+                name: stats.filename,
+                size: stats.size,
+                progress: 0
+            }
+            this.setState({ signedAttachment })
+            const metadata = {
+                signedAt: moment().format(),
+                signedBy: this.currentUser.uid,
+                phoneNumber: this.state.phoneNumber
+            }
+            const storageRefPath = `Projects/${this.ProjectId}/Documents/${this.DocumentType}/${this.DocumentId}/${moment().format('ll')}/${signedAttachment.name}`
+            const response = await this.uploadFile(signedAttachment, storageRefPath, true, metadata)
+            return response
         }
 
-        this.setState({ signedAttachment })
-
-        const metadata = {
-            signedAt: moment().format(),
-            signedBy: this.currentUser.uid,
-            phoneNumber: this.state.phoneNumber
+        catch (e) {
+            throw new Error("Erreur lors de l'importation du document.")
         }
-
-        const storageRefPath = `Projects/${this.ProjectId}/Documents/${this.DocumentType}/${this.DocumentId}/${moment().format('ll')}/${signedAttachment.name}`
-        const response = await this.uploadFile(signedAttachment, storageRefPath, true, metadata)
-
-        return response
     }
 
     renderAttachment() {
         let attachment = this.state.signedAttachment
-
         let readableSize = attachment.size / 1000
         readableSize = readableSize.toFixed(1)
 
@@ -555,14 +502,11 @@ class Signature extends Component {
                     <View style={{ flex: 0.17, justifyContent: 'center', alignItems: 'center' }}>
                         <MaterialCommunityIcons name='pdf-box' size={24} color={theme.colors.primary} />
                     </View>
-
                     <View style={{ flex: 0.68 }}>
                         <Text numberOfLines={1} ellipsizeMode='middle' style={[theme.customFontMSmedium.body]}>{attachment.name}</Text>
                         <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>{readableSize} KB</Text>
                     </View>
-
                     <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }} />
-
                 </View>
                 <View style={{ flex: 0.1, justifyContent: 'flex-end' }}>
                     <ProgressBar progress={attachment.progress} color={theme.colors.primary} visible={true} />
@@ -580,7 +524,7 @@ class Signature extends Component {
         if (uploading) {
             return (
                 <View style={styles.container}>
-                    <Appbar back customBackHandler={() => console.log('No action..waiting...')} title titleText={'Exportation du document signé...'} />
+                    <Appbar back title titleText={'Exportation du document signé...'} />
                     {this.renderAttachment()}
                 </View>
             )
@@ -588,8 +532,13 @@ class Signature extends Component {
 
         else return (
             <View style={styles.container}>
-                {!pdfEditMode && <Appbar back={true} title titleText={this.fileName} />}
-
+                {!pdfEditMode &&
+                    <Appbar
+                        back={true}
+                        title
+                        titleText={this.fileName}
+                    />
+                }
                 {fileDownloaded &&
                     <View style={styles.pdfContainer}>
                         <Pdf
@@ -605,57 +554,58 @@ class Signature extends Component {
                                 this.setState({ pageWidth: width, pageHeight: height })
                             }}
                             onPageSingleTap={(page, x, y) => {
-                                console.log('555')
                                 this.handleSingleTap(page, x, y)
                             }}
                             style={[styles.pdf]} />
                     </View>
                 }
-
                 {!pdfEditMode && filePath &&
                     <View>
                         {newPdfSaved &&
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 5 }}>
-                                <TouchableOpacity onPress={this.retrySign} style={[styles.button1, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 15 }]}>
+                            <View style={styles.buttonsContainer}>
+                                <TouchableOpacity onPress={this.retrySign} style={styles.button1}>
                                     <Text style={[theme.customFontMSsemibold.body, { color: '#fff', marginLeft: 5 }]}>RÉESSAYER</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={this.confirmSign} style={[styles.button1, { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', paddingVertical: 15 }]}>
+                                <TouchableOpacity onPress={this.confirmSign} style={styles.button1}>
                                     <Text style={[theme.customFontMSsemibold.body, { color: '#fff', marginLeft: 5 }]}>VALIDER</Text>
                                 </TouchableOpacity>
                             </View>}
 
                         {!newPdfSaved && fileDownloaded && isConnected && canUpdate &&
-                            // <TouchableOpacity onPress={this.startSignature} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
-                            <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={[styles.button2, { flexDirection: 'row', justifyContent: 'center', paddingVertical: 8 }]}>
+                            <TouchableOpacity onPress={() => this.setState({ showTerms: true })} style={styles.button2}>
                                 <FontAwesome5 name='signature' size={17} color='#fff' style={{ marginRight: 7 }} />
                                 <Text style={[theme.customFontMSsemibold.header, { color: '#fff', marginLeft: 7, letterSpacing: 1 }]}>SIGNER</Text>
                             </TouchableOpacity>
                         }
                     </View>
                 }
-
                 {showTerms &&
                     <TermsConditions
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
-                        //acceptTerms={this.verifyUser}
-                        acceptTerms={this.startSignature}
-                        dowloadPdf={() => {
+                        acceptTerms={this.verifyUser}
+                        //acceptTerms={this.startSignature}
+                        downloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
-                            this.downloadFile(this.termsPath, this.termsURL)
-                        }} />}
-
+                            this.downloadFile(termsDir, termsUrl)
+                        }} />
+                }
                 {showDialog && this.renderDialog()}
-                {loading && <LoadDialog loading={loading} message={loadingMessage} />}
-
+                {loading &&
+                    <LoadDialog
+                        loading={loading}
+                        message={loadingMessage}
+                    />
+                }
                 <Toast
                     duration={3500}
                     message={toastMessage}
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })}
-                    containerStyle={{ bottom: 0 }} />
-            </View>
+                    containerStyle={{ bottom: 0 }}
+                />
+            </View >
         )
     }
 }
@@ -692,6 +642,11 @@ const styles = StyleSheet.create({
         width: constants.ScreenWidth, //fixed to screen width
         backgroundColor: theme.colors.gray50
     },
+    buttonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 5
+    },
     button1: {
         width: constants.ScreenWidth * 0.45,
         height: constants.ScreenWidth * 0.1,
@@ -699,7 +654,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: theme.colors.primary,
         padding: 10,
-        marginVertical: 10
+        marginVertical: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 15
     },
     button2: {
         width: constants.ScreenWidth * 0.9,
@@ -708,7 +667,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: theme.colors.primary,
         padding: 10,
-        marginVertical: 10
+        marginVertical: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+        paddingVertical: 8
     },
     buttonText: {
         color: "#DAFFFF",
@@ -738,42 +700,3 @@ const styles = StyleSheet.create({
 
 
 
-
-// ***************** OLD CODE *******************************
- // async sendEmail() {
-    //     const code = this.state.code
-    //     const currentUser = firebase.auth().currentUser
-
-    //     const text = `<div>
-    //     <h4>Veuillez confirmer votre identité en saisissant le code suivant dans l'application Synergys afin de continuer la procédure de signature.</h4>
-    //     <h2>${code}</h2>
-    //     <h4>Si vous ce n'est pas vous, ou bien vous n'avez fourni à nulle personne tierce la permission de signer en votre nom, prière de signaler ce message auprès d'un responsable du Groupe Synergys.</h4>
-    //     </div>`
-
-    //     const sendMail = functions.httpsCallable('sendMail')
-    //     return await sendMail({ dest: currentUser.email, code: this.state.code, subject: "Signature digitale: Vérification de l'identité", text: text })
-    //         .then(() => {
-    //             return db.collection('Users').doc(currentUser.uid).update({ signCode: this.state.code })
-    //                 .then(() => {
-    //                     this.setState({ loadingMessage: 'Code envoyé !' })
-    //                     return true
-    //                 })
-    //         })
-    //         .catch((e) => { return false })
-    //         .finally(() => loadLog(this, false, ''))
-    // }
-
-    // async verifyCode() {
-    //     let { signCode } = this.state
-
-    //     await db.collection('Users').doc(firebase.auth().currentUser.uid).get().then((doc) => {
-
-    //         if (doc.data().signCode === signCode) {
-    //             this.setState({ showDialog: false })
-    //             this.confirmSign()
-    //         }
-
-    //         else setToast(this, 'e', 'Code de confirmation invalide.')
-    //     })
-
-    // }

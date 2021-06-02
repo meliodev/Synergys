@@ -17,7 +17,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { roles } from './constants'
+import { downloadDir, roles } from './constants'
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -346,7 +346,7 @@ export const myAlert = function myAlert(title, message, handleConfirm, handleCan
 
 export const displayError = (error) => {
   const showError = error && error.message !== "ignore"
-  if (showError) Alert.alert('', result.error.message)
+  if (showError) Alert.alert('', error.message)
 }
 
 export const downloadFile = async (main, fileName, url) => {
@@ -480,8 +480,7 @@ export const convertImageToPdf = async (attachment) => {
 //##File system
 export const setDestPath = async (fileName) => {
   try {
-    const Dir = Platform.OS === 'ios' ? RNFS.DocumentDirectoryPath : RNFS.DownloadDirectoryPath
-    const destFolder = `${Dir}/Synergys/Documents`
+    const destFolder = `${downloadDir}/Synergys/Documents`
     await RNFS.mkdir(destFolder)
     const destPath = `${destFolder}/${fileName}`
     return destPath
@@ -522,11 +521,12 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
     if (response.didCancel) {
       resolve(previousAttachments)
     }
+
     else if (response.error) {
       errorMessage = "Erreur lors de la sélection du fichier. Veuillez réessayer."
       reject(new Error(errorMessage))
     }
-
+    
     else {
       const image = {
         type: response.type,
@@ -589,7 +589,7 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
     let errorMessage = 'Erreur lors de la sélection du fichier. Veuillez réessayer.'
     if (DocumentPicker.isCancel(error))
       return attachments
-    throw new Error(errorMessage)
+    else throw new Error(errorMessage)
   }
 }
 

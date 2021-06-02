@@ -1,4 +1,6 @@
+
 DONE:
++++ ERRORS: Handling exceptions thrown by async functions
 +++ FEATURE: Adresse de saisi manuelle
 +++ Autofill address fields
 +++ automatic fill task/document

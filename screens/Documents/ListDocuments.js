@@ -102,18 +102,15 @@ class ListDocuments extends Component {
     async fetchExtraDocuments() {
         let { documentsList, documentsCount } = this.state
         let extraDocuments = []
-
-        await db
-            .collection('Documents')
-            .where('project.intervenant.id', '==', auth.currentUser.uid)
-            .get().then((snapshot) => {
-                documentsCount = documentsCount + snapshot.docs.length
-                for (const doc of snapshot.docs) {
-                    let document = doc.data()
-                    document.id = doc.id
-                    extraDocuments.push(document)
-                }
-            })
+        const query = db.collection('Documents').where('project.intervenant.id', '==', auth.currentUser.uid)
+        await query.get().then((snapshot) => {
+            documentsCount = documentsCount + snapshot.docs.length
+            for (const doc of snapshot.docs) {
+                let document = doc.data()
+                document.id = doc.id
+                extraDocuments.push(document)
+            }
+        })
 
         if (extraDocuments.length > 0)
             documentsList = documentsList.concat(extraDocuments)

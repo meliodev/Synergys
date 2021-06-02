@@ -12,7 +12,7 @@ moment.locale('fr')
 import { db } from '../firebase'
 import * as theme from "../core/theme"
 import { constants } from "../core/constants"
-import { isEditOffline, navigateToScreen, compareTimes } from "../core/utils"
+import { isEditOffline, navigateToScreen, compareTimes, displayError } from "../core/utils"
 import CustomIcon from "./CustomIcon"
 import ItemPicker from './ItemPicker'
 import Button from './Button'
@@ -25,7 +25,6 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
     const [pickedDate, setPickedDate] = React.useState('')
     const [pickedTask, setPickedTask] = React.useState(null)
     const [updateTaskLoading, setUpdateTaskLoading] = React.useState(false)
-
     const [selectedIsAllDay, setSelectedIsAllDay] = React.useState(false)
     const [selectedDate, setSelectedDate] = React.useState('')
     const [selectedStartHour, setSelectedStartHour] = React.useState('')
@@ -204,30 +203,35 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
 
     //Update task
     const updateTask = async () => {
-        //1. Check network
-        let isEditOffLine = isEditOffline(isEdit, isConnected)
-        if (isEditOffLine) return
+        try {
+            //1. Check network
+            let isEditOffLine = isEditOffline(isEdit, isConnected)
+            if (isEditOffLine) return
 
-        //2. Validate inputs (Times) //#task
-        const isTimesValid = validateTimes(selectedIsAllDay, selectedStartHour, selectedDueHour)
-        if (!isTimesValid) return
+            //2. Validate inputs (Times) //#task
+            const isTimesValid = validateTimes(selectedIsAllDay, selectedStartHour, selectedDueHour)
+            if (!isTimesValid) return
 
-        //3. Set update
-        const update = {
-            isAllDay: selectedIsAllDay,
-            date: moment(selectedDate).format('YYYY-MM-DD'),
+            //3. Set update
+            const update = {
+                isAllDay: selectedIsAllDay,
+                date: moment(selectedDate).format('YYYY-MM-DD'),
+            }
+
+            if (!selectedIsAllDay) {
+                update.startHour = selectedStartHour
+                update.dueHour = selectedDueHour
+            }
+
+            //4. Update task
+            setUpdateTaskLoading(true)
+            await db.collection('Agenda').doc(pickedTask.id).update(update)
+            await refreshConflicts()
+            setUpdateTaskLoading(false)
         }
-
-        if (!selectedIsAllDay) {
-            update.startHour = selectedStartHour
-            update.dueHour = selectedDueHour
+        catch (e) {
+            displayError({ message: "Erreur lors de la mise à jour de la tâche. Veuillez réessayer." })
         }
-
-        //4. Update task
-        setUpdateTaskLoading(true)
-        await db.collection('Agenda').doc(pickedTask.id).update(update)
-        await refreshConflicts()
-        setUpdateTaskLoading(false)
     }
 
     const validateTimes = (isAllDay, startHour, dueHour) => {

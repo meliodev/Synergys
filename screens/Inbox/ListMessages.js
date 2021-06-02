@@ -58,7 +58,7 @@ class ListMessages extends Component {
         if (!haveRead) {
             let usersHaveRead = message.haveRead
             usersHaveRead = usersHaveRead.concat([this.currentUser.uid])
-            await db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
+            db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
         }
 
         this.props.navigation.navigate('ViewMessage', { message: message })

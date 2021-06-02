@@ -42,7 +42,7 @@ class App extends Component {
     const channelId = await notifee.createChannel({
       id: 'projects',
       name: 'projects',
-      lights: false,
+      lights: false, 
       vibration: true,
       importance: AndroidImportance.HIGH,
     })

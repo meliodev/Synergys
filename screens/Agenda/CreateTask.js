@@ -27,7 +27,7 @@ import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
 import { constants, adminId } from "../../core/constants"
-import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress, formatDocument, unformatDocument } from "../../core/utils"
+import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { fetchDocument } from '../../api/firestore-api';
@@ -241,28 +241,33 @@ class CreateTask extends Component {
 
     //##CONFLICTS VERIFICATION
     async checkTasksConflicts(tasks) {
-        let overlappingTasks = {}
-        for (const tsk of tasks) {
-            const overlappingTasksArr = await this.checkAssignedToAvailability(tsk)
-            if (overlappingTasksArr.length > 0) {
-                overlappingTasks[tsk.id] = overlappingTasksArr
+        try {
+            let overlappingTasks = {}
+            for (const tsk of tasks) {
+                const overlappingTasksArr = await this.checkAssignedToAvailability(tsk)
+                if (overlappingTasksArr.length > 0) {
+                    overlappingTasks[tsk.id] = overlappingTasksArr
+                }
             }
+            return overlappingTasks
         }
-        return overlappingTasks
+        catch (e) {
+            const { message } = e
+            throw new Error(message)
+        }
     }
 
     async checkAssignedToAvailability(task) {
-        const dateChanged = this.initialState.startDate !== task.date
-        const timeChanged = this.initialState.startHour !== task.startHour
-        const assignedToChanged = this.initialState.assignedTo.id !== task.assignedTo.id
-        if (!dateChanged && !timeChanged && !assignedToChanged) return
-
-        const today = moment().format('YYYY-MM-DD')
-        const query = db.collection('Agenda').where('assignedTo.id', '==', task.assignedTo.id).where('date', '>=', today)
-        const overlappingTasks = await query.get().then((querySnapshot) => {
+        try {
+            const dateChanged = this.initialState.startDate !== task.date
+            const timeChanged = this.initialState.startHour !== task.startHour
+            const assignedToChanged = this.initialState.assignedTo.id !== task.assignedTo.id
+            if (!dateChanged && !timeChanged && !assignedToChanged) return
+            const today = moment().format('YYYY-MM-DD')
+            const query = db.collection('Agenda').where('assignedTo.id', '==', task.assignedTo.id).where('date', '>=', today)
+            const querySnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
 
             if (querySnapshot.empty) return []
-
             let overlappingTasks = []
             for (const doc of querySnapshot.docs) {
 
@@ -289,9 +294,11 @@ class CreateTask extends Component {
                 }
             }
             return overlappingTasks
-        })
-
-        return overlappingTasks
+        }
+        catch (e) {
+            const { message } = e
+            throw new Error(message)
+        }
     }
 
     handleConflicts(overlappingTasks, newTask) {
@@ -319,100 +326,109 @@ class CreateTask extends Component {
 
     //##POST
     async handleSubmit(isConflictHandler = false) {
-        Keyboard.dismiss()
+        try {
+            Keyboard.dismiss()
+            //1. Check network (disable edit offline)
+            const { isConnected } = this.props.network
+            let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+            if (isEditOffLine) return
 
-        //1. Check network (disable edit offline)
-        const { isConnected } = this.props.network
-        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
-        if (isEditOffLine) return
+            //2. Init variables
+            const { loading } = this.state
+            if (loading || _.isEqual(this.state, this.initialState)) return
+            load(this, true)
 
-        //2. Init variables
-        const { loading } = this.state
-        if (loading || _.isEqual(this.state, this.initialState)) return
-        load(this, true)
+            //3.1 Validate inputs 
+            const isValid = this.validateInputs()
+            if (!isValid) return
 
-        //3.1 Validate inputs 
-        const isValid = this.validateInputs()
-        if (!isValid) return
-
-        //3.2 POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
-        const currentRole = this.props.role.id
-        const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
-        if (isBlockedUpdates) {
-            Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
-            load(this, false)
-            return
-        }
-
-        //3.3 ADD INTERVENANT IF "ASSIGNED TO" IS NOT ONE OF PROJECT CONTACTS
-        const { assignedTo, project, startDate, endDate, type } = this.state
-        if (this.isProcess && assignedTo.role === 'Commercial' || assignedTo.role === 'Poseur') {
-            const isIntervenant = assignedTo.id !== project.comContact.id && assignedTo.id !== project.techContact.id
-            if (isIntervenant) {
-                db.collection('Projects').doc(project.id).update({ intervenant: assignedTo })
+            //3.2 POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
+            const currentRole = this.props.role.id
+            const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, this.state.project.step)
+            if (isBlockedUpdates) {
+                Alert.alert('Accès refusé', `Utilisateur non autorisé à modifier un projet dans la phase ${this.state.project.step}.`)
+                load(this, false)
+                return
             }
+
+            //3.3 ADD INTERVENANT IF "ASSIGNED TO" IS NOT ONE OF PROJECT CONTACTS
+            const { assignedTo, project, startDate, endDate, type } = this.state
+            if (this.isProcess && assignedTo.role === 'Commercial' || assignedTo.role === 'Poseur') {
+                const isIntervenant = assignedTo.id !== project.comContact.id && assignedTo.id !== project.techContact.id
+                if (isIntervenant) {
+                    db.collection('Projects').doc(project.id).update({ intervenant: assignedTo })
+                }
+            }
+
+            //4. Building task(s)
+            const properties = ["name", "assignedTo", "description", "project", "type", "priority", "status", "address", "color", "isAllDay", "startDate", "startHour", "dueHour"]
+            let task = unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
+            //specific
+            task.id = this.TaskId
+            task.date = moment(task.startDate).format('YYYY-MM-DD')
+            delete task.startDate
+            let natures
+            this.types.forEach((t) => { if (t.value === type) natures = t.natures })
+            task.natures = natures
+            let tasks = this.isEdit ? [task] : this.buildTasks(task, startDate, endDate)
+
+            //5.1
+            const isThisWeek = this.isTasksThisWeek(tasks)
+            if (!isThisWeek) {
+                Alert.alert('Limite dépassée', "Impossible de planifier une tâche avant 7 jours. Veuiller définir une autre date de début.")
+                load(this, false)
+                return
+            }
+
+            //5.2 Limit number of tasks created
+            const isOverLimit = this.limitTasks(tasks.length)
+            if (isOverLimit) {
+                Alert.alert('Limite dépassée', "Impossible d'ajouter plus de 25 tâches en une seule fois.")
+                load(this, false)
+                return
+            }
+
+            ////6. Handle conflicts
+            const overlappingTasks = await this.checkTasksConflicts(tasks)
+            if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+                load(this, false)
+                this.handleConflicts(overlappingTasks, task)
+                return
+            }
+
+            //7. Persist task(s)
+            await this.persistTasks(tasks)
+
+            //8. Go back
+            //if (this.prevScreen === 'Agenda') {
+            if (this.props.navigation.state.params.onGoBack) {
+                const refreshAgenda = true
+                this.props.navigation.state.params.onGoBack(refreshAgenda)
+            }
+            //}
+
+            this.props.navigation.goBack()
         }
-
-        //4. Building task(s)
-        const properties = ["name", "assignedTo", "description", "project", "type", "priority", "status", "address", "color", "isAllDay", "startDate", "startHour", "dueHour"]
-        let task = unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
-        //specific
-        task.id = this.TaskId
-        task.date = moment(task.startDate).format('YYYY-MM-DD')
-        delete task.startDate
-        let natures
-        this.types.forEach((t) => { if (t.value === type) natures = t.natures })
-        task.natures = natures
-        let tasks = this.isEdit ? [task] : this.buildTasks(task, startDate, endDate)
-
-        //5.1
-        const isThisWeek = this.isTasksThisWeek(tasks)
-        if (!isThisWeek) {
-            Alert.alert('Limite dépassée', "Impossible de planifier une tâche avant 7 jours. Veuiller définir une autre date de début.")
-            load(this, false)
-            return
+        catch (e) {
+            const { message } = e
+            displayError({ message })
         }
-
-        //5.2 Limit number of tasks created
-        const isOverLimit = this.limitTasks(tasks.length)
-        if (isOverLimit) {
-            Alert.alert('Limite dépassée', "Impossible d'ajouter plus de 25 tâches en une seule fois.")
-            load(this, false)
-            return
-        }
-
-        ////6. Handle conflicts
-        // const overlappingTasks = await this.checkTasksConflicts(tasks)
-        // if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
-        //     load(this, false)
-        //     this.handleConflicts(overlappingTasks, task)
-        //     return
-        // }
-
-        //7. Persist task(s)
-        await this.persistTasks(tasks)
-
-        //8. Go back
-        //if (this.prevScreen === 'Agenda') {
-        if (this.props.navigation.state.params.onGoBack) {
-            const refreshAgenda = true
-            this.props.navigation.state.params.onGoBack(refreshAgenda)
-        }
-        //}
-
-        this.props.navigation.goBack()
     }
 
     async persistTasks(tasks) {
-        if (this.isEdit) {
-            await this.updateTask(tasks[0])
+        try {
+            if (this.isEdit)
+                await this.updateTask(tasks[0])
+            else this.createTasks(tasks)
         }
-
-        else this.createTasks(tasks)
+        catch (e) {
+            const { message } = e
+            throw new Error(message)
+        }
     }
 
-    async updateTask(task) {
-        await db.collection('Agenda').doc(task.id).set(task, { merge: true })
+    updateTask(task) {
+        return db.collection('Agenda').doc(task.id).set(task, { merge: true })
     }
 
     createTasks(tasks) {

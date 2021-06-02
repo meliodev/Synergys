@@ -7,10 +7,11 @@ import AutoTags from "react-native-tag-autocomplete"
 
 import { db } from '../firebase'
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
-import { myAlert } from "../core/utils";
+import { constants, errorMessages } from "../core/constants";
+import { displayError, myAlert } from "../core/utils";
 
 import { withNavigation } from 'react-navigation'
+import { Alert } from "react-native"
 
 const uri = "https://mobirise.com/bootstrap-template/profile-template/assets/images/timothy-paul-smith-256424-1200x800.jpg";
 
@@ -62,7 +63,7 @@ class AutoCompleteBrands extends React.Component {
     async handleDeleteBrand(BrandId) {
         await db.collection('Brands').doc(BrandId).delete()
             .then(async () => this.props.navigation.goBack())
-            .catch((e) => console.error(e))
+            .catch((e) => displayError({ message: errorMessages.firestore.delete }))
     }
 
     customRenderSuggestion = suggestion => {

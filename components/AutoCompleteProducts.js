@@ -7,8 +7,8 @@ import AutoTags from "react-native-tag-autocomplete"
 
 import { db } from '../firebase'
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
-import { myAlert } from "../core/utils";
+import { constants, errorMessages } from "../core/constants";
+import { displayError, myAlert } from "../core/utils";
 
 import { withNavigation } from 'react-navigation'
 
@@ -63,7 +63,7 @@ class AutoCompleteProducts extends React.Component {
     async handleDeleteProduct(ProductId) {
         await db.collection('Products').doc(ProductId).update({ deleted: true })
             .then(async () => this.props.navigation.goBack())
-            .catch((e) => console.error(e))
+            .catch((e) =>  displayError({ message: errorMessages.firestore.delete }))
     }
 
     customRenderSuggestion = suggestion => {

@@ -26,9 +26,10 @@ import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
 import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient, fetchDocument } from '../../api/firestore-api'
-import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress } from "../../core/utils"
+import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
+import { setCurrentUser } from '../../core/redux'
 
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
 
@@ -41,7 +42,6 @@ class Profile extends Component {
         this.changePassword = this.changePassword.bind(this)
         this.passwordValidation = this.passwordValidation.bind(this)
         this.refreshToast = this.refreshToast.bind(this)
-        this.handleReauthenticateError = this.handleReauthenticateError.bind(this)
         this.fetchDocs = fetchDocs.bind(this)
         this.validateClientInputs = validateClientInputs.bind(this)
         this.refreshMonthlyGoals = this.refreshMonthlyGoals.bind(this)
@@ -62,7 +62,6 @@ class Profile extends Component {
 
         this.state = {
             id: this.userParam.id, //Not editable
-            currentUser: auth.currentUser,
             isPro: false,
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
@@ -94,23 +93,29 @@ class Profile extends Component {
 
     //##GET
     async componentDidMount() {
-        let user = await fetchDocument(this.dataCollection, this.userParam.id)
-        user = this.setUser(user)
-        if (!user) return
+        try {
+            let user = await fetchDocument(this.dataCollection, this.userParam.id)
+            user = this.setUser(user)
+            if (!user) return
 
-        if (this.isClient) await this.fetchClientProjects()
+            if (this.isClient) await this.fetchClientProjects()
 
-        // DC can view/add Coms goals
-        if (this.userParam.roleId === 'com') {
-            const initialTurnoverObjects = initTurnoverObjects()
-            const turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, this.userParam.id)
-            let turnoverArr = setTurnoverArr(turnoverObjects)
-            turnoverArr = sortMonths(turnoverArr)
-            const monthlyGoals = setMonthlyGoals(turnoverArr)
-            this.setState({ monthlyGoals })
+            // DC can view/add Coms goals
+            if (this.userParam.roleId === 'com') {
+                const initialTurnoverObjects = initTurnoverObjects()
+                const turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, this.userParam.id)
+                let turnoverArr = setTurnoverArr(turnoverObjects)
+                turnoverArr = sortMonths(turnoverArr)
+                const monthlyGoals = setMonthlyGoals(turnoverArr)
+                this.setState({ monthlyGoals })
+            }
+            this.initialState = _.cloneDeep(this.state)
+            load(this, false)
         }
-        this.initialState = _.cloneDeep(this.state)
-        load(this, false)
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     componentWillUnmount() {
@@ -205,7 +210,7 @@ class Profile extends Component {
     }
 
     //##POST
-    async handleSubmit() {
+    handleSubmit() {
 
         Keyboard.dismiss()
         if (this.state.loading || _.isEqual(this.state, this.initialState)) return
@@ -219,41 +224,37 @@ class Profile extends Component {
         let userData = []
         let { isPro, nom, prenom, denom, phone, address } = this.state
         const { isConnected } = this.props.network
+        const fullName = isPro ? denom.value : `${prenom.value} ${nom.value}`
 
         let user = {
+            fullName,
             phone: phone.value,
-            address
+            address,
         }
 
-        if (isConnected) {
-            if (isPro) {
-                user.denom = denom.value
-                user.siret = siret.value
-                user.fullName = denom.value
-            }
-
-            else if (!isPro) {
-                user.nom = nom.value
-                user.prenom = prenom.value
-                user.fullName = `${prenom.value} ${nom.value}`
-            }
+        if (isPro) {
+            user.denom = denom.value
+            user.siret = siret.value
+        }
+        else {
+            user.nom = nom.value
+            user.prenom = prenom.value
         }
 
         //Persist data
         db.collection(this.dataCollection).doc(this.userParam.id).set(user, { merge: true })
-
-        if (!isConnected) return
-
         const nomChanged = nom.value !== this.initialState.nom.value
         const prenomChanged = prenom.value !== this.initialState.prenom.value
         const denomChanged = denom.value !== this.initialState.denom.value
 
         //A cloud function updating firebase auth displayName is triggered -> give it some time to finish...
         if (nomChanged || prenomChanged || denomChanged) {
-            setTimeout(async () => {
-                await firebase.auth().currentUser.reload()
-                const currentUser = firebase.auth().currentUser
-                this.setState({ currentUser })
+            //Update redux state
+            let { currentUser } = this.props
+            currentUser.fullName = fullName
+            setCurrentUser(this, currentUser)
+            setTimeout(() => {
+                firebase.auth().currentUser.reload()
             }, 5000)
         }
 
@@ -264,7 +265,7 @@ class Profile extends Component {
     //##CONVERT PROSPECT TO CLIENT
     async clientConversion() {
 
-        const resp = await this.handleSubmit()
+        const resp = this.handleSubmit()
         if (resp && resp.error) return
 
         const { loading } = this.state
@@ -311,38 +312,37 @@ class Profile extends Component {
     }
 
     async changePassword() {
-        load(this, true)
+        try {
+            load(this, true)
 
-        //Validate passwords (old pass & new pass)
-        const isPasswordValid = this.passwordValidation()
-        if (!isPasswordValid) return
+            //Validate passwords (old pass & new pass)
+            const isPasswordValid = this.passwordValidation()
+            if (!isPasswordValid) return
 
-        let { currentPass, newPass, currentUser, email } = this.state
-        const emailCred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPass.value)
+            let { currentPass, newPass, email } = this.state
+            const { currentUser } = firebase.auth()
+            const emailCred = firebase.auth.EmailAuthProvider.credential(currentUser.email, currentPass.value)
 
-        //Re-authenticate user (for security)
-        const userCredential = await currentUser.reauthenticateWithCredential(emailCred).catch(e => this.handleReauthenticateError(e))
-        if (!userCredential) {
-            load(this, false)
-            return
+            //Re-authenticate user (for security)
+            await currentUser.reauthenticateWithCredential(emailCred)
+                .catch(e => { throw new Error(handleReauthenticateError(e)) })
+
+            //Update password
+            await currentUser.updatePassword(newPass.value)
+                .catch(e => { throw new Error(handleUpdatePasswordError(e)) })
+
+            setToast(this, 's', 'Mot de passe modifié avec succès')
         }
 
-        //Update password
-        await currentUser.updatePassword(newPass.value)
-            .then(() => {
-                setToast(this, 's', 'Mot de passe modifié avec succès')
-                const init = { value: '', error: '' }
-                this.setState({ currentPass: init, newPass: init })
-            })
-            .catch(e => handleUpdatePasswordError(e))
-            .finally(() => load(this, false))
-    }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
 
-    handleReauthenticateError(e) {
-        handleReauthenticateError(e)
-        const currentPass = { value: '', error: '' }
-        const newPass = { value: '', error: '' }
-        this.setState({ currentPass, newPass, loading: false })
+        finally {
+            const init = { value: '', error: '' }
+            this.setState({ currentPass: init, newPass: init, loading: false })
+        }
     }
 
     refreshToast(toastType, toastMessage) {
@@ -478,11 +478,17 @@ class Profile extends Component {
     }
 
     async refreshMonthlyGoals() {
-        const initialTurnoverObjects = initTurnoverObjects()
-        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, this.userParam.id)
-        const turnoverArr = setTurnoverArr(turnoverObjects)
-        const monthlyGoals = setMonthlyGoals(turnoverArr)
-        this.setState({ monthlyGoals })
+        try {
+            const initialTurnoverObjects = initTurnoverObjects()
+            let turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, this.userParam.id)
+            const turnoverArr = setTurnoverArr(turnoverObjects)
+            const monthlyGoals = setMonthlyGoals(turnoverArr)
+            this.setState({ monthlyGoals })
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     renderCommercialGoals(monthlyGoals, isCom) {
@@ -719,7 +725,8 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         permissions: state.permissions,
-        network: state.network
+        network: state.network,
+        currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }
 }

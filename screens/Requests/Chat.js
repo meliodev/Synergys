@@ -23,11 +23,11 @@ import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 import Loading from '../../components/Loading'
 
-import { uuidGenerator, setAttachmentIcon, downloadFile, getRoleIdFromValue } from '../../core/utils'
+import { uuidGenerator, setAttachmentIcon, downloadFile, getRoleIdFromValue, displayError } from '../../core/utils'
 
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
+import { constants, errorMessages } from '../../core/constants'
 import { uploadFiles } from '../../api/storage-api'
 import EmptyList from '../../components/EmptyList';
 
@@ -108,20 +108,12 @@ class Chat extends Component {
             const results = await DocumentPicker.pickMultiple({ type })
 
             for (const res of results) {
-                var fileCopied = false
-                let i = 0
 
                 //android only
-                if (res.uri.startsWith('content://')) { //#taskm remove this condition (useless..)
-
+                if (res.uri.startsWith('content://')) { //#task remove this condition (useless..)
                     //1. Copy file to Cach to get its relative path (Documentpicker provides only absolute path which can not be used to upload file to firebase)
                     const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
-
-                    fileCopied = await RNFS.copyFile(res.uri, destPath)
-                        .then(() => { return true })
-                        .catch((e) => setToast(this, 'e', 'Erreur de séléction de pièce jointe, veuillez réessayer'))
-
-                    if (!fileCopied) return
+                    await RNFS.copyFile(res.uri, destPath)
 
                     const document = {
                         path: destPath,
@@ -132,62 +124,57 @@ class Chat extends Component {
                     }
 
                     const { path, type, name, size } = document
-
                     if (type === mp4)
                         this.setState({ videoSource: path })
-
                     else if (type === png || type === jpeg)
                         this.setState({ imageSource: path })
-
-
                     else if (type === pdf || type === doc || type === docx)
                         this.setState({ file: { source: path, type, name, size } })
 
                     const messageId = await uuidGenerator()
                     document.messageId = messageId
-
                     await this.handleSend([{ text: '' }], messageId) //#task: get text using chat ref //#task2: add intermediary screen to crop/and adjust images
-
                     attachments.push(document)
                 }
-
-                fileCopied = false
-                i = i + 1
             }
-
-            return (attachments)
+            return attachments
         }
 
         catch (err) {
             if (DocumentPicker.isCancel(err)) return null
-            else Alert.alert("Erreur lors de l'exportation du fichier")
+            else displayError({ message: errorMessages.documents.upload })
         }
     }
 
     async handleUpload() {
-        //  let attachments = []
-        const attachments = await this.pickFilesAndSendMessage()
-        if (!attachments) return
+        try {
+            //PICK FILES & SEND MESSAGE
+            const attachments = await this.pickFilesAndSendMessage()
 
-        //UPLOAD FILES 
-        const storageRefPath = `/Chat/${this.chatId}/`
-        const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath, true, this.chatId)
-        if (!uploadedAttachments) return
+            //UPLOAD FILES 
+            const storageRefPath = `/Chat/${this.chatId}/`
+            const uploadedAttachments = await this.uploadFiles(attachments, storageRefPath, true, this.chatId)
+            if (!uploadedAttachments) throw new Error(errorMessages.documents.upload)
 
-        for (const attachedFile of uploadedAttachments) { //attachedFile contains uploadTask: It can be used to cancel/pause/resume the upload
-            const { downloadURL, name, size, type, messageId } = attachedFile
-            const payload = { pending: false, sent: true, received: true }
+            for (const attachedFile of uploadedAttachments) { //attachedFile contains uploadTask: It can be used to cancel/pause/resume the upload
+                const { downloadURL, name, size, type, messageId } = attachedFile
+                let payload = { pending: false, sent: true, received: true }
 
-            if (type === jpeg || type === png)
-                payload.image = downloadURL
+                if (type === jpeg || type === png)
+                    payload.image = downloadURL
 
-            else if (type === mp4)
-                payload.video = downloadURL
+                else if (type === mp4)
+                    payload.video = downloadURL
 
-            else if (type === pdf || type === doc || type === docx)
-                payload.file = { source: downloadURL, name, size, type: type }
+                else if (type === pdf || type === doc || type === docx)
+                    payload.file = { source: downloadURL, name, size, type: type }
 
-            await db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId).update(payload)
+                await db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId).update(payload)
+            }
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
         }
     }
 

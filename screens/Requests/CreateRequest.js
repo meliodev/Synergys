@@ -26,8 +26,8 @@ import Loading from "../../components/Loading";
 
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, refreshProject, refreshAddress, setAddress, removeDuplicateObjects, formatDocument, unformatDocument } from "../../core/utils";
+import { constants, errorMessages } from "../../core/constants";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, uuidGenerator, setToast, load, isEditOffline, refreshClient, refreshProject, refreshAddress, setAddress, removeDuplicateObjects, formatDocument, unformatDocument, displayError } from "../../core/utils";
 
 import { connect } from 'react-redux'
 import CreateTicket from './CreateTicket';
@@ -117,12 +117,18 @@ class CreateRequest extends Component {
     }
 
     async initEditMode() {
-        let request = await fetchDocument('Requests', this.RequestId)
-        request = await this.setRequest(request)
-        if (!request) return
-        const { project } = this.state
-        let productsList = await this.setProducts(project.id)
-        this.refreshModalData(productsList)
+        try {
+            let request = await fetchDocument('Requests', this.RequestId)
+            request = this.setRequest(request)
+            if (!request) return
+            const { project } = this.state
+            let productsList = await this.setProducts(project.id)
+            this.refreshModalData(productsList)
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     setRequest(request) {
@@ -238,31 +244,42 @@ class CreateRequest extends Component {
     }
 
     async onPressProjectCallBack(projectObject) {
-        const { id, name, client, step, address, comContact, techContact, intervenant, bill } = projectObject
-        const project = { id, name, client, step, address, comContact, techContact, intervenant }
-        this.setState({ project, client })
-        const isClientCharged = bill.amount !== ''
-        if (isClientCharged) await this.setProducts(project.id)
-        else this.setState({ productsFetched: true })
+        try {
+            const { id, name, client, step, address, comContact, techContact, intervenant, bill } = projectObject
+            const project = { id, name, client, step, address, comContact, techContact, intervenant }
+            this.setState({ project, client })
+            const isClientCharged = bill.amount !== ''
+            if (isClientCharged) await this.setProducts(project.id)
+            else this.setState({ productsFetched: true })
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     async setProducts(projectId) {
-        let productsList = []
-        const query = db.collection('Orders').where('project.id', '==', projectId).where('deleted', '==', false)
-        let ordersList = await fetchDocuments(query)
-        if (ordersList.length === 0) {
-            this.setState({ productsFetched: true })
+        try {
+            let productsList = []
+            const query = db.collection('Orders').where('project.id', '==', projectId).where('deleted', '==', false)
+            let ordersList = await fetchDocuments(query)
+            if (ordersList.length === 0) {
+                this.setState({ productsFetched: true })
+                return productsList
+            }
+            ordersList = removeDuplicateObjects(ordersList)
+            const noGeneratedBill = ordersList.length === 0
+            if (noGeneratedBill) return productsList
+            for (const order of ordersList) {
+                const products = order.orderLines.map((orderLine) => { return { ...orderLine.product, selected: false } })
+                productsList = [...productsList, ...products]
+            }
+            this.setState({ productsList, productsFetched: true })
             return productsList
         }
-        ordersList = removeDuplicateObjects(ordersList)
-        const noGeneratedBill = ordersList.length === 0
-        if (noGeneratedBill) return productsList
-        for (const order of ordersList) {
-            const products = order.orderLines.map((orderLine) => { return { ...orderLine.product, selected: false } })
-            productsList = [...productsList, ...products]
+        catch (e) {
+            throw new Error("Erreur lors du chargement le la liste des produits concernant ce projet.")
         }
-        this.setState({ productsList, productsFetched: true })
-        return productsList
     }
 
     renderProducts() {

@@ -74,42 +74,17 @@ class ListOrders extends Component {
             this.setState({ project: this.project }) //#task: change filter to QueryFilter
     }
 
-    // componentWillUnmount() {
-    //     this.unsubscribe()
-    // }
-
     async fetchOrders() {
-
         const { queryFilters } = this.props.permissions.orders
         if (queryFilters === []) this.setState({ ordersList: [], ordersCount: 0 })
         else {
             const params = { role: this.props.role.value }
             var query = configureQuery('Orders', queryFilters, params)
-
             this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
-                //let ordersList = await this.fetchExtraOrders()
                 load(this, false)
             })
         }
     }
-
-    // async fetchExtraOrders() {
-    //     let { ordersList, ordersCount } = this.state
-    //     await db
-    //         .collection('Orders')
-    //         .where('project.intervenant.id', '==', auth.currentUser.uid)
-    //         .get().then((snapshot) => {
-    //             ordersCount = ordersCount + snapshot.docs.length
-    //             for (const doc of snapshot.docs) {
-    //                 let order = doc.data()
-    //                 order.id = doc.id
-    //                 ordersList.push(order)
-    //             }
-    //         })
-
-    //     this.setState({ ordersList, ordersCount })
-    //     return ordersList
-    // }
 
     renderOrder(order) { //#edit
         return <OrderItem order={order} onPress={() => this.onPressOrder(order)} />

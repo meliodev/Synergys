@@ -44,10 +44,10 @@ export default class ViewTeam extends Component {
 
     async componentDidMount() {
         load(this, true)
-        this.unsubscribe = await db.collection('Teams').doc(this.teamId).onSnapshot(async (doc) => {
+        this.unsubscribe = db.collection('Teams').doc(this.teamId).onSnapshot(async (doc) => {
             const team = doc.data()
-            await this.getMembersData(team.members)
-            this.setState({ team })
+            const members = await this.getMembersData(team.members)
+            this.setState({ team, members })
             load(this, false)
         })
     }
@@ -57,20 +57,17 @@ export default class ViewTeam extends Component {
     }
 
     async getMembersData(membersId) {
-        if (membersId === []) return
-
         let members = []
         for (const memberId of membersId) {
-            await db.collection('Users').doc(memberId).get().then((doc) => {
-                if (!doc.exists) return
+            const query = db.collection('Users').doc(memberId)
+            const doc = await query.get()
+            if (doc.exists) {
                 let member = doc.data()
                 member.id = doc.id
                 members.push(member)
-            })
+            }
         }
-
-        this.setState({ members })
-        return
+        return members
     }
 
     renderTeam() {
@@ -84,16 +81,14 @@ export default class ViewTeam extends Component {
                     onPress={() => this.setState({ expanded: !expanded })}
                     theme={{ colors: { primary: '#333' } }}
                     titleStyle={theme.customFontMSsemibold.title}>
-
                     {loading ? <Loading style={{ margin: constants.ScreenWidth * 0.1 }} /> : this.renderMembers()}
-
                 </List.Accordion>
             </Card>
         )
     }
 
     renderMembers() {
-        let { members } = this.state
+        const { members } = this.state
 
         if (members.length > 0)
             return members.map((member, key) => {
@@ -112,13 +107,11 @@ export default class ViewTeam extends Component {
                             else if (!member.isPro && member.role !== 'Admin')
                                 return <List.Icon {...props} icon="account" />
                         }}
-
                         menu
                         options={[
                             { id: 0, title: 'Voir le profil' },
                             { id: 1, title: "Retirer de l'équipe" },
                         ]}
-
                         functions={[
                             () => this.viewProfil(member.id, member.role),
                             () => this.removeMember(member.id),
@@ -128,7 +121,13 @@ export default class ViewTeam extends Component {
             })
 
         else return (
-            <EmptyList iconName='account' iconStyle={{ width: 110, height: 110, marginBottom: 0 }} header='Aucun membre' description='' headerTextStyle={{ color: theme.colors.gray2, marginTop: 0 }} />
+            <EmptyList
+                iconName='account'
+                iconStyle={{ width: 110, height: 110, marginBottom: 0 }}
+                header='Aucun membre'
+                description=''
+                headerTextStyle={{ color: theme.colors.gray2, marginTop: 0 }}
+            />
         )
     }
 
@@ -182,13 +181,6 @@ export default class ViewTeam extends Component {
         const roleId = getRoleIdFromValue(role)
         this.props.navigation.navigate('Profile', { user: { id, roleId } })
     }
-
-    // showAlert(team) {
-    //     const title = "Supprimer l'équipe"
-    //     const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
-    //     const handleConfirm = async () => await deleteTeam(team).then(() => console.log('Batch succeeded !!!'))
-    //     this.myAlert(title, message, handleConfirm)
-    // } 
 
     render() {
         let { toastMessage, toastType } = this.state

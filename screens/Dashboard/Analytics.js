@@ -11,7 +11,7 @@ moment.locale('fr')
 import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants, highRoles } from '../../core/constants'
-import { load, sortMonths } from '../../core/utils'
+import { displayError, load, sortMonths } from '../../core/utils'
 import { fetchDocs, fetchTurnoverData } from '../../api/firestore-api'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from './helpers'
 
@@ -49,39 +49,22 @@ class Analytics extends Component {
     }
 
     async fetchData() {
-        const totalIncome = await this.fetchTotalIncome(this.queries.turnover)
-        const { totalProjects, totalClients } = await this.fetchTotals(this.queries.projects)
-        // let turnoverObjects = {
-        //     "03-2021": { "current": 3000, "id": "2021", "isCurrent": true, "month": "Mars.", "monthYear": "03-2021", "target": undefined, "year": "2021" },
-        //     "02-2021": { "current": 2000, "id": "2021", "isCurrent": true, "month": "Févr.", "monthYear": "02-2021", "target": undefined, "year": "2021" },
-        //     "04-2021": { "current": 4000, "id": "2021", "isCurrent": true, "month": "Avr.", "monthYear": "04-2021", "target": undefined, "year": "2021" },
-        //     "01-2021": { "current": 600, "id": "2021", "isCurrent": true, "month": "Janv.", "monthYear": "01-2021", "target": undefined, "year": "2021" },
-        //     "12-2020": { "current": 500, "id": "2020", "isCurrent": true, "month": "Dec.", "monthYear": "12-2020", "target": undefined, "year": "2020" },
-        //     "11-2020": { "current": 200, "id": "2020", "isCurrent": true, "month": "Nov.", "monthYear": "11-2020", "target": undefined, "year": "2020" },
-        // }
-
-        const initialTurnoverObjects = initTurnoverObjects()
-        let turnoverObjects = initialTurnoverObjects
-
-        // turnoverObjects["03-2021"] = { "current": 5000, "id": "2021", "isCurrent": true, "month": "Mars", "monthYear": "03-2021", "target": undefined, "year": "2021" }
-        // turnoverObjects["02-2021"] = { "current": 4000, "id": "2021", "isCurrent": true, "month": "Févr.", "monthYear": "02-2021", "target": undefined, "year": "2021" }
-        // turnoverObjects["04-2021"] = { "current": 6000, "id": "2021", "isCurrent": true, "month": "Avr.", "monthYear": "04-2021", "target": undefined, "year": "2021" }
-        // turnoverObjects["01-2021"] = { "current": 1000, "id": "2021", "isCurrent": true, "month": "Janv.", "monthYear": "01-2021", "target": undefined, "year": "2021" }
-        // turnoverObjects["11-2020"] = { "current": 200, "id": "2020", "isCurrent": true, "month": "Nov.", "monthYear": "11-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["12-2020"] = { "current": 300, "id": "2020", "isCurrent": true, "month": "Déc.", "monthYear": "12-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["10-2020"] = { "current": 100, "id": "2020", "isCurrent": true, "month": "Oct.", "monthYear": "10-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["09-2020"] = { "current": 90, "id": "2020", "isCurrent": true, "month": "Sept.", "monthYear": "09-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["08-2020"] = { "current": 80, "id": "2020", "isCurrent": true, "month": "Août.", "monthYear": "08-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["07-2020"] = { "current": 50, "id": "2020", "isCurrent": true, "month": "Juil.", "monthYear": "07-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["06-2020"] = { "current": 30, "id": "2020", "isCurrent": true, "month": "Juin.", "monthYear": "06-2020", "target": undefined, "year": "2020" }
-        // turnoverObjects["05-2020"] = { "current": 20, "id": "2020", "isCurrent": true, "month": "Mai.", "monthYear": "05-2020", "target": undefined, "year": "2020" }
-
-        turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects, auth.currentUser.uid)
-        let turnoverArr = setTurnoverArr(turnoverObjects)
-        turnoverArr = sortMonths(turnoverArr)
-        const monthlyGoals = setMonthlyGoals(turnoverArr)
-        const { chartLabels, chartDataSets } = this.setChart(turnoverArr)
-        this.setState({ totalIncome, totalProjects, totalClients, chartDataSets, chartLabels, monthlyGoals })
+        try {
+            const totalIncome = await this.fetchTotalIncome(this.queries.turnover)
+            const { totalProjects, totalClients } = await this.fetchTotals(this.queries.projects)
+            const initialTurnoverObjects = initTurnoverObjects()
+            let turnoverObjects = initialTurnoverObjects
+            turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects, auth.currentUser.uid)
+            let turnoverArr = setTurnoverArr(turnoverObjects)
+            turnoverArr = sortMonths(turnoverArr)
+            const monthlyGoals = setMonthlyGoals(turnoverArr)
+            const { chartLabels, chartDataSets } = this.setChart(turnoverArr)
+            this.setState({ totalIncome, totalProjects, totalClients, chartDataSets, chartLabels, monthlyGoals })
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     setChart(turnoverArr) {
@@ -109,9 +92,10 @@ class Analytics extends Component {
 
     //SUMMARY DATA
     async fetchTotalIncome(query) {
-        let totalIncome = 0
-        let monthsTurnovers = {}
-        await query.get().then((querySnapshot) => {
+        try {
+            let totalIncome = 0
+            let monthsTurnovers = {}
+            const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
             for (const doc of querySnapshot.docs) {
                 monthsTurnovers = doc.data()
                 delete monthsTurnovers.current
@@ -124,26 +108,32 @@ class Analytics extends Component {
                     }
                 }
             }
-        })
-
-        return totalIncome
+            return totalIncome
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     async fetchTotals(query) {
-        return query.get().then((querySnapshot) => {
+        try {
+            let totalProjects = 0
+            let totalClients = 0
+            const querysnapshot = await query.get()
             const clients = []
-
             querySnapshot.forEach((doc) => {
                 const project = doc.data()
                 const clientId = project.client.id
                 if (!clients.includes(clientId))
                     clients.push(clientId)
             })
-
             const totalProjects = querySnapshot.docs.length
             const totalClients = clients.length
             return { totalProjects, totalClients }
-        })
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     renderSummary() {
@@ -279,7 +269,6 @@ class Analytics extends Component {
     }
 
     onPressGoal(goal, index) {
-
         let incomeSources = []
         let incomeSource = {}
 
@@ -296,11 +285,17 @@ class Analytics extends Component {
     }
 
     async refreshMonthlyGoals() {
-        const initialTurnoverObjects = initTurnoverObjects()
-        let turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, auth.currentUser.uid)
-        const turnoverArr = setTurnoverArr(turnoverObjects)
-        const monthlyGoals = setMonthlyGoals(turnoverArr)
-        this.setState({ monthlyGoals })
+        try {
+            const initialTurnoverObjects = initTurnoverObjects()
+            let turnoverObjects = await fetchTurnoverData(this.queries.turnover, initialTurnoverObjects, auth.currentUser.uid)
+            const turnoverArr = setTurnoverArr(turnoverObjects)
+            const monthlyGoals = setMonthlyGoals(turnoverArr)
+            this.setState({ monthlyGoals })
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     renderGoals() {

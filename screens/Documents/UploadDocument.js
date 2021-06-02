@@ -30,7 +30,7 @@ import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
+import { constants, errorMessages } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -197,6 +197,7 @@ class UploadDocument extends Component {
     async setSignatures(DocumentId) {
         const query = db.collection('Documents').doc(DocumentId).collection('AttachmentHistory')
         let attachmentHistoryDocs = await fetchDocuments(query)
+        if (attachmentHistoryDocs === []) return
         attachmentHistoryDocs = attachmentHistoryDocs.filter((doc) => doc.sign_proofs_data)
         const signatures = attachmentHistoryDocs.map((doc) => {
             const { signedBy, signedAt } = doc.sign_proofs_data
@@ -207,12 +208,12 @@ class UploadDocument extends Component {
 
     attachmentListener(DocumentId) {
         return new Promise((resolve, reject) => {
-            this.unsubscribeAttachmentListener = db.collection('Documents').doc(DocumentId).onSnapshot(async (doc) => {
-                if (!doc.exists) return
+            const query = db.collection('Documents').doc(DocumentId)
+            this.unsubscribeAttachmentListener = query.onSnapshot(async (doc) => {
+                if (!doc.exists) resolve(true)
                 const localAttachment = this.state.attachment
-                if (!localAttachment) return
+                if (!localAttachment) resolve(true)
                 const remoteAttachment = doc.data().attachment
-                const localStatus = localAttachment.pending
                 const remoteStatus = remoteAttachment.pending
 
                 if (!remoteStatus) {
@@ -269,7 +270,7 @@ class UploadDocument extends Component {
 
         if (!_.isEqual(attachment, this.initialState.attachment))
             document.attachment.pending = true
-            
+
         if (isConversion) {
             document.createdAt = moment().format()
             document.createdBy = this.props.currentUser
@@ -285,10 +286,11 @@ class UploadDocument extends Component {
         //5. Upload
         const { attachment } = this.state
         const runUpload = attachment && !attachment.downloadURL
-        if (runUpload) await this.handleUpload(document, DocumentId, isConversion, isConnected)
+        if (runUpload)
+            const fileUploaded = await this.handleUpload(document, DocumentId, isConversion, isConnected)
 
         //6. Go back (Process context only)
-        if (this.documentType) {
+        if (this.documentType && fileUploaded) {
             const { onGoBack } = this.props.navigation.state.params
             if (onGoBack) onGoBack()
             this.props.navigation.goBack()
@@ -306,7 +308,7 @@ class UploadDocument extends Component {
             batch.set(documentRef, document, { merge: true })
             batch.set(attachmentsRef, document.attachment)
             batch.commit()
-            this.documentListener = db.collection('Documents').doc(DocumentId).onSnapshot((doc) => resolve(true))
+            this.documentListener = db.collection('Documents').doc(DocumentId).onSnapshot((doc) => resolve(true)) //Listener to handle offline persistance without using async/await
         })
     }
 
@@ -338,10 +340,9 @@ class UploadDocument extends Component {
             this.setState({ loading: false, loadingConversion: false })
 
         const fileUploaded = await this.uploadFile(isConversion, DocumentId)
-        if (!fileUploaded) {
-            setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.") //#task: put it on redux store
-            return
-        }
+        if (!fileUploaded)
+            setToast(this, 'e', errorMessages.documents.upload) //#task: put it on redux store
+        return fileUploaded
     }
 
     async uploadFile(isConversion, DocumentId) {
@@ -496,7 +497,6 @@ class UploadDocument extends Component {
     async configDocument(elements, index) {
 
         this.setState({ modalLoading: true })
-
         const { modalContent } = this.state
 
         if (modalContent === 'docTypes')

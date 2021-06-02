@@ -11,7 +11,6 @@ import messaging from '@react-native-firebase/messaging'
 
 //Background & quit state: messages listener   
 async function onBackgroundMessageReceived(message) {
-
     const channelId = await notifee.createChannel({
         id: 'projects',
         name: 'projects',

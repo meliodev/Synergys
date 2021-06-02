@@ -7,8 +7,9 @@ import NewsItem from '../../components/NewsItem'
 import Loading from '../../components/Loading'
 import EmptyList from '../../components/EmptyList'
 
-import { constants } from '../../core/constants'
-import { load } from '../../core/utils'
+import { constants, errorMessages } from '../../core/constants'
+import { displayError, load } from '../../core/utils'
+import { Alert } from 'react-native';
 
 class ListNews extends Component {
     constructor(props) {
@@ -31,8 +32,7 @@ class ListNews extends Component {
 
     fetchWordpressPosts = async () => {
         const response = await (await fetch("https://groupe-synergys.fr/wp-json/wp/v2/posts?_embed"))
-        const json = await response.json().catch((e) => console.error('wp error:', e))
-
+        const json = await response.json().catch((e) => displayError({ message: errorMessages.wordpress.posts }))
         this.setState({ news: json, loading: false })
     }
 
@@ -61,7 +61,7 @@ class ListNews extends Component {
     }
 
     viewNews(newspost) {
-        this.props.navigation.navigate('ViewNews', { newspost: newspost })
+        this.props.navigation.navigate('ViewNews', { newspost })
     }
 
     render() {
