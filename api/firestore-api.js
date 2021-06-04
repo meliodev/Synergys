@@ -5,6 +5,7 @@ import { checkEmailExistance } from './auth-api'
 import { sortMonths, nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
 import moment from 'moment'
 import 'moment/locale/fr'
+import { errorMessages } from '../core/constants'
 moment.locale('fr')
 
 //#FETCH DOS BY QUERY
@@ -237,29 +238,29 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
         turnoverObjects[month] = monthTurnover
       }
     }
-    catch (e) {
-      throw new Error(e)
+
+    //Each user has his target (DC's monthly target is the global turnover of month) (Com's monthly target is his own turnover)
+    const querySnapshotUsers = await db
+      .collection('Users')
+      .doc(userId)
+      .collection('Turnover')
+      .get()
+      .catch((e) => { throw new Error(errorMessages.firestore.get) })
+
+    for (const doc of querySnapshot.docs) {
+      const monthsTurnovers = doc.data()
+      delete monthsTurnovers.target
+      delete monthsTurnovers.current
+
+      for (const month in monthsTurnovers) {
+        turnoverObjects[month].target = monthsTurnovers[month].target
+      }
     }
+
+    return turnoverObjects
   }
 
-
-  //Each user has his target (DC's monthly target is the global turnover of month) (Com's monthly target is his own turnover)
-  const querySnapshotUsers = await db
-    .collection('Users')
-    .doc(userId)
-    .collection('Turnover')
-    .get()
-    .catch((e) => { throw new Error(errorMessages.firestore.get) })
-
-  for (const doc of querySnapshot.docs) {
-    const monthsTurnovers = doc.data()
-    delete monthsTurnovers.target
-    delete monthsTurnovers.current
-
-    for (const month in monthsTurnovers) {
-      turnoverObjects[month].target = monthsTurnovers[month].target
-    }
+  catch (e) {
+    throw new Error(e)
   }
-
-  return turnoverObjects
 }

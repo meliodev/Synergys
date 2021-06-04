@@ -34,10 +34,11 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             let nextPhase = ''
 
             //Verify/Update actions status
+            const arr = []
+            actions = actions.filter((a) => a !== null)
             if (actions.length > 0) {
 
                 actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
-
                 if (actions[0].cloudFunction) {
                     const sendEmail = functions.httpsCallable('sendEmail')
                     const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
@@ -50,12 +51,12 @@ export const processHandler = async (processModel, currentProcess, projectSecond
                         return currentProcess
                     }
                 }
-
                 var verif_res = await verifyActions(actions, attributes, process)
                 actions = verif_res.verifiedActions
                 allActionsValid = verif_res.allActionsValid
                 nextStep = verif_res.nextStep
                 nextPhase = verif_res.nextPhase
+
                 actions = setActionTimeLog(actions)
                 process[currentPhaseId].steps[currentStepId].actions = actions
             }
@@ -152,7 +153,6 @@ const configureActions = async (actions, attributes, process) => {
 
     try {
         let query
-
         for (let action of actions) {
 
             let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
@@ -181,6 +181,7 @@ const configureActions = async (actions, attributes, process) => {
                     if (item.filter === 'project.id') item.value = attributes.project.id
                 }
             }
+
 
             if (cloudFunction) {
                 const { params, queryAttachmentsUrls } = action.cloudFunction
@@ -245,6 +246,7 @@ const configureActions = async (actions, attributes, process) => {
                 }
             }
         }
+
         return actions
     }
 
@@ -439,7 +441,7 @@ const verifyActions_docCreation = async (actions) => {
     }
 }
 
-const verifyActions_manual = async (actions) => {
+const verifyActions_manual = (actions) => {
     let allActionsValid_manual = true
 
     for (let action of actions) {
@@ -634,7 +636,6 @@ export const getCurrentPhase = (process) => {
 }
 
 export const getCurrentStep = (process) => {
-
     let maxStepOrder = 0
     var currentPhaseId = getCurrentPhase(process)
     let currentStepId
@@ -663,7 +664,6 @@ export const getCurrentAction = (process) => {
     let currentAction = null
 
     for (const action of actions) {
-        //if (!currentAction && (action.status === 'pending' || action.status === 'done' && action.isAnimation))
         if (!currentAction && action.status === 'pending')
             currentAction = action
     }

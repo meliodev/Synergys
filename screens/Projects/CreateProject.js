@@ -198,14 +198,8 @@ class CreateProject extends Component {
     }
 
     async runListeners() {
-        const errorMessage = "Erreur lors du chargement de la section "
-        try {
-            await this.fetchDocuments().catch((e) => { throw new Error(errorMessage + "Documents") })
-            await this.fetchTasks().catch((e) => { throw new Error(errorMessage + "Tâches") })
-        }
-        catch (e) {
-            setToast(this, 'e', e.message)
-        }
+        await this.fetchDocuments()
+        await this.fetchTasks()
     }
 
     fetchDocuments() {
@@ -224,7 +218,7 @@ class CreateProject extends Component {
                 })
                 documentTypes = [...new Set(documentTypes)]
                 this.setState({ documentsList, documentTypes }, () => resolve(true))
-            }, onerror((event) => reject(false)))
+            })
         })
     }
 
@@ -244,7 +238,7 @@ class CreateProject extends Component {
                     taskTypes.push(task.type)
                     taskTypes = [...new Set(taskTypes)]
                     this.setState({ tasksList, taskTypes }, () => resolve(true))
-                }, onerror((event) => reject(false)))
+                })
             })
         })
     }
@@ -438,7 +432,6 @@ class CreateProject extends Component {
         }
 
         return tasksList.map((task, key) => {
-
             return (
                 <TouchableOpacity style={[styles.task, { backgroundColor: task.color }]} onPress={() => onPressTask(task.date, task.id)} >
                     <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>

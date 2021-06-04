@@ -95,7 +95,7 @@ class Analytics extends Component {
         try {
             let totalIncome = 0
             let monthsTurnovers = {}
-            const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
+            const querySnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
             for (const doc of querySnapshot.docs) {
                 monthsTurnovers = doc.data()
                 delete monthsTurnovers.current
@@ -119,7 +119,7 @@ class Analytics extends Component {
         try {
             let totalProjects = 0
             let totalClients = 0
-            const querysnapshot = await query.get()
+            const querySnapshot = await query.get()
             const clients = []
             querySnapshot.forEach((doc) => {
                 const project = doc.data()
@@ -127,8 +127,8 @@ class Analytics extends Component {
                 if (!clients.includes(clientId))
                     clients.push(clientId)
             })
-            const totalProjects = querySnapshot.docs.length
-            const totalClients = clients.length
+            totalProjects = querySnapshot.docs.length
+            totalClients = clients.length
             return { totalProjects, totalClients }
         }
         catch (e) {

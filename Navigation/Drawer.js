@@ -96,7 +96,7 @@ class DrawerMenu extends React.Component {
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
                     <View style={{ flex: 0.73 }}>
                         <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{fullName}</Text>
-                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role.value}</Text>
+                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role}</Text>
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                         <CustomIcon icon={faCog} color={theme.colors.gray_dark} />

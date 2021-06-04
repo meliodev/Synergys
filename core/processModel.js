@@ -435,7 +435,7 @@ export const processModel = {
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         collection: 'Agenda',
-                        documentId: '',
+                        documentId: '', //#task: should be array in case of RDN lasting for many days (multiple tasks)
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Rendez-vous N' },
@@ -664,7 +664,7 @@ export const processModel = {
                     //Check 
                     {
                         //General
-                        id: 'checkTechContact',
+                        id: 'checkTechContact', 
                         title: 'Renseigner un contact technique pour le projet',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,

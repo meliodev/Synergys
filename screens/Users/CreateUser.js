@@ -19,8 +19,9 @@ import LoadDialog from "../../components/LoadDialog"
 
 import { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, roles as allRoles } from "../../core/constants";
-import { nameValidator, emailValidator, passwordValidator, generateId, updateField, setToast, load, setAddress } from "../../core/utils"
+import { constants, errorMessages, roles as allRoles } from "../../core/constants";
+import { nameValidator, emailValidator, passwordValidator, generateId, updateField, setToast, load, setAddress, displayError } from "../../core/utils"
+import { checkEmailExistance } from "../../api/auth-api";
 
 const rolesPicker = {
   3: [
@@ -105,13 +106,13 @@ class CreateUser extends Component {
       if (isPro) {
         denom.error = denomError
         siret.error = siretError
-        this.setState({ denom, siret, phone, email, password, addressError, loading: false })
+        this.setState({ denom, siret, phone, email, password, addressError })
       }
 
       else {
         nom.error = nomError
         prenom.error = prenomError
-        this.setState({ nom, prenom, phone, email, password, addressError, loading: false })
+        this.setState({ nom, prenom, phone, email, password, addressError })
       }
       setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
       return false
@@ -129,15 +130,23 @@ class CreateUser extends Component {
       return
     }
 
-    let { role, isPro, error, loading } = this.state
-    let { nom, prenom, address, phone, email, password } = this.state
-    let { denom, siret } = this.state
+    this.setState({ loadingDialog: true })
+    let { role, isPro, nom, prenom, denom, siret, address, phone, email, password } = this.state
 
     //1. Validate inputs
     const isValid = await this.validateInputs()
-    if (!isValid) return
+    if (!isValid) {
+      this.setState({ loadingDialog: false })
+      return
+    }
 
-    this.setState({ loadingDialog: true })
+    //Validate if email address already exist
+    const emailExist = await checkEmailExistance(email.value)
+    if (emailExist) {
+      this.setState({ loadingDialog: false })
+      displayError({ message: errorMessages.auth.emailExist })
+      return
+    }
 
     //2. ADDING USER DOCUMENT
     let user = {

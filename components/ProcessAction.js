@@ -82,14 +82,13 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
-        await this.mainHandler()
+        await this.mainHandler(this.state.process)
             .catch((e) => displayError({ message: e.message }))
     }
 
-    async mainHandler() {
+    async mainHandler(process) {
         try {
             load(this, true)
-            const { process } = this.state
             const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
             await this.updateProcess(updatedProcess)
@@ -100,6 +99,7 @@ class ProcessAction extends Component {
             load(this, false)
         }
         catch (e) {
+            console.log("ERROR", e.message)
             throw new Error(e)
         }
     }
@@ -222,7 +222,8 @@ class ProcessAction extends Component {
                         screenParams.isProcess = true
                         screenParams.onGoBack = () => this.mainHandler(process)
                     }
-                    this.props.navigation.navigate(screenName, screenParams)
+                    if (screenName)
+                        this.props.navigation.navigate(screenName, screenParams)
                 }
             }
 
@@ -590,7 +591,7 @@ class ProcessAction extends Component {
                 <View style={styles.progressionLinks}>
                     <TouchableOpacity>
                         <CustomIcon
-                            onPress={this.mainHandler}
+                            onPress={() => this.mainHandler(process)}
                             icon={faRedo}
                             size={16}
                             color={theme.colors.white}

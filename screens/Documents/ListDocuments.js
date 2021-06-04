@@ -16,7 +16,7 @@ import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
 
 import { configureQuery } from '../../core/privileges'
-import { myAlert, downloadFile, loadLog, load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { myAlert, loadLog, load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFileNew } from "../../api/storage-api";
 

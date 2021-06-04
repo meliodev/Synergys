@@ -349,7 +349,7 @@ export const displayError = (error) => {
   if (showError) Alert.alert('', error.message)
 }
 
-export const downloadFile = async (main, fileName, url) => {
+export const downloadFile = async (fileName, url) => {
 
   try {
     const path = await setDestPath(fileName)
@@ -362,32 +362,24 @@ export const downloadFile = async (main, fileName, url) => {
     }
 
     //Download file...
-    else {
-      setToast(main, 'i', 'Début du téléchargement...')
-
-      let options = {
-        fileCache: true,
-        //path, //#ios
-        addAndroidDownloads: {
-          useDownloadManager: true,
-          notification: true,
-          path,
-          description: 'Image',
-        },
-      }
-
-      return config(options)
-        .fetch('GET', url)
-        .then(res => {
-          main.title = ''
-          return true
-        })
+    let options = {
+      fileCache: true,
+      //path, //#ios
+      addAndroidDownloads: {
+        useDownloadManager: true,
+        notification: true,
+        path,
+        description: 'Image',
+      },
     }
+
+    return RNFetchBlob
+      .config(options)
+      .fetch('GET', url)
   }
 
   catch (error) {
-    return false
-    console.error(error)
+    throw new Error('Erreur lors du téléchargement du fichier.')
   }
 }
 
@@ -523,10 +515,11 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
     }
 
     else if (response.error) {
+      console.log(response.error)
       errorMessage = "Erreur lors de la sélection du fichier. Veuillez réessayer."
       reject(new Error(errorMessage))
     }
-    
+
     else {
       const image = {
         type: response.type,
@@ -567,8 +560,7 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
       var i = 0
       if (res.uri.startsWith('content://')) {
         const destPath = await setDestPath(res.name)
-        fileMoved = await RNFS.moveFile(res.uri, destPath).then(() => { return true })
-        if (!fileMoved) throw new Error('')
+        await RNFS.moveFile(res.uri, destPath)
 
         const attachment = {
           path: destPath,
@@ -600,9 +592,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
     if (res.uri.startsWith('content://')) {
       const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
       const destPath = await setDestPath(attachmentName)
-      const fileMoved = await RNFS.moveFile(res.uri, destPath).then(() => { return true })
-
-      if (!fileMoved) throw new Error('')
+      await RNFS.moveFile(res.uri, destPath)
 
       const attachment = {
         path: destPath,

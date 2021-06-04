@@ -5,7 +5,7 @@ import Video from 'react-native-video-controls'
 
 import Toast from '../../components/Toast'
 import { constants } from '../../core/constants'
-import { downloadFile } from '../../core/utils'
+import { downloadFile, setToast } from '../../core/utils'
 
 import moment from 'moment'
 import 'moment/locale/fr'
@@ -23,7 +23,8 @@ export default class VideoPlayer extends Component {
     }
 
     handleDownload() {
-        downloadFile(this, `video_${moment().format('DD_MM_YYYY_HH_mm')}`, this.videoUrl)
+        setToast(this, 'i', 'Début du téléchargement...')
+        downloadFile(`video_${moment().format('DD_MM_YYYY_HH_mm')}`, this.videoUrl)
     }
 
     render() {

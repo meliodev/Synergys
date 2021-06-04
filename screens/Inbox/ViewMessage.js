@@ -148,7 +148,10 @@ export default class ViewMessage extends Component {
                 showRightIcon
                 showProgress={false}
                 rightIcon={
-                    <TouchableOpacity style={rightIconStyle} onPress={() => downloadFile(this, document.name, document.downloadURL)}>
+                    <TouchableOpacity style={rightIconStyle} onPress={() => {
+                        setToast(this, 'i', 'Début du téléchargement...')
+                        downloadFile(document.name, document.downloadURL)
+                    }}>
                         <CustomIcon icon={faArrowAltToBottom} color={theme.colors.gray_dark} size={20} />
                     </TouchableOpacity>
                 }

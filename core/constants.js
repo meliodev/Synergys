@@ -31,9 +31,12 @@ export const termsUrl = 'https://firebasestorage.googleapis.com/v0/b/projectmana
 
 export const errorMessages = {
     appInit: "Erreur inattendue lors de l'initialisation de la session. Veuillez redémarrer l'application.",
+    auth: {
+        emailExist: "L'adresse email que vous avez saisi est déjà associé à un compte."
+    },
     firestore: {
         get: "Erreur lors du chargement des données. Veuillez réessayer.",
-        update: "Erreur lors de la mise à jour des données. Veuillez réessayer."
+        update: "Erreur lors de la mise à jour des données. Veuillez réessayer.",
         delete: "Erreur inattendue lors de la suppression."
     },
     wordpress: { posts: "Erreur lors de la connection avec le serveur du siteweb." },
@@ -42,6 +45,6 @@ export const errorMessages = {
         roleUpdate: "Erreur lors de la modification du role. Veuillez réessayer.",
         passwordUpdate: "Erreur lors de la modification du mot de passe. Veuillez réessayer."
     },
-    documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." }
+    documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer."
 }

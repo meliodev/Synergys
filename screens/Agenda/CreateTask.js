@@ -272,8 +272,9 @@ class CreateTask extends Component {
             for (const doc of querySnapshot.docs) {
 
                 const taskDoc = doc.data()
+                const isCanceled = taskDoc.status === "Annulé"
                 const notSameDoc = taskDoc.id !== task.id //updating document
-                if (notSameDoc && taskDoc.date === task.date) {
+                if (!isCanceled && notSameDoc && taskDoc.date === task.date) {
                     if (taskDoc.isAllDay) {
                         overlappingTasks.push(taskDoc)
                     }

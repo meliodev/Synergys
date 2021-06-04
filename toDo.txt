@@ -1,4 +1,9 @@
 
+Questions:
+1. Visite tech préalable = RD1 & Visite tech = RDN ??
+2. Can a RDN last for multiple days ? in this case, multiple tasks will be created for each day. And postponing this RDN will 
+involve canceling multiple tasks. Which will involve auto-updating (runoperation) multiple documents during the process.
+
 DONE:
 +++ ERRORS: Handling exceptions thrown by async functions
 +++ FEATURE: Adresse de saisi manuelle

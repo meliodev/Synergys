@@ -24,7 +24,7 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import firebase, { db, auth } from '../../firebase'
-import { generateId, navigateToScreen, myAlert, updateField, downloadFile, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject, formatDocument, unformatDocument } from "../../core/utils"
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, arrayValidator, setToast, load, articles_fr, isEditOffline, refreshProject, formatDocument, unformatDocument } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
 import { blockRoleUpdateOnPhase } from '../../core/privileges'

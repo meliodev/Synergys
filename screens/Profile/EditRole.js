@@ -120,7 +120,7 @@ const mapStateToProps = (state) => {
 
     return {
         role: state.roles.role,
-        currentUser: state.currentUser
+        currentUser: state.currentUser,
         network: state.network
         //fcmToken: state.fcmtoken
     }

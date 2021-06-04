@@ -287,7 +287,7 @@ class UploadDocument extends Component {
         const { attachment } = this.state
         const runUpload = attachment && !attachment.downloadURL
         if (runUpload)
-            const fileUploaded = await this.handleUpload(document, DocumentId, isConversion, isConnected)
+            var fileUploaded = await this.handleUpload(document, DocumentId, isConversion, isConnected)
 
         //6. Go back (Process context only)
         if (this.documentType && fileUploaded) {

@@ -30,7 +30,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                 client = refreshUser(client)
                 return { client }
             }
- 
+
         else if (option.screen === 'ListProjects')
             var callback = (project) => {
                 project = refreshProject(project, false)
@@ -44,12 +44,17 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
             }
 
         const refresh = (filter) => {
-           // toggleFilter()
+            // toggleFilter()
             const obj = callback(filter)
             main.setState(obj)
         }
 
-        const navParams = { isRoot: false, titleText: option.titleText, showButton: false, onGoBack: refresh }
+        const navParams = {
+            isRoot: false,
+            titleText: option.titleText,
+            showButton: false,
+            onGoBack: refresh
+        }
         props.navigation.push(option.screen, navParams)
     }
 
@@ -87,7 +92,8 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     elements={option.values} />
             )
 
-        else if (option.type === 'screen')
+        else if (option.type === 'screen') {
+            console.log(option)
             return (
                 <TouchableOpacity onPress={() => onPressScreenPicker(option)}>
                     <TextInput
@@ -96,6 +102,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                         editable={false} />
                 </TouchableOpacity>
             )
+        }
     }
 
     const renderFooter = () => {
@@ -118,14 +125,11 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
             </MenuTrigger>
 
             <MenuOptions optionsContainerStyle={{ height: constants.ScreenHeight * 0.935, elevation: 50 }}>
-
                 {renderHeader()}
-
                 <View style={{ paddingHorizontal: theme.padding, paddingVertical: 5 }}>
                     {renderOptions()}
                     {renderFooter()}
                 </View>
-
             </MenuOptions>
 
         </PopupMenu>

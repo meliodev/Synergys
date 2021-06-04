@@ -23,7 +23,7 @@ import UploadProgress from '../../components/UploadProgress'
 import Toast from '../../components/Toast'
 import Loading from '../../components/Loading'
 
-import { uuidGenerator, setAttachmentIcon, downloadFile, getRoleIdFromValue, displayError } from '../../core/utils'
+import { uuidGenerator, setAttachmentIcon, downloadFile, getRoleIdFromValue, displayError, setToast } from '../../core/utils'
 
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
@@ -108,11 +108,10 @@ class Chat extends Component {
             const results = await DocumentPicker.pickMultiple({ type })
 
             for (const res of results) {
-
                 //android only
                 if (res.uri.startsWith('content://')) { //#task remove this condition (useless..)
                     //1. Copy file to Cach to get its relative path (Documentpicker provides only absolute path which can not be used to upload file to firebase)
-                    const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}${i}`
+                    const destPath = `${RNFS.TemporaryDirectoryPath}/${'temporaryDoc'}${Date.now()}-${Math.floor(Math.random() * 100)}`
                     await RNFS.copyFile(res.uri, destPath)
 
                     const document = {
@@ -141,8 +140,9 @@ class Chat extends Component {
         }
 
         catch (err) {
-            if (DocumentPicker.isCancel(err)) return null
-            else displayError({ message: errorMessages.documents.upload })
+            if (!DocumentPicker.isCancel(err))
+                displayError({ message: err })
+            return null
         }
     }
 
@@ -150,6 +150,7 @@ class Chat extends Component {
         try {
             //PICK FILES & SEND MESSAGE
             const attachments = await this.pickFilesAndSendMessage()
+            if (!attachments) return
 
             //UPLOAD FILES 
             const storageRefPath = `/Chat/${this.chatId}/`
@@ -358,7 +359,8 @@ class Chat extends Component {
                     containerStyle={{ width: constants.ScreenWidth * 0.65, marginHorizontal: 5 }}
                     onPress={() => {
                         if (pending) return
-                        downloadFile(this, file.name, file.source)
+                        setToast(this, 'i', 'Début du téléchargement...')
+                        downloadFile(file.name, file.source)
                     }}
                     showRightIcon={pending}
                     rightIcon={
@@ -471,7 +473,8 @@ class Chat extends Component {
                         <View style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}>
                             <TouchableOpacity style={{ padding: 10, backgroundColor: 'black', opacity: 0.8, borderRadius: 50, margin: 10 }} onPress={() => {
                                 this.toggleImageView()
-                                downloadFile(this, `image_${moment().format('DD_MM_YYYY_HH_mm')}`, imagesView[0].source.uri)
+                                setToast(this, 'i', 'Début du téléchargement...')
+                                downloadFile(`image_${moment().format('DD_MM_YYYY_HH_mm')}`, imagesView[0].source.uri)
                             }}>
                                 <MaterialCommunityIcons name={'download'} size={24} color='#fff' />
                             </TouchableOpacity>
