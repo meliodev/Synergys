@@ -200,6 +200,7 @@ class AuthLoadingScreen extends Component {
 
       let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
       if (startApp) this.props.navigation.navigate(routeName, routeParams)
+      else Alert.alert("", user+", "+this.props.role.id+", "+this.props.permissions.active)
     })
   }
 

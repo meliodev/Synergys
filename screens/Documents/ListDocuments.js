@@ -168,7 +168,7 @@ class ListDocuments extends Component {
                         options={[
                             { id: 0, type: 'picker', title: "Type", values: types, value: type, field: 'type' },
                             { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
-                            { id: 2, type: 'screen', title: "Projet", value: project.name.value, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
+                            { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
                         ]}
                     />
                 }

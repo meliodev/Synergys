@@ -71,6 +71,7 @@ class UploadDocument extends Component {
         this.persistDocument = this.persistDocument.bind(this)
         this.uploadFile = this.uploadFile.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
+        this.unformatDocument_conversion = this.unformatDocument_conversion.bind(this)
 
         //Document source (gen/upload)
         this.toggleModal = this.toggleModal.bind(this)
@@ -267,27 +268,24 @@ class UploadDocument extends Component {
         //4. Persist
         const props = ["project", "name", "description", "type", "state", "attachment", "attachmentSource", "orderData"]
         let document = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
+        const { attachment } = this.state
+        const isNewAttachment = attachment && !attachment.downloadURL
 
-        if (!_.isEqual(attachment, this.initialState.attachment))
+        if (isNewAttachment)
             document.attachment.pending = true
 
-        if (isConversion) {
-            document.createdAt = moment().format()
-            document.createdBy = this.props.currentUser
-            document.name = `${document.name} (Facture générée)`
-            document.type = 'Facture'
-            document.attachmentSource = 'conversion'
-            document.conversionSource = this.DocumentId //Id of the current "Devis"
-        }
+        if (isConversion)
+            document = this.unformatDocument_conversion(document)
+
         await this.persistDocument(document, DocumentId)
         this.documentListener()
         this.refreshState(document, DocumentId, isConversion)
 
         //5. Upload
-        const { attachment } = this.state
-        const runUpload = attachment && !attachment.downloadURL
-        if (runUpload)
+        if (isNewAttachment)
             var fileUploaded = await this.handleUpload(document, DocumentId, isConversion, isConnected)
+
+        this.initialState = _.cloneDeep(this.state)
 
         //6. Go back (Process context only)
         if (this.documentType && fileUploaded) {
@@ -312,13 +310,21 @@ class UploadDocument extends Component {
         })
     }
 
+    unformatDocument_conversion(document) {
+        document.createdAt = moment().format()
+        document.createdBy = this.props.currentUser
+        document.name = `${document.name} (Facture générée)`
+        document.type = 'Facture'
+        document.attachmentSource = 'conversion'
+        document.conversionSource = this.DocumentId //Id of the current "Devis"
+        return document
+    }
+
     //2. Refresh locally
     refreshState(document, DocumentId, isConversion) {
         if (isConversion) {
-            const { name } = this.state
-            const { type, attachmentSource, conversionSource } = document
-            name = document.name
             this.DocumentId = DocumentId
+            const { name, type, attachmentSource, conversionSource } = document
             this.setState({ name, type, attachmentSource, conversionSource })
         }
 
@@ -568,8 +574,14 @@ class UploadDocument extends Component {
     }
 
     async pickDoc() {
-        const attachment = await pickDoc(true, [DocumentPicker.types.pdf, DocumentPicker.types.images])
-        return attachment
+        try {
+            const attachment = await pickDoc(true, [DocumentPicker.types.pdf, DocumentPicker.types.images])
+            return attachment
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     async handleImageToPdfConversion(attachment) {

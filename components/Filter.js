@@ -35,7 +35,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
             var callback = (project) => {
                 project = refreshProject(project, false)
                 return { project }
-            }
+            } 
 
         else if (option.screen === 'ListEmployees')
             var callback = (assignedTo) => {
@@ -93,7 +93,6 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
             )
 
         else if (option.type === 'screen') {
-            console.log(option)
             return (
                 <TouchableOpacity onPress={() => onPressScreenPicker(option)}>
                     <TextInput

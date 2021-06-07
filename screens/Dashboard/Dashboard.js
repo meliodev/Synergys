@@ -7,6 +7,7 @@ import _ from 'lodash'
 import { connect } from 'react-redux'
 
 import * as theme from '../../core/theme'
+import {requestRESPermission, requestWESPermission} from '../../core/permissions'
 
 import Analytics from './Analytics'
 import Tasks from './Tasks'
@@ -53,6 +54,11 @@ class Dashboard extends Component {
         }
         if (props.role.id === 'client')
             props.navigation.navigate('ListProjects')
+    }
+
+    componentDidMount() {
+        requestWESPermission()
+        requestRESPermission()
     }
 
     renderMenuItem(item, index) {

@@ -20,7 +20,7 @@ import Toast from '../../components/Toast'
 import { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { load, setToast, updateField, nameValidator, uuidGenerator, pickDocs } from '../../core/utils'
+import { load, setToast, updateField, nameValidator, uuidGenerator, pickDocs, displayError } from '../../core/utils'
 
 import { fetchDocs } from '../../api/firestore-api';
 import { uploadFiles } from '../../api/storage-api';
@@ -77,9 +77,15 @@ class NewMessage extends Component {
 
     //PICKER
     async pickDocs() {
-        var { attachments } = this.state
-        const newAttachments = await pickDocs(attachments)
-        this.setState({ attachments: newAttachments })
+        try {
+            var { attachments } = this.state
+            const newAttachments = await pickDocs(attachments)
+            this.setState({ attachments: newAttachments })
+        }
+        catch (e) {
+            const { message } = e
+            displayError({ message })
+        }
     }
 
     //SUBMIT

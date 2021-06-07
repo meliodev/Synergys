@@ -118,7 +118,7 @@ class Agenda2 extends Component {
         if (!refresh) return
         this.setState({ refreshing: true })
         const { selectedDay } = this.state
-        this.setState({ items: {}, filteredItems: {}, taskItems: [], filteredTaskItems: [] }, () => this.loadItems(selectedDay))
+        this.setState({ items: {}, filteredItems: {} }, () => this.loadItems(selectedDay))
     }
 
     setTasksQuery() {
@@ -147,90 +147,25 @@ class Agenda2 extends Component {
         return query
     }
 
-    loadItems(day) {
-        setTimeout(async () => {
-
-            let items = {}
-
-            if (!items[day.dateString]) {
-
-                items[day.dateString] = []
-
-                const query = this.setTasksQuery()
-                if (!query) return
-                await query.get().then((tasksSnapshot) => {
-
-                    if (tasksSnapshot === null || tasksSnapshot.empty) return
-
-                    for (const taskDoc of tasksSnapshot.docs) { //#task: Initialize with empty array
-                        const task = taskDoc.data()
-                        const date = task.date //exp: 2021-01-07
-                        if (!items[date])
-                            items[date] = []
-                        const startDate = moment(task.startDate).format('YYYY-MM-DD')
-                        const dueDate = moment(task.dueDate).format('YYYY-MM-DD')
-
-                        items[date].push({
-                            id: taskDoc.id,
-                            name: task.name,
-                            date,
-                            isAllDay: task.isAllDay,
-                            startHour: task.startHour,
-                            dueHour: task.dueHour,
-                            type: task.type,
-                            status: task.status,
-                            priority: task.priority.toLowerCase(),
-                            project: task.project,
-                            assignedTo: task.assignedTo,
-                            color: task.color,
-                        })
-                    }
-                })
-                this.setState({ items }, () => {
-                    const taskItems = this.setTaskItems()
-                    this.setState({ taskItems, refreshing: false }, () => this.handleFilter(false))
-                })
-            }
-        }, 1000)
+    async loadItems(day) {
+        let items = {}
+        if (!items[day.dateString]) {
+            items[day.dateString] = []
+            const query = this.setTasksQuery()
+            if (!query) return
+            await query.get().then((tasksSnapshot) => {
+                for (const taskDoc of tasksSnapshot.docs) {
+                    const task = taskDoc.data()
+                    const { date } = task
+                    if (!items[date])
+                        items[date] = []
+                    items[date].push(task)
+                }
+            })
+            this.setState({ items }, () => this.handleFilter(false))
+        }
     }
 
-    renderTaskStatusController(item) {
-        const { id, date, status } = item
-        const changeStatus = (status) => {
-            db.collection('Agenda').doc(id).update({ status })
-            this.refreshItems(true)
-        }
-        let iconObject = null
-
-        switch (status) {
-            case 'En cours':
-                iconObject = { icon: faCheckCircle, color: theme.colors.gray_dark }
-                break;
-
-            case 'Terminé':
-                iconObject = { icon: faCheckCircle, color: theme.colors.valid }
-                break;
-
-            case 'Annulé':
-                iconObject = { icon: faTimesCircle, color: theme.colors.canceled }
-                break;
-
-            case 'En attente':
-                iconObject = { icon: faPauseCircle, color: theme.colors.pending }
-                break;
-
-            default:
-                return null
-        }
-        return (
-            <CustomIcon
-                icon={iconObject.icon}
-                color={iconObject.color}
-                size={26}
-                onPress={() => changeStatus(status)}
-            />
-        )
-    }
 
     handleFilter(toggle) {
         if (toggle) toggleFilter(this)
@@ -260,24 +195,6 @@ class Agenda2 extends Component {
 
     setCalendarType(isAgenda) {
         this.setState({ isAgenda }, () => this.refreshItems(true))
-    }
-
-    //Tab functions
-    setTaskItems() {
-        const { items } = this.state
-        let tasksList = []
-
-        for (let key in items) { //key is "date"
-            let tasks = items[key]
-
-            if (tasks.length > 0) {
-                let elements = []
-                tasks.forEach((task) => elements.push(task)) //other elements: tasks in that date
-                tasksList.push(elements) // array of arrays
-            }
-        }
-
-        return tasksList
     }
 
     togglePlanningTabs(isAgenda) {
@@ -496,19 +413,3 @@ const styles = StyleSheet.create({
         color: theme.colors.gray_googleAgenda
     }
 })
-
-
-
-
-
-
-
-
-
-       // const labels =
-        //     item.labels &&
-        //     item.labels.map(label => (
-        //         <View key={`label-${label}`} style={{ padding: 5, justifyContent: 'center', alignItems: 'center', backgroundColor: label === 'urgente' ? theme.colors.error : label === 'faible' ? theme.colors.primary : colors.primary, borderRadius: 3 }}>
-        //             <Text style={{ color: 'white', fontSize: 8 }}>{label}</Text>
-        //         </View>
-        //     ))

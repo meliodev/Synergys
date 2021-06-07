@@ -556,7 +556,6 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
   try {
     const results = await DocumentPicker.pickMultiple({ type })
     for (const res of results) {
-      var fileMoved = false
       var i = 0
       if (res.uri.startsWith('content://')) {
         const destPath = await setDestPath(res.name)
@@ -571,7 +570,6 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
         }
         attachments.push(attachment)
       }
-      fileMoved = false
       i = i + 1
     }
     return attachments

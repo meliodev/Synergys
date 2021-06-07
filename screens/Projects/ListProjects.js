@@ -83,8 +83,6 @@ class ListProjects extends Component {
 
     async componentDidMount() {
         Keyboard.dismiss()
-        requestWESPermission()
-        requestRESPermission()
 
         const { queryFilters } = this.props.permissions.projects
         if (queryFilters === []) this.setState({ projectsList: [], projectsCount: 0 })
