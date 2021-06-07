@@ -7,6 +7,7 @@ import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import NetInfo from "@react-native-community/netinfo"
+import SplashScreen from 'react-native-splash-screen'
 
 import Background from "../../components/NewBackground"
 import Loading from "../../components/Loading"
@@ -16,6 +17,7 @@ import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState, setCurrentUser, setNetwork, setProcessModel } from '../../core/redux'
 import { errorMessages } from "../../core/constants"
 import { displayError } from "../../core/utils"
+
 
 const roles = [
   { id: 'admin', value: 'Admin', level: 3 },
@@ -44,6 +46,8 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
+    SplashScreen.hide()
+
     //1. Notification action listeners
     await this.bootstrapNotifications()
     this.forgroundNotificationListener()
@@ -200,7 +204,6 @@ class AuthLoadingScreen extends Component {
 
       let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
       if (startApp) this.props.navigation.navigate(routeName, routeParams)
-      else Alert.alert("", user+", "+this.props.role.id+", "+this.props.permissions.active)
     })
   }
 
@@ -303,7 +306,7 @@ class AuthLoadingScreen extends Component {
       <Background>
         <Background style={styles.nestedBackground}>
           <View style={styles.container}>
-            <Text style={[theme.customFontMSregular.h1, styles.synergys]}>SYNERGYS</Text>
+            <Loading />
           </View>
         </Background>
       </Background>

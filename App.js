@@ -37,12 +37,11 @@ const paperTheme = {
 class App extends Component {
 
   async componentDidMount() {
-
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
       name: 'projects',
-      lights: false, 
+      lights: false,
       vibration: true,
       importance: AndroidImportance.HIGH,
     })
