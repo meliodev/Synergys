@@ -141,7 +141,6 @@ class CreateTask extends Component {
     }
 
     setDefaultState() {
-
         let defaultState = {}
 
         if (this.project && this.taskType) {
@@ -389,25 +388,23 @@ class CreateTask extends Component {
                 return
             }
 
-            ////6. Handle conflicts
-            const overlappingTasks = await this.checkTasksConflicts(tasks)
-            if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
-                load(this, false)
-                this.handleConflicts(overlappingTasks, task)
-                return
-            }
+            // ////6. Handle conflicts
+            // const overlappingTasks = await this.checkTasksConflicts(tasks)
+            // if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+            //     load(this, false)
+            //     this.handleConflicts(overlappingTasks, task)
+            //     return
+            // }
 
             //7. Persist task(s)
             await this.persistTasks(tasks)
 
             //8. Go back
-            //if (this.prevScreen === 'Agenda') {
             if (this.props.navigation.state.params.onGoBack) {
                 const refreshAgenda = true
-                this.props.navigation.state.params.onGoBack(refreshAgenda)
+                this.props.navigation.state.params.onGoBack(refreshAgenda, tasks[0])
             }
-            //}
-
+    
             this.props.navigation.goBack()
         }
         catch (e) {

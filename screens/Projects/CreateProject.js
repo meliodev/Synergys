@@ -69,6 +69,7 @@ class CreateProject extends Component {
         this.refreshTechContact = refreshTechContact.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
+        this.customBackHandler = this.customBackHandler.bind(this)
 
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDeleteProject = this.handleDeleteProject.bind(this)
@@ -93,6 +94,9 @@ class CreateProject extends Component {
         this.isClient = this.props.role.id === 'client'
         this.storageRefPath = `/Projects/${this.ProjectId}/Images/`
 
+        this.client = this.props.navigation.getParam('client', { id: '', fullName: '', email: '', role: '' })
+        this.address = this.props.navigation.getParam('address', { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' })
+
         this.state = {
             //TEXTINPUTS
             name: "",
@@ -101,8 +105,8 @@ class CreateProject extends Component {
             note: "",
 
             //Screens
-            address: { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' },
-            client: { id: '', fullName: '', email: '', role: '' },
+            address: this.address,
+            client: this.client,
 
             //Pickers
             state: 'En cours',
@@ -139,6 +143,8 @@ class CreateProject extends Component {
             tasksList: [],
             taskTypes: [],
             expandedTaskId: '',
+            hasPriorTechVisit: false,
+            hasPriorTechVisitError: '',
 
             error: '',
             loading: true,
@@ -232,7 +238,7 @@ class CreateProject extends Component {
                 let taskTypes = []
                 agendaSnapshot.forEach(async (taskDoc) => {
                     const task = taskDoc.data()
-                    task.id = taskDoc.id
+                    //task.id = taskDoc.id
                     task.date = taskDoc.dateKey
                     tasksList.push(task)
                     taskTypes.push(task.type)
@@ -245,7 +251,7 @@ class CreateProject extends Component {
 
     //Inputs validation
     validateInputs(isConnected) {
-        let { client, name, address, comContact, techContact, step } = this.state
+        let { client, name, address, comContact, techContact, step, hasPriorTechVisit } = this.state
 
         const isStepTech = techSteps.includes(step)
         const clientError = nameValidator(client.fullName, '"Client"')
@@ -254,13 +260,14 @@ class CreateProject extends Component {
         const techContactError = isStepTech ? nameValidator(techContact.id, '"Contact technique"') : ''
         const addressError = '' //Address optional on offline mode
         //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
+        const hasPriorTechVisitError = hasPriorTechVisit ? "" : "La création d'une visite technique préalable est obligatoire."
 
-        if (clientError || nameError || addressError || comContactError || techContactError) {
+        if (clientError || nameError || addressError || comContactError || techContactError || hasPriorTechVisitError) {
             client.error = clientError
             comContact.error = comContactError
             techContact.error = techContactError
             address.error = addressError
-            this.setState({ client, nameError, address, comContact, techContact, loading: false })
+            this.setState({ client, nameError, address, comContact, techContact, hasPriorTechVisitError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -525,10 +532,106 @@ class CreateProject extends Component {
         load(this, false)
     }
 
+    renderTasksForm() {
+        const canCreateTasks = this.props.permissions.tasks.canCreate
+        const { tasksList, taskTypes, expandedTaskId, name, client, step, address, comContact, techContact, intervenant, hasPriorTechVisitError } = this.state
+
+        const onPressLink1 = () => {
+            this.props.navigation.navigate('Agenda', {
+                isAgenda: false,
+                isRoot: false,
+                projectFilter: { id: this.ProjectId, name: this.state.name }
+            })
+        }
+
+        const onPressLink2 = () => {
+            this.props.navigation.navigate('CreateTask', {
+                project: { id: this.ProjectId, name, client, step, address, comContact, techContact, intervenant },
+                dynamicType: true,
+                taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] },
+                onGoBack: (refresh, task) => {
+                    let { tasksList, taskTypes } = this.state
+                    tasksList.push(task)
+                    taskTypes.push('Visite technique préalable')
+                    this.setState({ tasksList, taskTypes, hasPriorTechVisit: true })
+                }
+            })
+        }
+
+        return (
+            <FormSection
+                sectionTitle='Tâches'
+                sectionIcon={faTasks}
+                form={tasksList.length > 0 ?
+                    <View style={{ flex: 1 }}>
+
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10 }}>
+                            <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
+                            <Text
+                                onPress={onPressLink1}
+                                style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>
+                                {this.props.role.level === 1 ? "Voir mon agenda pour ce projet" : "Voir le planning du projet"}
+                            </Text>
+                        </View>
+
+                        <List.AccordionGroup
+                            expandedId={expandedTaskId}
+                            onAccordionPress={(expandedId) => {
+                                const isExpanded = expandedTaskId === expandedId
+                                this.setState({ expandedTaskId: isExpanded ? '' : expandedId })
+                            }}
+                        >
+                            {this.state.taskTypes.map((type) => {
+                                let filteredTasks = this.state.tasksList.filter((task) => task.type === type)
+                                return (
+                                    <List.Accordion
+                                        id={type}
+                                        showArrow
+                                        title={type}
+                                        titleStyle={theme.customFontMSregular.body}
+                                    >
+                                        {this.renderTasks(filteredTasks)}
+                                    </List.Accordion>
+                                )
+                            })}
+                        </List.AccordionGroup>
+                    </View>
+                    :
+                    <View style={{ flex: 1 }}>
+                        <ItemPicker
+                            onPress={onPressLink2}
+                            label='Créer une visite technique préalable *'
+                            // value={}
+                            errorText={hasPriorTechVisitError}
+                            editable={canCreateTasks}
+                        />
+                    </View>
+                } />
+        )
+    }
+
+    customBackHandler() {
+        const { hasPriorTechVisit, tasksList } = this.state
+        if (!this.isEdit && hasPriorTechVisit) {
+            const title = "Abandon du projet"
+            const message = 'Êtes-vous sûr de vouloir abandonner la création du projet. Les données saisies seront perdues.'
+            const handleConfirm = () => {
+                //Delete "Visite technique préalable"
+                if (tasksList.length > 0) {
+                    const taskId = tasksList[0].id
+                    db.collection("Agenda").doc(taskId).delete().then(() => console.log('TASK' + taskId + 'DELETED'))
+                }
+                this.props.navigation.goBack()
+            }
+            this.myAlert(title, message, handleConfirm)
+        }
+        else this.props.navigation.goBack()
+    }
+
     render() {
         let { client, name, description, note, address, state, step, bill, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
-        let { documentsList, documentTypes, tasksList, taskTypes, expandedTaskId, comContact, techContact } = this.state
+        let { documentsList, documentTypes, taskTypes, comContact, techContact } = this.state
         const { nameError, loading, docNotFound, toastMessage, toastType } = this.state
         const { isBlockedUpdates } = this.state
 
@@ -540,6 +643,10 @@ class CreateProject extends Component {
 
         const showBillSection = this.isEdit && (this.isCurrentHighRole || bill)
         const showProcessAction = this.isEdit && this.project && process
+
+        const isStepTech = techSteps.includes(step)
+        let showTasksForm = name !== "" && client.id !== "" && address.description !== "" && comContact.id !== "" && (!isStepTech || isStepTech && techContact.id !== "")
+        showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
         const { isConnected } = this.props.network
 
         if (docNotFound)
@@ -567,6 +674,7 @@ class CreateProject extends Component {
                     handleDelete={this.showAlert} loading={loading}
                     refresh={this.isEdit && !loading}
                     handleRefresh={this.handleRefresh}
+                    customBackHandler={this.customBackHandler}
                 />
 
                 {loading ?
@@ -668,7 +776,7 @@ class CreateProject extends Component {
                                             label='Client concerné *'
                                             value={client.fullName}
                                             errorText={client.error}
-                                            editable={canWrite && !this.isEdit}
+                                            editable={canWrite && !this.isEdit && this.client.id === ""}
                                         />
                                     }
 
@@ -747,6 +855,8 @@ class CreateProject extends Component {
                             } />
                         }
 
+                        {showTasksForm && this.renderTasksForm()}
+
                         <FormSection
                             sectionTitle='Bloc Notes'
                             sectionIcon={faQuoteRight}
@@ -766,41 +876,6 @@ class CreateProject extends Component {
                                         editable={canWrite} />
                                 </View>
                             } />
-
-                        {this.isEdit &&
-                            <FormSection
-                                sectionTitle='Tâches'
-                                sectionIcon={faTasks}
-                                form={
-                                    <View style={{ flex: 1 }}>
-
-                                        {canReadTasks &&
-                                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10, }}>
-                                                <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
-                                                <Text
-                                                    onPress={() => this.props.navigation.navigate('Agenda', { isAgenda: false, isRoot: false, projectFilter: { id: this.ProjectId, name: this.state.name } })}
-                                                    style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>{this.props.role.level === 1 ? "Voir mon agenda pour ce projet" : "Voir le planning du projet"}</Text>
-                                            </View>
-                                        }
-
-                                        <List.AccordionGroup
-                                            expandedId={expandedTaskId}
-                                            onAccordionPress={(expandedId) =>
-                                                this.setState({ expandedTaskId: expandedTaskId === expandedId ? '' : expandedId })
-                                            }>
-                                            {taskTypes.map((type) => {
-                                                let filteredTasks = tasksList.filter((task) => task.type === type)
-
-                                                return (
-                                                    <List.Accordion showArrow title={type} id={type} titleStyle={theme.customFontMSregular.body}>
-                                                        {this.renderTasks(filteredTasks)}
-                                                    </List.Accordion>
-                                                )
-                                            })}
-                                        </List.AccordionGroup>
-                                    </View>
-                                } />
-                        }
 
                         {this.isEdit &&
                             <FormSection

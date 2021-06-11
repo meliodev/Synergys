@@ -4,7 +4,7 @@ import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import NetInfo from "@react-native-community/netinfo"
 import _ from 'lodash'
-import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
+import { faPlusCircle, faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 import { faBullseyeArrow, faConstruction, faLock } from '@fortawesome/pro-light-svg-icons'
 import { connect } from 'react-redux'
 
@@ -426,10 +426,8 @@ class Profile extends Component {
     }
 
     renderProject(project) {
-        if (project.empty) {
+        if (project.empty)
             return <View style={styles.invisibleItem} />
-        }
-
         else return <ProjectItem2 project={project} onPress={() => this.onPressProject(project.id)} />
     }
 
@@ -440,13 +438,22 @@ class Profile extends Component {
     renderClientProjects(currentUser) {
         const isProfileOwner = this.userParam.id === currentUser.uid
         const mes = isProfileOwner ? 'Mes ' : ''
-        const { clientProjectsList } = this.state
+        const { clientProjectsList, isPro, denom, nom, prenom, email, address } = this.state
+
+        const client = {
+            id: this.userParam.id,
+            fullName: isPro ? denom.value : `${prenom.value} ${nom.value}`,
+            email: email.value,
+            role: 'Client',
+        }
 
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, marginTop: 16 }}>
                 <FormSection
                     sectionTitle={`${mes}Projets`}
-                    sectionIcon={faConstruction}
+                    sectionIcon={faPlusCircle}
+                    iconColor={theme.colors.primary}
+                    onPressIcon={() => this.props.navigation.navigate('CreateProject', { client, address })}
                     form={null}
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }}
                 />
@@ -633,7 +640,7 @@ class Profile extends Component {
                                             </Button>
                                         }
 
-                                        {this.isClient && !isProspect && clientProjectsList.length > 0 && this.renderClientProjects(currentUser)}
+                                        {this.isClient && this.renderClientProjects(currentUser)}
                                         {showGoalsSection && this.renderCommercialGoals(monthlyGoals, isCom)}
 
                                         {isProfileOwner &&

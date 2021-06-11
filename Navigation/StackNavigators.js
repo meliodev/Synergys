@@ -316,6 +316,27 @@ const ClientsManagementStack = createStackNavigator({
         screen: Address,
         navigationOptions: hideHeader
     },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    ListClients: {
+        screen: ListClients,
+        navigationOptions: hideHeader
+    },
+    CreateTask: {
+        screen: CreateTask,
+        navigationOptions: hideHeader
+    },
+    ListEmployees: {
+        screen: ListEmployees,
+        navigationOptions: hideHeader
+    },
+    DatePicker: {
+        screen: DatePicker,
+        navigationOptions: hideHeader
+    },
 })
 
 const RequestsManagementStack = createStackNavigator({

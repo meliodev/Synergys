@@ -43,7 +43,7 @@ const shortcutsModel = {
         value: '',
         icon: faConstruction,
         colors: { primary: '#fd9e64', secondary: '#faefe9' },
-        navigation: { screen: 'CreateProject', params: { prevScreen: 'Shortcuts' } }
+        navigation: { screen: 'ClientsManagement', params: { isRoot: false, prevScreen: 'Shortcuts' } }
     },
     createTask: {
         label: 'Nouvelle tâche',
