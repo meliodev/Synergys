@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Image } from "react-native";
 import Modal from 'react-native-modal'
 import { Title } from 'react-native-paper'
 import { faTimes, faUserAlt } from '@fortawesome/pro-light-svg-icons'
@@ -62,7 +62,8 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
         return (
             <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
                 <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
-                    <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />
+                    {element.icon && <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />}
+                    {element.image && <Image style={{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }} source={element.image} />}
                 </View>
                 <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
                     <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>

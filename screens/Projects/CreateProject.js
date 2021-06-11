@@ -851,7 +851,7 @@ class CreateProject extends Component {
                                         value={techContact.fullName || ''}
                                         error={!!techContact.error}
                                         errorText={techContact.error}
-                                        editable={canWrite && !this.isClient}
+                                        editable={canWrite && highRoles.includes(this.props.role.id)}
                                     />
                                 </View>
                             } />
