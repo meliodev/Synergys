@@ -16,15 +16,15 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
     const setIconPhase = (projectStep) => {
         switch (projectStep) {
-            case 'Initialisation':
+            case 'Prospect':
                 return faFolderOpen
                 break
 
-            case 'Rendez-vous 1':
+            case 'Visite technique préalable':
                 return faCalendar
                 break
 
-            case 'Rendez-vous N':
+            case 'Présentation étude ':
                 return faCalendarAlt
                 break
 

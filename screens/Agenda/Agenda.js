@@ -48,14 +48,13 @@ const KEYS_TO_FILTERS = ['type', 'status', 'priority', 'project.id', 'assignedTo
 const types = [
     { label: 'Tous', value: '' },
     { label: 'Normale', value: 'Normale' }, //#static
-    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' }, //#dynamic
     { label: 'Visite technique préalable', value: 'Visite technique préalable' }, //#dynamic
     { label: 'Visite technique', value: 'Visite technique' }, //#dynamic
     { label: 'Installation', value: 'Installation' }, //#dynamic
     { label: 'Rattrapage', value: 'Rattrapage' }, //#dynamic
     { label: 'Panne', value: 'Panne' }, //#static
     { label: 'Entretien', value: 'Entretien' }, //#static
-    { label: 'Rendez-vous N', value: 'Rendez-vous N' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+    { label: 'Présentation étude ', value: 'Présentation étude ' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
 const priorities = [

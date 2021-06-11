@@ -673,9 +673,9 @@ export const getCurrentAction = (process) => {
 
 //#Helpers
 const phases = [
-    { label: 'Initialisation', value: 'Initialisation', id: 'init' },
-    { label: 'Rendez-vous 1', value: 'Rendez-vous 1', id: 'rd1' },
-    { label: 'Rendez-vous N', value: 'Rendez-vous N', id: 'rdn' },
+    { label: 'Prospect', value: 'Prospect', id: 'init' },
+    { label: 'Visite technique préalable', value: 'Visite technique préalable', id: 'rd1' },
+    { label: 'Présentation étude ', value: 'Présentation étude ', id: 'rdn' },
     { label: 'Visite technique', value: 'Visite technique', id: 'technicalVisitManagement' },
     { label: 'Installation', value: 'Installation', id: 'installation' },
     { label: 'Maintenance', value: 'Maintenance', id: 'maintenance' },

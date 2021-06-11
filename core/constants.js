@@ -22,7 +22,7 @@ export const roles = [
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
 export const highRolesValues = ['Admin', 'Back office', 'Directeur commercial', 'Responsable technique']
 
-export const comSteps = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+export const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude ']
 export const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 
 export const downloadDir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir

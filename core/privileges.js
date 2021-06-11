@@ -66,7 +66,7 @@ const configureQueryParams = (queryFilters, params) => { //Task: Send the right 
 
 export const blockRoleUpdateOnPhase = (role, phase) => {
     let isBlockedUpdates = false
-    const comPhases = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+    const comPhases = ['Prospect', 'Visite technique préalable', 'Présentation étude ']
     const techPhases = ['Visite technique', 'Installation', 'Maintenance']
     const isComPhase = comPhases.includes(phase)
     const isTechPhase = techPhases.includes(phase)

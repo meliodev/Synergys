@@ -1,6 +1,6 @@
 export const processModel = {
     'init': {
-        title: 'Initialisation',
+        title: 'Prospect',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 1,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
@@ -200,10 +200,10 @@ export const processModel = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Rendez-vous N' }
+                            { filter: 'type', operation: '==', value: 'Présentation étude ' }
                         ],
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true },
+                        screenParams: { project: null, taskType: { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
@@ -393,7 +393,7 @@ export const processModel = {
         }
     },
     'rdn': {
-        title: 'Rendez-vous N',
+        title: 'Présentation étude ',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 3,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
@@ -411,11 +411,11 @@ export const processModel = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Rendez-vous N' },
+                            { filter: 'type', operation: '==', value: 'Présentation étude ' },
                             { filter: 'status', operation: '!=', value: 'Annulé' } //Check if there is an active RDN
                         ],
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true },
+                        screenParams: { project: null, taskType: { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
@@ -438,7 +438,7 @@ export const processModel = {
                         documentId: '', //#task: should be array in case of RDN lasting for many days (multiple tasks)
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Rendez-vous N' },
+                            { filter: 'type', operation: '==', value: 'Présentation étude ' },
                             { filter: 'status', operation: '!=', value: 'Annulé' } //Get id of active RDN (all old/canceled RDN are inactive)
                         ],
                         type: 'manual',
@@ -466,11 +466,11 @@ export const processModel = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Rendez-vous N' },
+                            { filter: 'type', operation: '==', value: 'Présentation étude ' },
                             { filter: 'status', operation: '!=', value: 'Annulé' }
                         ],
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, dynamicType: true },
+                        screenParams: { project: null, taskType: { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         status: 'pending',

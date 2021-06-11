@@ -646,14 +646,13 @@ let publicTaskTypes = [
 
 let alltaskTypes = [
   { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
-  { label: 'Rendez-vous 1', value: 'Rendez-vous 1', natures: ['com'] }, //#dynamic
   { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, //#dynamic
   { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
   { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
   { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
   { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
   { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
-  { label: 'Rendez-vous N', value: 'Rendez-vous N', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+  { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
 export const setPickerDocTypes = (currentRole, dynamicType, documentType) => {

@@ -39,9 +39,9 @@ const states = [
 ]
 
 const steps = [
-    { label: 'Initialisation', value: 'Initialisation' },
-    { label: 'Rendez-vous 1', value: 'Rendez-vous 1' },
-    { label: 'Rendez-vous N', value: 'Rendez-vous N' },
+    { label: 'Prospect', value: 'Prospect' },
+    { label: 'Visite technique préalable', value: 'Visite technique préalable' },
+    { label: 'Présentation étude ', value: 'Présentation étude ' },
     { label: 'Visite technique', value: 'Visite technique' },
     { label: 'Installation', value: 'Installation' },
     { label: 'Maintenance', value: 'Maintenance' },
@@ -60,7 +60,7 @@ const workTypes = [
     { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
 ]
 
-const comSteps = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
+const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude ']
 const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 
 const imagePickerOptions = {
@@ -124,7 +124,7 @@ class CreateProject extends Component {
 
             //Pickers
             state: 'En cours',
-            step: 'Initialisation',
+            step: 'Prospect',
             color: theme.colors.primary,
 
             comContact: { id: '', fullName: '', email: '', role: '' },
@@ -757,7 +757,7 @@ class CreateProject extends Component {
                                         errorText={step.error}
                                         selectedValue={step}
                                         onValueChange={(step) => this.setState({ step })}
-                                        title="Phase *"
+                                        title="Étape *"
                                         elements={steps}
                                         enabled={canWrite && !this.isClient}
                                     />

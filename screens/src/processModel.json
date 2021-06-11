@@ -1,6 +1,6 @@
  {
   "init": {
-    "title": "Initialisation",
+    "title": "Prospect",
     "status": "pending",
     "instructions": "Lorem ipsum dolor",
     "phaseOrder": 1,
@@ -143,7 +143,7 @@
     }
   },
   "rdn": {
-    "title": "Rendez-vous N",
+    "title": "Présentation étude ",
     "status": "pending",
     "instructions": "Lorem ipsum dolor",
     "phaseOrder": 3,
@@ -157,7 +157,7 @@
     "status": "pending",
     "instructions": "Lorem ipsum dolor",
     "phaseOrder": 4,
-    "previousPhase": "Rendez-vous N",
+    "previousPhase": "Présentation étude ",
     "progress": 0,
     "isCurrent": false,
     "steps": {
