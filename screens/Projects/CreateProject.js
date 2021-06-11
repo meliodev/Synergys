@@ -6,7 +6,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign, faRetweet } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
-
 import ImagePicker from 'react-native-image-picker'
 import ImageView from 'react-native-image-view'
 import { SliderBox } from "react-native-image-slider-box"
@@ -30,6 +29,7 @@ import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process'
 
 import { connect } from 'react-redux'
+import ModalCheckBoxes from '../../components/ModalCheckBoxes';
 
 const states = [
     { label: 'En attente', value: 'En attente' },
@@ -47,6 +47,19 @@ const steps = [
     { label: 'Maintenance', value: 'Maintenance' },
 ]
 
+const workTypes = [
+    { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', selected: false },
+    { label: 'PAC AIR/AIR (climatisation)', value: 'PAC AIR/AIR (climatisation)', selected: false },
+    { label: 'BALLON THERMODYNAMIQUE', value: 'BALLON THERMODYNAMIQUE', selected: false },
+    { label: 'BALLON SOLAIRE THERMIQUE', value: 'BALLON SOLAIRE THERMIQUE', selected: false },
+    { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', selected: false },
+    { label: 'PHOTOVOLTAÏQUE HYBRIDE', value: 'PHOTOVOLTAÏQUE HYBRIDE', selected: false },
+    { label: 'ISOLATION ', value: 'ISOLATION ', selected: false },
+    { label: 'VMC DOUBLE FLUX ', value: 'VMC DOUBLE FLUX ', selected: false },
+    { label: 'POÊLE A GRANULES ', value: 'POÊLE A GRANULES ', selected: false },
+    { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
+]
+
 const comSteps = ['Initialisation', 'Rendez-vous 1', 'Rendez-vous N']
 const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 
@@ -58,7 +71,7 @@ const imagePickerOptions = {
     noData: true,
 }
 
-const properties = ["client", "name", "description", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
+const properties = ["client", "name", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
 
 class CreateProject extends Component {
     constructor(props) {
@@ -101,7 +114,8 @@ class CreateProject extends Component {
             //TEXTINPUTS
             name: "",
             nameError: "",
-            description: "",
+            workTypes: workTypes,
+            isModalVisible: false,
             note: "",
 
             //Screens
@@ -183,10 +197,20 @@ class CreateProject extends Component {
         if (!project)
             this.setState({ docNotFound: true })
         else {
+            this.setWorkTypes(project)
             project = formatDocument(project, properties, [])
             this.setState(project)
         }
         return project
+    }
+
+    setWorkTypes(project) {
+        let { workTypes } = this.state
+        for (let wt of workTypes) {
+            if (project.workTypes.includes(wt.value))
+                wt.selected = true
+        }
+        this.setState({ workTypes })
     }
 
     setImageCarousel(attachments) {
@@ -260,7 +284,7 @@ class CreateProject extends Component {
         const techContactError = isStepTech ? nameValidator(techContact.id, '"Contact technique"') : ''
         const addressError = '' //Address optional on offline mode
         //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
-        const hasPriorTechVisitError = hasPriorTechVisit ? "" : "La création d'une visite technique préalable est obligatoire."
+        const hasPriorTechVisitError = this.isEdit ? "" : hasPriorTechVisit ? "" : "La création d'une visite technique préalable est obligatoire."
 
         if (clientError || nameError || addressError || comContactError || techContactError || hasPriorTechVisitError) {
             client.error = clientError
@@ -317,12 +341,15 @@ class CreateProject extends Component {
             }
         }
 
-        const props = ["name", "description", "client", "note", "state", "step", "address", "color", "bill", "comContact", "techContact", "intervenant"]
+        const props = ["name", "client", "note", "state", "step", "address", "color", "bill", "comContact", "techContact", "intervenant"]
         let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
         project.process = {
             version: getLatestProcessModelVersion(this.props.processModels)
         }
+        const selectedWorkTypes = this.state.workTypes.filter((wt) => wt.selected === true)
+        const selectedWorkTypesValues = selectedWorkTypes.map((wt) => wt.value)
+        project.workTypes = selectedWorkTypesValues
 
         db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
         this.refreshState(project)
@@ -628,8 +655,9 @@ class CreateProject extends Component {
         else this.props.navigation.goBack()
     }
 
+
     render() {
-        let { client, name, description, note, address, state, step, bill, color } = this.state
+        let { client, name, workTypes, note, address, state, step, bill, color } = this.state
         let { createdAt, createdBy, editedAt, editedBy } = this.state
         let { documentsList, documentTypes, taskTypes, comContact, techContact } = this.state
         const { nameError, loading, docNotFound, toastMessage, toastType } = this.state
@@ -722,18 +750,6 @@ class CreateProject extends Component {
                                     // autoFocus={!this.isEdit}
                                     />
 
-
-                                    <MyInput
-                                        label="Description"
-                                        returnKeyType="done"
-                                        value={description}
-                                        onChangeText={description => this.setState({ description })}
-                                        // error={!!description.error}
-                                        // errorText={description.error}
-                                        multiline={true}
-                                        editable={canWrite && !this.isClient}
-                                    />
-
                                     <Picker
                                         returnKeyType="next"
                                         value={step}
@@ -754,6 +770,13 @@ class CreateProject extends Component {
                                         title="État *"
                                         elements={states}
                                         enabled={canWrite && !this.isClient}
+                                    />
+
+                                    <ModalCheckBoxes
+                                        items={workTypes}
+                                        itemsFetched={true}
+                                        updateItems={(workTypes) => this.setState({ workTypes })}
+                                        onPressItem={(item) => console.log(item)}
                                     />
 
                                     <ColorPicker
@@ -950,7 +973,6 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps)(CreateProject)
 
 
-
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
@@ -1013,8 +1035,6 @@ const styles = StyleSheet.create({
         //marginTop: 10,
     },
 })
-
-
 
 
     //Delete Images from STORAGE //#RULE: NEVER DELETE FILES

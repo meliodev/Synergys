@@ -331,7 +331,7 @@ class CreateRequest extends Component {
         let { productsList } = this.state
 
         return (
-            <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.gray_light }}>
+            <View style={modalStyles.item}>
                 <Checkbox
                     status={productsList[key].selected ? 'checked' : 'unchecked'}
                     color={theme.colors.primary}
@@ -384,7 +384,12 @@ class CreateRequest extends Component {
                                 renderItem={({ item, index }) => this.renderModalItem(item, index)}
                             />
                             :
-                            <EmptyList icon={faLightbulbSlash} header='Aucune suggestion' description="Veuillez saisir manuellement, ci-dessous, les articles concernés." offLine={!isConnected} />
+                            <EmptyList
+                                icon={faLightbulbSlash}
+                                header='Aucune suggestion'
+                                description="Veuillez saisir manuellement, ci-dessous, les articles concernés."
+                                offLine={!isConnected}
+                            />
                         }
                     </View>
 
@@ -650,6 +655,14 @@ const modalStyles = StyleSheet.create({
         shadowOpacity: 0.32,
         shadowRadius: 5.46,
         elevation: 2,
+    },
+    item: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 10,
+        paddingVertical: 15,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_light
     },
     confirmButton: {
         alignSelf: 'center',
