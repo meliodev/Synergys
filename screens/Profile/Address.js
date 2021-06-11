@@ -56,7 +56,7 @@ class MarkerTypes extends React.Component {
     }
 
     getCurrentPosition() {
-    
+
         if (this.currentAddress.marker === '' || this.currentAddress.marker.longitude === '') return
 
         const marker = {
@@ -108,7 +108,10 @@ class MarkerTypes extends React.Component {
         Geocoder.from(lat, lng)
             .then(json => {
                 var addressComponent = json.results[0]
-                const address = { description: addressComponent.formatted_address, place_id: addressComponent.place_id }
+                const address = {
+                    description: addressComponent.formatted_address,
+                    place_id: addressComponent.place_id
+                }
                 this.setState({ address })
             })
             .catch(error => console.warn(error))
@@ -117,7 +120,7 @@ class MarkerTypes extends React.Component {
     }
 
     render() {
-        let { showInput, loading } = this.state
+        let { address, showInput, loading } = this.state
 
         return (
             <View style={{ flex: 1 }}>
@@ -129,7 +132,7 @@ class MarkerTypes extends React.Component {
                         showInput={showInput}
                         hideInput={() => this.setState({ showInput: false })} />
                     :
-                    <Appbar close={!loading} title titleText="Modifier l'adresse" check={!loading} handleSubmit={this.handleSubmit} search={!showInput && !loading} handleSearch={() => this.setState({ showInput: true })} />
+                    <Appbar close={!loading} title titleText={address.description} check={!loading} handleSubmit={this.handleSubmit} search={!showInput && !loading} handleSearch={() => this.setState({ showInput: true })} />
                 }
 
                 {!loading ?

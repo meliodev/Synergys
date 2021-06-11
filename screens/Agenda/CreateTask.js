@@ -105,7 +105,7 @@ class CreateTask extends Component {
             address: defaultState.address || { description: '', place_id: '' },
 
             //Schedule
-            isAllDay: true,
+            isAllDay: false,
             startDate: moment().format(),
             endDate: moment().format(),
             startHour: moment().format('HH:mm'),
@@ -388,13 +388,13 @@ class CreateTask extends Component {
                 return
             }
 
-            // ////6. Handle conflicts
-            // const overlappingTasks = await this.checkTasksConflicts(tasks)
-            // if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
-            //     load(this, false)
-            //     this.handleConflicts(overlappingTasks, task)
-            //     return
-            // }
+            //6. Handle conflicts
+            const overlappingTasks = await this.checkTasksConflicts(tasks)
+            if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+                load(this, false)
+                this.handleConflicts(overlappingTasks, task)
+                return
+            }
 
             //7. Persist task(s)
             await this.persistTasks(tasks)
@@ -404,7 +404,7 @@ class CreateTask extends Component {
                 const refreshAgenda = true
                 this.props.navigation.state.params.onGoBack(refreshAgenda, tasks[0])
             }
-    
+
             this.props.navigation.goBack()
         }
         catch (e) {

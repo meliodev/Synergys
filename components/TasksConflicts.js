@@ -59,7 +59,7 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                 <TouchableOpacity style={{ zIndex: 1, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
                     <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
                 </TouchableOpacity>
-                <Text style={[theme.customFontMSregular.h3, { marginLeft: theme.padding }]}>Gestion des conflits</Text>
+                <Text style={[theme.customFontMSregular.h3, { marginLeft: theme.padding }]}>Oupss</Text>
             </View>
         )
     }
