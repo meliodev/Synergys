@@ -750,27 +750,42 @@ class CreateProject extends Component {
                                     // autoFocus={!this.isEdit}
                                     />
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={step}
-                                        error={!!step.error}
-                                        errorText={step.error}
-                                        selectedValue={step}
-                                        onValueChange={(step) => this.setState({ step })}
-                                        title="Étape *"
-                                        elements={steps}
-                                        enabled={canWrite && !this.isClient}
-                                    />
+                                    {!this.isClient &&
+                                        <Picker
+                                            returnKeyType="next"
+                                            value={step}
+                                            error={!!step.error}
+                                            errorText={step.error}
+                                            selectedValue={step}
+                                            onValueChange={(step) => this.setState({ step })}
+                                            title="Étape *"
+                                            elements={steps}
+                                            enabled={canWrite && !this.isClient}
+                                        />
+                                    }
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={state}
-                                        selectedValue={state}
-                                        onValueChange={(state) => this.setState({ state })}
-                                        title="État *"
-                                        elements={states}
-                                        enabled={canWrite && !this.isClient}
-                                    />
+                                    {!this.isClient &&
+                                        <Picker
+                                            returnKeyType="next"
+                                            value={state}
+                                            selectedValue={state}
+                                            onValueChange={(state) => this.setState({ state })}
+                                            title="État *"
+                                            elements={states}
+                                            enabled={canWrite && !this.isClient}
+                                        />
+                                    }
+
+                                    {this.isClient &&
+                                        <MyInput
+                                            label="Phase *"
+                                            value={step + ' ' + state}
+                                            error={nameError}
+                                            errorText={nameError}
+                                            multiline={true}
+                                            editable={false}
+                                        />
+                                    }
 
                                     <ModalCheckBoxes
                                         items={workTypes}

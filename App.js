@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { LogBox } from 'react-native'
+import { LogBox, Text } from 'react-native'
 
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import { connect } from 'react-redux'
@@ -11,6 +11,7 @@ import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-n
 import { MenuProvider } from 'react-native-popup-menu';
 
 
+import PdfGen from './PdfGen'
 import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
 

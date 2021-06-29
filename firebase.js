@@ -1,4 +1,5 @@
 import firebase from '@react-native-firebase/app'
+import '@react-native-firebase/crashlytics'
 import '@react-native-firebase/firestore'
 import '@react-native-firebase/auth'
 import '@react-native-firebase/messaging'
@@ -16,6 +17,7 @@ export const db = dbTemp
 export const auth = firebase.auth()
 export const messaging = firebase.messaging()
 export const functions = firebase.functions()
+export const crashlytics = firebase.crashlytics()
 
 // in DEV env use emulators
 // TODO: https://github.com/invertase/react-native-firebase/pull/3690/files (only android redirects 10.0.2.2 to localhost)

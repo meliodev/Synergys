@@ -2,7 +2,7 @@
  * @format
  */
 import SplashScreen from 'react-native-splash-screen'
-SplashScreen.show()
+//SplashScreen.show()
 
 import { AppRegistry } from 'react-native';
 import App from './App';

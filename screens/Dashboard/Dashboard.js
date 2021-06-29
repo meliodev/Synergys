@@ -9,6 +9,8 @@ import { connect } from 'react-redux'
 import * as theme from '../../core/theme'
 import {requestRESPermission, requestWESPermission} from '../../core/permissions'
 
+import firebase from '../../firebase'
+
 import Analytics from './Analytics'
 import Tasks from './Tasks'
 import Notifications from './Notifications'
