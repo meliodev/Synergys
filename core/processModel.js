@@ -139,7 +139,7 @@ export const processModel = {
                         screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
-                        responsable: 'Commercial', 
+                        responsable: 'Commercial',
                         status: 'pending',
                     },
                     {
@@ -180,46 +180,21 @@ export const processModel = {
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Reporter', id: 'postpone', onSelectType: 'navigation', },
-                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },  
+                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
                     },
                 ]
             },
-            'rd2Creation': {
-                title: 'Initiation rendez-vous 2',
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 2,
-                actions: [
-                    {
-                        id: 'rd2Creation',
-                        title: 'Créer un rendez-vous 2',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Présentation étude ' }
-                        ],
-                        screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, dynamicType: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        responsable: 'Commercial',
-                        status: 'pending',
-                        nextStep: 'housingActionFile'
-                    }
-                ]
-            },
-            'housingActionFile': { 
+            'housingActionFile': {
                 title: 'Dossier action logement',
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
                     {
                         id: 'eebFileCreation',
-                        title: 'Créer une fiche EEB',
+                        title: 'Créer une fiche Étude et Évaluation des besoins',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         collection: 'Documents',
@@ -252,7 +227,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'NON', id: 'cancel', nextStep: 'aidFile', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'NON', id: 'cancel', nextStep: 'primeCEECreation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextPhase: 'technicalVisitManagement', onSelectType: 'transition', operation: null },
                         ],
                         responsable: 'Commercial',
@@ -260,32 +235,47 @@ export const processModel = {
                     },
                 ]
             },
-            'aidFile': {
-                title: 'Dossier aide',
+            'primeCEECreation': {
+                title: "Création d'une prime CEE",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 4,
                 actions: [
                     {
-                        id: 'helpFolderCreation',
-                        title: 'Créer un dossier aide',
+                        id: 'primeCEEChoice',
+                        title: 'Ce projet est il éligible à la prime cee ?',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'NON', id: 'cancel', nextPhase: 'rdn', onSelectType: 'transition', commentRequired: true },
+                            { label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'primeCEECreation',
+                        title: 'Créer une prime CEE',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 2,
                         collection: 'Documents',
                         //Verification
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Dossier aide' },
+                            { filter: 'type', operation: '==', value: 'Dossier CEE' },
                             { filter: 'deleted', operation: '==', value: false },
                             { filter: 'attachment.downloadURL', operation: '!=', value: '' }
                         ],
                         //Navigation
                         queryFiltersUpdateNav: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Dossier aide' },
+                            { filter: 'type', operation: '==', value: 'Dossier CEE' },
                             { filter: 'deleted', operation: '==', value: false },
                         ],
-                        screenName: 'UploadDocument',
-                        screenParams: { project: null, documentType: { label: 'Dossier aide', value: 'Dossier aide', selected: false }, dynamicType: true },
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
@@ -293,19 +283,44 @@ export const processModel = {
                     },
                     {
                         id: 'quoteCreationChoice',
-                        title: 'Voulez-vous continuer la procédure du projet ?',
+                        title: 'Souhaitez-vous toujours être acteur de la transition énergétique ?',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
+                        actionOrder: 3,
                         type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                            { label: 'Créer un devis', id: 'confirm', nextStep: 'quoteCreation', onSelectType: 'transition' },
+                            { label: 'Poursuivre', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
                     },
+                ]
+            },
+            'rd2Creation': {
+                title: 'Initiation rendez-vous 2',
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 2,
+                actions: [
+                    {
+                        id: 'rd2Creation',
+                        title: 'Créer un rendez-vous 2',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        collection: 'Agenda',
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Présentation étude ' }
+                        ],
+                        screenName: 'CreateTask', //creation
+                        screenParams: { project: null, taskType: { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, dynamicType: true },
+                        type: 'auto',
+                        verificationType: 'doc-creation',
+                        responsable: 'Commercial',
+                        status: 'pending',
+                        nextStep: 'quoteCreation'
+                    }
                 ]
             },
             'quoteCreation': {
@@ -334,54 +349,6 @@ export const processModel = {
                         ],
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'primeCEEChoice',
-                        title: 'Ce projet est il éligible à la prime cee ?',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'NON', id: 'cancel', nextPhase: 'rdn', onSelectType: 'transition', commentRequired: true },
-                            { label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                ]
-            },
-            'primeCEECreation': {
-                title: "Création d'une prime CEE",
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 6,
-                actions: [
-                    {
-                        id: 'primeCEECreation',
-                        title: 'Créer une prime CEE',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        collection: 'Documents',
-                        //Verification
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Dossier CEE' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-                        ],
-                        //Navigation
-                        queryFiltersUpdateNav: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Dossier CEE' },
-                            { filter: 'deleted', operation: '==', value: false },
-                        ],
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
@@ -664,7 +631,7 @@ export const processModel = {
                     //Check 
                     {
                         //General
-                        id: 'checkTechContact', 
+                        id: 'checkTechContact',
                         title: 'Renseigner un contact technique pour le projet',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
@@ -779,38 +746,8 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'technicalVisitChoice', },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'poseurAffectation', },
                             { label: 'Modifier la date', id: 'edit', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                ]
-            },
-            'technicalVisitChoice': {
-                title: 'Décision sur la visite technique',
-                instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
-                stepOrder: 2,
-                actions: [
-                    {
-                        id: 'technicalVisitChoice',
-                        title: 'Confirmez-vous la réalisation de la visite technique ?',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        collection: 'Agenda',
-                        documentId: '',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                        ],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '' },
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
-                            { label: 'Confirmer', id: 'confirm', nextStep: 'poseurAffectation', onSelectType: 'transition' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
@@ -903,27 +840,7 @@ export const processModel = {
                         responsable: 'Poseur',
                         status: 'pending',
                         verificationType: 'doc-creation',
-                    },
-                    {
-                        id: 'poseurAffectation', //Validate "poseur" set previously
-                        title: "Valider/Affecter un poseur à l'installation",
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Installation' }
-                        ],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true },
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '',
-                        choices: [
-                            { label: 'Valider le poseur', id: 'confirm', onSelectType: 'transition', nextStep: 'installationChoice' },
-                            { label: "Modifier le poseur", id: 'edit', onSelectType: 'navigation' },
-                        ],
-                        status: 'pending',
+                        nextStep: 'installationChoice'
                     },
                 ]
             },
@@ -1084,21 +1001,10 @@ export const processModel = {
                 stepOrder: 6,
                 actions: [
                     {
-                        id: 'quoteValidation',
-                        title: "Valider l'absence de réserve",
-                        instructions: "",
-                        actionOrder: 1,
-                        type: 'manual',
-                        verificationType: 'validation',
-                        comment: '',
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {
                         id: 'maintainanceContractChoice',
                         title: 'Voulez-vous initier le contrat de maintenance ?',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
+                        actionOrder: 1,
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
                         comment: '', //motif
