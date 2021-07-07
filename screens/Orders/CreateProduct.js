@@ -32,7 +32,7 @@ import firebase, { db, auth } from '../../firebase'
 import { fetchDocs } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
-import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, priceValidator, arrayValidator, setToast, load, displayError } from "../../core/utils";
+import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, positiveNumberValidator, arrayValidator, setToast, load, displayError } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { handleFirestoreError } from '../../core/exceptions';
@@ -208,7 +208,7 @@ class CreateProduct extends Component {
         const categoryError = nameValidator(category.value, `"Catégorie"`)
         brandError = arrayValidator(tagsSelected, `"Marque"`)
         const nameError = nameValidator(name.value, `"Désignation"`)
-        const priceError = priceValidator(price.value)
+        const priceError = positiveNumberValidator(price.value, `"Prix de vente"`)
 
         if (categoryError || brandError || nameError || priceError) {
             category.error = categoryError

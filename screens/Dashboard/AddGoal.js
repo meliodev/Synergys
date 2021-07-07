@@ -14,7 +14,7 @@ import MyInput from '../../components/TextInput'
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, priceValidator, formatDocument, unformatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, positiveNumberValidator, formatDocument, unformatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
 import { fetchDocs, fetchDocument } from "../../api/firestore-api";
@@ -99,7 +99,7 @@ class AddGoal extends Component {
     //##VALIDATE
     validateInputs() {
         const { target } = this.state
-        const targetError = priceValidator(target, `"Chiffre d'affaire cible"`)
+        const targetError = positiveNumberValidator(target, `"Chiffre d'affaire cible"`)
         if (targetError) {
             Keyboard.dismiss()
             this.setState({ targetError, loading: false })

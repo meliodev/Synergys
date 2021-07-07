@@ -27,7 +27,7 @@ const PickerBar = ({
         { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
         { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
         { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
-        { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+        { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
     ]
 
     const priorities = [

@@ -188,7 +188,7 @@ class AuthLoadingScreen extends Component {
         }
 
         else {
-          var routeName = roleValue !== 'Client' ? "App" : "ProjectsStack"
+          var routeName = roleValue !== 'Client' ? "SimulatorStack" : "ProjectsStack"
           var routeParams = {}
         }
       }

@@ -580,6 +580,7 @@ export default class PdfGeneration extends Component {
                 { label: 'Total T.T.C', value: totalTTC.toString() },
                 { label: 'PRIME CEE COUP DE POUCE', value: `-${primeCEE.toString()}` },
                 { label: 'PRIME RENOV', value: `-${primeRenov.toString()}` },
+                { label: 'Aides région', value: `-${primeRenov.toString()}` },
                 { label: 'Net à payer', value: totalNet.toString() },
             ]
 

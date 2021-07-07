@@ -27,7 +27,6 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
         if (autoValidation) {
             handleSelectElement(element, index) //only the selected element
         }
-
         else selectElement(index)
     }
 

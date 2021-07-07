@@ -24,7 +24,7 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
                 return faCalendar
                 break
 
-            case 'Présentation étude ':
+            case 'Présentation étude':
                 return faCalendarAlt
                 break
 

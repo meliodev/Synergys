@@ -13,7 +13,7 @@ import AutoCompleteProducts from '../../components/AutoCompleteProducts'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
 
-import { updateField, nameValidator, arrayValidator, priceValidator, setToast, load } from "../../core/utils";
+import { updateField, nameValidator, arrayValidator, positiveNumberValidator, setToast, load } from "../../core/utils";
 import { fetchDocs } from '../../api/firestore-api';
 
 class AddItem extends Component {
@@ -67,7 +67,7 @@ class AddItem extends Component {
 
         let tagsError = arrayValidator(tagsSelected, `"Article"`)
         let quantityError = nameValidator(quantity.value, `"Quantité"`)
-        let priceError = priceValidator(price.value)
+        let priceError = positiveNumberValidator(price.value, `"Prix unitaire"`)
 
         if (tagsError || quantityError || priceError) {
             Keyboard.dismiss()

@@ -3,6 +3,20 @@
     <item android:drawable="@color/background" />
     <item
         android:drawable="@drawable/splash_screen"
+        android:height="100dp"
+        android:width="100dp"
+        android:gravity="left"
+    />
+    <item
+        android:drawable="@drawable/splash_screen"
+        android:height="100dp"
+        android:width="100dp"
         android:gravity="center"
+    />
+    <item
+        android:drawable="@drawable/splash_screen"
+        android:height="100dp"
+        android:width="100dp"
+        android:gravity="bottom"
     />
 </layer-list>

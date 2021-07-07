@@ -41,7 +41,7 @@ const states = [
 const steps = [
     { label: 'Prospect', value: 'Prospect' },
     { label: 'Visite technique préalable', value: 'Visite technique préalable' },
-    { label: 'Présentation étude ', value: 'Présentation étude ' },
+    { label: 'Présentation étude', value: 'Présentation étude' },
     { label: 'Visite technique', value: 'Visite technique' },
     { label: 'Installation', value: 'Installation' },
     { label: 'Maintenance', value: 'Maintenance' },
@@ -60,7 +60,7 @@ const workTypes = [
     { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
 ]
 
-const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude ']
+const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
 const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 
 const imagePickerOptions = {

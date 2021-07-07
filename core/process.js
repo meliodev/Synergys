@@ -675,7 +675,7 @@ export const getCurrentAction = (process) => {
 const phases = [
     { label: 'Prospect', value: 'Prospect', id: 'init' },
     { label: 'Visite technique préalable', value: 'Visite technique préalable', id: 'rd1' },
-    { label: 'Présentation étude ', value: 'Présentation étude ', id: 'rdn' },
+    { label: 'Présentation étude', value: 'Présentation étude', id: 'rdn' },
     { label: 'Visite technique', value: 'Visite technique', id: 'technicalVisitManagement' },
     { label: 'Installation', value: 'Installation', id: 'installation' },
     { label: 'Maintenance', value: 'Maintenance', id: 'maintenance' },

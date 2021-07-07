@@ -62,6 +62,10 @@ import AddItem from '../screens/Orders/AddItem'
 import CreateProduct from '../screens/Orders/CreateProduct'
 import CreateOrder from '../screens/Orders/CreateOrder'
 
+//Forms
+import ListForms from '../screens/Forms/ListForms'
+import CreateEEB from '../screens/Forms/CreateEEB'
+
 //News
 import ListNews from '../screens/News/ListNews'
 import ViewNews from '../screens/News/ViewNews'
@@ -783,6 +787,21 @@ const OrdersStack = createStackNavigator({
     },
 })
 
+const SimulatorStack = createStackNavigator({
+    ListForms: {
+        screen: ListForms,
+        navigationOptions: hideHeader
+    },
+    CreateEEB: {
+        screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
+    },
+})
+
 const NewsStack = createStackNavigator({
     ListNews: {
         screen: ListNews,
@@ -856,6 +875,10 @@ export const AppStack = createSwitchNavigator({
     },
     OrdersStack: {
         screen: OrdersStack,
+        navigationOptions: hideHeader
+    },
+    SimulatorStack: {
+        screen: SimulatorStack,
         navigationOptions: hideHeader
     },
     NewsStack: {

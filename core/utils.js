@@ -48,10 +48,9 @@ export const arrayValidator = (array, label) => {
   return ''
 }
 
-export const priceValidator = (price) => {
+export const positiveNumberValidator = (price, label) => {
   price = Number(price)
-  console.log(price)
-  if (price <= 0) return `Le champs "Prix unitaire" est obligatoire`
+  if (price === "" || price <= 0) return `Le champs ${label} doit être un nombre positif`
   return ""
 }
 
@@ -652,7 +651,7 @@ let alltaskTypes = [
   { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
   { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
   { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
-  { label: 'Présentation étude ', value: 'Présentation étude ', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+  { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
 export const setPickerDocTypes = (currentRole, dynamicType, documentType) => {

@@ -54,7 +54,7 @@ const types = [
     { label: 'Rattrapage', value: 'Rattrapage' }, //#dynamic
     { label: 'Panne', value: 'Panne' }, //#static
     { label: 'Entretien', value: 'Entretien' }, //#static
-    { label: 'Présentation étude ', value: 'Présentation étude ' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
+    { label: 'Présentation étude', value: 'Présentation étude' }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
 const priorities = [

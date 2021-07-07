@@ -80,6 +80,7 @@ const colors = {
   miRequests: '#AD1457',
   miOrders: '#000',
   miDocuments: '#6D4C41',
+  miSimulator: 'green',
   miNews: '#000',
   miLogout: '#000',
 }

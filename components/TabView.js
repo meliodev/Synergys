@@ -13,12 +13,17 @@ const initialLayout = { width: Dimensions.get('window').width }
 export default class TabView extends React.Component {
 
   render() {
+
+    const { isSmallLabel } = this.props
+
     const renderScene = ({ route }) => {
       switch (route.key) {
         case 'first':
           return this.props.Tab1;
         case 'second':
           return this.props.Tab2;
+        case 'third':
+          return this.props.Tab3;
         default:
           return null;
       }
@@ -36,9 +41,8 @@ export default class TabView extends React.Component {
             const isFirstRoute = route.key === 'first'
             const backgroundColor = focused ? theme.colors.white : theme.colors.tabs
             const textColor = focused ? theme.colors.secondary : theme.colors.gray_dark
-
             let titleLowerCase = route.title.toLowerCase()
-            titleLowerCase = titleLowerCase.charAt(0).toUpperCase() + titleLowerCase.slice(1);
+            titleLowerCase = titleLowerCase.charAt(0).toUpperCase() + titleLowerCase.slice(1)
 
             const setIconSize = () => {
               if (isFirstRoute && this.props.icon1 === faUser)
@@ -49,10 +53,17 @@ export default class TabView extends React.Component {
             }
 
             return (
-              <View style={{ flexDirection: 'row', padding: theme.padding, width: constants.ScreenWidth * 0.43, justifyContent: 'center', alignItems: 'center', backgroundColor: backgroundColor, borderRadius: 10 }}>
-                <CustomIcon icon={isFirstRoute ? this.props.icon1 : this.props.icon2} size={setIconSize()} color={textColor} style={{ marginRight: 5 }} />
-                <Text style={[theme.customFontMSregular.header, { color: textColor, marginLeft: 5, letterSpacing: 0.5 }]}>
-                  {/* {route.title} */}
+              <View style={[styles.labelContainer, { backgroundColor }]}>
+                <CustomIcon
+                  icon={isFirstRoute ? this.props.icon1 : this.props.icon2}
+                  size={setIconSize()}
+                  color={textColor}
+                  style={{ marginRight: 5 }}
+                />
+                <Text
+                  numberOfLines={2}
+                  ellipsizeMode='tail'
+                  style={[isSmallLabel ? theme.customFontMSregular.small : theme.customFontMSregular.header, { color: textColor, marginLeft: 5, letterSpacing: 0.5 }]}>
                   {titleLowerCase}
                 </Text>
               </View>
@@ -67,7 +78,19 @@ export default class TabView extends React.Component {
 
 }
 
+TabView.defaultProps = {
+  isSmallLabel: false
+}
+
 const styles = StyleSheet.create({
+  labelContainer: {
+    flexDirection: 'row',
+    padding: theme.padding,
+    // width: constants.ScreenWidth * 0.4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10
+  },
   scene: {
     flex: 1,
   },
