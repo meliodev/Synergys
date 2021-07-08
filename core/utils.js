@@ -8,7 +8,7 @@ import { decode as atob, encode as btoa } from "base-64"
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
-import { PDFDocument, degrees, PageSizes } from 'pdf-lib'
+import { PDFDocument, degrees, PageSizes, StandardFonts, rgb } from 'pdf-lib'
 import _ from 'lodash'
 import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle } from '@fortawesome/pro-light-svg-icons'
 
@@ -18,6 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, roles } from './constants'
+import { ficheEEBModel as formPages } from "./ficheEEBModel";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -494,6 +495,178 @@ export const saveFile = async (file, fileName, encoding) => {
   }
 }
 
+
+export const chunk = (str, n) => {
+  var ret = [];
+  var i;
+  var len;
+
+  for (i = 0, len = str.length; i < len; i += n) {
+    ret.push(str.substr(i, n))
+  }
+
+  return ret
+}
+
+export const generateFichEEB = async (formInputs) => {
+  try {
+    const pdfDoc = await PDFDocument.load(ficheEEBBase64)
+    const pages = pdfDoc.getPages()
+    const firstPage = pages[0]
+
+    // Theme config
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+    const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+    const colors = {
+      primary: rgb(0.576, 0.768, 0.486),
+      black: rgb(0, 0, 0),
+      white: rgb(1, 1, 1),
+      gray: rgb(0.1333, 0.1333, 0.1333)
+    }
+    const caption = 10
+
+    for (const formPage of formPages) {
+      for (const field of formPage.fields) {
+        if (field.isMultiOptions && formInputs[field.id].length > 0 || formInputs[field.id] !== "") {
+
+          let positions = []
+
+          switch (field.type) {
+            case "textInput":
+              let text = formInputs[field.id]
+              if (field.pdfConfig.spaces) {
+                const { afterEach, str } = field.pdfConfig.spaces
+                text = chunk(text, afterEach).join(str)
+              }
+
+              if (field.id === "email") {
+                text = text.split('@')
+                text = text.join('                                                               ')
+              }
+
+              pages[field.pdfConfig.pageIndex].drawText(text,
+                {
+                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
+                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
+                  size: caption,
+                  font: timesRomanFont,
+                  color: colors.black,
+                })
+              break;
+
+            case "options":
+
+              if (field.isMultiOptions) {
+                for (const item of field.items) {
+                  if (!item.skip && formInputs[field.id].includes(item.value)) {
+                    const { dx, dy } = item.pdfConfig
+                    positions.push({ dx, dy })
+                  }
+                }
+              }
+
+              else {
+                const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
+                if (!field.items[index].pdfConfig.skip) {
+                  const { dx, dy } = field.items[index].pdfConfig
+                  positions.push({ dx, dy })
+                }
+              }
+
+              for (const position of positions) {
+                pages[field.items[0].pdfConfig.pageIndex].drawSquare({
+                  x: pages[field.items[0].pdfConfig.pageIndex].getWidth() + position.dx,
+                  y: pages[field.items[0].pdfConfig.pageIndex].getHeight() + position.dy,
+                  size: 7,
+                  color: rgb(0, 0, 0),
+                })
+              }
+
+              break;
+
+            case "picker":
+
+              if (field.pdfConfig) {
+                const { dx, dy } = field.pdfConfig
+                var { pageIndex } = field.pdfConfig
+
+                pages[pageIndex].drawText(formInputs[field.id],
+                  {
+                    x: pages[pageIndex].getWidth() + dx,
+                    y: pages[pageIndex].getHeight() + dy,
+                    size: caption,
+                    font: timesRomanFont,
+                    color: colors.black,
+                  })
+              }
+
+              else { //Picker = Options
+                const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
+                if (!field.items[index].pdfConfig.skip) {
+                  const { dx, dy } = field.items[index].pdfConfig
+                  var pageIndex = field.items[index].pdfConfig.pageIndex
+
+                  pages[pageIndex].drawSquare({
+                    x: pages[pageIndex].getWidth() + dx,
+                    y: pages[pageIndex].getHeight() + dy,
+                    size: 7,
+                    color: rgb(0, 0, 0),
+                  })
+                }
+              }
+
+              break;
+
+            case "number":
+              pages[field.pdfConfig.pageIndex].drawText(formInputs[field.id],
+                {
+                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
+                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
+                  size: caption,
+                  font: timesRomanFont,
+                  color: colors.black,
+                })
+
+            default: break;
+          }
+        }
+      }
+    }
+
+
+
+    // firstPage.drawSquare({
+    //     x: firstPage.getWidth() - 396,
+    //     y: firstPage.getHeight() - 104,
+    //     size: 7,
+    //     color: rgb(0, 0, 0),
+    // })
+
+    // firstPage.drawSquare({
+    //     x: firstPage.getWidth() - 319,
+    //     y: firstPage.getHeight() - 104,
+    //     size: 7,
+    //     color: rgb(0, 0, 0),
+    // })
+
+    // firstPage.drawSquare({
+    //     x: firstPage.getWidth() - 319,
+    //     y: firstPage.getHeight() - 117,
+    //     size: 7,
+    //     color: rgb(0, 0, 0),
+    // })
+
+    const pdfBytes = await pdfDoc.save()
+    const pdfBase64 = uint8ToBase64(pdfBytes)
+    return pdfBase64
+  }
+
+  catch (e) {
+    console.log(e)
+    displayError({ message: errorMessages.pdfGen })
+  }
+}
+
 //##IMAGE PICKER
 export const pickImage = (previousAttachments, isCamera = false, addPathSuffix = true) => {
   const options = {
@@ -613,6 +786,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
 
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 import { highRoles } from './constants'
+import { ficheEEBBase64 } from './files';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },

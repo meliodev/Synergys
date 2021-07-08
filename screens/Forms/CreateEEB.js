@@ -4,6 +4,9 @@ import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Image, FlatList } from 'react-native';
 import { ProgressBar, Checkbox } from "react-native-paper";
 import { connect } from 'react-redux'
+import _ from 'lodash'
+import Modal from 'react-native-modal'
+import Pdf from "react-native-pdf"
 
 import { AddressInput, Appbar, Button, CustomIcon, Picker, TextInput } from '../../components';
 import NumberInput from '../../components/NumberInput';
@@ -12,14 +15,20 @@ import { constants } from '../../core/constants';
 
 import * as theme from '../../core/theme'
 import { ficheEEBModel as pages } from '../../core/ficheEEBModel'
-import { nameValidator, positiveNumberValidator, setAddress, refreshAddress, emailValidator, generateId } from '../../core/utils';
+import { nameValidator, positiveNumberValidator, setAddress, refreshAddress, emailValidator, generateId, generateFichEEB, chunk } from '../../core/utils';
 import { db } from '../../firebase';
+import ModalHeader from '../../components/ModalHeader';
+import { ScrollView } from 'react-native';
+import { ficheEEBBase64 } from '../../core/files';
+import TextInputMask from 'react-native-text-input-mask';
 
 class CreateEEB extends Component {
     constructor(props) {
         super(props)
+
         this.goNext = this.goNext.bind(this)
         this.goBack = this.goBack.bind(this)
+        this.toggleModal = this.toggleModal.bind(this)
         this.setAddress = setAddress.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
 
@@ -30,6 +39,8 @@ class CreateEEB extends Component {
             pageIndex: 0,
             stepIndex: 0,
             progress: 0.5,
+            isPdfModalVisible: false,
+            pdfBase64: "",
 
             //Fields
             nameSir: "",
@@ -97,11 +108,11 @@ class CreateEEB extends Component {
         ]
         return (
             <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                <View style={{ justifyContent: "center", paddingTop: theme.padding * 3, backgroundColor: "#003250" }}>
-                    <CustomIcon icon={faVials} style={{ alignSelf: "center" }} size={75} color={theme.colors.white} secondaryColor={theme.colors.primary} />
-                    <Text style={[theme.customFontMSmedium.header, { color: theme.colors.white, textAlign: "center", letterSpacing: 1, marginBottom: 48, marginTop: 16 }]}>{title}</Text>
+                <View style={{ justifyContent: "center", paddingTop: theme.padding * 3, backgroundColor: "#003250", borderBottomWidth: 2, borderBottomColor: theme.colors.primary }}>
+                    <CustomIcon icon={faVials} style={{ alignSelf: "center" }} size={65} color={theme.colors.white} secondaryColor={theme.colors.primary} />
+                    <Text style={[theme.customFontMSmedium.h3, { color: theme.colors.white, textAlign: "center", letterSpacing: 1, marginBottom: 48, marginTop: 16 }]}>{title}</Text>
                 </View>
-                <View style={{ flex: 1, padding: theme.padding }}>
+                <View style={{ flex: 1, paddingHorizontal: theme.padding, paddingVertical: theme.padding * 2 }}>
                     <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>{message}</Text>
                     <View style={{ borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth, marginVertical: 24 }} />
                     {
@@ -144,7 +155,7 @@ class CreateEEB extends Component {
     }
 
     renderSteps() {
-        const steps = ["Votre Foyer", "Votre Habitation", "Votre Bilan", "Résultat"]
+        const steps = ["Votre Foyer", "Votre Habitation", "Votre Bilan"]
         return (
             <View style={{ alignItems: 'center' }}>
                 <FlatList
@@ -181,8 +192,24 @@ class CreateEEB extends Component {
         return <Text style={[theme.customFontMSmedium.header, { textAlign: 'center', marginTop: 32, letterSpacing: 1 }]}>{title}</Text>
     }
 
-    renderLabel(label) {
-        return <Text style={[theme.customFontMSregular.body, { textAlign: 'center', marginBottom: 8 }]}>{label}</Text>
+
+    renderLabel(label, items) {
+        let showLabel = false
+
+        //Hide label if no options available..
+        if (items) {
+            for (const item of items) {
+                if (item.isConditional && item.condition.values.includes(this.state[item.condition.with])) {
+                    showLabel = true
+                }
+            }
+        }
+
+        else showLabel = true
+
+        if (showLabel)
+            return <Text style={[theme.customFontMSregular.body, { textAlign: 'center', marginBottom: 8 }]}>{label}</Text>
+        else return null
     }
 
     renderForm() {
@@ -195,6 +222,7 @@ class CreateEEB extends Component {
 
     renderFields() {
         const { pageIndex } = this.state
+
         const { id, layout, fields, items } = pages[pageIndex]
         const fieldsComponents = fields.map((field) => {
 
@@ -228,6 +256,12 @@ class CreateEEB extends Component {
                             error={error}
                             errorText={error}
                             editable={true}
+                            render={props =>
+                                <TextInputMask
+                                    {...props}
+                                    mask={field.mask ? field.mask : ""}
+                                />
+                            }
                         />
                     )
 
@@ -257,9 +291,11 @@ class CreateEEB extends Component {
                     }
                     else items.forEach((e) => e.selected = e.label === this.state[id])
                     const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingHorizontal: 10 }
+
+
                     return (
                         <View>
-                            {this.renderLabel(label)}
+                            {this.renderLabel(label, items)}
                             <View style={[containerStyle, { justifyContent: items && items.length > 1 ? 'space-between' : 'center' }]}>
                                 {items.map((item, index) => {
                                     if (item.isConditional && !item.condition.values.includes(this.state[item.condition.with])) {
@@ -410,7 +446,7 @@ class CreateEEB extends Component {
 
         //Add Page browsed
         pagesDone.push(pageIndex)
-        this.setState({ pageIndex: pageIndex + 1, pagesDone })
+        this.setState({ pagesDone })
 
         //Remove errors
         for (const field of pages[pageIndex].fields) {
@@ -424,6 +460,17 @@ class CreateEEB extends Component {
         //Increment step
         if (pages[pageIndex].isLast)
             this.setState({ stepIndex: stepIndex + 1 })
+
+        const isLastPage = pageIndex === pages.length - 1
+
+        console.log(pages[pageIndex + 1])
+
+        //Submit
+        if (isLastPage)
+            this.handleSubmit()
+
+        //Increment page
+        else this.setState({ pageIndex: pageIndex + 1 })
     }
 
     goBack() {
@@ -474,22 +521,66 @@ class CreateEEB extends Component {
         delete state.pageIndex
         delete state.stepIndex
         delete state.progress
+        delete state.isPdfModalVisible
+        delete state.pdfBase64
         return state
     }
 
-    handleSubmit() {
-        const form = this.extractForm(this.state)
+    async handleSubmit() {
+        //HANDLE LOADING AND DISABLE DOUBLE CLICK
+        const state = _.cloneDeep(this.state)
+        const form = this.extractForm(state)
         const formId = generateId('GS-EEB-')
-        db.collection('Eeb').doc(formId).set(form)
-        this.setState({ showSuccessMessage: true })
+        const pdfBase64 = await generateFichEEB(form)
+        //db.collection('Eeb').doc(formId).set(form)
+        this.setState({ pdfBase64, showSuccessMessage: true })
     }
 
     successMessage() {
+        const title = "Estimation de votre prime: "
+        const estimation = "9732€"
+        const message1 = "Ce que nous vous recommandons"
+        const message2 = "Et Maintenant ?"
+        const instructions = [
+            "Renseigner vos informations et découvrez votre montant d’aides et les produits que nous vous recommandons",
+            "Déposer votre dossier d’aide directement en ligne!",
+            "Suivez l’avancement de vos demandes"
+        ]
+        return (
+            <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+                <View style={{ justifyContent: "center", paddingTop: theme.padding * 2, backgroundColor: "#003250", borderBottomWidth: 2, borderBottomColor: theme.colors.primary }}>
+                    <Text style={[theme.customFontMSmedium.header, { color: theme.colors.white, textAlign: "center", letterSpacing: 1, marginBottom: 48, marginTop: 16 }]}>
+                        {title}
+                        <Text style={[theme.customFontMSmedium.h2, { color: theme.colors.primary }]}>{estimation}</Text>
+                    </Text>
+                </View>
 
+                <View style={{ flex: 1, paddingHorizontal: theme.padding, paddingVertical: theme.padding * 2 }}>
+                    <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>{message1}</Text>
+                    <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>{message2}</Text>
+                    <View style={{ borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth, marginVertical: 24 }} />
+                </View>
+
+                <Button
+                    mode="contained"
+                    style={{ position: "absolute", bottom: theme.padding, alignSelf: "center", width: constants.ScreenWidth - theme.padding * 2, backgroundColor: theme.colors.primary }}
+                    onPress={() => this.setState({ isPdfModalVisible: true })}>
+                    Générer une fiche EEB
+                </Button>
+            </View>
+        )
+    }
+
+    toggleModal() {
+        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
     }
 
     render() {
         const { showWelcomeMessage, showSuccessMessage } = this.state
+
+        const { isPdfModalVisible, pdfBase64 } = this.state
+        if (pdfBase64)
+            var source = { uri: `data:application/pdf;base64,${pdfBase64}` }
 
         return (
             <View style={styles.mainContainer}>
@@ -517,6 +608,22 @@ class CreateEEB extends Component {
                             {this.renderButtons()}
                         </View>
                 }
+
+                <Modal
+                    isVisible={isPdfModalVisible}
+                    onSwipeComplete={this.toggleModal}
+                    onBackButtonPress={this.toggleModal}
+                    onBackdropPress={this.toggleModal}
+                    style={styles.modal}>
+                    <View style={styles.scrollableModal}>
+                        <ModalHeader title={"Fiche EEB générée"} toggleModal={this.toggleModal} />
+                        {pdfBase64 !== "" &&
+                            <View style={{ flex: 1 }}>
+                                <Pdf source={source} style={modalStyles.pdf} />
+                            </View>
+                        }
+                    </View>
+                </Modal>
             </View>
         )
     }
@@ -572,8 +679,67 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         flexDirection: 'row',
         justifyContent: 'space-between',
-    }
-});
+    },
+
+
+    modal: {
+        justifyContent: 'flex-end',
+        margin: 0,
+    },
+    scrollableModal: {
+        height: constants.ScreenHeight * 0.93,
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+        backgroundColor: '#fff'
+    },
+    scrollableModalContent1: {
+        height: 200,
+        backgroundColor: '#87BBE0',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    scrollableModalText1: {
+        fontSize: 20,
+        color: 'white',
+    },
+    scrollableModalContent2: {
+        height: 200,
+        backgroundColor: '#A9DCD3',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    scrollableModalText2: {
+        fontSize: 20,
+        color: 'white',
+    },
+})
+
+const modalStyles = StyleSheet.create({
+    modal: {
+        width: constants.ScreenWidth,
+        marginTop: constants.ScreenHeight * 0.07,
+        marginHorizontal: 0,
+        marginBottom: 0,
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+        backgroundColor: theme.colors.background
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: theme.colors.primary,
+        borderTopLeftRadius: constants.ScreenWidth * 0.03,
+        borderTopRightRadius: constants.ScreenWidth * 0.03,
+        paddingHorizontal: theme.padding,
+        paddingVertical: 10
+    },
+    pdf: {
+        flex: 1,
+        width: constants.ScreenWidth, //fixed to screen width
+        height: 500,
+        backgroundColor: theme.colors.gray50
+    },
+})
 
 
 
