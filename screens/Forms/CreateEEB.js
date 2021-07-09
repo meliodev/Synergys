@@ -8,7 +8,7 @@ import _ from 'lodash'
 import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
 
-import { AddressInput, Appbar, Button, CustomIcon, Picker, TextInput } from '../../components';
+import { AddressInput, Appbar, Button, CustomIcon, LoadDialog, Picker, TextInput } from '../../components';
 import NumberInput from '../../components/NumberInput';
 import SquareOption from '../../components/SquareOption';
 import { constants } from '../../core/constants';
@@ -31,6 +31,8 @@ class CreateEEB extends Component {
         this.toggleModal = this.toggleModal.bind(this)
         this.setAddress = setAddress.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
+        
+        this.project = this.props.navigation.getParam('project', '')
 
         this.state = {
             showWelcomeMessage: true,
@@ -41,6 +43,7 @@ class CreateEEB extends Component {
             progress: 0.5,
             isPdfModalVisible: false,
             pdfBase64: "",
+            loading: false,
 
             //Fields
             nameSir: "",
@@ -176,7 +179,11 @@ class CreateEEB extends Component {
 
         return (
             <View style={{ marginTop: 16 }}>
-                <ProgressBar progress={progress / 100} color={theme.colors.primary} visible={true} />
+                <ProgressBar
+                    progress={progress / 100}
+                    color={theme.colors.primary}
+                    visible={true}
+                />
                 <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_dark, marginVertical: 8 }]}>{progress}%</Text>
             </View>
         )
@@ -189,27 +196,12 @@ class CreateEEB extends Component {
     renderTitle() {
         const { pageIndex } = this.state
         const { title } = pages[pageIndex]
-        return <Text style={[theme.customFontMSmedium.header, { textAlign: 'center', marginTop: 32, letterSpacing: 1 }]}>{title}</Text>
+        return <Text style={[theme.customFontMSmedium.header, { textAlign: 'center', marginTop: 16, letterSpacing: 1 }]}>{title}</Text>
     }
 
 
     renderLabel(label, items) {
-        let showLabel = false
-
-        //Hide label if no options available..
-        if (items) {
-            for (const item of items) {
-                if (item.isConditional && item.condition.values.includes(this.state[item.condition.with])) {
-                    showLabel = true
-                }
-            }
-        }
-
-        else showLabel = true
-
-        if (showLabel)
-            return <Text style={[theme.customFontMSregular.body, { textAlign: 'center', marginBottom: 8 }]}>{label}</Text>
-        else return null
+        return <Text style={[theme.customFontMSregular.body, { textAlign: 'center', marginBottom: 8 }]}>{label}</Text>
     }
 
     renderForm() {
@@ -242,7 +234,30 @@ class CreateEEB extends Component {
 
             switch (field.type) {
                 case "textInput":
-                    return (
+                    if (field.mask)
+                        return (
+                            <TextInput
+                                label={label}
+                                returnKeyType="done"
+                                keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
+                                value={value}
+                                onChangeText={value => {
+                                    let update = {}
+                                    update[id] = value
+                                    this.setState(update)
+                                }}
+                                error={error}
+                                errorText={error}
+                                editable={true}
+                                render={props =>
+                                    <TextInputMask
+                                        {...props}
+                                        {...(field.mask && { mask: field.mask })}
+                                    />
+                                }
+                            />
+                        )
+                    else return (
                         <TextInput
                             label={label}
                             returnKeyType="done"
@@ -256,12 +271,6 @@ class CreateEEB extends Component {
                             error={error}
                             errorText={error}
                             editable={true}
-                            render={props =>
-                                <TextInputMask
-                                    {...props}
-                                    mask={field.mask ? field.mask : ""}
-                                />
-                            }
                         />
                     )
 
@@ -463,8 +472,6 @@ class CreateEEB extends Component {
 
         const isLastPage = pageIndex === pages.length - 1
 
-        console.log(pages[pageIndex + 1])
-
         //Submit
         if (isLastPage)
             this.handleSubmit()
@@ -523,17 +530,28 @@ class CreateEEB extends Component {
         delete state.progress
         delete state.isPdfModalVisible
         delete state.pdfBase64
+        delete state.loading
         return state
     }
 
     async handleSubmit() {
-        //HANDLE LOADING AND DISABLE DOUBLE CLICK
+        this.setState({ loading: true })
         const state = _.cloneDeep(this.state)
-        const form = this.extractForm(state)
+        let form = this.extractForm(state)
+        form = this.addFormLogs(form)
         const formId = generateId('GS-EEB-')
         const pdfBase64 = await generateFichEEB(form)
-        //db.collection('Eeb').doc(formId).set(form)
-        this.setState({ pdfBase64, showSuccessMessage: true })
+        db.collection('Eeb').doc(formId).set(form)
+        this.setState({ pdfBase64, showSuccessMessage: true, loading: false })
+    }
+
+    addFormLogs(form) {
+        form.createdAt = moment().format()
+        form.createdBy = this.props.currentUser
+        form.estimation = "9000" //provisoire
+        //Add project reference if we are on process context
+        if (this.project)
+            form.project = this.project
     }
 
     successMessage() {
@@ -576,9 +594,8 @@ class CreateEEB extends Component {
     }
 
     render() {
-        const { showWelcomeMessage, showSuccessMessage } = this.state
+        const { showWelcomeMessage, showSuccessMessage, isPdfModalVisible, pdfBase64, loading } = this.state
 
-        const { isPdfModalVisible, pdfBase64 } = this.state
         if (pdfBase64)
             var source = { uri: `data:application/pdf;base64,${pdfBase64}` }
 
@@ -624,6 +641,11 @@ class CreateEEB extends Component {
                         }
                     </View>
                 </Modal>
+
+                <LoadDialog
+                    message={"Traitement en cours"}
+                    loading={loading}
+                />
             </View>
         )
     }

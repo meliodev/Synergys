@@ -65,6 +65,7 @@ import CreateOrder from '../screens/Orders/CreateOrder'
 //Forms
 import ListForms from '../screens/Forms/ListForms'
 import CreateEEB from '../screens/Forms/CreateEEB'
+import EditEEB from '../screens/Forms/EditEEB'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -678,6 +679,7 @@ const DocumentsStack = createStackNavigator({
         screen: ListProjects,
         navigationOptions: hideHeader
     },
+    //Orders
     ListOrders: {
         screen: ListOrders,
         navigationOptions: hideHeader
@@ -696,6 +698,19 @@ const DocumentsStack = createStackNavigator({
     },
     PdfGeneration: {
         screen: PdfGeneration,
+        navigationOptions: hideHeader
+    },
+    //Fiche EEB
+    ListForms: {
+        screen: ListForms,
+        navigationOptions: hideHeader
+    },
+    CreateEEB: {
+        screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    EditEEB: {
+        screen: EditEEB,
         navigationOptions: hideHeader
     },
     //Profile screens
@@ -794,6 +809,10 @@ const SimulatorStack = createStackNavigator({
     },
     CreateEEB: {
         screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    EditEEB: {
+        screen: EditEEB,
         navigationOptions: hideHeader
     },
     Address: {

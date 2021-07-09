@@ -10,6 +10,9 @@ moment.locale('fr')
 
 //#FETCH DOS BY QUERY
 export function fetchDocs(query, MyList, MyCount, MyCallBack) {
+
+  console.log('00000000000')
+
   this.unsubscribe = query.onSnapshot((querysnapshot) => {
     var List = []
     var Count = 0

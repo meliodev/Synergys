@@ -23,8 +23,6 @@ import { load, toggleFilter, setFilter, handleFilter } from '../core/utils'
 import { configureQuery } from '../core/privileges'
 import { fetchDocs } from '../api/firestore-api';
 
-const KEYS_TO_FILTERS = ['id', 'name', 'state'] //#edit
-
 class ListFormsContainer extends Component {
     constructor(props) {
         super(props)
@@ -38,7 +36,7 @@ class ListFormsContainer extends Component {
         //filters
         // this.project = this.props.navigation.getParam('project', undefined) // For pdf generation
 
-        this.titleText = this.props.navigation.getParam('titleText', 'Commandes')
+        this.titleText = this.props.navigation.getParam('titleText', 'Simulations')
         this.showFAB = this.props.navigation.getParam('showFAB', true) && this.isRoot
         this.filteredItems = []
 
@@ -72,30 +70,19 @@ class ListFormsContainer extends Component {
         // else {
         //     const params = { role: this.props.role.value }
         //     var query = configureQuery('Orders', queryFilters, params)
-        const { collection } = this.props
-        const query = db.collection(collection).orderBy('createdAt', 'desc')
+        const { collection, query } = this.props
+        
         this.fetchDocs(query, 'List', 'Count', async () => {
             load(this, false)
         })
         //}
     }
 
-    renderItem(item) { //#edit
-        return <OrderItem order={order} onPress={() => this.onPressOrder(order)} />
-    }
-
-    onPressItem(item) {//#edit
-        if (this.isRoot)
-            this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
-
-        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), popCount: this.popCount, onGoBack: this.props.navigation.getParam('onGoBack', null) })
-    }
-
     render() {
         let { Count, List, loading } = this.state
         let { state, project, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
-        const { creationScreen } = this.props
+        const { countTitle, creationScreen } = this.props
         const canCreate = true //#task: edit it..
         const { isConnected } = this.props.network
 
@@ -104,7 +91,7 @@ class ListFormsContainer extends Component {
             { label: 'client.id', value: client.id },
             { label: 'project.id', value: project.id }
         ]
-        this.filteredItems = handleFilter(List, this.filteredItems, fields, searchInput, KEYS_TO_FILTERS)
+        this.filteredItems = handleFilter(List, this.filteredItems, fields, searchInput, this.props.KEYS_TO_FILTERS)
         const filterCount = this.filteredItems.length
         const filterActivated = filterCount < Count
         const s = filterCount > 1 ? 's' : ''
@@ -116,22 +103,33 @@ class ListFormsContainer extends Component {
                     <Loading size='large' />
                     :
                     <Background style={styles.container}>
+                        <SearchBar
+                            menu={this.props.isRoot}
+                            title={!showInput}
+                            titleText={this.titleText}
+                            showBar={showInput}
+                            placeholder='Rechercher un élément'
+                            handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                            searchInput={searchInput}
+                            searchUpdated={(searchInput) => this.setState({ searchInput })}
+                        />
+
                         {filterActivated && <ActiveFilter />}
-                        {Count > 0 && <ListSubHeader>{filterCount} élément{s}</ListSubHeader>}
+                        {Count > 0 && <ListSubHeader>{filterCount} {countTitle}{s}</ListSubHeader>}
 
                         {Count > 0 ?
                             <FlatList
                                 enableEmptySections={true}
                                 data={this.filteredItems}
                                 keyExtractor={item => item.id.toString()}
-                                renderItem={({ item }) => this.renderOrder(item)}
+                                renderItem={({ item }) => this.props.renderItem(item)}
                                 style={{ zIndex: 1 }}
                                 contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
                             :
                             this.props.emptyList
                         }
 
-                        {canCreate &&
+                        {canCreate && this.showFAB &&
                             <MyFAB onPress={() => this.props.navigation.navigate(creationScreen)} />
                         }
                     </Background>

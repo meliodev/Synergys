@@ -51,9 +51,14 @@ const imageSources = [
     { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
 
-const genSources = [
+const genOrderSources = [
     { label: 'Une commande existante', value: 'oldOrder', icon: faFileSearch },
     { label: 'Une nouvelle commande', value: 'newOrder', icon: faFilePlus },
+]
+
+const genFicheEEBSources = [
+    { label: 'Une simulation existante', value: 'oldSimulation', icon: faFileSearch },
+    { label: 'Une nouvelle simulation', value: 'newSimulation', icon: faFilePlus },
 ]
 
 const properties = ["project", "name", "type", "state", "attachment", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
@@ -105,7 +110,8 @@ class UploadDocument extends Component {
         this.types = setPickerDocTypes(this.currentRole, this.dynamicType, this.documentType)
         this.docSources = docSources
         this.imageSources = imageSources
-        this.genSources = genSources
+        this.genOrderSources = genOrderSources
+        this.genFicheEEBSources = genFicheEEBSources
 
         const defaultState = this.setDefaultState()
 
@@ -375,14 +381,18 @@ class UploadDocument extends Component {
     async onPressAttachment(canWrite) {
         if (!canWrite) return
 
-        if (!this.isEdit && !this.documentType)  //Creation & not pre-defined document type
+        if (!this.isEdit && !this.documentType) { //Creation & not pre-defined document type {
+            console.log('555')
             this.toggleModal()
+        }
 
         else { //this.isEdit || !this.isEdit && this.documentType
+            console.log('555')
+
             let modalContent = ''
             const { type } = this.state
-            let isQuoteOrBill = type === 'Devis' || type === 'Facture'
-            if (isQuoteOrBill) modalContent = 'docSources'
+            let isGenerable = type === 'Devis' || type === 'Facture' || type === "Fiche EEB"
+            if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
             this.setState({ modalContent, showModal: true })
         }
@@ -479,12 +489,20 @@ class UploadDocument extends Component {
             }
         }
 
-        else if (modalContent === 'genSources') {
+        else if (modalContent === 'genOrderSources') {
             const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
             return {
                 title: `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`,
                 columns: 2,
-                elements: this.genSources,
+                elements: this.genOrderSources,
+            }
+        }
+
+        else if (modalContent === 'genFicheEEBSources') {
+            return {
+                title: `Générer une fiche EEB à partir de:`,
+                columns: 2,
+                elements: this.genFicheEEBSources,
             }
         }
     }
@@ -514,7 +532,7 @@ class UploadDocument extends Component {
         else if (modalContent === 'imageSources')
             await this.configImageSources(index)
 
-        else if (modalContent === 'genSources')
+        else if (modalContent === 'genOrderSources' || modalContent === 'genFicheEEBSources')
             this.startGenPdf(index)
 
         this.setState({ modalLoading: false })
@@ -524,8 +542,8 @@ class UploadDocument extends Component {
     configDocTypes(index) {
         const type = this.types[index].value
         this.setState({ type })
-        const isQuoteOrBill = type === 'Devis' || type === 'Facture'
-        if (isQuoteOrBill) this.setState({ modalContent: 'docSources' })
+        const isGenerable = type === 'Devis' || type === 'Facture' || type === "Fiche EEB"
+        if (isGenerable) this.setState({ modalContent: 'docSources' })
         else this.setState({ modalContent: 'imageSources' })
     }
 
@@ -538,7 +556,9 @@ class UploadDocument extends Component {
         else {
             const { type } = this.state
             if (type === 'Facture')
-                this.setState({ modalContent: 'genSources' })
+                this.setState({ modalContent: 'genOrderSources' })
+            if (type === 'Fiche EEB')
+                this.setState({ modalContent: 'genFicheEEBSources' })
             else if (type === 'Devis')
                 this.startGenPdf(1)
         }
@@ -602,29 +622,42 @@ class UploadDocument extends Component {
 
     //3.2 Generation
     startGenPdf(index) {
-        const { type } = this.state
+        const { type, project } = this.state
         this.toggleModal()
+
         const navParams = {
             autoGenPdf: true,
             docType: type,
             DocumentId: this.DocumentId,
-            project: this.project,
+            project: project, //#test change from this.project to this.state.project (for filtering list of orders/simulations)
             isConversion: false,
             onGoBack: this.getGenPdf
+        }
+
+        if (type === "Devis" || type === "Facture") {
+            var titleText = "Choix de la commande"
+            var listScreen = "ListOrders"
+            var creationScreen = "CreateOrder"
+        }
+
+        else if (type === "Fiche EEB") {
+            var titleText = "Choix de la simulation"
+            var listScreen = "ListForms"
+            var creationScreen = "CreateEEB"
         }
 
         //Existing order
         if (index === 0) {
             navParams.isRoot = false
-            navParams.titleText = 'Choix de la commande'
+            navParams.titleText = titleText
             navParams.popCount = 3
-            this.props.navigation.navigate('ListOrders', navParams)
+            this.props.navigation.navigate(listScreen, navParams)
         }
 
         //New order
         else if (index === 1) {
             navParams.popCount = 2
-            this.props.navigation.navigate('CreateOrder', navParams)
+            this.props.navigation.navigate(creationScreen, navParams)
         }
     }
 
@@ -641,7 +674,7 @@ class UploadDocument extends Component {
     }
 
     getGenPdf(genPdf) {
-        const { pdfBase64Path: path, pdfName: name, order, isConversion } = genPdf
+        const { pdfBase64Path: path, pdfName: name, order, isConversion } = genPdf //#todo:  order is specific to devis/facture
         //order: The order from which this "Devis" was generated
         //isConversion: Conversion from Devis to Facture (boolean)
         const attachment = {
@@ -803,9 +836,9 @@ class UploadDocument extends Component {
                                         showAvatarText={false}
                                     />
 
-                                    {this.renderAttachment(canWrite)}
+                                    {project.id !== "" && this.renderAttachment(canWrite)}
 
-                                    {type !== '' &&
+                                    {type !== '' && project.id !== "" &&
                                         <MyInput
                                             label="Type *"
                                             returnKeyType="done"
