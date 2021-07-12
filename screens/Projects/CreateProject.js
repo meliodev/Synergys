@@ -101,7 +101,7 @@ class CreateProject extends Component {
         this.isCurrentHighRole = highRoles.includes(this.props.role.id)
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
-        this.isEdit = this.ProjectId ? true : false
+        this.isEdit = this.ProjectId !== ""
         this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-PR-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
         this.isClient = this.props.role.id === 'client'
@@ -181,8 +181,6 @@ class CreateProject extends Component {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
         load(this, false)
-
-        console.log(this.state.workTypes)
     }
 
     async initEditMode() {

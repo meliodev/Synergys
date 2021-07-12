@@ -1,6 +1,7 @@
 import React, { memo, Component } from "react"
 import { View, Alert, Text, StyleSheet } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
+import { ProgressBar } from "react-native-paper"
 import RNFS from 'react-native-fs'
 import firebase, { db } from '../../firebase'
 import notifee, { EventType } from '@notifee/react-native'
@@ -15,8 +16,13 @@ import Loading from "../../components/Loading"
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState, setCurrentUser, setNetwork, setProcessModel } from '../../core/redux'
-import { errorMessages } from "../../core/constants"
+import { constants, errorMessages } from "../../core/constants"
 import { displayError } from "../../core/utils"
+
+
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
 
 
 const roles = [
@@ -41,7 +47,8 @@ class AuthLoadingScreen extends Component {
     this.state = {
       initialNotification: false,
       routeName: '',
-      routeParams: {}
+      routeParams: {},
+      progress: 0,
     }
   }
 
@@ -50,10 +57,17 @@ class AuthLoadingScreen extends Component {
 
     //1. Notification action listeners
     await this.bootstrapNotifications()
+    this.updateProgress(0.25)
     this.forgroundNotificationListener()
+    this.updateProgress(0.5)
     this.backgroundNotificationListener()
+    this.updateProgress(0.6)
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
+  }
+
+  updateProgress(progress) {
+    this.setState({ progress })
   }
 
   //User action on a notification has caused app to open
@@ -155,6 +169,8 @@ class AuthLoadingScreen extends Component {
           }
           setProcessModel(this, processModels)
 
+          this.updateProgress(90)
+
           //4. Set currentUser
           const currUser = {
             id: user.uid,
@@ -203,24 +219,29 @@ class AuthLoadingScreen extends Component {
       }
 
       let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
-      if (startApp) this.props.navigation.navigate(routeName, routeParams)
+      if (startApp) {
+        this.updateProgress(1)
+        this.props.navigation.navigate(routeName, routeParams)
+      }
     })
   }
 
   async fetchProcessModels() {
-    const query = db.collection('Process').orderBy('createdAt', 'desc')
-    return query.get().then((querySnapshot) => {
-      let processModels = {}
-      if (querySnapshot.empty) {
-        return undefined
-      }
-      for (const doc of querySnapshot.docs) {
-        const version = doc.id
-        const model = doc.data()
-        processModels[version] = model
-      }
-      return processModels
-    })
+
+    const querySnapshot = await db.collection('Process').get()
+
+    let processModels = {}
+    if (querySnapshot.empty) {
+      return undefined
+    }
+
+    for (const doc of querySnapshot.docs) {
+      const version = doc.id
+      const model = doc.data()
+      processModels[version] = model
+    }
+
+    return processModels
   }
 
   async configurePrivileges(role) {
@@ -302,11 +323,18 @@ class AuthLoadingScreen extends Component {
   }
 
   render() {
+    const { progress } = this.state
+
     return (
       <Background>
         <Background style={styles.nestedBackground}>
           <View style={styles.container}>
-            <Loading />
+            <ProgressBar
+              progress={progress}
+              color={theme.colors.primary}
+              visible={true}
+              style={{ alignSelf: "center" }}
+            />
           </View>
         </Background>
       </Background>
@@ -331,8 +359,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    transform: [{ scaleY: -1 }]
+    width: constants.ScreenWidth * 0.5,
+    alignSelf: "center"
   },
   synergys: {
     textAlign: 'center',

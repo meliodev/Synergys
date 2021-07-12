@@ -19,13 +19,75 @@ import { constants } from '../../core/constants';
 
 import * as theme from '../../core/theme'
 import { ficheEEBModel as pages } from '../../core/ficheEEBModel'
-import { nameValidator, positiveNumberValidator, setAddress, refreshAddress, emailValidator, generateId, generateFichEEB, chunk } from '../../core/utils';
+import { nameValidator, positiveNumberValidator, setAddress, refreshAddress, emailValidator, generateId, generateFichEEB, chunk, formatDocument } from '../../core/utils';
 import { db } from '../../firebase';
 import ModalHeader from '../../components/ModalHeader';
 import { ScrollView } from 'react-native';
 import { ficheEEBBase64 } from '../../core/files';
 import { setStatusBarColor } from '../../core/redux';
 import TextInputMask from 'react-native-text-input-mask';
+import { fetchDocument } from '../../api/firestore-api';
+
+const properties = [
+    "nameSir",
+    "nameMiss",
+    "proSituationSir",
+    "ageSir",
+    "proSituationMiss",
+    "ageMiss",
+    "familySituation",
+    "houseOwnership",
+    "yearsHousing",
+    "taxIncome",
+    "familyMembersCount",
+    "childrenCount",
+    "aidAndSub",
+    "aidAndSubWorksType",
+    "aidAndSubWorksCost",
+    "housingType",
+    "landSurface",
+    "livingSurface",
+    "heatedSurface",
+    "yearHomeConstruction",
+    "roofType",
+    "cadastralRef",
+    "livingLevelsCount",
+    "roomsCount",
+    "ceilingHeight",
+    "slopeOrientation",
+    "slopeSupport",
+    "basementType",
+    "wallMaterial",
+    "wallThickness",
+    "internalWallsIsolation",
+    "externalWallsIsolation",
+    "floorIsolation",
+    "lostAticsIsolation",
+    "lostAticsIsolationMaterial",
+    "lostAticsIsolationAge",
+    "lostAticsIsolationThickness",
+    "lostAticsSurface",
+    "windowType",
+    "glazingType",
+    "hotWaterProduction",
+    "yearInstallationHotWater",
+    "heaters",
+    "transmittersTypes",
+    "yearInstallationHeaters",
+    "idealTemperature",
+    "isMaintenanceContract",
+    "isElectricityProduction",
+    "elecProdType",
+    "elecProdInstallYear",
+    "yearlyElecCost",
+    "roofLength",
+    "roofWidth",
+    "roofTilt",
+    "phone",
+    "disablePhoneContact",
+    "address",
+    "email",
+]
 
 class CreateEEB extends Component {
     constructor(props) {
@@ -38,9 +100,11 @@ class CreateEEB extends Component {
         this.refreshAddress = refreshAddress.bind(this)
 
         this.project = this.props.navigation.getParam('project', '')
+        this.SimulationId = this.props.navigation.getParam('SimulationId', '')
+        this.isEdit = this.SimulationId !== ""
 
         this.state = {
-            showWelcomeMessage: true,
+            showWelcomeMessage: !this.isEdit,
             showSuccessMessage: false,
             pagesDone: [],
             pageIndex: 0,
@@ -49,6 +113,7 @@ class CreateEEB extends Component {
             isPdfModalVisible: false,
             pdfBase64: "",
             loading: false,
+            docNotFound: false,
 
             //Fields
             nameSir: "",
@@ -64,6 +129,8 @@ class CreateEEB extends Component {
             familyMembersCount: "",
             childrenCount: "",
             aidAndSub: "",
+            aidAndSubWorksType: "",
+            aidAndSubWorksCost: "",
             housingType: "",
             landSurface: "",
             livingSurface: "",
@@ -83,6 +150,10 @@ class CreateEEB extends Component {
             externalWallsIsolation: "",
             floorIsolation: "",
             lostAticsIsolation: "",
+            lostAticsIsolationMaterial: [],
+            lostAticsIsolationAge: "",
+            lostAticsIsolationThickness: "",
+            lostAticsSurface: "",
             windowType: "",
             glazingType: "",
             hotWaterProduction: [],
@@ -106,8 +177,27 @@ class CreateEEB extends Component {
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
+        if (this.isEdit) await this.initEditMode()
+        this.initialState = _.cloneDeep(this.state)
+        load(this, false)
+    }
+
+    async initEditMode() {
+        let simulation = await fetchDocument('Eeb', this.SimulationId)
+        simulation = this.setSimulation(simulation)
+        if (!simulation) return
+    }
+
+    setSimulation(simulation) {
+        if (!simulation)
+            this.setState({ docNotFound: true })
+        else {
+            simulation = formatDocument(simulation, properties)
+            this.setState(simulation)
+        }
+        return simulation
     }
 
     welcomeMessage() {
@@ -210,14 +300,14 @@ class CreateEEB extends Component {
 
 
     renderLabel(label, items) {
-        return <Text style={[theme.customFontMSregular.body, { textAlign: 'center', marginBottom: 8 }]}>{label}</Text>
+        return <Text style={[theme.customFontMSregular.body, { textAlign: 'center', marginTop: 24, marginBottom: 8 }]}>{label}</Text>
     }
 
     renderForm() {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', paddingTop: 30 }}>
+            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 24 }}>
                 {this.renderFields()}
-            </View>
+            </ScrollView>
         )
     }
 
@@ -251,6 +341,7 @@ class CreateEEB extends Component {
                                 keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
                                 value={value}
                                 onChangeText={value => {
+                                    this.removeErrors()
                                     let update = {}
                                     update[id] = value
                                     this.setState(update)
@@ -273,6 +364,7 @@ class CreateEEB extends Component {
                             keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
                             value={value}
                             onChangeText={value => {
+                                this.removeErrors()
                                 let update = {}
                                 update[id] = value
                                 this.setState(update)
@@ -293,6 +385,18 @@ class CreateEEB extends Component {
                             selectedValue={value}
                             onValueChange={(value) => {
                                 let update = {}
+
+                                //0. Rollback
+                                if (field.rollBack) {
+                                    for (const f of field.rollBack.fields) {
+                                        if (f.type === "string")
+                                            update[f.id] = ""
+                                        else if (f.type === "array")
+                                            update[f.id] = []
+                                    }
+                                }
+
+                                //1. Change value
                                 update[field.id] = value
                                 this.setState(update)
                             }}
@@ -302,6 +406,7 @@ class CreateEEB extends Component {
                             style={field.style}
                         />
                     )
+                    break;
 
                 case "options":
                     if (isMultiOptions) {
@@ -309,7 +414,6 @@ class CreateEEB extends Component {
                     }
                     else items.forEach((e) => e.selected = e.label === this.state[id])
                     const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingHorizontal: 10 }
-
 
                     return (
                         <View>
@@ -326,6 +430,20 @@ class CreateEEB extends Component {
                                             index={index}
                                             elementSize={constants.ScreenWidth * 0.4}
                                             onPress={() => {
+
+                                                let update = {}
+
+                                                //0. Rollback
+                                                if (item.rollBack) {
+                                                    for (const field of item.rollBack.fields) {
+                                                        if (field.type === "string")
+                                                            update[field.id] = ""
+                                                        else if (field.type === "array")
+                                                            update[field.id] = []
+                                                    }
+                                                }
+
+                                                //1. Update value & Go Next
                                                 const { value } = item
                                                 var selectedOptions = this.state[id]
 
@@ -339,11 +457,13 @@ class CreateEEB extends Component {
                                                     if (this.state[id] === value)
                                                         selectedOptions = ""
                                                     else selectedOptions = value
-                                                    console.log(id, selectedOptions)
                                                 }
-                                                let update = {}
                                                 update[id] = selectedOptions
-                                                this.setState(update)
+
+                                                if (pages[pageIndex].fields.length === 1)
+                                                    this.setState(update, () => this.goNext())
+
+                                                else this.setState(update)
                                             }}
                                         />
                                     )
@@ -352,6 +472,7 @@ class CreateEEB extends Component {
                             {error ? <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, textAlign: 'center', marginTop: 8 }]}>{error}</Text> : null}
                         </View>
                     )
+                    break;
 
                 case "number":
                     return (
@@ -389,20 +510,21 @@ class CreateEEB extends Component {
                             />
                         </View>
                     )
+                    break;
 
-                case "address":
-                    return (
-                        <AddressInput
-                            label='Adresse postale'
-                            offLine={!this.props.network.isConnected}
-                            onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                            onChangeText={this.setAddress}
-                            clearAddress={() => this.setAddress('')}
-                            address={this.state.address}
-                            addressError={this.state.addressError}
-                            editable={true}
-                        />
-                    )
+                // case "address":
+                //     return (
+                //         <AddressInput
+                //             label='Adresse postale'
+                //             offLine={!this.props.network.isConnected}
+                //             onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                //             onChangeText={this.setAddress}
+                //             clearAddress={() => this.setAddress('')}
+                //             address={this.state.address}
+                //             addressError={this.state.addressError}
+                //             editable={true}
+                //         />
+                //     )
 
                 case "checkbox":
                     return (
@@ -415,6 +537,7 @@ class CreateEEB extends Component {
                             <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{label}</Text>
                         </View>
                     )
+                    break;
             }
         })
 
@@ -455,6 +578,18 @@ class CreateEEB extends Component {
         )
     }
 
+    removeErrors() {
+        const { pageIndex, pagesDone, stepIndex } = this.state
+
+        for (const field of pages[pageIndex].fields) {
+            let errorUpdate = {}
+            if (field.errorId) {
+                errorUpdate[field.errorId] = ""
+                this.setState(errorUpdate)
+            }
+        }
+    }
+
     goNext() {
         const { pageIndex, pagesDone, stepIndex } = this.state
 
@@ -467,13 +602,7 @@ class CreateEEB extends Component {
         this.setState({ pagesDone })
 
         //Remove errors
-        for (const field of pages[pageIndex].fields) {
-            let errorUpdate = {}
-            if (field.errorId) {
-                errorUpdate[field.errorId] = ""
-                this.setState(errorUpdate)
-            }
-        }
+        this.removeErrors()
 
         //Increment step
         if (pages[pageIndex].isLast)
@@ -506,27 +635,53 @@ class CreateEEB extends Component {
     verifyFields(pageIndex) {
         const { fields } = pages[pageIndex]
 
-        for (const field of fields) {
-            const { id, label, type, mendatory, isConditional, condition, isEmail, errorId } = field
+        let error = ""
 
-            if (mendatory) {
+        if (pages[pageIndex].exclusiveMendatory) {
+            let isError = true
+            for (const field of fields) {
+                isError = isError && this.state[field.id] === ""
+            }
 
-                if (type === "number")
-                    var error = positiveNumberValidator(this.state[id], `"${label}"`)
-                else if (isEmail)
-                    var error = emailValidator(this.state[id])
-                else var error = nameValidator(this.state[id], `"${label}"`)
+            error = isError ? "Veuillez remplir au moins un champs" : ""
 
-                if (error !== "") {
-                    if (!isConditional || isConditional && this.state[condition.with] !== "") {
-                        let errorUpdate = {}
-                        errorUpdate[errorId] = error
-                        this.setState(errorUpdate)
-                        return false
+            if (error !== "") {
+                for (const field of fields) {
+                    let errorUpdate = {}
+                    errorUpdate[field.errorId] = error
+                    this.setState(errorUpdate)
+                }
+                return false
+            }
+        }
+
+        else {
+            for (const field of fields) {
+                const { id, label, type, mendatory, isConditional, condition, isEmail, errorId } = field
+
+                if (mendatory) {
+                    if (type === "number")
+                        error = positiveNumberValidator(this.state[id], `"${label}"`)
+                    else if (isEmail)
+                        error = emailValidator(this.state[id])
+                    else error = nameValidator(this.state[id], `"${label}"`)
+
+                    if (error !== "") {
+                        const isHandleError = !isConditional
+                            || isConditional && !condition.values && this.state[condition.with] !== ""
+                            || isConditional && condition.values && condition.values.includes(this.state[condition.with])
+
+                        if (isHandleError) {
+                            let errorUpdate = {}
+                            errorUpdate[errorId] = error
+                            this.setState(errorUpdate)
+                            return false
+                        }
                     }
                 }
             }
         }
+
         return true
     }
 
@@ -550,7 +705,7 @@ class CreateEEB extends Component {
         form = this.addFormLogs(form)
         const formId = generateId('GS-EEB-')
         const pdfBase64 = await generateFichEEB(form)
-        db.collection('Eeb').doc(formId).set(form)
+        //  db.collection('Eeb').doc(formId).set(form)
         this.setState({ pdfBase64, showSuccessMessage: true, loading: false })
     }
 

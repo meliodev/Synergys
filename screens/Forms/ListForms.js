@@ -52,14 +52,15 @@ class ListForms extends React.Component {
         )
     }
 
+    //
 
     onPressItem(item) {
         if (this.isRoot)
-            this.props.navigation.navigate('EditEEB', {
+            this.props.navigation.navigate('CreateEEB', {
                 SimulationId: item.id
             })
 
-        else this.props.navigation.navigate('EditEEB', {
+        else this.props.navigation.navigate('CreateEEB', {
             SimulationId: item.id,
             autoGenPdf: true,
             docType: this.docType,
