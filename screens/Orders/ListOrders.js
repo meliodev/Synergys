@@ -79,7 +79,7 @@ class ListOrders extends Component {
         if (queryFilters === []) this.setState({ ordersList: [], ordersCount: 0 })
         else {
             const params = { role: this.props.role.value }
-            var query = configureQuery('Orders', queryFilters, params)
+            var query = configureQuery('Orders', queryFilters, params) //#task make query as a prop (for project filtering during process)
             this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
                 load(this, false)
             })

@@ -4,8 +4,8 @@ import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import NetInfo from "@react-native-community/netinfo"
 import _ from 'lodash'
-import { faPlusCircle, faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
-import { faBullseyeArrow, faConstruction, faLock } from '@fortawesome/pro-light-svg-icons'
+import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
+import { faPlusCircle, faBullseyeArrow, faConstruction, faLock } from '@fortawesome/pro-light-svg-icons'
 import { connect } from 'react-redux'
 
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
@@ -452,7 +452,6 @@ class Profile extends Component {
                 <FormSection
                     sectionTitle={`${mes}Projets`}
                     sectionIcon={faPlusCircle}
-                    iconColor={theme.colors.primary}
                     onPressIcon={() => this.props.navigation.navigate('CreateProject', { client, address })}
                     form={null}
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }}

@@ -167,11 +167,6 @@ const DashboardStack = createStackNavigator({
         screen: AddGoal,
         navigationOptions: hideHeader
     },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
     EditEmail: {
         screen: EditEmail,
         navigationOptions: hideHeader
@@ -225,6 +220,19 @@ const ProfileStack = createStackNavigator({
     },
     Address: {
         screen: Address,
+        navigationOptions: hideHeader
+    },
+    //Fiche EEB
+    ListForms: {
+        screen: ListForms,
+        navigationOptions: hideHeader
+    },
+    CreateEEB: {
+        screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    EditEEB: {
+        screen: EditEEB,
         navigationOptions: hideHeader
     },
 })
@@ -291,13 +299,83 @@ const ClientsManagementStack = createStackNavigator({
         screen: CreateClient,
         navigationOptions: hideHeader
     },
+    CreateProject: {
+        screen: CreateProject,
+        path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    Progression: {
+        screen: Progression,
+        navigationOptions: hideHeader
+    },
+    ListClients: {
+        screen: ListClients,
+        navigationOptions: hideHeader
+    },
+    CreateClient: {
+        screen: CreateClient,
+        navigationOptions: hideHeader
+    },
+    UploadDocument: { //access documents
+        screen: UploadDocument,
+        navigationOptions: hideHeader
+    },
+    Signature: {
+        screen: Signature,
+        navigationOptions: hideHeader
+    },
+    PdfGeneration: {
+        screen: PdfGeneration,
+        navigationOptions: hideHeader
+    },
+    ListProjects: {
+        screen: ListProjects,
+        navigationOptions: hideHeader
+    },
+    ListOrders: {
+        screen: ListOrders,
+        navigationOptions: hideHeader
+    },
+    CreateOrder: {
+        screen: CreateOrder,
+        navigationOptions: hideHeader
+    },
+    AddItem: {
+        screen: AddItem,
+        navigationOptions: hideHeader
+    },
+    CreateProduct: {
+        screen: CreateProduct,
+        navigationOptions: hideHeader
+    },
+    PdfGeneration: {
+        screen: PdfGeneration,
+        navigationOptions: hideHeader
+    },
+    //Agenda screens
+    Agenda: {
+        screen: Agenda,
+        navigationOptions: hideHeader
+    },
+    CreateTask: { //access tasks
+        screen: CreateTask,
+        navigationOptions: hideHeader
+    },
+    ListEmployees: {
+        screen: ListEmployees,
+        navigationOptions: hideHeader
+    },
+    DatePicker: {
+        screen: DatePicker,
+        navigationOptions: hideHeader
+    },
+    //Profile screens
     Profile: {
         screen: Profile,
         path: 'profile',
         navigationOptions: hideHeader
         // navigationOptions: navOptionsBackCheck
     },
-    //Profile screens
     AddGoal: {
         screen: AddGoal,
         navigationOptions: hideHeader
@@ -321,25 +399,17 @@ const ClientsManagementStack = createStackNavigator({
         screen: Address,
         navigationOptions: hideHeader
     },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
+    //Fiche EEB
+    ListForms: {
+        screen: ListForms,
         navigationOptions: hideHeader
     },
-    ListClients: {
-        screen: ListClients,
+    CreateEEB: {
+        screen: CreateEEB,
         navigationOptions: hideHeader
     },
-    CreateTask: {
-        screen: CreateTask,
-        navigationOptions: hideHeader
-    },
-    ListEmployees: {
-        screen: ListEmployees,
-        navigationOptions: hideHeader
-    },
-    DatePicker: {
-        screen: DatePicker,
+    EditEEB: {
+        screen: EditEEB,
         navigationOptions: hideHeader
     },
 })
@@ -549,6 +619,7 @@ const AgendaStack = createStackNavigator({
         screen: Address,
         navigationOptions: hideHeader
     },
+
 })
 
 const ProjectsStack = createStackNavigator({
@@ -609,6 +680,11 @@ const ProjectsStack = createStackNavigator({
         screen: PdfGeneration,
         navigationOptions: hideHeader
     },
+    //Agenda screens
+    Agenda: {
+        screen: Agenda,
+        navigationOptions: hideHeader
+    },
     CreateTask: { //access tasks
         screen: CreateTask,
         navigationOptions: hideHeader
@@ -619,11 +695,6 @@ const ProjectsStack = createStackNavigator({
     },
     DatePicker: {
         screen: DatePicker,
-        navigationOptions: hideHeader
-    },
-    //Agenda screens
-    Agenda: {
-        screen: Agenda,
         navigationOptions: hideHeader
     },
     //Profile screens
@@ -654,6 +725,19 @@ const ProjectsStack = createStackNavigator({
     },
     Address: {
         screen: Address,
+        navigationOptions: hideHeader
+    },
+    //Fiche EEB
+    ListForms: {
+        screen: ListForms,
+        navigationOptions: hideHeader
+    },
+    CreateEEB: {
+        screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    EditEEB: {
+        screen: EditEEB,
         navigationOptions: hideHeader
     },
 })

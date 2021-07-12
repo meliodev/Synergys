@@ -25,7 +25,7 @@ class Wrapper extends Component {
 
     componentDidMount() {
         this.networkListener()
-        //this.persistProcessModel()
+       this.persistProcessModel()
     }
 
     networkListener() {
@@ -40,54 +40,13 @@ class Wrapper extends Component {
 
 
     persistProcessModel() {
-        // const processModel = {
-        //     'version': 2,
-        //     'init': {
-        //         title: 'Initialisation',
-        //         instructions: 'Lorem ipsum dolor',
-        //         phaseOrder: 1,
-        //         followers: ['Admin', 'Directeur commercial', 'Commercial'],
-        //         steps: { //One step
-        //             'prospectCreation': {
-        //                 title: 'Création prospect',
-        //                 instructions: 'Lorem ipsum dolor',
-        //                 stepOrder: 1,
-        //                 actions: [
-        //                     {
-        //                         id: 'billAmount',
-        //                         title: "Montant de la facture", //#task allow adv to view devis before validating (multi-choice: voir/valider)
-        //                         instructions: "",
-        //                         actionOrder: 3,
-        //                         collection: 'Projects',
-        //                         documentId: '',
-        //                         properties: [],
-        //                         screenName: '',
-        //                         screenParams: null,
-        //                         type: 'manual',
-        //                         responsable: 'ADV',
-        //                         status: 'pending',
-        //                         comment: '',
-        //                         formSettings: {
-        //                             label: 'Montant de la facture',
-        //                             description: 'Veuillez renseigner le montant total de la facture de ce projet.',
-        //                             keyboardType: 'Numeric'
-        //                         },
-        //                         operation: { type: 'update', field: 'billAmount' },
-        //                         verificationType: 'comment',
-        //                     }
-        //                 ]
-        //             }
-        //         }
-        //     }
-        // }
-
         const { version } = processModel
         let copyProcessModel = _.cloneDeep(processModel)
         delete copyProcessModel.version
         const createdAt = moment().format()
         const payload = { process: copyProcessModel, createdAt }
 
-        db.collection('Process').doc(`version${version}`).set(payload).then(() => console.log('YEAH'))
+        db.collection('Process').doc(`version${version}`).set(payload)
     }
 
     componentWillUnmount() {

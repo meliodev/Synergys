@@ -115,7 +115,7 @@ export const processModel = {
         }
     },
     'rd1': {
-        title: 'Rendez-vous 1',
+        title: 'Visite technique préalable',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 2,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
@@ -180,7 +180,7 @@ export const processModel = {
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
                             { label: 'Reporter', id: 'postpone', onSelectType: 'navigation', },
-                            { label: 'Confirmer', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
+                            { label: 'Confirmer', id: 'confirm', nextStep: 'housingActionFile', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
@@ -190,7 +190,7 @@ export const processModel = {
             'housingActionFile': {
                 title: 'Dossier action logement',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 3,
+                stepOrder: 2,
                 actions: [
                     {
                         id: 'eebFileCreation',
@@ -238,7 +238,7 @@ export const processModel = {
             'primeCEECreation': {
                 title: "Création d'une prime CEE",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 4,
+                stepOrder: 3,
                 actions: [
                     {
                         id: 'primeCEEChoice',
@@ -249,8 +249,9 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'NON', id: 'cancel', nextPhase: 'rdn', onSelectType: 'transition', commentRequired: true },
-                            { label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
+                            { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true },
+                            //{ label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
+                            { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
@@ -280,28 +281,29 @@ export const processModel = {
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
+                        nextStep: 'rd2Creation'
                     },
-                    {
-                        id: 'quoteCreationChoice',
-                        title: 'Souhaitez-vous toujours être acteur de la transition énergétique ?',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 3,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                            { label: 'Poursuivre', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
+                    // {
+                    //     id: 'quoteCreationChoice',
+                    //     title: 'Souhaitez-vous toujours être acteur de la transition énergétique ?',
+                    //     instructions: 'Lorem ipsum dolor',
+                    //     actionOrder: 3,
+                    //     type: 'manual',
+                    //     verificationType: 'multiple-choices',
+                    //     comment: '', //motif
+                    //     choices: [
+                    //         { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+                    //         { label: 'Poursuivre', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition' },
+                    //     ],
+                    //     responsable: 'Commercial',
+                    //     status: 'pending',
+                    // },
                 ]
             },
             'rd2Creation': {
                 title: 'Initiation rendez-vous 2',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 2,
+                stepOrder: 4,
                 actions: [
                     {
                         id: 'rd2Creation',
@@ -757,7 +759,7 @@ export const processModel = {
             'poseurAffectation': {
                 title: "Affectation à un poseur",
                 instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
-                stepOrder: 3,
+                stepOrder: 2,
                 actions: [
                     {
                         id: 'poseurAffectation', //Validate "poseur" set previously
@@ -786,7 +788,7 @@ export const processModel = {
             'technicalVisitChoice2': {
                 title: 'Décision sur la visite technique',
                 instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
-                stepOrder: 4,
+                stepOrder: 3,
                 actions: [
                     {
                         id: 'technicalVisitChoice',
@@ -1332,7 +1334,7 @@ export const processModel = {
             'paymentStatus': { //conversion
                 title: "Finalisation de la facturation",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 10,
+                stepOrder: 9,
                 nextStep: '',
                 actions: [
                     {
@@ -1414,7 +1416,7 @@ export const processModel = {
             'emailBill': {
                 title: "Envoi facture par mail",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 11,
+                stepOrder: 10,
                 nextStep: '',
                 actions: [
                     //task: verify if bill & attestation fluide are still existing
@@ -1460,7 +1462,7 @@ export const processModel = {
             'clientReview': {
                 title: "Satisfaction client",
                 instructions: "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 12,
+                stepOrder: 11,
                 nextStep: '',
                 actions: [
                     {
@@ -1698,7 +1700,7 @@ export const processModel = {
             },
         }
     },
-    'version': 2
+    'version': 3
 }
 
 

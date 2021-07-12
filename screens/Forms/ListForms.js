@@ -16,6 +16,7 @@ import { constants } from "../../core/constants";
 import ListFormsContainer from "../../containers/ListFormsContainer";
 import SimulationItem from "../../components/SimulationItem";
 import { fetchDocs } from "../../api/firestore-api";
+import { setStatusBarColor } from "../../core/redux";
 
 
 class ListForms extends React.Component {
@@ -37,6 +38,10 @@ class ListForms extends React.Component {
             showInput: false,
             searchInput: '',
         }
+    }
+
+    componentDidMount() {
+        setStatusBarColor(this, { backgroundColor: theme.colors.background, barStyle: "dark-content" })
     }
 
     renderItem(item) {

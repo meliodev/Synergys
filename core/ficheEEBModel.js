@@ -1,4 +1,4 @@
-import { faBuilding, faCheck, faHouse, faTimes, faUser } from "@fortawesome/pro-light-svg-icons";
+import { faBuilding, faCheck, faHouse, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from './theme'
 
 export const ficheEEBModel = [
@@ -102,12 +102,12 @@ export const ficheEEBModel = [
                 label: "Situation de famille",
                 type: "options",
                 items: [
-                    { label: 'Célibataire', value: 'Célibataire', icon: faUser, pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 } },
-                    { label: 'Marié', value: 'Marié', icon: faUser, pdfConfig: { dx: -395, dy: - 350, pageIndex: 3 } },
-                    { label: 'Pacsé', value: 'Pacsé', icon: faUser, pdfConfig: { dx: -339, dy: - 350, pageIndex: 3 } },
-                    { label: 'Concubinage', value: 'Concubinage', icon: faUser, pdfConfig: { dx: -282, dy: - 350, pageIndex: 3 } },
-                    { label: 'Divorcé', value: 'Divorcé', icon: faUser, pdfConfig: { dx: -204, dy: - 350, pageIndex: 3 } },
-                    { label: 'Veuve', value: 'Veuve', icon: faUser, pdfConfig: { dx: -140, dy: - 350, pageIndex: 3 } }
+                    { label: 'Célibataire', value: 'Célibataire', icon: faQuestionCircle, pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 } },
+                    { label: 'Marié', value: 'Marié', icon: faQuestionCircle, pdfConfig: { dx: -395, dy: - 350, pageIndex: 3 } },
+                    { label: 'Pacsé', value: 'Pacsé', icon: faQuestionCircle, pdfConfig: { dx: -339, dy: - 350, pageIndex: 3 } },
+                    { label: 'Concubinage', value: 'Concubinage', icon: faQuestionCircle, pdfConfig: { dx: -282, dy: - 350, pageIndex: 3 } },
+                    { label: 'Divorcé', value: 'Divorcé', icon: faQuestionCircle, pdfConfig: { dx: -204, dy: - 350, pageIndex: 3 } },
+                    { label: 'Veuve', value: 'Veuve', icon: faQuestionCircle, pdfConfig: { dx: -140, dy: - 350, pageIndex: 3 } }
                 ],
             }
         ]
@@ -121,8 +121,8 @@ export const ficheEEBModel = [
                 label: "Propriétaire ou locataire",
                 type: "options",
                 items: [
-                    { label: 'Propriétaire', value: 'Propriétaire', icon: faUser, pdfConfig: { dx: -445, dy: - 387, pageIndex: 3 } },
-                    { label: 'Locataire', value: 'Locataire', icon: faUser, pdfConfig: { dx: -523, dy: - 387, pageIndex: 3 } },
+                    { label: 'Propriétaire', value: 'Propriétaire', icon: faQuestionCircle, pdfConfig: { dx: -445, dy: - 387, pageIndex: 3 } },
+                    { label: 'Locataire', value: 'Locataire', icon: faQuestionCircle, pdfConfig: { dx: -523, dy: - 387, pageIndex: 3 } },
                 ],
                 errorId: "houseOwnershipError",
                 mendatory: true,
@@ -274,10 +274,10 @@ export const ficheEEBModel = [
                 label: "Type de toit",
                 type: "options",
                 items: [
-                    { label: 'Toit-terasse', value: 'Toit-terasse', icon: faUser, pdfConfig: { dx: -509, dy: - 671, pageIndex: 3 } },
-                    { label: 'Combles aménagés', value: 'Combles aménagés', icon: faUser, pdfConfig: { dx: -417, dy: - 671, pageIndex: 3 } },
-                    { label: 'Combles perdus', value: 'Combles perdus', icon: faUser, pdfConfig: { dx: -296, dy: - 671, pageIndex: 3 } },
-                    { label: 'Terasses+Combles', value: 'Terasses+Combles', icon: faUser, pdfConfig: { dx: -190, dy: - 671, pageIndex: 3 } },
+                    { label: 'Toit-terasse', value: 'Toit-terasse', icon: faQuestionCircle, pdfConfig: { dx: -509, dy: - 671, pageIndex: 3 } },
+                    { label: 'Combles aménagés', value: 'Combles aménagés', icon: faQuestionCircle, pdfConfig: { dx: -417, dy: - 671, pageIndex: 3 } },
+                    { label: 'Combles perdus', value: 'Combles perdus', icon: faQuestionCircle, pdfConfig: { dx: -296, dy: - 671, pageIndex: 3 } },
+                    { label: 'Terasses+Combles', value: 'Terasses+Combles', icon: faQuestionCircle, pdfConfig: { dx: -190, dy: - 671, pageIndex: 3 } },
                 ],
                 errorId: "roofTypeError",
                 mendatory: true
@@ -306,10 +306,10 @@ export const ficheEEBModel = [
                 label: "Nombres de niveaux habitables",
                 type: "options",
                 items: [
-                    { label: '1', value: '1', icon: faUser, pdfConfig: { dx: -409, dy: - 720, pageIndex: 3 } },
-                    { label: '2', value: '2', icon: faUser, pdfConfig: { dx: -374, dy: - 720, pageIndex: 3 } },
-                    { label: '3', value: '3', icon: faUser, pdfConfig: { dx: -339, dy: - 720, pageIndex: 3 } },
-                    { label: '4', value: '4', icon: faUser, pdfConfig: { dx: -303, dy: - 720, pageIndex: 3 } },
+                    { label: '1', value: '1', icon: faQuestionCircle, pdfConfig: { dx: -409, dy: - 720, pageIndex: 3 } },
+                    { label: '2', value: '2', icon: faQuestionCircle, pdfConfig: { dx: -374, dy: - 720, pageIndex: 3 } },
+                    { label: '3', value: '3', icon: faQuestionCircle, pdfConfig: { dx: -339, dy: - 720, pageIndex: 3 } },
+                    { label: '4', value: '4', icon: faQuestionCircle, pdfConfig: { dx: -303, dy: - 720, pageIndex: 3 } },
                 ],
                 errorId: "livingLevelsCountError",
                 mendatory: true
@@ -354,10 +354,10 @@ export const ficheEEBModel = [
                 label: "Orientation de la pente la mieux exposée",
                 type: "options",
                 items: [
-                    { label: 'Est', value: 'Est', icon: faUser, pdfConfig: { dx: -381, dy: - 757, pageIndex: 3 } },
-                    { label: 'Sud-Est/Sud-Ouest', value: 'Sud-Est/Sud-Ouest', icon: faUser, pdfConfig: { dx: -303, dy: - 757, pageIndex: 3 } },
-                    { label: 'Sud', value: 'Sud', icon: faUser, pdfConfig: { dx: -169, dy: - 757, pageIndex: 3 } },
-                    { label: 'Ouest', value: 'Ouest', icon: faUser, pdfConfig: { dx: -119, dy: - 757, pageIndex: 3 } },
+                    { label: 'Est', value: 'Est', icon: faQuestionCircle, pdfConfig: { dx: -381, dy: - 757, pageIndex: 3 } },
+                    { label: 'Sud-Est/Sud-Ouest', value: 'Sud-Est/Sud-Ouest', icon: faQuestionCircle, pdfConfig: { dx: -303, dy: - 757, pageIndex: 3 } },
+                    { label: 'Sud', value: 'Sud', icon: faQuestionCircle, pdfConfig: { dx: -169, dy: - 757, pageIndex: 3 } },
+                    { label: 'Ouest', value: 'Ouest', icon: faQuestionCircle, pdfConfig: { dx: -119, dy: - 757, pageIndex: 3 } },
                 ],
                 errorId: "slopeOrientationError",
                 mendatory: true,
@@ -373,10 +373,10 @@ export const ficheEEBModel = [
                 label: "Support de la pente",
                 type: "options",
                 items: [
-                    { label: 'Terrain', value: 'Terrain', icon: faUser, pdfConfig: { dx: -452, dy: - 776, pageIndex: 3 } },
-                    { label: 'Garrage', value: 'Garrage', icon: faUser, pdfConfig: { dx: -381, dy: - 776, pageIndex: 3 } },
-                    { label: 'Toitutre', value: 'Toitutre', icon: faUser, pdfConfig: { dx: -303, dy: - 776, pageIndex: 3 } },
-                    { label: 'Autre', value: 'Autre', icon: faUser, pdfConfig: { dx: -225, dy: - 776, pageIndex: 3 } },
+                    { label: 'Terrain', value: 'Terrain', icon: faQuestionCircle, pdfConfig: { dx: -452, dy: - 776, pageIndex: 3 } },
+                    { label: 'Garrage', value: 'Garrage', icon: faQuestionCircle, pdfConfig: { dx: -381, dy: - 776, pageIndex: 3 } },
+                    { label: 'Toitutre', value: 'Toitutre', icon: faQuestionCircle, pdfConfig: { dx: -303, dy: - 776, pageIndex: 3 } },
+                    { label: 'Autre', value: 'Autre', icon: faQuestionCircle, pdfConfig: { dx: -225, dy: - 776, pageIndex: 3 } },
                 ],
                 errorId: "slopeSupportError",
                 mendatory: true
@@ -392,10 +392,10 @@ export const ficheEEBModel = [
                 label: "Type de sous-sol",
                 type: "options",
                 items: [
-                    { label: 'Cave', value: 'Cave', icon: faUser, pdfConfig: { dx: -452, dy: - 795, pageIndex: 3 } },
-                    { label: 'Terre-plein', value: 'Terre-plein', icon: faUser, pdfConfig: { dx: -381, dy: - 795, pageIndex: 3 } },
-                    { label: 'Vide sanitaire', value: 'Vide sanitaire', icon: faUser, pdfConfig: { dx: -303, dy: - 795, pageIndex: 3 } },
-                    { label: 'Aucun', value: 'Aucun', icon: faUser, pdfConfig: { dx: -225, dy: - 795, pageIndex: 3 } },
+                    { label: 'Cave', value: 'Cave', icon: faQuestionCircle, pdfConfig: { dx: -452, dy: - 795, pageIndex: 3 } },
+                    { label: 'Terre-plein', value: 'Terre-plein', icon: faQuestionCircle, pdfConfig: { dx: -381, dy: - 795, pageIndex: 3 } },
+                    { label: 'Vide sanitaire', value: 'Vide sanitaire', icon: faQuestionCircle, pdfConfig: { dx: -303, dy: - 795, pageIndex: 3 } },
+                    { label: 'Aucun', value: 'Aucun', icon: faQuestionCircle, pdfConfig: { dx: -225, dy: - 795, pageIndex: 3 } },
                 ],
                 errorId: "basementTypeError",
                 mendatory: true
@@ -413,12 +413,12 @@ export const ficheEEBModel = [
                 label: "Matériaux de construction des murs",
                 type: "options",
                 items: [
-                    { label: 'Pierre', value: 'Pierre', icon: faUser, pdfConfig: { dx: -396, dy: - 104, pageIndex: 0 } },
-                    { label: 'Béton', value: 'Béton', icon: faUser, pdfConfig: { dx: -319, dy: - 104, pageIndex: 0 } },
-                    { label: 'Béton celullaire', value: 'Béton celullaire', icon: faUser, pdfConfig: { dx: -240, dy: - 104, pageIndex: 0 } },
-                    { label: 'Brique', value: 'Brique', icon: faUser, pdfConfig: { dx: -396, dy: - 117, pageIndex: 0 } },
-                    { label: 'Bois', value: 'Bois', icon: faUser, pdfConfig: { dx: -319, dy: - 117, pageIndex: 0 } },
-                    { label: 'Autre', value: 'Autre', icon: faUser, pdfConfig: { dx: -240, dy: - 117, pageIndex: 0 } },
+                    { label: 'Pierre', value: 'Pierre', icon: faQuestionCircle, pdfConfig: { dx: -396, dy: - 104, pageIndex: 0 } },
+                    { label: 'Béton', value: 'Béton', icon: faQuestionCircle, pdfConfig: { dx: -319, dy: - 104, pageIndex: 0 } },
+                    { label: 'Béton celullaire', value: 'Béton celullaire', icon: faQuestionCircle, pdfConfig: { dx: -240, dy: - 104, pageIndex: 0 } },
+                    { label: 'Brique', value: 'Brique', icon: faQuestionCircle, pdfConfig: { dx: -396, dy: - 117, pageIndex: 0 } },
+                    { label: 'Bois', value: 'Bois', icon: faQuestionCircle, pdfConfig: { dx: -319, dy: - 117, pageIndex: 0 } },
+                    { label: 'Autre', value: 'Autre', icon: faQuestionCircle, pdfConfig: { dx: -240, dy: - 117, pageIndex: 0 } },
                 ],
                 errorId: "wallMaterialError",
                 mendatory: true
@@ -517,9 +517,9 @@ export const ficheEEBModel = [
                 label: "Type de fenêtre",
                 type: "options",
                 items: [
-                    { label: 'PVC', value: 'PVC', icon: faUser, pdfConfig: { dx: -396, dy: - 328, pageIndex: 0 } },
-                    { label: 'Bois', value: 'Bois', icon: faUser, pdfConfig: { dx: -318, dy: - 328, pageIndex: 0 } },
-                    { label: 'Alu', value: 'Alu', icon: faUser, pdfConfig: { dx: -240, dy: - 328, pageIndex: 0 } },
+                    { label: 'PVC', value: 'PVC', icon: faQuestionCircle, pdfConfig: { dx: -396, dy: - 328, pageIndex: 0 } },
+                    { label: 'Bois', value: 'Bois', icon: faQuestionCircle, pdfConfig: { dx: -318, dy: - 328, pageIndex: 0 } },
+                    { label: 'Alu', value: 'Alu', icon: faQuestionCircle, pdfConfig: { dx: -240, dy: - 328, pageIndex: 0 } },
                 ],
                 errorId: "windowTypeError",
                 mendatory: true
@@ -535,9 +535,9 @@ export const ficheEEBModel = [
                 label: "Type de vitrage",
                 type: "options",
                 items: [
-                    { label: 'Simple', value: 'Simple', icon: faUser, pdfConfig: { dx: -396, dy: - 347, pageIndex: 0 } },
-                    { label: 'Double', value: 'Double', icon: faUser, pdfConfig: { dx: -318, dy: - 347, pageIndex: 0 } },
-                    { label: 'Triple', value: 'Triple', icon: faUser, pdfConfig: { dx: -240, dy: - 347, pageIndex: 0 } },
+                    { label: 'Simple', value: 'Simple', icon: faQuestionCircle, pdfConfig: { dx: -396, dy: - 347, pageIndex: 0 } },
+                    { label: 'Double', value: 'Double', icon: faQuestionCircle, pdfConfig: { dx: -318, dy: - 347, pageIndex: 0 } },
+                    { label: 'Triple', value: 'Triple', icon: faQuestionCircle, pdfConfig: { dx: -240, dy: - 347, pageIndex: 0 } },
                 ],
                 errorId: "glazingTypeError",
                 mendatory: true
@@ -554,11 +554,11 @@ export const ficheEEBModel = [
                 type: "options",
                 isMultiOptions: true,
                 items: [
-                    { label: 'Chaudière', value: 'Chaudière', icon: faUser, pdfConfig: { dx: -396, dy: - 416, pageIndex: 0 } },
-                    { label: 'Cumulus électrique', value: 'Cumulus électrique', icon: faUser, pdfConfig: { dx: -304, dy: - 416, pageIndex: 0 } },
-                    { label: 'Chauffe-eau solaire', value: 'Chauffe-eau solaire', icon: faUser, pdfConfig: { dx: -190, dy: - 416, pageIndex: 0 } },
-                    { label: 'Pompe à chaleur', value: 'Pompe à chaleur', icon: faUser, pdfConfig: { dx: -396, dy: - 435, pageIndex: 0 } },
-                    { label: 'Thermodynamique', value: 'Thermodynamique', icon: faUser, pdfConfig: { dx: -304, dy: - 435, pageIndex: 0 } },
+                    { label: 'Chaudière', value: 'Chaudière', icon: faQuestionCircle, pdfConfig: { dx: -396, dy: - 416, pageIndex: 0 } },
+                    { label: 'Cumulus électrique', value: 'Cumulus électrique', icon: faQuestionCircle, pdfConfig: { dx: -304, dy: - 416, pageIndex: 0 } },
+                    { label: 'Chauffe-eau solaire', value: 'Chauffe-eau solaire', icon: faQuestionCircle, pdfConfig: { dx: -190, dy: - 416, pageIndex: 0 } },
+                    { label: 'Pompe à chaleur', value: 'Pompe à chaleur', icon: faQuestionCircle, pdfConfig: { dx: -396, dy: - 435, pageIndex: 0 } },
+                    { label: 'Thermodynamique', value: 'Thermodynamique', icon: faQuestionCircle, pdfConfig: { dx: -304, dy: - 435, pageIndex: 0 } },
                 ],
             }
         ],
@@ -604,14 +604,14 @@ export const ficheEEBModel = [
                 type: "options",
                 isMultiOptions: true,
                 items: [
-                    { label: 'Radiateurs électriques', value: 'Radiateurs électriques', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -453, dy: - 536, pageIndex: 0 } },
-                    { label: 'Clim réversible', value: 'Clim réversible', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -311, dy: - 554, pageIndex: 0 } },
-                    { label: 'Radiateur fonte', value: 'Radiateur fonte', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -265, dy: - 536, pageIndex: 0 } },
-                    { label: 'Radiateur alu', value: 'Radiateur alu', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -230, dy: - 536, pageIndex: 0 } },
-                    { label: 'Radiateur acier', value: 'Radiateur acier', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -205, dy: - 536, pageIndex: 0 } },
-                    { label: 'Chauffage au sol', value: 'Chauffage au sol', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -155, dy: - 536, pageIndex: 0 } },
-                    { label: 'Convecteur', value: 'Convecteur', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -453, dy: - 554, pageIndex: 0 } },
-                    { label: 'Autre', value: 'Autre', icon: faUser, isConditional: true, condition: { with: "heaters", values: ["Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -155, dy: - 554, pageIndex: 0 } },
+                    { label: 'Radiateurs électriques', value: 'Radiateurs électriques', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -453, dy: - 536, pageIndex: 0 } },
+                    { label: 'Clim réversible', value: 'Clim réversible', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -311, dy: - 554, pageIndex: 0 } },
+                    { label: 'Radiateur fonte', value: 'Radiateur fonte', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -265, dy: - 536, pageIndex: 0 } },
+                    { label: 'Radiateur alu', value: 'Radiateur alu', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -230, dy: - 536, pageIndex: 0 } },
+                    { label: 'Radiateur acier', value: 'Radiateur acier', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -205, dy: - 536, pageIndex: 0 } },
+                    { label: 'Chauffage au sol', value: 'Chauffage au sol', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Gaz", "Fioul", "Pompe & Chaleur", "Chaudière"] }, pdfConfig: { dx: -155, dy: - 536, pageIndex: 0 } },
+                    { label: 'Convecteur', value: 'Convecteur', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -453, dy: - 554, pageIndex: 0 } },
+                    { label: 'Autre', value: 'Autre', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -155, dy: - 554, pageIndex: 0 } },
                 ],
             }
         ]
@@ -666,7 +666,7 @@ export const ficheEEBModel = [
                 label: "Produisez-vous de l'éléctricité ?",
                 type: "options",
                 items: [
-                    { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { skip: true } },
+                    { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { skip: true }, rollBack: { fields: ["elecProdType", "elecProdInstallYear", "energyUsage"] } }, //#task: Handle rollback
                     { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { skip: true } },
                 ],
                 errorId: "isElectricityProductionError",
@@ -683,8 +683,8 @@ export const ficheEEBModel = [
                 label: "Type de production",
                 type: "options",
                 items: [
-                    { label: 'Photovoltaïque', value: 'Photovoltaïque', icon: faUser, pdfConfig: { dx: -453, dy: - 661, pageIndex: 0 } },
-                    { label: 'Eolienne', value: 'Eolienne', icon: faUser, pdfConfig: { dx: -325, dy: - 661, pageIndex: 0 } },
+                    { label: 'Photovoltaïque', value: 'Photovoltaïque', icon: faQuestionCircle, pdfConfig: { dx: -453, dy: - 661, pageIndex: 0 } },
+                    { label: 'Eolienne', value: 'Eolienne', icon: faQuestionCircle, pdfConfig: { dx: -325, dy: - 661, pageIndex: 0 } },
                 ],
                 mendatory: true,
                 errorId: "elecProdTypeError",
@@ -713,8 +713,8 @@ export const ficheEEBModel = [
                 label: "Revente ou autoconsommation ?",
                 type: "options",
                 items: [
-                    { label: 'Revente', value: 'Revente', icon: faUser, pdfConfig: { dx: -325, dy: - 680, pageIndex: 0 } },
-                    { label: 'Autoconsommation', value: 'Autoconsommation', icon: faUser, pdfConfig: { dx: -259, dy: - 680, pageIndex: 0 } },
+                    { label: 'Revente', value: 'Revente', icon: faQuestionCircle, pdfConfig: { dx: -325, dy: - 680, pageIndex: 0 } },
+                    { label: 'Autoconsommation', value: 'Autoconsommation', icon: faQuestionCircle, pdfConfig: { dx: -259, dy: - 680, pageIndex: 0 } },
                 ],
                 errorId: "energyUsageError",
                 mendatory: true,

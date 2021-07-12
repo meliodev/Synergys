@@ -11,6 +11,7 @@ import fcmtokenReducer from './Reducers/fcmtokenReducer'
 import networkReducer from './Reducers/networkReducer'
 import documentsReducer from './Reducers/documentsReducer'
 import processReducer from './Reducers/processReducer'
+import statusBarReducer from './Reducers/statusBarReducer'
 import { resetState } from '../core/redux';
 
 const rootPersistConfig = {
@@ -25,7 +26,8 @@ const appReducer = persistCombineReducers(rootPersistConfig, {
     fcmtoken: fcmtokenReducer,
     network: networkReducer,
     documents: documentsReducer,
-    process: processReducer
+    process: processReducer,
+    statusBar: statusBarReducer
 })
 
 const rootReducer = (state, action) => {

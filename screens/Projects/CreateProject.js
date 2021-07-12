@@ -181,6 +181,8 @@ class CreateProject extends Component {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
         load(this, false)
+
+        console.log(this.state.workTypes)
     }
 
     async initEditMode() {
@@ -676,6 +678,7 @@ class CreateProject extends Component {
         let showTasksForm = name !== "" && client.id !== "" && address.description !== "" && comContact.id !== "" && (!isStepTech || isStepTech && techContact.id !== "")
         showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
         const { isConnected } = this.props.network
+
 
         if (docNotFound)
             return (

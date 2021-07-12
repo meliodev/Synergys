@@ -12,9 +12,9 @@ import Loading from './Loading'
 import * as theme from '../core/theme'
 
 const Appbar = ({
-    white,
+    white, appBarColor,
     back, customBackHandler, blackBack, close, title, search, dots, check, send, attach, menu, edit, del, refresh, loading, controller,
-    titleText, controllerIcon,
+    titleText, controllerIcon, leftIconColor,
     searchBar,
     handleSearch, handleSubmit, handleSend, handleAttachement, handleMore, handleEdit, handleAction, handleDelete, handleRefresh,
     navigation, goBack, style, ...props }) => {
@@ -23,7 +23,7 @@ const Appbar = ({
     const showMenu = () => navigation.openDrawer()
 
     const AppBarIcon = ({ icon, iconColor, onPress, style }) => {
-        const faIcon = <FontAwesomeIcon icon={icon} size={24} color={iconColor}/>
+        const faIcon = <FontAwesomeIcon icon={icon} size={24} color={iconColor} />
         return <appbar.Action icon={faIcon} onPress={onPress} />
     }
 
@@ -38,9 +38,9 @@ const Appbar = ({
     }
 
     else return (
-        <appbar.Header style={[{ backgroundColor: theme.colors.appBar, elevation: 0 }, style]}>
+        <appbar.Header style={[{ backgroundColor: appBarColor || theme.colors.appBar, elevation: 0 }, style]}>
             {back && <AppBarIcon icon={faArrowLeft} onPress={customBackHandler || navBack} />}
-            {close && <AppBarIcon icon={faTimes} onPress={customBackHandler || navBack} />}
+            {close && <AppBarIcon icon={faTimes} onPress={customBackHandler || navBack} iconColor={leftIconColor || theme.colors.secondary} />}
             {menu && <AppBarIcon icon={faBars} onPress={showMenu} />}
             {searchBar}
             {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]} />}

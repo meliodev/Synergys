@@ -12,7 +12,7 @@ import CustomIcon from '../components/CustomIcon'
 
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
-import { resetState, setNetwork } from '../core/redux'
+import { resetState, setNetwork, setStatusBarColor } from '../core/redux'
 
 const menuPrivilleges = {
     backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
@@ -54,6 +54,7 @@ class DrawerMenu extends React.Component {
     componentDidMount() {
         const { currentUser } = firebase.auth()
         if (currentUser) this.setNotificationBadge(currentUser.uid)
+        setStatusBarColor(this, { backgroundColor: theme.colors.background, barStyle: "dark-content" })
     }
 
     componentWillUnmount() {
@@ -161,12 +162,12 @@ class DrawerMenu extends React.Component {
     }
 
     render() {
-        const { role, fcmToken } = this.props
+        const { role, fcmToken, statusBar } = this.props
         const { currentUser } = firebase.auth()
 
         return (
             <SafeAreaView style={styles.container}>
-                <StatusBar backgroundColor={theme.colors.background} barStyle="dark-content" />
+                <StatusBar backgroundColor={statusBar.backgroundColor} barStyle={statusBar.barStyle} />
 
                 {currentUser && this.renderHeader()}
 
@@ -175,7 +176,7 @@ class DrawerMenu extends React.Component {
                 </View>
 
                 <View style={[styles.footerContainer, { bottom: 5 }]}>
-                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.1.97</Text>
+                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.2.10</Text>
                 </View>
             </SafeAreaView>
         )
@@ -187,7 +188,8 @@ const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
         fcmToken: state.fcmtoken,
-        currentUser: state.currentUser
+        currentUser: state.currentUser,
+        statusBar: state.statusBar
     }
 }
 

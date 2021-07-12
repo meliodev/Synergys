@@ -8,6 +8,10 @@ import _ from 'lodash'
 import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
 
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import { AddressInput, Appbar, Button, CustomIcon, LoadDialog, Picker, TextInput } from '../../components';
 import NumberInput from '../../components/NumberInput';
 import SquareOption from '../../components/SquareOption';
@@ -20,6 +24,7 @@ import { db } from '../../firebase';
 import ModalHeader from '../../components/ModalHeader';
 import { ScrollView } from 'react-native';
 import { ficheEEBBase64 } from '../../core/files';
+import { setStatusBarColor } from '../../core/redux';
 import TextInputMask from 'react-native-text-input-mask';
 
 class CreateEEB extends Component {
@@ -31,7 +36,7 @@ class CreateEEB extends Component {
         this.toggleModal = this.toggleModal.bind(this)
         this.setAddress = setAddress.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
-        
+
         this.project = this.props.navigation.getParam('project', '')
 
         this.state = {
@@ -101,6 +106,10 @@ class CreateEEB extends Component {
         }
     }
 
+    componentDidMount() {
+        setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
+    }
+
     welcomeMessage() {
         const title = "SIMULATION EN LIGNE"
         const message = "Bienvenue sur l’outil de simulation en ligne et de dépôt de dossier d’aide. Les informations que vous renseignez seront utilisées uniquement pour calculer vos montants d’aides et les équipements préconisés. En fin de formulaire, vous aurez la possibilité de transformer votre simulation en dépôt de dossier en ligne. À tout moment vous pouvez être rappelé par un conseiller pour être accompagné dans votre démarche."
@@ -110,12 +119,12 @@ class CreateEEB extends Component {
             "Suivez l’avancement de vos demandes"
         ]
         return (
-            <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+            <View style={{ flex: 1, backgroundColor: theme.colors.white, justifyContent: "center" }}>
                 <View style={{ justifyContent: "center", paddingTop: theme.padding * 3, backgroundColor: "#003250", borderBottomWidth: 2, borderBottomColor: theme.colors.primary }}>
                     <CustomIcon icon={faVials} style={{ alignSelf: "center" }} size={65} color={theme.colors.white} secondaryColor={theme.colors.primary} />
                     <Text style={[theme.customFontMSmedium.h3, { color: theme.colors.white, textAlign: "center", letterSpacing: 1, marginBottom: 48, marginTop: 16 }]}>{title}</Text>
                 </View>
-                <View style={{ flex: 1, paddingHorizontal: theme.padding, paddingVertical: theme.padding * 2 }}>
+                <View style={{ flex: 1, paddingHorizontal: theme.padding, paddingVertical: theme.padding * 3 }}>
                     <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>{message}</Text>
                     <View style={{ borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth, marginVertical: 24 }} />
                     {
@@ -151,7 +160,7 @@ class CreateEEB extends Component {
         const color = isSelected ? theme.colors.white : theme.colors.gray_medium
 
         return (
-            <View style={[styles.step, { backgroundColor, borderColor }]}>
+            <View style={[styles.step, { backgroundColor }]}>
                 <Text style={[theme.customFontMSregular.caption, { color }]}>{step}</Text>
             </View>
         )
@@ -160,15 +169,15 @@ class CreateEEB extends Component {
     renderSteps() {
         const steps = ["Votre Foyer", "Votre Habitation", "Votre Bilan"]
         return (
-            <View style={{ alignItems: 'center' }}>
-                <FlatList
-                    horizontal={true}
-                    data={steps}
-                    keyExtractor={step => step}
-                    ItemSeparatorComponent={() => <View style={styles.separator} />}
-                    renderItem={({ item, index }) => this.renderStep(item, index)}
-                    showsHorizontalScrollIndicator={false}
-                />
+            <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: "space-between", backgroundColor: "#003250" }}>
+                {steps.map((step, index) => {
+                    return (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            {this.renderStep(step, index)}
+                            {index < steps.length - 1 && <View style={styles.separator} />}
+                        </View>
+                    )
+                })}
             </View>
         )
     }
@@ -178,13 +187,13 @@ class CreateEEB extends Component {
         const progress = Math.round((pagesDone.length / pages.length) * 100)
 
         return (
-            <View style={{ marginTop: 16 }}>
+            <View style={{ marginTop: 16, backgroundColor: '#003250' }}>
                 <ProgressBar
                     progress={progress / 100}
                     color={theme.colors.primary}
                     visible={true}
                 />
-                <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_dark, marginVertical: 8 }]}>{progress}%</Text>
+                <Text style={[theme.customFontMSregular.small, { color: theme.colors.white, marginVertical: 8 }]}>{progress}%</Text>
             </View>
         )
     }
@@ -206,7 +215,7 @@ class CreateEEB extends Component {
 
     renderForm() {
         return (
-            <View style={{ flex: 1, justifyContent: 'center' }}>
+            <View style={{ flex: 1, justifyContent: 'center', paddingTop: 30 }}>
                 {this.renderFields()}
             </View>
         )
@@ -552,6 +561,7 @@ class CreateEEB extends Component {
         //Add project reference if we are on process context
         if (this.project)
             form.project = this.project
+        return form
     }
 
     successMessage() {
@@ -601,7 +611,7 @@ class CreateEEB extends Component {
 
         return (
             <View style={styles.mainContainer}>
-                <Appbar close title titleText="Etude et Evaluation des besoins" />
+                <Appbar appBarColor={"#003250"} leftIconColor={theme.colors.white} close title titleText="Etude et Evaluation des besoins" />
 
                 {showWelcomeMessage ?
                     this.welcomeMessage()
@@ -675,21 +685,21 @@ const styles = StyleSheet.create({
         //paddingHorizontal: theme.padding
     },
     header: {
-        backgroundColor: theme.colors.white,
+        backgroundColor: "#003250",
         paddingHorizontal: theme.padding
     },
     step: {
         borderWidth: 1,
         padding: 8,
         paddingHorizontal: 16,
-        borderRadius: 16,
+        borderRadius: 4,
     },
     separator: {
-        width: 5,
+        width: constants.ScreenWidth * 0.011,
         height: StyleSheet.hairlineWidth,
         alignSelf: 'center',
         borderWidth: 1,
-        borderColor: theme.colors.gray_medium
+        borderColor: theme.colors.white
     },
     body: {
         flex: 1,

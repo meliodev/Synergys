@@ -209,7 +209,7 @@ class CreateTask extends Component {
 
     //##VALIDATE
     validateSchedule() {
-        const { isAllDay, startDate, endDate, startHour, dueHour, endDateError, dueHourError } = this.state
+        let { isAllDay, startDate, endDate, startHour, dueHour, endDateError, dueHourError } = this.state
         const periodicTaskCreation = !this.isEdit && !isAllDay
         const dateError = periodicTaskCreation ? compareDates(endDate, startDate, 'isBefore') : ''
         const timeError = isAllDay ? '' : compareTimes(moment(dueHour, 'hh:mm'), moment(startHour, 'hh:mm'), 'isBefore')

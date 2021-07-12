@@ -534,7 +534,7 @@ export default class PdfGeneration extends Component {
             const priceSummaryTitle_height = timesRomanFont.heightAtSize(caption) + padding / 2
 
             //Price container heigth
-            const priceData_height = 6 * timesRomanFont.heightAtSize(caption) + padding * 7
+            const priceData_height = 7 * timesRomanFont.heightAtSize(caption) + padding * 7
 
             //TVAs container heigth
             const tva_headers_height = timesRomanBoldFont.heightAtSize(caption) + padding * 0.2

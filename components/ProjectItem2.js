@@ -15,8 +15,13 @@ const iconContainerSize = constants.ScreenWidth * 0.24
 const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
     const setIconPhase = (projectStep) => {
+        console.log(project.id, projectStep)
         switch (projectStep) {
             case 'Prospect':
+                return faFolderOpen
+                break
+
+            case 'Initialisation': //Deprecated
                 return faFolderOpen
                 break
 

@@ -1,4 +1,9 @@
 //CurrentUser
+export const setStatusBarColor = (main, statusBarProps) => {
+    const action = { type: "STATUSBARCOLOR", value: statusBarProps }
+    main.props.dispatch(action)
+}
+
 export const setCurrentUser = (main, user) => {
     const action = { type: "CURRENTUSER", value: user }
     main.props.dispatch(action)

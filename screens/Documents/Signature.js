@@ -584,8 +584,8 @@ class Signature extends Component {
                     <TermsConditions
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
-                        acceptTerms={this.verifyUser}
-                        //acceptTerms={this.startSignature}
+                        //acceptTerms={this.verifyUser}
+                        acceptTerms={this.startSignature}
                         downloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
                             this.downloadFile(termsDir, termsUrl)
