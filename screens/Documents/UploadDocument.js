@@ -382,13 +382,10 @@ class UploadDocument extends Component {
         if (!canWrite) return
 
         if (!this.isEdit && !this.documentType) { //Creation & not pre-defined document type {
-            console.log('555')
             this.toggleModal()
         }
 
         else { //this.isEdit || !this.isEdit && this.documentType
-            console.log('555')
-
             let modalContent = ''
             const { type } = this.state
             let isGenerable = type === 'Devis' || type === 'Facture' || type === "Fiche EEB"
@@ -638,25 +635,27 @@ class UploadDocument extends Component {
             var titleText = "Choix de la commande"
             var listScreen = "ListOrders"
             var creationScreen = "CreateOrder"
+            var popCount = index === 0 ? 3 : 2
         }
 
         else if (type === "Fiche EEB") {
             var titleText = "Choix de la simulation"
             var listScreen = "ListForms"
             var creationScreen = "CreateEEB"
+            var popCount = index === 0 ? 2 : 1
         }
 
         //Existing order
         if (index === 0) {
             navParams.isRoot = false
             navParams.titleText = titleText
-            navParams.popCount = 3
+            navParams.popCount = popCount
             this.props.navigation.navigate(listScreen, navParams)
         }
 
         //New order
         else if (index === 1) {
-            navParams.popCount = 2
+            navParams.popCount = popCount
             this.props.navigation.navigate(creationScreen, navParams)
         }
     }
@@ -685,7 +684,7 @@ class UploadDocument extends Component {
             progress: 0,
         }
 
-        this.setState({ attachment, orderData: order }, () => {
+        this.setState({ attachment, orderData: order || null }, () => {
             if (!isConversion) return
             var DocumentId = genPdf.DocumentId
             this.handleSubmit(isConversion, DocumentId)
@@ -853,7 +852,7 @@ class UploadDocument extends Component {
                                         isLoading={modalLoading}
                                         modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
                                         isVisible={showModal}
-                                        toggleModal={() => this.toggleModal(true)}
+                                        toggleModal={() => this.toggleModal()}
                                         elements={elements}
                                         autoValidation={true}
                                         handleSelectElement={async (elements, index) => this.configDocument(elements, index)}

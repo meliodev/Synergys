@@ -525,6 +525,7 @@ export const generateFichEEB = async (formInputs) => {
     }
     const caption = 10
 
+
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
         if (field.isMultiOptions && formInputs[field.id].length > 0 || formInputs[field.id] !== "") {

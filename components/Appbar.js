@@ -14,7 +14,7 @@ import * as theme from '../core/theme'
 const Appbar = ({
     white, appBarColor,
     back, customBackHandler, blackBack, close, title, search, dots, check, send, attach, menu, edit, del, refresh, loading, controller,
-    titleText, controllerIcon, leftIconColor,
+    titleText, controllerIcon, iconsColor,
     searchBar,
     handleSearch, handleSubmit, handleSend, handleAttachement, handleMore, handleEdit, handleAction, handleDelete, handleRefresh,
     navigation, goBack, style, ...props }) => {
@@ -40,7 +40,7 @@ const Appbar = ({
     else return (
         <appbar.Header style={[{ backgroundColor: appBarColor || theme.colors.appBar, elevation: 0 }, style]}>
             {back && <AppBarIcon icon={faArrowLeft} onPress={customBackHandler || navBack} />}
-            {close && <AppBarIcon icon={faTimes} onPress={customBackHandler || navBack} iconColor={leftIconColor || theme.colors.secondary} />}
+            {close && <AppBarIcon icon={faTimes} onPress={customBackHandler || navBack} iconColor={iconsColor || theme.colors.secondary} />}
             {menu && <AppBarIcon icon={faBars} onPress={showMenu} />}
             {searchBar}
             {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]} />}
@@ -50,9 +50,9 @@ const Appbar = ({
             {dots && <AppBarIcon icon={faEllipsisVv} onPress={handleMore} />}
             {del && <AppBarIcon icon={faTrash} onPress={handleDelete} />}
             {loading && <Loading size='small' color='#fff' style={{ position: 'absolute', right: 15 }} />}
-            {check && <AppBarIcon icon={faCheck} onPress={handleSubmit} />}
+            {check && <AppBarIcon icon={faCheck} onPress={handleSubmit} iconColor={iconsColor || theme.colors.secondary}/>}
             {send && <AppBarIcon icon={faPaperPlane} onPress={handleSend} />}
-            {edit && <AppBarIcon icon={faPen} onPress={handleEdit} />}
+            {edit && <AppBarIcon icon={faPen} onPress={handleEdit}  iconColor={iconsColor || theme.colors.secondary}/>}
             {controller && <appbar.Action icon={controllerIcon} onPress={handleAction} />}
         </appbar.Header>
     )

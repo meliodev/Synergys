@@ -71,7 +71,7 @@ class ListFormsContainer extends Component {
         //     const params = { role: this.props.role.value }
         //     var query = configureQuery('Orders', queryFilters, params)
         const { collection, query } = this.props
-        
+
         this.fetchDocs(query, 'List', 'Count', async () => {
             load(this, false)
         })
@@ -132,6 +132,7 @@ class ListFormsContainer extends Component {
                         {canCreate && this.showFAB &&
                             <MyFAB onPress={() => this.props.navigation.navigate(creationScreen)} />
                         }
+
                     </Background>
                 }
             </View>

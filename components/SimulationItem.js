@@ -18,14 +18,22 @@ import { withNavigation } from 'react-navigation'
 
 const SimulationItem = ({ simulation, onPress, navigation, ...props }) => {
 
-    const { id, estimation, project, editedAt, nameSir, nameMiss } = simulation
-    const clientsNames = `${nameSir}${nameSir !== "" ? " & " : ""}${nameMiss}`
+    const { id, estimation, project, editedAt, nameSir, nameMiss, isDraft, createdBy, colorCat } = simulation
+    const isNameSir = nameSir !== ""
+    const isNameMiss = nameMiss !== ""
+    const bothNames = isNameSir && isNameMiss
+    if (bothNames)
+        var clientsNames = nameSir + " & " + nameMiss
+    else if (isNameSir)
+        var clientsNames = nameSir
+    else if (isNameMiss)
+        var clientsNames = nameMiss
 
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={styles.header}>
                 <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
-                <Text style={theme.customFontMSmedium.header}>€ {estimation}</Text>
+                <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation}</Text>
             </View>
 
             <View style={styles.body}>
@@ -37,8 +45,11 @@ const SimulationItem = ({ simulation, onPress, navigation, ...props }) => {
                 </Text>
             </View>
 
-            <View>
-                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(editedAt).format('ll')}</Text>
+            <Text style={[theme.customFontMSregular.caption, { marginBottom: 8, color: theme.colors.gray_dark }]}>Crée par {createdBy.fullName}</Text>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(editedAt).format('lll')}</Text>
+                {isDraft && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>Brouillon</Text>}
             </View>
         </TouchableOpacity >
     )

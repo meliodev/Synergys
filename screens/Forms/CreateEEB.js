@@ -1,7 +1,7 @@
 import { faVials } from '@fortawesome/pro-duotone-svg-icons';
 import { faBuilding, faCheck, faHouse, faTimes, faUser } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, FlatList } from 'react-native';
+import { Platform, StyleSheet, Text, View, Image, FlatList, BackHandler, TouchableOpacity } from 'react-native';
 import { ProgressBar, Checkbox } from "react-native-paper";
 import { connect } from 'react-redux'
 import _ from 'lodash'
@@ -12,14 +12,14 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { AddressInput, Appbar, Button, CustomIcon, LoadDialog, Picker, TextInput } from '../../components';
+import { AddressInput, Appbar, Button, CustomIcon, EmptyList, LoadDialog, Loading, Picker, TextInput, Toast } from '../../components';
 import NumberInput from '../../components/NumberInput';
 import SquareOption from '../../components/SquareOption';
 import { constants } from '../../core/constants';
 
 import * as theme from '../../core/theme'
 import { ficheEEBModel as pages } from '../../core/ficheEEBModel'
-import { nameValidator, positiveNumberValidator, setAddress, refreshAddress, emailValidator, generateId, generateFichEEB, chunk, formatDocument } from '../../core/utils';
+import { nameValidator, positiveNumberValidator, setAddress, refreshAddress, emailValidator, generateId, generateFichEEB, chunk, formatDocument, myAlert, saveFile } from '../../core/utils';
 import { db } from '../../firebase';
 import ModalHeader from '../../components/ModalHeader';
 import { ScrollView } from 'react-native';
@@ -27,8 +27,15 @@ import { ficheEEBBase64 } from '../../core/files';
 import { setStatusBarColor } from '../../core/redux';
 import TextInputMask from 'react-native-text-input-mask';
 import { fetchDocument } from '../../api/firestore-api';
+import StepIndicator from 'react-native-step-indicator';
+import { SafeAreaView } from 'react-native';
+import { Alert } from 'react-native';
+import { read } from 'react-native-fs';
 
 const properties = [
+    "estimation",
+    "colorCat",
+    "products",
     "nameSir",
     "nameMiss",
     "proSituationSir",
@@ -79,13 +86,17 @@ const properties = [
     "isElectricityProduction",
     "elecProdType",
     "elecProdInstallYear",
+    "energyUsage",
     "yearlyElecCost",
     "roofLength",
     "roofWidth",
     "roofTilt",
+    "addressNum",
+    "addressStreet",
+    "addressCode",
+    "addressCity",
     "phone",
     "disablePhoneContact",
-    "address",
     "email",
 ]
 
@@ -93,15 +104,23 @@ class CreateEEB extends Component {
     constructor(props) {
         super(props)
 
+        this.handleSubmit = this.handleSubmit.bind(this)
         this.goNext = this.goNext.bind(this)
         this.goBack = this.goBack.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
         this.setAddress = setAddress.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+        this.myAlert = myAlert.bind(this)
+
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
         this.project = this.props.navigation.getParam('project', '')
         this.SimulationId = this.props.navigation.getParam('SimulationId', '')
         this.isEdit = this.SimulationId !== ""
+
+        this.DocumentId = this.props.navigation.getParam('DocumentId', '')
+        this.popCount = this.props.navigation.getParam('popCount', 1) //Conversion from Devis to Facture
 
         this.state = {
             showWelcomeMessage: !this.isEdit,
@@ -113,7 +132,16 @@ class CreateEEB extends Component {
             isPdfModalVisible: false,
             pdfBase64: "",
             loading: false,
+            toastMessage: "",
+            toastType: "",
             docNotFound: false,
+            submitted: false,
+            readOnly: this.isEdit,
+            initialLoading: true,
+
+            products: [],
+            colorCat: "",
+            estimation: "",
 
             //Fields
             nameSir: "",
@@ -166,13 +194,17 @@ class CreateEEB extends Component {
             isElectricityProduction: "",
             elecProdType: "",
             elecProdInstallYear: "",
+            energyUsage: "",
             yearlyElecCost: "",
             roofLength: "",
             roofWidth: "",
             roofTilt: "",
+            addressNum: "",
+            addressStreet: "",
+            addressCode: "",
+            addressCity: "",
             phone: "",
-            disablePhoneContact: true,
-            address: "",
+            disablePhoneContact: undefined,
             email: "",
         }
     }
@@ -181,13 +213,15 @@ class CreateEEB extends Component {
         setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
-        load(this, false)
+        this.setState({ initialLoading: false })
     }
 
     async initEditMode() {
         let simulation = await fetchDocument('Eeb', this.SimulationId)
         simulation = this.setSimulation(simulation)
         if (!simulation) return
+        const pdfBase64 = await generateFichEEB(simulation)
+        this.setState({ pdfBase64 })
     }
 
     setSimulation(simulation) {
@@ -232,12 +266,7 @@ class CreateEEB extends Component {
                     }
                 </View>
 
-                <Button
-                    mode="contained"
-                    style={{ position: "absolute", bottom: theme.padding, alignSelf: "center", width: constants.ScreenWidth - theme.padding * 2, backgroundColor: theme.colors.primary }}
-                    onPress={() => this.setState({ showWelcomeMessage: false })}>
-                    Commencer
-                </Button>
+                {this.renderBottomCenterButton("Commencer", () => this.setState({ showWelcomeMessage: false }))}
             </View>
         )
     }
@@ -259,22 +288,35 @@ class CreateEEB extends Component {
     renderSteps() {
         const steps = ["Votre Foyer", "Votre Habitation", "Votre Bilan"]
         return (
-            <View style={{ flexDirection: "row", alignItems: 'center', justifyContent: "space-between", backgroundColor: "#003250" }}>
+            <View style={styles.stepsContainer}>
                 {steps.map((step, index) => {
                     return (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <TouchableOpacity
+                            style={{ flexDirection: "row", alignItems: "center" }}
+                            onPress={() => {
+                                if (!this.isEdit) return
+
+                                //Verify fields
+                                const isValid = this.verifyFields(this.state.pageIndex)
+                                if (!isValid) return
+
+                                const firstPageIndex = pages.findIndex((page) => index === page.stepIndex)
+                                this.setState({ pageIndex: firstPageIndex, stepIndex: index })
+                            }}
+                        >
                             {this.renderStep(step, index)}
                             {index < steps.length - 1 && <View style={styles.separator} />}
-                        </View>
+                        </TouchableOpacity>
                     )
-                })}
-            </View>
+                })
+                }
+            </View >
         )
     }
 
     renderProgression() {
         const { pagesDone } = this.state
-        const progress = Math.round((pagesDone.length / pages.length) * 100)
+        const progress = Math.round((pagesDone.length / (pages.length - 1)) * 100)
 
         return (
             <View style={{ marginTop: 16, backgroundColor: '#003250' }}>
@@ -304,17 +346,21 @@ class CreateEEB extends Component {
     }
 
     renderForm() {
-        return (
+        const { pageIndex } = this.state
+
+        if (pages[pageIndex].id === "submit")
+            return this.successMessage()
+
+        else return (
             <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 24 }}>
-                {this.renderFields()}
+                {this.renderFields(pageIndex)}
             </ScrollView>
         )
     }
 
-    renderFields() {
-        const { pageIndex } = this.state
-
+    renderFields(pageIndex) {
         const { id, layout, fields, items } = pages[pageIndex]
+
         const fieldsComponents = fields.map((field) => {
 
             const value = this.state[field.id]
@@ -460,7 +506,7 @@ class CreateEEB extends Component {
                                                 }
                                                 update[id] = selectedOptions
 
-                                                if (pages[pageIndex].fields.length === 1)
+                                                if (pages[pageIndex].fields.length === 1 && !isMultiOptions)
                                                     this.setState(update, () => this.goNext())
 
                                                 else this.setState(update)
@@ -550,8 +596,9 @@ class CreateEEB extends Component {
 
     renderButtons() {
         const { pageIndex } = this.state
-        const isLastPage = pageIndex === pages.length - 1
-        const title = isLastPage ? "Soumettre" : "Continuer"
+        const isSubmit = pages[pageIndex].id === 'submit'
+        const isLastFormPage = pageIndex === pages.length - 2
+        const title = isSubmit ? "Soumettre" : isLastFormPage ? "Terminer" : "Continuer"
 
         return (
             <View style={styles.buttonsContainer}>
@@ -608,11 +655,16 @@ class CreateEEB extends Component {
         if (pages[pageIndex].isLast)
             this.setState({ stepIndex: stepIndex + 1 })
 
-        const isLastPage = pageIndex === pages.length - 1
+        //Show results
+        const isLastFormPage = pageIndex === pages.length - 2
+        const isSubmit = pages[pageIndex].id === 'submit'
+        if (isLastFormPage) {
+            this.getResults(true)
+        }
 
-        //Submit
-        if (isLastPage)
+        else if (isSubmit) {
             this.handleSubmit()
+        }
 
         //Increment page
         else this.setState({ pageIndex: pageIndex + 1 })
@@ -620,6 +672,9 @@ class CreateEEB extends Component {
 
     goBack() {
         let { pageIndex, pagesDone, stepIndex } = this.state
+
+        if (pageIndex === pages.length - 1)
+            this.setState({ showSuccessMessage: false })
 
         //Pop page browsed
         this.setState({ pageIndex: pagesDone[pagesDone.length - 1] }, () => {
@@ -695,33 +750,265 @@ class CreateEEB extends Component {
         delete state.isPdfModalVisible
         delete state.pdfBase64
         delete state.loading
+        delete state.toastMessage
+        delete state.toastType
+        delete state.docNotFound
+        delete state.initialLoading
+        // delete state.products
+        // delete state.colorCat
+        // delete state.estimation
+        delete state.submitted
+        delete state.readOnly
         return state
     }
 
-    async handleSubmit() {
+    async getResults(calculEstimation) {
         this.setState({ loading: true })
+
+        const form = this.unformatSimulation()
+        const pdfBase64 = await generateFichEEB(form)
+        this.setState({ pdfBase64 })
+
+        if (calculEstimation) {
+            const products = this.setProducts(form)
+            const colorCat = this.setColorCat(form)
+            const estimation = this.calculateEstimation(products, colorCat)
+
+            this.setState({
+                pageIndex: this.state.pageIndex + 1,
+                products,
+                colorCat,
+                estimation,
+                showSuccessMessage: true,
+                loading: false
+            })
+        }
+    }
+
+    unformatSimulation() {
         const state = _.cloneDeep(this.state)
         let form = this.extractForm(state)
+        return form
+    }
+
+    handleSubmit() {
+        this.setState({ loading: true })
+
+        //Verify onPress Check icon
+        if (this.isEdit) {
+            const isValid = this.verifyFields(this.state.pageIndex)
+            if (!isValid) {
+                this.setState({ loading: false })
+                return
+            }
+        }
+
+        const SimulationId = this.isEdit ? this.SimulationId : generateId('GS-EEB-')
+        let form = this.unformatSimulation()
         form = this.addFormLogs(form)
-        const formId = generateId('GS-EEB-')
-        const pdfBase64 = await generateFichEEB(form)
-        //  db.collection('Eeb').doc(formId).set(form)
-        this.setState({ pdfBase64, showSuccessMessage: true, loading: false })
+        db.collection('Eeb').doc(SimulationId).set(form)
+        this.isEdit = true
+        this.SimulationId = SimulationId
+        this.setState({
+            pageIndex: 0,
+            pagesDone: [],
+            submitted: true,
+            readOnly: true,
+            loading: false,
+            toastMessage: "Formulaire enregistré avec succès !",
+            toastType: "success"
+        })
+    }
+
+    setProducts(form) {
+        let products = []
+        const { transmittersTypes, heaters, lostAticsIsolation, lostAticsIsolationAge, heatedSurface, slopeOrientation, roofLength, roofWidth, yearlyElecCost, livingSurface, hotWaterProduction } = form
+        const pacAirAir = "Pac air air (climatisation)"
+        const pacAirEau = "PAC AIR EAU"
+        const isoCombles = "Isolation des combles"
+        const ballonThermo = "Ballon thermodynamique"
+        const photovolt = "Photovoltaïque"
+
+        if (transmittersTypes.includes("Radiateurs électriques"))
+            products.push(pacAirAir)
+
+        const heatersValues = ["Chaudière", "Gaz", "Fioul"]
+        if (heatersValues.includes(heaters))
+            products.push(pacAirEau)
+
+        if (lostAticsIsolation == "Oui" && lostAticsIsolationAge > 6 && heatedSurface > 24)
+            products.push(isoCombles)
+
+        // const slopeOrientationValues = ["Sud-Est/Sud-Ouest", "Sud"]
+        // const roofSurface = Number(roofWidth) * Number(roofLength)
+        // const yearlyCost_PerSquareMeter = yearlyElecCost / livingSurface
+        // if (slopeOrientationValues.includes(slopeOrientation) && roofSurface > 20 && yearlyCost_PerSquareMeter > 10)
+        //     products.push(photovolt)
+
+        if (hotWaterProduction.includes("Cumulus électrique") || hotWaterProduction.includes("Chaudière"))
+            products.push(ballonThermo)
+
+        return products
+    }
+
+    setColorCat(form) {
+
+        let { taxIncome, familyMembersCount } = form
+        taxIncome = Number(taxIncome)
+        familyMembersCount = Number(familyMembersCount)
+
+        let personnesSupplementaires = familyMembersCount - 5
+        if (personnesSupplementaires < 0) {
+            personnesSupplementaires = 0
+        }
+
+        let couleurChoisie = 'Aucun'
+        const isOneMember = familyMembersCount === 1
+        const isTwoMembers = familyMembersCount === 2
+        const isThreeMembers = familyMembersCount === 3
+        const isFourMembers = familyMembersCount === 4
+        const isFiveMembers = familyMembersCount === 5
+        const isMoreThanFive = familyMembersCount >= 6
+
+        if (taxIncome <= 14879 && isOneMember
+            || (taxIncome <= 21760 && isTwoMembers)
+            || (taxIncome <= 26170 && isThreeMembers)
+            || (taxIncome <= 30572 && isFourMembers)
+            || (taxIncome <= 34993 && isFiveMembers)
+            || (taxIncome <= (34993 + (4412 * personnesSupplementaires)) && isMoreThanFive)) {
+            couleurChoisie = 'blue'
+        }
+
+        else if ((taxIncome <= 19074 && isOneMember)
+            || (taxIncome <= 27896 && isTwoMembers)
+            || (taxIncome <= 33547 && isThreeMembers)
+            || (taxIncome <= 39192 && isFourMembers)
+            || (taxIncome <= 44860 && isFiveMembers)
+            || (taxIncome <= (44860 + (5651 * personnesSupplementaires)) && isMoreThanFive)) {
+            couleurChoisie = 'yellow'
+        }
+
+        else if ((taxIncome <= 29148 && isOneMember)
+            || (taxIncome <= 42848 && isTwoMembers)
+            || (taxIncome <= 51592 && isThreeMembers)
+            || (taxIncome <= 60336 && isFourMembers)
+            || (taxIncome <= 69081 && isFiveMembers)
+            || (taxIncome <= (69081 + (8744 * personnesSupplementaires)) && isMoreThanFive)) {
+            couleurChoisie = 'purple'
+        }
+
+        else if ((taxIncome > 29148 && isOneMember)
+            || (taxIncome > 42848 && isTwoMembers)
+            || (taxIncome > 51592 && isThreeMembers)
+            || (taxIncome > 60336 && isFourMembers)
+            || (taxIncome > 69081 && isFiveMembers)
+            || (taxIncome > (69081 + (8744 * personnesSupplementaires)) && isMoreThanFive)) {
+            couleurChoisie = 'pink'
+        }
+
+        return couleurChoisie
+    }
+
+    calculateEstimation(products, colorCat) {
+        let totalAide = 0
+        const isPacAirAir = products.includes("Pac air air (climatisation)") ? 1 : 0
+        const isPacAirEau = products.includes("PAC AIR EAU") ? 1 : 0
+        const isIsolationComble = products.includes("Isolation des combles") ? 1 : 0
+        const isPhotovoltaique = products.includes("Photovoltaïque") ? 1 : 0
+        const isBallonThermo = products.includes("Ballon thermodynamique") ? 1 : 0
+        let { lostAticsSurface } = this.state
+        lostAticsSurface = Number(lostAticsSurface)
+
+        if (colorCat == 'blue') {
+            totalAide = (8364 * isPacAirEau) + (900 * isPacAirAir) + (1368 * isBallonThermo) + (22 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique)
+        }
+
+        else if (colorCat == 'yellow') {
+            totalAide = (7364 * isPacAirEau) + (450 * isPacAirAir) + (884 * isBallonThermo) + (22 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique)
+        }
+
+        else if (colorCat == 'purple') {
+            totalAide = (4727 * isPacAirEau) + (450 * isPacAirAir) + (484 * isBallonThermo) + (11 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique)
+        }
+
+        else if (colorCat == 'pink') {
+            totalAide = (2727 * isPacAirEau) + (450 * isPacAirAir) + (84 * isBallonThermo) + (11 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique)
+        }
+
+        return totalAide
     }
 
     addFormLogs(form) {
-        form.createdAt = moment().format()
-        form.createdBy = this.props.currentUser
-        form.estimation = "9000" //provisoire
+        console.log('IS EDIT:::::::::::::::::::::', this.isEdit)
+
+        if (!this.isEdit) {
+            form.createdAt = moment().format()
+            form.createdBy = this.props.currentUser
+
+            //Add draft tag
+            if (this.state.pageIndex < pages.length - 1)
+                form.isDraft = true
+        }
+
+        else form.isDraft = false
+
+        form.editedAt = moment().format()
+        form.editedBy = this.props.currentUser
         //Add project reference if we are on process context
         if (this.project)
             form.project = this.project
         return form
     }
 
+    getImage(name) {
+        switch (name) {
+            case "Pac air air (climatisation)":
+                return require("../../assets/icons/pacAirAir.png")
+                break;
+            case "PAC AIR EAU":
+                return require("../../assets/icons/pacAirEau.png")
+                break;
+            case "Ballon thermodynamique":
+                return require("../../assets/icons/ballonThermo.png")
+                break;
+            case "Isolation des combles":
+                return require("../../assets/icons/isoCombles.png")
+                break;
+            default:
+                return require("../../assets/icons/pacAirAir.png")
+                break;
+        }
+    }
+
+    renderTrackingSteps() {
+        const steps = [
+            { circleColor: 'green', barColor: "green", textColor: theme.colors.secondary, title: 'OK', caption: "L'estimation de votre prime à été calculée" },
+            { circleColor: 'green', barColor: theme.colors.graySilver, textColor: theme.colors.secondary, title: 'Contact', caption: 'Un conseiller vous contacte par téléphone et valide votre dossier.' },
+            { circleColor: theme.colors.graySilver, barColor: theme.colors.graySilver, textColor: theme.colors.graySilver, title: 'Etude et devis', caption: 'Synergys vous remet votre étude et votre devis.' },
+            { circleColor: theme.colors.graySilver, barColor: theme.colors.graySilver, textColor: theme.colors.graySilver, title: 'Travaux', caption: 'Le devis accepté, nous entamons les travaux.' },
+            { circleColor: theme.colors.graySilver, barColor: theme.colors.graySilver, textColor: theme.colors.graySilver, title: 'Aide', caption: "Pour les aides ? Vous n'avez pas à les avancer, Synergys est mandataire administratif et financier de maprimerénov !" }
+        ]
+
+        return steps.map((step, index) => {
+            return (
+                <View style={{ flexDirection: 'row' }}>
+                    <View style={{ alignItems: 'center' }}>
+                        <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: step.circleColor }} />
+                        {index !== steps.length - 1 && <View style={{ flex: 1, width: 2, backgroundColor: step.barColor }} />}
+                    </View>
+
+                    <View style={{ flex: 1, paddingLeft: 16, marginBottom: 24 }}>
+                        <Text style={[theme.customFontMSsemibold.body, { marginTop: -4, color: step.textColor }]}>{step.title}</Text>
+                        <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{step.caption}</Text>
+                    </View>
+                </View>
+            )
+        })
+    }
+
     successMessage() {
         const title = "Estimation de votre prime: "
-        const estimation = "9732€"
+        const { products, colorCat, estimation, submitted } = this.state
         const message1 = "Ce que nous vous recommandons"
         const message2 = "Et Maintenant ?"
         const instructions = [
@@ -729,28 +1016,62 @@ class CreateEEB extends Component {
             "Déposer votre dossier d’aide directement en ligne!",
             "Suivez l’avancement de vos demandes"
         ]
+
+        const labels = [
+            "OK",
+            "Un conseiller vous contacte par téléphone et valide votre dossier.",
+            "Synergys vous remet votre étude et votre devis.",
+            "Le devis accepté, nous entamons les travaux.",
+            "Pour les aides ? Vous n'avez pas à les avancer, Synergys est mandataire administratif et financier de maprimerénov'!"
+        ]
+
         return (
-            <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                <View style={{ justifyContent: "center", paddingTop: theme.padding * 2, backgroundColor: "#003250", borderBottomWidth: 2, borderBottomColor: theme.colors.primary }}>
-                    <Text style={[theme.customFontMSmedium.header, { color: theme.colors.white, textAlign: "center", letterSpacing: 1, marginBottom: 48, marginTop: 16 }]}>
-                        {title}
-                        <Text style={[theme.customFontMSmedium.h2, { color: theme.colors.primary }]}>{estimation}</Text>
-                    </Text>
-                </View>
+            <View style={{ flex: 1 }}>
+                <ScrollView style={{ backgroundColor: theme.colors.white }} contentContainerStyle={{ paddingBottom: 8 }}>
 
-                <View style={{ flex: 1, paddingHorizontal: theme.padding, paddingVertical: theme.padding * 2 }}>
-                    <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>{message1}</Text>
-                    <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>{message2}</Text>
-                    <View style={{ borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth, marginVertical: 24 }} />
-                </View>
+                    <View style={styles.sucessMessageContent}>
+                        <View style={[styles.colorCatCircle, { backgroundColor: colorCat }]} />
+                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>
+                            {title}
+                            <Text style={[theme.customFontMSmedium.h2, { color: theme.colors.primary }]}>{estimation}€</Text>
+                        </Text>
+                    </View>
 
-                <Button
-                    mode="contained"
-                    style={{ position: "absolute", bottom: theme.padding, alignSelf: "center", width: constants.ScreenWidth - theme.padding * 2, backgroundColor: theme.colors.primary }}
-                    onPress={() => this.setState({ isPdfModalVisible: true })}>
-                    Générer une fiche EEB
-                </Button>
+                    <View style={{ padding: theme.padding }}>
+                        <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message1}</Text>
+                        {products.map((product) => {
+                            return (
+                                <View style={{ flexDirection: "row" }}>
+                                    <Image source={this.getImage(product)} style={{ alignSelf: 'center', width: 15, height: 15 }} />
+                                    <Text style={[theme.customFontMSregular.body, { marginLeft: 8 }]}>{product}</Text>
+                                </View>
+                            )
+                        }
+                        )}
+                    </View>
+
+                    <View style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth }} />
+
+                    <View style={{ flex: 1, padding: theme.padding }}>
+                        <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message2}</Text>
+                        {this.renderTrackingSteps()}
+                        <Image source={require('../../assets/images/maprimerenove.jpg')} style={{ width: constants.ScreenWidth - theme.padding * 2, height: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }} />
+                    </View>
+                </ScrollView>
+
+                {submitted && this.renderBottomCenterButton("Générer une fiche EEB", this.toggleModal)}
             </View>
+        )
+    }
+
+    renderBottomCenterButton(title, onPress) {
+        return (
+            <Button
+                mode="contained"
+                style={styles.bottomCenterButton}
+                onPress={onPress}>
+                {title}
+            </Button>
         )
     }
 
@@ -758,38 +1079,204 @@ class CreateEEB extends Component {
         this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
     }
 
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+    }
+
+    handleBackButtonClick() {
+        const { showWelcomeMessage, submitted, readOnly } = this.state
+
+        if (!this.isEdit && !showWelcomeMessage && !submitted) {
+            const title = "Abandonner"
+            const message = 'Les données saisies seront perdues. Êtes-vous sûr de vouloir annuler ?'
+            const handleConfirm = () => this.props.navigation.goBack(null);
+            this.myAlert(title, message, handleConfirm)
+        }
+
+        else {
+            if (!readOnly)
+                this.setState({ readOnly: true })
+            else this.props.navigation.goBack(null);
+        }
+        return true;
+    }
+
+    renderOverview() {
+        const form = this.unformatSimulation()
+        const { readOnly } = this.state
+
+        const products = form.products.join(', ')
+
+        const summary = [
+            { title: "Couleur", value: form.colorCat, isColor: true },
+            { title: "Produits recommandés", value: products },
+            { title: "Estimation", value: `${form.estimation} €` },
+        ]
+
+        return (
+            <View style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={{ flexGrow: 1, paddingTop: theme.padding / 2, paddingBottom: theme.padding * 3, backgroundColor: theme.colors.gray_extraLight }}>
+
+                    <View style={{ marginBottom: theme.padding / 2, backgroundColor: theme.colors.white }}>
+                        {summary.map((item) => {
+                            return (
+                                <View style={styles.overviewRow}>
+                                    <Text style={[theme.customFontMSsemibold.caption, styles.overviewText, { opacity: 0.8 }]}>{item.title}</Text>
+                                    {item.isColor ?
+                                        <View style={styles.overviewText}>
+                                            <View style={{ height: 18, width: 18, borderRadius: 9, backgroundColor: item.value }} />
+                                        </View>
+                                        :
+                                        <Text style={[theme.customFontMSbold.caption, styles.overviewText]}>{item.value}</Text>
+                                    }
+                                </View>
+                            )
+                        })}
+                    </View>
+
+                    <View style={{ marginBottom: 16, backgroundColor: 'white' }}>
+
+                        {pages.map((page, index) => {
+
+                            return page.fields.map((field) => {
+
+                                if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
+
+                                    //String fields
+                                    if (typeof (form[field.id]) === "string") {
+                                        if (form[field.id] !== "") {
+                                            var values = form[field.id]
+                                        }
+                                    }
+
+                                    //Boolean fields
+                                    else if (typeof (form[field.id]) === 'boolean') {
+                                        var values = form[field.id] === false ? "Oui" : "Non"
+                                    }
+
+                                    //Array fields
+                                    else if (form[field.id] !== []) {
+                                        var values = ""
+                                        var values = form[field.id].join(', ')
+                                    }
+                                }
+
+                                if (values)
+                                    return (
+                                        <TouchableOpacity
+                                            onPress={() => this.setState({ pageIndex: index, readOnly: false })}
+                                            style={styles.overviewRow}>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
+                                        </TouchableOpacity>
+                                    )
+
+                                //Empty fields
+                                else return null
+                            })
+
+                        })
+                        }
+                    </View>
+                </ScrollView>
+
+                {this.isEdit && readOnly && this.renderBottomCenterButton("Générer une fiche EEB", this.toggleModal)}
+
+            </View>
+        )
+    }
+
+    async savePdfBase64(pdfBase64) {
+        const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
+        saveFile(pdfBase64, pdfName, 'base64')
+            .then((destPath) => {
+                this.props.navigation.state.params.onGoBack({
+                    pdfBase64Path: destPath,
+                    pdfName,
+                    DocumentId: this.DocumentId
+                })
+                this.props.navigation.pop(this.popCount)
+            })
+            .catch((e) => {
+                Alert.alert('', e.message)
+                return
+            })
+    }
+
     render() {
-        const { showWelcomeMessage, showSuccessMessage, isPdfModalVisible, pdfBase64, loading } = this.state
+        const { showWelcomeMessage, showSuccessMessage, isPdfModalVisible, pdfBase64, submitted, readOnly, loading, initialLoading, docNotFound, toastMessage, toastType } = this.state
 
         if (pdfBase64)
             var source = { uri: `data:application/pdf;base64,${pdfBase64}` }
 
+        if (docNotFound)
+            return (
+                <View style={styles.mainContainer}>
+                    <Appbar close title titleText={this.title} />
+                    <EmptyList
+                        icon={faTimes}
+                        header='Simulation introuvable'
+                        description="La simulation est introuvable dans la base de données. Il se peut qu'elle ait été supprimé."
+                        offLine={!this.props.network.isConnected}
+                    />
+                </View>
+            )
+
         return (
             <View style={styles.mainContainer}>
-                <Appbar appBarColor={"#003250"} leftIconColor={theme.colors.white} close title titleText="Etude et Evaluation des besoins" />
+                <Appbar
+                    appBarColor={"#003250"}
+                    iconsColor={theme.colors.white}
+                    close
+                    title
+                    check={!readOnly}
+                    handleSubmit={this.handleSubmit}
+                    edit={this.isEdit && readOnly}
+                    handleEdit={() => this.setState({ submitted: false, readOnly: false })}
+                    titleText="Etude et Evaluation des besoins"
+                    customBackHandler={this.handleBackButtonClick}
+                />
 
-                {showWelcomeMessage ?
-                    this.welcomeMessage()
+                {initialLoading ?
+                    <Loading />
                     :
-                    showSuccessMessage ?
-                        this.successMessage()
+                    this.isEdit && readOnly ?
+                        this.renderOverview()
                         :
-                        <View style={styles.container}>
-                            <View style={styles.header}>
-                                {this.renderSteps()}
-                                {this.renderProgression()}
+                        showWelcomeMessage ?
+                            this.welcomeMessage()
+                            :
+                            <View style={styles.container}>
+
+                                {!showSuccessMessage &&
+                                    <View style={styles.header}>
+                                        {this.renderSteps()}
+                                        {this.renderProgression()}
+                                    </View>
+                                }
+
+                                {!showSuccessMessage && this.renderSeparator()}
+
+                                {showSuccessMessage ?
+                                    this.renderForm()
+                                    :
+                                    <View style={styles.body}>
+                                        {this.renderTitle()}
+                                        {this.renderForm()}
+                                    </View>
+                                }
+
+                                {!submitted && this.renderButtons()}
                             </View>
-
-                            {this.renderSeparator()}
-
-                            <View style={styles.body}>
-                                {this.renderTitle()}
-                                {this.renderForm()}
-                            </View>
-
-                            {this.renderButtons()}
-                        </View>
                 }
+
+                <Toast
+                    duration={3500}
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })}
+                    containerStyle={{ bottom: constants.ScreenHeight * 0.1 }}
+                />
 
                 <Modal
                     isVisible={isPdfModalVisible}
@@ -804,6 +1291,7 @@ class CreateEEB extends Component {
                                 <Pdf source={source} style={modalStyles.pdf} />
                             </View>
                         }
+                        {this.renderBottomCenterButton("Valider la fiche EEB", () => this.savePdfBase64(pdfBase64))}
                     </View>
                 </Modal>
 
@@ -861,13 +1349,59 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         paddingHorizontal: theme.padding
     },
+    stepsContainer: {
+        flexDirection: "row",
+        alignItems: 'center',
+        justifyContent: "space-between",
+        backgroundColor: "#003250"
+    },
     buttonsContainer: {
         paddingHorizontal: theme.padding,
-        backgroundColor: theme.colors.white,
+        backgroundColor: theme.colors.background,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-
+    bottomCenterButton: {
+        position: "absolute",
+        bottom: 0,
+        alignSelf: "center",
+        width: constants.ScreenWidth - theme.padding * 2,
+        backgroundColor: theme.colors.primary
+    },
+    sucessMessageContent: {
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: theme.padding * 2,
+        backgroundColor: "#003250",
+        borderBottomWidth: 2,
+        borderBottomColor: theme.colors.primary
+    },
+    colorCatCircle: {
+        height: 18,
+        width: 18,
+        borderRadius: 9,
+        backgroundColor: 'green',
+        marginTop: 6
+    },
+    successMessageTitle: {
+        color: theme.colors.white,
+        textAlign: "center",
+        letterSpacing: 1,
+        marginLeft: 8
+    },
+    overviewRow: {
+        flexDirection: "row",
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_light,
+        marginHorizontal: theme.padding,
+    },
+    overviewText: {
+        flex: 0.5,
+        paddingHorizontal: theme.padding / 2,
+        paddingRight: theme.padding * 2,
+        paddingVertical: theme.padding / 2,
+    },
 
     modal: {
         justifyContent: 'flex-end',
@@ -928,6 +1462,50 @@ const modalStyles = StyleSheet.create({
     },
 })
 
+const itemStyles = StyleSheet.create({
+    container: {
+        flexDirection: 'row',
+        width: constants.ScreenWidth,
+    },
+    trackingRow: {
+        flex: 0.5,
+        flexDirection: 'row'
+    },
+    trackingLineRight: {
+        borderRightWidth: 1
+    },
+    trackingLineLeft: {
+        borderLeftWidth: 1
+    },
+    trackingCircle: {
+        position: 'absolute',
+        width: 16,
+        height: 16,
+        borderRadius: 8,
+    },
+    iconContainer: {
+        flex: 0.25,
+        justifyContent: 'center',
+        alignItems: 'center',
+        //backgroundColor: 'yellow'
+    },
+    iconBackground: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: constants.ScreenWidth * 0.085,
+        width: constants.ScreenWidth * 0.17,
+        height: constants.ScreenWidth * 0.17,
+        //padding: constants.ScreenWidth * 0.05
+    },
+
+    textContainer: {
+        flex: 0.6,
+        justifyContent: 'center',
+        paddingLeft: 15,
+        paddingRight: 10,
+        // backgroundColor: 'green'
+    },
+});
 
 
 
@@ -943,3 +1521,20 @@ const modalStyles = StyleSheet.create({
 
 
 
+
+
+
+        //DONE
+        //Submit color, estimation & products
+        //Algo: products not showing all
+        //Scrollview on recap simulation
+        //"Générer une fiche eeb" button is showed even after pressing faPen
+        //message: Enregistré avec succés
+        // Save draft (check icon when this.isEdit === false)
+        // Tag drafts
+        // Navigate to pageindex onPress field recap
+        // Cancel attachment removes reference
+
+        //TO FIX
+        //Soumettre: crash when editing existing field (try speed)
+        //--> Check screenshot of error

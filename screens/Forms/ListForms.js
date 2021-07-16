@@ -24,6 +24,7 @@ class ListForms extends React.Component {
     constructor(props) {
         super(props)
         this.renderItem = this.renderItem.bind(this)
+        this.onPressItem = this.onPressItem.bind(this)
         this.fetchDocs = fetchDocs.bind(this)
 
         this.titleText = this.props.navigation.getParam('titleText', 'Simulations')
@@ -48,7 +49,7 @@ class ListForms extends React.Component {
         return (
             <SimulationItem
                 simulation={item}
-                onPress={this.onPressItem.bind(this)} />
+                onPress={() => this.onPressItem(item)} />
         )
     }
 
@@ -73,7 +74,7 @@ class ListForms extends React.Component {
     render() {
         const { index, searchInput, showInput } = this.state
         const { isConnected } = this.props.network
-        const query = this.project ? db.collection('Eeb').where('project.id', '==', this.project.id) : db.collection('Eeb')
+        const query = this.project ? db.collection('Eeb').where('project.id', '==', this.project.id) : db.collection('Eeb').orderBy('createdAt', 'desc')
         const emptyListDesc = this.isRoot ? 'Appuyez sur le boutton "+" pour faire une simulation.' : "Veuillez créer une fiche EEB à partir d'une nouvelle simulation."
 
         return (
