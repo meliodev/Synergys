@@ -533,7 +533,17 @@ export const ficheEEBModel = [
                 label: "Isolation des combles perdus",
                 type: "options",
                 items: [
-                    { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -318, dy: - 209, pageIndex: 0 }, rollBack: { fields: [{ id: "lostAticsIsolationMaterial", type: "string" }, { id: "lostAticsIsolationAge", type: "string" }, { id: "lostAticsIsolationThickness", type: "string" }, { id: "lostAticsSurface", type: "string" }] } },
+                    {
+                        label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -318, dy: - 209, pageIndex: 0 },
+                        rollBack: {
+                            fields: [
+                                { id: "lostAticsIsolationMaterial", type: "array" },
+                                { id: "lostAticsIsolationAge", type: "string" },
+                                { id: "lostAticsIsolationThickness", type: "string" },
+                                { id: "lostAticsSurface", type: "string" }
+                            ]
+                        }
+                    },
                     { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { dx: -396, dy: - 209, pageIndex: 0 } },
                 ],
                 errorId: "lostAticsIsolationError",
