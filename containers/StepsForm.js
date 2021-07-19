@@ -1,4 +1,3 @@
-import { faVials } from '@fortawesome/pro-duotone-svg-icons';
 import { faBuilding, faCheck, faHouse, faTimes, faUser } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Image, FlatList, BackHandler, TouchableOpacity } from 'react-native';
@@ -12,95 +11,26 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { AddressInput, Appbar, Button, CustomIcon, EmptyList, LoadDialog, Loading, Picker, TextInput, Toast } from '../../components';
-import NumberInput from '../../components/NumberInput';
-import SquareOption from '../../components/SquareOption';
-import { constants } from '../../core/constants';
+import { AddressInput, Appbar, Button, CustomIcon, EmptyList, LoadDialog, Loading, Picker, TextInput, Toast } from '../components';
+import NumberInput from '../components/NumberInput';
+import SquareOption from '../components/SquareOption';
+import { constants } from '../core/constants';
 
-import * as theme from '../../core/theme'
-import { ficheEEBModel as pages } from '../../core/ficheEEBModel'
-import { nameValidator, positiveNumberValidator, emailValidator, generateId, generateFichEEB, chunk, formatDocument, myAlert, saveFile } from '../../core/utils';
-import { db } from '../../firebase';
-import ModalHeader from '../../components/ModalHeader';
+import * as theme from '../core/theme'
+import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile } from '../core/utils';
+import { db } from '../firebase';
+import ModalHeader from '../components/ModalHeader';
 import { ScrollView } from 'react-native';
-import { ficheEEBBase64 } from '../../core/files';
-import { setStatusBarColor } from '../../core/redux';
+import { ficheEEBBase64 } from '../core/files';
+import { setStatusBarColor } from '../core/redux';
 import TextInputMask from 'react-native-text-input-mask';
-import { fetchDocument } from '../../api/firestore-api';
+import { fetchDocument } from '../api/firestore-api';
 import StepIndicator from 'react-native-step-indicator';
 import { SafeAreaView } from 'react-native';
 import { Alert } from 'react-native';
 import { read } from 'react-native-fs';
 
-const properties = [
-    "estimation",
-    "colorCat",
-    "products",
-    "nameSir",
-    "nameMiss",
-    "proSituationSir",
-    "ageSir",
-    "proSituationMiss",
-    "ageMiss",
-    "familySituation",
-    "houseOwnership",
-    "yearsHousing",
-    "taxIncome",
-    "familyMembersCount",
-    "childrenCount",
-    "aidAndSub",
-    "aidAndSubWorksType",
-    "aidAndSubWorksCost",
-    "housingType",
-    "landSurface",
-    "livingSurface",
-    "heatedSurface",
-    "yearHomeConstruction",
-    "roofType",
-    "cadastralRef",
-    "livingLevelsCount",
-    "roomsCount",
-    "ceilingHeight",
-    "slopeOrientation",
-    "slopeSupport",
-    "basementType",
-    "wallMaterial",
-    "wallThickness",
-    "internalWallsIsolation",
-    "externalWallsIsolation",
-    "floorIsolation",
-    "lostAticsIsolation",
-    "lostAticsIsolationMaterial",
-    "lostAticsIsolationAge",
-    "lostAticsIsolationThickness",
-    "lostAticsSurface",
-    "windowType",
-    "glazingType",
-    "hotWaterProduction",
-    "yearInstallationHotWater",
-    "heaters",
-    "transmittersTypes",
-    "yearInstallationHeaters",
-    "idealTemperature",
-    "isMaintenanceContract",
-    "isElectricityProduction",
-    "elecProdType",
-    "elecProdInstallYear",
-    "energyUsage",
-    "yearlyElecCost",
-    "roofLength",
-    "roofWidth",
-    "roofTilt",
-    "addressNum",
-    "addressStreet",
-    "addressCode",
-    "addressCity",
-    "phone",
-    "disablePhoneContact",
-    "email",
-]
-
-class CreateEEB extends Component {
+class StepsForm extends Component {
     constructor(props) {
         super(props)
 
@@ -112,8 +42,7 @@ class CreateEEB extends Component {
         this.myAlert = myAlert.bind(this)
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
-        this.SimulationId = this.props.navigation.getParam('SimulationId', '')
-        this.isEdit = this.SimulationId !== ""
+        this.isEdit = this.props.DocId !== ""
 
         this.project = this.props.navigation.getParam('project', '')
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
@@ -125,7 +54,7 @@ class CreateEEB extends Component {
             pagesDone: [],
             pageIndex: 0,
             stepIndex: 0,
-            progress: 0.5,
+            progress: 0,
             isPdfModalVisible: false,
             pdfBase64: "",
             loading: false,
@@ -135,75 +64,7 @@ class CreateEEB extends Component {
             submitted: false,
             readOnly: this.isEdit,
             initialLoading: true,
-
-            //results
-            products: [],
-            colorCat: "",
-            estimation: "",
-
-            //Fields
-            nameSir: "",
-            nameMiss: "",
-            proSituationSir: "",
-            ageSir: "",
-            proSituationMiss: "",
-            ageMiss: "",
-            familySituation: "",
-            houseOwnership: "",
-            yearsHousing: "",
-            taxIncome: "",
-            familyMembersCount: "",
-            childrenCount: "",
-            aidAndSub: "",
-            aidAndSubWorksType: "",
-            aidAndSubWorksCost: "",
-            housingType: "",
-            landSurface: "",
-            livingSurface: "",
-            heatedSurface: "",
-            yearHomeConstruction: "",
-            roofType: "",
-            cadastralRef: "",
-            livingLevelsCount: "",
-            roomsCount: "",
-            ceilingHeight: "",
-            slopeOrientation: "",
-            slopeSupport: "",
-            basementType: "",
-            wallMaterial: "",
-            wallThickness: "",
-            internalWallsIsolation: "",
-            externalWallsIsolation: "",
-            floorIsolation: "",
-            lostAticsIsolation: "",
-            lostAticsIsolationMaterial: [],
-            lostAticsIsolationAge: "",
-            lostAticsIsolationThickness: "",
-            lostAticsSurface: "",
-            windowType: "",
-            glazingType: "",
-            hotWaterProduction: [],
-            yearInstallationHotWater: "",
-            heaters: "",
-            transmittersTypes: [],
-            yearInstallationHeaters: "",
-            idealTemperature: "",
-            isMaintenanceContract: "",
-            isElectricityProduction: "",
-            elecProdType: "",
-            elecProdInstallYear: "",
-            energyUsage: "",
-            yearlyElecCost: "",
-            roofLength: "",
-            roofWidth: "",
-            roofTilt: "",
-            addressNum: "",
-            addressStreet: "",
-            addressCode: "",
-            addressCity: "",
-            phone: "",
-            disablePhoneContact: undefined,
-            email: "",
+            ...this.props.initialState
         }
     }
 
@@ -216,76 +77,26 @@ class CreateEEB extends Component {
     }
 
     async initEditMode() {
-        let simulation = await fetchDocument('Eeb', this.SimulationId)
-        simulation = this.setSimulation(simulation)
-        if (!simulation) return
-        const pdfBase64 = await generateFichEEB(simulation)
+        let document = await fetchDocument(this.props.collection, this.props.DocId)
+        document = this.setDocument(document)
+        if (!document) return
+        const pdfBase64 = await this.props.generatePdf(document)
         this.setState({ pdfBase64 })
     }
 
-    setSimulation(simulation) {
-        if (!simulation)
+    setDocument(document) {
+        if (!document)
             this.setState({ docNotFound: true })
         else {
-            simulation = formatDocument(simulation, properties)
-            this.setState(simulation)
+            document = formatDocument(document, this.props.stateProperties)
+            this.setState(document)
         }
-        return simulation
-    }
-
-    //##Welcome 
-    welcomeMessage() {
-        const title = "SIMULATION EN LIGNE"
-        const message = "Bienvenue sur l’outil de simulation en ligne et de dépôt de dossier d’aide. Les informations que vous renseignez seront utilisées uniquement pour calculer vos montants d’aides et les équipements préconisés. En fin de formulaire, vous aurez la possibilité de transformer votre simulation en dépôt de dossier en ligne. À tout moment vous pouvez être rappelé par un conseiller pour être accompagné dans votre démarche."
-        const instructions = [
-            "Renseigner vos informations et découvrez votre montant d’aides et les produits que nous vous recommandons",
-            "Déposer votre dossier d’aide directement en ligne !",
-            "Suivez l’avancement de vos demandes"
-        ]
-        return (
-            <View style={styles.welcomeContainer}>
-
-                <View style={styles.welcomeHeader}>
-                    <CustomIcon
-                        icon={faVials}
-                        style={{ alignSelf: "center" }}
-                        size={65}
-                        color={theme.colors.white}
-                        secondaryColor={theme.colors.primary}
-                    />
-                    <Text style={[theme.customFontMSmedium.h3, styles.welcomeTitle]}>
-                        {title}
-                    </Text>
-                </View>
-
-                <View style={styles.welcomeInstructionsContainer}>
-                    <Text style={[theme.customFontMSregular.body, { opacity: 0.8 }]}>
-                        {message}
-                    </Text>
-                    <View style={styles.welcomeSeparator} />
-                    {
-                        instructions.map((instruction, index) => {
-                            const count = index + 1
-                            return (
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={{ color: theme.colors.primary }}>{count}. </Text>
-                                    <Text style={[theme.customFontMSregular.caption, { marginBottom: 12 }]}>
-                                        {instruction}
-                                    </Text>
-                                </View>
-                            )
-                        })
-                    }
-                </View>
-
-                {this.renderBottomCenterButton("Commencer", () => this.setState({ showWelcomeMessage: false }))}
-            </View>
-        )
+        return document
     }
 
     //##Steps
-    renderSteps() {
-        const steps = ["Votre Foyer", "Votre Habitation", "Votre Bilan"]
+    renderSteps(pages, steps) {
+
         return (
             <View style={styles.stepsContainer}>
                 {steps.map((step, index) => {
@@ -327,7 +138,7 @@ class CreateEEB extends Component {
         )
     }
 
-    renderProgression() {
+    renderProgression(pages) {
         const { pagesDone } = this.state
         const progress = Math.round((pagesDone.length / (pages.length - 1)) * 100)
 
@@ -346,7 +157,7 @@ class CreateEEB extends Component {
     }
 
     //##Form
-    renderTitle() {
+    renderTitle(pages) {
         const { pageIndex } = this.state
         const { title } = pages[pageIndex]
         return (
@@ -364,7 +175,7 @@ class CreateEEB extends Component {
         )
     }
 
-    renderForm() {
+    renderForm(pages) {
         const { pageIndex } = this.state
 
         if (pages[pageIndex].id === "submit")
@@ -372,12 +183,12 @@ class CreateEEB extends Component {
 
         else return (
             <ScrollView contentContainerStyle={styles.formContainer}>
-                {this.renderFields(pageIndex)}
+                {this.renderFields(pages, pageIndex)}
             </ScrollView>
         )
     }
 
-    renderFields(pageIndex) {
+    renderFields(pages, pageIndex) {
         const { id, layout, fields, items } = pages[pageIndex]
 
         const fieldsComponents = fields.map((field) => {
@@ -613,7 +424,7 @@ class CreateEEB extends Component {
         return fieldsComponents
     }
 
-    renderButtons() {
+    renderButtons(pages) {
         const { pageIndex } = this.state
         const isSubmit = pages[pageIndex].id === 'submit'
         const isLastFormPage = pageIndex === pages.length - 2
@@ -647,6 +458,7 @@ class CreateEEB extends Component {
     //##Handlers
     goNext() {
         const { pageIndex, pagesDone, stepIndex } = this.state
+        const { pages } = this.props
 
         //Verify fields
         const isValid = this.verifyFields(pageIndex)
@@ -680,6 +492,7 @@ class CreateEEB extends Component {
 
     goBack() {
         let { pageIndex, pagesDone, stepIndex } = this.state
+        const { pages } = this.props
 
         if (pageIndex === pages.length - 1)
             this.setState({ showSuccessMessage: false })
@@ -696,6 +509,7 @@ class CreateEEB extends Component {
     }
 
     verifyFields(pageIndex) {
+        const { pages } = this.props
         const { fields } = pages[pageIndex]
 
         let error = ""
@@ -751,7 +565,7 @@ class CreateEEB extends Component {
     removeErrors() {
         const { pageIndex, pagesDone, stepIndex } = this.state
 
-        for (const field of pages[pageIndex].fields) {
+        for (const field of this.props.pages[pageIndex].fields) {
             let errorUpdate = {}
             if (field.errorId) {
                 errorUpdate[field.errorId] = ""
@@ -773,12 +587,13 @@ class CreateEEB extends Component {
             }
         }
 
-        const SimulationId = this.isEdit ? this.SimulationId : generateId('GS-EEB-')
+        const DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
         let form = this.unformatSimulation()
         form = this.addFormLogs(form)
-        db.collection('Eeb').doc(SimulationId).set(form)
+        db.collection('Eeb').doc(DocId).set(form)
+
         this.isEdit = true
-        this.SimulationId = SimulationId
+        this.DocId = DocId
         this.setState({
             pageIndex: 0,
             pagesDone: [],
@@ -797,7 +612,7 @@ class CreateEEB extends Component {
             form.createdBy = this.props.currentUser
 
             //Add draft tag
-            if (this.state.pageIndex < pages.length - 1)
+            if (this.state.pageIndex < this.props.pages.length - 1)
                 form.isDraft = true
         }
 
@@ -844,7 +659,7 @@ class CreateEEB extends Component {
         this.setState({ loading: true })
 
         const form = this.unformatSimulation()
-        const pdfBase64 = await generateFichEEB(form)
+        const pdfBase64 = await this.props.generatePdf(form)
         this.setState({ pdfBase64 })
 
         if (calculEstimation) {
@@ -1031,7 +846,7 @@ class CreateEEB extends Component {
                     <View style={{ flex: 1, padding: theme.padding }}>
                         <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message2}</Text>
                         {this.renderTrackingSteps()}
-                        <Image source={require('../../assets/images/maprimerenove.jpg')} style={{ width: constants.ScreenWidth - theme.padding * 2, height: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }} />
+                        <Image source={require('../assets/images/maprimerenove.jpg')} style={{ width: constants.ScreenWidth - theme.padding * 2, height: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }} />
                     </View>
                 </ScrollView>
 
@@ -1069,19 +884,19 @@ class CreateEEB extends Component {
     getImage(name) {
         switch (name) {
             case "Pac air air (climatisation)":
-                return require("../../assets/icons/pacAirAir.png")
+                return require("../assets/icons/pacAirAir.png")
                 break;
             case "PAC AIR EAU":
-                return require("../../assets/icons/pacAirEau.png")
+                return require("../assets/icons/pacAirEau.png")
                 break;
             case "Ballon thermodynamique":
-                return require("../../assets/icons/ballonThermo.png")
+                return require("../assets/icons/ballonThermo.png")
                 break;
             case "Isolation des combles":
-                return require("../../assets/icons/isoCombles.png")
+                return require("../assets/icons/isoCombles.png")
                 break;
             default:
-                return require("../../assets/icons/pacAirAir.png")
+                return require("../assets/icons/pacAirAir.png")
                 break;
         }
     }
@@ -1113,6 +928,7 @@ class CreateEEB extends Component {
     renderOverview() {
         const form = this.unformatSimulation()
         const { readOnly } = this.state
+        const { pages } = this.props
         const { colorCat, estimation } = form
         const products = form.products.join(', ')
 
@@ -1233,6 +1049,7 @@ class CreateEEB extends Component {
 
     renderContent() {
         const { initialLoading, readOnly, showWelcomeMessage, showSuccessMessage, submitted } = this.state
+        const { pages, steps } = this.props
 
         if (initialLoading)
             return <Loading />
@@ -1240,24 +1057,26 @@ class CreateEEB extends Component {
         else if (this.isEdit && readOnly)
             return this.renderOverview()
 
-        else if (showWelcomeMessage)
-            return this.welcomeMessage()
+        else if (showWelcomeMessage && this.props.welcomeMessage) {
+            const callBack = () => this.setState({ showWelcomeMessage: false })
+            return this.props.welcomeMessage(callBack)
+        }
 
         else return (
             <View style={styles.container}>
                 {!showSuccessMessage &&
                     <View style={styles.header}>
-                        {this.renderSteps()}
-                        {this.renderProgression()}
+                        {this.renderSteps(pages, steps)}
+                        {this.renderProgression(pages)}
                     </View>
                 }
 
                 <View style={styles.body}>
-                    {!showSuccessMessage && this.renderTitle()}
-                    {this.renderForm()}
+                    {!showSuccessMessage && this.renderTitle(pages)}
+                    {this.renderForm(pages)}
                 </View>
 
-                {!submitted && this.renderButtons()}
+                {!submitted && this.renderButtons(pages)}
             </View>
         )
     }
@@ -1362,7 +1181,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(CreateEEB)
+export default connect(mapStateToProps)(StepsForm)
 
 const styles = StyleSheet.create({
     mainContainer: {
@@ -1370,35 +1189,6 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-    },
-    welcomeContainer: {
-        flex: 1,
-        backgroundColor: theme.colors.white,
-        justifyContent: "center"
-    },
-    welcomeHeader: {
-        justifyContent: "center",
-        paddingTop: theme.padding * 3,
-        backgroundColor: "#003250",
-        borderBottomWidth: 2,
-        borderBottomColor: theme.colors.primary
-    },
-    welcomeTitle: {
-        color: theme.colors.white,
-        textAlign: "center",
-        letterSpacing: 1,
-        marginBottom: 48,
-        marginTop: 16
-    },
-    welcomeInstructionsContainer: {
-        flex: 1,
-        paddingHorizontal: theme.padding,
-        paddingVertical: theme.padding * 3
-    },
-    welcomeSeparator: {
-        borderColor: theme.colors.gray_light,
-        borderWidth: StyleSheet.hairlineWidth,
-        marginVertical: 24
     },
     formContainer: {
         flexGrow: 1,
