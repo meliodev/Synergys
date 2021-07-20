@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, roles } from './constants'
-import { ficheEEBModel as formPages } from "./ficheEEBModel";
+import { ficheEEBModel as formPages } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -508,7 +508,7 @@ export const chunk = (str, n) => {
   return ret
 }
 
-export const generateFichEEB = async (formInputs) => {
+export const generateFicheEEB = async (formInputs) => {
   try {
     const pdfDoc = await PDFDocument.load(ficheEEBBase64)
     const pages = pdfDoc.getPages()
@@ -666,6 +666,10 @@ export const generateFichEEB = async (formInputs) => {
     console.log(e)
     displayError({ message: errorMessages.pdfGen })
   }
+}
+
+export const generatePvReception = async (formInputs) => {
+  console.log('...')
 }
 
 //##IMAGE PICKER

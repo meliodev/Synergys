@@ -255,15 +255,15 @@ export const ficheEEBModel = [
         id: "surfaces",
         title: "HABITATION",
         fields: [
-                    {
-                        id: "landSurface",
-                        type: "textInput",
-                        isNumeric: true,
-                        label: "Surface du terrain en m²",
-                        errorId: "landSurfaceError",
-                        mendatory: true,
-                        pdfConfig: { dx: -490, dy: - 615, pageIndex: 3 }
-                    },
+            {
+                id: "landSurface",
+                type: "textInput",
+                isNumeric: true,
+                label: "Surface du terrain en m²",
+                errorId: "landSurfaceError",
+                mendatory: true,
+                pdfConfig: { dx: -490, dy: - 615, pageIndex: 3 }
+            },
             {
                 id: "livingSurface",
                 type: "textInput",
@@ -949,6 +949,131 @@ export const ficheEEBModel = [
             },
         ],
         isLast: true
+    },
+    {
+        id: "submit",
+        fields: []
+    }
+]
+
+export const PvReceptionModel = [
+    {//0
+        id: "projectOwner",
+        title: "",
+        fields: [
+            {
+                id: "projectOwner",
+                type: "textInput",
+                label: "Nom et prénom du maître d'ouvrage",
+                errorId: "projectOwnerError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+        stepIndex: 0,
+    },
+    {//1
+        id: "orderDate",
+        title: "",
+        fields: [
+            {
+                id: "orderDate",
+                type: "datePicker",
+                label: "Commande en date du :",
+                errorId: "orderDateError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//2
+        id: "acceptWorksReceptionDate",
+        title: "",
+        fields: [
+            {
+                id: "acceptWorksReceptionDate",
+                type: "datePicker",
+                label: "Accepter la réception des travaux sans réserves à effet du:",
+                errorId: "acceptWorksReceptionDateError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//3
+        id: "acceptReservesReceptionDate",
+        title: "",
+        fields: [
+            {
+                id: "acceptReservesReceptionDate",
+                type: "datePicker",
+                label: "Accepter la réception assortie de réserves à effet du:",
+                errorId: "acceptReservesReceptionDateError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//4
+        id: "reservesNature",
+        title: "",
+        fields: [
+            {
+                id: "reservesNature",
+                type: "textInput",
+                label: "Nature des réserves",
+                errorId: "reservesNatureError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//5
+        id: "worksToExecute",
+        title: "",
+        fields: [
+            {
+                id: "worksToExecute",
+                type: "textInput",
+                label: "Travaux à exécuter",
+                errorId: "worksToExecuteError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//6
+        id: "timeLimitFromToday",
+        title: "",
+        fields: [
+            {
+                id: "timeLimitFromToday",
+                type: "textInput",
+                label: "Délai imparti à compter de ce jour",
+                errorId: "timeLimitFromTodayError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//6
+        id: "madeIn",
+        title: "",
+        fields: [
+            {
+                id: "madeIn",
+                type: "textInput",
+                label: "Fait à:",
+                errorId: "madeInError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
+    },
+    {//7
+        id: "doneOn",
+        title: "",
+        fields: [
+            {
+                id: "doneOn",
+                type: "datePicker",
+                label: "Fait le:",
+                errorId: "doneOnError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 }
+            },
+        ],
     },
     {
         id: "submit",

@@ -61,6 +61,11 @@ const genFicheEEBSources = [
     { label: 'Une nouvelle simulation', value: 'newSimulation', icon: faFilePlus },
 ]
 
+const genPV = [
+    { label: 'Un formulaire existant', value: 'oldForm', icon: faFileSearch },
+    { label: 'Une nouveau formulaire', value: 'newForm', icon: faFilePlus },
+]
+
 const properties = ["project", "name", "type", "state", "attachment", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
 
 class UploadDocument extends Component {
@@ -112,6 +117,7 @@ class UploadDocument extends Component {
         this.imageSources = imageSources
         this.genOrderSources = genOrderSources
         this.genFicheEEBSources = genFicheEEBSources
+        this.genPV = genPV
 
         const defaultState = this.setDefaultState()
 
@@ -388,7 +394,8 @@ class UploadDocument extends Component {
         else { //this.isEdit || !this.isEdit && this.documentType
             let modalContent = ''
             const { type } = this.state
-            let isGenerable = type === 'Devis' || type === 'Facture' || type === "Fiche EEB"
+            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception']
+            let isGenerable = generableTypes.includes(type)
             if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
             this.setState({ modalContent, showModal: true })
@@ -502,6 +509,14 @@ class UploadDocument extends Component {
                 elements: this.genFicheEEBSources,
             }
         }
+
+        else if (modalContent === 'genPV') {
+            return {
+                title: `Générer un PV récéption à partir de:`,
+                columns: 2,
+                elements: this.genPV,
+            }
+        }
     }
 
     toggleModal(reset) {
@@ -529,7 +544,7 @@ class UploadDocument extends Component {
         else if (modalContent === 'imageSources')
             await this.configImageSources(index)
 
-        else if (modalContent === 'genOrderSources' || modalContent === 'genFicheEEBSources')
+        else if (modalContent === 'genOrderSources' || modalContent === 'genFicheEEBSources' || modalContent === 'genPV')
             this.startGenPdf(index)
 
         this.setState({ modalLoading: false })
@@ -539,7 +554,8 @@ class UploadDocument extends Component {
     configDocTypes(index) {
         const type = this.types[index].value
         this.setState({ type })
-        const isGenerable = type === 'Devis' || type === 'Facture' || type === "Fiche EEB"
+        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception']
+        let isGenerable = generableTypes.includes(type)
         if (isGenerable) this.setState({ modalContent: 'docSources' })
         else this.setState({ modalContent: 'imageSources' })
     }
@@ -556,6 +572,8 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
+            if (type === 'PV réception')
+                this.setState({ modalContent: 'genPV' })
             else if (type === 'Devis')
                 this.startGenPdf(1)
         }
@@ -619,6 +637,7 @@ class UploadDocument extends Component {
 
     //3.2 Generation
     startGenPdf(index) {
+
         const { type, project } = this.state
         this.toggleModal()
 
@@ -642,6 +661,14 @@ class UploadDocument extends Component {
             var titleText = "Choix de la simulation"
             var listScreen = "ListForms"
             var creationScreen = "CreateEEB"
+            var popCount = index === 0 ? 2 : 1
+        }
+
+        else if (type === "PV réception") {
+            console.log('5555555555555555555555555555555555555555')
+            var titleText = "Choix du formulaire"
+            var listScreen = "ListForms"
+            var creationScreen = "CreatePvReception"
             var popCount = index === 0 ? 2 : 1
         }
 

@@ -65,7 +65,7 @@ import CreateOrder from '../screens/Orders/CreateOrder'
 //Forms
 import ListForms from '../screens/Forms/ListForms'
 import CreateEEB from '../screens/Forms/CreateEEB'
-import EditEEB from '../screens/Forms/EditEEB'
+import CreatePvReception from '../screens/Forms/PvReception/CreatePvReception'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -231,8 +231,9 @@ const ProfileStack = createStackNavigator({
         screen: CreateEEB,
         navigationOptions: hideHeader
     },
-    EditEEB: {
-        screen: EditEEB,
+    //PV reception
+    CreatePvReception: {
+        screen: CreatePvReception,
         navigationOptions: hideHeader
     },
 })
@@ -408,8 +409,9 @@ const ClientsManagementStack = createStackNavigator({
         screen: CreateEEB,
         navigationOptions: hideHeader
     },
-    EditEEB: {
-        screen: EditEEB,
+    //PV reception
+    CreatePvReception: {
+        screen: CreatePvReception,
         navigationOptions: hideHeader
     },
 })
@@ -736,8 +738,9 @@ const ProjectsStack = createStackNavigator({
         screen: CreateEEB,
         navigationOptions: hideHeader
     },
-    EditEEB: {
-        screen: EditEEB,
+    //PV reception
+    CreatePvReception: {
+        screen: CreatePvReception,
         navigationOptions: hideHeader
     },
 })
@@ -793,8 +796,9 @@ const DocumentsStack = createStackNavigator({
         screen: CreateEEB,
         navigationOptions: hideHeader
     },
-    EditEEB: {
-        screen: EditEEB,
+    //PV reception
+    CreatePvReception: {
+        screen: CreatePvReception,
         navigationOptions: hideHeader
     },
     //Profile screens
@@ -893,10 +897,6 @@ const SimulatorStack = createStackNavigator({
     },
     CreateEEB: {
         screen: CreateEEB,
-        navigationOptions: hideHeader
-    },
-    EditEEB: {
-        screen: EditEEB,
         navigationOptions: hideHeader
     },
     Address: {

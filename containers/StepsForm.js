@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 import _ from 'lodash'
 import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
+import DatePicker from 'react-native-date-picker'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -43,6 +44,7 @@ class StepsForm extends Component {
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
         this.isEdit = this.props.DocId !== ""
+        this.DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
 
         this.project = this.props.navigation.getParam('project', '')
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
@@ -77,7 +79,7 @@ class StepsForm extends Component {
     }
 
     async initEditMode() {
-        let document = await fetchDocument(this.props.collection, this.props.DocId)
+        let document = await fetchDocument(this.props.collection, this.DocId)
         document = this.setDocument(document)
         if (!document) return
         const pdfBase64 = await this.props.generatePdf(document)
@@ -100,22 +102,22 @@ class StepsForm extends Component {
         return (
             <View style={styles.stepsContainer}>
                 {steps.map((step, index) => {
-                    return (
+                    if (step === "")
+                        return <View style={styles.stepsSeparator} />
+
+                    else return (
                         <TouchableOpacity
                             style={{ flexDirection: "row", alignItems: "center" }}
                             onPress={() => {
                                 if (!this.isEdit) return
-
                                 //Verify fields
                                 const isValid = this.verifyFields(this.state.pageIndex)
                                 if (!isValid) return
-
                                 const firstPageIndex = pages.findIndex((page) => index === page.stepIndex)
                                 this.setState({ pageIndex: firstPageIndex, stepIndex: index })
                             }}
                         >
                             {this.renderStep(step, index)}
-                            {index < steps.length - 1 && <View style={[styles.separator, styles.stepsSeparator]} />}
                         </TouchableOpacity>
                     )
                 })
@@ -388,19 +390,19 @@ class StepsForm extends Component {
                     )
                     break;
 
-                // case "address":
-                //     return (
-                //         <AddressInput
-                //             label='Adresse postale'
-                //             offLine={!this.props.network.isConnected}
-                //             onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                //             onChangeText={this.setAddress}
-                //             clearAddress={() => this.setAddress('')}
-                //             address={this.state.address}
-                //             addressError={this.state.addressError}
-                //             editable={true}
-                //         />
-                //     )
+                case "address":
+                    return (
+                        <AddressInput
+                            label='Adresse postale'
+                            offLine={!this.props.network.isConnected}
+                            onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                            onChangeText={this.setAddress}
+                            clearAddress={() => this.setAddress('')}
+                            address={this.state.address}
+                            addressError={this.state.addressError}
+                            editable={true}
+                        />
+                    )
 
                 case "checkbox":
                     return (
@@ -414,6 +416,26 @@ class StepsForm extends Component {
                         </View>
                     )
                     break;
+
+                case "datePicker":
+                    return (
+                        <View>
+                            {this.renderLabel(label)}
+                            <DatePicker
+                                date={value}
+                                onDateChange={(selectedDate) => {
+                                    let update = {}
+                                    update[id] = selectedDate
+                                    this.setState(update)
+                                }}
+                                mode='date'
+                                locale='fr'
+                                androidVariant="nativeAndroid"
+                                fadeToColor={theme.colors.primary}
+                                style={{ alignSelf: "center", marginTop: 32 }}
+                            />
+                        </View>
+                    )
             }
         })
 
@@ -458,7 +480,7 @@ class StepsForm extends Component {
     //##Handlers
     goNext() {
         const { pageIndex, pagesDone, stepIndex } = this.state
-        const { pages } = this.props
+        const { pages, collection } = this.props
 
         //Verify fields
         const isValid = this.verifyFields(pageIndex)
@@ -478,8 +500,9 @@ class StepsForm extends Component {
         //Show results
         const isLastFormPage = pageIndex === pages.length - 2
         const isSubmit = pages[pageIndex].id === 'submit'
+
         if (isLastFormPage) {
-            this.setResults(true)
+            this.setResults(collection === "Eeb")
         }
 
         else if (isSubmit) {
@@ -576,6 +599,7 @@ class StepsForm extends Component {
 
     //##Logic: Submit
     handleSubmit() {
+
         this.setState({ loading: true })
 
         //Verify onPress Check icon
@@ -587,10 +611,11 @@ class StepsForm extends Component {
             }
         }
 
-        const DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
-        let form = this.unformatSimulation()
+        const { idPattern, collection } = this.props
+        const DocId = this.isEdit ? this.DocId : generateId(idPattern)
+        let form = this.unformatDocument()
         form = this.addFormLogs(form)
-        db.collection('Eeb').doc(DocId).set(form)
+        db.collection(collection).doc(DocId).set(form)
 
         this.isEdit = true
         this.DocId = DocId
@@ -626,7 +651,7 @@ class StepsForm extends Component {
         return form
     }
 
-    unformatSimulation() {
+    unformatDocument() {
         const state = _.cloneDeep(this.state)
         let form = this.extractForm(state)
         return form
@@ -646,9 +671,6 @@ class StepsForm extends Component {
         delete state.toastType
         delete state.docNotFound
         delete state.initialLoading
-        // delete state.products
-        // delete state.colorCat
-        // delete state.estimation
         delete state.submitted
         delete state.readOnly
         return state
@@ -658,7 +680,7 @@ class StepsForm extends Component {
     async setResults(calculEstimation) {
         this.setState({ loading: true })
 
-        const form = this.unformatSimulation()
+        const form = this.unformatDocument()
         const pdfBase64 = await this.props.generatePdf(form)
         this.setState({ pdfBase64 })
 
@@ -668,14 +690,16 @@ class StepsForm extends Component {
             const estimation = this.setEstimation(products, colorCat)
 
             this.setState({
-                pageIndex: this.state.pageIndex + 1,
                 products,
                 colorCat,
                 estimation,
                 showSuccessMessage: true,
+                pageIndex: this.state.pageIndex + 1,
                 loading: false
             })
         }
+
+        else this.handleSubmit()
     }
 
     setProducts(form) {
@@ -924,96 +948,6 @@ class StepsForm extends Component {
         return true;
     }
 
-    //##Overview
-    renderOverview() {
-        const form = this.unformatSimulation()
-        const { readOnly } = this.state
-        const { pages } = this.props
-        const { colorCat, estimation } = form
-        const products = form.products.join(', ')
-
-        const summary = [
-            { title: "Couleur", value: colorCat, isColor: true },
-            { title: "Produits recommandés", value: products },
-            { title: "Estimation", value: `${estimation} €` },
-        ]
-        const showSummary = colorCat !== "" && products !== [] && estimation > 0
-
-        return (
-            <View style={{ flex: 1 }}>
-                <ScrollView contentContainerStyle={styles.overviewContainer}>
-
-                    {showSummary &&
-                        <View style={{ marginBottom: theme.padding / 2, backgroundColor: theme.colors.white }}>
-                            {summary.map((item) => {
-                                return (
-                                    <View style={styles.overviewRow}>
-                                        <Text style={[theme.customFontMSsemibold.caption, styles.overviewText, { opacity: 0.8 }]}>{item.title}</Text>
-                                        {item.isColor ?
-                                            <View style={styles.overviewText}>
-                                                <View style={{ height: 16, width: 16, borderRadius: 8, backgroundColor: item.value }} />
-                                            </View>
-                                            :
-                                            <Text style={[theme.customFontMSbold.caption, styles.overviewText]}>{item.value}</Text>
-                                        }
-                                    </View>
-                                )
-                            })}
-                        </View>
-                    }
-
-                    <View style={{ marginBottom: 16, backgroundColor: 'white' }}>
-
-                        {pages.map((page, index) => {
-
-                            return page.fields.map((field) => {
-
-                                if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
-
-                                    //String fields
-                                    if (typeof (form[field.id]) === "string") {
-                                        if (form[field.id] !== "") {
-                                            var values = form[field.id]
-                                        }
-                                    }
-
-                                    //Boolean fields
-                                    else if (typeof (form[field.id]) === 'boolean') {
-                                        var values = form[field.id] === false ? "Oui" : "Non"
-                                    }
-
-                                    //Array fields
-                                    else if (form[field.id] !== []) {
-                                        var values = ""
-                                        var values = form[field.id].join(', ')
-                                    }
-                                }
-
-                                if (values)
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => this.setState({ pageIndex: index, readOnly: false })}
-                                            style={styles.overviewRow}>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
-                                        </TouchableOpacity>
-                                    )
-
-                                //Empty fields
-                                else return null
-                            })
-
-                        })
-                        }
-                    </View>
-                </ScrollView>
-
-                {this.isEdit && readOnly && this.renderBottomCenterButton("Générer une fiche EEB", this.toggleModal)}
-
-            </View>
-        )
-    }
-
     //##Helpers
     toggleModal() {
         this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
@@ -1055,7 +989,7 @@ class StepsForm extends Component {
             return <Loading />
 
         else if (this.isEdit && readOnly)
-            return this.renderOverview()
+            return this.props.renderOverview()
 
         else if (showWelcomeMessage && this.props.welcomeMessage) {
             const callBack = () => this.setState({ showWelcomeMessage: false })
@@ -1127,7 +1061,7 @@ class StepsForm extends Component {
                     handleSubmit={this.handleSubmit}
                     edit={this.isEdit && readOnly}
                     handleEdit={() => this.setState({ submitted: false, readOnly: false })}
-                    titleText="Etude et Evaluation des besoins"
+                    titleText={this.props.titleText}
                     customBackHandler={this.handleBackButtonClick}
                 />
 
@@ -1202,17 +1136,14 @@ const styles = StyleSheet.create({
     },
     step: {
         borderWidth: 1,
+        borderColor: "#003250",
         padding: 8,
         paddingHorizontal: 16,
         borderRadius: 4,
     },
-    separator: {
-        height: StyleSheet.hairlineWidth,
-        borderWidth: 1,
-    },
     stepsSeparator: {
-        width: constants.ScreenWidth * 0.011,
-        alignSelf: 'center',
+        flex: 1,
+        borderWidth: StyleSheet.hairlineWidth,
         borderColor: theme.colors.white,
     },
     body: {
