@@ -188,7 +188,7 @@ export const processModel = {
                 ]
             },
             'housingActionFile': {
-                title: 'Dossier action logement',
+                title: 'Évaluation des besoins',
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 2,
                 actions: [

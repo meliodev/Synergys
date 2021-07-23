@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, roles } from './constants'
-import { ficheEEBModel as formPages } from "./forms";
+import { ficheEEBModel, PvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -508,13 +508,22 @@ export const chunk = (str, n) => {
   return ret
 }
 
-export const generateFicheEEB = async (formInputs) => {
+export const generatePdfForm = async (formInputs, pdfType) => {
   try {
-    const pdfDoc = await PDFDocument.load(ficheEEBBase64)
-    const pages = pdfDoc.getPages()
-    const firstPage = pages[0]
 
-    // Theme config
+    if (pdfType === "PvReception") {
+      var originalPdfBase64 = pvReceptionBase64
+      var formPages = PvReceptionModel
+    }
+    else if (pdfType === "Eeb") {
+      var originalPdfBase64 = ficheEEBBase64
+      var formPages = ficheEEBModel
+    }
+
+    const pdfDoc = await PDFDocument.load(originalPdfBase64)
+    const pages = pdfDoc.getPages()
+
+    //Theme config
     const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
     const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
     const colors = {
@@ -524,7 +533,6 @@ export const generateFicheEEB = async (formInputs) => {
       gray: rgb(0.1333, 0.1333, 0.1333)
     }
     const caption = 10
-
 
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
@@ -544,6 +552,8 @@ export const generateFicheEEB = async (formInputs) => {
                 text = text.split('@')
                 text = text.join('                                                               ')
               }
+
+              console.log('................', field.id, field.pdfConfig.pageIndex)
 
               pages[field.pdfConfig.pageIndex].drawText(text,
                 {
@@ -634,29 +644,6 @@ export const generateFicheEEB = async (formInputs) => {
       }
     }
 
-
-
-    // firstPage.drawSquare({
-    //     x: firstPage.getWidth() - 396,
-    //     y: firstPage.getHeight() - 104,
-    //     size: 7,
-    //     color: rgb(0, 0, 0),
-    // })
-
-    // firstPage.drawSquare({
-    //     x: firstPage.getWidth() - 319,
-    //     y: firstPage.getHeight() - 104,
-    //     size: 7,
-    //     color: rgb(0, 0, 0),
-    // })
-
-    // firstPage.drawSquare({
-    //     x: firstPage.getWidth() - 319,
-    //     y: firstPage.getHeight() - 117,
-    //     size: 7,
-    //     color: rgb(0, 0, 0),
-    // })
-
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
     return pdfBase64
@@ -666,10 +653,6 @@ export const generateFicheEEB = async (formInputs) => {
     console.log(e)
     displayError({ message: errorMessages.pdfGen })
   }
-}
-
-export const generatePvReception = async (formInputs) => {
-  console.log('...')
 }
 
 //##IMAGE PICKER
@@ -791,7 +774,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
 
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 import { highRoles } from './constants'
-import { ficheEEBBase64 } from './files';
+import { ficheEEBBase64, pvReceptionBase64 } from './files';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },

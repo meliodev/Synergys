@@ -7,7 +7,8 @@ import StepsForm from '../../../containers/StepsForm'
 import { CustomIcon, Button } from '../../../components/index'
 
 import { PvReceptionModel } from '../../../core/forms'
-import { generatePvReception } from '../../../core/utils'
+import { pvReceptionBase64, ficheEEBBase64 } from '../../../core/files'
+import { generatePdfForm, generatePvReception } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 
@@ -21,6 +22,13 @@ const properties = [
     "timeLimitFromToday",
     "madeIn",
     "doneOn",
+    "clientName",
+    "installationAddress",
+    "phone",
+    "commissioningDate",
+    "appreciation",
+    "appreciationDate",
+    "signatoryName",
 ]
 
 const initialState = {
@@ -33,6 +41,13 @@ const initialState = {
     timeLimitFromToday: "",
     madeIn: "",
     doneOn: new Date(),
+    clientName: "",
+    installationAddress: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+    phone: "",
+    commissioningDate: new Date(),
+    appreciation: "",
+    appreciationDate: new Date(),
+    signatoryName: "",
 }
 
 class CreateEEB extends Component {
@@ -65,7 +80,9 @@ class CreateEEB extends Component {
                 //welcomeMessage={this.welcomeMessage}
                 steps={["1", "", "2", "", "3"]}
                 pages={PvReceptionModel}
-                generatePdf={generatePvReception}
+                originalPdfBase64={pvReceptionBase64}
+                generatePdf={generatePdfForm}
+                genButtonTitle="Générer un PV réception"
                 renderOverview={this.renderOverview}
             />
         )

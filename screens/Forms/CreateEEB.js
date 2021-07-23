@@ -7,7 +7,9 @@ import StepsForm from '../../containers/StepsForm'
 import { CustomIcon, Button } from '../../components/index'
 
 import { ficheEEBModel } from '../../core/forms'
-import { generateFicheEEB } from '../../core/utils'
+import { ficheEEBBase64 } from '../../core/files'
+
+import { generatePdfForm } from '../../core/utils'
 import { constants } from '../../core/constants'
 import * as theme from '../../core/theme'
 
@@ -216,97 +218,6 @@ class CreateEEB extends Component {
         )
     }
 
-    //##Overview
-    renderOverview() {
-        const form = this.unformatDocument()
-        const { readOnly } = this.state
-        const { pages } = this.props
-        const { colorCat, estimation } = form
-        const products = form.products.join(', ')
-
-        const summary = [
-            { title: "Couleur", value: colorCat, isColor: true },
-            { title: "Produits recommandés", value: products },
-            { title: "Estimation", value: `${estimation} €` },
-        ]
-        const showSummary = colorCat !== "" && products !== [] && estimation > 0
-
-        return (
-            <View style={{ flex: 1 }}>
-                <ScrollView contentContainerStyle={styles.overviewContainer}>
-
-                    {showSummary &&
-                        <View style={{ marginBottom: theme.padding / 2, backgroundColor: theme.colors.white }}>
-                            {summary.map((item) => {
-                                return (
-                                    <View style={styles.overviewRow}>
-                                        <Text style={[theme.customFontMSsemibold.caption, styles.overviewText, { opacity: 0.8 }]}>{item.title}</Text>
-                                        {item.isColor ?
-                                            <View style={styles.overviewText}>
-                                                <View style={{ height: 16, width: 16, borderRadius: 8, backgroundColor: item.value }} />
-                                            </View>
-                                            :
-                                            <Text style={[theme.customFontMSbold.caption, styles.overviewText]}>{item.value}</Text>
-                                        }
-                                    </View>
-                                )
-                            })}
-                        </View>
-                    }
-
-                    <View style={{ marginBottom: 16, backgroundColor: 'white' }}>
-
-                        {pages.map((page, index) => {
-
-                            return page.fields.map((field) => {
-
-                                if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
-
-                                    //String fields
-                                    if (typeof (form[field.id]) === "string") {
-                                        if (form[field.id] !== "") {
-                                            var values = form[field.id]
-                                        }
-                                    }
-
-                                    //Boolean fields
-                                    else if (typeof (form[field.id]) === 'boolean') {
-                                        var values = form[field.id] === false ? "Oui" : "Non"
-                                    }
-
-                                    //Array fields
-                                    else if (form[field.id] !== []) {
-                                        var values = ""
-                                        var values = form[field.id].join(', ')
-                                    }
-                                }
-
-                                if (values)
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => this.setState({ pageIndex: index, readOnly: false })}
-                                            style={styles.overviewRow}>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
-                                        </TouchableOpacity>
-                                    )
-
-                                //Empty fields
-                                else return null
-                            })
-
-                        })
-                        }
-                    </View>
-                </ScrollView>
-
-                {this.isEdit && readOnly && this.renderBottomCenterButton("Générer une fiche EEB", this.toggleModal)}
-
-            </View>
-        )
-    }
-
-
     render() {
         return (
             <StepsForm
@@ -320,8 +231,9 @@ class CreateEEB extends Component {
                 welcomeMessage={this.welcomeMessage}
                 steps={["Votre Foyer", "", "Votre Habitation", "", "Votre Bilan"]}
                 pages={ficheEEBModel}
-                generatePdf={generateFicheEEB}
-                renderOverview = {this.props.renderOverview}
+                generatePdf={(formInputs) => generatePdfForm(formInputs, ficheEEBBase64)}
+                genButtonTitle="Générer une fiche EEB"
+                renderOverview={this.props.renderOverview}
             />
         )
     }

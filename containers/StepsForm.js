@@ -18,7 +18,7 @@ import SquareOption from '../components/SquareOption';
 import { constants } from '../core/constants';
 
 import * as theme from '../core/theme'
-import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile } from '../core/utils';
+import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile, setAddress, refreshAddress } from '../core/utils';
 import { db } from '../firebase';
 import ModalHeader from '../components/ModalHeader';
 import { ScrollView } from 'react-native';
@@ -82,7 +82,7 @@ class StepsForm extends Component {
         let document = await fetchDocument(this.props.collection, this.DocId)
         document = this.setDocument(document)
         if (!document) return
-        const pdfBase64 = await this.props.generatePdf(document)
+        const pdfBase64 = await this.props.generatePdf(document, this.props.collection)
         this.setState({ pdfBase64 })
     }
 
@@ -197,7 +197,7 @@ class StepsForm extends Component {
 
             const value = this.state[field.id]
             const error = this.state[field.errorId]
-            const { id, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, mendatory } = field
+            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, mendatory } = field
             const asterisk = mendatory ? ' *' : ''
             const label = field.label + asterisk
 
@@ -271,6 +271,8 @@ class StepsForm extends Component {
                                             update[f.id] = ""
                                         else if (f.type === "array")
                                             update[f.id] = []
+                                        else if (f.type === "date")
+                                            update[f.id] = new Date()
                                     }
                                 }
 
@@ -318,6 +320,8 @@ class StepsForm extends Component {
                                                             update[field.id] = ""
                                                         else if (field.type === "array")
                                                             update[field.id] = []
+                                                        else if (field.type === "date")
+                                                            update[field.id] = new Date()
                                                     }
                                                 }
 
@@ -393,13 +397,37 @@ class StepsForm extends Component {
                 case "address":
                     return (
                         <AddressInput
-                            label='Adresse postale'
+                            label={label}
                             offLine={!this.props.network.isConnected}
-                            onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                            onChangeText={this.setAddress}
-                            clearAddress={() => this.setAddress('')}
-                            address={this.state.address}
-                            addressError={this.state.addressError}
+                            onPress={() => this.props.navigation.navigate('Address', {
+                                onGoBack: (address) => {
+                                    let update = {}
+                                    update[id] = address
+                                    this.setState(update)
+                                }
+                            })}
+                            onChangeText={(description) => {
+                                const address = {
+                                    description,
+                                    marker: { latitude: '', longitude: '' },
+                                    place_id: ''
+                                }
+                                let update = {}
+                                update[id] = address
+                                this.setState(update)
+                            }}
+                            clearAddress={() => {
+                                const address = {
+                                    description: "",
+                                    marker: { latitude: '', longitude: '' },
+                                    place_id: ''
+                                }
+                                let update = {}
+                                update[id] = address
+                                this.setState(update)
+                            }}
+                            address={this.state[id]}
+                            addressError={this.state[errorId]}
                             editable={true}
                         />
                     )
@@ -562,6 +590,8 @@ class StepsForm extends Component {
                 if (mendatory) {
                     if (type === "number")
                         error = positiveNumberValidator(this.state[id], `"${label}"`)
+                    else if (type === "address")
+                        error = nameValidator(this.state[id].description, `"${label}"`)
                     else if (isEmail)
                         error = emailValidator(this.state[id])
                     else error = nameValidator(this.state[id], `"${label}"`)
@@ -615,8 +645,9 @@ class StepsForm extends Component {
         const DocId = this.isEdit ? this.DocId : generateId(idPattern)
         let form = this.unformatDocument()
         form = this.addFormLogs(form)
-        db.collection(collection).doc(DocId).set(form)
+      //  db.collection(collection).doc(DocId).set(form)
 
+        
         this.isEdit = true
         this.DocId = DocId
         this.setState({
@@ -681,7 +712,7 @@ class StepsForm extends Component {
         this.setState({ loading: true })
 
         const form = this.unformatDocument()
-        const pdfBase64 = await this.props.generatePdf(form)
+        const pdfBase64 = await this.props.generatePdf(form, this.props.collection)
         this.setState({ pdfBase64 })
 
         if (calculEstimation) {
@@ -980,6 +1011,99 @@ class StepsForm extends Component {
             </Button>
         )
     }
+    //##Overview
+    renderOverview() {
+        const form = this.unformatDocument()
+        const { readOnly } = this.state
+        const { pages, collection } = this.props
+
+        let showSummary = false
+        if (collection === "Eeb") {
+            const { colorCat, estimation } = form
+            const products = form.products.join(', ')
+
+            const summary = [
+                { title: "Couleur", value: colorCat, isColor: true },
+                { title: "Produits recommandés", value: products },
+                { title: "Estimation", value: `${estimation} €` },
+            ]
+            showSummary = colorCat !== "" && products !== [] && estimation > 0
+        }
+
+        return (
+            <View style={{ flex: 1 }}>
+                <ScrollView contentContainerStyle={styles.overviewContainer}>
+
+                    {showSummary &&
+                        <View style={{ marginBottom: theme.padding / 2, backgroundColor: theme.colors.white }}>
+                            {summary.map((item) => {
+                                return (
+                                    <View style={styles.overviewRow}>
+                                        <Text style={[theme.customFontMSsemibold.caption, styles.overviewText, { opacity: 0.8 }]}>{item.title}</Text>
+                                        {item.isColor ?
+                                            <View style={styles.overviewText}>
+                                                <View style={{ height: 16, width: 16, borderRadius: 8, backgroundColor: item.value }} />
+                                            </View>
+                                            :
+                                            <Text style={[theme.customFontMSbold.caption, styles.overviewText]}>{item.value}</Text>
+                                        }
+                                    </View>
+                                )
+                            })}
+                        </View>
+                    }
+
+                    <View style={{ marginBottom: 16, backgroundColor: 'white' }}>
+
+                        {pages.map((page, index) => {
+
+                            return page.fields.map((field) => {
+
+                                if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
+
+                                    //String fields
+                                    if (typeof (form[field.id]) === "string") {
+                                        if (form[field.id] !== "") {
+                                            var values = form[field.id]
+                                        }
+                                    }
+
+                                    //Boolean fields
+                                    else if (typeof (form[field.id]) === 'boolean') {
+                                        var values = form[field.id] === false ? "Oui" : "Non"
+                                    }
+
+                                    //Array fields
+                                    else if (form[field.id] !== []) {
+                                        var values = ""
+                                        var values = form[field.id].join(', ')
+                                    }
+                                }
+
+                                if (values)
+                                    return (
+                                        <TouchableOpacity
+                                            onPress={() => this.setState({ pageIndex: index, readOnly: false })}
+                                            style={styles.overviewRow}>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
+                                        </TouchableOpacity>
+                                    )
+
+                                //Empty fields
+                                else return null
+                            })
+
+                        })
+                        }
+                    </View>
+                </ScrollView>
+
+                {this.isEdit && readOnly && this.renderBottomCenterButton(this.props.genButtonTitle, this.toggleModal)}
+
+            </View>
+        )
+    }
 
     renderContent() {
         const { initialLoading, readOnly, showWelcomeMessage, showSuccessMessage, submitted } = this.state
@@ -989,7 +1113,7 @@ class StepsForm extends Component {
             return <Loading />
 
         else if (this.isEdit && readOnly)
-            return this.props.renderOverview()
+            return this.renderOverview()
 
         else if (showWelcomeMessage && this.props.welcomeMessage) {
             const callBack = () => this.setState({ showWelcomeMessage: false })
