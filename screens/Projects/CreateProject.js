@@ -657,11 +657,14 @@ class CreateProject extends Component {
 
 
     render() {
-        let { client, name, workTypes, note, address, state, step, bill, color } = this.state
-        let { createdAt, createdBy, editedAt, editedBy } = this.state
-        let { documentsList, documentTypes, taskTypes, comContact, techContact } = this.state
-        const { nameError, loading, docNotFound, toastMessage, toastType } = this.state
-        const { isBlockedUpdates } = this.state
+        let {
+            client, name, workTypes, note, address, state, step, bill, color,
+            createdAt, createdBy, editedAt, editedBy,
+            documentsList, documentTypes, taskTypes, comContact, techContact,
+            nameError, loading, docNotFound, toastMessage, toastType,
+            isBlockedUpdates
+        } = this.state
+        const { isConnected } = this.props.network
 
         //Privilleges
         let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
@@ -673,10 +676,10 @@ class CreateProject extends Component {
         const showProcessAction = this.isEdit && this.project && process
 
         const isStepTech = techSteps.includes(step)
-        let showTasksForm = name !== "" && client.id !== "" && address.description !== "" && comContact.id !== "" && (!isStepTech || isStepTech && techContact.id !== "")
+        const fields = [name, client.id, address.description, comContact.id]
+        let showTasksForm = !fields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
         showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
-        const { isConnected } = this.props.network
-
+        const showContactTechnic = isStepTech
 
         if (docNotFound)
             return (
@@ -723,6 +726,16 @@ class CreateProject extends Component {
                                     role={this.props.role}
                                 />
                             </View>
+                        }
+
+                        {this.isEdit &&
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation={this.props.navigation}
+                            />
                         }
 
                         <FormSection
@@ -795,12 +808,12 @@ class CreateProject extends Component {
                                         onPressItem={(item) => console.log(item)}
                                     />
 
-                                    <ColorPicker
+                                    {/* <ColorPicker
                                         label='Couleur du projet'
                                         selectedColor={color}
                                         updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
                                         editable={canWrite}
-                                    />
+                                    /> */}
                                 </View>
                             } />
 
@@ -852,23 +865,25 @@ class CreateProject extends Component {
                                         error={!!comContact.error}
                                         errorText={comContact.error}
                                         editable={canWrite && !this.isClient}
-                                        style={{}}
                                     />
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'ListEmployees', {
-                                            onGoBack: this.refreshTechContact,
-                                            prevScreen: 'CreateProject',
-                                            isRoot: false,
-                                            titleText: 'Choisir un poseur',
-                                            query: db.collection('Users').where('role', '==', 'Poseur').where('deleted', '==', false)
-                                        })
-                                        }
-                                        label="Contact technique"
-                                        value={techContact.fullName || ''}
-                                        error={!!techContact.error}
-                                        errorText={techContact.error}
-                                        editable={canWrite && highRoles.includes(this.props.role.id)}
-                                    />
+
+                                    {showContactTechnic &&
+                                        <ItemPicker
+                                            onPress={() => navigateToScreen(this, 'ListEmployees', {
+                                                onGoBack: this.refreshTechContact,
+                                                prevScreen: 'CreateProject',
+                                                isRoot: false,
+                                                titleText: 'Choisir un poseur',
+                                                query: db.collection('Users').where('role', '==', 'Poseur').where('deleted', '==', false)
+                                            })
+                                            }
+                                            label="Contact technique *"
+                                            value={techContact.fullName || ''}
+                                            error={!!techContact.error}
+                                            errorText={techContact.error}
+                                            editable={canWrite && highRoles.includes(this.props.role.id)}
+                                        />
+                                    }
                                 </View>
                             } />
 
@@ -951,16 +966,6 @@ class CreateProject extends Component {
                         }
 
                         {this.renderPlacePictures(canWrite, isConnected)}
-
-                        {this.isEdit &&
-                            <ActivitySection
-                                createdBy={createdBy}
-                                createdAt={createdAt}
-                                editedBy={editedBy}
-                                editedAt={editedAt}
-                                navigation={this.props.navigation}
-                            />
-                        }
                     </ScrollView>
                 }
 

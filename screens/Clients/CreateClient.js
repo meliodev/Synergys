@@ -13,11 +13,13 @@ import MyInput from "../../components/TextInput"
 import AddressInput from "../../components/AddressInput"
 import Button from "../../components/Button"
 import Toast from "../../components/Toast"
+import { CustomIcon } from "../../components";
 
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { createClient, validateClientInputs } from "../../api/firestore-api";
 import { generateId, updateField, load, navigateToScreen, setAddress } from "../../core/utils"
+import { faMagic } from "@fortawesome/pro-light-svg-icons";
 
 class CreateClient extends Component {
 
@@ -89,7 +91,7 @@ class CreateClient extends Component {
                         id: this.ClientId,
                         isPro,
                         denom: denom.value,
-                        nom: nom.value, 
+                        nom: nom.value,
                         prenom: prenom.value,
                         role: 'Client',
                         email: email.value,
@@ -211,12 +213,19 @@ class CreateClient extends Component {
                             onChangeText={text => updateField(this, password, text)}
                             error={!!password.error}
                             errorText={password.error}
-                            secureTextEntry={!password.show}
+                           // secureTextEntry={!password.show}
                             autoCapitalize="none"
-                            right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
-                                password.show = !password.show
-                                this.setState({ password })
-                            }} />}
+                            right={
+                                <TextInput.Icon
+                                    name={<CustomIcon icon={faMagic} color={theme.colors.inpuIcon} />}
+                                    color={theme.colors.secondary}
+                                    onPress={() => {
+                                        const password = { value: generateId('', 6), error: "" }
+                                        this.setState({ password })
+                                    }}
+                                />
+                            }
+                            editable= {false}
                         />
 
                         <Toast message={error} onDismiss={() => this.setState({ error: '' })} />

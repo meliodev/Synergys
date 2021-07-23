@@ -5,11 +5,11 @@ import { StyleSheet, Text } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import * as theme from '../../core/theme'
 
-export default function StepProgress({ progress, style }) {
+export default function StepProgress({ progress, style, size = 27 }) {
 
   return (
     <AnimatedCircularProgress
-      size={27}
+      size={size}
       width={2}
       fill={progress}
       tintColor={progress >= 75 ? theme.colors.primary : theme.colors.secondary}
@@ -18,24 +18,16 @@ export default function StepProgress({ progress, style }) {
       backgroundColor="#D8D8D8"
       rotation={0}>
       {(fill) => {
-      return(
-        <Text
-          style={[
-            styles.percentText,
-            { color: progress >= 75 ? theme.colors.primary : theme.colors.secondary },
-          ]}>
-          {parseInt(fill)}%
-        </Text>
-      )
+        return (
+          <Text
+            style={[
+              theme.customFontMSbold.extraSmall,
+              { color: progress >= 75 ? theme.colors.primary : theme.colors.secondary },
+            ]}>
+            {parseInt(fill)}%
+          </Text>
+        )
       }}
     </AnimatedCircularProgress>
   );
 }
-
-const styles = StyleSheet.create({
-  percentText: {
-    textAlign: 'center',
-    fontSize: 8,
-    fontWeight: 'bold',
-  },
-});

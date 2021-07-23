@@ -13,7 +13,7 @@ import PdfGen from './PdfGen'
 import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
 
-import firebase from './firebase'
+import firebase, { remoteConfig } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from './fontConfig'
 import * as theme from './core/theme'
@@ -38,6 +38,8 @@ class App extends Component {
   async componentDidMount() {
     SplashScreen.hide()
 
+    await this.initRemoteConfig()
+
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
@@ -48,6 +50,19 @@ class App extends Component {
     })
 
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
+  }
+
+  async initRemoteConfig() {
+    await remoteConfig.setDefaults({ minAppVersion: '1.2.10' })
+    const fetchedRemotely = await remoteConfig.fetchAndActivate()
+    await remoteConfig.fetch(60)
+
+    // if (fetchedRemotely) {
+    //   console.log('Configs were retrieved from the backend and activated.');
+    // }
+    // else {
+    //   console.log('No configs were fetched from the backend, and the local configs were already activated',)
+    // }
   }
 
   //Forground: messages listener

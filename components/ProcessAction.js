@@ -1,8 +1,6 @@
 
-import React, { useState, useEffect, Component } from "react"
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
-import { List } from 'react-native-paper'
-import Dialog from 'react-native-dialog'
+import React, { Component } from "react"
+import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
 import firebase, { db, auth } from '../firebase'
 import _ from 'lodash'
 import { faCheckCircle, faExclamationCircle, faInfoCircle, faRedo, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
@@ -20,8 +18,8 @@ import CustomIcon from './CustomIcon'
 import StepProgress from './process/StepProgress'
 import Loading from './Loading'
 
-import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, getLatestProcessModel, checkForcedValidations } from '../core/process'
-import { enableProcessAction, checkTechContact } from '../core/privileges'
+import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, checkForcedValidations } from '../core/process'
+import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants, errorMessages } from "../core/constants"
@@ -489,57 +487,55 @@ class ProcessAction extends Component {
     }
 
     //renderers
-    renderAction = (canUpdate, action) => {
+    renderAction = (canUpdate, action, style) => {
         if (!action) return null
         const { loading, loadingMessage } = this.state
         var { title, status, verificationType, choices } = action
+        const { mainColor, textFont } = style
         var isComment = typeof (action.comment) !== 'undefined' && action.comment !== ''
         const isDialog = choices || verificationType === 'comment'
         const leftIcon = action.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle
-        const leftIconColor = action.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? theme.colors.gray_dark : theme.colors.primary
+        const leftIconColor = action.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? mainColor : "green"
 
         return (
-            <View style={styles.action}>
-                <TouchableOpacity onPress={() => this.onPressAction(canUpdate, action)} style={styles.actionTouchable}>
-                    <View style={styles.actionEmptySpace} />
-                    <View style={styles.actionTitleContainer}>
-                        {!loading &&
+            <View style={styles.actionTouchable}>
+                <View style={styles.actionTitleContainer}>
+                    {!loading &&
+                        <CustomIcon
+                            icon={leftIcon}
+                            size={18}
+                            color={leftIconColor}
+                        />
+                    }
+                    <Text style={[textFont, { flex: 0.95, marginLeft: 10, color: mainColor }]}>
+                        {loading ? loadingMessage : title}
+                    </Text>
+                </View>
+
+                {loading ?
+                    <View style={styles.actionIconsContainer}>
+                        <ActivityIndicator size='small' color={theme.colors.primary} />
+                        <ActivityIndicator size='small' color={theme.colors.white} />
+                    </View>
+                    :
+                    <View style={[styles.actionIconsContainer, { justifyContent: isComment ? 'space-between' : 'flex-end' }]}>
+                        {isComment &&
                             <CustomIcon
-                                icon={leftIcon}
-                                size={19}
-                                color={leftIconColor}
+                                icon={faExclamationCircle}
+                                size={16}
+                                color={mainColor}
+                                onPress={() => Alert.alert('Commentaire', action.comment)}
                             />
                         }
-                        <View style={{ flex: 0.95, marginLeft: 10 }}>
-                            <Text style={[theme.customFontMSregular.caption]}>{loading ? loadingMessage : title}</Text>
-                        </View>
+                        <CustomIcon
+                            icon={faInfoCircle}
+                            size={16}
+                            color={mainColor}
+                            onPress={() => Alert.alert('Instructions', action.instructions)}
+                        />
                     </View>
-
-                    {loading ?
-                        <View style={styles.actionIconsContainer}>
-                            <ActivityIndicator size='small' color={theme.colors.white} />
-                            <ActivityIndicator size='small' color={theme.colors.primary} />
-                        </View>
-                        :
-                        <View style={[styles.actionIconsContainer, { justifyContent: isComment ? 'space-between' : 'flex-end' }]}>
-                            {isComment &&
-                                <CustomIcon
-                                    icon={faExclamationCircle}
-                                    size={16}
-                                    color={theme.colors.gray_dark}
-                                    onPress={() => Alert.alert('Commentaire', action.comment)}
-                                />
-                            }
-                            <CustomIcon
-                                icon={faInfoCircle}
-                                size={16}
-                                color={theme.colors.gray_dark}
-                                onPress={() => Alert.alert('Instructions', action.instructions)}
-                            />
-                        </View>
-                    }
-                    {isDialog && this.renderDialog(action.formSettings)}
-                </TouchableOpacity>
+                }
+                {isDialog && this.renderDialog(action.formSettings)}
             </View>
         )
     }
@@ -587,22 +583,22 @@ class ProcessAction extends Component {
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>
-                <Text style={[theme.customFontMSregular.body, styles.headerBarText]}>Suivi du projet</Text>
+                <Text style={[theme.customFontMSmedium.caption, styles.headerBarText]}>SUIVI DU PROJET</Text>
                 <View style={styles.progressionLinks}>
                     <TouchableOpacity>
                         <CustomIcon
                             onPress={() => this.mainHandler(process)}
                             icon={faRedo}
-                            size={16}
-                            color={theme.colors.white}
+                            size={18}
+                            color={theme.colors.primary}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity>
                         <CustomIcon
                             onPress={onPressEye}
                             icon={faEye}
-                            size={18}
-                            color={theme.colors.white}
+                            size={19}
+                            color={theme.colors.primary}
                         />
                     </TouchableOpacity>
                 </View>
@@ -610,29 +606,35 @@ class ProcessAction extends Component {
         )
     }
 
-
-    renderAccordion(canUpdate) {
+    renderProcessBox(canUpdate) {
         const { expanded, currentPhase, currentStep, currentAction } = this.state
         const phaseTitle = currentPhase ? currentPhase.title : "Chargement de la phase..."
         const stepTitle = currentStep ? `${currentStep.stepOrder}. ${currentStep.title}` : "Chargement de l'étape..."
         const doneActions = currentStep ? currentStep.actions.filter((action) => action.status === 'done').length : undefined
         const totalActions = currentStep ? currentStep.actions.length : undefined
         var progress = totalActions ? (doneActions / totalActions) * 100 : undefined
+
         return (
-            <List.Accordion
-                showArrow
-                style={[styles.accordion, { borderBottomWidth: expanded ? StyleSheet.hairlineWidth * 2 : 0 }]}
-                title={phaseTitle}
-                description={stepTitle}
-                titleNumberOfLines={1}
-                descriptionNumberOfLines={1}
-                left={props => totalActions ? <StepProgress progress={progress} style={{ marginTop: 25, marginRight: 2 }} /> : null}
-                expanded={expanded}
-                titleStyle={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginBottom: 5 }]}
-                descriptionStyle={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}
-                onPress={() => this.setState({ expanded: !expanded })}>
-                {this.renderAction(canUpdate, currentAction)}
-            </List.Accordion >
+            <View style= {{ borderBottomRightRadius: 5, borderBottomLeftRadius:5}}>
+                <View style={{ padding: theme.padding }}>
+                    <Text style={[theme.customFontMSmedium.body, { marginBottom: 8 }]}>{phaseTitle}</Text>
+                    <Text style={theme.customFontMSregular.body}>{stepTitle}</Text>
+                    {totalActions &&
+                        <StepProgress
+                            progress={progress}
+                            size={60}
+                            style={{ alignSelf: "center", marginTop: theme.padding*0.8 }}
+                        />
+                    }
+                </View>
+
+                <TouchableOpacity
+                    onPress={() => this.onPressAction(canUpdate, currentAction)}
+                    style={{ padding: theme.padding, backgroundColor: theme.colors.primary, borderBottomLeftRadius: 5, borderBottomRightRadius: 5, }}>
+                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.white, marginBottom: theme.padding }]}>Action à faire:</Text>
+                    {this.renderAction(canUpdate, currentAction, { mainColor: theme.colors.white, textFont: theme.customFontMSbold.body })}
+                </TouchableOpacity>
+            </View>
         )
     }
 
@@ -667,7 +669,7 @@ class ProcessAction extends Component {
         else return (
             <View style={styles.container}>
                 {this.renderHeaderBar()}
-                {this.renderAccordion(canUpdate)}
+                {this.renderProcessBox(canUpdate)}
                 {pressedAction && pressedAction.choices && this.renderModal()}
             </View>
         )
@@ -682,22 +684,33 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         backgroundColor: theme.colors.white,
         margin: 15,
+        marginVertical: 35
     },
     headerBarContainer: {
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.section,
         borderTopRightRadius: 5,
         borderTopLeftRadius: 5,
-        paddingVertical: 5
+        borderBottomWidth: 2,
+        borderBottomColor: theme.colors.gray_light,
+        paddingVertical: theme.padding,
+        // justifyContent: 'center'
     },
     headerBarText: {
-        color: theme.colors.white,
+        letterSpacing: 2.5,
+        opacity: 0.7,
         textAlign: 'center'
+    },
+    stepContainer: {
+        flexDirection: 'row',
+        alignItems: "center",
+        marginTop: theme.padding,
+        marginBottom: theme.padding * 4
     },
     progressionLinks: {
         flexDirection: 'row',
         zIndex: 1,
         position: 'absolute',
-        top: 5,
+        top: theme.padding * 1.2,
         right: theme.padding / 2,
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -709,21 +722,9 @@ const styles = StyleSheet.create({
         marginLeft: 0,
         borderBottomColor: theme.colors.gray_light
     },
-    action: {
-        height: 50,
-        paddingLeft: 0,
-        paddingRight: 0,
-        //marginHorizontal: 5,
-        // backgroundColor: 'green'
-    },
     actionTouchable: {
-        flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        //  paddingHorizontal: 10,
-        //backgroundColor: 'pink'
-        //paddingHorizontal: 5
     },
     actionEmptySpace: {
         flex: 0.1,

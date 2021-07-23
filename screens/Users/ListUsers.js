@@ -121,7 +121,7 @@ class ListUsers extends Component {
     )
   }
 
-  onPressFAB() {
+  onPressFAB() { 
     const { prevScreen, userType, onGoBack } = this.props
     const nextScreen = userType === 'utilisateur' ? 'CreateUser' : 'CreateClient'
     const isProspect = userType === 'prospect'

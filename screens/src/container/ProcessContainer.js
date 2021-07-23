@@ -54,11 +54,12 @@ class ProcessContainer extends Component {
                     children={
                       <View style={{ marginLeft: constants.ScreenWidth * 0.035, paddingBottom: 15, borderLeftWidth: index !== stepsData[currentPage].length - 1 ? 2 : 0, borderLeftColor: theme.colors.gray_light }}>
                         {item.actions.map((action, index) => {
+                          const actionStyle = { mainColor: theme.colors.secondary, textFont: theme.customFontMSregular.caption }
                           const isFirstAction = index === 0
                           const isPreviousActionDone = index > 0 && item.actions[index - 1].status === 'done'
                           const isActionPending = action.status === 'pending'
                           const canUpdateAction = canUpdateStep && (isFirstAction || isPreviousActionDone) && isActionPending
-                          return this.props.renderAction(false, action)
+                          return this.props.renderAction(false, action, actionStyle)
                         })
                         }
                       </View>

@@ -9,6 +9,8 @@ export const constants = {
     ScreenHeight: height
 }
 
+export const appVersion = "1.2.10"
+
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },
     { id: 'backoffice', label: 'Back office', value: 'Back office', bool: 'isBackOffice', level: 3 },

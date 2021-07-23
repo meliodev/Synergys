@@ -1,22 +1,23 @@
 import React, { memo, Component } from "react"
-import { View, Alert, Text, StyleSheet } from "react-native"
+import { View, Alert, Text, StyleSheet, Linking } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
 import { ProgressBar } from "react-native-paper"
 import RNFS from 'react-native-fs'
-import firebase, { db } from '../../firebase'
+import firebase, { db, remoteConfig } from '../../firebase'
 import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import NetInfo from "@react-native-community/netinfo"
 import SplashScreen from 'react-native-splash-screen'
 
+import Button from "../../components/Button"
 import Background from "../../components/NewBackground"
 import Loading from "../../components/Loading"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState, setCurrentUser, setNetwork, setProcessModel } from '../../core/redux'
-import { constants, errorMessages } from "../../core/constants"
+import { appVersion, constants, errorMessages } from "../../core/constants"
 import { displayError } from "../../core/utils"
 
 
@@ -49,6 +50,7 @@ class AuthLoadingScreen extends Component {
       routeName: '',
       routeParams: {},
       progress: 0,
+      requiresUpdate: false
     }
   }
 
@@ -56,6 +58,13 @@ class AuthLoadingScreen extends Component {
     SplashScreen.hide()
 
     //1. Notification action listeners
+    const isUpToDate = this.checkAppVersion()
+    if (!isUpToDate) {
+      Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
+      this.setState({ requiresUpdate: true })
+      return
+    }
+
     await this.bootstrapNotifications()
     this.updateProgress(0.25)
     this.forgroundNotificationListener()
@@ -64,6 +73,16 @@ class AuthLoadingScreen extends Component {
     this.updateProgress(0.6)
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
+  }
+
+  checkAppVersion() {
+    const minAppVersion = remoteConfig.getValue('minAppVersion')
+    console.log("", minAppVersion.asString())
+
+    if (minAppVersion.asString() > appVersion) {
+      return false
+    }
+    return true
   }
 
   updateProgress(progress) {
@@ -204,7 +223,7 @@ class AuthLoadingScreen extends Component {
         }
 
         else {
-          var routeName = roleValue !== 'Client' ? "CreatePvReception" : "ProjectsStack"
+          var routeName = roleValue !== 'Client' ? "App" : "ProjectsStack"
           var routeParams = {}
         }
       }
@@ -322,8 +341,14 @@ class AuthLoadingScreen extends Component {
     }
   }
 
+  downloadApp() {
+    //const appDowloadLink = remoteConfig.getValue('minAppVersion')
+    const appDowloadLink = "https://drive.google.com/file/d/1Hnkaf1bFyPyGEMpJ9f5egG2z-jkVpU7n/view?usp=sharing"
+    Linking.openURL(appDowloadLink)
+  }
+
   render() {
-    const { progress } = this.state
+    const { progress, requiresUpdate } = this.state
 
     return (
       <Background>
@@ -337,6 +362,16 @@ class AuthLoadingScreen extends Component {
             />
           </View>
         </Background>
+        {requiresUpdate &&
+          <Button
+            mode="contained"
+            onPress={this.downloadApp}
+            style={{ position: 'absolute', bottom: constants.ScreenHeight * 0.2, width: constants.ScreenWidth*0.75, alignSelf: 'center' }}
+            outlinedColor={theme.colors.primary}
+          >
+            Mettre à jour
+          </Button>
+        }
       </Background>
     )
   }

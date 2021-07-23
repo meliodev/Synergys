@@ -66,7 +66,7 @@ class ClientsManagement extends React.Component {
                             searchInput={searchInput}
                             prevScreen='ClientsManagement'
                             userType='client'
-                            menu
+                            menu 
                             offLine={!isConnected}
                             permissions={permissionsClients}
                             query={queryClients}

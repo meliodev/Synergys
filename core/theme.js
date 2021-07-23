@@ -172,6 +172,14 @@ const customFontMSbold = {
     fontSize: sizes.caption,
     fontFamily: 'Montserrat-Bold',
   },
+  small: {
+    fontSize: 10,
+    fontFamily: 'Montserrat-Bold',
+  },
+  extraSmall: {
+    fontSize: 8,
+    fontFamily: 'Montserrat-Bold',
+  },
 }
 
 const customFontMSsemibold = {

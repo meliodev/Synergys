@@ -227,7 +227,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'NON', id: 'cancel', nextStep: 'primeCEECreation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextPhase: 'technicalVisitManagement', onSelectType: 'transition', operation: null },
                         ],
                         responsable: 'Commercial',
@@ -235,75 +235,75 @@ export const processModel = {
                     },
                 ]
             },
-            'primeCEECreation': {
-                title: "Création d'une prime CEE",
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 3,
-                actions: [
-                    {
-                        id: 'primeCEEChoice',
-                        title: 'Ce projet est il éligible à la prime cee ?',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true },
-                            //{ label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
-                            { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'primeCEECreation',
-                        title: 'Créer une prime CEE',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
-                        collection: 'Documents',
-                        //Verification
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Dossier CEE' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-                        ],
-                        //Navigation
-                        queryFiltersUpdateNav: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Dossier CEE' },
-                            { filter: 'deleted', operation: '==', value: false },
-                        ],
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        responsable: 'Commercial',
-                        status: 'pending',
-                        nextStep: 'rd2Creation'
-                    },
-                    // {
-                    //     id: 'quoteCreationChoice',
-                    //     title: 'Souhaitez-vous toujours être acteur de la transition énergétique ?',
-                    //     instructions: 'Lorem ipsum dolor',
-                    //     actionOrder: 3,
-                    //     type: 'manual',
-                    //     verificationType: 'multiple-choices',
-                    //     comment: '', //motif
-                    //     choices: [
-                    //         { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                    //         { label: 'Poursuivre', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition' },
-                    //     ],
-                    //     responsable: 'Commercial',
-                    //     status: 'pending',
-                    // },
-                ]
-            },
+            // 'primeCEECreation': {
+            //     title: "Création d'une prime CEE",
+            //     instructions: 'Lorem ipsum dolor',
+            //     stepOrder: 3,
+            //     actions: [
+            //         {
+            //             id: 'primeCEEChoice',
+            //             title: 'Ce projet est il éligible à la prime cee ?',
+            //             instructions: 'Lorem ipsum dolor',
+            //             actionOrder: 1,
+            //             type: 'manual',
+            //             verificationType: 'multiple-choices',
+            //             comment: '', //motif
+            //             choices: [
+            //                 { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true },
+            //                 //{ label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
+            //                 { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
+            //             ],
+            //             responsable: 'Commercial',
+            //             status: 'pending',
+            //         },
+            //         {
+            //             id: 'primeCEECreation',
+            //             title: 'Créer une prime CEE',
+            //             instructions: 'Lorem ipsum dolor',
+            //             actionOrder: 2,
+            //             collection: 'Documents',
+            //             //Verification
+            //             queryFilters: [
+            //                 { filter: 'project.id', operation: '==', value: '' },
+            //                 { filter: 'type', operation: '==', value: 'Dossier CEE' },
+            //                 { filter: 'deleted', operation: '==', value: false },
+            //                 { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+            //             ],
+            //             //Navigation
+            //             queryFiltersUpdateNav: [
+            //                 { filter: 'project.id', operation: '==', value: '' },
+            //                 { filter: 'type', operation: '==', value: 'Dossier CEE' },
+            //                 { filter: 'deleted', operation: '==', value: false },
+            //             ],
+            //             screenName: 'UploadDocument', //creation
+            //             screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
+            //             type: 'auto',
+            //             verificationType: 'doc-creation',
+            //             responsable: 'Commercial',
+            //             status: 'pending',
+            //             nextStep: 'rd2Creation'
+            //         },
+            //         // {
+            //         //     id: 'quoteCreationChoice',
+            //         //     title: 'Souhaitez-vous toujours être acteur de la transition énergétique ?',
+            //         //     instructions: 'Lorem ipsum dolor',
+            //         //     actionOrder: 3,
+            //         //     type: 'manual',
+            //         //     verificationType: 'multiple-choices',
+            //         //     comment: '', //motif
+            //         //     choices: [
+            //         //         { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+            //         //         { label: 'Poursuivre', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition' },
+            //         //     ],
+            //         //     responsable: 'Commercial',
+            //         //     status: 'pending',
+            //         // },
+            //     ]
+            // },
             'rd2Creation': {
                 title: 'Initiation rendez-vous 2',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 4,
+                stepOrder: 3,
                 actions: [
                     {
                         id: 'rd2Creation',
