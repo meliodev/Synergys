@@ -22,7 +22,8 @@ export const processModel = {
                         properties: ['nom'],
                         //Navigation
                         screenName: 'Profile',
-                        screenParams: { user: { id: '', roleId: 'client' } },
+                        screenParams: { user: { id: '', roleId: 'client' }, project: null },
+                        screenPush: true,
                         //Verification
                         type: 'auto',
                         verificationType: 'data-fill',
@@ -42,7 +43,8 @@ export const processModel = {
                         properties: ['prenom'],
                         //Navigation
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { user: { id: '', roleId: 'client' } },
+                        screenParams: { user: { id: '', roleId: 'client' }, project: null },
+                        screenPush: true,
                         //Verification
                         type: 'auto',
                         verificationType: 'data-fill',
@@ -59,7 +61,8 @@ export const processModel = {
                         documentId: '', //dynamic
                         properties: ['address', 'description'],
                         screenName: 'Profile',
-                        screenParams: { user: { id: '', roleId: 'client' } },
+                        screenParams: { user: { id: '', roleId: 'client' }, project: null },
+                        screenPush: true,
                         type: 'auto',
                         verificationType: 'data-fill',
                         verificationValue: '',
@@ -75,7 +78,8 @@ export const processModel = {
                         documentId: '', // dynamic
                         properties: ['phone'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { user: { id: '', roleId: 'client' } },
+                        screenParams: { user: { id: '', roleId: 'client' }, project: null },
+                        screenPush: true,
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -91,7 +95,8 @@ export const processModel = {
                         documentId: '', // dynamic
                         properties: ['isProspect'],
                         screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { user: { id: '', roleId: 'client' } },
+                        screenParams: { user: { id: '', roleId: 'client' }, project: null },
+                        screenPush: true,
                         type: 'auto',
                         responsable: 'Commercial',
                         status: 'pending',
@@ -612,16 +617,34 @@ export const processModel = {
                         verificationType: 'doc-creation',
                     },
                     {
-                        id: 'comment',
-                        title: 'Commentaire',
-                        instructions: "Veuillez renseigner des informations utiles (exp: disponibilité du client, accessibilité....)",
+                        id: 'isQuoteFinanced',
+                        title: "Le devis est-il accompagné d'un financement ?",
+                        instructions: 'Lorem ipsum dolor',
                         actionOrder: 9,
                         type: 'manual',
-                        verificationType: 'comment',
-                        comment: '',
+                        verificationType: 'multiple-choices',
+                        comment: '', //#task: comments are joined (separated by ;)
+                        choices: [
+                            { label: 'NON', id: 'comment', nextStep: 'technicalVisitCreation', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
+                        ],
                         responsable: 'Commercial',
                         status: 'pending',
-                        nextStep: 'technicalVisitCreation',
+                    },
+                    {
+                        id: 'financingWebsite',
+                        title: 'Propositions de financement',
+                        instructions: "Lorem ipsum dolor",
+                        actionOrder: 10,
+                        type: 'manual',
+                        comment: '',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            { label: 'www.adhefi.com', id: 'cashPayment', nextStep: 'technicalVisitCreation', onSelectType: 'commentPicker' },
+                            { label: 'www.moncofidispro.fr', id: 'financing', nextStep: 'technicalVisitCreation', onSelectType: 'commentPicker' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
                     },
                 ]
             },
@@ -1700,9 +1723,9 @@ export const processModel = {
             },
         }
     },
-    'version': 3
+    'version': 4
 }
 
-
+//Version 4: Handle goback to CreateProject screen after "Convertir prospect en client" (added project param to navigation)
 
 

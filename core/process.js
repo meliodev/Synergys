@@ -684,7 +684,6 @@ const phases = [
 export const getPhaseId = (phaseValue) => {
     const phaseValueArr = [phaseValue]
     const phaseObject = phases.filter(phaseObject => phaseValueArr.includes(phaseObject.value))
-    console.log(phaseValueArr, "555555555555")
     const currentPhase = phaseObject[0].id
     return currentPhase
 }

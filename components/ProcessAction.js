@@ -86,6 +86,7 @@ class ProcessAction extends Component {
 
     async mainHandler(process) {
         try {
+            console.log('YEAAAAAAAAAAH')
             load(this, true)
             const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
@@ -194,7 +195,7 @@ class ProcessAction extends Component {
             await countDown(500) //#task: why this ???
             const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
 
-            const { responsable, verificationType, type, screenName, screenParams, nextStep, nextPhase, formSettings } = currentAction
+            const { responsable, verificationType, type, screenName, screenParams, screenPush, nextStep, nextPhase, formSettings } = currentAction
             const { process, currentPhase } = this.state
 
             const currentUserId = auth.currentUser.uid
@@ -220,8 +221,12 @@ class ProcessAction extends Component {
                         screenParams.isProcess = true
                         screenParams.onGoBack = () => this.mainHandler(process)
                     }
-                    if (screenName)
-                        this.props.navigation.navigate(screenName, screenParams)
+                    if (screenName) {
+                        if (screenPush)
+                            this.props.navigation.push(screenName, screenParams)
+                        else
+                            this.props.navigation.navigate(screenName, screenParams)
+                    }
                 }
             }
 
@@ -505,9 +510,10 @@ class ProcessAction extends Component {
                             icon={leftIcon}
                             size={18}
                             color={leftIconColor}
+                            style={{ marginTop: 3, marginRight: 10, }}
                         />
                     }
-                    <Text style={[textFont, { flex: 0.95, marginLeft: 10, color: mainColor }]}>
+                    <Text style={[textFont, { flex: 1, color: mainColor }]}>
                         {loading ? loadingMessage : title}
                     </Text>
                 </View>
@@ -615,7 +621,7 @@ class ProcessAction extends Component {
         var progress = totalActions ? (doneActions / totalActions) * 100 : undefined
 
         return (
-            <View style= {{ borderBottomRightRadius: 5, borderBottomLeftRadius:5}}>
+            <View style={{ borderBottomRightRadius: 5, borderBottomLeftRadius: 5 }}>
                 <View style={{ padding: theme.padding }}>
                     <Text style={[theme.customFontMSmedium.body, { marginBottom: 8 }]}>{phaseTitle}</Text>
                     <Text style={theme.customFontMSregular.body}>{stepTitle}</Text>
@@ -623,7 +629,7 @@ class ProcessAction extends Component {
                         <StepProgress
                             progress={progress}
                             size={60}
-                            style={{ alignSelf: "center", marginTop: theme.padding*0.8 }}
+                            style={{ alignSelf: "center", marginTop: theme.padding * 0.8 }}
                         />
                     }
                 </View>
@@ -732,15 +738,15 @@ const styles = StyleSheet.create({
     actionTitleContainer: {
         flex: 0.8,
         flexDirection: 'row',
-        alignItems: 'center',
-        //  backgroundColor: 'brown'
+        // backgroundColor: 'brown'
     },
     actionIconsContainer: {
         flex: 0.1,
         flexDirection: 'row',
         justifyContent: 'flex-end',
         marginRight: 10,
-        //   backgroundColor: 'blue'
+        paddingTop: 3,
+        // backgroundColor: 'blue'
     }
 })
 

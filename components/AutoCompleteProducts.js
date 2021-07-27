@@ -48,7 +48,6 @@ class AutoCompleteProducts extends React.Component {
     }
 
     viewProduct(ProductId) {
-        console.log('PID', ProductId)
         this.props.navigation.navigate('CreateProduct', { ProductId: ProductId, onGoBack: (product) => console.log(product) })
     }
 
@@ -63,7 +62,7 @@ class AutoCompleteProducts extends React.Component {
     async handleDeleteProduct(ProductId) {
         await db.collection('Products').doc(ProductId).update({ deleted: true })
             .then(async () => this.props.navigation.goBack())
-            .catch((e) =>  displayError({ message: errorMessages.firestore.delete }))
+            .catch((e) => displayError({ message: errorMessages.firestore.delete }))
     }
 
     customRenderSuggestion = suggestion => {
@@ -76,14 +75,16 @@ class AutoCompleteProducts extends React.Component {
                     <Text style={theme.customFontMSbold.body}>{product.name}</Text>
                     <Text style={[theme.customFontMSregular.body, { color: 'gray', marginTop: 10 }]}>Prix: <Text style={{ color: '#000' }}>€{product.price}</Text></Text>
                 </View>
-                <View style={{ justifyContent: 'space-between' }}>
-                    <TouchableOpacity onPress={() => this.viewProduct(product.id)} style={{ flex: 0.5, marginBottom: 7, justifyContent: 'center', alignItems: 'center' }}>
-                        <MaterialCommunityIcons name='pencil' size={19} color={theme.colors.graySilver} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => this.showAlert(product.id)} style={{ flex: 0.5, marginTop: 7, justifyContent: 'center', alignItems: 'center' }}>
-                        <MaterialCommunityIcons name='delete' size={19} color={theme.colors.graySilver} />
-                    </TouchableOpacity>
-                </View>
+                {this.props.role === "admin" &&
+                    <View style={{ justifyContent: 'space-between' }}>
+                        <TouchableOpacity onPress={() => this.viewProduct(product.id)} style={{ flex: 0.5, marginBottom: 7, justifyContent: 'center', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name='pencil' size={19} color={theme.colors.graySilver} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => this.showAlert(product.id)} style={{ flex: 0.5, marginTop: 7, justifyContent: 'center', alignItems: 'center' }}>
+                            <MaterialCommunityIcons name='delete' size={19} color={theme.colors.graySilver} />
+                        </TouchableOpacity>
+                    </View>
+                }
             </View>
         )
     }

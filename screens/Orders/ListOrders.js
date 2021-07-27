@@ -22,6 +22,7 @@ import { constants } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { configureQuery } from '../../core/privileges'
 import { fetchDocs } from '../../api/firestore-api';
+import { firebase } from '@react-native-firebase/crashlytics';
 
 const KEYS_TO_FILTERS = ['id', 'name', 'state'] //#edit
 
@@ -79,7 +80,7 @@ class ListOrders extends Component {
         if (queryFilters === []) this.setState({ ordersList: [], ordersCount: 0 })
         else {
             const params = { role: this.props.role.value }
-            var query = configureQuery('Orders', queryFilters, params) //#task make query as a prop (for project filtering during process)
+            var query = configureQuery('Orders', queryFilters, params) //#task make query as a prop (for project filtering during process devis generation)
             this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
                 load(this, false)
             })

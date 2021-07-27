@@ -153,9 +153,8 @@ export default class PdfGeneration extends Component {
             const reducer = (a, b) => Number(a) + Number(b)
             const totalTaxe = taxeValues.reduce(reducer)
             const totalTTC = subTotal + totalTaxe
-            const primeCEE = this.order.primeCEE //#task: add input
-            const primeRenov = this.order.primeRenov //#task: add input
-            const totalNet = totalTTC - primeCEE - primeRenov
+            const { primeCEE, primeRenov, aidRegion } = this.order
+            const totalNet = totalTTC - primeCEE - primeRenov - aidRegion
 
             //1. HeaderLeft: Logo
             //Embed logo image
@@ -542,7 +541,7 @@ export default class PdfGeneration extends Component {
             const tva_rows_height = taxes.length * tva_single_row_height
             const tva_table_height = tva_headers_height + tva_rows_height
 
-            const priceSummaryBoxHeight = priceData_height + tva_table_height + padding
+            const priceSummaryBoxHeight = priceData_height + tva_table_height + padding * 2
 
             //Check marginTop -> Turn page
             if (marginTop >= height * 0.9 - priceSummaryTitle_height - priceSummaryBoxHeight) {
@@ -579,8 +578,8 @@ export default class PdfGeneration extends Component {
                 { label: 'TVA', value: totalTaxe.toString() },
                 { label: 'Total T.T.C', value: totalTTC.toString() },
                 { label: 'PRIME CEE COUP DE POUCE', value: `-${primeCEE.toString()}` },
-                { label: 'PRIME RENOV', value: `-${primeRenov.toString()}` },
-                { label: 'Aides région', value: `-${primeRenov.toString()}` },
+                { label: 'Maprimerévov', value: `-${primeRenov.toString()}` },
+                { label: 'Aides région', value: `-${aidRegion.toString()}` },
                 { label: 'Net à payer', value: totalNet.toString() },
             ]
 
@@ -676,7 +675,7 @@ export default class PdfGeneration extends Component {
             for (const x of tva_lines_x_positions) {
                 pages[pageIndex].drawLine({
                     start: { x, y: tva_firstHorizontalLine },
-                    end: { x, y: height - marginTop + timesRomanFont.heightAtSize(caption) + padding * 0.2 },
+                    end: { x, y: height - marginTop + timesRomanFont.heightAtSize(caption) },
                     thickness: 1,
                     color: colors.gray
                 })

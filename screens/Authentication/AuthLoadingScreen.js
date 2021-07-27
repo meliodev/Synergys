@@ -59,11 +59,11 @@ class AuthLoadingScreen extends Component {
 
     //1. Notification action listeners
     const isUpToDate = this.checkAppVersion()
-    if (!isUpToDate) {
-      Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
-      this.setState({ requiresUpdate: true })
-      return
-    }
+    // if (!isUpToDate) {
+    //   Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
+    //   this.setState({ requiresUpdate: true })
+    //   return
+    // }
 
     await this.bootstrapNotifications()
     this.updateProgress(0.25)

@@ -17,8 +17,8 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
         else onPress()
     }
 
-    const AvatarText = ({ text }) => (
-        <View style={[styles.avatarText]} >
+    const AvatarText = ({ text, style }) => (
+        <View style={[styles.avatarText, style]} >
             <Text style={[theme.customFontMSregular.small, { color: theme.colors.white }]}>{text}</Text>
         </View >
     )
@@ -52,18 +52,16 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                     <View>
                         {renderLabel(theme.customFontMSregular.caption, false)}
                         <View style={{ flexDirection: 'row', paddingTop: 10 }}>
-                            {showAvatarText &&
-                                <View style={{ flex: 0.08 }}>
-                                    <AvatarText text={avatarText} />
-                                </View>
-                            }
-                            <View style={{ flex: showAvatarText ? 0.825 : 0.905 }}>
+
+                            <View style={{ flex: 1, flexDirection: 'row', paddingRight: theme.padding }}>
+                                {showAvatarText && <AvatarText text={avatarText} style={{ marginRight: theme.padding/2 }} />}
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{value}</Text>
                             </View>
 
-                            <View style={{ flex: 0.095, alignItems: 'center' }}>
+                            <View style={{ alignItems: 'center' }}>
                                 <CustomIcon icon={icon} color={theme.colors.inpuIcon} />
                             </View>
+
                         </View>
                     </View>
                     :
@@ -71,7 +69,7 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                         <View style={{ flex: 0.905 }}>
                             {renderLabel(theme.customFontMSregular.body, true)}
                         </View>
-                        <View style={{ flex: 0.095, alignItems: 'center' }}>
+                        <View style={{ alignItems: 'center' }}>
                             <CustomIcon icon={icon} color={theme.colors.inpuIcon} />
                         </View>
                     </View>

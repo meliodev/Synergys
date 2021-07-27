@@ -5,7 +5,8 @@ import TextInputMask from 'react-native-text-input-mask'
 import NetInfo from "@react-native-community/netinfo"
 import _ from 'lodash'
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
-import { faPlusCircle, faBullseyeArrow, faConstruction, faLock } from '@fortawesome/pro-light-svg-icons'
+import { faPlusCircle } from '@fortawesome/pro-duotone-svg-icons'
+import { faBullseyeArrow, faConstruction, faLock } from '@fortawesome/pro-light-svg-icons'
 import { connect } from 'react-redux'
 
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
@@ -54,6 +55,7 @@ class Profile extends Component {
         this.isClient = this.userParam.roleId === 'client'
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
         this.isProcess = this.props.navigation.getParam('isProcess', false)
+        this.project = this.props.navigation.getParam('project', null)
         this.initialState = {}
 
         if (this.userParam.roleId === 'com') {
@@ -268,15 +270,10 @@ class Profile extends Component {
         const resp = this.handleSubmit()
         if (resp && resp.error) return
 
-        const { loading } = this.state
-        const { isPro, nom, prenom, denom, siret, address, phone, email } = this.state
-        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password: { value: '' } }
-        //autogen password
-        userData.password.value = generateId('', 7) //#task: generate it backend side
         const { isConnected } = this.props.network
-
-        const isValid = this.validateClientInputs(userData, false)
-        if (!isValid) return
+        const { isPro, nom, prenom, denom, siret, address, phone, email, loading } = this.state
+        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password: { value: '' } }
+        userData.password.value = generateId('', 6)
 
         this.setState({ loadingDialog: true })
         const response = await createClient(userData, this.userParam.id, isConnected, true, true)
@@ -289,6 +286,14 @@ class Profile extends Component {
         else {
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
                 this.setState({ loadingDialog: false })
+
+                if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
+                    this.props.navigation.state.params.onGoBack()
+                }
+
+                if (this.project)
+                    this.props.navigation.pop()
+
                 this.props.navigation.goBack()
             }, 6000) //We can reduce this timeout later on...
         }
@@ -452,6 +457,9 @@ class Profile extends Component {
                 <FormSection
                     sectionTitle={`${mes}Projets`}
                     sectionIcon={faPlusCircle}
+                    iconColor={theme.colors.white}
+                    iconSize={28}
+                    iconSecondaryColor={theme.colors.primary}
                     onPressIcon={() => this.props.navigation.navigate('CreateProject', { client, address })}
                     form={null}
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }}
@@ -536,7 +544,14 @@ class Profile extends Component {
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar menu={showMenu} back={!showMenu} title titleText='Profil' check={!userNotFound && (canUpdate || this.isClient)} handleSubmit={this.handleSubmit} />
+                <Appbar
+                    menu={showMenu}
+                    back={!showMenu}
+                    title
+                    titleText='Profil'
+                    check={!userNotFound && (canUpdate || this.isClient)}
+                    handleSubmit={this.handleSubmit}
+                />
 
                 {userNotFound || !currentUser ?
                     <EmptyList icon={faUserSlash} header='Utilisateur introuvable' description='Cet utilisateur est introuvable dans la base de données.' offLine={!isConnected} />

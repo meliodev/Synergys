@@ -6,6 +6,8 @@ export const configureQuery = (collection, queryFilters, params) => {
 
     let query = db.collection(collection)
 
+    console.log(queryFilters)
+
     if (queryFilters) { // (if undefined -> user has full read access)
 
         queryFilters = configureQueryParams(queryFilters, params)
@@ -65,15 +67,11 @@ const configureQueryParams = (queryFilters, params) => { //Task: Send the right 
 }
 
 export const blockRoleUpdateOnPhase = (role, phase) => {
-    let isBlockedUpdates = false
     const comPhases = ['Prospect', 'Visite technique préalable', 'Présentation étude']
     const techPhases = ['Visite technique', 'Installation', 'Maintenance']
     const isComPhase = comPhases.includes(phase)
     const isTechPhase = techPhases.includes(phase)
-
-    if (role === 'com' && isTechPhase || role === 'poseur' && isComPhase)
-        isBlockedUpdates = true
-
+    const isBlockedUpdates = role === 'com' && isTechPhase || role === 'poseur' && isComPhase
     return isBlockedUpdates
 }
 

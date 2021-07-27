@@ -36,7 +36,7 @@ class CreateClient extends Component {
 
         this.isProspect = this.props.navigation.getParam('isProspect', false)
         this.userType = this.isProspect ? 'prospect' : 'client'
-        this.titleText = `Nouveau ${this.userType}`
+        this.titleText = `${this.userType.charAt(0).toUpperCase()}${this.userType.slice(1)} en cours`
 
         this.state = {
             checked: 'first', //professional/Particular
@@ -117,7 +117,11 @@ class CreateClient extends Component {
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar close={!loading} title titleText={this.titleText} check={!loading} handleSubmit={() => this.handleSubmit(false)} />
+                <Appbar
+                    close={!loading}
+                    title
+                    titleText={this.titleText}
+                />
 
                 {loading ?
                     <Loading size='large' />
@@ -213,7 +217,7 @@ class CreateClient extends Component {
                             onChangeText={text => updateField(this, password, text)}
                             error={!!password.error}
                             errorText={password.error}
-                           // secureTextEntry={!password.show}
+                            // secureTextEntry={!password.show}
                             autoCapitalize="none"
                             right={
                                 <TextInput.Icon
@@ -225,7 +229,7 @@ class CreateClient extends Component {
                                     }}
                                 />
                             }
-                            editable= {false}
+                            editable={false}
                         />
 
                         <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
@@ -233,6 +237,14 @@ class CreateClient extends Component {
 
                     </ScrollView >
                 }
+
+                <Button
+                    mode="contained"
+                    onPress={() => this.handleSubmit(false)}
+                    backgroundColor={theme.colors.primary}
+                    style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
+                    Valider
+                </Button>
             </View>
         )
     }

@@ -4,7 +4,7 @@ import { Card, Title, FAB, ProgressBar, List, TextInput as TextInputPaper } from
 import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
-import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign, faRetweet } from '@fortawesome/pro-light-svg-icons'
+import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign, faRetweet, faUser } from '@fortawesome/pro-light-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-solid-svg-icons'
 import ImagePicker from 'react-native-image-picker'
 import ImageView from 'react-native-image-view'
@@ -485,6 +485,7 @@ class CreateProject extends Component {
 
         return (
             <FormSection
+                hide={!this.isEdit}
                 sectionTitle='Photos et plan du lieu'
                 sectionIcon={faImage}
                 showSection={!loading}
@@ -744,13 +745,14 @@ class CreateProject extends Component {
                             isLoading={loading}
                             form={
                                 <View style={{ flex: 1 }}>
-                                    <MyInput
+
+                                    {/* <MyInput
                                         label="Numéro du projet"
                                         returnKeyType="done"
                                         value={this.ProjectId}
                                         editable={false}
                                         disabled
-                                    />
+                                    /> */}
 
                                     <MyInput
                                         label="Nom du projet *"
@@ -778,7 +780,7 @@ class CreateProject extends Component {
                                         />
                                     }
 
-                                    {!this.isClient &&
+                                    {!this.isClient && this.isEdit &&
                                         <Picker
                                             returnKeyType="next"
                                             value={state}
@@ -818,8 +820,8 @@ class CreateProject extends Component {
                             } />
 
                         <FormSection
-                            sectionTitle='Références'
-                            sectionIcon={faRetweet}
+                            sectionTitle='Client'
+                            sectionIcon={faUser}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
@@ -832,16 +834,19 @@ class CreateProject extends Component {
                                         />
                                     }
 
-                                    <AddressInput
-                                        offLine={!isConnected}
-                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
-                                        onChangeText={this.setAddress}
-                                        clearAddress={() => this.setAddress('')}
-                                        address={address}
-                                        addressError={address.error}
-                                        editable={canWrite}
-                                        isEdit={this.isEdit}
-                                    />
+                                    {client.id !== "" &&
+                                        <AddressInput
+                                            offLine={!isConnected}
+                                            onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                            onChangeText={this.setAddress}
+                                            clearAddress={() => this.setAddress('')}
+                                            address={address}
+                                            addressError={address.error}
+                                            editable={canWrite}
+                                            isEdit={this.isEdit}
+                                        />
+                                    }
+
                                 </View>
                             }
                         />
@@ -912,6 +917,7 @@ class CreateProject extends Component {
                         {showTasksForm && this.renderTasksForm()}
 
                         <FormSection
+                            hide={!this.isEdit}
                             sectionTitle='Bloc Notes'
                             sectionIcon={faQuoteRight}
                             formContainerStyle={{ paddingTop: 25 }}

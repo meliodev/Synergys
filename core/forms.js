@@ -678,7 +678,7 @@ export const ficheEEBModel = [
                     { label: "Bois", value: "Bois", pdfConfig: { dx: -311, dy: - 517, pageIndex: 0 } },
                     { label: "Autre", value: "Autre", pdfConfig: { dx: -240, dy: - 517, pageIndex: 0 } },
                 ],
-                label: "Organes de chauffage",
+                label: "Type de chauffage",
                 mendatory: true,
                 errorId: "heatersError",
                 style: { marginBottom: 32 },

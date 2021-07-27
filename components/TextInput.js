@@ -16,7 +16,7 @@ const TextInput = ({ errorText, disabled, whiteTheme, link, ...props }) => {
           {
             colors: {
               placeholder: theme.colors.secondary,
-              text: (disabled && props.editable === false) ? theme.colors.placeholder : link ? 'green' : theme.colors.gray_dark,
+              text: (disabled && !props.editable) ? theme.colors.placeholder : link ? 'green' : theme.colors.gray_dark,
               error: theme.colors.error
             },
           }

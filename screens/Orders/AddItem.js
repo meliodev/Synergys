@@ -116,13 +116,17 @@ class AddItem extends Component {
         this.setState({ tagsSelected: [product], price: { value: product.price, error: '' }, quantity: { value: '1', error: '' }, taxe: { name: product.taxe, rate: Number(product.taxe), value: '' } })
     }
 
+    addItem() {
+        this.props.navigation.navigate('CreateProduct', { onGoBack: this.refreshProduct })
+    }
+
     render() {
         const { item, description, suggestions, tagsSelected, quantity, price, taxe, loading } = this.state
         const noItemSelected = tagsSelected.length === 0
 
         const { isConnected } = this.props.network
+        const isAdmin = this.props.role.id === "admin"
 
-        console.log('loading...', loading)
         return (
             <View style={styles.container}>
                 <Appbar back={!loading} title titleText='Ligne de commande' check={!loading} handleSubmit={this.handleSubmit} />
@@ -142,13 +146,17 @@ class AddItem extends Component {
                                     showInput={noItemSelected}
                                     errorText=''
                                     suggestionsBellow={true}
+                                    role={this.props.role.id}
                                 />
                             </View>
 
                             {noItemSelected ?
-                                <TouchableOpacity style={styles.plusIcon} onPress={() => this.props.navigation.navigate('CreateProduct', { onGoBack: this.refreshProduct })}>
-                                    <MaterialCommunityIcons name='plus' color={theme.colors.primary} size={21} />
-                                </TouchableOpacity>
+                                (
+                                    isAdmin &&
+                                    <TouchableOpacity style={styles.plusIcon} onPress={this.addItem}>
+                                        <MaterialCommunityIcons name='plus' color={theme.colors.primary} size={21} />
+                                    </TouchableOpacity>
+                                )
                                 :
                                 <TouchableOpacity style={[styles.plusIcon, { paddingTop: 0 }]} onPress={this.handleDelete}>
                                     <MaterialCommunityIcons name='close' color={theme.colors.placeholder} size={21} />
@@ -187,6 +195,7 @@ class AddItem extends Component {
                                     onChangeText={text => updateField(this, price, text)}
                                     error={!!price.error}
                                     errorText={price.error}
+                                    editable={isAdmin}
                                 />
                             </View>
                         </View>
@@ -203,6 +212,7 @@ class AddItem extends Component {
                                     taxe.rate = Number(rate)
                                     this.setState({ taxe })
                                 }}
+                                editable={isAdmin}
                             />
                         </View>
 
