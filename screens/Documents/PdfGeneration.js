@@ -143,21 +143,23 @@ export default class PdfGeneration extends Component {
 
             //Dynamic data
             const createdAt = moment().format('DD/MM/YYYY')
-            const { orderLines, subTotal, taxes, project, editedBy } = this.order
+            const { orderLines, subTotal, subTotalProducts, taxes, project, primeCEE, primeRenov, aidRegion, discount, editedBy } = this.order
             const client = await db.collection('Clients').doc(project.client.id).get().then((doc) => { return doc.data() })
             const responsable = await db.collection('Users').doc(editedBy.id).get().then((doc) => { return doc.data() })
-            // const orderLines = [ { "description": "", "price": "300", "product": { "category": "FOURNITURE ET POSE D'UNE POMPE A CHALEUR AIR/EAU", "brand": "Tesla", "createdAt": "4 janv. 2021 14:12", "createdBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "deleted": false, "description": "lorem ipsum dolor", "editedAt": "4 janv. 2021 15:13", "editedBy": { "fullName": "Salim Salim", "id": "GS-US-xQ6s" }, "id": "GS-AR-yH4C", "name": "Installation et mise en service d'une pompe à chaleur Air/Eau", "price": "300", "type": "product" }, "quantity": "1" }, ]
-            // const taxes = [ { name: '1', value: '5', value: 400 } ]
-            orderLines.sort((a, b) => (a.product.category > b.product.category) ? 1 : -1) //Sort in alphabetical order
+
+            const orderLinesSorter1 = (a, b) => (a.product.category > b.product.category) ? 1 : -1
+            orderLines.sort(orderLinesSorter1) //Sort by category in alphabetical order
+            const orderLinesSorter2 = (a, b) => (a.priority > b.priority) ? 1 : -1
+            orderLines.sort(orderLinesSorter2) //Sort Product before Services
+
             const taxeValues = taxes.map((taxeItem) => taxeItem.value)
             const reducer = (a, b) => Number(a) + Number(b)
             const totalTaxe = taxeValues.reduce(reducer)
-            const totalTTC = subTotal + totalTaxe
-            const { primeCEE, primeRenov, aidRegion } = this.order
-            const totalNet = totalTTC - primeCEE - primeRenov - aidRegion
+            const discountValue = (subTotal * discount) / 100
+            const totalNetHT = subTotal - primeCEE - primeRenov - aidRegion - discountValue
+            const totalTTC = totalNetHT + totalTaxe
 
             //1. HeaderLeft: Logo
-            //Embed logo image
             const logoImage = await pdfDoc.embedPng(logoBase64)
             const logoDims = logoImage.scale(0.2)
 
@@ -406,11 +408,12 @@ export default class PdfGeneration extends Component {
             marginTop += topBarHeight + cste * 2
             maxWidth = width * 0.5 - padding
 
-            let catNum = 0
+            let catNum = 1
+            let subCat = 1
             let category = null
 
             for (let orderLine of orderLines) {
-                var i = 0
+                //var i = 0
 
                 //Add new page
                 if (marginTop >= height * 0.9) { //Footer = height * 0.1
@@ -435,7 +438,6 @@ export default class PdfGeneration extends Component {
                 if (category !== orderLine.product.category) {
 
                     //Cat Num
-                    catNum += 1
                     pages[pageIndex].drawText(catNum.toString(),
                         {
                             x: firstVerticalLine_x + padding * 0.8,
@@ -444,14 +446,13 @@ export default class PdfGeneration extends Component {
                             font: timesRomanBoldFont,
                             lineHeight,
                             color: colors.black,
-                        })
+                        }
+                    )
 
                     //Cat Name
                     category = orderLine.product.category
-
                     textArray = [category]
                     textArrayFormated = this.lineBreaker(textArray, timesRomanBoldFont, caption, maxWidth)
-
                     textArrayFormated.forEach((text) => {
                         pages[pageIndex].drawText(text,
                             {
@@ -461,16 +462,16 @@ export default class PdfGeneration extends Component {
                                 font: timesRomanBoldFont,
                                 lineHeight,
                                 color: colors.black,
-                            })
+                            }
+                        )
 
                         marginTop = marginTop + timesRomanFont.sizeAtHeight(caption)
                     })
-
                     marginTop = marginTop + cste
                 }
 
                 //Draw orderline data
-                const num = `${catNum}.${1}`
+                const num = `${catNum}.${subCat}`
                 const rowData = [num, orderLine.quantity, 'U', orderLine.product.price, orderLine.price]
 
                 rowData.forEach((row, key) => {
@@ -504,7 +505,8 @@ export default class PdfGeneration extends Component {
                 })
 
                 marginTop = marginTop + cste
-                i += 1
+                catNum += 1
+                subCat += 1
             }
 
 
@@ -533,7 +535,7 @@ export default class PdfGeneration extends Component {
             const priceSummaryTitle_height = timesRomanFont.heightAtSize(caption) + padding / 2
 
             //Price container heigth
-            const priceData_height = 7 * timesRomanFont.heightAtSize(caption) + padding * 7
+            const priceData_height = 9 * timesRomanFont.heightAtSize(caption) + padding * 9
 
             //TVAs container heigth
             const tva_headers_height = timesRomanBoldFont.heightAtSize(caption) + padding * 0.2
@@ -574,13 +576,15 @@ export default class PdfGeneration extends Component {
 
             //2.2 Draw price details
             const priceDatas = [
-                { label: 'Total H.T', value: subTotal.toString() },
-                { label: 'TVA', value: totalTaxe.toString() },
-                { label: 'Total T.T.C', value: totalTTC.toString() },
+                { label: 'Total H.T', value: subTotal.toString() }, //subtotal, primeCEE, primeRenov, AidRegion, discount, taxes 
+                { label: `Remise ${discount > 0 ? discount : ""}${discount > 0 ? "%" : ""}`, value: `-${discountValue.toString()}` },
                 { label: 'PRIME CEE COUP DE POUCE', value: `-${primeCEE.toString()}` },
                 { label: 'Maprimerévov', value: `-${primeRenov.toString()}` },
                 { label: 'Aides région', value: `-${aidRegion.toString()}` },
-                { label: 'Net à payer', value: totalNet.toString() },
+                { label: 'Total Net H.T', value: totalNetHT.toString() }, //calculable
+                { label: 'TVA', value: totalTaxe.toString() },
+                { label: 'Total T.T.C', value: totalTTC.toString() }, //calculable
+                { label: 'Net à payer', value: totalTTC.toString() }, //calculable
             ]
 
             priceDatas.forEach((priceData) => {

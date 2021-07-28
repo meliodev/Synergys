@@ -23,6 +23,7 @@ class AddItem extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.refreshProduct = this.refreshProduct.bind(this)
+        this.addItem = this.addItem.bind(this)
 
         this.orderLine = this.props.navigation.getParam('orderLine', null)
         this.orderKey = this.props.navigation.getParam('orderKey', '')
@@ -95,14 +96,18 @@ class AddItem extends Component {
         let { tagsSelected, description, quantity, price, taxe } = this.state
         const taxeValue = (taxe.rate / 100) * price.value * quantity.value
         taxe.value = taxeValue
+        const product = tagsSelected[0]
 
         let orderLine = {
-            product: tagsSelected[0],
+            product,
             description: description.value,
             quantity: quantity.value,
             price: price.value,
-            taxe: taxe
+            taxe,
+            priority: product.type === "product" ? 0 : 1
         }
+
+        console.log("................", orderLine)
 
         this.props.navigation.state.params.onGoBack(orderLine, this.orderKey)
         this.props.navigation.goBack()

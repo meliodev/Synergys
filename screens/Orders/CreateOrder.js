@@ -37,11 +37,17 @@ const states = [
     { label: 'En cours', value: 'En cours' },
     { label: 'Annulé', value: 'Annulé' },
 ]
+const discounts = [
+    { label: '0', value: '0' },
+    { label: '5', value: '5' },
+    { label: '10', value: '10' },
+    { label: '15', value: '15' },
+]
 const properties = ["project", "state", "orderLines", "taxes", "primeCEE", "primeRenov", "aidRegion", "discount", "validated", "createdAt", "createdBy", "editedAt", "editedBy"]
 const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
-const warningMessage = "Attention, la tarification appliquée n'est pas conforme, veuillez APPUYER ICI pour notifier votre responsable d'agence."
+const warningMessage = "Attention, la tarification appliquée n'est pas conforme, veuillez notifier votre responsable d'agence pour valider."
 const confirmMessage = "La remise a été validé par votre responsable d'agence. Vous pouvez continuer."
-const pendingMessageAdmin = "Veuillez APPUYER ICI pour valider la remise appliquée par votre commercial."
+const pendingMessageAdmin = "Valider la remise appliquée par votre commercial."
 const pendingMessageCom = "Votre responsable technique a été notifié. Veuillez patienter ou bien contactez le par téléphone..."
 
 //Components (Helpers)
@@ -59,12 +65,16 @@ const SummaryRow = ({ label, value, valuePrefix = "€", textTheme = theme.custo
     )
 }
 
+const SummarySeparator = ({ }) => {
+    return <View style={{ height: StyleSheet.hairlineWidth, width: constants.ScreenWidth - theme.padding * 2, backgroundColor: '#E0E0E0', marginTop: 15 }} />
+}
+
 class CreateOrder extends Component {
     constructor(props) {
         super(props)
         this.refreshOrderLine = this.refreshOrderLine.bind(this)
         this.refreshProject = refreshProject.bind(this)
-        this.calculateSubTotal = this.calculateSubTotal.bind(this)
+        this.calculatePrices = this.calculatePrices.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.runOrderListener = this.runOrderListener.bind(this)
         this.generatePdf = this.generatePdf.bind(this)
@@ -103,18 +113,25 @@ class CreateOrder extends Component {
             state: 'En cours',
 
             //Order Lines
-            orderLines: [{ "description": "", "price": "500", "product": { "brand": [Object], "category": "Catégorie 2", "createdAt": "2021-05-11T18:22:13+00:00", "createdBy": [Object], "deleted": false, "description": "", "editedAt": "2021-05-11T18:22:13+00:00", "editedBy": [Object], "hasPendingWrites": false, "id": "GS-AR-F83f", "name": "Produit 1", "price": "500", "taxe": "", "type": "product" }, "quantity": "1", "taxe": { "name": "", "rate": "", "value": 0 } }],
+            orderLines: [],
+            //[{ "description": "", "price": "500", "product": { "brand": [Object], "category": "Catégorie 2", "createdAt": "2021-05-11T18:22:13+00:00", "createdBy": [Object], "deleted": false, "description": "", "editedAt": "2021-05-11T18:22:13+00:00", "editedBy": [Object], "hasPendingWrites": false, "id": "GS-AR-F83f", "name": "Produit 1", "price": "500", "taxe": "", "type": "product" }, "quantity": "1", "taxe": { "name": "", "rate": "", "value": 0 } }],
             checked: 'first',
-            subTotal: 900,
+            subTotal: 0,
+            subTotalProducts: 0,
             taxe: 0,
             taxes: [],
-            total: 900,
+            total: 0,
             primeCEE: 0,
             primeRenov: 0,
             aidRegion: 0,
             discount: 0,
             discountError: "",
             validated: true,
+
+            //Prices Summary
+            totalNetHT: 0,
+            totalTTC: 0,
+            totalNet: 0,
 
             discountValidationStep: "",
             enableSubmit: true,
@@ -149,7 +166,7 @@ class CreateOrder extends Component {
         this.setState({ order }) //For pdf generation
         order = await this.setOrder(order)
         if (!order) return
-        this.calculateTotals(order.taxes)
+        this.calculatePrices(order.orderLines)
         if (!order.validated) { //Validation pending...
             this.setDiscountPopUp()
             this.runOrderListener()
@@ -166,11 +183,6 @@ class CreateOrder extends Component {
         return order
     }
 
-    calculateTotals(taxes) {
-        const { orderLines } = this.state
-        const subTotal = this.calculateSubTotal(orderLines)
-        this.calculateTotal(subTotal, taxes)
-    }
 
     setDiscountPopUp() {
         if (this.isHighrole)
@@ -257,7 +269,7 @@ class CreateOrder extends Component {
         // }
 
         //Set order
-        const properties = ["project", "state", "orderLines", "subTotal", "taxes", "primeCEE", "primeRenov", "aidRegion", "discount", "total", "validated"]
+        const properties = ["project", "state", "orderLines", "subTotal", "subTotalProducts", "taxes", "primeCEE", "primeRenov", "aidRegion", "discount", "total", "validated"]
         let order = unformatDocument(this.state, properties, this.props.currentUser, this.isEdit)
         order.validated = !notifyAdmin
 
@@ -294,18 +306,39 @@ class CreateOrder extends Component {
         if (overwriteIndex.toString())
             orderLines[overwriteIndex] = orderLine
         else orderLines.push(orderLine)
-        this.setState({ orderLines })
+        this.calculatePrices(orderLines)
+    }
 
-        const subTotal = this.calculateSubTotal(orderLines)
-        this.setState({ subTotal })
+    removeOrderLine(key) {
+        let { orderLines } = this.state
+        orderLines.splice(key, 1)
+        this.calculatePrices(orderLines)
+    }
 
+    calculatePrices(orderLines) {
+        const { discount, primeCEE, primeRenov, aidRegion } = this.state
+
+        //Subtotal
+        let subTotal = 0
+        for (const orderLine of orderLines) {
+            subTotal = subTotal + orderLine.quantity * orderLine.price
+        }
+
+        //Products OrderLines
+        const productsOrderLines = orderLines.filter((orderLine) => orderLine.priority === 0)
+        let subTotalProducts = 0
+        for (const productsOrderLine of productsOrderLines) {
+            subTotalProducts = subTotalProducts + productsOrderLine.quantity * productsOrderLine.price
+        }
+
+        //Taxes
         const taxes = this.setTaxes(orderLines)
-        this.calculateTotal(subTotal, taxes)
+
+        this.setState({ orderLines, subTotal, subTotalProducts, taxes })
     }
 
     setTaxes(orderLines) {
         const taxesTemp = orderLines.map((orderLine) => orderLine.taxe) //taxe = {name, rate, value} ; value = taxe*price*quantity
-
         var holder = {}
 
         //Sum up taxes with same rate
@@ -327,36 +360,9 @@ class CreateOrder extends Component {
             })
         }
 
+        console.log('555', taxes)
+
         return taxes
-    }
-
-    removeOrderLine(key) {
-        let { orderLines } = this.state
-        orderLines.splice(key, 1)
-        this.setState({ orderLines })
-        const subTotal = this.calculateSubTotal(orderLines)
-        const { taxes } = this.state
-        this.calculateTotal(subTotal, taxes)
-    }
-
-    calculateSubTotal(orderLines) {
-        let subTotal = 0
-        for (const orderLine of orderLines) {
-            subTotal = subTotal + orderLine.quantity * orderLine.price
-        }
-        return subTotal
-    }
-
-    calculateTotal(subTotal, taxes) {
-        let total = subTotal
-
-        if (taxes.length > 0) {
-            var taxeValues = taxes.map(taxe => taxe.value)
-            const sumTaxes = taxeValues.reduce((prev, next) => prev + next)
-            total = total + sumTaxes
-        }
-
-        this.setState({ total })
     }
 
     //RENDERERS
@@ -401,20 +407,37 @@ class CreateOrder extends Component {
         )
     }
 
-    renderSummary() {
-        const { total, subTotal, primeCEE, primeRenov, aidRegion, discount } = this.state
-        const discountValue = (subTotal * discount) / 100
-        const totalNet = total - primeCEE - primeRenov - aidRegion - discountValue
+    renderSummary() { //totalNetHT, 
+        const { orderLines, total, taxes, subTotal, subTotalProducts, primeCEE, primeRenov, aidRegion, discount } = this.state
+        const showTotalNetHT = primeCEE > 0 || primeRenov > 0 || aidRegion > 0 || discount > 0
+
+        //Discount on products only (not on services)
+        const discountValue = (subTotalProducts * discount) / 100
+
+        const totalNetHT = subTotal - discountValue - primeCEE - primeRenov - aidRegion
+        let totalTTC = totalNetHT
+        if (taxes.length > 0) {
+            var taxeValues = taxes.map(taxe => taxe.value)
+            const sumTaxes = taxeValues.reduce((prev, next) => prev + next)
+            totalTTC = totalTTC + sumTaxes
+        }
+
         return (
-            <View>
+            <View style={{ marginTop: theme.padding }}>
                 <SummaryRow label="Total H.T" valuePrefix="€" value={subTotal} />
-                {this.renderTaxes()}
-                <SummaryRow label="Total T.T.C" valuePrefix="€" value={total} />
+                <SummarySeparator />
+
+                {discount > 0 && <SummaryRow label={`Remise (${discount}%)`} valuePrefix="- €" value={discountValue} />}
                 {primeCEE > 0 && <SummaryRow label="Prime Cee" valuePrefix="- €" value={primeCEE} />}
-                {primeRenov > 0 && <SummaryRow label="Prime Renov" valuePrefix="- €" value={primeRenov} />}
+                {primeRenov > 0 && <SummaryRow label="Maprimerévov" valuePrefix="- €" value={primeRenov} />}
                 {aidRegion > 0 && <SummaryRow label="Aides région" valuePrefix="- €" value={aidRegion} />}
-                {discount > 0 && <SummaryRow label="Remise" valuePrefix="- %" value={discount} />}
-                <SummaryRow label="Net à payer" valuePrefix="€" value={totalNet} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
+                {showTotalNetHT && <SummaryRow label="Total Net HT" valuePrefix="€" value={totalNetHT} />}
+                {showTotalNetHT && <SummarySeparator />}
+
+                {this.renderTaxes()}
+                <SummaryRow label="Total T.T.C" valuePrefix="€" value={totalTTC} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
+
+                {/* <SummaryRow label="Net à payer" valuePrefix="€" value={totalTTC} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} /> */}
             </View >
         )
     }
@@ -424,7 +447,7 @@ class CreateOrder extends Component {
         if (taxes.length === 0) return null
         return taxes.map((taxe) => {
             const { name, value } = taxe
-            return <SummaryRow label={`TVA ${taxe.name}`} valuePrefix="%" value={value} />
+            return <SummaryRow label={`TVA (${taxe.name}%)`} valuePrefix="€" value={value} />
         })
     }
 
@@ -491,14 +514,13 @@ class CreateOrder extends Component {
         const isPendingAdmin = discountValidationStep === "pendingAdmin"
         const isConfirm = discountValidationStep === "confirmed"
         const isCancelable = isWarning || isPendingCom || isPendingAdmin
+        const isSubmittable = isWarning || isPendingAdmin
 
         const backgroundColor = isWarning ? theme.colors.error : isPendingCom ? "#616161" : "green"
+        const widthButton = constants.ScreenWidth * 0.5 - theme.padding * 1.75
 
         return (
-            <TouchableOpacity
-                style={[styles.discountPopUp, { backgroundColor }]}
-                onPress={this.onPressDiscountPopUp}
-            >
+            <View style={[styles.discountPopUp, { backgroundColor }]}>
                 <View style={{ flexDirection: 'row' }}>
                     <View style={{ justifyContent: 'center', paddingRight: theme.padding }}>
                         <CustomIcon icon={isWarning ? faExclamationTriangle : faCheckCircle} color='white' />
@@ -512,16 +534,30 @@ class CreateOrder extends Component {
                         </Text>
                     </View>
                 </View>
-                {isCancelable &&
-                    <Button
-                        mode="outlined"
-                        onPress={this.cancelDiscount}
-                        style={[styles.discountCancelButton, { backgroundColor }]}
-                        labelStyle={{ color: theme.colors.white }}
-                    >
-                        Annuler la remise
-                     </Button>
-                }
+
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    {isCancelable &&
+                        <Button
+                            mode="outlined"
+                            onPress={this.cancelDiscount}
+                            style={[styles.discountCancelButton, { backgroundColor, width: widthButton }]}
+                            labelStyle={{ color: theme.colors.white }}
+                        >
+                            {(isWarning || isPendingCom) ? "Annuler" : isPendingAdmin ? "Refuser" : ""}
+                        </Button>
+                    }
+                    {isSubmittable &&
+                        <Button
+                            mode="outlined"
+                            onPress={this.onPressDiscountPopUp}
+                            style={[styles.discountCancelButton, { backgroundColor, width: widthButton }]}
+                            labelStyle={{ color: theme.colors.white }}
+                        >
+                            {isWarning ? "Notifier" : isPendingAdmin ? "Valider" : ""}
+                        </Button>
+                    }
+                </View>
+
                 {isConfirm &&
                     <CustomIcon
                         icon={faTimes}
@@ -530,7 +566,7 @@ class CreateOrder extends Component {
                         style={{ position: "absolute", right: 8, top: 8 }}
                     />
                 }
-            </TouchableOpacity>
+            </View>
         )
     }
 
@@ -545,8 +581,6 @@ class CreateOrder extends Component {
         const { isConnected } = this.props.network
 
         const pdfGenButtonLabel = `Générer ${articles_fr('le', masculins, docType)} ${docType}`
-
-        console.log("discountValidationStep", discountValidationStep)
 
         if (docNotFound)
             return (
@@ -659,7 +693,9 @@ class CreateOrder extends Component {
                                             returnKeyType="done"
                                             keyboardType='numeric'
                                             value={primeCEE}
-                                            onChangeText={primeCEE => this.setState({ primeCEE })}
+                                            onChangeText={primeCEE => {
+                                                this.setState({ primeCEE })
+                                            }}
                                         />
 
                                         <MyInput
@@ -667,7 +703,10 @@ class CreateOrder extends Component {
                                             returnKeyType="done"
                                             keyboardType='numeric'
                                             value={primeRenov}
-                                            onChangeText={primeRenov => this.setState({ primeRenov })}
+                                            onChangeText={primeRenov => {
+                                                this.setState({ primeRenov })
+
+                                            }}
                                         />
 
                                         <MyInput
@@ -675,7 +714,9 @@ class CreateOrder extends Component {
                                             returnKeyType="done"
                                             keyboardType='numeric'
                                             value={aidRegion}
-                                            onChangeText={aidRegion => this.setState({ aidRegion })}
+                                            onChangeText={aidRegion => {
+                                                this.setState({ aidRegion })
+                                            }}
                                         />
                                     </View>
                                 }
@@ -686,14 +727,18 @@ class CreateOrder extends Component {
                                 sectionIcon={faHandsUsd}
                                 form={
                                     <View style={{ flex: 1, paddingTop: 10 }}>
-                                        <MyInput
-                                            label="Remise (%)"
-                                            returnKeyType="done"
-                                            keyboardType='numeric'
+                                        <Picker
+                                            title="Remise (%)"
+                                            returnKeyType="next"
                                             value={discount}
-                                            onChangeText={discount => this.setState({ discount })}
+                                            selectedValue={discount}
+                                            onValueChange={(discount) => {
+                                                this.setState({ discount })
+                                            }}
                                             error={!!discountError}
                                             errorText={discountError}
+                                            elements={discounts}
+                                            enabled={canWrite}
                                         />
                                     </View>
                                 }
