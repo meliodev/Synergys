@@ -1,14 +1,19 @@
 
 import * as React from 'react';
-import { Card, Title, Paragraph } from 'react-native-paper';
+import { Card, Text, Paragraph } from 'react-native-paper';
+import * as theme from '../core/theme'
 
 const NewsItem = ({ title, uri, overview, onPress, style, ...props }) => {
-    console.log('uri', uri)
+
+    //  title = title.replaceAll('&rsquo;', "'")
+    title = title.replace(/&rsquo;/g, "'");
+    title = title.replace(/&#8217;/g, "'");
+
     return (
-        <Card onPress= {onPress} style={style}>
-            <Card.Cover source={{ uri: uri }} />
+        <Card onPress={onPress} style={style}>
+            <Card.Cover source={{ uri }} />
             <Card.Content>
-                <Title>{title}</Title>
+                <Text style={[theme.customFontMSregular.body, { paddingTop: theme.padding }]}>{title}</Text>
                 {/* <Paragraph>{overview}</Paragraph> */}
             </Card.Content>
         </Card>

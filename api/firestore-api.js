@@ -47,6 +47,7 @@ export function fetchDocuments(query) {
       for (const doc of querySnapshot.docs) {
         let data = doc.data()
         data.id = doc.id
+        documents.push(data)
       }
       return documents
     })
@@ -56,12 +57,14 @@ export function fetchDocuments(query) {
 export function fetchDocument(collection, id, subCollection, subId) {
   let query = db.collection(collection).doc(id)
   if (subCollection) query = query.collection(subCollection).doc(subId)
-  return query.get().then((doc) => {
-    if (!doc.exists) return null
-    let data = doc.data()
-    data.id = doc.id
-    return data
-  })
+  return query.get()
+    .then((doc) => {
+      if (!doc.exists) return null
+      let data = doc.data()
+      data.id = doc.id
+      return data
+    })
+    .catch((e) => { throw new Error('Erreur lors de la connection avec la base de données. Veuillez réessayer plus tard.') })
 }
 
 //#TEAMS
@@ -146,20 +149,18 @@ export const createClient = async function createClient(userData, ClientId, isCo
     userType: 'client',
     createdBy: { id: auth.currentUser.uid, fullName: auth.currentUser.displayName },
     createdAt: moment().format(),
-    deleted: false
+    isPro,
   }
 
   if (isPro) {
     client.denom = denom.value
     client.siret = siret.value
-    client.isPro = true
     client.fullName = denom.value
   }
 
   else if (!isPro) {
     client.nom = nom.value
     client.prenom = prenom.value
-    client.isPro = false
     client.fullName = `${prenom.value} ${nom.value}`
   }
 

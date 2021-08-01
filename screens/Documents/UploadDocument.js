@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert } from 'react-native';
 import { Card, Title, TextInput } from 'react-native-paper'
 import DocumentPicker from 'react-native-document-picker';
-import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages, faInfoCircle } from '@fortawesome/pro-light-svg-icons'
+import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages, faInfoCircle, faSignature, faFileSignature, } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 
@@ -30,7 +30,7 @@ import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants, errorMessages } from "../../core/constants";
+import { constants, errorMessages, highRoles } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -61,8 +61,8 @@ const genFicheEEBSources = [
     { label: 'Une nouvelle simulation', value: 'newSimulation', icon: faFilePlus },
 ]
 
-const genPV = [
-    { label: 'Un formulaire existant', value: 'oldForm', icon: faFileSearch },
+const genFormSources = [
+    { label: 'Un formulaire existant existante', value: 'oldForm', icon: faFileSearch },
     { label: 'Une nouveau formulaire', value: 'newForm', icon: faFilePlus },
 ]
 
@@ -112,12 +112,13 @@ class UploadDocument extends Component {
         this.onGoBack = this.props.navigation.getParam('onGoBack', undefined) //Not editable
 
         this.currentRole = this.props.role.id
+        this.isHighrole = highRoles.includes(this.currentRole)
         this.types = setPickerDocTypes(this.currentRole, this.dynamicType, this.documentType)
         this.docSources = docSources
         this.imageSources = imageSources
         this.genOrderSources = genOrderSources
         this.genFicheEEBSources = genFicheEEBSources
-        this.genPV = genPV
+        this.genFormSources = genFormSources
 
         const defaultState = this.setDefaultState()
 
@@ -394,7 +395,7 @@ class UploadDocument extends Component {
         else { //this.isEdit || !this.isEdit && this.documentType
             let modalContent = ''
             const { type } = this.state
-            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception']
+            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov']
             let isGenerable = generableTypes.includes(type)
             if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
@@ -510,11 +511,11 @@ class UploadDocument extends Component {
             }
         }
 
-        else if (modalContent === 'genPV') {
+        else if (modalContent === 'genFormSources') {
             return {
-                title: `Générer un PV récéption à partir de:`,
+                title: `Générer un ${type} à partir de:`,
                 columns: 2,
-                elements: this.genPV,
+                elements: this.genFormSources,
             }
         }
     }
@@ -544,7 +545,7 @@ class UploadDocument extends Component {
         else if (modalContent === 'imageSources')
             await this.configImageSources(index)
 
-        else if (modalContent === 'genOrderSources' || modalContent === 'genFicheEEBSources' || modalContent === 'genPV')
+        else if (modalContent === 'genOrderSources' || modalContent === 'genFicheEEBSources' || modalContent === 'genFormSources')
             this.startGenPdf(index)
 
         this.setState({ modalLoading: false })
@@ -554,7 +555,7 @@ class UploadDocument extends Component {
     configDocTypes(index) {
         const type = this.types[index].value
         this.setState({ type })
-        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception']
+        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov']
         let isGenerable = generableTypes.includes(type)
         if (isGenerable) this.setState({ modalContent: 'docSources' })
         else this.setState({ modalContent: 'imageSources' })
@@ -572,8 +573,8 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
-            if (type === 'PV réception')
-                this.setState({ modalContent: 'genPV' })
+            if (type === 'PV réception' || type === 'Mandat MaPrimeRénov')
+                this.setState({ modalContent: 'genFormSources' })
             else if (type === 'Devis')
                 this.startGenPdf(1)
         }
@@ -664,8 +665,14 @@ class UploadDocument extends Component {
             var popCount = index === 0 ? 2 : 1
         }
 
+        else if (type === "Mandat MaPrimeRénov") {
+            var titleText = "Choix du formulaire"
+            var listScreen = "ListForms"
+            var creationScreen = "CreateMandatMPR"
+            var popCount = index === 0 ? 2 : 1
+        }
+
         else if (type === "PV réception") {
-            console.log('5555555555555555555555555555555555555555')
             var titleText = "Choix du formulaire"
             var listScreen = "ListForms"
             var creationScreen = "CreatePvReception"
@@ -763,7 +770,7 @@ class UploadDocument extends Component {
 
             return (
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
-                    <CustomIcon icon={faPen} size={21} color={theme.colors.placeholder} />
+                    <CustomIcon icon={faFileSignature} size={21} color={theme.colors.placeholder} />
                     <View>
                         <Text numberOfLines={1} style={[theme.customFontMSregular.body, { marginLeft: 15 }]}>
                             <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>{signedBy.fullName} </Text>
@@ -791,14 +798,13 @@ class UploadDocument extends Component {
         const attachmentUploaded = attachment && !attachment.pending
         const isEditAndAttachmentUploaded = this.isEdit && attachmentUploaded
         const allowViewDocument = isEditAndAttachmentUploaded
-        const showSignatures = this.isEdit && signatures.length > 0
-
+        const showSignatures = signatures.length > 0
+        //Valider la date de la visite technique
         const showDocOperations = isEditAndAttachmentUploaded
         const isGeneratedQuote = type === 'Devis' && orderData
-        const allowConversion = isGeneratedQuote
+        const allowConversion = isGeneratedQuote && this.isHighRole
         const allowSign = canUpdate || this.props.role.id === 'client'
-
-        // console.log('name', name)
+        const showType = type !== '' && project.id !== "" && attachment
 
         if (docNotFound)
             return (
@@ -836,18 +842,43 @@ class UploadDocument extends Component {
 
                     <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: constants.ScreenWidth * 0.02 }}>
 
+
+                        {showSignatures &&
+                            <FormSection
+                                sectionTitle='Signatures'
+                                sectionIcon={faSignature}
+                                form={
+                                    <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+                                        {this.renderSignees()}
+                                    </View>
+                                }
+                            />
+                        }
+
+                        {this.isEdit &&
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation={this.props.navigation}
+                            />
+                        }
+
                         <FormSection
                             sectionTitle='Informations générales'
                             sectionIcon={faInfoCircle}
                             form={
                                 <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                                    <MyInput
-                                        label="Numéro du document"
-                                        returnKeyType="done"
-                                        value={this.DocumentId}
-                                        editable={false}
-                                        disabled
-                                    />
+                                    {this.isEdit &&
+                                        <MyInput
+                                            label="Numéro du document"
+                                            returnKeyType="done"
+                                            value={this.DocumentId}
+                                            editable={false}
+                                            disabled
+                                        />
+                                    }
 
                                     <ItemPicker
                                         onPress={() => {
@@ -864,7 +895,7 @@ class UploadDocument extends Component {
 
                                     {project.id !== "" && this.renderAttachment(canWrite)}
 
-                                    {type !== '' && project.id !== "" &&
+                                    {showType &&
                                         <MyInput
                                             label="Type *"
                                             returnKeyType="done"
@@ -923,25 +954,6 @@ class UploadDocument extends Component {
                             }
                         />
 
-                        {showSignatures &&
-                            <Card style={{ margin: 5 }}>
-                                <Card.Content>
-                                    <Title>Signatures</Title>
-                                    {this.renderSignees()}
-                                </Card.Content>
-                            </Card>
-                        }
-
-                        {this.isEdit &&
-                            <ActivitySection
-                                createdBy={createdBy}
-                                createdAt={createdAt}
-                                editedBy={editedBy}
-                                editedAt={editedAt}
-                                navigation={this.props.navigation}
-                            />
-                        }
-
                     </ScrollView>
 
                     {showDocOperations &&
@@ -995,6 +1007,7 @@ export default connect(mapStateToProps)(UploadDocument)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.white
     },
     fab: {
         //flex: 1,

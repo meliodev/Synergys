@@ -50,3 +50,18 @@ export const errorMessages = {
     documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer."
 }
+
+export const phases = [
+    { label: 'Prospect', value: 'Prospect', id: 'init' },
+    { label: 'Visite technique préalable', value: 'Visite technique préalable', id: 'rd1' },
+    { label: 'Présentation étude', value: 'Présentation étude', id: 'rdn' },
+    { label: 'Visite technique', value: 'Visite technique', id: 'technicalVisitManagement' },
+    { label: 'Installation', value: 'Installation', id: 'installation' },
+    { label: 'Maintenance', value: 'Maintenance', id: 'maintenance' },
+]
+
+export const items_scrollTo = {
+    "CreateProject": {
+        "comContact": { x: 0, y: 1000, animated: true },
+    }
+}

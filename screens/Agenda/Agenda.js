@@ -109,6 +109,7 @@ class Agenda2 extends Component {
             filterOpened: false,
 
             selectedDay: moment().format('YYYY-MM-DD'),
+            currentMonthYear: moment().format('MMMM YYYY'),
             refreshing: false,
         }
     }
@@ -201,7 +202,7 @@ class Agenda2 extends Component {
     }
 
     onDayPress(selectedDay) {
-        this.setState({ selectedDay })
+        this.setState({ selectedDay, currentMonthYear: `${moment(selectedDay.dateString).format('MMMM YYYY')}` })
     }
 
     renderDay(dateObject, item) {
@@ -268,7 +269,7 @@ class Agenda2 extends Component {
     render() {
         const roleId = this.props.role.id
         const { canCreate } = this.props.permissions.tasks
-        let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing } = this.state
+        let { isAgenda, displayType, items, filteredItems, taskItems, filteredTaskItems, type, status, priority, assignedTo, project, filterOpened, refreshing, currentMonthYear } = this.state
         const filterActivated = !_.isEqual(items, filteredItems)
         const isHighrole = highRoles.includes(this.props.role.id)
 
@@ -278,6 +279,7 @@ class Agenda2 extends Component {
                     <PickerBar
                         main={this}
                         menu={this.isRoot}
+                        titleText= {currentMonthYear}
                         //Refresh
                         refresh
                         onRefresh={() => this.refreshItems(true)}
@@ -290,7 +292,12 @@ class Agenda2 extends Component {
                         project={project}
                         assignedTo={assignedTo} />
                     :
-                    <Appbar back={!this.isRoot} menu={this.isRoot} title titleText='Mon agenda' />
+                    <Appbar
+                        back={!this.isRoot}
+                        menu={this.isRoot}
+                        title
+                        titleText='Mon agenda'
+                    />
                 }
 
                 {isHighrole && <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />}
@@ -406,8 +413,9 @@ const styles = StyleSheet.create({
         marginTop: -3
     },
     dayText: {
-        fontFamily: '-Medium',
-        fontSize: 12,
+        fontFamily: 'Montserrat-Medium',
+        marginLeft: 2,
+        fontSize: 10,  
         letterSpacing: 1,
         color: theme.colors.gray_googleAgenda
     }

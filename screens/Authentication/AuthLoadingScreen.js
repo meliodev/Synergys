@@ -13,6 +13,7 @@ import SplashScreen from 'react-native-splash-screen'
 import Button from "../../components/Button"
 import Background from "../../components/NewBackground"
 import Loading from "../../components/Loading"
+import AppVersion from "../../components/AppVersion"
 
 import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
@@ -57,8 +58,8 @@ class AuthLoadingScreen extends Component {
   async componentDidMount() {
     SplashScreen.hide()
 
-    //1. Notification action listeners
-    const isUpToDate = this.checkAppVersion()
+    // //1. Notification action listeners
+    // const isUpToDate = this.checkAppVersion()
     // if (!isUpToDate) {
     //   Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
     //   this.setState({ requiresUpdate: true })
@@ -223,7 +224,7 @@ class AuthLoadingScreen extends Component {
         }
 
         else {
-          var routeName = roleValue !== 'Client' ? "App" : "ProjectsStack"
+          var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
           var routeParams = {}
         }
       }
@@ -347,6 +348,14 @@ class AuthLoadingScreen extends Component {
     Linking.openURL(appDowloadLink)
   }
 
+  renderAppVersion() {
+    return (
+      <View style={{ position: "absolute", bottom: theme.padding, right: theme.padding }}>
+        <AppVersion />
+      </View>
+    )
+  }
+
   render() {
     const { progress, requiresUpdate } = this.state
 
@@ -366,12 +375,13 @@ class AuthLoadingScreen extends Component {
           <Button
             mode="contained"
             onPress={this.downloadApp}
-            style={{ position: 'absolute', bottom: constants.ScreenHeight * 0.2, width: constants.ScreenWidth*0.75, alignSelf: 'center' }}
+            style={{ position: 'absolute', bottom: constants.ScreenHeight * 0.2, width: constants.ScreenWidth * 0.75, alignSelf: 'center' }}
             outlinedColor={theme.colors.primary}
           >
             Mettre à jour
           </Button>
         }
+        {this.renderAppVersion()}
       </Background>
     )
   }

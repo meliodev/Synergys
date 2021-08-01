@@ -120,7 +120,9 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
                         onPress={onPressCheck}
                         color={theme.colors.primary}
                     />
-                    <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>Saisir l'adresse manuellement</Text>
+                    <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]} onPress={onPressCheck}>
+                        Saisir l'adresse manuellement
+                    </Text>
                 </View>
 
                 <ModalOptions

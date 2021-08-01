@@ -18,7 +18,7 @@ import SquareOption from '../components/SquareOption';
 import { constants } from '../core/constants';
 
 import * as theme from '../core/theme'
-import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile, setAddress, refreshAddress } from '../core/utils';
+import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile, setAddress, refreshAddress, displayError } from '../core/utils';
 import { db } from '../firebase';
 import ModalHeader from '../components/ModalHeader';
 import { ScrollView } from 'react-native';
@@ -65,6 +65,7 @@ class StepsForm extends Component {
             docNotFound: false,
             submitted: false,
             readOnly: this.isEdit,
+            isEdit: this.isEdit,
             initialLoading: true,
             ...this.props.initialState
         }
@@ -72,18 +73,28 @@ class StepsForm extends Component {
 
     //##Initialization
     async componentDidMount() {
-        setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
-        if (this.isEdit) await this.initEditMode()
-        this.initialState = _.cloneDeep(this.state)
-        this.setState({ initialLoading: false })
+        try {
+            setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
+            if (this.state.isEdit) await this.initEditMode()
+            this.initialState = _.cloneDeep(this.state)
+            this.setState({ initialLoading: false })
+        }
+        catch (e) {
+            displayError({ message: e.message })
+        }
     }
 
     async initEditMode() {
-        let document = await fetchDocument(this.props.collection, this.DocId)
-        document = this.setDocument(document)
-        if (!document) return
-        const pdfBase64 = await this.props.generatePdf(document, this.props.collection)
-        this.setState({ pdfBase64 })
+        try {
+            let document = await fetchDocument(this.props.collection, this.DocId)
+            document = this.setDocument(document)
+            if (!document) return
+            const pdfBase64 = await this.props.generatePdf(document, this.props.collection)
+            this.setState({ pdfBase64 })
+        }
+        catch (e) {
+            throw new Error(e)
+        }
     }
 
     setDocument(document) {
@@ -109,7 +120,7 @@ class StepsForm extends Component {
                         <TouchableOpacity
                             style={{ flexDirection: "row", alignItems: "center" }}
                             onPress={() => {
-                                if (!this.isEdit) return
+                                if (!this.state.isEdit) return
                                 //Verify fields
                                 const isValid = this.verifyFields(this.state.pageIndex)
                                 if (!isValid) return
@@ -433,14 +444,17 @@ class StepsForm extends Component {
                     )
 
                 case "checkbox":
+                    const onPressCheckBox = () => this.setState({ disablePhoneContact: !this.state.disablePhoneContact })
                     return (
                         <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
                             <Checkbox
                                 status={this.state.disablePhoneContact ? 'unchecked' : 'checked'}
-                                onPress={() => this.setState({ disablePhoneContact: !this.state.disablePhoneContact })}
+                                onPress={onPressCheckBox}
                                 color={theme.colors.primary}
                             />
-                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{label}</Text>
+                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]} onPress={onPressCheckBox}>
+                                {label}
+                            </Text>
                         </View>
                     )
                     break;
@@ -525,12 +539,15 @@ class StepsForm extends Component {
         if (pages[pageIndex].isLast)
             this.setState({ stepIndex: stepIndex + 1 })
 
-        //Show results
+        //Show results or submit
         const isLastFormPage = pageIndex === pages.length - 2
         const isSubmit = pages[pageIndex].id === 'submit'
 
         if (isLastFormPage) {
-            this.setResults(collection === "Eeb")
+            if (collection === "Simulations")
+                this.setResults()
+
+            else this.handleSubmit()
         }
 
         else if (isSubmit) {
@@ -628,12 +645,12 @@ class StepsForm extends Component {
     }
 
     //##Logic: Submit
-    handleSubmit() {
+    async handleSubmit() {
 
         this.setState({ loading: true })
 
         //Verify onPress Check icon
-        if (this.isEdit) {
+        if (this.state.isEdit) {
             const isValid = this.verifyFields(this.state.pageIndex)
             if (!isValid) {
                 this.setState({ loading: false })
@@ -642,44 +659,26 @@ class StepsForm extends Component {
         }
 
         const { idPattern, collection } = this.props
-        const DocId = this.isEdit ? this.DocId : generateId(idPattern)
+        const DocId = this.state.isEdit ? this.DocId : generateId(idPattern)
         let form = this.unformatDocument()
         form = this.addFormLogs(form)
-      //  db.collection(collection).doc(DocId).set(form)
 
-        
-        this.isEdit = true
+        db.collection(collection).doc(DocId).set(form)
+
+        const pdfBase64 = await this.props.generatePdf(form, this.props.collection)
+
         this.DocId = DocId
         this.setState({
+            pdfBase64,
             pageIndex: 0,
             pagesDone: [],
             submitted: true,
             readOnly: true,
+            isEdit: true,
             loading: false,
             toastMessage: "Formulaire enregistré avec succès !",
             toastType: "success"
         })
-    }
-
-    addFormLogs(form) {
-
-        if (!this.isEdit) {
-            form.createdAt = moment().format()
-            form.createdBy = this.props.currentUser
-
-            //Add draft tag
-            if (this.state.pageIndex < this.props.pages.length - 1)
-                form.isDraft = true
-        }
-
-        else form.isDraft = false
-
-        form.editedAt = moment().format()
-        form.editedBy = this.props.currentUser
-        //Add project reference if we are on process context
-        if (this.project)
-            form.project = this.project
-        return form
     }
 
     unformatDocument() {
@@ -704,18 +703,39 @@ class StepsForm extends Component {
         delete state.initialLoading
         delete state.submitted
         delete state.readOnly
+        delete state.isEdit
         return state
     }
 
+    addFormLogs(form) {
+
+        if (!this.state.isEdit) {
+            form.createdAt = moment().format()
+            form.createdBy = this.props.currentUser
+
+            //Add draft tag
+            if (this.state.pageIndex < this.props.pages.length - 1)
+                form.isDraft = true
+        }
+
+        else {
+            form.isDraft = false //#task: false user can edit and not finish again the form (we have to tag the form once user reach final page)
+        }
+
+        form.editedAt = moment().format()
+        form.editedBy = this.props.currentUser
+        form.deleted = false
+        //Add project reference if we are on process context
+        if (this.project)
+            form.project = this.project
+        return form
+    }
+
     //##Logic: Results
-    async setResults(calculEstimation) {
-        this.setState({ loading: true })
-
-        const form = this.unformatDocument()
-        const pdfBase64 = await this.props.generatePdf(form, this.props.collection)
-        this.setState({ pdfBase64 })
-
-        if (calculEstimation) {
+    async setResults() {
+        return new Promise((resolve, reject) => {
+            this.setState({ loading: true })
+            const form = this.unformatDocument()
             const products = this.setProducts(form)
             const colorCat = this.setColorCat(form)
             const estimation = this.setEstimation(products, colorCat)
@@ -727,10 +747,8 @@ class StepsForm extends Component {
                 showSuccessMessage: true,
                 pageIndex: this.state.pageIndex + 1,
                 loading: false
-            })
-        }
-
-        else this.handleSubmit()
+            }, () => resolve())
+        })
     }
 
     setProducts(form) {
@@ -962,9 +980,9 @@ class StepsForm extends Component {
     }
 
     handleBackButtonClick() {
-        const { showWelcomeMessage, submitted, readOnly } = this.state
+        const { showWelcomeMessage, submitted, readOnly, isEdit } = this.state
 
-        if (!this.isEdit && !showWelcomeMessage && !submitted) {
+        if (!isEdit && !showWelcomeMessage && !submitted) {
             const title = "Abandonner"
             const message = 'Les données saisies seront perdues. Êtes-vous sûr de vouloir annuler ?'
             const handleConfirm = () => this.props.navigation.goBack(null);
@@ -1011,18 +1029,19 @@ class StepsForm extends Component {
             </Button>
         )
     }
+
     //##Overview
     renderOverview() {
         const form = this.unformatDocument()
-        const { readOnly } = this.state
+        const { readOnly, isEdit } = this.state
         const { pages, collection } = this.props
 
         let showSummary = false
-        if (collection === "Eeb") {
+        if (collection === "Simulations") {
             const { colorCat, estimation } = form
             const products = form.products.join(', ')
 
-            const summary = [
+            var summary = [
                 { title: "Couleur", value: colorCat, isColor: true },
                 { title: "Produits recommandés", value: products },
                 { title: "Estimation", value: `${estimation} €` },
@@ -1083,7 +1102,7 @@ class StepsForm extends Component {
                                 if (values)
                                     return (
                                         <TouchableOpacity
-                                            onPress={() => this.setState({ pageIndex: index, readOnly: false })}
+                                            onPress={() => this.setState({ pageIndex: index, readOnly: false, submitted: false })}
                                             style={styles.overviewRow}>
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
@@ -1099,20 +1118,22 @@ class StepsForm extends Component {
                     </View>
                 </ScrollView>
 
-                {this.isEdit && readOnly && this.renderBottomCenterButton(this.props.genButtonTitle, this.toggleModal)}
+                {isEdit && readOnly &&
+                    this.renderBottomCenterButton(this.props.genButtonTitle, this.toggleModal)
+                }
 
             </View>
         )
     }
 
     renderContent() {
-        const { initialLoading, readOnly, showWelcomeMessage, showSuccessMessage, submitted } = this.state
+        const { initialLoading, readOnly, showWelcomeMessage, showSuccessMessage, submitted, isEdit } = this.state
         const { pages, steps } = this.props
 
         if (initialLoading)
             return <Loading />
 
-        else if (this.isEdit && readOnly)
+        else if (isEdit && readOnly)
             return this.renderOverview()
 
         else if (showWelcomeMessage && this.props.welcomeMessage) {
@@ -1146,6 +1167,7 @@ class StepsForm extends Component {
             isPdfModalVisible,
             pdfBase64,
             submitted,
+            isEdit,
             readOnly,
             loading,
             initialLoading,
@@ -1153,6 +1175,7 @@ class StepsForm extends Component {
             toastMessage,
             toastType
         } = this.state
+        const { collection } = this.props
 
         if (pdfBase64)
             var source = { uri: `data:application/pdf;base64,${pdfBase64}` }
@@ -1182,8 +1205,12 @@ class StepsForm extends Component {
                     close
                     title
                     check={!readOnly}
-                    handleSubmit={this.handleSubmit}
-                    edit={this.isEdit && readOnly}
+                    handleSubmit={async () => {
+                        if (collection === "Simulations")
+                            await this.setResults()
+                        this.handleSubmit()
+                    }}
+                    edit={isEdit && readOnly}
                     handleEdit={() => this.setState({ submitted: false, readOnly: false })}
                     titleText={this.props.titleText}
                     customBackHandler={this.handleBackButtonClick}

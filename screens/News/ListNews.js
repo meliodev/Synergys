@@ -61,7 +61,8 @@ class ListNews extends Component {
     }
 
     viewNews(newspost) {
-        this.props.navigation.navigate('ViewNews', { newspost })
+      //  console.log(newspost)
+       this.props.navigation.navigate('ViewNews', { newspost })
     }
 
     render() {

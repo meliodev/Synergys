@@ -59,9 +59,8 @@ class AutoCompleteProducts extends React.Component {
         this.myAlert(title, message, handleConfirm)
     }
 
-    async handleDeleteProduct(ProductId) {
-        await db.collection('Products').doc(ProductId).update({ deleted: true })
-            .then(async () => this.props.navigation.goBack())
+    handleDeleteProduct(ProductId) {
+        db.collection('Products').doc(ProductId).delete()
             .catch((e) => displayError({ message: errorMessages.firestore.delete }))
     }
 

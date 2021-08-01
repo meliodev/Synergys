@@ -15,7 +15,6 @@ const iconContainerSize = constants.ScreenWidth * 0.24
 const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
 
     const setIconPhase = (projectStep) => {
-        console.log(project.id, projectStep)
         switch (projectStep) {
             case 'Prospect':
                 return faFolderOpen
@@ -69,7 +68,7 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
             <View style={[styles.iconContainer, { backgroundColor: project.color }]}>
                 <CustomIcon icon={setIconPhase(project.step)} size={iconContainerSize * 0.45} color={theme.colors.white} secondaryColor={theme.colors.secondary} />
             </View>
-            <View style={{ width: iconContainerSize * 1.1 }}>
+            <View style={{ width: iconContainerSize * 1.1, height: iconContainerSize * 0.4 }}>
                 <Text style={[theme.customFontMSregular.caption, { flexWrap: 'wrap', textAlign: 'center', color: theme.colors.secondary }]} numberOfLines={2}>{project.name}</Text>
             </View>
         </TouchableOpacity>
@@ -81,12 +80,12 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 24,
-        //   backgroundColor: 'pink',
+        //backgroundColor: 'pink',
     },
     iconContainer: {
         width: iconContainerSize,
         height: iconContainerSize,
-        borderRadius: constants.ScreenWidth * 0.05,
+        borderRadius: constants.ScreenWidth * 0.033,
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 10

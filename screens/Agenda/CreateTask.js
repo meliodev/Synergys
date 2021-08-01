@@ -88,12 +88,12 @@ class CreateTask extends Component {
 
         this.state = {
             //TEXTINPUTS
-            name: defaultState.name || "",
+            name: defaultState.name || "Normale",
             nameError: "",
             description: "",
 
             //PICKERS
-            type: defaultState.type || 'Normale',
+            type: defaultState.type || '',
             priority: 'Moyenne',
             status: 'En cours',
             color: theme.colors.primary,
@@ -366,8 +366,9 @@ class CreateTask extends Component {
             //specific
             task.id = this.TaskId
             task.date = moment(task.startDate).format('YYYY-MM-DD')
+            task.name = `${task.type} ${task.project.id}`
             delete task.startDate
-            let natures
+            let natures = []
             this.types.forEach((t) => { if (t.value === type) natures = t.natures })
             task.natures = natures
             let tasks = this.isEdit ? [task] : this.buildTasks(task, startDate, endDate)
@@ -657,27 +658,56 @@ class CreateTask extends Component {
 
         else return (
             <View style={styles.container}>
-                <Appbar close title titleText={this.title} check={this.isEdit ? canWrite && !loading : !loading} handleSubmit={() => this.handleSubmit(false)} del={canDelete && this.isEdit && !loading} handleDelete={this.alertDeleteTask} />
+                <Appbar
+                    close
+                    title
+                    titleText={this.title}
+                    check={this.isEdit ? canWrite && !loading : !loading}
+                    handleSubmit={() => this.handleSubmit(false)}
+                    del={canDelete && this.isEdit && !loading}
+                    handleDelete={this.alertDeleteTask}
+                />
 
                 {loading ?
                     <Loading size='large' />
                     :
                     <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
 
+                        {<FormSection
+                            sectionTitle='Créneau horaire'
+                            sectionIcon={faCalendar}
+                            form={this.renderTimeForm(canWrite)}
+                        />}
+
                         <FormSection
                             sectionTitle='Informations générales'
                             sectionIcon={faInfoCircle}
                             form={
                                 <View style={{ flex: 1 }}>
-                                    <MyInput
-                                        label="Numéro de la tâche"
-                                        returnKeyType="done"
-                                        value={this.TaskId}
-                                        editable={false}
-                                        disabled
+                                    {this.isEdit &&
+                                        <MyInput
+                                            label="Numéro de la tâche"
+                                            returnKeyType="done"
+                                            value={this.TaskId}
+                                            editable={false}
+                                            disabled
+                                        />
+                                    }
+
+                                    <Picker
+                                        returnKeyType="next"
+                                        value={type}
+                                        error={!!type.error}
+                                        errorText={type.error}
+                                        selectedValue={type}
+                                        onValueChange={(type) => this.setState({ type })}
+                                        title="Type *"
+                                        elements={this.types}
+                                        enabled={canWrite && this.enableTypePicker} //pre-defined task type
+                                        containerStyle={{ marginBottom: 10 }}
                                     />
 
-                                    <MyInput
+                                    {/* <MyInput
                                         label="Nom de la tâche *"
                                         returnKeyType="done"
                                         value={name}
@@ -686,7 +716,7 @@ class CreateTask extends Component {
                                         errorText={nameError}
                                         editable={canWrite}
                                     // autoFocus={!this.isEdit}
-                                    />
+                                    /> */}
 
                                     <ItemPicker
                                         onPress={() => navigateToScreen(this, 'ListEmployees', {
@@ -714,20 +744,7 @@ class CreateTask extends Component {
                                         editable={canWrite}
                                     />
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={type}
-                                        error={!!type.error}
-                                        errorText={type.error}
-                                        selectedValue={type}
-                                        onValueChange={(type) => this.setState({ type })}
-                                        title="Type *"
-                                        elements={this.types}
-                                        enabled={canWrite && this.enableTypePicker} //pre-defined task type
-                                        containerStyle={{ marginBottom: 10 }}
-                                    />
-
-                                    <Picker
+                                    {/* <Picker
                                         returnKeyType="next"
                                         value={priority}
                                         error={!!priority.error}
@@ -738,35 +755,31 @@ class CreateTask extends Component {
                                         elements={priorities}
                                         enabled={canWrite}
                                         containerStyle={{ marginBottom: 10 }}
-                                    />
+                                    /> */}
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={status}
-                                        error={!!status.error}
-                                        errorText={status.error}
-                                        selectedValue={status}
-                                        onValueChange={(status) => this.setState({ status })}
-                                        title="État *"
-                                        elements={statuses}
-                                        enabled={canWrite}
-                                        containerStyle={{ marginBottom: 10 }}
-                                    />
+                                    {this.isEdit &&
+                                        <Picker
+                                            returnKeyType="next"
+                                            value={status}
+                                            error={!!status.error}
+                                            errorText={status.error}
+                                            selectedValue={status}
+                                            onValueChange={(status) => this.setState({ status })}
+                                            title="État *"
+                                            elements={statuses}
+                                            enabled={canWrite}
+                                            containerStyle={{ marginBottom: 10 }}
+                                        />
+                                    }
 
-                                    <ColorPicker
+                                    {/* <ColorPicker
                                         label='Couleur de la tâche'
                                         selectedColor={color}
                                         updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite} />
+                                        editable={canWrite} /> */}
                                 </View>
                             }
                         />
-
-                        {<FormSection
-                            sectionTitle='Créneau horaire'
-                            sectionIcon={faCalendar}
-                            form={this.renderTimeForm(canWrite)}
-                        />}
 
                         <FormSection
                             sectionTitle='Références'

@@ -340,7 +340,9 @@ class CreateRequest extends Component {
                         this.setState({ productsList })
                     }}
                 />
-                <Text style={[theme.customFontMSregular.body, { marginLeft: 15, flex: 1 }]}>{product.name}</Text>
+                <Text style={[theme.customFontMSregular.body, { marginLeft: 15, flex: 1 }]}>
+                    {product.name}
+                </Text>
             </View>
         )
     }

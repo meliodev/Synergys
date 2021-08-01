@@ -17,8 +17,8 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { downloadDir, roles } from './constants'
-import { ficheEEBModel, PvReceptionModel } from "./forms";
+import { downloadDir, errorMessages, roles } from './constants'
+import { ficheEEBModel, mandatMPRModel, PvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -304,6 +304,7 @@ export const removeDuplicateObjects = (arr) => {
   return filteredArr
 }
 
+
 //##WARNINGS
 export const isEditOffline = (isEdit, isConnected) => {
   if (!isConnected && isEdit) {
@@ -515,9 +516,13 @@ export const generatePdfForm = async (formInputs, pdfType) => {
       var originalPdfBase64 = pvReceptionBase64
       var formPages = PvReceptionModel
     }
-    else if (pdfType === "Eeb") {
+    else if (pdfType === "Simulations") {
       var originalPdfBase64 = ficheEEBBase64
       var formPages = ficheEEBModel
+    }
+    else if (pdfType === "MandatsMPR") {
+      var originalPdfBase64 = mandatMPRBase64
+      var formPages = mandatMPRModel
     }
 
     const pdfDoc = await PDFDocument.load(originalPdfBase64)
@@ -536,6 +541,7 @@ export const generatePdfForm = async (formInputs, pdfType) => {
 
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
+
         if (field.isMultiOptions && formInputs[field.id].length > 0 || formInputs[field.id] !== "") {
 
           let positions = []
@@ -552,8 +558,6 @@ export const generatePdfForm = async (formInputs, pdfType) => {
                 text = text.split('@')
                 text = text.join('                                                               ')
               }
-
-              console.log('................', field.id, field.pdfConfig.pageIndex)
 
               pages[field.pdfConfig.pageIndex].drawText(text,
                 {
@@ -648,10 +652,9 @@ export const generatePdfForm = async (formInputs, pdfType) => {
     const pdfBase64 = uint8ToBase64(pdfBytes)
     return pdfBase64
   }
-
   catch (e) {
     console.log(e)
-    displayError({ message: errorMessages.pdfGen })
+    throw new Error(errorMessages.pdfGen)
   }
 }
 
@@ -774,7 +777,9 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
 
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 import { highRoles } from './constants'
-import { ficheEEBBase64, pvReceptionBase64 } from './files';
+import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
+import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
+import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
@@ -789,7 +794,8 @@ const allDocTypes = [
   { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
   { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
   { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
-  { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
+  // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
+  { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
   { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
   { label: 'PV réception', value: 'PV réception', icon: faReceipt },
@@ -816,10 +822,12 @@ let alltaskTypes = [
   { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
 
+//Documents
 export const setPickerDocTypes = (currentRole, dynamicType, documentType) => {
   return setPickerTypes(currentRole, dynamicType, documentType, publicDocTypes, allDocTypes)
 }
 
+//Tasks
 export const setPickerTaskTypes = (currentRole, dynamicType, documentType) => {
   return setPickerTypes(currentRole, dynamicType, documentType, publicTaskTypes, alltaskTypes)
 }

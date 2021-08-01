@@ -23,6 +23,7 @@ import { sizes } from '../../core/theme'
 import * as theme from '../../core/theme'
 import { constants, errorMessages } from "../../core/constants"
 import { Alert } from "react-native"
+import { groupBy } from "../../core/process"
 
 //urls
 const urlForm = "https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/Templates%2Fdod_character.pdf?alt=media&token=b2c00766-4377-4d31-ad38-fad84eac5376"
@@ -114,6 +115,17 @@ export default class PdfGeneration extends Component {
         return dataArrayFormated
     }
 
+    sortOrderLines(orderLines) {
+        const arrGrouped = groupBy(orderLines, "category")
+        let resultArray = []
+        for (const key in arrGrouped) {
+            const array = arrGrouped[key]
+            array.sort((a, b) => (a.priority > b.priority) ? 1 : -1)
+            resultArray = [...resultArray, ...array]
+        }
+        return resultArray
+    }
+
     async generatePurchaseDoc() {
         try {
             // Create a new PDFDocument
@@ -143,21 +155,17 @@ export default class PdfGeneration extends Component {
 
             //Dynamic data
             const createdAt = moment().format('DD/MM/YYYY')
-            const { orderLines, subTotal, subTotalProducts, taxes, project, primeCEE, primeRenov, aidRegion, discount, editedBy } = this.order
+            const { subTotal, subTotalProducts, taxes, project, primeCEE, primeRenov, aidRegion, discount, editedBy } = this.order
             const client = await db.collection('Clients').doc(project.client.id).get().then((doc) => { return doc.data() })
             const responsable = await db.collection('Users').doc(editedBy.id).get().then((doc) => { return doc.data() })
-
-            const orderLinesSorter1 = (a, b) => (a.product.category > b.product.category) ? 1 : -1
-            orderLines.sort(orderLinesSorter1) //Sort by category in alphabetical order
-            const orderLinesSorter2 = (a, b) => (a.priority > b.priority) ? 1 : -1
-            orderLines.sort(orderLinesSorter2) //Sort Product before Services
-
+            const orderLines = this.sortOrderLines(this.order.orderLines)
             const taxeValues = taxes.map((taxeItem) => taxeItem.value)
             const reducer = (a, b) => Number(a) + Number(b)
             const totalTaxe = taxeValues.reduce(reducer)
             const discountValue = (subTotal * discount) / 100
-            const totalNetHT = subTotal - primeCEE - primeRenov - aidRegion - discountValue
+            const totalNetHT = subTotal - discountValue
             const totalTTC = totalNetHT + totalTaxe
+            const totalNet = totalTTC - primeCEE - primeRenov - aidRegion
 
             //1. HeaderLeft: Logo
             const logoImage = await pdfDoc.embedPng(logoBase64)
@@ -408,12 +416,11 @@ export default class PdfGeneration extends Component {
             marginTop += topBarHeight + cste * 2
             maxWidth = width * 0.5 - padding
 
-            let catNum = 1
+            let catNum = 0
             let subCat = 1
             let category = null
 
             for (let orderLine of orderLines) {
-                //var i = 0
 
                 //Add new page
                 if (marginTop >= height * 0.9) { //Footer = height * 0.1
@@ -436,6 +443,8 @@ export default class PdfGeneration extends Component {
 
                 //Draw category (number and name)
                 if (category !== orderLine.product.category) {
+                    catNum += 1
+                    subCat = 1
 
                     //Cat Num
                     pages[pageIndex].drawText(catNum.toString(),
@@ -452,11 +461,11 @@ export default class PdfGeneration extends Component {
                     //Cat Name
                     category = orderLine.product.category
                     textArray = [category]
-                    textArrayFormated = this.lineBreaker(textArray, timesRomanBoldFont, caption, maxWidth)
+                    textArrayFormated = this.lineBreaker(textArray, timesRomanBoldFont, caption, maxWidth) //to upper case
                     textArrayFormated.forEach((text) => {
                         pages[pageIndex].drawText(text,
                             {
-                                x: secondVerticalLine_x + padding * 0.8,
+                                x: secondVerticalLine_x + padding/2.5,
                                 y: height - marginTop,
                                 size: caption,
                                 font: timesRomanBoldFont,
@@ -478,7 +487,7 @@ export default class PdfGeneration extends Component {
                     const index = key > 0 ? key + 1 : key
                     pages[pageIndex].drawText(row,
                         {
-                            x: marginLeftCalculator(line_x_positions, index),
+                            x: marginLeftCalculator(line_x_positions, index) - 2,
                             y: height - marginTop,
                             size: caption,
                             font: timesRomanFont,
@@ -505,7 +514,6 @@ export default class PdfGeneration extends Component {
                 })
 
                 marginTop = marginTop + cste
-                catNum += 1
                 subCat += 1
             }
 
@@ -578,24 +586,28 @@ export default class PdfGeneration extends Component {
             const priceDatas = [
                 { label: 'Total H.T', value: subTotal.toString() }, //subtotal, primeCEE, primeRenov, AidRegion, discount, taxes 
                 { label: `Remise ${discount > 0 ? discount : ""}${discount > 0 ? "%" : ""}`, value: `-${discountValue.toString()}` },
+                { label: 'Total Net H.T', value: totalNetHT.toString() }, //calculable
+
+                { label: 'TVA', value: totalTaxe.toString() },
+                { label: 'Total T.T.C', value: totalTTC.toString(), pdfConfig: { font: timesRomanBoldFont } }, //calculable
+
                 { label: 'PRIME CEE COUP DE POUCE', value: `-${primeCEE.toString()}` },
                 { label: 'Maprimerévov', value: `-${primeRenov.toString()}` },
                 { label: 'Aides région', value: `-${aidRegion.toString()}` },
-                { label: 'Total Net H.T', value: totalNetHT.toString() }, //calculable
-                { label: 'TVA', value: totalTaxe.toString() },
-                { label: 'Total T.T.C', value: totalTTC.toString() }, //calculable
-                { label: 'Net à payer', value: totalTTC.toString() }, //calculable
+
+                { label: 'Net à payer', value: totalNet.toString(), pdfConfig: { font: timesRomanBoldFont } }, //calculable
             ]
 
             priceDatas.forEach((priceData) => {
                 marginTop += padding + timesRomanFont.heightAtSize(caption)
+                const { pdfConfig } = priceData
 
                 pages[pageIndex].drawText(priceData.label,
                     {
                         x: headerRigth_x_start + padding,
                         y: height - marginTop,
                         size: caption,
-                        font: timesRomanFont,
+                        font: pdfConfig && pdfConfig.font ? pdfConfig.font : timesRomanFont,
                         lineHeight,
                         color: colors.black,
                     })
@@ -605,7 +617,7 @@ export default class PdfGeneration extends Component {
                         x: width - marginRight - padding - timesRomanFont.widthOfTextAtSize(priceData.value, caption),
                         y: height - marginTop,
                         size: caption,
-                        font: timesRomanFont,
+                        font: pdfConfig && pdfConfig.font ? pdfConfig.font : timesRomanFont,
                         lineHeight,
                         color: colors.black,
                     })
@@ -1094,6 +1106,7 @@ export default class PdfGeneration extends Component {
         }
 
         catch (e) {
+            console.log(e)
             displayError({ message: errorMessages.pdfGen })
         }
     }

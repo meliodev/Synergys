@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Platform, ActivityIndicator, Alert } from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, Platform, ActivityIndicator, Alert, BackHandler } from "react-native";
 import { ProgressBar } from 'react-native-paper'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5'
@@ -60,6 +60,10 @@ class Signature extends Component {
         this.retrySign = this.retrySign.bind(this)
         this.confirmSign = this.confirmSign.bind(this)
         this.uploadFile = uploadFile.bind(this)
+        this.handleBackButtonClick = this.handleBackButtonClick.bind(this)
+        this.myAlert = myAlert.bind(this)
+
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
         this.state = {
             fileDownloaded: false,
@@ -113,6 +117,11 @@ class Signature extends Component {
 
     async componentDidMount() {
         await this.init()
+    }
+
+    //##BackHandler
+    componentWillUnmount() {
+        BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
     }
 
     async init() {
@@ -380,6 +389,7 @@ class Signature extends Component {
             //Reset original file
             this.setState({ filePath: this.originalFilePath, newPdfPath: null })
             await this.loadOriginalFile(this.originalFilePath)
+            loadLog(this, false, '')
             //start signature
             this.startSignature()
         }
@@ -515,6 +525,19 @@ class Signature extends Component {
         )
     }
 
+    handleBackButtonClick() {
+        const { newPdfSaved } = this.state
+
+        if (newPdfSaved) {
+            const title = "Annuler la signature"
+            const message = 'La signature ne sera pas enregistré'
+            const handleConfirm = () => this.props.navigation.goBack(null)
+            this.myAlert(title, message, handleConfirm)
+        }
+        else this.props.navigation.goBack(null)
+        return true
+    }
+
 
     render() {
         let { fileDownloaded, filePath, pdfEditMode, newPdfSaved, showDialog, showTerms, uploading, loading, loadingMessage, toastType, toastMessage } = this.state
@@ -524,7 +547,11 @@ class Signature extends Component {
         if (uploading) {
             return (
                 <View style={styles.container}>
-                    <Appbar back title titleText={'Exportation du document signé...'} />
+                    <Appbar
+                        back
+                        title
+                        titleText={'Exportation du document signé...'}
+                    />
                     {this.renderAttachment()}
                 </View>
             )
@@ -537,6 +564,7 @@ class Signature extends Component {
                         back={true}
                         title
                         titleText={this.fileName}
+                        customBackHandler={this.handleBackButtonClick}
                     />
                 }
                 {fileDownloaded &&
@@ -584,7 +612,7 @@ class Signature extends Component {
                     <TermsConditions
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
-                        // acceptTerms={this.verifyUser}
+                        //acceptTerms={this.verifyUser}
                         acceptTerms={this.startSignature}
                         downloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')

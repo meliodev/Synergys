@@ -19,6 +19,8 @@ import { ThemeColors, withNavigation } from 'react-navigation'
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
     const { id, step, name, description, address, state, client, editedAt, editedBy } = project
+    let { version } = project.process
+    version = version.replace("version", "")
 
     const setStateColor = (state) => {
         switch (state) {
@@ -55,13 +57,14 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     return (
         <Card style={styles.container} onPress={onPress}>
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(step)} style={[styles.linearGradient, styles.stepContainer]}>
-                <Text style={[theme.customFontMSregular.small, styles.header]} numberOfLines={1}>{id}</Text>
-                <Text style={[theme.customFontMSregular.body, { color: theme.colors.white }]}>{step}</Text>
+                <Text style={[theme.customFontMSmedium.extraSmall, styles.header]} numberOfLines={1}>{id}</Text>
+                <Text style={[theme.customFontMSbold.caption, { color: theme.colors.white }]}>{step}</Text>
+                <Text style={[theme.customFontMSregular.small, styles.processVersion]}>V{version}</Text>
             </LinearGradient>
 
             <Card.Content style={styles.content}>
                 <View style={{ flex: 1, alignSelf: 'flex-start' }}>
-                    <Title style={[theme.customFontMSmedium.body]} numberOfLines={1}>{name}</Title>                  
+                    <Title style={[theme.customFontMSmedium.body]} numberOfLines={1}>{name}</Title>
                     <View style={{ alignItems: 'flex-start', marginBottom: 20 }}>
                         {address.description !== '' && <Text numberOfLines={2} style={theme.customFontMSregular.caption}>à {address.description}</Text>}
                         <Text numberOfLines={1} style={theme.customFontMSregular.caption}>chez <Text style={[theme.customFontMSregular.caption, { textDecorationLine: 'underline' }]} onPress={viewClientProfile}>{client.fullName}</Text></Text>
@@ -94,6 +97,11 @@ const styles = StyleSheet.create({
     header: {
         position: 'absolute',
         left: theme.padding,
+        color: theme.colors.white
+    },
+    processVersion: {
+        position: 'absolute',
+        right: theme.padding,
         color: theme.colors.white
     },
     content: {

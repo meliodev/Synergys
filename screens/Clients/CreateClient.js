@@ -36,7 +36,8 @@ class CreateClient extends Component {
 
         this.isProspect = this.props.navigation.getParam('isProspect', false)
         this.userType = this.isProspect ? 'prospect' : 'client'
-        this.titleText = `${this.userType.charAt(0).toUpperCase()}${this.userType.slice(1)} en cours`
+        this.titleText = `${this.userType.charAt(0).toUpperCase()}${this.userType.slice(1)}`
+        this.titleText = this.isProspect ? this.titleText : `${this.titleText} en cours`
 
         this.state = {
             checked: 'first', //professional/Particular
@@ -116,7 +117,7 @@ class CreateClient extends Component {
         const loadingMessage = `Création du ${this.userType} en cours...`
 
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
                 <Appbar
                     close={!loading}
                     title
@@ -126,7 +127,11 @@ class CreateClient extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
+                    <ScrollView
+                        keyboardShouldPersistTaps="always"
+                        style={styles.container}
+                        contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}
+                    >
                         <MyInput
                             label="Identifiant client"
                             value={this.ClientId}
@@ -263,6 +268,7 @@ export default connect(mapStateToProps)(CreateClient)
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1
+        flex: 1,
+        backgroundColor: theme.colors.white
     }
 })

@@ -43,7 +43,7 @@ class CreateTeam extends Component {
 
         this.initialState = _.cloneDeep(this.state)
     }
-    
+
     validateInputs() {
         let { name } = this.state
         const nameError = nameValidator(name.value, `Nom de l'équipe`)
@@ -105,12 +105,14 @@ class CreateTeam extends Component {
                     <Loading size='large' />
                     :
                     <View style={styles.formContainer}>
-                        <MyInput
-                            label="Identifiant de l'équipe"
-                            value={this.teamId}
-                            editable={false}
-                            disabled
-                        />
+                        {this.isEdit &&
+                            <MyInput
+                                label="Identifiant de l'équipe"
+                                value={this.teamId}
+                                editable={false}
+                                disabled
+                            />
+                        }
 
                         <MyInput
                             label="Nom de l'équipe *"

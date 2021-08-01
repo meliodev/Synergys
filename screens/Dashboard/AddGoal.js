@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Keyboard, 
 import MonthPicker from 'react-native-month-year-picker'
 import { faCalendarPlus, faInfoCircle, faFileAlt } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
+import { connect } from 'react-redux'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -16,12 +17,7 @@ import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, positiveNumberValidator, formatDocument, unformatDocument } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
-
-import { fetchDocs, fetchDocument } from "../../api/firestore-api";
-import { uploadFiles } from "../../api/storage-api";
-import { processMain, getCurrentStep, getCurrentAction, getPhaseId } from '../../core/process'
-
-import { connect } from 'react-redux'
+import { fetchDocument } from "../../api/firestore-api";
 import ActivitySection from '../../containers/ActivitySection';
 
 const properties = ["target", "description", "createdAt", "createdBy", "editedAt", "editedBy"]
@@ -79,7 +75,7 @@ class AddGoal extends Component {
     }
 
     async initEditMode() {
-        const goals = await fetchDocument('Users', this.userId, 'Turnover', this.GoalId) 
+        const goals = await fetchDocument('Users', this.userId, 'Turnover', this.GoalId)
         let goal = goals[this.monthYear]
         goal = this.setGoal(goal)
         if (!goal) return
@@ -200,6 +196,7 @@ class AddGoal extends Component {
                         </View>
 
                         {this.incomeSources.map((source, index) => {
+                            console.log(source, "..........")
                             return (
                                 <TouchableOpacity
                                     onPress={() => onPressProjectId(source.projectId)}
@@ -295,7 +292,7 @@ class AddGoal extends Component {
                                         label="Description"
                                         returnKeyType="done"
                                         value={description}
-                                        onChangeText={text => updateField(this, description, text)}
+                                        onChangeText={description => this.setState({ description })}
                                         multiline={true}
                                         editable={canWrite}
                                     />

@@ -33,14 +33,17 @@ const NotificationItem = ({ notification, actions, navigation, ...props }) => {
     }
 
     const markAsReadAndNavigate = async () => {
-        const params = notification.navigation
-        const screen = params.screen
 
         if (!notification.read) {
             db.collection('Users').doc(auth.currentUser.uid).collection('Notifications').doc(notification.id).update({ read: true })
         }
 
-        navigation.navigate(screen, params)
+        const { navigation } = notification
+        if (navigation) {
+            const params = navigation
+            const screen = params.screen
+            navigation.navigate(screen, params)
+        }
     }
 
 

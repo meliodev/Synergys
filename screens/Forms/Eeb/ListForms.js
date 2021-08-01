@@ -3,20 +3,20 @@ import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { connect } from 'react-redux'
 import { faUser, faAddressCard, fal, faFileInvoice, faVial, faVials } from '@fortawesome/pro-light-svg-icons'
 
-import TwoTabs from '../../components/TwoTabs'
-import SearchBar from '../../components/SearchBar'
-import TabView from '../../components/TabView'
-import EmptyList from "../../components/EmptyList";
+import TwoTabs from '../../../components/TwoTabs'
+import SearchBar from '../../../components/SearchBar'
+import TabView from '../../../components/TabView'
+import EmptyList from "../../../components/EmptyList";
 
-import ListUsers from '../Users/ListUsers'
+import ListUsers from '../../Users/ListUsers'
 
-import { db } from '../../firebase'
-import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
-import ListFormsContainer from "../../containers/ListFormsContainer";
-import SimulationItem from "../../components/SimulationItem";
-import { fetchDocs } from "../../api/firestore-api";
-import { setStatusBarColor } from "../../core/redux";
+import { db } from '../../../firebase'
+import * as theme from "../../../core/theme";
+import { constants } from "../../../core/constants";
+import ListFormsContainer from "../../../containers/ListFormsContainer";
+import SimulationItem from "../../../components/SimulationItem";
+import { fetchDocs } from "../../../api/firestore-api";
+import { setStatusBarColor } from "../../../core/redux";
 
 
 class ListForms extends React.Component {
@@ -74,13 +74,13 @@ class ListForms extends React.Component {
     render() {
         const { index, searchInput, showInput } = this.state
         const { isConnected } = this.props.network
-        const query = this.project ? db.collection('Eeb').where('project.id', '==', this.project.id) : db.collection('Eeb').orderBy('createdAt', 'desc')
+        const query = this.project ? db.collection('Simulations').where('project.id', '==', this.project.id) : db.collection('Simulations').orderBy('createdAt', 'desc')
         const emptyListDesc = this.isRoot ? 'Appuyez sur le boutton "+" pour faire une simulation.' : "Veuillez créer une fiche EEB à partir d'une nouvelle simulation."
 
         return (
             <View style={{ flex: 1 }}>
                 <ListFormsContainer
-                    collection='Eeb'
+                    collection='Simulations'
                     query={query}
                     creationScreen="CreateEEB"
                     navigation={this.props.navigation}

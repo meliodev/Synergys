@@ -22,8 +22,9 @@ import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, process
 import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
-import { constants, errorMessages } from "../core/constants"
+import { constants, errorMessages, items_scrollTo } from "../core/constants"
 import ProcessContainer from "../screens/src/container/ProcessContainer"
+import { Linking } from "react-native"
 
 //component
 class ProcessAction extends Component {
@@ -86,7 +87,6 @@ class ProcessAction extends Component {
 
     async mainHandler(process) {
         try {
-            console.log('YEAAAAAAAAAAH')
             load(this, true)
             const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
@@ -195,17 +195,17 @@ class ProcessAction extends Component {
             await countDown(500) //#task: why this ???
             const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
 
-            const { responsable, verificationType, type, screenName, screenParams, screenPush, nextStep, nextPhase, formSettings } = currentAction
+            const { responsable, verificationType, type, screenName, screenParams, screenPush, nextStep, nextPhase, formSettings, scrollTo } = currentAction
             const { process, currentPhase } = this.state
 
             const currentUserId = auth.currentUser.uid
             const currentUserRole = this.props.role.value
-            const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
-            if (!enableAction) {
-                disableLoading()
-                Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
-                return
-            }
+            // const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
+            // if (!enableAction) {
+            //     disableLoading()
+            //     Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+            //     return
+            // }
 
             if (type === 'auto') {
                 disableLoading()
@@ -213,6 +213,11 @@ class ProcessAction extends Component {
                 //Modal
                 if (currentAction.choices) {
                     this.setState({ showModal: true })
+                }
+
+                else if (scrollTo) {
+                    const { screen, itemId } = scrollTo
+                    this.props.scrollTo(items_scrollTo[screen][itemId])
                 }
 
                 //Navigation
@@ -298,7 +303,7 @@ class ProcessAction extends Component {
             this.setState({ loadingModal: true, choice })  //used in case of comment
             const { process, pressedAction } = this.state
             const { screenName, screenParams, choices } = pressedAction
-            const { onSelectType, commentRequired, operation } = choice
+            const { onSelectType, commentRequired, operation, link } = choice
             const { nextStep, nextPhase } = choice
 
             //Highlight selected choice
@@ -345,6 +350,10 @@ class ProcessAction extends Component {
                     await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
                 }
 
+                else if (onSelectType === "openLink") {
+                    await Linking.openURL(link)
+                }
+
                 this.setState({ loadingModal: false, showModal: false })
             }
         }
@@ -379,8 +388,10 @@ class ProcessAction extends Component {
     //func4
     runOperation = async (operation, action) => {
         if (!operation) return
-        const { collection, documentId } = action
+
         const { type, field, value } = operation
+        const collection = operation.collection ? operation.collection : action.collection
+        const documentId = operation.docId ? operation.docId : action.documentId
 
         if (type === 'update') {
             let update = {}
@@ -492,18 +503,18 @@ class ProcessAction extends Component {
     }
 
     //renderers
-    renderAction = (canUpdate, action, style) => {
+    renderAction = (canUpdate, action, actionTheme, style) => {
         if (!action) return null
         const { loading, loadingMessage } = this.state
         var { title, status, verificationType, choices } = action
-        const { mainColor, textFont } = style
+        const { mainColor, textFont } = actionTheme
         var isComment = typeof (action.comment) !== 'undefined' && action.comment !== ''
         const isDialog = choices || verificationType === 'comment'
         const leftIcon = action.id === 'cancelProject' ? faTimesCircle : status === 'pending' ? faCheckCircle : faSolidCheckCircle
         const leftIconColor = action.id === 'cancelProject' ? theme.colors.error : status === 'pending' ? mainColor : "green"
 
         return (
-            <View style={styles.actionTouchable}>
+            <View style={[styles.actionTouchable, style]}>
                 <View style={styles.actionTitleContainer}>
                     {!loading &&
                         <CustomIcon
@@ -638,7 +649,12 @@ class ProcessAction extends Component {
                     onPress={() => this.onPressAction(canUpdate, currentAction)}
                     style={{ padding: theme.padding, backgroundColor: theme.colors.primary, borderBottomLeftRadius: 5, borderBottomRightRadius: 5, }}>
                     <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.white, marginBottom: theme.padding }]}>Action à faire:</Text>
-                    {this.renderAction(canUpdate, currentAction, { mainColor: theme.colors.white, textFont: theme.customFontMSbold.body })}
+                    {this.renderAction(canUpdate, currentAction, { mainColor: theme.colors.white, textFont: theme.customFontMSbold.body }, {})}
+                    {currentAction && currentAction.responsable &&
+                        <Text style={[theme.customFontMSregular.small, { color: theme.colors.white ,marginTop: theme.padding }]}>
+                            Responsable: {currentAction.responsable}
+                        </Text>
+                    }
                 </TouchableOpacity>
             </View>
         )

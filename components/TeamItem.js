@@ -2,7 +2,6 @@
 
 import React, { Children, Component } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableHighlight, Alert, FlatList, TouchableOpacity, ScrollView } from 'react-native'
-import { Checkbox } from 'react-native-paper'
 
 import Icon from 'react-native-vector-icons/Feather'
 import Icon2 from 'react-native-vector-icons/FontAwesome5'

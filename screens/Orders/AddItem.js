@@ -104,10 +104,9 @@ class AddItem extends Component {
             quantity: quantity.value,
             price: price.value,
             taxe,
-            priority: product.type === "product" ? 0 : 1
+            priority: product.type === "product" ? 0 : 1,
+            category: product.category
         }
-
-        console.log("................", orderLine)
 
         this.props.navigation.state.params.onGoBack(orderLine, this.orderKey)
         this.props.navigation.goBack()

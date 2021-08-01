@@ -14,7 +14,7 @@ import { constants } from '../core/constants'
 import { withNavigation } from 'react-navigation'
 
 const PickerBar = ({
-    options, functions, menuTrigger, style, navigation,
+    titleText, options, functions, menuTrigger, style, navigation,
     main, filterOpened, type, status, priority, project, assignedTo,
     filter, refresh, onRefresh, menu = true, ...props }) => {
 
@@ -70,7 +70,7 @@ const PickerBar = ({
                 functions={functions}
                 menuTrigger={menuTrigger} /> */}
 
-            {<appbar.Content title='' />}
+            {<appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]}/>}
 
             <Filter
                 isAppBar={true}

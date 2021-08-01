@@ -2,7 +2,7 @@
 
 import React, { Children, Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, } from 'react-native';
-import { Checkbox, List } from 'react-native-paper';
+import { List } from 'react-native-paper';
 import Icon1 from 'react-native-vector-icons/MaterialCommunityIcons';
 import Icon2 from 'react-native-vector-icons/FontAwesome5';
 import * as theme from '../core/theme';

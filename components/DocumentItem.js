@@ -83,17 +83,17 @@ const DocumentItem = ({ document, options, functions, navigation, ...props }) =>
 
             <Card.Content style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'flex-start' }}>
-                    <MaterialCommunityIcons name={iconType} color={colorIconType} size={33} />
+                    <MaterialCommunityIcons name={iconType} color={theme.colors.primary} size={33} />
                 </View>
 
                 <View style={{ flex: 0.85 }}>
-                    <Text ellipsizeMode='middle' style={[theme.customFontMSmedium.header, { flex: 1, marginBottom: 10, lineHeight: 25 }]} >{document.name}</Text>
+                    <Text ellipsizeMode='middle' style={[theme.customFontMSmedium.body, { flex: 1, marginBottom: 10, lineHeight: 25 }]} >{document.name}</Text>
                     <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between' }}>
                         <View style={{ flex: 0.75 }}>
-                            <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, textAlign: 'left' }]}>Envoyé par {document.createdBy.fullName}</Text>
+                            <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { color: theme.colors.gray_dark, textAlign: 'left' }]}>Envoyé par {document.createdBy.fullName}</Text>
                         </View>
                         <View style={{ flex: 0.25 }}>
-                            <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, textAlign: 'right' }]}>{moment(document.createdAt).format('DD MMM')}</Text>
+                            <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.gray_dark, textAlign: 'right' }]}>{moment(document.createdAt).format('DD MMM')}</Text>
                         </View>
                     </View>
                 </View>

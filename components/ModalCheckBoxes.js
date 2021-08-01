@@ -24,18 +24,22 @@ export default class ModalCheckBoxes extends Component {
     }
 
     renderItem(items, item, key) {
-        console.log(item, '55555555555555')
+
+        onPressItem = () => {
+            items[key].selected = !items[key].selected
+            this.props.updateItems(items)
+        }
+        
         return (
             <View style={modalStyles.item}>
                 <Checkbox
                     status={items[key].selected ? 'checked' : 'unchecked'}
                     color={theme.colors.primary}
-                    onPress={() => {
-                        items[key].selected = !items[key].selected
-                        this.props.updateItems(items)
-                    }}
+                    onPress={onPressItem}
                 />
-                <Text style={[theme.customFontMSregular.body, { marginLeft: 15, flex: 1 }]}>{item.label}</Text>
+                <Text style={[theme.customFontMSregular.body, { marginLeft: 15, flex: 1 }]} onPress={onPressItem}>
+                    {item.label}
+                </Text>
             </View>
         )
     }

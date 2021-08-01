@@ -2,7 +2,7 @@
 
 import React, { Children, Component } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, } from 'react-native';
-import { Checkbox, List } from 'react-native-paper';
+import { List } from 'react-native-paper';
 import { faAddressCard, faUsers, faUserTie, faUser, faUserShield, faUserCog } from '@fortawesome/pro-solid-svg-icons'
 
 import * as theme from '../core/theme';

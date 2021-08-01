@@ -63,9 +63,11 @@ import CreateProduct from '../screens/Orders/CreateProduct'
 import CreateOrder from '../screens/Orders/CreateOrder'
 
 //Forms
-import ListForms from '../screens/Forms/ListForms'
-import CreateEEB from '../screens/Forms/CreateEEB'
+import ListForms from '../screens/Forms/Eeb/ListForms'
+import CreateEEB from '../screens/Forms/Eeb/CreateEEB'
 import CreatePvReception from '../screens/Forms/PvReception/CreatePvReception'
+import CreateMandatMPR from '../screens/Forms/MandatMaPrimeRenov/CreateMandatMPR'
+import CreateMandatSynergys from '../screens/Forms/MandatSynergys/CreateMandatSynergys'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -229,6 +231,14 @@ const ProfileStack = createStackNavigator({
     },
     CreateEEB: {
         screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    CreateMandatMPR: {
+        screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    CreateMandatSynergys: {
+        screen: CreateMandatSynergys,
         navigationOptions: hideHeader
     },
     //PV reception
@@ -407,6 +417,14 @@ const ClientsManagementStack = createStackNavigator({
     },
     CreateEEB: {
         screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    CreateMandatMPR: {
+        screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    CreateMandatSynergys: {
+        screen: CreateMandatSynergys,
         navigationOptions: hideHeader
     },
     //PV reception
@@ -738,6 +756,14 @@ const ProjectsStack = createStackNavigator({
         screen: CreateEEB,
         navigationOptions: hideHeader
     },
+    CreateMandatMPR: {
+        screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    CreateMandatSynergys: {
+        screen: CreateMandatSynergys,
+        navigationOptions: hideHeader
+    },
     //PV reception
     CreatePvReception: {
         screen: CreatePvReception,
@@ -794,6 +820,14 @@ const DocumentsStack = createStackNavigator({
     },
     CreateEEB: {
         screen: CreateEEB,
+        navigationOptions: hideHeader
+    },
+    CreateMandatMPR: {
+        screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    CreateMandatSynergys: {
+        screen: CreateMandatSynergys,
         navigationOptions: hideHeader
     },
     //PV reception

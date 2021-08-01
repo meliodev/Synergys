@@ -13,14 +13,15 @@ import CustomIcon from '../components/CustomIcon'
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 import { resetState, setNetwork, setStatusBarColor } from '../core/redux'
+import AppVersion from '../components/AppVersion';
 
 const menuPrivilleges = {
     backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
     admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
     dircom: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'simulator', 'news', 'logout'],
-    com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'orders', 'documents', 'simulator', 'news', 'logout'],
+    com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'simulator', 'news', 'logout'],
     tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'simulator', 'news', 'logout'],
-    poseur: ['home', 'inbox', 'projects', 'planning', 'requests', 'simulator', 'news', 'logout'],
+    poseur: ['projects', 'inbox', 'planning', 'requests', 'simulator', 'news', 'logout'],
     client: ['projects', 'inbox', 'requests', 'documents', 'simulator', 'news', 'logout']
 }
 
@@ -176,7 +177,7 @@ class DrawerMenu extends React.Component {
                 </View>
 
                 <View style={[styles.footerContainer, { bottom: 5 }]}>
-                    <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.gray400 }]}>App v1.2.10</Text>
+                    <AppVersion />
                 </View>
             </SafeAreaView>
         )

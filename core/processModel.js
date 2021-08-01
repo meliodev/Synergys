@@ -222,22 +222,23 @@ export const processModel = {
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
+                        nextStep: 'rd2Creation',
                     },
-                    {
-                        id: 'eebFileChoice',
-                        title: 'Le client est-il eligible au dossier action logement ?',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                            { label: 'OUI', id: 'confirm', nextPhase: 'technicalVisitManagement', onSelectType: 'transition', operation: null },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
+                    // {
+                    //     id: 'eebFileChoice',
+                    //     title: 'Le client est-il eligible au dossier action logement ?',
+                    //     instructions: 'Lorem ipsum dolor',
+                    //     actionOrder: 2,
+                    //     type: 'manual',
+                    //     verificationType: 'multiple-choices',
+                    //     comment: '', //motif
+                    //     choices: [
+                    //         { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                    //         { label: 'OUI', id: 'confirm', nextPhase: 'technicalVisitManagement', onSelectType: 'transition', operation: null },
+                    //     ],
+                    //     responsable: 'Commercial',
+                    //     status: 'pending',
+                    // },
                 ]
             },
             // 'primeCEECreation': {
@@ -373,12 +374,12 @@ export const processModel = {
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
             'rd2Creation': {
-                title: 'Créer un rendez-vous 2',
+                title: 'Créer un rendez-vous 2', //1. verify if RD2 exists
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 1,
                 actions: [
                     {
-                        id: 'rd2Creation', //1. verify if RD2 exists
+                        id: 'rd2Creation',
                         title: 'Créer un rendez-vous 2',
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
@@ -394,64 +395,64 @@ export const processModel = {
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        nextStep: 'rdnChoice',
+                        nextStep: 'signature',
                     }
                 ]
             },
-            'rdnChoice': {
-                title: "Modifier l'état du rendez-vous",
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 2,
-                actions: [
-                    {
-                        id: 'rdnChoice',
-                        title: 'Modifier le statut du rendez-vous',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        collection: 'Agenda',
-                        documentId: '', //#task: should be array in case of RDN lasting for many days (multiple tasks)
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Présentation étude' },
-                            { filter: 'status', operation: '!=', value: 'Annulé' } //Get id of active RDN (all old/canceled RDN are inactive)
-                        ],
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
-                            { label: 'Reporter', id: 'postpone', nextStep: 'rdnCreation', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
-                            { label: 'Confirmer', id: 'confirm', nextStep: 'signature', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    }
-                ]
-            },
-            'rdnCreation': { //rdn postpone
-                title: "Création d'un rendez-vous 2 (Report)",
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 3,
-                actions: [
-                    {
-                        id: 'rd2Creation', //1. verify if RD2 exists
-                        title: 'Créer un rendez-vous 2 (Report)',
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Présentation étude' },
-                            { filter: 'status', operation: '!=', value: 'Annulé' }
-                        ],
-                        screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, dynamicType: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        status: 'pending',
-                        nextStep: 'rdnChoice',
-                    }
-                ]
-            },
+            // 'rdnChoice': {
+            //     title: "Modifier l'état du rendez-vous",
+            //     instructions: 'Lorem ipsum dolor',
+            //     stepOrder: 2,
+            //     actions: [
+            //         {
+            //             id: 'rdnChoice',
+            //             title: 'Modifier le statut du rendez-vous',
+            //             instructions: 'Lorem ipsum dolor',
+            //             actionOrder: 1,
+            //             collection: 'Agenda',
+            //             documentId: '', //#task: should be array in case of RDN lasting for many days (multiple tasks)
+            //             queryFilters: [
+            //                 { filter: 'project.id', operation: '==', value: '' },
+            //                 { filter: 'type', operation: '==', value: 'Présentation étude' },
+            //                 { filter: 'status', operation: '!=', value: 'Annulé' } //Get id of active RDN (all old/canceled RDN are inactive)
+            //             ],
+            //             type: 'manual',
+            //             verificationType: 'multiple-choices',
+            //             choices: [
+            //                 { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+            //                 { label: 'Reporter', id: 'postpone', nextStep: 'rdnCreation', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+            //                 { label: 'Confirmer', id: 'confirm', nextStep: 'signature', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
+            //             ],
+            //             responsable: 'Commercial',
+            //             status: 'pending',
+            //         }
+            //     ]
+            // },
+            // 'rdnCreation': { //rdn postpone
+            //     title: "Création d'un rendez-vous 2 (Report)",
+            //     instructions: 'Lorem ipsum dolor',
+            //     stepOrder: 3,
+            //     actions: [
+            //         {
+            //             id: 'rd2Creation', //1. verify if RD2 exists
+            //             title: 'Créer un rendez-vous 2 (Report)',
+            //             instructions: 'Lorem ipsum dolor',
+            //             actionOrder: 1,
+            //             collection: 'Agenda',
+            //             queryFilters: [
+            //                 { filter: 'project.id', operation: '==', value: '' },
+            //                 { filter: 'type', operation: '==', value: 'Présentation étude' },
+            //                 { filter: 'status', operation: '!=', value: 'Annulé' }
+            //             ],
+            //             screenName: 'CreateTask', //creation
+            //             screenParams: { project: null, taskType: { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, dynamicType: true },
+            //             type: 'auto',
+            //             verificationType: 'doc-creation',
+            //             status: 'pending',
+            //             nextStep: 'rdnChoice',
+            //         }
+            //     ]
+            // },
             //
             'signature': {
                 title: 'Signature du devis',
@@ -459,34 +460,17 @@ export const processModel = {
                 stepOrder: 4,
                 actions: [
                     {
-                        id: 'idCard1',
-                        title: "Pièce d'identité 1",
-                        instructions: 'Lorem ipsum dolor',
+                        id: 'taxStatement',
+                        title: "Relevé d'impôt",
+                        instructions: "Veuillez importer le relevé d'impôt du client.",
                         actionOrder: 1,
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
-                            { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'idCard2',
-                        title: "Pièce d'identité 2 (optionnel)",
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
+                            // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
                         ],
@@ -497,6 +481,23 @@ export const processModel = {
                         id: 'proofOfAddress',
                         title: "Justificatif de domicile (moins de 3 mois)",
                         instructions: 'Lorem ipsum dolor',
+                        actionOrder: 2,
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
+                        type: 'manual', //Check manually
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                            { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'taxStatement',
+                        title: "Plan cadastral",
+                        instructions: "Veuillez importer le plan cadastral du client.",
                         actionOrder: 3,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
@@ -504,6 +505,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
+                            // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
                         ],
@@ -511,9 +513,9 @@ export const processModel = {
                         status: 'pending',
                     },
                     {
-                        id: 'iban',
-                        title: 'RIB',
-                        instructions: 'Lorem ipsum dolor',
+                        id: 'propertyTax',
+                        title: "Taxe foncière",
+                        instructions: "Veuillez importer la taxe foncière du client.",
                         actionOrder: 4,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
@@ -521,41 +523,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
-                            { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'paySlip',
-                        title: "Dernier bulletin de salaire",
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 5,
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
-                            { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'accountStatement',
-                        title: "Relevé de compte",
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 6,
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
+                            // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
                         ],
@@ -566,7 +534,7 @@ export const processModel = {
                         id: 'quoteCreation', //Verify if quote exists
                         title: 'Créer un devis',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 7,
+                        actionOrder: 5,
                         collection: 'Documents',
                         //Verification
                         queryFilters: [
@@ -592,7 +560,7 @@ export const processModel = {
                         id: 'signedQuoteCreation', //#task: check if devis is still existing..
                         title: 'Signer le devis',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 8,
+                        actionOrder: 6,
                         collection: 'Documents',
                         queryFilters: [ //VERIFICATION: verify if signed quote exists
                             { filter: 'project.id', operation: '==', value: '' },
@@ -620,7 +588,7 @@ export const processModel = {
                         id: 'isQuoteFinanced',
                         title: "Le devis est-il accompagné d'un financement ?",
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 9,
+                        actionOrder: 7,
                         type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //#task: comments are joined (separated by ;)
@@ -635,13 +603,14 @@ export const processModel = {
                         id: 'financingWebsite',
                         title: 'Propositions de financement',
                         instructions: "Lorem ipsum dolor",
-                        actionOrder: 10,
+                        actionOrder: 8,
                         type: 'manual',
                         comment: '',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'www.adhefi.com', id: 'cashPayment', nextStep: 'technicalVisitCreation', onSelectType: 'commentPicker' },
-                            { label: 'www.moncofidispro.fr', id: 'financing', nextStep: 'technicalVisitCreation', onSelectType: 'commentPicker' },
+                            { label: 'www.adhefi.com', id: 'cashPayment', onSelectType: 'openLink', link: 'https://www.adhefi.com' },
+                            { label: 'www.moncofidispro.fr', id: 'financing', onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
+                            { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
@@ -666,6 +635,7 @@ export const processModel = {
                         properties: ['techContact', 'id'],
                         //Verification
                         type: 'auto',
+                        scrollTo: { screen: "CreateProject", itemId: 'comContact' },
                         verificationType: 'data-fill',
                         verificationValue: '',
                         responsable: 'Commercial',
@@ -685,7 +655,7 @@ export const processModel = {
                         screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
-                        responsable: 'Poseur',
+                        responsable: 'Commercial',
                         status: 'pending',
                         nextStep: 'payModeValidation',
                     }
@@ -771,7 +741,7 @@ export const processModel = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'poseurAffectation', },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'poseurAffectation', operation: { collection: "Clients", docId: "", type: 'update', field: 'status', value: "activated" } },
                             { label: 'Modifier la date', id: 'edit', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
@@ -1723,7 +1693,7 @@ export const processModel = {
             },
         }
     },
-    'version': 4
+    'version': 5
 }
 
 //Version 4: Handle goback to CreateProject screen after "Convertir prospect en client" (added project param to navigation)

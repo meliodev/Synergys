@@ -154,6 +154,18 @@ class CreateOrder extends Component {
         }
     }
 
+
+    groupBy(arr, property) {
+        return arr.reduce((memo, x) => {
+            if (!memo[x[property]]) {
+                memo[x[property]] = []
+            }
+
+            memo[x[property]].push(x)
+            return memo
+        }, {})
+    }
+
     //FETCH-INITIALIZE
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
@@ -407,20 +419,21 @@ class CreateOrder extends Component {
         )
     }
 
+    sumTaxes(taxes) {
+        if (taxes.length === 0) return 0
+        var taxeValues = taxes.map(taxe => taxe.value)
+        const sum = taxeValues.reduce((prev, next) => prev + next)
+        return sum
+    }
+
     renderSummary() { //totalNetHT, 
         const { orderLines, total, taxes, subTotal, subTotalProducts, primeCEE, primeRenov, aidRegion, discount } = this.state
-        const showTotalNetHT = primeCEE > 0 || primeRenov > 0 || aidRegion > 0 || discount > 0
-
+        const showTotalNetHT = discount > 0
         //Discount on products only (not on services)
         const discountValue = (subTotalProducts * discount) / 100
-
-        const totalNetHT = subTotal - discountValue - primeCEE - primeRenov - aidRegion
-        let totalTTC = totalNetHT
-        if (taxes.length > 0) {
-            var taxeValues = taxes.map(taxe => taxe.value)
-            const sumTaxes = taxeValues.reduce((prev, next) => prev + next)
-            totalTTC = totalTTC + sumTaxes
-        }
+        const totalNetHT = subTotal - discountValue
+        const totalTTC = totalNetHT + this.sumTaxes(taxes)
+        const totalNet = totalTTC - primeCEE - primeRenov - aidRegion
 
         return (
             <View style={{ marginTop: theme.padding }}>
@@ -428,16 +441,19 @@ class CreateOrder extends Component {
                 <SummarySeparator />
 
                 {discount > 0 && <SummaryRow label={`Remise (${discount}%)`} valuePrefix="- €" value={discountValue} />}
-                {primeCEE > 0 && <SummaryRow label="Prime Cee" valuePrefix="- €" value={primeCEE} />}
-                {primeRenov > 0 && <SummaryRow label="Maprimerévov" valuePrefix="- €" value={primeRenov} />}
-                {aidRegion > 0 && <SummaryRow label="Aides région" valuePrefix="- €" value={aidRegion} />}
                 {showTotalNetHT && <SummaryRow label="Total Net HT" valuePrefix="€" value={totalNetHT} />}
                 {showTotalNetHT && <SummarySeparator />}
 
                 {this.renderTaxes()}
                 <SummaryRow label="Total T.T.C" valuePrefix="€" value={totalTTC} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
+                <SummarySeparator />
 
-                {/* <SummaryRow label="Net à payer" valuePrefix="€" value={totalTTC} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} /> */}
+                {primeCEE > 0 && <SummaryRow label="Prime Cee" valuePrefix="- €" value={primeCEE} />}
+                {primeRenov > 0 && <SummaryRow label="Maprimerévov" valuePrefix="- €" value={primeRenov} />}
+                {aidRegion > 0 && <SummaryRow label="Aides région" valuePrefix="- €" value={aidRegion} />}
+                <SummarySeparator />
+
+                <SummaryRow label="Net à payer" valuePrefix="€" value={totalNet} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
             </View >
         )
     }
@@ -447,6 +463,7 @@ class CreateOrder extends Component {
         if (taxes.length === 0) return null
         return taxes.map((taxe) => {
             const { name, value } = taxe
+            if (!taxe.name) return null
             return <SummaryRow label={`TVA (${taxe.name}%)`} valuePrefix="€" value={value} />
         })
     }

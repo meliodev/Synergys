@@ -35,11 +35,11 @@ const TaskItem = ({ task, onPress, style }) => {
     return (
         <TouchableOpacity style={[styles.item, { backgroundColor: taskColor, opacity, borderColor: theme.colors.error, borderWidth }, style]} onPress={onPress} >
             <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
-                <Text style={[theme.customFontMSregular.body, { color: textColor }]} numberOfLines={1}>{name}</Text>
+                <Text style={[theme.customFontMSsemibold.caption, { color: textColor }]} numberOfLines={1}>{name}</Text>
             </View>
             <View style={{ flex: 0.5, alignItems: 'flex-end', justifyContent: 'center', paddingLeft: 5 }}>
                 {/* <Text style={[theme.customFontMSregular.caption, { color: '#fff' }]} numberOfLines={1}>{task.assignedTo.fullName}</Text> */}
-                <Text style={[theme.customFontMSregular.caption, { color: textColor, marginRight: 10 }]} numberOfLines={1}>{timerange}</Text>
+                <Text style={[theme.customFontMSsemibold.caption, { color: textColor, marginRight: 10 }]} numberOfLines={1}>{timerange}</Text>
             </View>
         </TouchableOpacity>
     )

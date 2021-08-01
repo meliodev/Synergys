@@ -34,6 +34,15 @@ class ListNotifications extends Component {
     }
 
     async componentDidMount() {
+        const appLinkParams = { ListScreen: 'ListProjects', CreateScreen: 'CreateProject', DocumentId: 'ProjectId' }
+        const { CreateScreen, DocumentId } = appLinkParams
+
+        const a = { screen: CreateScreen }
+        let b = {}
+        b[DocumentId] = "555"
+
+        const data = { ...a, ...b }
+        console.log(data)
         //Static query
         let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'desc')
         this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { load(this, false) })

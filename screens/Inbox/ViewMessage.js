@@ -92,9 +92,9 @@ export default class ViewMessage extends Component {
         const showHideText = showOldMessages ? 'Masquer le texte des messages précédents' : 'Afficher le texte des messages précédents'
 
         return (
-            <View style={{ marginBottom: 15, marginHorizontal: constants.ScreenWidth * 0.045 }}>
+            <View style={{ marginBottom: 15 }}>
 
-                <View>
+                <View style={{ paddingHorizontal: theme.padding }}>
                     {messagesRendered.map((msg, key) => {
 
                         const sentAtDate = moment(msg.sentAt).format('ll')
@@ -122,7 +122,7 @@ export default class ViewMessage extends Component {
                 {selectedMessage.attachments && this.renderAttachments(selectedMessage.attachments)}
 
                 {/* {selectedMessage.sender.id !== this.currentUser.uid && */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: theme.padding, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth * 2, borderBottomColor: theme.colors.gray_light }}>
                     <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage.sender, messagesRendered)}
                         style={{ width: '39%', alignSelf: 'center' }}>
                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>Répondre</Text>
@@ -199,7 +199,7 @@ export default class ViewMessage extends Component {
                         <List.Accordion
                             id={message.id}
                             showArrow
-                            style={{ paddingVertical: constants.ScreenHeight * 0.015, borderBottomWidth: !isExpanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.grey_300 }}
+                            style={{ paddingVertical: constants.ScreenHeight * 0.015, borderBottomWidth: !isExpanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}
                             titleComponent={
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                                     <Text numberOfLines={1} style={[theme.customFontMSregular.header, { marginRight: isExpanded ? 3 : 5 }]}>{message.sender.fullName}</Text>

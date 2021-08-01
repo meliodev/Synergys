@@ -126,6 +126,7 @@ class CreateProject extends Component {
             state: 'En cours',
             step: 'Prospect',
             color: theme.colors.primary,
+            process: null,
 
             comContact: { id: '', fullName: '', email: '', role: '' },
             techContact: { id: '', fullName: '', email: '', role: '' },
@@ -165,7 +166,9 @@ class CreateProject extends Component {
             docNotFound: false,
 
             //Specific privileges (poseur & commercial)
-            isBlockedUpdates: false
+            isBlockedUpdates: false,
+
+            scrollViewRef: null
         }
     }
 
@@ -194,8 +197,10 @@ class CreateProject extends Component {
     }
 
     setProject(project) {
+
         if (!project)
             this.setState({ docNotFound: true })
+
         else {
             this.setWorkTypes(project)
             project = formatDocument(project, properties, [])
@@ -207,7 +212,7 @@ class CreateProject extends Component {
     setWorkTypes(project) {
         let { workTypes } = this.state
         for (let wt of workTypes) {
-            if (project.workTypes.includes(wt.value))
+            if (project.workTypes && project.workTypes.includes(wt.value))
                 wt.selected = true
         }
         this.setState({ workTypes })
@@ -352,7 +357,7 @@ class CreateProject extends Component {
         project.workTypes = selectedWorkTypesValues
 
         db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        this.refreshState(project)
+        await this.refreshState(project)
     }
 
     async refreshState(project) {
@@ -363,14 +368,16 @@ class CreateProject extends Component {
                 this.setState({ createdAt, createdBy }, async () => {
                     this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
                     this.project.id = this.ProjectId
-                    this.setState({ process: project.process })
+                    this.title = 'Modifier le projet'
+                    this.isEdit = true
+
+                    this.setState({ process: project.process }) //re-rendering (showing process)
                     this.setImageCarousel(project.attachments)
                     this.setUserAccess(project.step)
                     await this.runListeners()
-                    this.title = 'Modifier le projet'
-                    this.isEdit = true
                 })
             }
+
             load(this, false)
             setToast(this, 's', toastMessage)
             this.initialState = _.cloneDeep(this.state)
@@ -400,7 +407,7 @@ class CreateProject extends Component {
         let { attachments } = this.state
         attachments[currentImage].deleted = true
         db.collection('Projects').doc(this.ProjectId).update({ attachments })
-        this.setState({ attachments, isImageViewVisible: false }, () => console.log(this.state.attachments))
+        this.setState({ attachments, isImageViewVisible: false })
     }
 
     async pickImage() {
@@ -647,7 +654,7 @@ class CreateProject extends Component {
                 //Delete "Visite technique préalable"
                 if (tasksList.length > 0) {
                     const taskId = tasksList[0].id
-                    db.collection("Agenda").doc(taskId).delete().then(() => console.log('TASK' + taskId + 'DELETED'))
+                    db.collection("Agenda").doc(taskId).delete()
                 }
                 this.props.navigation.goBack()
             }
@@ -656,10 +663,9 @@ class CreateProject extends Component {
         else this.props.navigation.goBack()
     }
 
-
     render() {
         let {
-            client, name, workTypes, note, address, state, step, bill, color,
+            client, name, workTypes, note, address, state, step, bill, color, process,
             createdAt, createdBy, editedAt, editedBy,
             documentsList, documentTypes, taskTypes, comContact, techContact,
             nameError, loading, docNotFound, toastMessage, toastType,
@@ -680,7 +686,9 @@ class CreateProject extends Component {
         const fields = [name, client.id, address.description, comContact.id]
         let showTasksForm = !fields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
         showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
-        const showContactTechnic = isStepTech
+        const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
+
+        console.log("5", this.state.scrollViewRef)
 
         if (docNotFound)
             return (
@@ -713,7 +721,7 @@ class CreateProject extends Component {
                 {loading ?
                     this.renderPlacePictures(canWrite, isConnected)
                     :
-                    <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="always">
+                    <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="always" ref={ref => this.scrollView = ref}>
 
                         {showProcessAction &&
                             <View>
@@ -725,6 +733,7 @@ class CreateProject extends Component {
                                     canUpdate={canWrite && !this.isClient}
                                     isAllProcess={false}
                                     role={this.props.role}
+                                    scrollTo={(position) => this.scrollView.scrollTo(position)}
                                 />
                             </View>
                         }
@@ -746,14 +755,16 @@ class CreateProject extends Component {
                             form={
                                 <View style={{ flex: 1 }}>
 
-                                    {/* <MyInput
-                                        label="Numéro du projet"
-                                        returnKeyType="done"
-                                        value={this.ProjectId}
-                                        editable={false}
-                                        disabled
-                                    /> */}
-
+                                    {this.isEdit &&
+                                        <MyInput
+                                            label="Numéro du projet"
+                                            returnKeyType="done"
+                                            value={this.ProjectId}
+                                            editable={false}
+                                            disabled
+                                        />
+                                    }
+                                    
                                     <MyInput
                                         label="Nom du projet *"
                                         returnKeyType="done"

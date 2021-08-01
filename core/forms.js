@@ -1,4 +1,4 @@
-import { faBuilding, faCheck, faHouse, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faBuilding, faCheck, faHouse, faTimes, faQuestionCircle, faMars, faVenus } from "@fortawesome/pro-light-svg-icons";
 import * as theme from './theme'
 
 export const ficheEEBModel = [
@@ -95,25 +95,7 @@ export const ficheEEBModel = [
             },
         ]
     },
-    { //2 DONE
-        id: "familySituation",
-        title: "SITUATION",
-        fields: [
-            {
-                id: "familySituation",
-                label: "Situation de famille",
-                type: "options",
-                items: [
-                    { label: 'Célibataire', value: 'Célibataire', icon: faQuestionCircle, pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 } },
-                    { label: 'Marié', value: 'Marié', icon: faQuestionCircle, pdfConfig: { dx: -395, dy: - 350, pageIndex: 3 } },
-                    { label: 'Pacsé', value: 'Pacsé', icon: faQuestionCircle, pdfConfig: { dx: -339, dy: - 350, pageIndex: 3 } },
-                    { label: 'Concubinage', value: 'Concubinage', icon: faQuestionCircle, pdfConfig: { dx: -282, dy: - 350, pageIndex: 3 } },
-                    { label: 'Divorcé', value: 'Divorcé', icon: faQuestionCircle, pdfConfig: { dx: -204, dy: - 350, pageIndex: 3 } },
-                    { label: 'Veuve', value: 'Veuve', icon: faQuestionCircle, pdfConfig: { dx: -140, dy: - 350, pageIndex: 3 } }
-                ],
-            }
-        ]
-    },
+
     { //3 DONE
         id: "houseOwnership",
         title: "SITUATION",
@@ -668,12 +650,12 @@ export const ficheEEBModel = [
                 id: "heaters",
                 type: "picker",
                 items: [
-                    { label: "Selectionner un organe", value: "" },
+                    { label: "Selectionner un type", value: "" },
                     { label: "Electrique", value: "Electrique", pdfConfig: { dx: -453, dy: - 499, pageIndex: 0 } },
                     { label: "Gaz", value: "Gaz", pdfConfig: { dx: -375, dy: - 499, pageIndex: 0 } },
                     { label: "Fioul", value: "Fioul", pdfConfig: { dx: -311, dy: - 499, pageIndex: 0 } },
                     { label: "Pompe & Chaleur", value: "Pompe & Chaleur", pdfConfig: { dx: -240, dy: - 499, pageIndex: 0 } },
-                    { label: "Chaudière", value: "Chaudière", pdfConfig: { dx: -453, dy: - 517, pageIndex: 0 } },
+                    // { label: "Chaudière", value: "Chaudière", pdfConfig: { dx: -453, dy: - 517, pageIndex: 0 } },
                     { label: "Poéle", value: "Poéle", pdfConfig: { dx: -375, dy: - 517, pageIndex: 0 } },
                     { label: "Bois", value: "Bois", pdfConfig: { dx: -311, dy: - 517, pageIndex: 0 } },
                     { label: "Autre", value: "Autre", pdfConfig: { dx: -240, dy: - 517, pageIndex: 0 } },
@@ -950,6 +932,140 @@ export const ficheEEBModel = [
         ],
         isLast: true
     },
+    {
+        id: "submit",
+        fields: []
+    }
+]
+
+export const mandatMPRModel = [
+    { //1 DONE
+        id: "identity",
+        title: "IDENTITÉ DU MANDANT",
+        fields: [
+            {
+                id: "sexe",
+                label: "Je soussigné (vous le mandant):",
+                type: "options",
+                items: [
+                    { label: 'Monsieur', value: 'Monsieur', icon: faMars, pdfConfig: { dx: -473, dy: - 350, pageIndex: 0 } },
+                    { label: 'Madame', value: 'Madame', icon: faVenus, pdfConfig: { dx: -395, dy: - 350, pageIndex: 0 } },
+                ],
+                mendatory: true,
+            }
+        ]
+    },
+    {//2 DONE
+        id: "identity",
+        title: "IDENTITÉ DU MANDANT",
+        fields: [
+            {
+                id: "applicantFirstName",
+                type: "textInput",
+                label: "Prénom",
+                errorId: "applicantFirstNameError",
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 0 },
+                mendatory: true
+            },
+            {
+                id: "applicantLastName",
+                type: "textInput",
+                label: "Nom",
+                errorId: "applicantLastNameError", //add max lenght
+                pdfConfig: { dx: -520, dy: - 155, pageIndex: 0 }, //add spaces
+                mendatory: true
+            },
+        ]
+    },
+    {
+        id: "property",
+        title: "PROPRIÉTÉ DU MANDANT",
+        fields: [
+            {
+                id: "address",
+                type: "textInput",
+                label: "Adresse détaillée complète",
+                errorId: "addressError",
+                pdfConfig: { dx: -556, dy: - 194, pageIndex: 0 },
+                mendatory: true,
+            },
+        ]
+    },
+    {
+        id: "property",
+        title: "PROPRIÉTÉ DU MANDANT",
+        fields: [
+            {
+                id: "addressCode",
+                type: "textInput",
+                mask: "[0][0][0][0][0]",
+                label: "Code Postal",
+                isNumeric: true,
+                errorId: "addressCodeError",
+                mendatory: true,
+                pdfConfig: { dx: -518, dy: - 218, pageIndex: 0, spaces: { afterEach: 1, str: '      ' } }
+            },
+        ]
+    },
+    // {
+    //     id: "property",
+    //     title: "PROPRIÉTÉ DU MANDANT",
+    //     fields: [
+    //         {
+    //             id: "commune",
+    //             type: "textInput",
+    //             label: "Commune",
+    //             errorId: "communeError",
+    //             pdfConfig: { dx: -556, dy: - 194, pageIndex: 3 },
+    //             mendatory: true,
+    //         },
+    //     ]
+    // },
+    // {
+    //     id: "property",
+    //     title: "COORDONNÉES DU MANDANT",
+    //     fields: [
+    //         {
+    //             id: "email",
+    //             type: "textInput",
+    //             isEmail: true,
+    //             label: "Adresse email",
+    //             errorId: "emailError",
+    //             mendatory: true,
+    //             pdfConfig: { dx: -380, dy: - 267, pageIndex: 3 }
+    //         },
+    //     ]
+    // },
+    // {
+    //     id: "property",
+    //     title: "COORDONNÉES DU MANDANT",
+    //     fields: [
+    //         {
+    //             id: "phone",
+    //             type: "textInput",
+    //             mask: "[00][00][00][00][00]",
+    //             isNumeric: true,
+    //             label: "Téléphone",
+    //             errorId: "phoneError",
+    //             mendatory: true,
+    //             pdfConfig: { dx: -521, dy: - 243, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } }
+    //         },
+    //     ]
+    // },
+    // {//8
+    //     id: "journal",
+    //     title: "",
+    //     fields: [
+    //         {
+    //             id: "createdIn",
+    //             type: "textInput",
+    //             label: "Mandat Maprimerénov fait à:",
+    //             errorId: "createdInError",
+    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+    //             mendatory: true,
+    //         },
+    //     ],
+    // },
     {
         id: "submit",
         fields: []

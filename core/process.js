@@ -6,7 +6,7 @@ import { db, functions } from '../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
 import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from './utils'
-import { errorMessages } from './constants';
+import { errorMessages, phases } from './constants';
 
 //#PROCESS ALGORITHM/LOGIC
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
@@ -39,6 +39,7 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             if (actions.length > 0) {
 
                 actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
+
                 if (actions[0].cloudFunction) {
                     const sendEmail = functions.httpsCallable('sendEmail')
                     const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
@@ -155,7 +156,7 @@ const configureActions = async (actions, attributes, process) => {
         let query
         for (let action of actions) {
 
-            let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav } = action
+            let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav, choices } = action
 
             //1. Complete missing params
             if (collection && documentId === '') {
@@ -182,6 +183,13 @@ const configureActions = async (actions, attributes, process) => {
                 }
             }
 
+            if (choices) {
+                for (let item of action.choices) {
+                    if (item.operation && item.operation.collection === "Clients") {
+                        item.operation.docId = attributes.clientId
+                    }
+                }
+            }
 
             if (cloudFunction) {
                 const { params, queryAttachmentsUrls } = action.cloudFunction
@@ -672,23 +680,22 @@ export const getCurrentAction = (process) => {
 }
 
 //#Helpers
-const phases = [
-    { label: 'Prospect', value: 'Prospect', id: 'init' },
-    { label: 'Visite technique préalable', value: 'Visite technique préalable', id: 'rd1' },
-    { label: 'Présentation étude', value: 'Présentation étude', id: 'rdn' },
-    { label: 'Visite technique', value: 'Visite technique', id: 'technicalVisitManagement' },
-    { label: 'Installation', value: 'Installation', id: 'installation' },
-    { label: 'Maintenance', value: 'Maintenance', id: 'maintenance' },
+const phasesIdsValuesMap = [
+    { values: ['Prospect', 'Initialisation'], id: 'init' },
+    { values: ['Visite technique préalable', 'Rendez-vous 1'], id: 'rd1' },
+    { values: ['Présentation étude', 'Rendez-vous N'], id: 'rdn' },
+    { values: ['Visite technique'], id: 'technicalVisitManagement' },
+    { values: ['Installation'], id: 'installation' },
+    { values: ['Maintenance'], id: 'maintenance' },
 ]
 
 export const getPhaseId = (phaseValue) => {
-    const phaseValueArr = [phaseValue]
-    const phaseObject = phases.filter(phaseObject => phaseValueArr.includes(phaseObject.value))
-    const currentPhase = phaseObject[0].id
-    return currentPhase
+    const index = phasesIdsValuesMap.findIndex((item) => item.values.includes(phaseValue))
+    const currentPhaseId = phasesIdsValuesMap[index].id
+    return currentPhaseId
 }
 
-const groupBy = (arr, property) => {
+export const groupBy = (arr, property) => {
     return arr.reduce((memo, x) => {
         if (!memo[x[property]]) {
             memo[x[property]] = []

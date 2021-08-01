@@ -16,12 +16,14 @@ import RadioButton from "../../components/RadioButton"
 import MyInput from "../../components/TextInput"
 import Toast from "../../components/Toast"
 import LoadDialog from "../../components/LoadDialog"
+import { CustomIcon } from "../../components";
 
 import { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, errorMessages, roles as allRoles } from "../../core/constants";
 import { nameValidator, emailValidator, passwordValidator, generateId, updateField, setToast, load, setAddress, displayError } from "../../core/utils"
 import { checkEmailExistance } from "../../api/auth-api";
+import { faMagic } from "@fortawesome/pro-light-svg-icons";
 
 const rolesPicker = {
   3: [
@@ -207,7 +209,11 @@ class CreateUser extends Component {
         {loading ?
           <Loading size='large' />
           :
-          <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}>
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            style={{ backgroundColor: theme.colors.white }}
+            contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}
+          >
             <MyInput
               label="Identifiant utilisateur"
               value={this.userId}
@@ -319,11 +325,18 @@ class CreateUser extends Component {
               error={!!password.error}
               errorText={password.error}
               autoCapitalize="none"
-              secureTextEntry={!password.show}
-              right={<TextInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                password.show = !password.show
-                this.setState({ password })
-              }} />}
+              // secureTextEntry={!password.show}
+              right={
+                <TextInput.Icon
+                  name={<CustomIcon icon={faMagic} color={theme.colors.inpuIcon} />}
+                  color={theme.colors.secondary}
+                  onPress={() => {
+                    const password = { value: generateId('', 6), error: "" }
+                    this.setState({ password })
+                  }}
+                />
+              }
+              editable={false}
             />
 
             <Toast

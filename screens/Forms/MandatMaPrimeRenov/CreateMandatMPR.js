@@ -3,159 +3,36 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, } from 'react-native'
 import { faVials } from '@fortawesome/pro-duotone-svg-icons';
 
-import StepsForm from '../../containers/StepsForm'
-import { CustomIcon, Button } from '../../components/index'
+import StepsForm from '../../../containers/StepsForm'
+import { CustomIcon, Button } from '../../../components/index'
 
-import { ficheEEBModel } from '../../core/forms'
-import { ficheEEBBase64 } from '../../core/files'
+import { mandatMPRModel } from '../../../core/forms'
+import { mandatMPRBase64 } from '../../../assets/files/mandatMPRBase64'
 
-import { generatePdfForm } from '../../core/utils'
-import { constants } from '../../core/constants'
-import * as theme from '../../core/theme'
+import { generatePdfForm } from '../../../core/utils'
+import { constants } from '../../../core/constants'
+import * as theme from '../../../core/theme'
 
 const properties = [
-    "estimation",
-    "colorCat",
-    "products",
-    "nameSir",
-    "nameMiss",
-    "proSituationSir",
-    "ageSir",
-    "proSituationMiss",
-    "ageMiss",
-    "familySituation",
-    "houseOwnership",
-    "yearsHousing",
-    "taxIncome",
-    "familyMembersCount",
-    "childrenCount",
-    "aidAndSub",
-    "aidAndSubWorksType",
-    "aidAndSubWorksCost",
-    "housingType",
-    "landSurface",
-    "livingSurface",
-    "heatedSurface",
-    "yearHomeConstruction",
-    "roofType",
-    "cadastralRef",
-    "livingLevelsCount",
-    "roomsCount",
-    "ceilingHeight",
-    "slopeOrientation",
-    "slopeSupport",
-    "basementType",
-    "wallMaterial",
-    "wallThickness",
-    "internalWallsIsolation",
-    "externalWallsIsolation",
-    "floorIsolation",
-    "lostAticsIsolation",
-    "lostAticsIsolationMaterial",
-    "lostAticsIsolationAge",
-    "lostAticsIsolationThickness",
-    "lostAticsSurface",
-    "windowType",
-    "glazingType",
-    "hotWaterProduction",
-    "yearInstallationHotWater",
-    "heaters",
-    "transmittersTypes",
-    "yearInstallationHeaters",
-    "idealTemperature",
-    "isMaintenanceContract",
-    "isElectricityProduction",
-    "elecProdType",
-    "elecProdInstallYear",
-    "energyUsage",
-    "yearlyElecCost",
-    "roofLength",
-    "roofWidth",
-    "roofTilt",
-    "addressNum",
-    "addressStreet",
+    "sexe",
+    "applicantFirstName",
+    "applicantLastName",
+    "address",
     "addressCode",
-    "addressCity",
-    "phone",
-    "disablePhoneContact",
-    "email",
 ]
 
 const initialState = {
-    //results
-    products: [],
-    colorCat: "",
-    estimation: "",
-
-    //Fields
-    nameSir: "",
-    nameMiss: "",
-    proSituationSir: "",
-    ageSir: "",
-    proSituationMiss: "",
-    ageMiss: "",
-    familySituation: "",
-    houseOwnership: "",
-    yearsHousing: "",
-    taxIncome: "",
-    familyMembersCount: "",
-    childrenCount: "",
-    aidAndSub: "",
-    aidAndSubWorksType: "",
-    aidAndSubWorksCost: "",
-    housingType: "",
-    landSurface: "",
-    livingSurface: "",
-    heatedSurface: "",
-    yearHomeConstruction: "",
-    roofType: "",
-    cadastralRef: "",
-    livingLevelsCount: "",
-    roomsCount: "",
-    ceilingHeight: "",
-    slopeOrientation: "",
-    slopeSupport: "",
-    basementType: "",
-    wallMaterial: "",
-    wallThickness: "",
-    internalWallsIsolation: "",
-    externalWallsIsolation: "",
-    floorIsolation: "",
-    lostAticsIsolation: "",
-    lostAticsIsolationMaterial: [],
-    lostAticsIsolationAge: "",
-    lostAticsIsolationThickness: "",
-    lostAticsSurface: "",
-    windowType: "",
-    glazingType: "",
-    hotWaterProduction: [],
-    yearInstallationHotWater: "",
-    heaters: "",
-    transmittersTypes: [],
-    yearInstallationHeaters: "",
-    idealTemperature: "",
-    isMaintenanceContract: "",
-    isElectricityProduction: "",
-    elecProdType: "",
-    elecProdInstallYear: "",
-    energyUsage: "",
-    yearlyElecCost: "",
-    roofLength: "",
-    roofWidth: "",
-    roofTilt: "",
-    addressNum: "",
-    addressStreet: "",
+    sexe: "",
+    applicantFirstName: "",
+    applicantLastName: "",
+    address: "",
     addressCode: "",
-    addressCity: "",
-    phone: "",
-    disablePhoneContact: true,
-    email: "",
 }
 
-class CreateEEB extends Component {
+class CreateMandatMPR extends Component {
     constructor(props) {
         super(props)
-        this.SimulationId = this.props.navigation.getParam('SimulationId', '')
+        this.MandatMPRId = this.props.navigation.getParam('MandatMPRId', '')
 
         this.state = {
 
@@ -221,19 +98,18 @@ class CreateEEB extends Component {
     render() {
         return (
             <StepsForm
-                titleText="Etude et Evaluation des besoins"
+                titleText="Créer un mandat Maprimerénov"
                 navigation={this.props.navigation}
                 stateProperties={properties}
                 initialState={initialState}
                 idPattern={"GS-EEB-"}
-                DocId={this.SimulationId}
-                collection={"Eeb"}
-                welcomeMessage={this.welcomeMessage}
-                steps={["Votre Foyer", "", "Votre Habitation", "", "Votre Bilan"]}
-                pages={ficheEEBModel}
-                generatePdf={(formInputs) => generatePdfForm(formInputs, ficheEEBBase64)}
-                genButtonTitle="Générer une fiche EEB"
-                renderOverview={this.props.renderOverview}
+                DocId={this.MandatMPRId}
+                collection={"MandatsMPR"}
+                //welcomeMessage={this.welcomeMessage}
+                steps={["Identité", "", "Habitation", "", "Coordonnées"]}
+                pages={mandatMPRModel}
+                generatePdf={(formInputs) => generatePdfForm(formInputs, "MandatsMPR")}
+                genButtonTitle="Générer un Mandat Maprimerénov"
             />
         )
     }
@@ -278,4 +154,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default CreateEEB
+export default CreateMandatMPR
