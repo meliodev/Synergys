@@ -77,12 +77,13 @@ const properties = [
     "addressCode",
     "addressCity",
     "phone",
-    "disablePhoneContact",
+    // "disablePhoneContact",
     "email",
     "createdAt",
     "createdBy",
     "editedAt",
     "editedBy",    
+    "isSubmitted" //used to tag drafts (not submitted)
 ]
 
 const initialState = {
@@ -152,7 +153,7 @@ const initialState = {
     addressCode: "",
     addressCity: "",
     phone: "",
-    disablePhoneContact: true,
+    // disablePhoneContact: true,
     email: "",
 }
  
@@ -237,6 +238,7 @@ class CreateEEB extends Component {
                 pages={ficheEEBModel}
                 generatePdf={(formInputs) => generatePdfForm(formInputs, "Simulations")}
                 genButtonTitle="Générer une fiche EEB"
+                fileName = "Fiche EEB"
             />
         )
     }

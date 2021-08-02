@@ -909,11 +909,11 @@ export const ficheEEBModel = [
                 mendatory: true,
                 pdfConfig: { dx: -521, dy: - 243, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } }
             },
-            {
-                id: "disablePhoneContact",
-                label: "J'accepte d'être rappelé à ce numéro",
-                type: "checkbox",
-            },
+            // {
+            //     id: "disablePhoneContact",
+            //     label: "J'accepte d'être rappelé à ce numéro",
+            //     type: "checkbox",
+            // },
         ]
     },
     {//37

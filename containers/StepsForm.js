@@ -117,19 +117,9 @@ class StepsForm extends Component {
                         return <View style={styles.stepsSeparator} />
 
                     else return (
-                        <TouchableOpacity
-                            style={{ flexDirection: "row", alignItems: "center" }}
-                            onPress={() => {
-                                if (!this.state.isEdit) return
-                                //Verify fields
-                                const isValid = this.verifyFields(this.state.pageIndex)
-                                if (!isValid) return
-                                const firstPageIndex = pages.findIndex((page) => index === page.stepIndex)
-                                this.setState({ pageIndex: firstPageIndex, stepIndex: index })
-                            }}
-                        >
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
                             {this.renderStep(step, index)}
-                        </TouchableOpacity>
+                        </View>
                     )
                 })
                 }
@@ -520,7 +510,7 @@ class StepsForm extends Component {
     }
 
     //##Handlers
-    goNext() {
+    async goNext() {
         const { pageIndex, pagesDone, stepIndex } = this.state
         const { pages, collection } = this.props
 
@@ -544,14 +534,20 @@ class StepsForm extends Component {
         const isSubmit = pages[pageIndex].id === 'submit'
 
         if (isLastFormPage) {
-            if (collection === "Simulations")
-                this.setResults()
+            if (collection === "Simulations") {
+                await this.setResults()
+                this.setState({
+                    showSuccessMessage: true,
+                    pageIndex: this.state.pageIndex + 1,
+                    loading: false
+                })
+            }
 
-            else this.handleSubmit()
+            else this.handleSubmit(true)
         }
 
         else if (isSubmit) {
-            this.handleSubmit()
+            this.handleSubmit(true)
         }
 
         //Increment page
@@ -645,23 +641,22 @@ class StepsForm extends Component {
     }
 
     //##Logic: Submit
-    async handleSubmit() {
+    async handleSubmit(isSubmitted) {
 
         this.setState({ loading: true })
 
         //Verify onPress Check icon
-        if (this.state.isEdit) {
-            const isValid = this.verifyFields(this.state.pageIndex)
-            if (!isValid) {
-                this.setState({ loading: false })
-                return
-            }
+        const isValid = this.verifyFields(this.state.pageIndex)
+        if (!isValid) {
+            this.setState({ loading: false })
+            return
         }
 
         const { idPattern, collection } = this.props
         const DocId = this.state.isEdit ? this.DocId : generateId(idPattern)
         let form = this.unformatDocument()
         form = this.addFormLogs(form)
+        form.isSubmitted = form.isSubmitted ? true : isSubmitted
 
         db.collection(collection).doc(DocId).set(form)
 
@@ -704,6 +699,14 @@ class StepsForm extends Component {
         delete state.submitted
         delete state.readOnly
         delete state.isEdit
+
+        for (const key in state) {
+            const isErrorField = key.toLowerCase().includes('error')
+            if (isErrorField) {
+                delete state[key]
+            }
+        }
+
         return state
     }
 
@@ -712,14 +715,6 @@ class StepsForm extends Component {
         if (!this.state.isEdit) {
             form.createdAt = moment().format()
             form.createdBy = this.props.currentUser
-
-            //Add draft tag
-            if (this.state.pageIndex < this.props.pages.length - 1)
-                form.isDraft = true
-        }
-
-        else {
-            form.isDraft = false //#task: false user can edit and not finish again the form (we have to tag the form once user reach final page)
         }
 
         form.editedAt = moment().format()
@@ -744,9 +739,6 @@ class StepsForm extends Component {
                 products,
                 colorCat,
                 estimation,
-                showSuccessMessage: true,
-                pageIndex: this.state.pageIndex + 1,
-                loading: false
             }, () => resolve())
         })
     }
@@ -1165,6 +1157,7 @@ class StepsForm extends Component {
             showWelcomeMessage,
             showSuccessMessage,
             isPdfModalVisible,
+            pageIndex,
             pdfBase64,
             submitted,
             isEdit,
@@ -1204,11 +1197,16 @@ class StepsForm extends Component {
                     iconsColor={theme.colors.white}
                     close
                     title
-                    check={!readOnly}
+                    check={!showWelcomeMessage && !readOnly}
                     handleSubmit={async () => {
                         if (collection === "Simulations")
                             await this.setResults()
-                        this.handleSubmit()
+
+                        const isSubmit = this.props.pages[pageIndex].id === 'submit'
+                        const isLastFormPage = pageIndex === this.props.pages.length - 2
+                        const isSubmitted = collection === "Simulations" ? isSubmit : isLastFormPage
+
+                        this.handleSubmit(isSubmitted)
                     }}
                     edit={isEdit && readOnly}
                     handleEdit={() => this.setState({ submitted: false, readOnly: false })}
@@ -1227,7 +1225,7 @@ class StepsForm extends Component {
                 >
                     <View style={styles.scrollableModal}>
                         <ModalHeader
-                            title={"Fiche EEB générée"}
+                            title={`${this.props.fileName} générée`}
                             toggleModal={this.toggleModal}
                         />
                         {pdfBase64 !== "" &&
@@ -1235,7 +1233,7 @@ class StepsForm extends Component {
                                 <Pdf source={source} style={modalStyles.pdf} />
                             </View>
                         }
-                        {this.renderBottomCenterButton("Valider la fiche EEB", () => this.savePdfBase64(pdfBase64))}
+                        {this.renderBottomCenterButton(`Valider la ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64))}
                     </View>
                 </Modal>
 

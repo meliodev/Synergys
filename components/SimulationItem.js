@@ -18,7 +18,7 @@ import { withNavigation } from 'react-navigation'
 
 const SimulationItem = ({ simulation, onPress, navigation, ...props }) => {
 
-    const { id, estimation, project, editedAt, nameSir, nameMiss, isDraft, createdBy, colorCat } = simulation
+    const { id, estimation, project, editedAt, nameSir, nameMiss, isDraft, createdBy, colorCat, isSubmitted } = simulation
     const isNameSir = nameSir !== ""
     const isNameMiss = nameMiss !== ""
     const bothNames = isNameSir && isNameMiss
@@ -49,7 +49,7 @@ const SimulationItem = ({ simulation, onPress, navigation, ...props }) => {
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(editedAt).format('lll')}</Text>
-                {isDraft && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>Brouillon</Text>}
+                {!isSubmitted && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>Brouillon</Text>}
             </View>
         </TouchableOpacity >
     )

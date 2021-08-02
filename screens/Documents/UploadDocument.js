@@ -138,6 +138,7 @@ class UploadDocument extends Component {
 
             //File Picker
             attachment: null,
+            attachmentError: "",
 
             //Logs
             createdBy: { id: '', fullName: '' },
@@ -243,11 +244,13 @@ class UploadDocument extends Component {
     //SUBMISSION
     validateInputs() {
         let { project, name, attachment } = this.state
+        console.log('attchment', attachment)
         let projectError = nameValidator(project.id, '"Projet"')
         let nameError = nameValidator(name, '"Nom du document"')
+        let attachmentError = !attachment ? 'La pièce jointe est obligatoire' : ""
 
-        if (projectError || nameError) {
-            this.setState({ projectError, nameError, loading: false, loadingConversion: false })
+        if (projectError || nameError || attachmentError) {
+            this.setState({ projectError, nameError, attachmentError, loading: false, loadingConversion: false })
             return false
         }
         return true
@@ -586,7 +589,7 @@ class UploadDocument extends Component {
         const result = await this.setAttachment(isCamera)
         const { attachment, error } = result
         if (error) displayError(error)
-        else this.setState({ attachment, orderData: null })
+        else this.setState({ attachment, attachmentError: "", orderData: null })
         this.toggleModal()
     }
 
@@ -785,7 +788,7 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment, orderData } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError, nameError } = this.state
+        let { loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError, nameError, attachmentError } = this.state
         const { checked, modalContent, showModal, attachmentSource } = this.state
         const { isConnected } = this.props.network
 
@@ -893,7 +896,16 @@ class UploadDocument extends Component {
                                         showAvatarText={false}
                                     />
 
-                                    {project.id !== "" && this.renderAttachment(canWrite)}
+                                    {project.id !== "" &&
+                                        <View>
+                                            {this.renderAttachment(canWrite)}
+                                            {attachmentError !== "" &&
+                                                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3 }]}>
+                                                    {attachmentError}
+                                                </Text>
+                                            }
+                                        </View>
+                                    }
 
                                     {showType &&
                                         <MyInput

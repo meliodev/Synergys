@@ -24,7 +24,7 @@ import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
-import { fetchDocs, fetchDocument } from "../../api/firestore-api";
+import { fetchDocs, fetchDocument, listenDocument } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process'
 
@@ -187,13 +187,21 @@ class CreateProject extends Component {
     }
 
     async initEditMode() {
-        let project = await fetchDocument('Projects', this.ProjectId)
-        this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
-        project = this.setProject(project)
-        if (!project) return
-        this.setImageCarousel(project.attachments)
-        this.setUserAccess(project.step)
-        await this.runListeners()
+        let query = db.collection("Projects").doc(this.ProjectId)
+        return new Promise((resolve, reject) => {
+            query.onSnapshot(async (doc) => {
+                if (!doc.exists) return null
+                let project = doc.data()
+                project.id = doc.id
+                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+                project = this.setProject(project)
+                if (!project) return
+                this.setImageCarousel(project.attachments)
+                this.setUserAccess(project.step)
+                await this.runListeners()
+                resolve(true)
+            })
+        })
     }
 
     setProject(project) {
@@ -764,7 +772,7 @@ class CreateProject extends Component {
                                             disabled
                                         />
                                     }
-                                    
+
                                     <MyInput
                                         label="Nom du projet *"
                                         returnKeyType="done"
