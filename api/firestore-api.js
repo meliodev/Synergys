@@ -67,20 +67,6 @@ export function fetchDocument(collection, id, subCollection, subId) {
     .catch((e) => { throw new Error('Erreur lors de la connection avec la base de données. Veuillez réessayer plus tard.') })
 }
 
-
-export function listenDocument(collection, id, subCollection, subId) {
-  let query = db.collection(collection).doc(id)
-  if (subCollection) query = query.collection(subCollection).doc(subId)
-  return new Promise((resolve, reject) => {
-    query.onSnapshot((doc) => {
-      if (!doc.exists) return null
-      let data = doc.data()
-      data.id = doc.id
-      resolve(data)
-    })
-  })
-}
-
 //#TEAMS
 export const deleteTeam = async (team) => {
   // Get a new write batch

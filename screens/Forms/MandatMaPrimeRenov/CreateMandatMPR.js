@@ -12,6 +12,7 @@ import { mandatMPRBase64 } from '../../../assets/files/mandatMPRBase64'
 import { generatePdfForm } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
+import { db } from '../../../firebase';
 
 const properties = [
     "sexe",
@@ -19,6 +20,15 @@ const properties = [
     "applicantLastName",
     "address",
     "addressCode",
+    "commune",
+    "email",
+    "phone",
+    "createdIn",
+    "createdAt",
+    "createdBy",
+    "editedAt",
+    "editedBy",
+    "isSubmitted",
 ]
 
 const initialState = {
@@ -27,6 +37,9 @@ const initialState = {
     applicantLastName: "",
     address: "",
     addressCode: "",
+    commune: "",
+    email: "",
+    createdIn: "",
 }
 
 class CreateMandatMPR extends Component {
@@ -38,6 +51,7 @@ class CreateMandatMPR extends Component {
 
         }
     }
+
 
     //##Welcome 
     welcomeMessage(callBack) {
@@ -110,6 +124,7 @@ class CreateMandatMPR extends Component {
                 pages={mandatMPRModel}
                 generatePdf={(formInputs) => generatePdfForm(formInputs, "MandatsMPR")}
                 genButtonTitle="Générer un Mandat Maprimerénov"
+                fileName="Mandat MaPrimeRénov"
             />
         )
     }

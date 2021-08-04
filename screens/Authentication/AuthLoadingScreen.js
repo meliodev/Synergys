@@ -224,7 +224,7 @@ class AuthLoadingScreen extends Component {
         }
 
         else {
-          var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
+          var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "MandatMPRStack"
           var routeParams = {}
         }
       }

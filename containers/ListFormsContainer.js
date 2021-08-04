@@ -35,8 +35,6 @@ class ListFormsContainer extends Component {
 
         //filters
         // this.project = this.props.navigation.getParam('project', undefined) // For pdf generation
-
-        this.titleText = this.props.navigation.getParam('titleText', 'Simulations')
         this.showFAB = this.props.navigation.getParam('showFAB', true) && this.isRoot
         this.filteredItems = []
 
@@ -82,7 +80,7 @@ class ListFormsContainer extends Component {
         let { Count, List, loading } = this.state
         let { state, project, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
-        const { countTitle, creationScreen } = this.props
+        const { titleText, countTitle, creationScreen } = this.props
         const canCreate = true //#task: edit it..
         const { isConnected } = this.props.network
 
@@ -96,6 +94,7 @@ class ListFormsContainer extends Component {
         const filterActivated = filterCount < Count
         const s = filterCount > 1 ? 's' : ''
 
+        console.log('CREATION SCREEN', creationScreen)
         return (
             <View style={styles.container}>
 
@@ -106,7 +105,7 @@ class ListFormsContainer extends Component {
                         <SearchBar
                             menu={this.props.isRoot}
                             title={!showInput}
-                            titleText={this.titleText}
+                            titleText={titleText}
                             showBar={showInput}
                             placeholder='Rechercher un élément'
                             handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}

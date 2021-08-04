@@ -545,19 +545,25 @@ export const generatePdfForm = async (formInputs, pdfType) => {
         if (field.isMultiOptions && formInputs[field.id].length > 0 || formInputs[field.id] !== "") {
 
           let positions = []
+          let text = ""
 
           switch (field.type) {
             case "textInput":
-              let text = formInputs[field.id]
-              if (field.pdfConfig.spaces) {
-                const { afterEach, str } = field.pdfConfig.spaces
-                text = chunk(text, afterEach).join(str)
+              text = formInputs[field.id]
+
+              if (typeof (text) !== "undefined") {
+                if (field.pdfConfig.spaces) {
+                  const { afterEach, str } = field.pdfConfig.spaces
+                  text = chunk(text, afterEach).join(str)
+                }
+
+                if (field.id === "email" && field.splitArobase) {
+                  text = text.split('@')
+                  text = text.join('                                                               ')
+                }
               }
 
-              if (field.id === "email") {
-                text = text.split('@')
-                text = text.join('                                                               ')
-              }
+              else text = ""
 
               pages[field.pdfConfig.pageIndex].drawText(text,
                 {
@@ -641,9 +647,27 @@ export const generatePdfForm = async (formInputs, pdfType) => {
                   font: timesRomanFont,
                   color: colors.black,
                 })
+              break;
+
+            case "autogen":
+              if (field.pdfConfig.spaces) {
+                text = field.value
+                const { afterEach, str } = field.pdfConfig.spaces
+                text = chunk(text, afterEach).join(str)
+              }
+              pages[field.pdfConfig.pageIndex].drawText(text,
+                {
+                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
+                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
+                  size: caption,
+                  font: timesRomanFont,
+                  color: colors.black,
+                })
+              break;
 
             default: break;
           }
+
         }
       }
     }

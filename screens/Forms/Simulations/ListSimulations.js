@@ -14,12 +14,12 @@ import { db } from '../../../firebase'
 import * as theme from "../../../core/theme";
 import { constants } from "../../../core/constants";
 import ListFormsContainer from "../../../containers/ListFormsContainer";
-import SimulationItem from "../../../components/SimulationItem";
+import SimulationItem from "../../../components/genForms/SimulationItem";
 import { fetchDocs } from "../../../api/firestore-api";
 import { setStatusBarColor } from "../../../core/redux";
 
 
-class ListForms extends React.Component {
+class ListSimulations extends React.Component {
 
     constructor(props) {
         super(props)
@@ -49,7 +49,9 @@ class ListForms extends React.Component {
         return (
             <SimulationItem
                 simulation={item}
-                onPress={() => this.onPressItem(item)} />
+                onPress={() => this.onPressItem(item)}
+                nameSir={item.nameSir}
+                nameMiss={item.nameMiss} />
         )
     }
 
@@ -57,11 +59,11 @@ class ListForms extends React.Component {
 
     onPressItem(item) {
         if (this.isRoot)
-            this.props.navigation.navigate('CreateEEB', {
+            this.props.navigation.navigate('CreateSimulation', {
                 SimulationId: item.id
             })
 
-        else this.props.navigation.navigate('CreateEEB', {
+        else this.props.navigation.navigate('CreateSimulation', {
             SimulationId: item.id,
             autoGenPdf: true,
             docType: this.docType,
@@ -80,9 +82,10 @@ class ListForms extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <ListFormsContainer
+                    titleText="Simulations"
                     collection='Simulations'
                     query={query}
-                    creationScreen="CreateEEB"
+                    creationScreen="CreateSimulation"
                     navigation={this.props.navigation}
                     fetchItems={this.fetchItems}
                     renderItem={this.renderItem}
@@ -112,7 +115,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(ListForms)
+export default connect(mapStateToProps)(ListSimulations)
 
 
 

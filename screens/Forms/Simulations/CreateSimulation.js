@@ -157,7 +157,7 @@ const initialState = {
     email: "",
 }
  
-class CreateEEB extends Component {
+class CreateSimulation extends Component {
     constructor(props) {
         super(props)
         this.SimulationId = this.props.navigation.getParam('SimulationId', '')
@@ -283,4 +283,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default CreateEEB
+export default CreateSimulation

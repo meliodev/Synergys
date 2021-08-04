@@ -9,31 +9,32 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import Button from './Button'
+import Button from '../Button'
 
-import * as theme from '../core/theme';
-import { constants } from '../core/constants';
+import * as theme from '../../core/theme';
+import { constants } from '../../core/constants';
 
 import { withNavigation } from 'react-navigation'
 
-const SimulationItem = ({ simulation, onPress, navigation, ...props }) => {
+const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...props }) => {
 
-    const { id, estimation, project, editedAt, nameSir, nameMiss, isDraft, createdBy, colorCat, isSubmitted } = simulation
-    const isNameSir = nameSir !== ""
-    const isNameMiss = nameMiss !== ""
-    const bothNames = isNameSir && isNameMiss
+    const { id, project, editedAt, isDraft, createdBy, isSubmitted, colorCat, estimation } = item
+
+    const isNameClient1 = nameClient1 !== ""
+    const isNameClient2 = nameClient2 !== ""
+    const bothNames = isNameClient1 && isNameClient2
     if (bothNames)
-        var clientsNames = nameSir + " & " + nameMiss
-    else if (isNameSir)
-        var clientsNames = nameSir
-    else if (isNameMiss)
-        var clientsNames = nameMiss
+        var clientsNames = nameClient1 + " & " + nameClient2
+    else if (isNameClient1)
+        var clientsNames = nameClient1
+    else if (isNameClient2)
+        var clientsNames = nameClient2
 
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={styles.header}>
                 <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
-                <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation}</Text>
+                {estimation && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation}</Text>}
             </View>
 
             <View style={styles.body}>
@@ -45,7 +46,7 @@ const SimulationItem = ({ simulation, onPress, navigation, ...props }) => {
                 </Text>
             </View>
 
-            <Text style={[theme.customFontMSregular.caption, { marginBottom: 8, color: theme.colors.gray_dark }]}>Crée par {createdBy.fullName}</Text>
+            {/* <Text style={[theme.customFontMSregular.caption, { marginBottom: 8, color: theme.colors.gray_dark }]}>Crée par {createdBy.fullName}</Text> */}
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(editedAt).format('lll')}</Text>
@@ -94,4 +95,4 @@ const styles = StyleSheet.create({
     }
 })
 
-export default withNavigation(SimulationItem)
+export default withNavigation(FormItem)

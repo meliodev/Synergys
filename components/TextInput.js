@@ -4,7 +4,7 @@ import { TextInput as NativeTextInput } from 'react-native';
 import { TextInput as Input } from "react-native-paper";
 import * as theme from "../core/theme";
 
-const TextInput = ({ errorText, disabled, whiteTheme, link, ...props }) => {
+const TextInput = ({ errorText, disabled, whiteTheme, link, maxLength, ...props }) => {
 
   return (
     <View style={styles.container}>
@@ -12,6 +12,7 @@ const TextInput = ({ errorText, disabled, whiteTheme, link, ...props }) => {
         style={[theme.customFontMSregular.body, styles.input]}
         selectionColor={whiteTheme ? '#fff' : theme.colors.primary}
         underlineColor={theme.colors.gray_extraLight}
+        maxLength={maxLength}
         theme={
           {
             colors: {

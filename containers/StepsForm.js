@@ -198,7 +198,7 @@ class StepsForm extends Component {
 
             const value = this.state[field.id]
             const error = this.state[field.errorId]
-            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, mendatory } = field
+            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, mendatory, maxLength } = field
             const asterisk = mendatory ? ' *' : ''
             const label = field.label + asterisk
 
@@ -251,8 +251,10 @@ class StepsForm extends Component {
                             error={error}
                             errorText={error}
                             editable={true}
+                            maxLength={maxLength}
                         />
                     )
+                    break;
 
                 case "picker":
                     return (
@@ -432,6 +434,7 @@ class StepsForm extends Component {
                             editable={true}
                         />
                     )
+                    break;
 
                 case "checkbox":
                     const onPressCheckBox = () => this.setState({ disablePhoneContact: !this.state.disablePhoneContact })
@@ -468,11 +471,16 @@ class StepsForm extends Component {
                             />
                         </View>
                     )
+                    break;
+
+                case "autogen":
+                    return null
+                    break;
             }
         })
 
         const arr = fieldsComponents.filter((e) => e !== null)
-        const noField = arr.length === 0
+        const noField = arr.length === 0 
         if (noField) this.setState({ pageIndex: this.state.pageIndex + 1 })
 
         return fieldsComponents
@@ -991,7 +999,7 @@ class StepsForm extends Component {
 
     //##Helpers
     toggleModal() {
-        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
+        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible }, () => console.log("22222222222"))
     }
 
     async savePdfBase64(pdfBase64) {
@@ -1043,6 +1051,10 @@ class StepsForm extends Component {
 
         return (
             <View style={{ flex: 1 }}>
+                <Text style={[theme.customFontMSbold.body, { backgroundColor: theme.colors.primary, width: "100%", textAlign: 'center', color: theme.colors.white, alignSelf: "center", paddingVertical: theme.padding * 0.8, letterSpacing: 1 }]}>
+                    RÉCAPITULATIF
+                </Text>
+
                 <ScrollView contentContainerStyle={styles.overviewContainer}>
 
                     {showSummary &&
@@ -1343,7 +1355,7 @@ const styles = StyleSheet.create({
     },
     overviewContainer: {
         flexGrow: 1,
-        paddingTop: theme.padding / 2,
+        // paddingTop: theme.padding / 2,
         paddingBottom: theme.padding * 3,
         backgroundColor: theme.colors.gray_extraLight
     },

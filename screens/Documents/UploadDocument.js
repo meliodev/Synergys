@@ -63,7 +63,7 @@ const genFicheEEBSources = [
 
 const genFormSources = [
     { label: 'Un formulaire existant existante', value: 'oldForm', icon: faFileSearch },
-    { label: 'Une nouveau formulaire', value: 'newForm', icon: faFilePlus },
+    { label: 'Un nouveau formulaire', value: 'newForm', icon: faFilePlus },
 ]
 
 const properties = ["project", "name", "type", "state", "attachment", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
@@ -649,7 +649,7 @@ class UploadDocument extends Component {
             autoGenPdf: true,
             docType: type,
             DocumentId: this.DocumentId,
-            project: project, //#test change from this.project to this.state.project (for filtering list of orders/simulations)
+            project, //#test change from this.project to this.state.project (for filtering list of orders/simulations)
             isConversion: false,
             onGoBack: this.getGenPdf
         }
@@ -663,21 +663,21 @@ class UploadDocument extends Component {
 
         else if (type === "Fiche EEB") {
             var titleText = "Choix de la simulation"
-            var listScreen = "ListForms"
-            var creationScreen = "CreateEEB"
+            var listScreen = "ListSimulations"
+            var creationScreen = "CreateSimulation"
             var popCount = index === 0 ? 2 : 1
         }
 
         else if (type === "Mandat MaPrimeRénov") {
             var titleText = "Choix du formulaire"
-            var listScreen = "ListForms"
+            var listScreen = "ListMandatsMPR"
             var creationScreen = "CreateMandatMPR"
             var popCount = index === 0 ? 2 : 1
         }
 
         else if (type === "PV réception") {
             var titleText = "Choix du formulaire"
-            var listScreen = "ListForms"
+            var listScreen = "ListSimulations"
             var creationScreen = "CreatePvReception"
             var popCount = index === 0 ? 2 : 1
         }

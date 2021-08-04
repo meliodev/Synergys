@@ -24,7 +24,7 @@ import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
 
-import { fetchDocs, fetchDocument, listenDocument } from "../../api/firestore-api";
+import { fetchDocs, fetchDocument } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process'
 

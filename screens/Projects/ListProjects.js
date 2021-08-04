@@ -90,34 +90,35 @@ class ListProjects extends Component {
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
             this.fetchDocs(query, 'projectsList', 'projectsCount', async () => {
-                if (!highRoles.includes(this.props.role.id))
-                    await this.fetchExtraProjects() //Intervenant
+                // if (!highRoles.includes(this.props.role.id))
+                //     await this.fetchExtraProjects() //Intervenant
                 load(this, false)
             })
         }
     }
 
-    async fetchExtraProjects() {
-        let { projectsList, projectsCount } = this.state
-        let extraProjects = []
+    //#deprecated
+    // async fetchExtraProjects() {
+    //     let { projectsList, projectsCount } = this.state
+    //     let extraProjects = []
 
-        await db
-            .collection('Projects')
-            .where('intervenant.id', '==', auth.currentUser.uid)
-            .get().then((snapshot) => {
-                projectsCount = projectsCount + snapshot.docs.length
-                for (const doc of snapshot.docs) {
-                    let project = doc.data()
-                    project.id = doc.id
-                    extraProjects.push(project)
-                }
-            })
+    //     await db
+    //         .collection('Projects')
+    //         .where('intervenant.id', '==', auth.currentUser.uid)
+    //         .get().then((snapshot) => {
+    //             projectsCount = projectsCount + snapshot.docs.length
+    //             for (const doc of snapshot.docs) {
+    //                 let project = doc.data()
+    //                 project.id = doc.id
+    //                 extraProjects.push(project)
+    //             }
+    //         })
 
-        if (extraProjects.length > 0)
-            projectsList = projectsList.concat(extraProjects)
+    //     if (extraProjects.length > 0)
+    //         projectsList = projectsList.concat(extraProjects)
 
-        this.setState({ projectsList, projectsCount })
-    }
+    //     this.setState({ projectsList, projectsCount })
+    // }
 
     componentWillUnmount() {
         this.unsubscribe && this.unsubscribe()

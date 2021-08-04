@@ -6,8 +6,6 @@ export const configureQuery = (collection, queryFilters, params) => {
 
     let query = db.collection(collection)
 
-    console.log(queryFilters)
-
     if (queryFilters) { // (if undefined -> user has full read access)
 
         queryFilters = configureQueryParams(queryFilters, params)
@@ -24,7 +22,7 @@ export const configureQuery = (collection, queryFilters, params) => {
             }
 
             else if (queryFilter.clause === 'orderBy') {
-                query = query.orderBy(field, sort)
+                query = query.orderBy(field, sort).limit(2)
             }
         })
     }

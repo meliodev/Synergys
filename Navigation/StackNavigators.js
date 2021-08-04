@@ -63,10 +63,15 @@ import CreateProduct from '../screens/Orders/CreateProduct'
 import CreateOrder from '../screens/Orders/CreateOrder'
 
 //Forms
-import ListForms from '../screens/Forms/Eeb/ListForms'
-import CreateEEB from '../screens/Forms/Eeb/CreateEEB'
+//Simulation
+import CreateSimulation from '../screens/Forms/Simulations/CreateSimulation'
+import ListSimulations from '../screens/Forms/Simulations/ListSimulations'
+//PV réception
 import CreatePvReception from '../screens/Forms/PvReception/CreatePvReception'
+//Mandat MPR
 import CreateMandatMPR from '../screens/Forms/MandatMaPrimeRenov/CreateMandatMPR'
+import ListMandatsMPR from '../screens/Forms/MandatMaPrimeRenov/ListMandatsMPR'
+//Mandat Synergys
 import CreateMandatSynergys from '../screens/Forms/MandatSynergys/CreateMandatSynergys'
 
 //News
@@ -225,16 +230,20 @@ const ProfileStack = createStackNavigator({
         navigationOptions: hideHeader
     },
     //Fiche EEB
-    ListForms: {
-        screen: ListForms,
+    ListSimulations: {
+        screen: ListSimulations,
         navigationOptions: hideHeader
     },
-    CreateEEB: {
-        screen: CreateEEB,
+    CreateSimulation: {
+        screen: CreateSimulation,
         navigationOptions: hideHeader
     },
     CreateMandatMPR: {
         screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsMPR: {
+        screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -411,16 +420,20 @@ const ClientsManagementStack = createStackNavigator({
         navigationOptions: hideHeader
     },
     //Fiche EEB
-    ListForms: {
-        screen: ListForms,
+    ListSimulations: {
+        screen: ListSimulations,
         navigationOptions: hideHeader
     },
-    CreateEEB: {
-        screen: CreateEEB,
+    CreateSimulation: {
+        screen: CreateSimulation,
         navigationOptions: hideHeader
     },
     CreateMandatMPR: {
         screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsMPR: {
+        screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -747,17 +760,21 @@ const ProjectsStack = createStackNavigator({
         screen: Address,
         navigationOptions: hideHeader
     },
-    //Fiche EEB
-    ListForms: {
-        screen: ListForms,
+    // //Fiche EEB
+    ListSimulations: {
+        screen: ListSimulations,
         navigationOptions: hideHeader
     },
-    CreateEEB: {
-        screen: CreateEEB,
+    CreateSimulation: {
+        screen: CreateSimulation,
         navigationOptions: hideHeader
     },
     CreateMandatMPR: {
         screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsMPR: {
+        screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -814,16 +831,20 @@ const DocumentsStack = createStackNavigator({
         navigationOptions: hideHeader
     },
     //Fiche EEB
-    ListForms: {
-        screen: ListForms,
+    ListSimulations: {
+        screen: ListSimulations,
         navigationOptions: hideHeader
     },
-    CreateEEB: {
-        screen: CreateEEB,
+    CreateSimulation: {
+        screen: CreateSimulation,
         navigationOptions: hideHeader
     },
     CreateMandatMPR: {
         screen: CreateMandatMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsMPR: {
+        screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -925,16 +946,27 @@ const OrdersStack = createStackNavigator({
 })
 
 const SimulatorStack = createStackNavigator({
-    ListForms: {
-        screen: ListForms,
+    ListSimulations: {
+        screen: ListSimulations,
         navigationOptions: hideHeader
     },
-    CreateEEB: {
-        screen: CreateEEB,
+    CreateSimulation: {
+        screen: CreateSimulation,
         navigationOptions: hideHeader
     },
     Address: {
         screen: Address,
+        navigationOptions: hideHeader
+    },
+})
+
+const MandatMPRStack = createStackNavigator({
+    ListMandatsMPR: {
+        screen: ListMandatsMPR,
+        navigationOptions: hideHeader
+    },
+    CreateMandatMPR: {
+        screen: CreateMandatMPR,
         navigationOptions: hideHeader
     },
 })
@@ -1016,6 +1048,10 @@ export const AppStack = createSwitchNavigator({
     },
     SimulatorStack: {
         screen: SimulatorStack,
+        navigationOptions: hideHeader
+    },
+    MandatMPRStack: {
+        screen: MandatMPRStack,
         navigationOptions: hideHeader
     },
     NewsStack: {

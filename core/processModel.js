@@ -457,7 +457,7 @@ export const processModel = {
             'signature': {
                 title: 'Signature du devis',
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 4,
+                stepOrder: 2,
                 actions: [
                     {
                         id: 'taxStatement',
@@ -620,7 +620,7 @@ export const processModel = {
             'technicalVisitCreation': {
                 title: "Création d'une visite technique",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 5,
+                stepOrder: 3,
                 actions: [
                     //Check 
                     {

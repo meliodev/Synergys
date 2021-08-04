@@ -1,4 +1,5 @@
 import { faBuilding, faCheck, faHouse, faTimes, faQuestionCircle, faMars, faVenus } from "@fortawesome/pro-light-svg-icons";
+import moment from "moment";
 import * as theme from './theme'
 
 export const ficheEEBModel = [
@@ -927,7 +928,7 @@ export const ficheEEBModel = [
                 label: "Adresse email",
                 errorId: "emailError",
                 mendatory: true,
-                pdfConfig: { dx: -380, dy: - 267, pageIndex: 3 }
+                pdfConfig: { dx: -380, dy: - 267, pageIndex: 3, splitArobase: true }
             },
         ],
         isLast: true
@@ -948,12 +949,14 @@ export const mandatMPRModel = [
                 label: "Je soussigné (vous le mandant):",
                 type: "options",
                 items: [
-                    { label: 'Monsieur', value: 'Monsieur', icon: faMars, pdfConfig: { dx: -473, dy: - 350, pageIndex: 0 } },
-                    { label: 'Madame', value: 'Madame', icon: faVenus, pdfConfig: { dx: -395, dy: - 350, pageIndex: 0 } },
+                    { label: 'Monsieur', value: 'Monsieur', icon: faMars, pdfConfig: { dx: -511, dy: - 401, pageIndex: 0 } },
+                    { label: 'Madame', value: 'Madame', icon: faVenus, pdfConfig: { dx: -473, dy: - 401, pageIndex: 0 } },
                 ],
                 mendatory: true,
             }
-        ]
+        ],
+        isFirst: true,
+        stepIndex: 1,
     },
     {//2 DONE
         id: "identity",
@@ -962,20 +965,23 @@ export const mandatMPRModel = [
             {
                 id: "applicantFirstName",
                 type: "textInput",
+                maxLength: 15,
                 label: "Prénom",
                 errorId: "applicantFirstNameError",
-                pdfConfig: { dx: -520, dy: - 155, pageIndex: 0 },
+                pdfConfig: { dx: -223, dy: - 415, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
                 mendatory: true
             },
             {
                 id: "applicantLastName",
                 type: "textInput",
+                maxLength: 24,
                 label: "Nom",
                 errorId: "applicantLastNameError", //add max lenght
-                pdfConfig: { dx: -520, dy: - 155, pageIndex: 0 }, //add spaces
+                pdfConfig: { dx: -501, dy: - 415, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
                 mendatory: true
             },
-        ]
+        ],
+        isLast: true,
     },
     {
         id: "property",
@@ -986,10 +992,13 @@ export const mandatMPRModel = [
                 type: "textInput",
                 label: "Adresse détaillée complète",
                 errorId: "addressError",
-                pdfConfig: { dx: -556, dy: - 194, pageIndex: 0 },
+                maxLength: 100,
+                pdfConfig: { dx: -520, dy: - 440, pageIndex: 0 }, //add spaces
                 mendatory: true,
             },
-        ]
+        ],
+        isFirst: true,
+        stepIndex: 2,
     },
     {
         id: "property",
@@ -1003,73 +1012,116 @@ export const mandatMPRModel = [
                 isNumeric: true,
                 errorId: "addressCodeError",
                 mendatory: true,
-                pdfConfig: { dx: -518, dy: - 218, pageIndex: 0, spaces: { afterEach: 1, str: '      ' } }
+                pdfConfig: { dx: -478, dy: - 456, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
             },
         ]
     },
-    // {
-    //     id: "property",
-    //     title: "PROPRIÉTÉ DU MANDANT",
-    //     fields: [
-    //         {
-    //             id: "commune",
-    //             type: "textInput",
-    //             label: "Commune",
-    //             errorId: "communeError",
-    //             pdfConfig: { dx: -556, dy: - 194, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ]
-    // },
-    // {
-    //     id: "property",
-    //     title: "COORDONNÉES DU MANDANT",
-    //     fields: [
-    //         {
-    //             id: "email",
-    //             type: "textInput",
-    //             isEmail: true,
-    //             label: "Adresse email",
-    //             errorId: "emailError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -380, dy: - 267, pageIndex: 3 }
-    //         },
-    //     ]
-    // },
-    // {
-    //     id: "property",
-    //     title: "COORDONNÉES DU MANDANT",
-    //     fields: [
-    //         {
-    //             id: "phone",
-    //             type: "textInput",
-    //             mask: "[00][00][00][00][00]",
-    //             isNumeric: true,
-    //             label: "Téléphone",
-    //             errorId: "phoneError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -521, dy: - 243, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } }
-    //         },
-    //     ]
-    // },
-    // {//8
-    //     id: "journal",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "createdIn",
-    //             type: "textInput",
-    //             label: "Mandat Maprimerénov fait à:",
-    //             errorId: "createdInError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
+    {
+        id: "property",
+        title: "PROPRIÉTÉ DU MANDANT",
+        fields: [
+            {
+                id: "commune",
+                type: "textInput",
+                maxLength: 31,
+                label: "Commune",
+                errorId: "communeError",
+                pdfConfig: { dx: -386, dy: - 456, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
+                mendatory: true,
+            },
+        ],
+        isLast: true
+    },
+    {
+        id: "property",
+        title: "COORDONNÉES DU MANDANT",
+        fields: [
+            {
+                id: "email",
+                type: "textInput",
+                isEmail: true,
+                label: "Adresse email",
+                errorId: "emailError",
+                mendatory: true,
+                pdfConfig: { dx: -478, dy: - 471, pageIndex: 0 }
+            },
+        ],
+        isFirst: true,
+        stepIndex: 3,
+    },
+    {
+        id: "property",
+        title: "COORDONNÉES DU MANDANT",
+        fields: [
+            {
+                id: "phone",
+                type: "textInput",
+                mask: "[00][00][00][00][00]",
+                isNumeric: true,
+                label: "Téléphone",
+                errorId: "phoneError",
+                mendatory: true,
+                pdfConfig: { dx: -171, dy: - 471, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }
+            },
+        ]
+    },
+    //autogen
+    {
+        id: '',
+        title: '',
+        fields: [
+            //AUTO-GEN
+            {
+                id: "dayNow",
+                type: "autogen",
+                value: moment().format('DD'),
+                pdfConfig: {
+                    dx: -423, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
+                    mendatory: true,
+                }
+            },
+            {
+                id: "monthNow",
+                type: "autogen",
+                value: moment().format('MM'),
+                pdfConfig: {
+                    dx: -398, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
+                    mendatory: true,
+                }
+            },
+            {
+                id: "yearNow",
+                type: "autogen",
+                value: moment().format('YYYY'),
+                pdfConfig: {
+                    dx: -372, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
+                    mendatory: true,
+                }
+            },
+        ]
+    },
+    {//8
+        id: "journal",
+        title: "",
+        fields: [
+            {
+                id: "createdIn",
+                type: "textInput",
+                maxLength: 18,
+                label: "Mandat Maprimerénov fait à:",
+                errorId: "createdInError",
+                pdfConfig: { dx: -515, dy: - 693, pageIndex: 1 },
+                mendatory: true,
+                autoDate: { pdfConfig: { dx: -422, dy: - 693, pageIndex: 1 } }
+            },
+        ],
+        isLast: true,
+    },
+    //#task: Generate createdAt & print it on pdf
     {
         id: "submit",
         fields: []
-    }
+    },
 ]
 
 export const PvReceptionModel = [

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog, faCommentDots, faScroll, faVials } from '@fortawesome/pro-light-svg-icons'
+import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog, faCommentDots, faScroll, faVials, faHandHoldingUsd } from '@fortawesome/pro-light-svg-icons'
 import firebase, { db } from '../firebase'
 import { connect } from 'react-redux'
 import NetInfo from "@react-native-community/netinfo"
@@ -17,7 +17,7 @@ import AppVersion from '../components/AppVersion';
 
 const menuPrivilleges = {
     backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
-    admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
+    admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'mandatmpr', 'simulator', 'documents', 'news', 'logout'],
     dircom: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'simulator', 'news', 'logout'],
     com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'simulator', 'news', 'logout'],
     tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'simulator', 'news', 'logout'],
@@ -35,6 +35,7 @@ const menuItems = [
     { id: 'requests', name: 'Demandes', icon: faTicketAlt, color: theme.colors.miRequests, navScreen: 'RequestsManagementStack' },
     { id: 'orders', name: 'Commandes', icon: faFileInvoice, color: theme.colors.miOrders, navScreen: 'OrdersStack' },
     { id: 'documents', name: 'Documents', icon: faFolder, color: theme.colors.miDocuments, navScreen: 'DocumentsStack' },
+    { id: 'mandatmpr', name: 'Mandats MPR', icon: faHandHoldingUsd, color: theme.colors.miSimulator, navScreen: 'MandatMPRStack' },
     { id: 'simulator', name: 'Simulateur', icon: faVials, color: theme.colors.miSimulator, navScreen: 'SimulatorStack' },
     { id: 'news', name: 'Actualités', icon: faNewspaper, color: theme.colors.miNews, navScreen: 'NewsStack' },
     { id: 'logout', name: 'Se déconnecter', icon: faSignOutAlt, color: theme.colors.miLogout, navScreen: 'LoginScreen' },
