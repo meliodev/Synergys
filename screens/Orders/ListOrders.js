@@ -21,7 +21,7 @@ import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
 import { configureQuery } from '../../core/privileges'
-import { fetchDocs } from '../../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { firebase } from '@react-native-firebase/crashlytics';
 
 const KEYS_TO_FILTERS = ['id', 'name', 'state'] //#edit
@@ -36,7 +36,7 @@ const states = [
 class ListOrders extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
         this.onPressOrder = this.onPressOrder.bind(this) //#edit
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
@@ -81,9 +81,9 @@ class ListOrders extends Component {
         else {
             const params = { role: this.props.role.value }
             var query = configureQuery('Orders', queryFilters, params) //#task make query as a prop (for project filtering during process devis generation)
-            this.fetchDocs(query, 'ordersList', 'ordersCount', async () => {
-                load(this, false)
-            })
+            //this.fetchDocs(query, 'ordersList', 'ordersCount', async () => { load(this, false) })
+            const ordersList = await fetchDocuments(query)
+            this.setState({ ordersList, ordersCount: ordersList.length, loading: false })
         }
     }
 

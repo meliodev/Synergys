@@ -14,7 +14,7 @@ import MyFAB from '../../components/MyFAB'
 import Loading from '../../components/Loading'
 
 import firebase, { db } from '../../firebase'
-import { fetchDocs } from "../../api/firestore-api";
+import { fetchDocs, fetchDocuments } from "../../api/firestore-api";
 import { load, myAlert } from "../../core/utils";
 
 import { withNavigation } from 'react-navigation'
@@ -22,7 +22,7 @@ import { withNavigation } from 'react-navigation'
 class ListNotifications extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        //this.fetchDocs = fetchDocs.bind(this)
         this.myAlert = myAlert.bind(this)
         this.currentUser = firebase.auth().currentUser
 
@@ -34,24 +34,12 @@ class ListNotifications extends Component {
     }
 
     async componentDidMount() {
-        const appLinkParams = { ListScreen: 'ListProjects', CreateScreen: 'CreateProject', DocumentId: 'ProjectId' }
-        const { CreateScreen, DocumentId } = appLinkParams
-
-        const a = { screen: CreateScreen }
-        let b = {}
-        b[DocumentId] = "555"
-
-        const data = { ...a, ...b }
-        console.log(data)
         //Static query
         let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'desc')
-        this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { load(this, false) })
+        // this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { load(this, false) })
+        const notificationsList = await fetchDocuments(query)
+        this.setState({ notificationsList, notificationsCount: notificationsList.length, loading: false })
     }
-
-    componentWillUnmount() {
-        this.unsubscribe()
-    }
-
 
     render() {
         let { notificationsCount, loading } = this.state

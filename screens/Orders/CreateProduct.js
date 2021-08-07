@@ -29,7 +29,7 @@ import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import firebase, { db, auth } from '../../firebase'
-import { fetchDocs } from "../../api/firestore-api";
+import { fetchDocs, fetchDocuments } from "../../api/firestore-api";
 import { uploadFile } from "../../api/storage-api";
 
 import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, positiveNumberValidator, arrayValidator, setToast, load, displayError } from "../../core/utils";
@@ -41,7 +41,7 @@ import SquarePlus from '../../components/SquarePlus';
 class CreateProduct extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        //this.fetchDocs = fetchDocs.bind(this)
         this.fetchProduct = this.fetchProduct.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.pickNewBrandLogo = this.pickNewBrandLogo.bind(this)
@@ -127,7 +127,7 @@ class CreateProduct extends Component {
     }
 
     fetchCategories() {
-        this.unsubscribeCategories = db.collection('ProductCategories').onSnapshot((querysnapshot) => {
+        this.unsubscribeCategories = db.collection('ProductCategories').get().then((querysnapshot) => {
             let categories = [{ label: 'Selectionnez une catégorie', value: '' }]
 
             if (querysnapshot.empty) return
@@ -144,9 +144,11 @@ class CreateProduct extends Component {
     }
 
     //Brands suggestions
-    fetchSuggestions() {
+    async fetchSuggestions() {
         const query = db.collection('Brands')
-        this.fetchDocs(query, 'suggestions', '', () => { })
+        // this.fetchDocs(query, 'suggestions', '', () => { })
+        const suggestions = await fetchDocuments(query)
+        this.setState({ suggestions, loading: false })
     }
 
     //on Edit

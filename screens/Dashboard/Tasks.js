@@ -11,7 +11,7 @@ import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load } from '../../core/utils'
-import { fetchDocs } from '../../api/firestore-api'
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api'
 import { renderSection } from './helpers'
 
 import { EmptyList, TaskItem, Loading } from '../../components'
@@ -19,7 +19,7 @@ import { EmptyList, TaskItem, Loading } from '../../components'
 class Tasks extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             tasksList: [],
@@ -28,7 +28,7 @@ class Tasks extends Component {
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const today = moment().format('YYYY-MM-DD')
         const queryTasks = db
             .collection('Agenda')
@@ -37,11 +37,15 @@ class Tasks extends Component {
             .orderBy('date', 'asc')
             .limit(5)
 
-        this.fetchDocs(queryTasks, 'tasksList', 'tasksCount', () => {
-            let { tasksList } = this.state
-            tasksList = this.formatTasks(tasksList)
-            this.setState({ tasksList }, () => load(this, false))
-        })
+        // this.fetchDocs(queryTasks, 'tasksList', 'tasksCount', () => {
+        //     let { tasksList } = this.state
+        //     tasksList = this.formatTasks(tasksList)
+        //     this.setState({ tasksList }, () => load(this, false))
+        // })
+
+        let tasksList = await fetchDocuments(query)
+        tasksList = this.formatTasks(tasksList)
+        this.setState({ tasksList, tasksCount: tasksList.length, loading: false })
     }
 
     tasksSection(isConnected) {

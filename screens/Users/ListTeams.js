@@ -10,7 +10,7 @@ import { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { myAlert, checkPlural, load } from '../../core/utils'
-import { fetchDocs, deleteTeam } from '../../api/firestore-api'
+import { fetchDocs, deleteTeam, fetchDocuments } from '../../api/firestore-api'
 
 import ListSubHeader from '../../components/ListSubHeader'
 import UserItem from '../../components/UserItem'
@@ -27,7 +27,7 @@ class ListTeams extends Component {
         this.myAlert = myAlert.bind(this)
         this.alertDeleteTeam = this.alertDeleteTeam.bind(this)
         this.renderTeam = this.renderTeam.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             teamsList: [],
@@ -41,7 +41,9 @@ class ListTeams extends Component {
     async componentDidMount() {
         load(this, true)
         const query = db.collection('Teams').where('deleted', '==', false)
-        this.fetchDocs(query, 'teamsList', 'teamsCount', () => load(this, false))
+        //this.fetchDocs(query, 'teamsList', 'teamsCount', () => load(this, false))
+        const teamsList = await fetchDocuments(query)
+        this.setState({ teamsList, teamsCount: teamsList.length, loading: false })
     }
 
     viewTeam(team) {

@@ -21,12 +21,12 @@ import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 import { load, toggleFilter, setFilter, handleFilter } from '../core/utils'
 import { configureQuery } from '../core/privileges'
-import { fetchDocs } from '../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../api/firestore-api';
 
 class ListFormsContainer extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        //this.fetchDocs = fetchDocs.bind(this)
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false) // For pdf generation
@@ -69,11 +69,11 @@ class ListFormsContainer extends Component {
         //     const params = { role: this.props.role.value }
         //     var query = configureQuery('Orders', queryFilters, params)
         const { collection, query } = this.props
-
-        this.fetchDocs(query, 'List', 'Count', async () => {
-            load(this, false)
-        })
+        // this.fetchDocs(query, 'List', 'Count', async () => { load(this, false) })
         //}
+
+        const List = await fetchDocuments(query)
+        this.setState({ List, Count: List.length, loading: false })
     }
 
     render() {

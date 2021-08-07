@@ -15,12 +15,12 @@ import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { configureQuery } from '../../core/privileges'
 
-import { fetchDocs } from "../../api/firestore-api";
+import { fetchDocs, fetchDocuments } from "../../api/firestore-api";
 
 class ListMessages extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        //this.fetchDocs = fetchDocs.bind(this)
         this.markAsReadAndNavigate = this.markAsReadAndNavigate.bind(this)
         this.currentUser = firebase.auth().currentUser
 
@@ -37,7 +37,9 @@ class ListMessages extends Component {
         else {
             const params = { role: this.props.role.value }
             const query = configureQuery('Messages', queryFilters, params)
-            this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
+            // this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
+            const messagesList = await fetchDocuments(query)
+            this.setState({ messagesList, messagesCount: messagesList.length, loading: false })
         }
     }
 

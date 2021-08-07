@@ -14,7 +14,6 @@ import { db } from '../../../firebase'
 import * as theme from "../../../core/theme";
 import { constants } from "../../../core/constants";
 import ListFormsContainer from "../../../containers/ListFormsContainer";
-import { fetchDocs } from "../../../api/firestore-api";
 import { setStatusBarColor } from "../../../core/redux";
 import MandatSynergysItem from "../../../components/genForms/MandatSynergysItem";
 
@@ -24,7 +23,6 @@ class ListMandatsSynergys extends React.Component {
         super(props)
         this.renderItem = this.renderItem.bind(this)
         this.onPressItem = this.onPressItem.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
 
         this.titleText = this.props.navigation.getParam('titleText', 'Mandats Synergys')
         this.isRoot = this.props.navigation.getParam('isRoot', true)

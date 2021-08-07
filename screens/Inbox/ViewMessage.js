@@ -10,7 +10,7 @@ import firebase, { db, functions } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { downloadFile, setToast, load } from '../../core/utils'
-import { fetchDocs } from '../../api/firestore-api'
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api'
 
 import moment from 'moment'
 import 'moment/locale/fr'
@@ -28,7 +28,7 @@ export default class ViewMessage extends Component {
         super(props)
         this.currentUser = firebase.auth().currentUser
         this.message = this.props.navigation.getParam('message', '')
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             messagesList: [],
@@ -41,8 +41,7 @@ export default class ViewMessage extends Component {
         }
     }
 
-    componentDidMount() {
-
+    async componentDidMount() {
         //Static query
         const query = db
             .collection('Messages')
@@ -51,7 +50,9 @@ export default class ViewMessage extends Component {
             .where('speakersIds', 'array-contains', this.currentUser.uid)
             .orderBy('sentAt', 'desc')
 
-        this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })
+        // this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })
+        const messagesList = await fetchDocuments(query)
+        this.setState({ messagesList, messagesCount: messagesList.length, loading: false })
     }
 
     componentWillUnmount() {

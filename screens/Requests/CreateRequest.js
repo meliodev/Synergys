@@ -50,7 +50,7 @@ class CreateRequest extends Component {
         this.refreshClient = refreshClient.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
+       // this.fetchDocs = fetchDocs.bind(this)
         this.onPressProjectCallBack = this.onPressProjectCallBack.bind(this)
         this.setProducts = this.setProducts.bind(this)
         this.toggleModal = this.toggleModal.bind(this)

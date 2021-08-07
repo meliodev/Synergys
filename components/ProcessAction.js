@@ -90,14 +90,10 @@ class ProcessAction extends Component {
             const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
             await this.updateProcess(updatedProcess)
-            console.log('1111')
-
             if (isAllProcess) {
                 this.refreshProcessHistory(updatedProcess)
             }
-
             await this.refreshProcess(updatedProcess)
-            console.log('2222')
         }
         catch (e) {
             console.log("ERROR", e.message)

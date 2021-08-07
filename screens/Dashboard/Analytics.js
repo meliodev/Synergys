@@ -12,7 +12,7 @@ import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants, highRoles } from '../../core/constants'
 import { displayError, load, sortMonths } from '../../core/utils'
-import { fetchDocs, fetchTurnoverData } from '../../api/firestore-api'
+import { fetchTurnoverData } from '../../api/firestore-api'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from './helpers'
 
 import { Picker, TurnoverGoal, Loading } from '../../components'
@@ -22,7 +22,6 @@ import { TouchableOpacity } from 'react-native-gesture-handler'
 class Analytics extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
         this.refreshMonthlyGoals = this.refreshMonthlyGoals.bind(this)
         this.currentMonth = moment().format('MMM')
         this.currentMonth = this.currentMonth.charAt(0).toUpperCase() + this.currentMonth.slice(1)

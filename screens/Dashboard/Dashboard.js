@@ -7,7 +7,7 @@ import _ from 'lodash'
 import { connect } from 'react-redux'
 
 import * as theme from '../../core/theme'
-import {requestRESPermission, requestWESPermission} from '../../core/permissions'
+import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 
 import firebase from '../../firebase'
 
@@ -120,12 +120,12 @@ class Dashboard extends Component {
             <View style={styles.mainContainer}>
                 <Appbar menu title titleText='Accueil' />
                 {this.renderMenuItems()}
-                {/* <View style={styles.container}>
+                <View style={styles.container}>
                     {content === 'analytics' && <Analytics navigation={this.props.navigation} />}
                     {content === 'tasks' && <Tasks navigation={this.props.navigation} />}
                     {content === 'notifications' && <Notifications navigation={this.props.navigation} />}
                     {content === 'shortcuts' && <Shortcuts navigation={this.props.navigation} />}
-                </View> */}
+                </View>
             </View>
         )
     }

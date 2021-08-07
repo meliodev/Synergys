@@ -21,7 +21,7 @@ import { constants, highRoles } from '../../core/constants';
 import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { configureQuery } from '../../core/privileges'
-import { fetchDocs } from '../../api/firestore-api';
+import { fetchDocs,fetchDocuments } from '../../api/firestore-api';
 import { db, auth } from '../../firebase'
 
 import { withNavigation } from 'react-navigation'
@@ -52,7 +52,7 @@ class ListProjects extends Component {
     constructor(props) {
         super(props)
         this.onPressProject = this.onPressProject.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
+        //this.fetchDocs = fetchDocs.bind(this)
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.titleText = this.props.navigation.getParam('titleText', 'Projets')
@@ -89,36 +89,11 @@ class ListProjects extends Component {
         else {
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
-            this.fetchDocs(query, 'projectsList', 'projectsCount', async () => {
-                // if (!highRoles.includes(this.props.role.id))
-                //     await this.fetchExtraProjects() //Intervenant
-                load(this, false)
-            })
+            //this.fetchDocs(query, 'projectsList', 'projectsCount', async () => { load(this, false) })
+            const projectsList = await fetchDocuments(query)
+            this.setState({ projectsList, projectsCount: projectsList.length, loading: false })
         }
     }
-
-    //#deprecated
-    // async fetchExtraProjects() {
-    //     let { projectsList, projectsCount } = this.state
-    //     let extraProjects = []
-
-    //     await db
-    //         .collection('Projects')
-    //         .where('intervenant.id', '==', auth.currentUser.uid)
-    //         .get().then((snapshot) => {
-    //             projectsCount = projectsCount + snapshot.docs.length
-    //             for (const doc of snapshot.docs) {
-    //                 let project = doc.data()
-    //                 project.id = doc.id
-    //                 extraProjects.push(project)
-    //             }
-    //         })
-
-    //     if (extraProjects.length > 0)
-    //         projectsList = projectsList.concat(extraProjects)
-
-    //     this.setState({ projectsList, projectsCount })
-    // }
 
     componentWillUnmount() {
         this.unsubscribe && this.unsubscribe()

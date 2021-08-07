@@ -17,7 +17,7 @@ import Loading from '../../components/Loading'
 
 import { configureQuery } from '../../core/privileges'
 import { myAlert, loadLog, load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
-import { fetchDocs } from '../../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { uploadFileNew } from "../../api/storage-api";
 
 import { auth, db } from '../../firebase'
@@ -55,7 +55,7 @@ class ListDocuments extends Component {
     constructor(props) {
         super(props)
         this.filteredDocuments = []
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
         this.bootstrapUploads = this.bootstrapUploads.bind(this)
 
@@ -78,7 +78,7 @@ class ListDocuments extends Component {
     }
 
     //Fetch documents
-    componentDidMount() {
+    async componentDidMount() {
         //Rehydrate killed upload tasks
         this.bootstrapUploads()
 
@@ -91,31 +91,10 @@ class ListDocuments extends Component {
         else {
             const params = { role: this.props.role.value }
             var query = configureQuery('Documents', queryFilters, params)
-            this.fetchDocs(query, 'documentsList', 'documentsCount', async () => {
-                if (!highRoles.includes(this.props.role.id))
-                    await this.fetchExtraDocuments() //Intervenant
-                load(this, false)
-            })
+            //this.fetchDocs(query, 'documentsList', 'documentsCount', async () => load(this, false))
+            const documentsList = await fetchDocuments(query)
+            this.setState({ documentsList, documentsCount: documentsList.length, loading: false })
         }
-    }
-
-    async fetchExtraDocuments() {
-        let { documentsList, documentsCount } = this.state
-        let extraDocuments = []
-        const query = db.collection('Documents').where('project.intervenant.id', '==', auth.currentUser.uid)
-        await query.get().then((snapshot) => {
-            documentsCount = documentsCount + snapshot.docs.length
-            for (const doc of snapshot.docs) {
-                let document = doc.data()
-                document.id = doc.id
-                extraDocuments.push(document)
-            }
-        })
-
-        if (extraDocuments.length > 0)
-            documentsList = documentsList.concat(extraDocuments)
-
-        this.setState({ documentsList, documentsCount })
     }
 
     bootstrapUploads() {
@@ -137,10 +116,6 @@ class ListDocuments extends Component {
 
     renderDocument(document) {
         return <DocumentItem document={document} />
-    }
-
-    componentWillUnmount() {
-        this.unsubscribe && this.unsubscribe()
     }
 
     renderSearchBar() {
@@ -192,7 +167,7 @@ class ListDocuments extends Component {
         return (
             <View style={styles.container}>
 
-                { loading ?
+                {loading ?
                     <Background style={styles.container}>
                         {this.renderSearchBar()}
                         <Loading size='large' />

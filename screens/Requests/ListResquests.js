@@ -13,7 +13,7 @@ import EmptyList from '../../components/EmptyList'
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { fetchDocs } from '../../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { configureQuery } from '../../core/privileges';
 
 const KEYS_TO_FILTERS = ['id', 'client.fullName', 'subject', 'state']
@@ -23,7 +23,7 @@ const KEYS_TO_FILTERS = ['id', 'client.fullName', 'subject', 'state']
 class ListRequests extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             requestsList: [],
@@ -32,7 +32,7 @@ class ListRequests extends Component {
         }
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const role = this.props.role.id
         const { currentUser } = firebase.auth()
         const isClient = (role === 'client')
@@ -42,7 +42,9 @@ class ListRequests extends Component {
         else {
             const params = { type: this.props.requestType }
             var query = configureQuery('Requests', queryFilters, params)
-            this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
+            //this.fetchDocs(query, 'requestsList', 'requestsCount', () => { })
+            const requestsList = await fetchDocuments(query)
+            this.setState({ requestsList, requestsCount: requestsList.length, loading: false })
         }
     }
 

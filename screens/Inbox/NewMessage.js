@@ -22,7 +22,7 @@ import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { load, setToast, updateField, nameValidator, uuidGenerator, pickDocs, displayError } from '../../core/utils'
 
-import { fetchDocs } from '../../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { uploadFiles } from '../../api/storage-api';
 
 class NewMessage extends Component {
@@ -39,7 +39,7 @@ class NewMessage extends Component {
         this.oldMessages = this.props.navigation.getParam('oldMessages', [])
         this.subscribers = this.props.navigation.getParam('subscribers', [])
 
-        this.fetchDocs = fetchDocs.bind(this)
+        //this.fetchDocs = fetchDocs.bind(this)
         this.uploadFiles = uploadFiles.bind(this)
 
         this.state = {
@@ -67,12 +67,14 @@ class NewMessage extends Component {
     }
 
     async componentDidMount() {
-        this.fetchSuggestions()
+        await this.fetchSuggestions()
     }
 
-    fetchSuggestions() {
+    async fetchSuggestions() {
         const query = db.collection('Users')
-        this.fetchDocs(query, 'suggestions', 'suggestionsCount', () => { load(this, false) })
+        //this.fetchDocs(query, 'suggestions', 'suggestionsCount', () => { load(this, false) })
+        const suggestions = await fetchDocuments(query)
+        this.setState({ suggestions, suggestionsCount: suggestions.length, loading: false })
     }
 
     //PICKER

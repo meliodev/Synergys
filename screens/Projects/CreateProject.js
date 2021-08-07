@@ -76,7 +76,7 @@ const properties = ["client", "name", "note", "address", "state", "step", "color
 class CreateProject extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+      //  this.fetchDocs = fetchDocs.bind(this)
         this.refreshClient = refreshClient.bind(this)
         this.refreshComContact = refreshComContact.bind(this)
         this.refreshTechContact = refreshTechContact.bind(this)
@@ -172,14 +172,6 @@ class CreateProject extends Component {
         }
     }
 
-
-    componentWillUnmount() {
-        if (this.isEdit) {
-            this.unsubscribeDocuments && this.unsubscribeDocuments()
-            this.unsubscribeTasks && this.unsubscribeTasks()
-        }
-    }
-
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
@@ -198,7 +190,7 @@ class CreateProject extends Component {
                 if (!project) return
                 this.setImageCarousel(project.attachments)
                 this.setUserAccess(project.step)
-                await this.runListeners()
+                await this.fetchOtherData()
                 resolve(true)
             })
         })
@@ -239,48 +231,47 @@ class CreateProject extends Component {
         this.setState({ isBlockedUpdates })
     }
 
-    async runListeners() {
+    async fetchOtherData() {
         await this.fetchDocuments()
         await this.fetchTasks()
     }
 
     fetchDocuments() {
-        return new Promise((resolve, reject) => {
-            const query = db.collection('Documents').where('deleted', '==', false).where('project.id', '==', this.ProjectId).orderBy('createdAt', 'DESC')
-            this.unsubscribeDocuments = query.onSnapshot((querysnapshot) => {
-                if (querysnapshot.empty)
-                    resolve(true)
-                let documentsList = []
-                let documentTypes = []
-                querysnapshot.forEach((doc) => {
-                    let document = doc.data()
-                    document.id = doc.id
-                    documentsList.push(document)
-                    documentTypes.push(document.type)
-                })
-                documentTypes = [...new Set(documentTypes)]
-                this.setState({ documentsList, documentTypes }, () => resolve(true))
+        const query = db
+            .collection('Documents')
+            .where('deleted', '==', false)
+            .where('project.id', '==', this.ProjectId)
+            .orderBy('createdAt', 'DESC')
+
+        return query.get().then((querysnapshot) => {
+            if (querysnapshot.empty) return
+            let documentsList = []
+            let documentTypes = []
+            querysnapshot.forEach((doc) => {
+                let document = doc.data()
+                document.id = doc.id
+                documentsList.push(document)
+                documentTypes.push(document.type)
             })
+            documentTypes = [...new Set(documentTypes)]
+            this.setState({ documentsList, documentTypes })
         })
     }
 
     fetchTasks() {
-        return new Promise((resolve, reject) => {
-            const query = db.collection('Agenda').where('project.id', '==', this.ProjectId)
-            this.unsubscribeTasks = query.onSnapshot((agendaSnapshot) => {
-                if (agendaSnapshot.empty)
-                    resolve(true)
-                let tasksList = []
-                let taskTypes = []
-                agendaSnapshot.forEach(async (taskDoc) => {
-                    const task = taskDoc.data()
-                    //task.id = taskDoc.id
-                    task.date = taskDoc.dateKey
-                    tasksList.push(task)
-                    taskTypes.push(task.type)
-                    taskTypes = [...new Set(taskTypes)]
-                    this.setState({ tasksList, taskTypes }, () => resolve(true))
-                })
+        const query = db.collection('Agenda').where('project.id', '==', this.ProjectId)
+        return query.get().then((agendaSnapshot) => {
+            if (agendaSnapshot.empty) return
+            let tasksList = []
+            let taskTypes = []
+            agendaSnapshot.forEach(async (taskDoc) => {
+                const task = taskDoc.data()
+                //task.id = taskDoc.id
+                task.date = taskDoc.dateKey
+                tasksList.push(task)
+                taskTypes.push(task.type)
+                taskTypes = [...new Set(taskTypes)]
+                this.setState({ tasksList, taskTypes })
             })
         })
     }
@@ -377,11 +368,10 @@ class CreateProject extends Component {
                     this.project.id = this.ProjectId
                     this.title = 'Modifier le projet'
                     this.isEdit = true
-
                     this.setState({ process: project.process }) //re-rendering (showing process)
                     this.setImageCarousel(project.attachments)
                     this.setUserAccess(project.step)
-                    await this.runListeners()
+                    await this.fetchOtherData()
                 })
             }
 

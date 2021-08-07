@@ -11,7 +11,7 @@ import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load } from '../../core/utils'
-import { fetchDocs } from '../../api/firestore-api'
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api'
 import { renderSection } from './helpers'
 
 import { Section, NotificationItem, Loading } from '../../components'
@@ -19,7 +19,7 @@ import { Section, NotificationItem, Loading } from '../../components'
 class Summary extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
             notificationsList: [],
@@ -28,8 +28,8 @@ class Summary extends Component {
         }
     }
 
-    componentDidMount() {
-        const queryNotifications = db
+    async componentDidMount() {
+        const query = db
             .collection('Users')
             .doc(auth.currentUser.uid)
             .collection('Notifications')
@@ -38,7 +38,9 @@ class Summary extends Component {
             .orderBy('sentAt', 'desc')
             .limit(5)
 
-        this.fetchDocs(queryNotifications, 'notificationsList', 'notificationsCount', () => { load(this, false) })
+        // this.fetchDocs(queryNotifications, 'notificationsList', 'notificationsCount', () => { load(this, false) })
+        let notificationsList = await fetchDocuments(query)
+        this.setState({ notificationsList, notificationsCount: notificationsList.length, loading: false })
     }
 
     notificationsSection(isConnected) {

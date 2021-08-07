@@ -15,7 +15,6 @@ import * as theme from "../../../core/theme";
 import { constants } from "../../../core/constants";
 import ListFormsContainer from "../../../containers/ListFormsContainer";
 // import SimulationItem from "../../../components/SimulationItem";
-import { fetchDocs } from "../../../api/firestore-api";
 import { setStatusBarColor } from "../../../core/redux";
 import MandatMPRItem from "../../../components/genForms/MandatMPRItem";
 
@@ -26,7 +25,6 @@ class ListMandatsMPR extends React.Component {
         super(props)
         this.renderItem = this.renderItem.bind(this)
         this.onPressItem = this.onPressItem.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
 
         this.titleText = this.props.navigation.getParam('titleText', 'Simulations')
         this.isRoot = this.props.navigation.getParam('isRoot', true)

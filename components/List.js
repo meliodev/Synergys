@@ -10,7 +10,7 @@ import Button from './Button'
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 import { myAlert } from '../core/utils'
-import { fetchDocs, fetchMessages } from '../api/firestore-api';
+import { fetchDocs, fetchDocuments, fetchMessages } from '../api/firestore-api';
 
 import { withNavigation } from 'react-navigation'
 
@@ -18,7 +18,7 @@ class CustomList extends Component {
     constructor(props) {
         super(props)
         this.myAlert = myAlert.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
         // this.filterMessages = this.filterMessages.bind(this)
 
         this.state = {
@@ -29,7 +29,9 @@ class CustomList extends Component {
 
     async componentDidMount() {
         const query = this.props.query
-        this.fetchDocs(query, 'List', 'Count', () => { })
+        //this.fetchDocs(query, 'List', 'Count', () => { })
+        const List = await fetchDocuments(query)
+        this.setState({ List, Count: List.length, loading: false })
     }
 
     render() {

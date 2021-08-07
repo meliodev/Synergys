@@ -67,7 +67,11 @@ export default class AddMembers extends Component {
     }
 
     getFreeUsers() {
-        const query = db.collection('Users').where('hasTeam', '==', false).where('deleted', '==', false)
+        const query = db
+            .collection('Users')
+            .where('hasTeam', '==', false)
+            .where('deleted', '==', false)
+            
         this.unsubscribe = query.onSnapshot((querysnapshot) => {
             let members = []
             let membersCount = 0
@@ -99,7 +103,7 @@ export default class AddMembers extends Component {
             <UserItem
                 item={member}
                 onPress={check.bind(this, key)}
-                userType= 'utilisateur'
+                userType='utilisateur'
                 controller={
                     <Checkbox
                         status={members[key].checked ? 'checked' : 'unchecked'}

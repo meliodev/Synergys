@@ -1007,7 +1007,7 @@ class StepsForm extends Component {
 
     //##Helpers
     toggleModal() {
-        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible }, () => console.log("22222222222"))
+        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
     }
 
     async savePdfBase64(pdfBase64) {

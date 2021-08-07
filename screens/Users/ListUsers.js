@@ -37,9 +37,7 @@ class ListUsers extends Component {
 
   async componentDidMount() {
     const query = this.props.query
-
     // this.fetchDocs(query, 'usersList', 'usersCount', () => load(this, false))
-
     const usersList = await fetchDocuments(query)
     this.setState({ usersList, usersCount: usersList.length, loading: false })
   }

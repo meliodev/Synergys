@@ -14,12 +14,12 @@ import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
 
 import { updateField, nameValidator, arrayValidator, positiveNumberValidator, setToast, load } from "../../core/utils";
-import { fetchDocs } from '../../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 
 class AddItem extends Component {
     constructor(props) {
         super(props)
-        this.fetchDocs = fetchDocs.bind(this)
+        //  this.fetchDocs = fetchDocs.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.refreshProduct = this.refreshProduct.bind(this)
@@ -58,9 +58,11 @@ class AddItem extends Component {
         this.fetchSuggestions()
     }
 
-    fetchSuggestions() {
+    async fetchSuggestions() {
         const query = db.collection('Products')
-        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
+        //this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
+        const suggestions = await fetchDocuments(query)
+        this.setState({ suggestions, loading: false })
     }
 
     validateInputs() {
