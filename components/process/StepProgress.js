@@ -11,7 +11,7 @@ export default function StepProgress({ progress, style, size = 27 }) {
     <AnimatedCircularProgress
       size={size}
       width={2}
-      fill={progress}
+      fill={progress || 0}
       tintColor={progress >= 75 ? theme.colors.primary : theme.colors.secondary}
       style={style}
       // onAnimationComplete={() => console.log('onAnimationComplete')}

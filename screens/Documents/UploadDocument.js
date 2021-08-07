@@ -153,7 +153,8 @@ class UploadDocument extends Component {
             attachmentSource: '', //upload || generation || conversion
             orderData: null,
 
-            loading: true,
+            initialLoading: true,
+            loading: false,
             docNotFound: false,
             loadingConversion: false,
             modalLoading: false,
@@ -183,8 +184,7 @@ class UploadDocument extends Component {
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode(this.DocumentId)
         this.initialState = _.cloneDeep(this.state)
-        console.log('000')
-        load(this, false)
+        this.setState({ initialLoading: false })
     }
 
     componentWillUnmount() {
@@ -747,9 +747,6 @@ class UploadDocument extends Component {
             else this.initEditMode(this.DocumentId)
         }
 
-        console.log("PARAMS::::::::::", project, attachment, type)
-
-
         var params = {
             onGoBack,
             ProjectId: this.state.project.id,
@@ -791,7 +788,7 @@ class UploadDocument extends Component {
     render() {
         let { project, name, description, type, state, attachment, orderData } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError, nameError, attachmentError } = this.state
+        let { initialLoading, loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError, nameError, attachmentError } = this.state
         const { checked, modalContent, showModal, attachmentSource } = this.state
         const { isConnected } = this.props.network
 
@@ -811,6 +808,14 @@ class UploadDocument extends Component {
         const allowConversion = isGeneratedQuote && this.isHighRole
         const allowSign = canUpdate || this.props.role.id === 'client'
         const showType = type !== '' && project.id !== "" && attachment
+
+        if (initialLoading)
+            return (
+                <View style={styles.container}>
+                    <Appbar close title titleText='Chargement du document...' />
+                    <Loading />
+                </View>
+            )
 
         if (docNotFound)
             return (
@@ -858,16 +863,6 @@ class UploadDocument extends Component {
                                         {this.renderSignees()}
                                     </View>
                                 }
-                            />
-                        }
-
-                        {this.isEdit &&
-                            <ActivitySection
-                                createdBy={createdBy}
-                                createdAt={createdAt}
-                                editedBy={editedBy}
-                                editedAt={editedAt}
-                                navigation={this.props.navigation}
                             />
                         }
 
@@ -968,6 +963,17 @@ class UploadDocument extends Component {
                                 </View>
                             }
                         />
+
+                        {this.isEdit &&
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation={this.props.navigation}
+                            />
+                        }
+
 
                     </ScrollView>
 

@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
+import { View, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, ActivityIndicator, Alert } from "react-native"
 import firebase, { db, auth } from '../firebase'
 import _ from 'lodash'
 import { faCheckCircle, faExclamationCircle, faInfoCircle, faRedo, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
@@ -90,11 +90,14 @@ class ProcessAction extends Component {
             const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
             await this.updateProcess(updatedProcess)
-            this.refreshProcess(updatedProcess)
+            console.log('1111')
+
             if (isAllProcess) {
                 this.refreshProcessHistory(updatedProcess)
             }
-            load(this, false)
+
+            await this.refreshProcess(updatedProcess)
+            console.log('2222')
         }
         catch (e) {
             console.log("ERROR", e.message)
@@ -119,18 +122,21 @@ class ProcessAction extends Component {
     }
 
     //3. Refresh latest process locally
-    refreshProcess(process) {
-        const { currentPhaseId, currentStepId } = getCurrentStep(process)
-        const currentPhase = process[currentPhaseId]
-        const currentStep = process[currentPhaseId].steps[currentStepId]
-        const currentAction = getCurrentAction(process)
+    async refreshProcess(process) {
+        return new Promise((resolve, reject) => {
+            const { currentPhaseId, currentStepId } = getCurrentStep(process)
+            const currentPhase = process[currentPhaseId]
+            const currentStep = process[currentPhaseId].steps[currentStepId]
+            const currentAction = getCurrentAction(process)
 
-        this.setState({
-            process,
-            currentPhase, currentStep,
-            currentPhaseId, currentStepId,
-            currentAction,
-            nextStep: '', nextPhase: ''
+            this.setState({
+                process,
+                currentPhase, currentStep,
+                currentPhaseId, currentStepId,
+                currentAction,
+                nextStep: '', nextPhase: '',
+                loading: false
+            }, () => resolve(true))
         })
     }
 
@@ -184,81 +190,120 @@ class ProcessAction extends Component {
         this.setState({ phaseLabels, phaseStatuses, stepsData: steps })
     }
 
+    disableLoading() {
+        this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
+    }
+
     //func1
     onPressAction = async (canUpdate, currentAction) => {
 
         try {
+            console.log("Action Pressed ******************************")
             if (!canUpdate) return
             const loadingMessage = "Traitement en cours..."
-            this.setState({ loading: true, loadingMessage, pressedAction: currentAction })
-            await countDown(500) //#task: why this ???
-            const disableLoading = () => this.setState({ loading: false, loadingMessage: this.initialLoadingMessage })
+            this.setState({
+                loading: true,
+                loadingMessage,
+                pressedAction: currentAction
+            }, async () => {
+                await countDown(500)
+                const { responsable, type, scrollTo } = currentAction
+                const { process, currentPhase } = this.state
 
-            const { responsable, verificationType, type, screenName, screenParams, screenPush, nextStep, nextPhase, formSettings, scrollTo } = currentAction
-            const { process, currentPhase } = this.state
-
-            const currentUserId = auth.currentUser.uid
-            const currentUserRole = this.props.role.value
-            // const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
-            // if (!enableAction) {
-            //     disableLoading()
-            //     Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
-            //     return
-            // }
-
-            if (type === 'auto') {
-                disableLoading()
-
-                //Modal
-                if (currentAction.choices) {
-                    this.setState({ showModal: true })
+                //Check user privilleges on action
+                const currentUserId = auth.currentUser.uid
+                const currentUserRole = this.props.role.value
+                const enableAction = enableProcessAction(responsable, currentUserId, currentUserRole, currentPhase)
+                if (!enableAction) {
+                    this.disableLoading()
+                    Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+                    return
                 }
 
-                else if (scrollTo) {
-                    const { screen, itemId } = scrollTo
-                    this.props.scrollTo(items_scrollTo[screen][itemId])
-                }
+                if (type === 'auto') {
 
-                //Navigation
-                else {
-                    if (screenParams) {
-                        screenParams.isProcess = true
-                        screenParams.onGoBack = () => this.mainHandler(process)
+                    //Modal
+                    if (currentAction.choices) {
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage,
+                            showModal: true
+                        })
                     }
-                    if (screenName) {
-                        if (screenPush)
-                            this.props.navigation.push(screenName, screenParams)
-                        else
-                            this.props.navigation.navigate(screenName, screenParams)
+
+                    //Sroll to item
+                    else if (scrollTo) {
+                        const { screen, itemId } = scrollTo
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage
+                        })
+                        this.props.scrollTo(items_scrollTo[screen][itemId])
+                    }
+
+                    //Navigation
+                    else {
+                        let { screenParams, screenName, screenPush } = currentAction
+                        if (screenParams) {
+                            screenParams.isProcess = true
+                            screenParams.onGoBack = () => this.mainHandler(process)
+                        }
+                        if (screenName) {
+                            if (screenPush)
+                                this.props.navigation.push(screenName, screenParams)
+                            else
+                                this.props.navigation.navigate(screenName, screenParams)
+                        }
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage
+                        })
                     }
                 }
-            }
 
-            else if (type === 'manual') {
-                //Dialog
-                if (verificationType === 'comment') {
-                    this.setNextStepOrPhase(nextStep, nextPhase) //To use later it onSubmit comment
-                    const dialogTitle = formSettings && formSettings.label || 'Commentaire'
-                    const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
-                    disableLoading()
-                    this.setState({ dialogTitle, dialogDescription, showDialog: true })
+                else if (type === 'manual') {
+                    const { verificationType, nextStep, nextPhase, formSettings } = currentAction
+
+                    //Dialog
+                    if (verificationType === 'comment') {
+                        this.setNextStepOrPhase(nextStep, nextPhase) //To use later it onSubmit comment
+                        const dialogTitle = formSettings && formSettings.label || 'Commentaire'
+                        const dialogDescription = formSettings && formSettings.description || "Veuillez renseigner des informations utiles."
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage,
+                            dialogTitle,
+                            dialogDescription,
+                            showDialog: true
+                        })
+                    }
+                    //Modal
+                    else if (verificationType === 'multiple-choices') {
+                        this.disableLoading()
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage,
+                            showModal: true
+                        })
+                    }
+                    //Direct
+                    else if (verificationType === 'validation') {
+                        await this.validateAction(null, null, false, nextStep, nextPhase)
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage,
+                        })
+                    }
+                    else if (verificationType === 'phaseRollback') {
+                        await this.runOperation(currentAction.operation, currentAction) //Exp: update project status back to 'En cours'
+                        await this.phaseRollback()
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage,
+                        })
+                    }
                 }
-                //Modal
-                else if (verificationType === 'multiple-choices') {
-                    disableLoading()
-                    this.setState({ showModal: true })
-                }
-                //Direct
-                else if (verificationType === 'validation') {
-                    await this.validateAction(null, null, false, nextStep, nextPhase)
-                    disableLoading()
-                }
-                else if (verificationType === 'phaseRollback') {
-                    await this.runOperation(currentAction.operation, currentAction) //Exp: update project status back to 'En cours'
-                    await this.phaseRollback()
-                    disableLoading()
-                }
-            }
+            })
         }
 
         catch (e) {
@@ -300,8 +345,9 @@ class ProcessAction extends Component {
     onSelectChoice = async (choice) => {
         try {
             this.setState({ loadingModal: true, choice })  //used in case of comment
+            await countDown(500)
             const { process, pressedAction } = this.state
-            const { screenName, screenParams, choices } = pressedAction
+            let { screenName, screenParams, choices } = pressedAction
             const { onSelectType, commentRequired, operation, link } = choice
             const { nextStep, nextPhase } = choice
 
@@ -327,33 +373,36 @@ class ProcessAction extends Component {
                         screenParams.isProcess = true
                         screenParams.onGoBack = () => this.mainHandler(process)
                     }
+                    this.setState({ showModal: false, loadingModal: false })
                     this.props.navigation.navigate(screenName, screenParams)
                 }
 
-                else if (onSelectType === 'actionRollBack') { //roll back to previous action (update its status to "pending")
-                    await this.undoPreviousAction()
-                }
+                else {
+                    if (onSelectType === 'actionRollBack') { //roll back to previous action (update its status to "pending")
+                        await this.undoPreviousAction()
+                    }
 
-                else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                    await this.runOperation(operation, pressedAction)
-                    await this.validateAction(null, null, false, nextStep, nextPhase)
-                }
+                    else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
+                        await this.runOperation(operation, pressedAction)
+                        await this.validateAction(null, null, false, nextStep, nextPhase)
+                    }
 
-                else if (onSelectType === 'validation') {
-                    await this.runOperation(operation, pressedAction)
-                    await this.validateAction(null, null, false, null, null, true)
-                }
+                    else if (onSelectType === 'validation') {
+                        await this.runOperation(operation, pressedAction)
+                        await this.validateAction(null, null, false, null, null, true)
+                    }
 
-                else if (onSelectType === 'commentPicker') {
-                    await this.runOperation(operation, pressedAction)
-                    await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
-                }
+                    else if (onSelectType === 'commentPicker') {
+                        await this.runOperation(operation, pressedAction)
+                        await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
+                    }
 
-                else if (onSelectType === "openLink") {
-                    await Linking.openURL(link)
-                }
+                    else if (onSelectType === "openLink") {
+                        await Linking.openURL(link)
+                    }
 
-                this.setState({ loadingModal: false, showModal: false })
+                    this.setState({ showModal: false, loadingModal: false })
+                }
             }
         }
         catch (e) {
@@ -433,7 +482,7 @@ class ProcessAction extends Component {
                 currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
             })
 
-            await countDown(1000)
+            // await countDown(1000)
 
             if (nextStep || nextPhase) {
                 processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
@@ -630,12 +679,14 @@ class ProcessAction extends Component {
         const totalActions = currentStep ? currentStep.actions.length : undefined
         var progress = totalActions ? (doneActions / totalActions) * 100 : undefined
 
+        const showProgress = totalActions && progress !== undefined ? true : false
+
         return (
             <View style={{ borderBottomRightRadius: 5, borderBottomLeftRadius: 5 }}>
                 <View style={{ padding: theme.padding }}>
                     <Text style={[theme.customFontMSmedium.body, { marginBottom: 8 }]}>{phaseTitle}</Text>
                     <Text style={theme.customFontMSregular.body}>{stepTitle}</Text>
-                    {totalActions &&
+                    {showProgress &&
                         <StepProgress
                             progress={progress}
                             size={60}
@@ -644,17 +695,17 @@ class ProcessAction extends Component {
                     }
                 </View>
 
-                <TouchableOpacity
-                    onPress={() => this.onPressAction(canUpdate, currentAction)}
-                    style={{ padding: theme.padding, backgroundColor: theme.colors.primary, borderBottomLeftRadius: 5, borderBottomRightRadius: 5, }}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.white, marginBottom: theme.padding }]}>Action à faire:</Text>
-                    {this.renderAction(canUpdate, currentAction, { mainColor: theme.colors.white, textFont: theme.customFontMSbold.body }, {})}
-                    {currentAction && currentAction.responsable &&
-                        <Text style={[theme.customFontMSregular.small, { color: theme.colors.white ,marginTop: theme.padding }]}>
-                            Responsable: {currentAction.responsable}
-                        </Text>
-                    }
-                </TouchableOpacity>
+                <TouchableWithoutFeedback onPress={() => this.onPressAction(canUpdate, currentAction)}>
+                    <View style={{ padding: theme.padding, backgroundColor: theme.colors.primary, borderBottomLeftRadius: 5, borderBottomRightRadius: 5, }}>
+                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.white, marginBottom: theme.padding }]}>Action à faire:</Text>
+                        {this.renderAction(canUpdate, currentAction, { mainColor: theme.colors.white, textFont: theme.customFontMSbold.body }, {})}
+                        {currentAction && currentAction.responsable &&
+                            <Text style={[theme.customFontMSregular.small, { color: theme.colors.white, marginTop: theme.padding }]}>
+                                Responsable: {currentAction.responsable}
+                            </Text>
+                        }
+                    </View>
+                </TouchableWithoutFeedback>
             </View>
         )
     }

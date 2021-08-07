@@ -205,7 +205,6 @@ class CreateProject extends Component {
     }
 
     setProject(project) {
-
         if (!project)
             this.setState({ docNotFound: true })
 

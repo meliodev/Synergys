@@ -26,7 +26,7 @@ import EmptyList from "../../components/EmptyList"
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
-import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient, fetchDocument } from '../../api/firestore-api'
+import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient, fetchDocument, fetchDocuments } from '../../api/firestore-api'
 import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
@@ -79,6 +79,7 @@ class Profile extends Component {
             currentPass: { value: '', error: '', show: false },
             newPass: { value: '', error: '', show: false },
 
+            loadingClientProjects: true,
             clientProjectsList: [],
             monthlyGoals: [],
 
@@ -100,7 +101,7 @@ class Profile extends Component {
             user = this.setUser(user)
             if (!user) return
 
-            if (this.isClient) await this.fetchClientProjects()
+            if (this.isClient) this.fetchClientProjects()
 
             // DC can view/add Coms goals
             if (this.userParam.roleId === 'com') {
@@ -158,13 +159,17 @@ class Profile extends Component {
         return formatedUser
     }
 
-    fetchClientProjects() {
+    async fetchClientProjects() {
         var query = db
             .collection('Projects')
             .where('client.id', '==', this.userParam.id)
             .where('deleted', '==', false)
             .orderBy('createdAt', 'DESC')
-        this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => { })
+
+        const clientProjectsList = await fetchDocuments(query)
+        this.setState({ clientProjectsList, clientProjectsCount: clientProjectsList.length, loadingClientProjects: false })
+
+        // this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => { })
     }
 
     //##VALIDATE
@@ -443,7 +448,7 @@ class Profile extends Component {
     renderClientProjects(currentUser) {
         const isProfileOwner = this.userParam.id === currentUser.uid
         const mes = isProfileOwner ? 'Mes ' : ''
-        const { clientProjectsList, isPro, denom, nom, prenom, email, address } = this.state
+        const { loadingClientProjects, clientProjectsList, isPro, denom, nom, prenom, email, address } = this.state
 
         const client = {
             id: this.userParam.id,
@@ -464,13 +469,18 @@ class Profile extends Component {
                     form={null}
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }}
                 />
-                <FlatList
-                    data={formatRow(true, clientProjectsList, 3)}
-                    keyExtractor={item => item.id.toString()}
-                    renderItem={({ item }) => this.renderProject(item)}
-                    style={{ zIndex: 1 }}
-                    numColumns={3}
-                    columnWrapperStyle={{ justifyContent: 'space-between' }} />
+                {loadingClientProjects ?
+                    <Loading />
+                    :
+                    <FlatList
+                        data={formatRow(true, clientProjectsList, 3)}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item }) => this.renderProject(item)}
+                        style={{ zIndex: 1 }}
+                        numColumns={3}
+                        columnWrapperStyle={{ justifyContent: 'space-between' }} />
+                }
+
             </View>
         )
     }

@@ -10,7 +10,7 @@ import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
 import { load, myAlert, getRoleIdFromValue } from '../../core/utils'
-import { fetchDocs } from '../../api/firestore-api'
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api'
 
 import UserItem from '../../components/UserItem'
 import EmptyList from '../../components/EmptyList'
@@ -30,19 +30,23 @@ class ListUsers extends Component {
 
     this.state = {
       usersList: [],
-      usersCount: 0,
+      usersCount: 3,
       loading: true
     }
   }
 
   async componentDidMount() {
     const query = this.props.query
-    this.fetchDocs(query, 'usersList', 'usersCount', () => load(this, false))
+
+    // this.fetchDocs(query, 'usersList', 'usersCount', () => load(this, false))
+
+    const usersList = await fetchDocuments(query)
+    this.setState({ usersList, usersCount: usersList.length, loading: false })
   }
 
-  componentWillUnmount() {
-    this.unsubscribe()
-  }
+  // componentWillUnmount() {
+  //   this.unsubscribe()
+  // }
 
   alertDeleteUser(user) {
     const title = "Supprimer l'utilisateur"
@@ -121,7 +125,7 @@ class ListUsers extends Component {
     )
   }
 
-  onPressFAB() { 
+  onPressFAB() {
     const { prevScreen, userType, onGoBack } = this.props
     const nextScreen = userType === 'utilisateur' ? 'CreateUser' : 'CreateClient'
     const isProspect = userType === 'prospect'

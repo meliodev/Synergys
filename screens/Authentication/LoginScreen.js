@@ -4,6 +4,10 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { TextInput as paperInput } from 'react-native-paper'
 import LinearGradient from 'react-native-linear-gradient'
 
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import Appbar from "../../components/Appbar"
 import NewBackground from "../../components/NewBackground"
 import Logo from "../../components/Logo"
@@ -43,6 +47,7 @@ class LoginScreen extends Component {
     const emailError = emailValidator(email.value)
     const passwordError = passwordValidator(password.value)
 
+
     if (emailError) {
       this.setState({ ...email, error: emailError })
       return false
@@ -53,6 +58,8 @@ class LoginScreen extends Component {
       return false
     }
 
+    console.log('invalid..')
+
     return true
   }
 
@@ -61,17 +68,27 @@ class LoginScreen extends Component {
     if (loading) return
     load(this, true)
 
+    console.log('555')
     //Inputs validation
     const isValid = this.validateInputs()
+    console.log('888')
     if (!isValid) {
+      console.log('invalid')
       load(this, false)
       return
     }
 
+    console.log('999')
+
+
+    console.log("Starting logging...", moment().format('HH:mm:ss'))
     const response = await loginUser({ email: email.value, password: password.value })
+
     if (response.error) {
       this.setState({ loading: false, error: response.error })
     }
+
+    else console.log("Logged in at", moment().format('HH:mm:ss'))
   }
 
   forgotPassword() {
