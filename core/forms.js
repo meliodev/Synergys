@@ -1124,6 +1124,362 @@ export const mandatMPRModel = [
     },
 ]
 
+export const mandatSynergysModel = [
+    { //1 DONE
+        id: "service",
+        title: "PRESTATION",
+        fields: [
+            {
+                id: "serviceProvider",
+                label: "Synergys ou Sous-Traitance",
+                type: "options",
+                items: [
+                    { label: 'Synergys', value: 'Synergys', icon: faQuestionCircle, pdfConfig: { dx: -471, dy: - 174, squareSize: 12, pageIndex: 0 } },
+                    { label: 'Sous-Traitance', value: 'Sous-Traitance', icon: faQuestionCircle, pdfConfig: { dx: -278, dy: - 174, squareSize: 12, pageIndex: 0 } },
+                ],
+                errorId: "serviceProviderError",
+                mendatory: true,
+            }
+        ],
+        isFirst: true,
+        stepIndex: 0,
+    },
+    { //1 DONE
+        id: "service",
+        title: "PRESTATION",
+        fields: [
+            {
+                id: "serviceType",
+                label: "Type de prestation",
+                type: "options",
+                items: [
+                    {
+                        label: 'Installation',
+                        value: 'Installation (Synergys)',
+                        icon: faQuestionCircle,
+                        pdfConfig: { dx: -444, dy: - 197, squareSize: 8, pageIndex: 0 },
+                        isConditional: true,
+                        condition: { with: "serviceProvider", values: ["Synergys"] },
+                    },
+                    {
+                        label: 'SAV',
+                        value: 'SAV (Synergys)',
+                        icon: faQuestionCircle,
+                        pdfConfig: { dx: -362, dy: - 197, squareSize: 8, pageIndex: 0 },
+                        isConditional: true,
+                        condition: { with: "serviceProvider", values: ["Synergys"] },
+                    },
+                    {
+                        label: 'Installation',
+                        value: 'Installation (Sous-Traitance)',
+                        icon: faQuestionCircle,
+                        pdfConfig: { dx: -252, dy: - 197, squareSize: 8, pageIndex: 0 },
+                        isConditional: true,
+                        condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
+                    },
+                    {
+                        label: 'SAV',
+                        value: 'SAV (Sous-Traitance)',
+                        icon: faQuestionCircle,
+                        pdfConfig: { dx: -169, dy: - 197, squareSize: 8, pageIndex: 0 },
+                        isConditional: true,
+                        condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
+                    },
+                ],
+                errorId: "serviceTypeError",
+                mendatory: true,
+            }
+        ],
+        isConditional: true,
+        condition: { with: "serviceProvider", values: ["Synergys"] },
+    },
+    { //1 DONE
+        id: "service",
+        title: "PRESTATION",
+        fields: [
+            {
+                id: "productTypes",
+                label: "Type de produits",
+                type: "options",
+                isMultiOptions: true,
+                items: [
+                    { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                    { label: 'PAC AIR/AIR', value: 'PAC AIR/AIR', icon: faQuestionCircle, pdfConfig: { dx: -430, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                    { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                    { label: 'ISOLATION', value: 'ISOLATION', icon: faQuestionCircle, pdfConfig: { dx: -183, dy: - 252, squareSize: 8, pageIndex: 0 } },
+                    { label: 'CHAUFFE-EAU THERMODYNAMIQUE', value: 'CHAUFFE-EAU THERMODYNAMIQUE', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 271, squareSize: 8, pageIndex: 0 } },
+                    { label: 'VMC', value: 'VMC', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 271, squareSize: 8, pageIndex: 0 } },
+                ],
+                errorId: "productTypesError",
+                mendatory: true,
+            }
+        ],
+        isLast: true
+    },
+    {//2 DONE
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "clientFirstName",
+                type: "textInput",
+                maxLength: 15,
+                label: "Prénom",
+                errorId: "clientFirstNameError",
+                pdfConfig: { dx: -490, dy: - 339, pageIndex: 0 }, //add spaces
+                mendatory: true
+            },
+            {
+                id: "clientLastName",
+                type: "textInput",
+                maxLength: 24,
+                label: "Nom",
+                errorId: "clientLastNameError", //add max lenght
+                pdfConfig: { dx: -235, dy: - 339, pageIndex: 0 }, //add spaces
+                mendatory: true
+            },
+        ],
+        isFirst: true,
+        stepIndex: 1,
+    },
+    {//2 DONE
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "addressClient",
+                type: "textInput",
+                label: "Adresse",
+                errorId: "addressClientError",
+                maxLength: 100,
+                pdfConfig: { dx: -475, dy: - 374, pageIndex: 0 }, //add spaces
+                mendatory: true,
+            },
+        ],
+    },
+    {//2 DONE
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "addressCodeClient",
+                type: "textInput",
+                mask: "[0][0][0][0][0]",
+                label: "Code Postal",
+                isNumeric: true,
+                errorId: "addressCodeClientError",
+                mendatory: true,
+                pdfConfig: { dx: -453, dy: - 445, pageIndex: 0 }
+            },
+        ]
+    },
+    {//2 DONE
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "addressCityClient",
+                type: "textInput",
+                label: "Ville",
+                errorId: "addressCityClientError",
+                mendatory: true,
+                pdfConfig: { dx: -257, dy: - 445, pageIndex: 0 }
+            },
+        ]
+    },
+    {//2 DONE
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "fixedPhoneClient",
+                type: "textInput",
+                mask: "[00][00][00][00][00]",
+                isNumeric: true,
+                label: "Téléphone fixe",
+                errorId: "fixedPhoneClientError",
+                pdfConfig: { dx: -500, dy: - 487, pageIndex: 0 }
+            },
+            {
+                id: "mobilePhoneClient",
+                type: "textInput",
+                mask: "[00][00][00][00][00]",
+                isNumeric: true,
+                label: "Téléphone mobile",
+                errorId: "mobilePhoneClientError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 487, pageIndex: 0 }
+            },
+        ]
+    },
+    {//37
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "emailClient",
+                type: "textInput",
+                isEmail: true,
+                label: "Adresse email",
+                errorId: "emailClientError",
+                mendatory: true,
+                pdfConfig: { dx: -500, dy: - 530, pageIndex: 0, splitArobase: true }
+            },
+        ],
+        isLast: true
+    },
+    {//37
+        id: "client",
+        title: "COORDONNÉES CLIENT",
+        fields: [
+            {
+                id: "isSiteInfoEqualToClientInfo",
+                label: "Est-ce que les coordonnées du chantier sont différentes de celle du client ?",
+                type: "options",
+                items: [
+                    {
+                        label: 'Non',
+                        value: 'Non',
+                        icon: faTimes,
+                        iconColor: theme.colors.error,
+                        pdfConfig: { skip: true },
+                        autoCopy: [
+                            { id: "siteName", copyFrom: "clientLastName" },
+                            { id: "addressSite", copyFrom: "addressClient" },
+                            { id: "addressCodeSite", copyFrom: "addressCodeClient" },
+                            { id: "phoneSite", copyFrom: "mobilePhoneClient" },
+                            { id: "emailSite", copyFrom: "emailClient" },
+                        ]
+                    },
+                    {
+                        label: 'Oui',
+                        value: 'Oui',
+                        icon: faCheck,
+                        iconColor: "green",
+                        pdfConfig: { skip: true }
+                    },
+                ],
+                errorId: "isSiteInfoEqualToClientInfoError",
+                mendatory: true
+            },
+        ]
+    },
+    {//37
+        id: "site",
+        title: "COORDONNÉES CHANTIER",
+        fields: [
+            {
+                id: "siteName",
+                type: "textInput",
+                maxLength: 15,
+                label: "Nom",
+                errorId: "siteNameError",
+                pdfConfig: { dx: -492, dy: - 587, pageIndex: 0 }, //add spaces
+                mendatory: true,
+                isConditional: true,
+                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+            }
+        ]
+    },
+    {//37
+        id: "site",
+        title: "COORDONNÉES CHANTIER",
+        fields: [
+            {
+                id: "addressSite",
+                type: "textInput",
+                label: "Adresse",
+                errorId: "addressSiteError",
+                maxLength: 40,
+                pdfConfig: { dx: -480, dy: - 622, pageIndex: 0 }, //add spaces
+                mendatory: true,
+                isConditional: true,
+                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+            }
+        ]
+    },
+    {//2 DONE
+        id: "site",
+        title: "COORDONNÉES CHANTIER",
+        fields: [
+            {
+                id: "addressCodeSite",
+                type: "textInput",
+                mask: "[0][0][0][0][0]",
+                label: "Code Postal",
+                isNumeric: true,
+                errorId: "addressCodeSiteError",
+                mendatory: true,
+                isConditional: true,
+                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+                pdfConfig: { dx: -455, dy: - 693, pageIndex: 0 }
+            }
+        ]
+    },
+    {//2 DONE
+        id: "site",
+        title: "COORDONNÉES CHANTIER",
+        fields: [
+            {
+                id: "phoneSite",
+                type: "textInput",
+                mask: "[00][00][00][00][00]",
+                isNumeric: true,
+                label: "Téléphone mobile",
+                errorId: "phoneSiteError",
+                mendatory: true,
+                isConditional: true,
+                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+                pdfConfig: { dx: -500, dy: - 737, pageIndex: 0 }
+            },
+        ]
+    },
+    {//2 DONE
+        id: "site",
+        title: "COORDONNÉES CHANTIER",
+        fields: [
+            {
+                id: "emailSite",
+                type: "textInput",
+                isEmail: true,
+                label: "Adresse email",
+                errorId: "emailSiteError",
+                mendatory: true,
+                isConditional: true,
+                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+                pdfConfig: { dx: -502, dy: - 779, pageIndex: 0 }
+            },
+        ]
+    },
+    {
+        id: "site",
+        title: "COORDONNÉES CHANTIER",
+        fields: [
+            {
+                id: "financingAids",
+                label: "A sélectionner si présent",
+                type: "options",
+                isMultiOptions: true,
+                items: [
+                    { label: 'ACTION LOGEMENT', value: 'ACTION LOGEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 615, pageIndex: 0 } },
+                    { label: 'CHEQUE REGION', value: 'CHEQUE REGION', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 648, pageIndex: 0 } },
+                    { label: 'MA PRIME RENOV', value: 'MA PRIME RENOV', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 684, pageIndex: 0 } }, //#task scroll to error offset_y
+                    { label: 'CEE', value: 'CEE', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 719, pageIndex: 0 } }, //#task scroll to error offset_y
+                    { label: 'FINANCEMENT', value: 'FINANCEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 754, pageIndex: 0 } }, //#task scroll to error offset_y
+                ],
+                style: { marginTop: 100 },
+                // isConditional: true,
+                // condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+            },
+        ],
+        isLast: true
+    },
+    {
+        id: "submit",
+        fields: []
+    }
+]
+
 export const PvReceptionModel = [
     //---------------------------  Page 1
     {//0

@@ -73,6 +73,7 @@ import CreateMandatMPR from '../screens/Forms/MandatMaPrimeRenov/CreateMandatMPR
 import ListMandatsMPR from '../screens/Forms/MandatMaPrimeRenov/ListMandatsMPR'
 //Mandat Synergys
 import CreateMandatSynergys from '../screens/Forms/MandatSynergys/CreateMandatSynergys'
+import ListMandatsSynergys from '../screens/Forms/MandatSynergys/ListMandatsSynergys'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -244,6 +245,10 @@ const ProfileStack = createStackNavigator({
     },
     ListMandatsMPR: {
         screen: ListMandatsMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsSynergys: {
+        screen: ListMandatsSynergys,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -434,6 +439,10 @@ const ClientsManagementStack = createStackNavigator({
     },
     ListMandatsMPR: {
         screen: ListMandatsMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsSynergys: {
+        screen: ListMandatsSynergys,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -777,6 +786,10 @@ const ProjectsStack = createStackNavigator({
         screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
+    ListMandatsSynergys: {
+        screen: ListMandatsSynergys,
+        navigationOptions: hideHeader
+    },
     CreateMandatSynergys: {
         screen: CreateMandatSynergys,
         navigationOptions: hideHeader
@@ -845,6 +858,10 @@ const DocumentsStack = createStackNavigator({
     },
     ListMandatsMPR: {
         screen: ListMandatsMPR,
+        navigationOptions: hideHeader
+    },
+    ListMandatsSynergys: {
+        screen: ListMandatsSynergys,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
@@ -971,6 +988,17 @@ const MandatMPRStack = createStackNavigator({
     },
 })
 
+const MandatSynergysStack = createStackNavigator({
+    ListMandatsSynergys: {
+        screen: ListMandatsSynergys,
+        navigationOptions: hideHeader
+    },
+    CreateMandatSynergys: {
+        screen: CreateMandatSynergys,
+        navigationOptions: hideHeader
+    },
+})
+
 const NewsStack = createStackNavigator({
     ListNews: {
         screen: ListNews,
@@ -1052,6 +1080,10 @@ export const AppStack = createSwitchNavigator({
     },
     MandatMPRStack: {
         screen: MandatMPRStack,
+        navigationOptions: hideHeader
+    },
+    MandatSynergysStack: {
+        screen: MandatSynergysStack,
         navigationOptions: hideHeader
     },
     NewsStack: {

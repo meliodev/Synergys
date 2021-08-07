@@ -455,7 +455,7 @@ export const processModel = {
             // },
             //
             'signature': {
-                title: 'Signature du devis',
+                title: 'Signature des documents',
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 2,
                 actions: [
@@ -585,10 +585,118 @@ export const processModel = {
                         verificationType: 'doc-creation',
                     },
                     {
+                        id: 'mandatMPRCreation',
+                        title: 'Créer un mandat MaPrimeRénov',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 7,
+                        collection: 'Documents',
+                        //Verification
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+                            { filter: 'deleted', operation: '==', value: false },
+                        ],
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { project: null, documentType: { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', selected: false }, dynamicType: true },
+                        type: 'auto',
+                        verificationType: 'doc-creation',
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'signedMandatMPRCreation', //#task: check if devis is still existing..
+                        title: 'Signer le mandat MaPrimeRénov',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 8,
+                        collection: 'Documents',
+                        queryFilters: [ //VERIFICATION: verify if signed quote exists
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
+                        ],
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+                            { filter: 'deleted', operation: '==', value: false },
+                        ],
+                        screenName: 'UploadDocument',
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        type: 'auto',
+                        choices: [
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Signer le mandat MaPrimeRénov', id: 'sign', onSelectType: 'navigation' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                    },
+                    {
+                        id: 'mandatSynergysCreation',
+                        title: 'Créer un mandat Synergys',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 9,
+                        collection: 'Documents',
+                        //Verification
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat Synergys' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat Synergys' },
+                            { filter: 'deleted', operation: '==', value: false },
+                        ],
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { project: null, documentType: { label: 'Mandat Synergys', value: 'Mandat Synergys', selected: false }, dynamicType: true },
+                        type: 'auto',
+                        verificationType: 'doc-creation',
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'signedMandatMPRCreation', //#task: check if devis is still existing..
+                        title: 'Signer le mandat Synergys',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 10,
+                        collection: 'Documents',
+                        queryFilters: [ //VERIFICATION: verify if signed quote exists
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat Synergys' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
+                        ],
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Mandat Synergys' },
+                            { filter: 'deleted', operation: '==', value: false },
+                        ],
+                        screenName: 'UploadDocument',
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat Synergys', value: 'Mandat Synergys', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        type: 'auto',
+                        choices: [
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Signer le mandat Synergys', id: 'sign', onSelectType: 'navigation' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                    },
+                    {
                         id: 'isQuoteFinanced',
                         title: "Le devis est-il accompagné d'un financement ?",
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 7,
+                        actionOrder: 11,
                         type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //#task: comments are joined (separated by ;)
@@ -603,7 +711,7 @@ export const processModel = {
                         id: 'financingWebsite',
                         title: 'Propositions de financement',
                         instructions: "Lorem ipsum dolor",
-                        actionOrder: 8,
+                        actionOrder: 12,
                         type: 'manual',
                         comment: '',
                         verificationType: 'multiple-choices',
@@ -779,7 +887,7 @@ export const processModel = {
                 ]
             },
             'technicalVisitChoice2': {
-                title: 'Décision sur la visite technique',
+                title: 'Cloturation de la visite technique',
                 instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
                 stepOrder: 3,
                 actions: [
@@ -1260,70 +1368,6 @@ export const processModel = {
                     },
                 ]
             },
-            // 'facturationOption2': { //conversion
-            //     title: "Facturation",
-            //     instructions: 'Lorem ipsum dolor',
-            //     stepOrder: 9,
-            //     nextStep: '',
-            //     actions: [
-            //         {
-            //             id: 'billConversion',
-            //             title: 'Convertir le devis en facture',
-            //             instructions: 'Appuyez sur le bouton "Convertir en devis". Cette opération va créer une facture à partir du devis. Le devis original ne sera ainsi ni altéré ni supprimé.',
-            //             actionOrder: 1,
-            //             collection: 'Documents',
-            //             queryFilters: [ //VERIFICATION: verify if bill exists
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Facture' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //             ],
-            //             queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to generate bill from it) 
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Devis' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //             ],
-            //             screenName: 'UploadDocument',
-            //             screenParams: { DocumentId: '', documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
-            //             type: 'auto',
-            //             choices: [
-            //                 { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-            //                 { label: 'Voir le devis', id: 'view', onSelectType: 'navigation' },
-            //             ],
-            //             responsable: 'Poseur',
-            //             status: 'pending',
-            //             verificationType: 'doc-creation',
-            //         },
-            //         {
-            //             id: 'signBill', //#task: check if devis is still existing..
-            //             title: 'Signer la facture',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 2,
-            //             collection: 'Documents',
-            //             queryFilters: [ //VERIFICATION: verify if signed bill exists
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Facture' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //                 { filter: 'attachmentSource', operation: '==', value: 'signature' }
-            //             ],
-            //             queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing bill (to update signature) 
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Facture' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //             ],
-            //             screenName: 'UploadDocument',
-            //             screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
-            //             type: 'auto',
-            //             verificationType: 'doc-creation',
-            //             choices: [
-            //                 { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-            //                 { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
-            //             ],
-            //             responsable: 'Poseur',
-            //             status: 'pending',
-            //             nextStep: 'paymentStatus',
-            //         },
-            //     ]
-            // },
             'paymentStatus': { //conversion
                 title: "Finalisation de la facturation",
                 instructions: 'Lorem ipsum dolor',

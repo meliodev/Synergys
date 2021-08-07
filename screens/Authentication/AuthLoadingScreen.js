@@ -181,12 +181,14 @@ class AuthLoadingScreen extends Component {
           const action = { type: "SET_PERMISSIONS", value: remotePermissions }
           this.props.dispatch(action)
 
+          console.log('111111')
           //3. Set processModel
           const processModels = await this.fetchProcessModels()
           if (!processModels) {
             displayError({ message: errorMessages.appInit })
             return
           }
+
           setProcessModel(this, processModels)
 
           this.updateProgress(90)
@@ -224,7 +226,7 @@ class AuthLoadingScreen extends Component {
         }
 
         else {
-          var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "MandatMPRStack"
+          var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
           var routeParams = {}
         }
       }
@@ -250,11 +252,11 @@ class AuthLoadingScreen extends Component {
 
     const querySnapshot = await db.collection('Process').get()
 
-    let processModels = {}
     if (querySnapshot.empty) {
       return undefined
     }
 
+    let processModels = {}
     for (const doc of querySnapshot.docs) {
       const version = doc.id
       const model = doc.data()

@@ -150,6 +150,7 @@ export const createClient = async function createClient(userData, ClientId, isCo
     createdBy: { id: auth.currentUser.uid, fullName: auth.currentUser.displayName },
     createdAt: moment().format(),
     isPro,
+    deleted: false
   }
 
   if (isPro) {
@@ -187,7 +188,7 @@ export const createClient = async function createClient(userData, ClientId, isCo
 
   //3". CREATE PROSPECT (document only)
   else {
-    db.collection('Clients').doc(ClientId).set(client)
+    db.collection('Clients').doc(ClientId).set(client).then(()=>console.log('PROSPECT CREATED !!!'))
   }
 }
 

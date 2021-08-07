@@ -644,7 +644,6 @@ class CreateProject extends Component {
                         <ItemPicker
                             onPress={onPressLink2}
                             label='Créer une visite technique préalable *'
-                            // value={}
                             errorText={hasPriorTechVisitError}
                             editable={canCreateTasks}
                         />
@@ -695,8 +694,6 @@ class CreateProject extends Component {
         let showTasksForm = !fields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
         showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
         const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
-
-        console.log("5", this.state.scrollViewRef)
 
         if (docNotFound)
             return (

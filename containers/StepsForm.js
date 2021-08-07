@@ -43,7 +43,8 @@ class StepsForm extends Component {
         this.myAlert = myAlert.bind(this)
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
-        this.isEdit = this.props.DocId !== ""
+        this.isEdit = this.props.DocId !== "" && this.props.DocId !== undefined
+        console.log(this.props.DocId)
         this.DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
 
         this.project = this.props.navigation.getParam('project', '')
@@ -316,7 +317,7 @@ class StepsForm extends Component {
 
                                                 let update = {}
 
-                                                //0. Rollback
+                                                //0.1 Rollback
                                                 if (item.rollBack) {
                                                     for (const field of item.rollBack.fields) {
                                                         if (field.type === "string")
@@ -325,6 +326,13 @@ class StepsForm extends Component {
                                                             update[field.id] = []
                                                         else if (field.type === "date")
                                                             update[field.id] = new Date()
+                                                    }
+                                                }
+
+                                                //0.2 AUTO COPY-PASTE
+                                                if (item.autoCopy) {
+                                                    for (const element of item.autoCopy) {
+                                                        update[element.id] = this.state.[element.copyFrom]
                                                     }
                                                 }
 
@@ -480,7 +488,7 @@ class StepsForm extends Component {
         })
 
         const arr = fieldsComponents.filter((e) => e !== null)
-        const noField = arr.length === 0 
+        const noField = arr.length === 0
         if (noField) this.setState({ pageIndex: this.state.pageIndex + 1 })
 
         return fieldsComponents

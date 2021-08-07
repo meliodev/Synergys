@@ -94,7 +94,6 @@ class ListFormsContainer extends Component {
         const filterActivated = filterCount < Count
         const s = filterCount > 1 ? 's' : ''
 
-        console.log('CREATION SCREEN', creationScreen)
         return (
             <View style={styles.container}>
 

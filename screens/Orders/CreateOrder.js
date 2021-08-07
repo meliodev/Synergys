@@ -372,8 +372,6 @@ class CreateOrder extends Component {
             })
         }
 
-        console.log('555', taxes)
-
         return taxes
     }
 

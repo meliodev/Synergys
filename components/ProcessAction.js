@@ -1,4 +1,3 @@
-
 import React, { Component } from "react"
 import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator, Alert } from "react-native"
 import firebase, { db, auth } from '../firebase'

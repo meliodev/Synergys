@@ -12,8 +12,12 @@ import { errorMessages, phases } from './constants';
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
 
     try {
-        if (!processModel || typeof (processModel) === 'undefined' || typeof (currentProcess) === 'undefined') {
-            Alert.alert('Erreur inattendue', "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application.")
+        console.log('START PROCESS HANDLER', moment().format('HH:mm:ss'))
+        if (!processModel || processModel === undefined || currentProcess === undefined) {
+            Alert.alert(
+                'Erreur inattendue',
+                "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application."
+            )
             return currentProcess
         }
 
@@ -23,9 +27,12 @@ export const processHandler = async (processModel, currentProcess, projectSecond
         let loopHandler = true
         while (loopHandler) {
             //0. Initialize process with 1st phase/1st step
+            console.log("1", moment().format())
             if (Object.keys(process).length === 1) {
                 process = initProcess(processModel, process, projectSecondPhase)
             }
+
+            console.log("2", moment().format())
 
             var { currentPhaseId, currentStepId } = getCurrentStep(process)
             let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
@@ -33,12 +40,16 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             let nextStep = ''
             let nextPhase = ''
 
+            console.log("3", moment().format())
+
             //Verify/Update actions status
             const arr = []
             actions = actions.filter((a) => a !== null)
             if (actions.length > 0) {
 
+                console.log("4", moment().format())
                 actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
+                console.log("5", moment().format())
 
                 if (actions[0].cloudFunction) {
                     const sendEmail = functions.httpsCallable('sendEmail')
@@ -52,7 +63,11 @@ export const processHandler = async (processModel, currentProcess, projectSecond
                         return currentProcess
                     }
                 }
+
+                console.log("6", moment().format())
                 var verif_res = await verifyActions(actions, attributes, process)
+                console.log("7", moment().format())
+
                 actions = verif_res.verifiedActions
                 allActionsValid = verif_res.allActionsValid
                 nextStep = verif_res.nextStep
@@ -64,20 +79,24 @@ export const processHandler = async (processModel, currentProcess, projectSecond
 
             //3'. Found nextStep/nextPhase -> All actions valid -> Transition
             if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
+                console.log("8", moment().format())
                 const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
                 process = transitionRes.process
                 const { processEnded } = transitionRes
                 if (processEnded) loopHandler = false
+                console.log("9", moment().format())
             }
 
             //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
             else loopHandler = false
         }
 
+        console.log('END PROCESS HANDLER', moment().format('HH:mm:ss'))
         return process || currentProcess
     }
 
     catch (e) {
+        console.log(e.message)
         const { message } = e
         displayError({ message })
         return currentProcess
@@ -158,6 +177,7 @@ const configureActions = async (actions, attributes, process) => {
 
             let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav, choices } = action
 
+            console.log("4.1", moment().format('HH:mm:ss'))
             //1. Complete missing params
             if (collection && documentId === '') {
                 if (collection === 'Projects') action.documentId = attributes.project.id
@@ -225,11 +245,18 @@ const configureActions = async (actions, attributes, process) => {
 
             const selectedQueryFilters = queryFiltersUpdateNav || queryFilters || null
 
+            console.log("4.2", moment().format('HH:mm:ss'))
+
             if (collection && collection !== '' && selectedQueryFilters && selectedQueryFilters.length > 0) {
 
+                console.log("4.2.1", moment().format('HH:mm:ss')) //##performance: Get querysnapshot is too slow (8 seconds)
                 query = db.collection(collection)
-                selectedQueryFilters.forEach(({ filter, operation, value }) => { query = query.where(filter, operation, value) })
+                selectedQueryFilters.forEach(({ filter, operation, value }) => {
+                    query = query.where(filter, operation, value)
+                })
+                console.log("4.2.2", moment().format('HH:mm:ss'))
                 const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
+                console.log("4.2.3", moment().format('HH:mm:ss'))
 
                 //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
@@ -253,6 +280,8 @@ const configureActions = async (actions, attributes, process) => {
                     }
                 }
             }
+
+            console.log("4.3", moment().format('HH:mm:ss'))
         }
 
         return actions
@@ -280,11 +309,13 @@ const verifyActions = async (actions, attributes, process) => {
         let allActionsValid_dataFill = true
 
         if (actions_dataFill.length > 0) {
+            console.log("6.1", moment().format('HH:mm:ss'))
             var res1 = await verifyActions_dataFill(actions_dataFill)
             allActionsValid_dataFill = res1.allActionsValid_dataFill
             actions_dataFill = res1.verifiedActions_dataFill
             nextStep = res1.nextStep
             nextPhase = res1.nextPhase
+            console.log("6.2", moment().format('HH:mm:ss'))
         }
 
         //VERIFICATION TYPE 2: doc-creation
@@ -292,11 +323,13 @@ const verifyActions = async (actions, attributes, process) => {
         let allActionsValid_docCreation = true
 
         if (actions_docCreation.length > 0) {
+            console.log("6.3", moment().format('HH:mm:ss'))
             var res2 = await verifyActions_docCreation(actions_docCreation)
             allActionsValid_docCreation = res2.allActionsValid_docCreation
             actions_docCreation = res2.verifiedActions_docCreation
             nextStep = res2.nextStep
             nextPhase = res2.nextPhase
+            console.log("6.4", moment().format('HH:mm:ss'))
         }
 
         //MANUAL
@@ -309,13 +342,16 @@ const verifyActions = async (actions, attributes, process) => {
         let allActionsValid_manual = true
 
         if (actions_manual.length > 0) {
+            console.log("6.5", moment().format('HH:mm:ss'))
             var res3 = verifyActions_manual(actions_manual)
             allActionsValid_manual = res3.allActionsValid_manual
             actions_manual = res3.verifiedActions_manual
+            console.log("6.6", moment().format('HH:mm:ss'))
         }
 
         allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_manual
         verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_manual)
+        console.log("6.7", moment().format('HH:mm:ss'))
 
         return { allActionsValid, verifiedActions, nextStep, nextPhase }
     }
@@ -415,10 +451,12 @@ const verifyActions_docCreation = async (actions) => {
 
         for (let action of actions) {
 
+            console.log('A', moment().format('HH:mm:ss'))
             const { collection, queryFilters, events } = action
             let query = db.collection(collection)
             queryFilters.forEach(({ filter, operation, value }) => query = query.where(filter, operation, value))
             const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
+            console.log('B', moment().format('HH:mm:ss'))
 
             if (querysnapshot.empty) {
                 if (events && events.onDocNotFound) {  //CASE1: Conditional transition (2 options) depending on doc found or not
@@ -494,14 +532,11 @@ export const handleTransition = (processModel, process, currentPhaseId, currentS
 
     //Next step transition
     if (nextStepId) {
-        console.log('Transition to next step:', nextStepId)
         process = projectNextStepInit(processModel, process, currentPhaseId, currentStepId, nextStepId)
     }
 
     //Next phase transition
     else if (nextPhaseId) {
-        console.log('Transition to next phase:', nextPhaseId)
-
         //Update project (status/step)
         if (nextPhaseId === 'cancelProject') {
             cancelProject(ProjectId)

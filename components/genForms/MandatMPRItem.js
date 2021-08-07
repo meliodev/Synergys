@@ -8,7 +8,7 @@ const MandatMPRItem = ({ mandat, onPress, navigation, applicantName, ...props })
     return (
         <FormItem
             item={mandat}
-            onPress={onPress}
+            onPress={onPress} 
             navigation={navigation}
             nameClient1={applicantName}
             nameClient2=""

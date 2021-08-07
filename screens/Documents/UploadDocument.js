@@ -183,6 +183,7 @@ class UploadDocument extends Component {
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode(this.DocumentId)
         this.initialState = _.cloneDeep(this.state)
+        console.log('000')
         load(this, false)
     }
 
@@ -244,7 +245,6 @@ class UploadDocument extends Component {
     //SUBMISSION
     validateInputs() {
         let { project, name, attachment } = this.state
-        console.log('attchment', attachment)
         let projectError = nameValidator(project.id, '"Projet"')
         let nameError = nameValidator(name, '"Nom du document"')
         let attachmentError = !attachment ? 'La pièce jointe est obligatoire' : ""
@@ -747,9 +747,12 @@ class UploadDocument extends Component {
             else this.initEditMode(this.DocumentId)
         }
 
+        console.log("PARAMS::::::::::", project, attachment, type)
+
+
         var params = {
             onGoBack,
-            ProjectId: project.id,
+            ProjectId: this.state.project.id,
             DocumentId: this.DocumentId,
             DocumentType: type,
             fileName: attachment.name,
@@ -1170,4 +1173,3 @@ const modalStyles2 = StyleSheet.create({
     //         }
     //     })
     // }
-

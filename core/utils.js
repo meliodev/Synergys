@@ -10,7 +10,7 @@ import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
 import { PDFDocument, degrees, PageSizes, StandardFonts, rgb } from 'pdf-lib'
 import _ from 'lodash'
-import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle } from '@fortawesome/pro-light-svg-icons'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, errorMessages, roles } from './constants'
-import { ficheEEBModel, mandatMPRModel, PvReceptionModel } from "./forms";
+import { ficheEEBModel, mandatMPRModel, mandatSynergysModel, PvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -524,6 +524,10 @@ export const generatePdfForm = async (formInputs, pdfType) => {
       var originalPdfBase64 = mandatMPRBase64
       var formPages = mandatMPRModel
     }
+    else if (pdfType === "MandatsSynergys") {
+      var originalPdfBase64 = mandatSynergysBase64
+      var formPages = mandatSynergysModel
+    }
 
     const pdfDoc = await PDFDocument.load(originalPdfBase64)
     const pages = pdfDoc.getPages()
@@ -588,21 +592,23 @@ export const generatePdfForm = async (formInputs, pdfType) => {
 
               else {
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
+                console.log('.......', field.id, field.items[index].pdfConfig)
+
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   positions.push({ dx, dy })
                 }
+
               }
 
               for (const position of positions) {
                 pages[field.items[0].pdfConfig.pageIndex].drawSquare({
                   x: pages[field.items[0].pdfConfig.pageIndex].getWidth() + position.dx,
                   y: pages[field.items[0].pdfConfig.pageIndex].getHeight() + position.dy,
-                  size: 7,
+                  size: field.items[0].pdfConfig.squareSize || 7,
                   color: rgb(0, 0, 0),
                 })
               }
-
               break;
 
             case "picker":
@@ -672,8 +678,10 @@ export const generatePdfForm = async (formInputs, pdfType) => {
       }
     }
 
+
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
+
     return pdfBase64
   }
   catch (e) {
@@ -804,6 +812,7 @@ import { highRoles } from './constants'
 import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
 import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
 import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
+import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
@@ -820,6 +829,7 @@ const allDocTypes = [
   { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
   // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
   { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
+  { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
   { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
   { label: 'PV réception', value: 'PV réception', icon: faReceipt },
