@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native';
 import { List } from 'react-native-paper';
 import { connect } from 'react-redux'
 import { faFileInvoice } from '@fortawesome/pro-light-svg-icons'
@@ -19,14 +19,14 @@ import Loading from '../components/Loading'
 import firebase, { db, auth } from '../firebase'
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
-import { load, toggleFilter, setFilter, handleFilter } from '../core/utils'
+import { load, toggleFilter, setFilter, handleFilter, countDown } from '../core/utils'
 import { configureQuery } from '../core/privileges'
 import { fetchDocs, fetchDocuments } from '../api/firestore-api';
 
 class ListFormsContainer extends Component {
     constructor(props) {
         super(props)
-        //this.fetchDocs = fetchDocs.bind(this)
+        this.fetchItems = this.fetchItems.bind(this)
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false) // For pdf generation
@@ -51,18 +51,20 @@ class ListFormsContainer extends Component {
             client: { id: '', fullName: '' },
             filterOpened: false,
 
-            loading: false,
+            loading: true,
+            refreshing: false
         }
     }
 
     async componentDidMount() {
-        load(this, true)
         await this.fetchItems()
-        // if (this.project)
-        //     this.setState({ project: this.project }) //#task: change filter to QueryFilter
     }
 
-    async fetchItems() {
+    async fetchItems(count) {
+        this.setState({ refreshing: true })
+        if (count) {
+            await countDown(count)
+        }
         // const { queryFilters } = this.props.permissions.eeb
         // if (queryFilters === []) this.setState({ List: [], Count: 0 })
         // else {
@@ -71,9 +73,8 @@ class ListFormsContainer extends Component {
         const { collection, query } = this.props
         // this.fetchDocs(query, 'List', 'Count', async () => { load(this, false) })
         //}
-
         const List = await fetchDocuments(query)
-        this.setState({ List, Count: List.length, loading: false })
+        this.setState({ List, Count: List.length, loading: false, refreshing: false })
     }
 
     render() {
@@ -100,7 +101,7 @@ class ListFormsContainer extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <Background style={styles.container}>
+                    <Background showMotif={filterCount < 4} style={styles.container}>
                         <SearchBar
                             menu={this.props.isRoot}
                             title={!showInput}
@@ -122,13 +123,20 @@ class ListFormsContainer extends Component {
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.props.renderItem(item)}
                                 style={{ zIndex: 1 }}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchItems}
+                                    />
+                                }
+                            />
                             :
                             this.props.emptyList
                         }
 
                         {canCreate && this.showFAB &&
-                            <MyFAB onPress={() => this.props.navigation.navigate(creationScreen)} />
+                            <MyFAB onPress={() => this.props.navigation.navigate(creationScreen, { onGoBack: () => this.fetchItems(2000) })} />
                         }
 
                     </Background>

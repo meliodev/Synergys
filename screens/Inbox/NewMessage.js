@@ -72,7 +72,6 @@ class NewMessage extends Component {
 
     async fetchSuggestions() {
         const query = db.collection('Users')
-        //this.fetchDocs(query, 'suggestions', 'suggestionsCount', () => { load(this, false) })
         const suggestions = await fetchDocuments(query)
         this.setState({ suggestions, suggestionsCount: suggestions.length, loading: false })
     }

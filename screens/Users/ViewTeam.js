@@ -36,19 +36,17 @@ export default class ViewTeam extends Component {
             expanded: true,
             team: {},
 
-            loading: false,
+            loading: true,
             toastMessage: '',
             toastType: '',
         }
     }
 
     async componentDidMount() {
-        load(this, true)
         this.unsubscribe = db.collection('Teams').doc(this.teamId).onSnapshot(async (doc) => {
             const team = doc.data()
             const members = await this.getMembersData(team.members)
-            this.setState({ team, members })
-            load(this, false)
+            this.setState({ team, members, loading: false })
         })
     }
 

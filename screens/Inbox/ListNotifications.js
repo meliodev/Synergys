@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList } from 'react-native'
+import { StyleSheet, Text, View, TouchableOpacity, Image, FlatList, RefreshControl } from 'react-native'
 import { List } from 'react-native-paper';
 import { faBell } from '@fortawesome/pro-light-svg-icons'
 
@@ -23,22 +23,38 @@ class ListNotifications extends Component {
     constructor(props) {
         super(props)
         //this.fetchDocs = fetchDocs.bind(this)
+        this.fetchNotifications = this.fetchNotifications.bind(this)
         this.myAlert = myAlert.bind(this)
         this.currentUser = firebase.auth().currentUser
 
         this.state = {
             notificationsList: [],
             notificationsCount: 0,
-            loading: true
+            loading: true,
+            refreshing: false
         }
     }
 
     async componentDidMount() {
-        //Static query
-        let query = db.collection('Users').doc(this.currentUser.uid).collection('Notifications').where('deleted', '==', false).orderBy('sentAt', 'desc')
-        // this.fetchDocs(query, 'notificationsList', 'notificationsCount', () => { load(this, false) })
+        await this.fetchNotifications()
+    }
+
+    async fetchNotifications() {
+        this.setState({ refreshing: true })
+        let query = db
+            .collection('Users')
+            .doc(this.currentUser.uid)
+            .collection('Notifications')
+            .where('deleted', '==', false)
+            .orderBy('sentAt', 'desc')
         const notificationsList = await fetchDocuments(query)
-        this.setState({ notificationsList, notificationsCount: notificationsList.length, loading: false })
+
+        this.setState({
+            notificationsList,
+            notificationsCount: notificationsList.length,
+            loading: false,
+            refreshing: false
+        })
     }
 
     render() {
@@ -54,7 +70,7 @@ class ListNotifications extends Component {
                         <Loading size='large' />
                     </Background>
                     :
-                    <Background style={styles.container}>
+                    <Background showMotif={notificationsCount < 5} style={styles.container}>
                         <ListSubHeader style={{ marginBottom: 10 }}>{notificationsCount} notification{s}</ListSubHeader>
 
                         {notificationsCount > 0 ?
@@ -65,6 +81,12 @@ class ListNotifications extends Component {
                                 extraData={this.state}
                                 keyExtractor={(item) => { return item.id }}
                                 renderItem={(item) => <NotificationItem notification={item.item} navigation={this.props.navigation} />}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchNotifications}
+                                    />
+                                }
                             />
                             :
                             <EmptyList icon={faBell} iconColor={theme.colors.miInbox} header='Notifications' description='Aucune notification pour le moment.' offLine={this.props.offLine} />

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList, Keyboard } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Keyboard, RefreshControl } from 'react-native';
 import { List, Card } from 'react-native-paper';
 import { connect } from 'react-redux'
 import { faConstruction } from '@fortawesome/pro-light-svg-icons'
@@ -18,10 +18,10 @@ import CustomIcon from '../../components/CustomIcon'
 
 import * as theme from '../../core/theme';
 import { constants, highRoles } from '../../core/constants';
-import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined } from '../../core/utils'
+import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined, countDown } from '../../core/utils'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 import { configureQuery } from '../../core/privileges'
-import { fetchDocs,fetchDocuments } from '../../api/firestore-api';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { db, auth } from '../../firebase'
 
 import { withNavigation } from 'react-navigation'
@@ -52,6 +52,7 @@ class ListProjects extends Component {
     constructor(props) {
         super(props)
         this.onPressProject = this.onPressProject.bind(this)
+        this.fetchProjects = this.fetchProjects.bind(this)
         //this.fetchDocs = fetchDocs.bind(this)
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
@@ -77,26 +78,34 @@ class ListProjects extends Component {
             columnCount: 1,
 
             loading: true,
+            refreshing: false,
         }
     }
 
 
     async componentDidMount() {
-        Keyboard.dismiss()
+        await this.fetchProjects()
+    }
+
+    //#task: put lazy fetching: https://github.com/patrickleemsantos/react-native-food-panther/blob/master/App.js
+    async fetchProjects() {
+        this.setState({ refreshing: true })
 
         const { queryFilters } = this.props.permissions.projects
-        if (queryFilters === []) this.setState({ projectsList: [], projectsCount: 0 })
+        if (queryFilters === []) {
+            this.setState({ projectsList: [], projectsCount: 0 })
+        }
         else {
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
-            //this.fetchDocs(query, 'projectsList', 'projectsCount', async () => { load(this, false) })
             const projectsList = await fetchDocuments(query)
-            this.setState({ projectsList, projectsCount: projectsList.length, loading: false })
+            this.setState({
+                projectsList,
+                projectsCount: projectsList.length,
+                loading: false,
+                refreshing: false
+            })
         }
-    }
-
-    componentWillUnmount() {
-        this.unsubscribe && this.unsubscribe()
     }
 
     renderProject(project) {
@@ -191,7 +200,7 @@ class ListProjects extends Component {
                         <Loading size='large' />
                     </Background>
                     :
-                    <Background>
+                    <Background showMotif={filterCount < 3}>
                         {this.renderSearchBar()}
                         {filterActivated && <ActiveFilter />}
 
@@ -206,11 +215,18 @@ class ListProjects extends Component {
                                 data={formatRow(this.state.view === 'list' ? false : true, this.filteredProjects, columnCount)}
                                 keyExtractor={item => item.id}
                                 renderItem={({ item }) => this.renderProject(item)}
-                                style={{ zIndex: 1 }}
+                                style={{ zIndex: 5 }}
                                 numColumns={columnCount}
                                 key={columnCount}
                                 columnWrapperStyle={columnCount > 1 && styles.columnWrapperStyle}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding, paddingTop: 10 }} />
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding, paddingTop: 10 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchProjects}
+                                    />
+                                }
+                            />
                             :
                             <EmptyList icon={faConstruction} header='Aucun projet' description='Gérez tous vos projets. Appuyez sur le boutton "+" pour en créer un nouveau.' />
                         }
@@ -230,7 +246,8 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.background
     },
     columnWrapperStyle: {
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        zIndex: 10
     },
     invisibleItem: { //Same shape of ProjectItem2
         width: constants.ScreenWidth * 0.24,

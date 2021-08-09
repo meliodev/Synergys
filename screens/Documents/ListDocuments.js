@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList } from 'react-native'
+import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native'
 import { List } from 'react-native-paper'
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { connect } from 'react-redux'
@@ -16,7 +16,7 @@ import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
 
 import { configureQuery } from '../../core/privileges'
-import { myAlert, loadLog, load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { myAlert, loadLog, load, toggleFilter, setFilter, handleFilter, countDown } from '../../core/utils'
 import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { uploadFileNew } from "../../api/storage-api";
 
@@ -55,9 +55,10 @@ class ListDocuments extends Component {
     constructor(props) {
         super(props)
         this.filteredDocuments = []
-        // this.fetchDocs = fetchDocs.bind(this)
         this.uploadFileNew = uploadFileNew.bind(this)
         this.bootstrapUploads = this.bootstrapUploads.bind(this)
+        this.fetchSynergysDocuments = this.fetchSynergysDocuments.bind(this)
+        this.onPressDocument = this.onPressDocument.bind(this)
 
         this.state = {
             documentsList: [],
@@ -74,26 +75,34 @@ class ListDocuments extends Component {
             filterOpened: false,
 
             loading: true,
+            refreshing: false
         }
     }
 
-    //Fetch documents
     async componentDidMount() {
         //Rehydrate killed upload tasks
         this.bootstrapUploads()
+        await this.fetchSynergysDocuments()
+    }
 
-        const role = this.props.role.id
-
+    async fetchSynergysDocuments(count) {
+        this.setState({ refreshing: true })
+        if (count) {
+            await countDown(count)
+        }
         const { queryFilters } = this.props.permissions.documents
         if (queryFilters === [])
-            this.setState({ documentsList: [], documentsCount: 0 })
-
+            this.setState({ documentsList: [], documentsCount: 0, refreshing: false })
         else {
             const params = { role: this.props.role.value }
             var query = configureQuery('Documents', queryFilters, params)
-            //this.fetchDocs(query, 'documentsList', 'documentsCount', async () => load(this, false))
             const documentsList = await fetchDocuments(query)
-            this.setState({ documentsList, documentsCount: documentsList.length, loading: false })
+            this.setState({
+                documentsList,
+                documentsCount: documentsList.length,
+                loading: false,
+                refreshing: false
+            })
         }
     }
 
@@ -115,7 +124,16 @@ class ListDocuments extends Component {
     }
 
     renderDocument(document) {
-        return <DocumentItem document={document} />
+        return <DocumentItem document={document} onPress={() => this.onPressDocument(document.id)} />
+    }
+
+    onPressDocument(DocumentId) {
+        this.props.navigation.navigate('UploadDocument', {
+            isEdit: true,
+            title: '',
+            DocumentId,
+            onGoBack: () => this.fetchSynergysDocuments(2000)
+        })
     }
 
     renderSearchBar() {
@@ -173,7 +191,7 @@ class ListDocuments extends Component {
                         <Loading size='large' />
                     </Background>
                     :
-                    <Background style={styles.container}>
+                    <Background showMotif={filterCount < 6} style={styles.container}>
                         {this.renderSearchBar()}
                         {filterActivated && <ActiveFilter />}
                         {documentsCount > 0 && <ListSubHeader>{filterCount} document{s}</ListSubHeader>}
@@ -185,11 +203,20 @@ class ListDocuments extends Component {
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderDocument(item)}
                                 style={{ zIndex: 1 }}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }} />
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchSynergysDocuments}
+                                    />
+                                }
+                            />
                             :
                             <EmptyList icon={faFolder} header='Aucun document' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
                         }
-                        {canCreate && <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument')} />}
+                        {canCreate &&
+                            <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument', { onGoBack: () => this.fetchSynergysDocuments(2000) })} />
+                        }
                     </Background>}
             </View>
 

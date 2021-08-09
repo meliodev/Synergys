@@ -9,8 +9,8 @@ import Entypo from 'react-native-vector-icons/Entypo'
 import firebase, { db, functions } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { downloadFile, setToast, load } from '../../core/utils'
-import { fetchDocs, fetchDocuments } from '../../api/firestore-api'
+import { downloadFile, setToast, load, countDown } from '../../core/utils'
+import { fetchDocuments } from '../../api/firestore-api'
 
 import moment from 'moment'
 import 'moment/locale/fr'
@@ -28,6 +28,7 @@ export default class ViewMessage extends Component {
         super(props)
         this.currentUser = firebase.auth().currentUser
         this.message = this.props.navigation.getParam('message', '')
+        this.fetchMessages = this.fetchMessages.bind(this)
         // this.fetchDocs = fetchDocs.bind(this)
 
         this.state = {
@@ -42,7 +43,16 @@ export default class ViewMessage extends Component {
     }
 
     async componentDidMount() {
-        //Static query
+        await this.fetchMessages()
+        this.props.navigation.addListener('willFocus', async () => {
+            await this.fetchMessages()
+        })
+    }
+
+    async fetchMessages(count) {
+        if (count) {
+            await countDown(count)
+        }
         const query = db
             .collection('Messages')
             .doc(this.message.id)
@@ -50,13 +60,8 @@ export default class ViewMessage extends Component {
             .where('speakersIds', 'array-contains', this.currentUser.uid)
             .orderBy('sentAt', 'desc')
 
-        // this.fetchDocs(query, 'messagesList', 'messagesCount', () => { load(this, false) })
         const messagesList = await fetchDocuments(query)
         this.setState({ messagesList, messagesCount: messagesList.length, loading: false })
-    }
-
-    componentWillUnmount() {
-        this.unsubscribe()
     }
 
     goToReply(sender, messagesRendered) {
@@ -68,7 +73,7 @@ export default class ViewMessage extends Component {
             tagsSelected,
             subject: `RE: ${this.message.mainSubject}`,
             oldMessages: messagesRendered,
-            subscribers: this.message.subscribers
+            subscribers: this.message.subscribers,
         })
     }
 
@@ -81,7 +86,7 @@ export default class ViewMessage extends Component {
             tagsSelected: allSpeakers,
             subject: `RE: ${this.message.mainSubject}`,
             oldMessages: messagesRendered,
-            subscribers: this.message.subscribers
+            subscribers: this.message.subscribers,
         })
     }
 

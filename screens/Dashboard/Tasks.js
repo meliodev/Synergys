@@ -30,18 +30,12 @@ class Tasks extends Component {
 
     async componentDidMount() {
         const today = moment().format('YYYY-MM-DD')
-        const queryTasks = db
+        const query = db
             .collection('Agenda')
             .where('assignedTo.id', '==', auth.currentUser.uid)
             .where('date', '>=', today)
             .orderBy('date', 'asc')
             .limit(5)
-
-        // this.fetchDocs(queryTasks, 'tasksList', 'tasksCount', () => {
-        //     let { tasksList } = this.state
-        //     tasksList = this.formatTasks(tasksList)
-        //     this.setState({ tasksList }, () => load(this, false))
-        // })
 
         let tasksList = await fetchDocuments(query)
         tasksList = this.formatTasks(tasksList)

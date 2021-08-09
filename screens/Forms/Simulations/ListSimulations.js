@@ -85,7 +85,6 @@ class ListSimulations extends React.Component {
                     query={query}
                     creationScreen="CreateSimulation"
                     navigation={this.props.navigation}
-                    fetchItems={this.fetchItems}
                     renderItem={this.renderItem}
                     countTitle="simulation"
                     KEYS_TO_FILTERS={['id']}

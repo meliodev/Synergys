@@ -91,7 +91,7 @@ class CreateClient extends Component {
                     const user = {
                         id: this.ClientId,
                         isPro,
-                        denom: denom.value,
+                        denom: denom.value, 
                         nom: nom.value,
                         prenom: prenom.value,
                         role: 'Client',

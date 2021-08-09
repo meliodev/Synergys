@@ -304,11 +304,11 @@ class UploadDocument extends Component {
         this.initialState = _.cloneDeep(this.state)
 
         //6. Go back (Process context only)
-        if (this.documentType && fileUploaded) {
-            const { onGoBack } = this.props.navigation.state.params
-            if (onGoBack) onGoBack()
-            this.props.navigation.goBack()
-        }
+        // if (this.documentType && fileUploaded) {
+        const { onGoBack } = this.props.navigation.state.params
+        if (onGoBack) onGoBack()
+        this.props.navigation.goBack()
+        // }
 
         this.setState({ loading: false, loadingConversion: false })
     }
@@ -384,7 +384,11 @@ class UploadDocument extends Component {
 
     handleDelete() {
         db.collection('Documents').doc(this.DocumentId).update({ deleted: true })
-        this.props.navigation.goBack() //removed deleteAttachment: Client wants to keep all files archived.
+        //Refreshing documents list
+        if (this.props.navigation.state.params.onGoBack) {
+            this.props.navigation.state.params.onGoBack()
+        }
+        this.props.navigation.goBack()
     }
 
     //ATTACHMENT COMPONENT
@@ -395,10 +399,10 @@ class UploadDocument extends Component {
             this.toggleModal()
         }
 
-        else { //this.isEdit || !this.isEdit && this.documentType
+        else { //this.isEdit || !this.isEdit && this.documentType 
             let modalContent = ''
             const { type } = this.state
-            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov']
+            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
             let isGenerable = generableTypes.includes(type)
             if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
@@ -558,7 +562,7 @@ class UploadDocument extends Component {
     configDocTypes(index) {
         const type = this.types[index].value
         this.setState({ type })
-        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov']
+        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
         let isGenerable = generableTypes.includes(type)
         if (isGenerable) this.setState({ modalContent: 'docSources' })
         else this.setState({ modalContent: 'imageSources' })
@@ -576,7 +580,7 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
-            if (type === 'PV réception' || type === 'Mandat MaPrimeRénov')
+            if (type === 'PV réception' || type === 'Mandat MaPrimeRénov' || type === 'Mandat Synergys')
                 this.setState({ modalContent: 'genFormSources' })
             else if (type === 'Devis')
                 this.startGenPdf(1)
@@ -672,6 +676,13 @@ class UploadDocument extends Component {
             var titleText = "Choix du formulaire"
             var listScreen = "ListMandatsMPR"
             var creationScreen = "CreateMandatMPR"
+            var popCount = index === 0 ? 2 : 1
+        }
+
+        else if (type === "Mandat Synergys") {
+            var titleText = "Choix du formulaire"
+            var listScreen = "ListMandatsSynergys"
+            var creationScreen = "CreateMandatSynergys"
             var popCount = index === 0 ? 2 : 1
         }
 
@@ -777,7 +788,7 @@ class UploadDocument extends Component {
                     <View>
                         <Text numberOfLines={1} style={[theme.customFontMSregular.body, { marginLeft: 15 }]}>
                             <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>{signedBy.fullName} </Text>
-                             a signé le document</Text>
+                            a signé le document</Text>
                         <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {signDate} à {signTime}</Text>
                     </View>
                 </View>

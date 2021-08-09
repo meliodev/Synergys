@@ -183,7 +183,7 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                             {renderTimeForm(null, true, true)}
                             <Button mode="contained" onPress={updateTask} style={{ alignSelf: 'center', width: constants.ScreenWidth * 0.9 - theme.padding * 3.5 }} outlinedColor={theme.colors.primary}>
                                 modifier
-                        </Button>
+                            </Button>
                         </View>
                     : null
                 }
@@ -372,7 +372,11 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                 <AppBar />
                 {noConflicts ?
                     <View style={{ flex: 1 }}>
-                        <EmptyList icon={faShieldCheck} header='Aucun conflit' description="Aucun conflit n'a été détécté. Vous pouvez soumettre cette tâche." />
+                        <EmptyList
+                            icon={faShieldCheck}
+                            header='Aucun conflit'
+                            description="Aucun conflit n'a été détécté. Vous pouvez soumettre cette tâche."
+                        />
                     </View>
                     :
                     <View style={{ flex: 1 }}>
@@ -405,7 +409,7 @@ const styles = StyleSheet.create({
     },
     //conflicts
     conflictsContainer: {
-        flex: 0.65
+        flex: 0.55
     },
     datesContainer: {
         paddingHorizontal: theme.padding,
@@ -436,8 +440,7 @@ const styles = StyleSheet.create({
     },
     //Updates
     updatesContainer: {
-        flex: 0.35,
-        //marginTop: 50,
+        flex: 0.45,
         marginHorizontal: theme.padding,
         paddingTop: theme.padding,
         paddingBottom: theme.padding / 2,

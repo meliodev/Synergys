@@ -1,12 +1,12 @@
 import React, { Component } from 'react'
-import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard, FlatList, Alert } from 'react-native'
+import { StyleSheet, ScrollView, TouchableOpacity, View, Text, Keyboard, FlatList, Alert, RefreshControl } from 'react-native'
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask'
 import NetInfo from "@react-native-community/netinfo"
 import _ from 'lodash'
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-duotone-svg-icons'
-import { faBullseyeArrow, faConstruction, faLock } from '@fortawesome/pro-light-svg-icons'
+import { faBullseyeArrow, faConstruction, faLock, faRedo } from '@fortawesome/pro-light-svg-icons'
 import { connect } from 'react-redux'
 
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
@@ -27,7 +27,7 @@ import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
 import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient, fetchDocument, fetchDocuments } from '../../api/firestore-api'
-import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError } from "../../core/utils"
+import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError, countDown } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
 import { setCurrentUser } from '../../core/redux'
@@ -38,12 +38,14 @@ class Profile extends Component {
 
     constructor(props) {
         super(props)
+        this.fetchProfile = this.fetchProfile.bind(this)
+        this.fetchClientProjects = this.fetchClientProjects.bind(this)
         this.clientConversion = this.clientConversion.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.changePassword = this.changePassword.bind(this)
         this.passwordValidation = this.passwordValidation.bind(this)
         this.refreshToast = this.refreshToast.bind(this)
-        this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
         this.validateClientInputs = validateClientInputs.bind(this)
         this.refreshMonthlyGoals = this.refreshMonthlyGoals.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
@@ -83,6 +85,7 @@ class Profile extends Component {
             clientProjectsList: [],
             monthlyGoals: [],
 
+            refreshing: false,
             loading: true,
             loadingDialog: false,
             loadingSignOut: false,
@@ -97,11 +100,10 @@ class Profile extends Component {
     //##GET
     async componentDidMount() {
         try {
-            let user = await fetchDocument(this.dataCollection, this.userParam.id)
-            user = this.setUser(user)
-            if (!user) return
+            await this.fetchProfile()
 
-            if (this.isClient) this.fetchClientProjects()
+            if (this.isClient)
+                this.fetchClientProjects()
 
             // DC can view/add Coms goals
             if (this.userParam.roleId === 'com') {
@@ -121,8 +123,15 @@ class Profile extends Component {
         }
     }
 
-    componentWillUnmount() {
-        if (this.unsubscribe) this.unsubscribe()
+    async fetchProfile(count) {
+        this.setState({ refreshing: true })
+        if (count) {
+            await countDown(count)
+        }
+        let user = await fetchDocument(this.dataCollection, this.userParam.id)
+        user = this.setUser(user)
+        this.setState({ refreshing: false })
+        if (!user) return
     }
 
     async setUser(user) {
@@ -160,6 +169,8 @@ class Profile extends Component {
     }
 
     async fetchClientProjects() {
+        this.setState({ loadingClientProjects: true })
+
         var query = db
             .collection('Projects')
             .where('client.id', '==', this.userParam.id)
@@ -167,9 +178,11 @@ class Profile extends Component {
             .orderBy('createdAt', 'DESC')
 
         const clientProjectsList = await fetchDocuments(query)
-        this.setState({ clientProjectsList, clientProjectsCount: clientProjectsList.length, loadingClientProjects: false })
-
-        // this.fetchDocs(query, 'clientProjectsList', 'clientProjectsCount', () => { })
+        this.setState({
+            clientProjectsList,
+            clientProjectsCount: clientProjectsList.length,
+            loadingClientProjects: false
+        })
     }
 
     //##VALIDATE
@@ -442,7 +455,7 @@ class Profile extends Component {
     }
 
     onPressProject(ProjectId) {
-        this.props.navigation.navigate('CreateProject', { ProjectId })
+        this.props.navigation.navigate('CreateProject', { ProjectId, onGoBack: () => this.fetchProfile(1000) })
     }
 
     renderClientProjects(currentUser) {
@@ -461,16 +474,33 @@ class Profile extends Component {
             <View style={{ flex: 1, marginTop: 16 }}>
                 <FormSection
                     sectionTitle={`${mes}Projets`}
-                    sectionIcon={faPlusCircle}
-                    iconColor={theme.colors.white}
-                    iconSize={28}
-                    iconSecondaryColor={theme.colors.primary}
-                    onPressIcon={() => this.props.navigation.navigate('CreateProject', { client, address })}
+                    sectionRightComponent={
+                        () => {
+                            return (
+                                <View style={{ flexDirection: 'row' }}>
+                                    <CustomIcon
+                                        icon={faRedo}
+                                        size={28}
+                                        color={theme.colors.primary}
+                                        onPress={this.fetchClientProjects}
+                                        style={{ marginRight: theme.padding * 1.5 }}
+                                    />
+                                    <CustomIcon
+                                        icon={faPlusCircle}
+                                        size={28}
+                                        color={theme.colors.white}
+                                        secondaryColor={theme.colors.primary}
+                                        onPress={() => this.props.navigation.navigate('CreateProject', { client, address, onGoBack: () => this.fetchProfile(1000) })}
+                                    />
+                                </View>
+                            )
+                        }
+                    }
                     form={null}
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }}
                 />
                 {loadingClientProjects ?
-                    <Loading />
+                    <Loading style={{ marginTop: 33 }} />
                     :
                     <FlatList
                         data={formatRow(true, clientProjectsList, 3)}
@@ -567,7 +597,15 @@ class Profile extends Component {
                     <EmptyList icon={faUserSlash} header='Utilisateur introuvable' description='Cet utilisateur est introuvable dans la base de données.' offLine={!isConnected} />
                     :
                     <View style={{ flex: 1 }}>
-                        <ScrollView style={styles.container}>
+                        <ScrollView
+                            style={styles.container}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={this.state.refreshing}
+                                    onRefresh={this.fetchProfile}
+                                />
+                            }
+                        >
                             {loading ?
                                 <Loading style={{ marginTop: constants.ScreenHeight * 0.4 }} size='large' />
                                 :

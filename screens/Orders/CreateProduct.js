@@ -118,16 +118,8 @@ class CreateProduct extends Component {
         load(this, false)
     }
 
-    componentWillUnmount() {
-        if (this.unsubscribeCategories)
-            this.unsubscribeCategories()
-
-        if (this.unsubscribe)
-            this.unsubscribe()
-    }
-
     fetchCategories() {
-        this.unsubscribeCategories = db.collection('ProductCategories').get().then((querysnapshot) => {
+        db.collection('ProductCategories').get().then((querysnapshot) => {
             let categories = [{ label: 'Selectionnez une catégorie', value: '' }]
 
             if (querysnapshot.empty) return

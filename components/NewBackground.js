@@ -5,7 +5,7 @@ import { SvgXml } from 'react-native-svg';
 import { constants } from '../core/constants'
 import * as theme from '../core/theme'
 
-const NewBackground = ({ children, style, motifStyle }) => {
+const NewBackground = ({ children, style, motifStyle, showMotif = true }) => {
 
     const motif = `
     <svg width="440" height="229.192" viewBox="0 0 440 229.192">
@@ -21,10 +21,10 @@ const NewBackground = ({ children, style, motifStyle }) => {
    `
 
     return (
-        <View style={[styles.background, style]}>
+        <View style={[styles.background]}>
             <KeyboardAvoidingView style={styles.container} behavior="padding">
                 {children}
-                <SvgXml xml={motif} style={[styles.motifStyle, motifStyle]} />
+                {showMotif && <SvgXml xml={motif} style={[styles.motifStyle, motifStyle]} />}
             </KeyboardAvoidingView>
         </View>
     )
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: '100%',
         position: 'absolute',
-        backgroundColor: theme.colors.background
+        backgroundColor: theme.colors.background,
     },
     container: {
         flex: 1,

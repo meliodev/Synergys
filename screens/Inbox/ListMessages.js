@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, TouchableOpacity, FlatList, Text } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, FlatList, Text, RefreshControl } from 'react-native'
 import { List } from 'react-native-paper';
 import { withNavigation } from 'react-navigation'
 import { faPen, faEnvelope } from '@fortawesome/pro-light-svg-icons'
@@ -9,6 +9,7 @@ import ListSubHeader from '../../components/ListSubHeader'
 import MessageItem from '../../components/MessageItem'
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
+import { Loading } from '../../components';
 
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
@@ -16,30 +17,48 @@ import { constants } from '../../core/constants'
 import { configureQuery } from '../../core/privileges'
 
 import { fetchDocs, fetchDocuments } from "../../api/firestore-api";
+import { countDown } from '../../core/utils';
 
 class ListMessages extends Component {
     constructor(props) {
         super(props)
-        //this.fetchDocs = fetchDocs.bind(this)
+        this.fetchMessages = this.fetchMessages.bind(this)
         this.markAsReadAndNavigate = this.markAsReadAndNavigate.bind(this)
         this.currentUser = firebase.auth().currentUser
 
         this.state = {
             messagesList: [],
             messagesCount: 0,
+            loading: true,
+            refreshing: false
         }
     }
 
     async componentDidMount() {
+        await this.fetchMessages()
+        this.props.navigation.addListener('willFocus', async () => {
+            await this.fetchMessages()
+        })
+    }
 
+    async fetchMessages(count) {
+        this.setState({ refreshing: true })
+        if (count) {
+            await countDown(count)
+        }
         const { queryFilters } = this.props.permissions
-        if (queryFilters === []) this.setState({ messagesList: [], messagesCount: 0 })
+        if (queryFilters === [])
+            this.setState({ messagesList: [], messagesCount: 0, loading: false })
         else {
             const params = { role: this.props.role.value }
             const query = configureQuery('Messages', queryFilters, params)
-            // this.fetchDocs(query, 'messagesList', 'messagesCount', () => { })
             const messagesList = await fetchDocuments(query)
-            this.setState({ messagesList, messagesCount: messagesList.length, loading: false })
+            this.setState({
+                messagesList,
+                messagesCount: messagesList.length,
+                loading: false,
+                refreshing: false
+            })
         }
     }
 
@@ -68,29 +87,53 @@ class ListMessages extends Component {
 
 
     render() {
-        let { messagesCount } = this.state
+        let { messagesCount, loading } = this.state
         const { canCreate } = this.props.permissions
 
         const s = messagesCount > 1 ? 's' : ''
 
         return (
-            <Background style={styles.container}>
-                <ListSubHeader>{messagesCount} sujet{s}</ListSubHeader>
+            <View style={{ flex: 1 }}>
 
-                {messagesCount > 0 ?
-                    < FlatList
-                        style={styles.root}
-                        contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
-                        data={this.state.messagesList}
-                        extraData={this.state}
-                        keyExtractor={(item) => { return item.id }}
-                        renderItem={(item) => this.renderMessage(item)}
-                    />
+                {loading ?
+                    <Background>
+                        <Loading size='large' />
+                    </Background>
                     :
-                    <EmptyList icon={faEnvelope} iconColor={theme.colors.miInbox} header='Messages' description="Aucun message pour le moment." offLine={this.props.offLine} />
+                    <Background showMotif={messagesCount < 5} style={styles.container}>
+                        <ListSubHeader>{messagesCount} sujet{s}</ListSubHeader>
+
+                        {messagesCount > 0 ?
+                            < FlatList
+                                style={styles.root}
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.1 }}
+                                data={this.state.messagesList}
+                                extraData={this.state}
+                                keyExtractor={(item) => { return item.id }}
+                                renderItem={(item) => this.renderMessage(item)}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchMessages}
+                                    />
+                                }
+                            />
+                            :
+                            <EmptyList
+                                icon={faEnvelope}
+                                iconColor={theme.colors.miInbox}
+                                header='Messages'
+                                description="Aucun message pour le moment."
+                                offLine={this.props.offLine}
+                            />
+                        }
+                        {canCreate &&
+                            <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />
+                        }
+                    </Background >
                 }
-                {canCreate && <MyFAB icon={faPen} onPress={() => this.props.navigation.navigate('NewMessage')} />}
-            </Background >
+            </View>
+
         )
 
     }

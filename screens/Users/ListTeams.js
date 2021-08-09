@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert } from 'react-native'
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Alert, RefreshControl } from 'react-native'
 import { List } from 'react-native-paper'
 import { faUsers } from '@fortawesome/pro-light-svg-icons'
 import { withNavigation } from 'react-navigation'
@@ -28,29 +28,38 @@ class ListTeams extends Component {
         this.alertDeleteTeam = this.alertDeleteTeam.bind(this)
         this.renderTeam = this.renderTeam.bind(this)
         // this.fetchDocs = fetchDocs.bind(this)
+        this.fetchTeams = this.fetchTeams.bind(this)
 
         this.state = {
             teamsList: [],
             teamsCount: 0,
             members: [],
-
-            loading: false,
+            loading: true,
+            refreshing: false
         }
     }
 
     async componentDidMount() {
-        load(this, true)
+        await this.fetchTeams()
+    }
+
+    async fetchTeams() {
+        this.setState({ refreshing: true })
         const query = db.collection('Teams').where('deleted', '==', false)
-        //this.fetchDocs(query, 'teamsList', 'teamsCount', () => load(this, false))
         const teamsList = await fetchDocuments(query)
-        this.setState({ teamsList, teamsCount: teamsList.length, loading: false })
+        this.setState({
+            teamsList,
+            teamsCount: teamsList.length,
+            loading: false,
+            refreshing: false
+        })
     }
 
     viewTeam(team) {
         this.props.navigation.navigate('ViewTeam', { teamId: team.id })
     }
 
-    alertDeleteTeam(team) { 
+    alertDeleteTeam(team) {
         const title = "Supprimer l'équipe"
         const message = 'Etes-vous sûr de vouloir supprimer cette équipe ? Cette opération est irreversible.'
         const handleConfirm = async () => await deleteTeam(team).then(() => console.log('Batch succeeded !!!'))
@@ -106,7 +115,14 @@ class ListTeams extends Component {
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderTeam(item)}
                                 style={{ paddingHorizontal: 15 }}
-                                contentContainerStyle={{ paddingBottom: 75 }} />
+                                contentContainerStyle={{ paddingBottom: 75 }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchTeams}
+                                    />
+                                }
+                            />
                             :
                             <EmptyList icon={faUsers} iconColor={theme.colors.miUsers} header='Aucune équipe' description='Gérez les équipes. Appuyez sur le boutton "+" pour en créer un nouvelle.' offLine={this.props.offLine} />
                         }

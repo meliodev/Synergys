@@ -37,7 +37,17 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
         }
     }
 
-    const netPrice = order.total - order.primeRenov - order.primeCEE
+    const sumTaxes = (taxes) => {
+        if (taxes.length === 0) return 0
+        var taxeValues = taxes.map(taxe => taxe.value)
+        const sum = taxeValues.reduce((prev, next) => prev + next)
+        return sum
+    }
+
+    const { subTotal, discount, taxes, primeCEE, primeRenov, aidRegion } = order
+    const discountedPrice = subTotal - (subTotal * discount) / 100
+    const taxedPrice = discountedPrice + sumTaxes(taxes)
+    const netPrice = taxedPrice - primeCEE - primeRenov - aidRegion
 
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>

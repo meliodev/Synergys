@@ -66,7 +66,7 @@ class UsersManagement extends React.Component {
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
                     icon1={faUser}
                     icon2={faUsers}
-                    Tab1={
+                    Tab1={ 
                         <ListUsers
                             searchInput={searchInput}
                             prevScreen='UsersManagement'

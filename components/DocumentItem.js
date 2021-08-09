@@ -15,7 +15,7 @@ import { constants } from '../core/constants';
 import { ThemeColors, withNavigation } from 'react-navigation'
 import { color } from 'react-native-reanimated';
 
-const DocumentItem = ({ document, options, functions, navigation, ...props }) => {
+const DocumentItem = ({ document, options, functions, onPress, ...props }) => {
 
     const setStateColor = (state) => {
         switch (state) {
@@ -79,7 +79,7 @@ const DocumentItem = ({ document, options, functions, navigation, ...props }) =>
     // }
 
     return (
-        <Card style={{ marginVertical: 3, marginHorizontal: 5, elevation: 2, backgroundColor: theme.colors.white }} onPress={() => navigation.navigate('UploadDocument', { isEdit: true, title: '', DocumentId: document.id })}>
+        <Card style={{ marginVertical: 3, marginHorizontal: 5, elevation: 2, backgroundColor: theme.colors.white }} onPress={onPress}>
 
             <Card.Content style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'flex-start' }}>

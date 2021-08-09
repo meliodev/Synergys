@@ -1,7 +1,7 @@
 
 
 import React, { Component } from 'react'
-import { StyleSheet, View, FlatList, Alert } from 'react-native'
+import { StyleSheet, View, FlatList, Alert, RefreshControl } from 'react-native'
 import { faUserPlus, faUserFriends } from '@fortawesome/pro-light-svg-icons'
 import { withNavigation } from 'react-navigation'
 import SearchInput, { createFilter } from 'react-native-search-filter'
@@ -9,7 +9,7 @@ import SearchInput, { createFilter } from 'react-native-search-filter'
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
 import { constants } from '../../core/constants'
-import { load, myAlert, getRoleIdFromValue } from '../../core/utils'
+import { load, myAlert, getRoleIdFromValue, countDown } from '../../core/utils'
 import { fetchDocs, fetchDocuments } from '../../api/firestore-api'
 
 import UserItem from '../../components/UserItem'
@@ -26,25 +26,37 @@ class ListUsers extends Component {
     super(props)
     this.myAlert = myAlert.bind(this)
     this.renderUser = this.renderUser.bind(this)
-    this.fetchDocs = fetchDocs.bind(this)
+    this.fetchUsers = this.fetchUsers.bind(this)
+    this.customOnGoBack = this.customOnGoBack.bind(this)
 
     this.state = {
       usersList: [],
       usersCount: 3,
-      loading: true
+      loading: true,
+      refreshing: false
     }
   }
 
   async componentDidMount() {
-    const query = this.props.query
-    // this.fetchDocs(query, 'usersList', 'usersCount', () => load(this, false))
-    const usersList = await fetchDocuments(query)
-    this.setState({ usersList, usersCount: usersList.length, loading: false })
+    await this.fetchUsers()
   }
 
-  // componentWillUnmount() {
-  //   this.unsubscribe()
-  // }
+  async fetchUsers(count) {
+    this.setState({ refreshing: true })
+
+    if (count) {
+      await countDown(count)
+    }
+
+    const query = this.props.query
+    const usersList = await fetchDocuments(query)
+    this.setState({
+      usersList,
+      usersCount: usersList.length,
+      loading: false,
+      refreshing: false
+    })
+  }
 
   alertDeleteUser(user) {
     const title = "Supprimer l'utilisateur"
@@ -78,8 +90,8 @@ class ListUsers extends Component {
 
     // Commit the batch
     batch.commit()
-      .then(() => console.log("Batch succeeded !"))
-      .catch(e => console.error(e))
+
+    this.fetchUsers(3000)
   }
 
   renderUser = (user) => {
@@ -123,11 +135,16 @@ class ListUsers extends Component {
     )
   }
 
+  customOnGoBack(user) {
+    if (this.props.onGoBack) this.props.onGoBack(user)
+    this.fetchUsers(2000)
+  }
+
   onPressFAB() {
     const { prevScreen, userType, onGoBack } = this.props
     const nextScreen = userType === 'utilisateur' ? 'CreateUser' : 'CreateClient'
     const isProspect = userType === 'prospect'
-    this.props.navigation.navigate(nextScreen, { prevScreen, isProspect, onGoBack })
+    this.props.navigation.navigate(nextScreen, { prevScreen, isProspect, onGoBack: (user) => this.customOnGoBack(user) })
   }
 
   render() {
@@ -155,7 +172,14 @@ class ListUsers extends Component {
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => this.renderUser(item)}
                 style={{ paddingHorizontal: theme.padding }}
-                contentContainerStyle={{ paddingBottom: 75 }} />
+                contentContainerStyle={{ paddingBottom: 75 }}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={this.state.refreshing}
+                    onRefresh={this.fetchUsers}
+                  />
+                }
+              />
               :
               <EmptyList icon={this.props.emptyListIcon || faUserFriends} iconColor={theme.colors.miUsers} header={this.props.emptyListHeader} description={this.props.emptyListDesc} offLine={this.props.offLine} />
             }

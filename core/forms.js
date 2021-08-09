@@ -450,7 +450,7 @@ export const ficheEEBModel = [
                 id: "wallThickness",
                 type: "textInput",
                 isNumeric: true,
-                label: "Epaisseur des murs",
+                label: "Epaisseur des murs en cm",
                 errorId: "wallThicknessError",
                 pdfConfig: { dx: -485, dy: - 135, pageIndex: 0 }
             },

@@ -30,8 +30,6 @@ const TaskItem = ({ task, onPress, style }) => {
     const borderWidth = isLate ? StyleSheet.hairlineWidth : 0
     const opacity = done ? 0.5 : 1
 
-    console.log(task.date, task.status)
-
     return (
         <TouchableOpacity style={[styles.item, { backgroundColor: taskColor, opacity, borderColor: theme.colors.error, borderWidth }, style]} onPress={onPress} >
             <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>

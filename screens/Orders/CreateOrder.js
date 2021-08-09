@@ -215,6 +215,10 @@ class CreateOrder extends Component {
         load(this, true)
         this.title = 'Suppression de la commande...'
         db.collection('Orders').doc(this.OrderId).update({ deleted: true })
+        //Refreshing orders list
+        if (this.props.navigation.state.params.onGoBack) {
+            this.props.navigation.state.params.onGoBack()
+        }
         load(this, false)
         this.props.navigation.goBack()
     }
@@ -293,8 +297,13 @@ class CreateOrder extends Component {
             load(this, false)
         }
 
-        else if (!this.autoGenPdf)
+        else if (!this.autoGenPdf) {
+            //Refreshing orders list
+            if (this.props.navigation.state.params.onGoBack) {
+                this.props.navigation.state.params.onGoBack()
+            }
             this.props.navigation.goBack()
+        }
 
         //#task: Store order to be able to generate pdf in case user goes back from PdfGeneration
         else this.setState({ order, loading: false }, () => this.generatePdf(order, this.state.docType))

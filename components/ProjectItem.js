@@ -87,6 +87,7 @@ const styles = StyleSheet.create({
         marginVertical: theme.padding / 2,
         borderRadius: 10,
         elevation: 4,
+        zIndex: 100
     },
     linearGradient: {
         flex: 1,

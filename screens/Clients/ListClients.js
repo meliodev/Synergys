@@ -1,5 +1,4 @@
 
-
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TextInput, TouchableHighlight, FlatList, ScrollView, Alert } from 'react-native'
 import { List, FAB } from 'react-native-paper'
@@ -14,7 +13,7 @@ import { constants } from '../../core/constants'
 import { myAlert } from '../../core/utils'
 
 import ListUsers from '../Users/ListUsers'
-
+ 
 class ListClients extends Component {
     constructor(props) {
         super(props)

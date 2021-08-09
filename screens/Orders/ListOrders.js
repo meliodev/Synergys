@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, RefreshControl } from 'react-native';
 import { List } from 'react-native-paper';
 import { connect } from 'react-redux'
 import { faFileInvoice } from '@fortawesome/pro-light-svg-icons'
@@ -19,7 +19,7 @@ import Loading from '../../components/Loading'
 import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme';
 import { constants } from '../../core/constants';
-import { load, toggleFilter, setFilter, handleFilter } from '../../core/utils'
+import { load, toggleFilter, setFilter, handleFilter, countDown } from '../../core/utils'
 import { configureQuery } from '../../core/privileges'
 import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { firebase } from '@react-native-firebase/crashlytics';
@@ -36,8 +36,8 @@ const states = [
 class ListOrders extends Component {
     constructor(props) {
         super(props)
-        // this.fetchDocs = fetchDocs.bind(this)
         this.onPressOrder = this.onPressOrder.bind(this) //#edit
+        this.fetchOrders = this.fetchOrders.bind(this) //#edit
 
         this.isRoot = this.props.navigation.getParam('isRoot', true)
         this.autoGenPdf = this.props.navigation.getParam('autoGenPdf', false) // For pdf generation
@@ -64,26 +64,35 @@ class ListOrders extends Component {
             client: { id: '', fullName: '' },
             filterOpened: false,
 
-            loading: false,
+            loading: true,
+            refreshing: false
         }
     }
 
     async componentDidMount() {
-        load(this, true)
         await this.fetchOrders()
         if (this.project)
             this.setState({ project: this.project }) //#task: change filter to QueryFilter
     }
 
-    async fetchOrders() {
+    async fetchOrders(count) {
+        this.setState({ refreshing: true })
+        if (count) {
+            await countDown(count)
+        }
         const { queryFilters } = this.props.permissions.orders
-        if (queryFilters === []) this.setState({ ordersList: [], ordersCount: 0 })
+        if (queryFilters === [])
+            this.setState({ ordersList: [], ordersCount: 0, refreshing: false })
         else {
             const params = { role: this.props.role.value }
             var query = configureQuery('Orders', queryFilters, params) //#task make query as a prop (for project filtering during process devis generation)
-            //this.fetchDocs(query, 'ordersList', 'ordersCount', async () => { load(this, false) })
             const ordersList = await fetchDocuments(query)
-            this.setState({ ordersList, ordersCount: ordersList.length, loading: false })
+            this.setState({
+                ordersList,
+                ordersCount: ordersList.length,
+                loading: false,
+                refreshing: false
+            })
         }
     }
 
@@ -93,9 +102,19 @@ class ListOrders extends Component {
 
     onPressOrder(order) {//#edit
         if (this.isRoot)
-            this.props.navigation.navigate('CreateOrder', { OrderId: order.id })
+            this.props.navigation.navigate('CreateOrder', {
+                OrderId: order.id,
+                onGoBack: () => this.fetchOrders(2000)
+            })
 
-        else this.props.navigation.navigate('CreateOrder', { OrderId: order.id, autoGenPdf: true, docType: this.docType, DocumentId: this.props.navigation.getParam('DocumentId', ''), popCount: this.popCount, onGoBack: this.props.navigation.getParam('onGoBack', null) })
+        else this.props.navigation.navigate('CreateOrder', {
+            OrderId: order.id,
+            autoGenPdf: true,
+            docType: this.docType,
+            DocumentId: this.props.navigation.getParam('DocumentId', ''),
+            popCount: this.popCount,
+            onGoBack: this.props.navigation.getParam('onGoBack', null)
+        })
     }
 
     renderSearchBar() {
@@ -158,7 +177,7 @@ class ListOrders extends Component {
                         <Loading size='large' />
                     </Background>
                     :
-                    <Background style={styles.container}>
+                    <Background showMotif={filterCount < 4} style={styles.container}>
 
                         {this.renderSearchBar()}
                         {filterActivated && <ActiveFilter />}
@@ -171,7 +190,14 @@ class ListOrders extends Component {
                                 keyExtractor={item => item.id.toString()}
                                 renderItem={({ item }) => this.renderOrder(item)}
                                 style={{ zIndex: 1 }}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }} />
+                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }}
+                                refreshControl={
+                                    <RefreshControl
+                                        refreshing={this.state.refreshing}
+                                        onRefresh={this.fetchOrders}
+                                    />
+                                }
+                            />
                             :
                             <EmptyList
                                 icon={faFileInvoice}
@@ -182,7 +208,7 @@ class ListOrders extends Component {
                         }
 
                         {canCreate && this.showFAB &&
-                            <MyFAB onPress={() => this.props.navigation.navigate('CreateOrder')} />
+                            <MyFAB onPress={() => this.props.navigation.navigate('CreateOrder', { onGoBack: () => this.fetchOrders(2000) })} />
                         }
                     </Background>}
             </View>

@@ -4,7 +4,21 @@ import { View, Text, StyleSheet } from 'react-native'
 import Section from './Section'
 import * as theme from '../core/theme'
 
-const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle, formContainerStyle, onPressIcon, iconColor, iconSize, iconSecondaryColor, showSection = true, hide = false }) => {
+const FormSection = ({
+    sectionTitle,
+    sectionIcon,
+    sectionRightComponent = null,
+    form,
+    containerStyle,
+    formContainerStyle,
+    onPressIcon,
+    iconColor,
+    iconSize,
+    iconSecondaryColor,
+    showSection = true,
+    hide = false
+}) => {
+
     if (hide) return null
 
     return (
@@ -16,7 +30,8 @@ const FormSection = ({ sectionTitle, sectionIcon, form, containerStyle, formCont
                     onPressIcon={onPressIcon}
                     iconColor={iconColor}
                     iconSecondaryColor={iconSecondaryColor}
-                    iconSize= {iconSize}
+                    iconSize={iconSize}
+                    rightComponent={sectionRightComponent}
                 />
             }
 

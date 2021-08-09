@@ -76,7 +76,7 @@ const properties = ["client", "name", "note", "address", "state", "step", "color
 class CreateProject extends Component {
     constructor(props) {
         super(props)
-      //  this.fetchDocs = fetchDocs.bind(this)
+        //  this.fetchDocs = fetchDocs.bind(this)
         this.refreshClient = refreshClient.bind(this)
         this.refreshComContact = refreshComContact.bind(this)
         this.refreshTechContact = refreshTechContact.bind(this)
@@ -656,6 +656,7 @@ class CreateProject extends Component {
             }
             this.myAlert(title, message, handleConfirm)
         }
+
         else this.props.navigation.goBack()
     }
 
@@ -682,7 +683,8 @@ class CreateProject extends Component {
         const fields = [name, client.id, address.description, comContact.id]
         let showTasksForm = !fields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
         showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
-        const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
+        // const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
+        const showContactTechnic = this.isEdit
 
         if (docNotFound)
             return (
@@ -831,7 +833,13 @@ class CreateProject extends Component {
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
                                         <ItemPicker
-                                            onPress={() => navigateToScreen(this, 'ListClients', { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false })}
+                                            onPress={() => {
+                                                navigateToScreen(
+                                                    this,
+                                                    'ListClients',
+                                                    { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false }
+                                                )
+                                            }}
                                             label='Client concerné *'
                                             value={client.fullName}
                                             errorText={client.error}
@@ -897,50 +905,6 @@ class CreateProject extends Component {
                                 </View>
                             } />
 
-                        {showBillSection && < FormSection
-                            sectionTitle='Facturation'
-                            sectionIcon={faEuroSign}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    <MyInput
-                                        label="Montant facturé (€)*"
-                                        returnKeyType="done"
-                                        keyboardType='numeric'
-                                        value={bill.amount}
-                                        onChangeText={amount => {
-                                            bill.amount = amount
-                                            this.setState({ bill })
-                                        }}
-                                        editable={canWrite && !this.isClient}
-                                    // error={!!price.error}
-                                    // errorText={price.error}
-                                    />
-                                </View>
-                            } />
-                        }
-
-                        {showTasksForm && this.renderTasksForm()}
-
-                        <FormSection
-                            hide={!this.isEdit}
-                            sectionTitle='Bloc Notes'
-                            sectionIcon={faQuoteRight}
-                            formContainerStyle={{ paddingTop: 25 }}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    <TextInput
-                                        underlineColorAndroid="transparent"
-                                        placeholder="Rapportez des notes utiles..."
-                                        placeholderTextColor={theme.colors.gray_dark}
-                                        numberOfLines={7}
-                                        multiline={true}
-                                        onChangeText={note => this.setState({ note })}
-                                        value={note}
-                                        style={styles.note}
-                                        autoCapitalize='sentences'
-                                        editable={canWrite} />
-                                </View>
-                            } />
 
                         {this.isEdit &&
                             <FormSection
@@ -975,6 +939,52 @@ class CreateProject extends Component {
                                     </View>
                                 } />
                         }
+
+                        {showTasksForm && this.renderTasksForm()}
+
+                        {showBillSection && < FormSection
+                            sectionTitle='Facturation'
+                            sectionIcon={faEuroSign}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    <MyInput
+                                        label="Montant facturé (€)*"
+                                        returnKeyType="done"
+                                        keyboardType='numeric'
+                                        value={bill.amount}
+                                        onChangeText={amount => {
+                                            bill.amount = amount
+                                            this.setState({ bill })
+                                        }}
+                                        editable={canWrite && !this.isClient}
+                                    // error={!!price.error}
+                                    // errorText={price.error}
+                                    />
+                                </View>
+                            } />
+                        }
+
+                        <FormSection
+                            hide={!this.isEdit}
+                            sectionTitle='Bloc Notes'
+                            sectionIcon={faQuoteRight}
+                            formContainerStyle={{ paddingTop: 25 }}
+                            form={
+                                <View style={{ flex: 1 }}>
+                                    <TextInput
+                                        underlineColorAndroid="transparent"
+                                        placeholder="Rapportez des notes utiles..."
+                                        placeholderTextColor={theme.colors.gray_dark}
+                                        numberOfLines={7}
+                                        multiline={true}
+                                        onChangeText={note => this.setState({ note })}
+                                        value={note}
+                                        style={styles.note}
+                                        autoCapitalize='sentences'
+                                        editable={canWrite} />
+                                </View>
+                            }
+                        />
 
                         {this.renderPlacePictures(canWrite, isConnected)}
                     </ScrollView>

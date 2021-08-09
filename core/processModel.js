@@ -734,7 +734,7 @@ export const processModel = {
                     {
                         //General
                         id: 'checkTechContact',
-                        title: 'Renseigner un contact technique pour le projet',
+                        title: 'Renseigner un contact technique pour le projet', //#add refresh before scrollto
                         instructions: 'Lorem ipsum dolor',
                         actionOrder: 1,
                         //Verification

@@ -184,6 +184,11 @@ class CreateUser extends Component {
     await db.collection('newUsers').doc(this.userId).set(user)
     setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
       this.setState({ loadingDialog: false })
+
+      if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
+        this.props.navigation.state.params.onGoBack()
+      }
+
       this.props.navigation.navigate(this.prevScreen)
     }, 6000)
   }

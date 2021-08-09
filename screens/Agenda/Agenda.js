@@ -129,7 +129,10 @@ class Agenda2 extends Component {
 
         //AGENDA (static)
         if (isAgenda) {
-            query = db.collection('Agenda').where('assignedTo.id', '==', currentUser.uid).orderBy('date', 'asc')
+            query = db
+                .collection('Agenda')
+                .where('assignedTo.id', '==', currentUser.uid)
+                .orderBy('date', 'asc')
             return query
         }
 
@@ -279,7 +282,7 @@ class Agenda2 extends Component {
                     <PickerBar
                         main={this}
                         menu={this.isRoot}
-                        titleText= {currentMonthYear}
+                        titleText={currentMonthYear}
                         //Refresh
                         refresh
                         onRefresh={() => this.refreshItems(true)}
@@ -415,7 +418,7 @@ const styles = StyleSheet.create({
     dayText: {
         fontFamily: 'Montserrat-Medium',
         marginLeft: 2,
-        fontSize: 10,  
+        fontSize: 10,
         letterSpacing: 1,
         color: theme.colors.gray_googleAgenda
     }

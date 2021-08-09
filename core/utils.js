@@ -958,6 +958,7 @@ export function refreshTechContact(user) {
 
 export function refreshAssignedTo(user) {
   const assignedTo = refreshUser(user)
+  console.log(assignedTo)
   this.setState({ assignedTo, assignedToError: "" })
 }
 

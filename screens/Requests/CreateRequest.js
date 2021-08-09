@@ -50,7 +50,7 @@ class CreateRequest extends Component {
         this.refreshClient = refreshClient.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
-       // this.fetchDocs = fetchDocs.bind(this)
+        // this.fetchDocs = fetchDocs.bind(this)
         this.onPressProjectCallBack = this.onPressProjectCallBack.bind(this)
         this.setProducts = this.setProducts.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
@@ -222,6 +222,12 @@ class CreateRequest extends Component {
         this.AddRequestAndChatRoom(request, this.isEdit)
 
         load(this, false)
+
+        //Refreshing requests list
+        if (this.props.navigation.state.params.onGoBack) {
+            this.props.navigation.state.params.onGoBack()
+        }
+
         this.props.navigation.goBack()
     }
 
@@ -416,7 +422,7 @@ class CreateRequest extends Component {
                             onPress={() => this.handleConfirmModal(productsList, otherProducts)}
                             style={modalStyles.confirmButton}>
                             Confirmer
-                    </Button>
+                        </Button>
                     </View>
                 </View>
             </Modal >
