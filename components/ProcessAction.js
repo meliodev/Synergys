@@ -432,11 +432,12 @@ class ProcessAction extends Component {
     //func4
     runOperation = async (operation, action) => {
         if (!operation) return
+        //test github merge
 
         const { type, field, value } = operation
         const collection = operation.collection ? operation.collection : action.collection
         const documentId = operation.docId ? operation.docId : action.documentId
-
+ 
         if (type === 'update') {
             let update = {}
             update[field] = value
