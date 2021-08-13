@@ -79,11 +79,17 @@ class ListDocuments extends Component {
         }
     }
 
+    componentWillUnmount() {
+        this.willFocusSubscription.remove()
+    }
+
     async componentDidMount() {
         //Rehydrate killed upload tasks
         this.bootstrapUploads()
         await this.fetchSynergysDocuments()
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => await this.fetchSynergysDocuments())
     }
+
 
     async fetchSynergysDocuments(count) {
         this.setState({ refreshing: true })

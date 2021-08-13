@@ -37,8 +37,13 @@ class ListUsers extends Component {
     }
   }
 
+  componentWillUnmount() {
+    this.willFocusSubscription.remove()
+  }
+
   async componentDidMount() {
     await this.fetchUsers()
+    this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => await this.fetchUsers())
   }
 
   async fetchUsers(count) {

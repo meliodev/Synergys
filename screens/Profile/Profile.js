@@ -97,13 +97,19 @@ class Profile extends Component {
         }
     }
 
+    componentWillUnmount() {
+        this.willFocusSubscription.remove()
+    }
+
     //##GET
     async componentDidMount() {
         try {
             await this.fetchProfile()
 
-            if (this.isClient)
+            if (this.isClient) {
                 this.fetchClientProjects()
+                this.willFocusSubscription = this.props.navigation.addListener('willFocus', () => this.fetchClientProjects())
+            }
 
             // DC can view/add Coms goals
             if (this.userParam.roleId === 'com') {

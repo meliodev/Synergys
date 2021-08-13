@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:226695008961:android:984009f07a7086d804fa40",
+        "mobilesdk_app_id": "1:226695008961:android:dea197c7bf910ab204fa40",
         "android_client_info": {
-          "package_name": "com.synergys"
+          "package_name": "com.groupe.synergys"
         }
       },
       "oauth_client": [

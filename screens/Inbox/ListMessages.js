@@ -34,9 +34,13 @@ class ListMessages extends Component {
         }
     }
 
+    componentWillUnmount() {
+        this.willFocusListener.remove()
+    }
+
     async componentDidMount() {
         await this.fetchMessages()
-        this.props.navigation.addListener('willFocus', async () => {
+        this.willFocusListener = this.props.navigation.addListener('willFocus', async () => {
             await this.fetchMessages()
         })
     }

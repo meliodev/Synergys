@@ -153,6 +153,7 @@ class AuthLoadingScreen extends Component {
 
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
+
         const { currentUser } = firebase.auth()
         const { isConnected } = this.props.network
 
@@ -173,6 +174,7 @@ class AuthLoadingScreen extends Component {
           }
 
           //2. Set privilleges
+          console.log('fetching user privilleges...')
           const remotePermissions = await this.configurePrivileges(roleValue)
           if (!remotePermissions) {
             displayError({ message: errorMessages.appInit })
@@ -181,15 +183,17 @@ class AuthLoadingScreen extends Component {
           const action = { type: "SET_PERMISSIONS", value: remotePermissions }
           this.props.dispatch(action)
 
-          console.log('111111')
+          console.log('User privilleges fetched and set on redux state !')
+
           //3. Set processModel
+          console.log('Fetching process model...')
           const processModels = await this.fetchProcessModels()
           if (!processModels) {
             displayError({ message: errorMessages.appInit })
             return
           }
-
           setProcessModel(this, processModels)
+          console.log('Process models fetched and set on redux state !')
 
           this.updateProgress(90)
 
@@ -220,7 +224,7 @@ class AuthLoadingScreen extends Component {
           var { routeName, ...routeParams } = params
         }
 
-        //Notification link
+        //Dynamic link (notification)
         else if (initialNotification) {
           var { routeName, routeParams } = this.state
         }
