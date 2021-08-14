@@ -64,6 +64,7 @@ class ListMandatsMPR extends React.Component {
             MandatMPRId: item.id,
             autoGenPdf: true,
             docType: this.docType,
+            project: this.props.navigation.getParam('project', ''),
             DocumentId: this.props.navigation.getParam('DocumentId', ''),
             popCount: this.popCount,
             onGoBack: this.props.navigation.getParam('onGoBack', null)

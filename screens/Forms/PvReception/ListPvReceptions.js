@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { connect } from 'react-redux'
-import { faUser, faAddressCard, fal, faFileInvoice, faVial, faVials, faHandHoldingUsd, faSave } from '@fortawesome/pro-light-svg-icons'
+import { faUser, faAddressCard, fal, faFileInvoice, faVial, faVials, faHandHoldingUsd, faReceipt } from '@fortawesome/pro-light-svg-icons'
 
 import TwoTabs from '../../../components/TwoTabs'
 import SearchBar from '../../../components/SearchBar'
@@ -15,16 +15,16 @@ import * as theme from "../../../core/theme";
 import { constants } from "../../../core/constants";
 import ListFormsContainer from "../../../containers/ListFormsContainer";
 import { setStatusBarColor } from "../../../core/redux";
-import MandatSynergysItem from "../../../components/genForms/MandatSynergysItem";
+import PvReceptionItem from "../../../components/genForms/PvReceptionItem";
 
-class ListMandatsSynergys extends React.Component {
+class ListPvReceptions extends React.Component {
 
     constructor(props) {
         super(props)
         this.renderItem = this.renderItem.bind(this)
         this.onPressItem = this.onPressItem.bind(this)
 
-        this.titleText = this.props.navigation.getParam('titleText', 'Mandats Synergys')
+        this.titleText = this.props.navigation.getParam('titleText', 'PV Réception')
         this.isRoot = this.props.navigation.getParam('isRoot', true)
 
         this.project = this.props.navigation.getParam('project', undefined)
@@ -45,21 +45,21 @@ class ListMandatsSynergys extends React.Component {
 
     renderItem(item) {
         return (
-            <MandatSynergysItem
-                mandat={item}
+            <PvReceptionItem
+                pv={item}
                 onPress={() => this.onPressItem(item)}
-                applicantName={`${item.applicantFirstName} ${item.applicantLastName}`} />
+                projectOwner={`${item.projectOwner}`} />
         )
     }
 
     onPressItem(item) {
         if (this.isRoot)
-            this.props.navigation.navigate('CreateMandatSynergys', {
-                MandatSynergysId: item.id
+            this.props.navigation.navigate('CreatePvReception', {
+                PvReceptionId: item.id
             })
 
-        else this.props.navigation.navigate('CreateMandatSynergys', {
-            MandatSynergysId: item.id,
+        else this.props.navigation.navigate('CreatePvReception', {
+            PvReceptionId: item.id,
             autoGenPdf: true,
             docType: this.docType,
             project: this.props.navigation.getParam('project', ''),
@@ -72,25 +72,33 @@ class ListMandatsSynergys extends React.Component {
     render() {
         const { index, searchInput, showInput } = this.state
         const { isConnected } = this.props.network
-        const query = this.project ? db.collection('MandatsSynergys').where('project.id', '==', this.project.id) : db.collection('MandatsSynergys').orderBy('createdAt', 'desc')
-        const emptyListDesc = this.isRoot ? 'Appuyez sur le boutton "+" pour créer un mandat Synergys.' : "Veuillez créer un mandat Synergys à partir d'un nouveau formulaire."
+
+        const query = this.project ?
+            db.collection('PvReception').where('project.id', '==', this.project.id)
+            :
+            db.collection('PvReception').orderBy('createdAt', 'desc')
+
+        const emptyListDesc = this.isRoot ?
+            'Appuyez sur le boutton "+" pour créer un PV réception.'
+            :
+            "Veuillez créer un PV réception à partir d'un nouveau formulaire."
 
         return (
             <View style={{ flex: 1 }}>
                 <ListFormsContainer
-                    titleText="Mandats Synergys"
-                    collection='MandatsSynergys'
+                    titleText="PVs réception"
+                    collection='PvReception'
                     query={query}
-                    creationScreen="CreateMandatSynergys"
+                    creationScreen="CreatePvReception"
                     navigation={this.props.navigation}
                     renderItem={this.renderItem}
-                    countTitle="mandat"
+                    countTitle="PV"
                     KEYS_TO_FILTERS={['id']}
                     isRoot={this.isRoot}
                     emptyList={
                         <EmptyList
-                            icon={faSave}
-                            header='Aucun mandat Synergys'
+                            icon={faReceipt}
+                            header='Aucun PV réception'
                             description={emptyListDesc}
                             offLine={!isConnected}
                         />
@@ -110,7 +118,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(ListMandatsSynergys)
+export default connect(mapStateToProps)(ListPvReceptions)
 
 
 

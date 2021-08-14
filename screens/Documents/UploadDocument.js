@@ -649,11 +649,12 @@ class UploadDocument extends Component {
         const { type, project } = this.state
         this.toggleModal()
 
+        console.log(project, '**********************')
         const navParams = {
             autoGenPdf: true,
             docType: type,
             DocumentId: this.DocumentId,
-            project, //#test change from this.project to this.state.project (for filtering list of orders/simulations)
+            project,
             isConversion: false,
             onGoBack: this.getGenPdf
         }
@@ -688,7 +689,7 @@ class UploadDocument extends Component {
 
         else if (type === "PV réception") {
             var titleText = "Choix du formulaire"
-            var listScreen = "ListSimulations"
+            var listScreen = "ListPvReceptions"
             var creationScreen = "CreatePvReception"
             var popCount = index === 0 ? 2 : 1
         }

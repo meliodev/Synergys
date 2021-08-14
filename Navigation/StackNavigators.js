@@ -68,6 +68,7 @@ import CreateSimulation from '../screens/Forms/Simulations/CreateSimulation'
 import ListSimulations from '../screens/Forms/Simulations/ListSimulations'
 //PV réception
 import CreatePvReception from '../screens/Forms/PvReception/CreatePvReception'
+import ListPvReceptions from '../screens/Forms/PvReception/ListPvReceptions'
 //Mandat MPR
 import CreateMandatMPR from '../screens/Forms/MandatMaPrimeRenov/CreateMandatMPR'
 import ListMandatsMPR from '../screens/Forms/MandatMaPrimeRenov/ListMandatsMPR'
@@ -258,6 +259,10 @@ const ProfileStack = createStackNavigator({
     //PV reception
     CreatePvReception: {
         screen: CreatePvReception,
+        navigationOptions: hideHeader
+    },
+    ListPvReceptions: {
+        screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
 })
@@ -452,6 +457,10 @@ const ClientsManagementStack = createStackNavigator({
     //PV reception
     CreatePvReception: {
         screen: CreatePvReception,
+        navigationOptions: hideHeader
+    },
+    ListPvReceptions: {
+        screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
 })
@@ -799,6 +808,10 @@ const ProjectsStack = createStackNavigator({
         screen: CreatePvReception,
         navigationOptions: hideHeader
     },
+    ListPvReceptions: {
+        screen: ListPvReceptions,
+        navigationOptions: hideHeader
+    },
 })
 
 const DocumentsStack = createStackNavigator({
@@ -871,6 +884,10 @@ const DocumentsStack = createStackNavigator({
     //PV reception
     CreatePvReception: {
         screen: CreatePvReception,
+        navigationOptions: hideHeader
+    },
+    ListPvReceptions: {
+        screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
     //Profile screens

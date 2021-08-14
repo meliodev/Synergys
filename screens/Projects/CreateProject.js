@@ -803,8 +803,8 @@ class CreateProject extends Component {
                                         <MyInput
                                             label="Phase *"
                                             value={step + ' ' + state}
-                                            error={nameError}
-                                            errorText={nameError}
+                                            // error={nameError}
+                                            // errorText={nameError}
                                             multiline={true}
                                             editable={false}
                                         />

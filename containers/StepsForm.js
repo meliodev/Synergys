@@ -731,14 +731,15 @@ class StepsForm extends Component {
         if (!this.state.isEdit) {
             form.createdAt = moment().format()
             form.createdBy = this.props.currentUser
+            //Add project reference if we are on process context
+            if (this.project)
+                form.project = this.project
         }
 
         form.editedAt = moment().format()
         form.editedBy = this.props.currentUser
         form.deleted = false
-        //Add project reference if we are on process context
-        if (this.project)
-            form.project = this.project
+
         return form
     }
 

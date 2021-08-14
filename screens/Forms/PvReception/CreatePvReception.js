@@ -3,61 +3,65 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, } from 'react-native'
 import { faVials } from '@fortawesome/pro-duotone-svg-icons';
 
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import StepsForm from '../../../containers/StepsForm'
 import { CustomIcon, Button } from '../../../components/index'
 
-import { PvReceptionModel } from '../../../core/forms'
+import { pvReceptionModel } from '../../../core/forms'
 import { pvReceptionBase64, ficheEEBBase64 } from '../../../core/files'
 import { generatePdfForm, generatePvReception } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 
 const properties = [
-    "projectOwner",
-    "orderDate",
-    "acceptWorksReceptionDate",
-    "acceptReservesReceptionDate",
+    "acceptReception",
     "reservesNature",
-    "worksToExecute",
-    "timeLimitFromToday",
-    "madeIn",
-    "doneOn",
-    "clientName",
-    "installationAddress",
-    "phone",
-    "commissioningDate",
-    "appreciation",
-    "appreciationDate",
-    "signatoryName",
+    // "worksToExecute",
+    // "timeLimitFromToday",
+    // "madeIn",
+    // "doneOn",
+    // "clientName",
+    // "installationAddress",
+    // "phone",
+    // "commissioningDate",
+    // "appreciation",
+    // "appreciationDate",
+    // "signatoryName",
 ]
 
 const initialState = {
-    projectOwner: "",
-    orderDate: new Date(),
-    acceptWorksReceptionDate: new Date(),
-    acceptReservesReceptionDate: new Date(),
+    acceptReception: "",
     reservesNature: "",
-    worksToExecute: "",
-    timeLimitFromToday: "",
-    madeIn: "",
-    doneOn: new Date(),
-    clientName: "",
-    installationAddress: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
-    phone: "",
-    commissioningDate: new Date(),
-    appreciation: "",
-    appreciationDate: new Date(),
-    signatoryName: "",
+    // worksToExecute: "",
+    // timeLimitFromToday: "",
+    // madeIn: "",
+    // doneOn: new Date(),
+    // clientName: "",
+    // installationAddress: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+    // phone: "",
+    // commissioningDate: new Date(),
+    // appreciation: "",
+    // appreciationDate: new Date(),
+    // signatoryName: "",
 }
 
-class CreateSimulation extends Component {
+class CreatePvReception extends Component {
     constructor(props) {
         super(props)
 
         this.PvReceptionId = this.props.navigation.getParam('PvReceptionId', '')
+        this.project = this.props.navigation.getParam('project', null)
+        this.clientFullName = ""
+        this.billingDate = ""
+        if (this.project) {
+            this.clientFullName = this.project.client.fullName
+            this.billingDate = moment().format('DD/MM/YYYY') //Info not available: Billing date is registred only after filling Billing amount during the process
+        }
 
         this.state = {
-
         }
     }
 
@@ -68,6 +72,9 @@ class CreateSimulation extends Component {
     }
 
     render() {
+
+        const { clientFullName, billingDate } = this
+
         return (
             <StepsForm
                 titleText="Nouveau PV réception"
@@ -79,11 +86,10 @@ class CreateSimulation extends Component {
                 collection={"PvReception"}
                 //welcomeMessage={this.welcomeMessage}
                 steps={["1", "", "2", "", "3"]}
-                pages={PvReceptionModel}
-                originalPdfBase64={pvReceptionBase64}
-                generatePdf={generatePdfForm}
+                pages={pvReceptionModel({ clientFullName, billingDate })}
+                generatePdf={(formInputs) => generatePdfForm(formInputs, "PvReception", { clientFullName, billingDate })}
                 genButtonTitle="Générer un PV réception"
-                renderOverview={this.renderOverview}
+                fileName="PV Réception"
             />
         )
     }
@@ -128,4 +134,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default CreateSimulation
+export default CreatePvReception

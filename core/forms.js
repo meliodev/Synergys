@@ -1480,298 +1480,318 @@ export const mandatSynergysModel = [
     }
 ]
 
-export const PvReceptionModel = [
-    //---------------------------  Page 1
-    {//0
-        id: "projectOwner",
-        title: "",
-        fields: [
-            {
-                id: "projectOwner",
-                type: "textInput",
-                label: "Nom et prénom du maître d'ouvrage",
-                errorId: "projectOwnerError",
-                pdfConfig: { dx: -520, dy: - 155, pageIndex: 0 },
-                mendatory: true,
-            },
-        ],
-        stepIndex: 0,
-    },
-    // {//1
-    //     id: "orderDate",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "orderDate",
-    //             type: "datePicker",
-    //             label: "Commande en date du :",
-    //             errorId: "orderDateError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // { //2
-    //     id: "acceptReception",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "acceptReception",
-    //             label: "Travaux avec ou sans réserves ?",
-    //             type: "options",
-    //             items: [
-    //                 {
-    //                     label: 'Accepter la réception des travaux sans réserves',
-    //                     value: 'noReserves',
-    //                     icon: faQuestionCircle,
-    //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-    //                     rollBack: {
-    //                         fields: [
-    //                             { id: "acceptWorksReceptionDate", type: "date" },
-    //                         ]
-    //                     }
-    //                 },
-    //                 {
-    //                     label: 'Accepter la réception assortie de réserves',
-    //                     value: 'withReserves',
-    //                     icon: faQuestionCircle,
-    //                     pdfConfig: { dx: -395, dy: - 350, pageIndex: 3 },
-    //                     rollBack: {
-    //                         fields: [
-    //                             { id: "acceptReservesReceptionDate", type: "date" },
-    //                         ]
-    //                     }
-    //                 },
-    //             ],
-    //             errorId: "acceptReceptionError",
-    //             mendatory: true,
-    //         }
-    //     ]
-    // },
-    // {//3
-    //     id: "acceptWorksReceptionDate",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "acceptWorksReceptionDate",
-    //             type: "datePicker",
-    //             label: "Accepter la réception des travaux sans réserves à effet du:",
-    //             errorId: "acceptWorksReceptionDateError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             isConditional: true,
-    //             condition: { with: "acceptReception", values: ["noReserves"] },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//4
-    //     id: "acceptReservesReceptionDate",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "acceptReservesReceptionDate",
-    //             type: "datePicker",
-    //             label: "Accepter la réception assortie de réserves à effet du:",
-    //             errorId: "acceptReservesReceptionDateError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             isConditional: true,
-    //             condition: { with: "acceptReception", values: ["withReserves"] },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//5
-    //     id: "reservesNature",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "reservesNature",
-    //             type: "textInput",
-    //             label: "Nature des réserves",
-    //             errorId: "reservesNatureError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//6
-    //     id: "worksToExecute",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "worksToExecute",
-    //             type: "textInput",
-    //             label: "Travaux à exécuter",
-    //             errorId: "worksToExecuteError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//7
-    //     id: "timeLimitFromToday",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "timeLimitFromToday",
-    //             type: "textInput",
-    //             label: "Délai imparti à compter de ce jour",
-    //             errorId: "timeLimitFromTodayError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//8
-    //     id: "madeIn",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "madeIn",
-    //             type: "textInput",
-    //             label: "Fait à:",
-    //             errorId: "madeInError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//9
-    //     id: "doneOn",
-    //     title: "",
-    //     fields: [
-    //         {
-    //             id: "doneOn",
-    //             type: "datePicker",
-    //             label: "Fait le:",
-    //             errorId: "doneOnError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // //----------------------- PAGE2
-    // {//1
-    //     id: "clientName",
-    //     title: "Coordonnées du chantier",
-    //     fields: [
-    //         {
-    //             id: "clientName",
-    //             type: "textInput",
-    //             label: "Nom et prénom du client",
-    //             errorId: "clientNameError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // {//2
-    //     id: "installationAddress",
-    //     title: "Coordonnées du chantier",
-    //     fields: [
-    //         {
-    //             id: "installationAddress",
-    //             type: "address",
-    //             label: "Adresse complète de l'installation",
-    //             errorId: "installationAddressError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         }
-    //     ]
-    // },
-    // {//3
-    //     id: "clientPhone",
-    //     title: "Coordonnées du chantier",
-    //     fields: [
-    //         {
-    //             id: "phone",
-    //             type: "textInput",
-    //             mask: "[00][00][00][00][00]",
-    //             isNumeric: true,
-    //             label: "Téléphone",
-    //             errorId: "phoneError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -521, dy: - 243, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } },
-    //             mendatory: true,
-    //         },
-    //     ]
-    // },
-    // {//4
-    //     id: "commissioningDate",
-    //     title: "Coordonnées du chantier",
-    //     fields: [
-    //         {
-    //             id: "commissioningDate",
-    //             type: "datePicker",
-    //             label: "Date de mise en service",
-    //             errorId: "commissioningDateError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    // { //5
-    //     id: "appreciation",
-    //     title: "Appréciation de la prestation",
-    //     fields: [
-    //         {
-    //             id: "appreciation",
-    //             label: "Qualité globale de la prestation",
-    //             type: "options",
-    //             items: [
-    //                 {
-    //                     label: 'Très satisfaisante',
-    //                     value: 'verySatisfaying',
-    //                     icon: faQuestionCircle,
-    //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-    //                 },
-    //                 {
-    //                     label: 'Satisfaisante',
-    //                     value: 'satisfaying',
-    //                     icon: faQuestionCircle,
-    //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-    //                 },
-    //                 {
-    //                     label: 'Peu satisfaisante',
-    //                     value: 'littleSatisfaying',
-    //                     icon: faQuestionCircle,
-    //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-    //                 },
-    //                 {
-    //                     label: 'Insatisfaisante',
-    //                     value: 'unSatisfaying',
-    //                     icon: faQuestionCircle,
-    //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-    //                 },
-    //             ],
-    //             mendatory: true,
-    //         },
-    //     ]
-    // },
-    // {//6
-    //     id: "appreciationDate",
-    //     title: "Appréciation de la prestation",
-    //     fields: [
-    //         {
-    //             id: "appreciationDate",
-    //             type: "datePicker",
-    //             label: "Date de l'appréciation",
-    //             errorId: "appreciationDateError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //         {
-    //             id: "signatoryName",
-    //             type: "textInput",
-    //             label: "Nom du signataire",
-    //             errorId: "signatoryNameError",
-    //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-    //             mendatory: true,
-    //         },
-    //     ],
-    // },
-    {
-        id: "submit",
-        fields: []
-    }
-]
+export const pvReceptionModel = (params) => {
+
+    const { clientFullName, billingDate } = params
+
+    const model = [
+        //---------------------------  Page 1
+        //autogen
+        { //2
+            id: "acceptReception",
+            title: "",
+            fields: [
+                {
+                    id: "acceptReception",
+                    label: "Travaux avec ou sans réserves ?",
+                    type: "options",
+                    items: [
+                        {
+                            label: 'Accepter la réception des travaux sans réserves',
+                            value: 'Sans réserves',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -492, dy: - 226, pageIndex: 0 },
+                            rollBack: {
+                                fields: [
+                                    { id: "acceptWorksReceptionDate", type: "date" },
+                                ]
+                            }
+                        },
+                        {
+                            label: 'Accepter la réception assortie de réserves',
+                            value: 'Avec réserves',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -492, dy: - 250, pageIndex: 0 },
+                            rollBack: {
+                                fields: [
+                                    { id: "acceptReservesReceptionDate", type: "date" },
+                                ]
+                            }
+                        },
+                    ],
+                    errorId: "acceptReceptionError",
+                    mendatory: true,
+                }
+            ]
+        },
+        {
+            id: '',
+            title: '',
+            fields: [
+                //AUTO-GEN
+                {
+                    id: "projectOwner",
+                    type: "autogen",
+                    value: clientFullName,
+                    pdfConfig: { dx: -423, dy: - 132, pageIndex: 0 }
+                },
+                {
+                    id: "billingDate",
+                    type: "autogen",
+                    value: billingDate,
+                    pdfConfig: { dx: -335, dy: - 172, pageIndex: 0 }
+                },
+                {
+                    id: "reserveDate1",
+                    type: "autogen",
+                    value: moment().format('DD/MM/YYYY'),
+                    pdfConfig: { dx: -174, dy: - 225, pageIndex: 0 },
+                    isConditional: true,
+                    condition: { with: "acceptReception", values: ["Sans réserves"] },
+                },
+                {
+                    id: "reserveDate2",
+                    type: "autogen",
+                    value: moment().format('DD/MM/YYYY'),
+                    pdfConfig: { dx: -200, dy: - 249, pageIndex: 0 },
+                    isConditional: true,
+                    condition: { with: "acceptReception", values: ["Avec réserves"] },
+                },
+                {
+                    id: "todayDate1",
+                    type: "autogen",
+                    value: moment().format('DD/MM/YYYY'),
+                    pdfConfig: { dx: -295, dy: - 547, pageIndex: 0 }
+                },
+            ]
+        },
+        // {//3
+        //     id: "acceptWorksReceptionDate",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "acceptWorksReceptionDate",
+        //             type: "datePicker",
+        //             label: "Accepter la réception des travaux sans réserves à effet du:",
+        //             errorId: "acceptWorksReceptionDateError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             isConditional: true,
+        //             condition: { with: "acceptReception", values: ["noReserves"] },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // {//4
+        //     id: "acceptReservesReceptionDate",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "acceptReservesReceptionDate",
+        //             type: "datePicker",
+        //             label: "Accepter la réception assortie de réserves à effet du:",
+        //             errorId: "acceptReservesReceptionDateError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             isConditional: true,
+        //             condition: { with: "acceptReception", values: ["withReserves"] },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        {//5
+            id: "reservesNature",
+            title: "",
+            fields: [
+                {
+                    id: "reservesNature",
+                    type: "textInput",
+                    label: "Nature des réserves",
+                    errorId: "reservesNatureError",
+                    pdfConfig: { dx: -335, dy: - 267, pageIndex: 0 },
+                    mendatory: true,
+                },
+            ],
+        },
+        // {//6
+        //     id: "worksToExecute",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "worksToExecute",
+        //             type: "textInput",
+        //             label: "Travaux à exécuter",
+        //             errorId: "worksToExecuteError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // {//7
+        //     id: "timeLimitFromToday",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "timeLimitFromToday",
+        //             type: "textInput",
+        //             label: "Délai imparti à compter de ce jour",
+        //             errorId: "timeLimitFromTodayError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // {//8
+        //     id: "madeIn",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "madeIn",
+        //             type: "textInput",
+        //             label: "Fait à:",
+        //             errorId: "madeInError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // {//9
+        //     id: "doneOn",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "doneOn",
+        //             type: "datePicker",
+        //             label: "Fait le:",
+        //             errorId: "doneOnError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // //----------------------- PAGE2
+        // {//1
+        //     id: "clientName",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "clientName",
+        //             type: "textInput",
+        //             label: "Nom et prénom du client",
+        //             errorId: "clientNameError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // {//2
+        //     id: "installationAddress",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "installationAddress",
+        //             type: "address",
+        //             label: "Adresse complète de l'installation",
+        //             errorId: "installationAddressError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         }
+        //     ]
+        // },
+        // {//3
+        //     id: "clientPhone",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "phone",
+        //             type: "textInput",
+        //             mask: "[00][00][00][00][00]",
+        //             isNumeric: true,
+        //             label: "Téléphone",
+        //             errorId: "phoneError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -521, dy: - 243, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } },
+        //             mendatory: true,
+        //         },
+        //     ]
+        // },
+        // {//4
+        //     id: "commissioningDate",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "commissioningDate",
+        //             type: "datePicker",
+        //             label: "Date de mise en service",
+        //             errorId: "commissioningDateError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // { //5
+        //     id: "appreciation",
+        //     title: "Appréciation de la prestation",
+        //     fields: [
+        //         {
+        //             id: "appreciation",
+        //             label: "Qualité globale de la prestation",
+        //             type: "options",
+        //             items: [
+        //                 {
+        //                     label: 'Très satisfaisante',
+        //                     value: 'verySatisfaying',
+        //                     icon: faQuestionCircle,
+        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
+        //                 },
+        //                 {
+        //                     label: 'Satisfaisante',
+        //                     value: 'satisfaying',
+        //                     icon: faQuestionCircle,
+        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
+        //                 },
+        //                 {
+        //                     label: 'Peu satisfaisante',
+        //                     value: 'littleSatisfaying',
+        //                     icon: faQuestionCircle,
+        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
+        //                 },
+        //                 {
+        //                     label: 'Insatisfaisante',
+        //                     value: 'unSatisfaying',
+        //                     icon: faQuestionCircle,
+        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
+        //                 },
+        //             ],
+        //             mendatory: true,
+        //         },
+        //     ]
+        // },
+        // {//6
+        //     id: "appreciationDate",
+        //     title: "Appréciation de la prestation",
+        //     fields: [
+        //         {
+        //             id: "appreciationDate",
+        //             type: "datePicker",
+        //             label: "Date de l'appréciation",
+        //             errorId: "appreciationDateError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //         {
+        //             id: "signatoryName",
+        //             type: "textInput",
+        //             label: "Nom du signataire",
+        //             errorId: "signatoryNameError",
+        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        {
+            id: "submit",
+            fields: []
+        }
+    ]
+
+    return model
+}

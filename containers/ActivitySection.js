@@ -44,7 +44,7 @@ const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navigation,
 
                     {showEditedAt &&
                         <MyInput
-                            label="Dernière mise à jour"
+                            label="Date de mise à jour"
                             returnKeyType="done"
                             value={moment(editedAt).format('lll')}
                             editable={false}

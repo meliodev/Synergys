@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, errorMessages, roles } from './constants'
-import { ficheEEBModel, mandatMPRModel, mandatSynergysModel, PvReceptionModel } from "./forms";
+import { ficheEEBModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -509,12 +509,12 @@ export const chunk = (str, n) => {
   return ret
 }
 
-export const generatePdfForm = async (formInputs, pdfType) => {
+export const generatePdfForm = async (formInputs, pdfType, params) => {
   try {
 
     if (pdfType === "PvReception") {
       var originalPdfBase64 = pvReceptionBase64
-      var formPages = PvReceptionModel
+      var formPages = pvReceptionModel(params)
     }
     else if (pdfType === "Simulations") {
       var originalPdfBase64 = ficheEEBBase64
@@ -656,19 +656,25 @@ export const generatePdfForm = async (formInputs, pdfType) => {
               break;
 
             case "autogen":
+              text = field.value
               if (field.pdfConfig.spaces) {
-                text = field.value
                 const { afterEach, str } = field.pdfConfig.spaces
                 text = chunk(text, afterEach).join(str)
               }
-              pages[field.pdfConfig.pageIndex].drawText(text,
+
+              const condtionUnsatisfied = field.isConditional && !field.condition.values.includes(formInputs[field.condition.with])
+              if (condtionUnsatisfied)
+                console.log("Skip drawing................................")
+
+              else pages[field.pdfConfig.pageIndex].drawText(text,
                 {
                   x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
                   y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
                   size: caption,
                   font: timesRomanFont,
                   color: colors.black,
-                })
+                }
+              )
               break;
 
             default: break;

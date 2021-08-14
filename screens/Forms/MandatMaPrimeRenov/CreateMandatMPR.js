@@ -39,6 +39,7 @@ const initialState = {
     addressCode: "",
     commune: "",
     email: "",
+    phone: "",
     createdIn: "",
 }
 
@@ -48,7 +49,6 @@ class CreateMandatMPR extends Component {
         this.MandatMPRId = this.props.navigation.getParam('MandatMPRId', '')
 
         this.state = {
-
         }
     }
 
