@@ -19,33 +19,31 @@ import * as theme from '../../../core/theme'
 const properties = [
     "acceptReception",
     "reservesNature",
-    // "worksToExecute",
-    // "timeLimitFromToday",
-    // "madeIn",
-    // "doneOn",
-    // "clientName",
-    // "installationAddress",
-    // "phone",
+    "worksToExecute",
+    "timeLimitFromToday",
+    "madeIn",
+    "clientName",
+    "installationAddress",
+    "phone",
     // "commissioningDate",
-    // "appreciation",
+    "appreciation",
     // "appreciationDate",
-    // "signatoryName",
+    "signatoryName",
 ]
 
 const initialState = {
     acceptReception: "",
     reservesNature: "",
-    // worksToExecute: "",
-    // timeLimitFromToday: "",
-    // madeIn: "",
-    // doneOn: new Date(),
-    // clientName: "",
-    // installationAddress: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
-    // phone: "",
+    worksToExecute: "",
+    timeLimitFromToday: "",
+    madeIn: "",
+    clientName: "",
+    installationAddress: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+    phone: "",
     // commissioningDate: new Date(),
-    // appreciation: "",
+    appreciation: "",
     // appreciationDate: new Date(),
-    // signatoryName: "",
+    signatoryName: "",
 }
 
 class CreatePvReception extends Component {
@@ -85,7 +83,7 @@ class CreatePvReception extends Component {
                 DocId={this.PvReceptionId}
                 collection={"PvReception"}
                 //welcomeMessage={this.welcomeMessage}
-                steps={["1", "", "2", "", "3"]}
+                steps={["RÉSERVES", "", "CHANTIER", "", "INSTALLATIONS"]}
                 pages={pvReceptionModel({ clientFullName, billingDate })}
                 generatePdf={(formInputs) => generatePdfForm(formInputs, "PvReception", { clientFullName, billingDate })}
                 genButtonTitle="Générer un PV réception"

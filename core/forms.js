@@ -1486,7 +1486,6 @@ export const pvReceptionModel = (params) => {
 
     const model = [
         //---------------------------  Page 1
-        //autogen
         { //2
             id: "acceptReception",
             title: "",
@@ -1524,11 +1523,11 @@ export const pvReceptionModel = (params) => {
                 }
             ]
         },
+        //AUTO-GEN
         {
             id: '',
             title: '',
             fields: [
-                //AUTO-GEN
                 {
                     id: "projectOwner",
                     type: "autogen",
@@ -1563,40 +1562,41 @@ export const pvReceptionModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -295, dy: - 547, pageIndex: 0 }
                 },
+                {
+                    id: "appreciationDate",
+                    type: "autogen",
+                    value: moment().format('DD/MM/YYYY'),
+                    pdfConfig: { dx: -500, dy: -747, pageIndex: 1 },
+                },
+                {
+                    id: "dayNow",
+                    type: "autogen",
+                    value: moment().format('DD'),
+                    pdfConfig: {
+                        dx: -182, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
+                        mendatory: true,
+                    }
+                },
+                {
+                    id: "monthNow",
+                    type: "autogen",
+                    value: moment().format('MM'),
+                    pdfConfig: {
+                        dx: -148, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
+                        mendatory: true,
+                    }
+                },
+                {
+                    id: "yearNow",
+                    type: "autogen",
+                    value: moment().format('YYYY'),
+                    pdfConfig: {
+                        dx: -115, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
+                        mendatory: true,
+                    }
+                },
             ]
         },
-        // {//3
-        //     id: "acceptWorksReceptionDate",
-        //     title: "",
-        //     fields: [
-        //         {
-        //             id: "acceptWorksReceptionDate",
-        //             type: "datePicker",
-        //             label: "Accepter la réception des travaux sans réserves à effet du:",
-        //             errorId: "acceptWorksReceptionDateError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             isConditional: true,
-        //             condition: { with: "acceptReception", values: ["noReserves"] },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // {//4
-        //     id: "acceptReservesReceptionDate",
-        //     title: "",
-        //     fields: [
-        //         {
-        //             id: "acceptReservesReceptionDate",
-        //             type: "datePicker",
-        //             label: "Accepter la réception assortie de réserves à effet du:",
-        //             errorId: "acceptReservesReceptionDateError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             isConditional: true,
-        //             condition: { with: "acceptReception", values: ["withReserves"] },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
         {//5
             id: "reservesNature",
             title: "",
@@ -1606,187 +1606,151 @@ export const pvReceptionModel = (params) => {
                     type: "textInput",
                     label: "Nature des réserves",
                     errorId: "reservesNatureError",
-                    pdfConfig: { dx: -335, dy: - 267, pageIndex: 0 },
+                    pdfConfig: { dx: -335, dy: - 267, pageIndex: 0 }, //#task: split in 4lines: make a split lenght pattern
                     mendatory: true,
                 },
             ],
         },
-        // {//6
-        //     id: "worksToExecute",
-        //     title: "",
-        //     fields: [
-        //         {
-        //             id: "worksToExecute",
-        //             type: "textInput",
-        //             label: "Travaux à exécuter",
-        //             errorId: "worksToExecuteError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // {//7
-        //     id: "timeLimitFromToday",
-        //     title: "",
-        //     fields: [
-        //         {
-        //             id: "timeLimitFromToday",
-        //             type: "textInput",
-        //             label: "Délai imparti à compter de ce jour",
-        //             errorId: "timeLimitFromTodayError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // {//8
-        //     id: "madeIn",
-        //     title: "",
-        //     fields: [
-        //         {
-        //             id: "madeIn",
-        //             type: "textInput",
-        //             label: "Fait à:",
-        //             errorId: "madeInError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // {//9
-        //     id: "doneOn",
-        //     title: "",
-        //     fields: [
-        //         {
-        //             id: "doneOn",
-        //             type: "datePicker",
-        //             label: "Fait le:",
-        //             errorId: "doneOnError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // //----------------------- PAGE2
-        // {//1
-        //     id: "clientName",
-        //     title: "Coordonnées du chantier",
-        //     fields: [
-        //         {
-        //             id: "clientName",
-        //             type: "textInput",
-        //             label: "Nom et prénom du client",
-        //             errorId: "clientNameError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // {//2
-        //     id: "installationAddress",
-        //     title: "Coordonnées du chantier",
-        //     fields: [
-        //         {
-        //             id: "installationAddress",
-        //             type: "address",
-        //             label: "Adresse complète de l'installation",
-        //             errorId: "installationAddressError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         }
-        //     ]
-        // },
-        // {//3
-        //     id: "clientPhone",
-        //     title: "Coordonnées du chantier",
-        //     fields: [
-        //         {
-        //             id: "phone",
-        //             type: "textInput",
-        //             mask: "[00][00][00][00][00]",
-        //             isNumeric: true,
-        //             label: "Téléphone",
-        //             errorId: "phoneError",
-        //             mendatory: true,
-        //             pdfConfig: { dx: -521, dy: - 243, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } },
-        //             mendatory: true,
-        //         },
-        //     ]
-        // },
-        // {//4
-        //     id: "commissioningDate",
-        //     title: "Coordonnées du chantier",
-        //     fields: [
-        //         {
-        //             id: "commissioningDate",
-        //             type: "datePicker",
-        //             label: "Date de mise en service",
-        //             errorId: "commissioningDateError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3, spaces: { afterEach: 2, str: '          ' } },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
-        // { //5
-        //     id: "appreciation",
-        //     title: "Appréciation de la prestation",
-        //     fields: [
-        //         {
-        //             id: "appreciation",
-        //             label: "Qualité globale de la prestation",
-        //             type: "options",
-        //             items: [
-        //                 {
-        //                     label: 'Très satisfaisante',
-        //                     value: 'verySatisfaying',
-        //                     icon: faQuestionCircle,
-        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-        //                 },
-        //                 {
-        //                     label: 'Satisfaisante',
-        //                     value: 'satisfaying',
-        //                     icon: faQuestionCircle,
-        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-        //                 },
-        //                 {
-        //                     label: 'Peu satisfaisante',
-        //                     value: 'littleSatisfaying',
-        //                     icon: faQuestionCircle,
-        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-        //                 },
-        //                 {
-        //                     label: 'Insatisfaisante',
-        //                     value: 'unSatisfaying',
-        //                     icon: faQuestionCircle,
-        //                     pdfConfig: { dx: -473, dy: - 350, pageIndex: 3 },
-        //                 },
-        //             ],
-        //             mendatory: true,
-        //         },
-        //     ]
-        // },
-        // {//6
-        //     id: "appreciationDate",
-        //     title: "Appréciation de la prestation",
-        //     fields: [
-        //         {
-        //             id: "appreciationDate",
-        //             type: "datePicker",
-        //             label: "Date de l'appréciation",
-        //             errorId: "appreciationDateError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //         {
-        //             id: "signatoryName",
-        //             type: "textInput",
-        //             label: "Nom du signataire",
-        //             errorId: "signatoryNameError",
-        //             pdfConfig: { dx: -520, dy: - 155, pageIndex: 3 },
-        //             mendatory: true,
-        //         },
-        //     ],
-        // },
+        {//6
+            id: "worksToExecute",
+            title: "",
+            fields: [
+                {
+                    id: "worksToExecute",
+                    type: "textInput",
+                    label: "Travaux à exécuter",
+                    errorId: "worksToExecuteError",
+                    pdfConfig: { dx: -337, dy: - 348, pageIndex: 0 },
+                    mendatory: true,
+                },
+            ],
+        },
+        {//7
+            id: "timeLimitFromToday",
+            title: "",
+            fields: [
+                {
+                    id: "timeLimitFromToday",
+                    type: "textInput",
+                    label: "Délai imparti à compter de ce jour",
+                    errorId: "timeLimitFromTodayError",
+                    pdfConfig: { dx: -265, dy: - 428, pageIndex: 0 },
+                    mendatory: true,
+                },
+            ],
+        },
+        {//8
+            id: "madeIn",
+            title: "",
+            fields: [
+                {
+                    id: "madeIn",
+                    type: "textInput",
+                    label: "Fait à:",
+                    errorId: "madeInError",
+                    pdfConfig: { dx: -452, dy: - 547, pageIndex: 0 },
+                    mendatory: true,
+                },
+            ],
+        },
+        //----------------------- PAGE2
+        {//1
+            id: "clientName",
+            title: "Coordonnées du chantier",
+            fields: [
+                {
+                    id: "clientName",
+                    type: "textInput",
+                    label: "Nom et prénom du client",
+                    errorId: "clientNameError",
+                    pdfConfig: { dx: -430, dy: - 239, pageIndex: 1 },
+                    mendatory: true,
+                },
+            ],
+        },
+        {//2
+            id: "installationAddress",
+            title: "Coordonnées du chantier",
+            fields: [
+                {
+                    id: "installationAddress",
+                    type: "address",
+                    label: "Adresse complète de l'installation",
+                    errorId: "installationAddressError",
+                    pdfConfig: { dx: -393, dy: - 262, pageIndex: 1 },
+                    mendatory: true,
+                }
+            ]
+        },
+        {//3
+            id: "clientPhone",
+            title: "Coordonnées du chantier",
+            fields: [
+                {
+                    id: "phone",
+                    type: "textInput",
+                    mask: "[00][00][00][00][00]",
+                    isNumeric: true,
+                    label: "Téléphone",
+                    errorId: "phoneError",
+                    mendatory: true,
+                    pdfConfig: { dx: -450, dy: - 314, pageIndex: 1, spaces: { afterEach: 2, str: '          ' } }, //task: make spacing pattern to be more dynamic
+                    mendatory: true,
+                },
+            ]
+        },
+        { //5
+            id: "appreciation",
+            title: "Appréciation de la prestation",
+            fields: [
+                {
+                    id: "appreciation",
+                    label: "Qualité globale de la prestation",
+                    type: "options",
+                    items: [
+                        {
+                            label: 'Très satisfaisante',
+                            value: 'Très satisfaisante',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -340, dy: - 723, pageIndex: 1, squareSize: 10 },
+                        },
+                        {
+                            label: 'Satisfaisante',
+                            value: 'Satisfaisante',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -257, dy: - 723, pageIndex: 1, squareSize: 12 },
+                        },
+                        {
+                            label: 'Peu satisfaisante',
+                            value: 'Peu satisfaisante',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -176, dy: - 723, pageIndex: 1, squareSize: 12 },
+                        },
+                        {
+                            label: 'Insatisfaisante',
+                            value: 'Insatisfaisante',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -94, dy: - 723, pageIndex: 1, squareSize: 12 },
+                        },
+                    ],
+                    mendatory: true,
+                },
+            ]
+        },
+        {//6
+            id: "appreciationDate",
+            title: "Appréciation de la prestation",
+            fields: [
+                {
+                    id: "signatoryName",
+                    type: "textInput",
+                    label: "Nom du signataire",
+                    errorId: "signatoryNameError",
+                    pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
+                    mendatory: true,
+                },
+            ],
+        },
         {
             id: "submit",
             fields: []

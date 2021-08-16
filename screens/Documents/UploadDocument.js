@@ -62,7 +62,7 @@ const genFicheEEBSources = [
 ]
 
 const genFormSources = [
-    { label: 'Un formulaire existant existante', value: 'oldForm', icon: faFileSearch },
+    { label: 'Un formulaire existant', value: 'oldForm', icon: faFileSearch },
     { label: 'Un nouveau formulaire', value: 'newForm', icon: faFilePlus },
 ]
 
@@ -649,7 +649,6 @@ class UploadDocument extends Component {
         const { type, project } = this.state
         this.toggleModal()
 
-        console.log(project, '**********************')
         const navParams = {
             autoGenPdf: true,
             docType: type,

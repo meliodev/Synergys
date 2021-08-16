@@ -592,13 +592,10 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
               else {
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
-                console.log('.......', field.id, field.items[index].pdfConfig)
-
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   positions.push({ dx, dy })
                 }
-
               }
 
               for (const position of positions) {
@@ -664,9 +661,22 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
               const condtionUnsatisfied = field.isConditional && !field.condition.values.includes(formInputs[field.condition.with])
               if (condtionUnsatisfied)
-                console.log("Skip drawing................................")
+                console.log("Skip drawing text..")
 
               else pages[field.pdfConfig.pageIndex].drawText(text,
+                {
+                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
+                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
+                  size: caption,
+                  font: timesRomanFont,
+                  color: colors.black,
+                }
+              )
+              break;
+
+            case "address":
+              text = formInputs[field.id].description
+              pages[field.pdfConfig.pageIndex].drawText(text,
                 {
                   x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
                   y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,

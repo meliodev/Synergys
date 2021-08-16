@@ -1105,8 +1105,13 @@ class StepsForm extends Component {
                                         var values = form[field.id] === false ? "Oui" : "Non"
                                     }
 
+                                    //Address field
+                                    else if (form[field.id].description) {
+                                        var values = form[field.id].description
+                                    }
+
                                     //Array fields
-                                    else if (form[field.id] !== []) {
+                                    else if (Array.isArray(form[field.id]) && form[field.id] !== []) {
                                         var values = ""
                                         var values = form[field.id].join(', ')
                                     }
@@ -1115,7 +1120,10 @@ class StepsForm extends Component {
                                 if (values)
                                     return (
                                         <TouchableOpacity
-                                            onPress={() => this.setState({ pageIndex: index, readOnly: false, submitted: false })}
+                                            onPress={() => {
+                                                if (field.type === "autogen") return
+                                                this.setState({ pageIndex: index, readOnly: false, submitted: false })
+                                            }}
                                             style={styles.overviewRow}>
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
@@ -1388,6 +1396,7 @@ const styles = StyleSheet.create({
         height: constants.ScreenHeight * 0.93,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
         borderTopRightRadius: constants.ScreenWidth * 0.03,
+        paddingBottom: 70,
         backgroundColor: '#fff'
     },
     scrollableModalContent1: {
