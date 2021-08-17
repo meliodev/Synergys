@@ -33,11 +33,13 @@ const properties = [
     "phoneSite",
     "emailSite",
     "financingAids",
+
+    "project",
     "createdAt",
     "createdBy",
     "editedAt",
     "editedBy",
-    "isSubmitted",
+    "isSubmitted" //used to tag drafts (not submitted)
 ]
 
 const initialState = {

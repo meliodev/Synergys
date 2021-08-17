@@ -213,6 +213,14 @@ export const countDown = async (ms) => {
   })
 }
 
+export const arrayIntersection = (obj1, obj2) => {
+  const arr1 = Array.isArray(obj1) ? obj1 : [obj1] //Convert to array
+  const arr2 = Array.isArray(obj2) ? obj2 : [obj2] //Convert to array
+  const filteredArray = arr2.filter(value => arr1.includes(value))
+  const isIntersection = filteredArray.length > 0
+  return isIntersection
+}
+
 export const setAttachmentIcon = (type) => {
 
   switch (type) {
@@ -581,7 +589,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
             case "options":
 
-              if (field.isMultiOptions) {
+              if (field.isMultiOptions || field.isStepMultiOptions) {
                 for (const item of field.items) {
                   if (!item.skip && formInputs[field.id].includes(item.value)) {
                     const { dx, dy } = item.pdfConfig
@@ -591,7 +599,10 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               }
 
               else {
+                console.log('.888', formInputs[field.id], field.id)
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
+                console.log('index???', index)
+
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   positions.push({ dx, dy })
@@ -625,7 +636,10 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               }
 
               else { //Picker = Options
+                console.log('.........', formInputs[field.id], field.id)
+
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
+              console.log('index:::', index)
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   var pageIndex = field.items[index].pdfConfig.pageIndex

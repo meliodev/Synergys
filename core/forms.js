@@ -1520,7 +1520,7 @@ export const pvReceptionModel = (params) => {
                     ],
                     errorId: "acceptReceptionError",
                     mendatory: true,
-                }
+                },
             ]
         },
         //AUTO-GEN
@@ -1691,7 +1691,7 @@ export const pvReceptionModel = (params) => {
                     type: "textInput",
                     mask: "[00][00][00][00][00]",
                     isNumeric: true,
-                    label: "Téléphone",
+                    label: "Téléphone du client",
                     errorId: "phoneError",
                     mendatory: true,
                     pdfConfig: { dx: -450, dy: - 314, pageIndex: 1, spaces: { afterEach: 2, str: '          ' } }, //task: make spacing pattern to be more dynamic
@@ -1699,6 +1699,424 @@ export const pvReceptionModel = (params) => {
                 },
             ]
         },
+        //********************************* INSTALLATIONS
+        { //Inst1
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "Installations",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Chauffe‐eau solaire individuel',
+                            value: 'Chauffe‐eau solaire individuel',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 382, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: { fields: [{ id: "solarWaterHeaterSensorSurface", type: "string" }] }
+                        },
+                    ],
+                },
+                {
+                    id: "solarWaterHeaterSensorSurface",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Surface du capteur (en m²)",
+                    errorId: "solarWaterHeaterSensorSurfaceError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Chauffe‐eau solaire individuel"] },
+                    pdfConfig: { dx: -160, dy: - 380, pageIndex: 1 },
+                    mendatory: true,
+                },
+            ]
+        },
+        { //Inst2
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Système solaire combiné',
+                            value: 'Système solaire combiné',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 405, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: { fields: [{ id: "combinedSolarSystemSensorSurface", type: "string" }] }
+                        },
+                    ],
+                },
+                {
+                    id: "combinedSolarSystemSensorSurface",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Surface du capteur (en m²)",
+                    errorId: "combinedSolarSystemSensorSurfaceError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Système solaire combiné"] },
+                    pdfConfig: { dx: -160, dy: - 403, pageIndex: 1 },
+                    mendatory: true,
+                },
+            ]
+        },
+        { //Inst3
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Solaire thermique collectif (ECS)',
+                            value: 'Solaire thermique collectif (ECS)',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 428, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: { fields: [{ id: "collectiveSolarThermalSensorSurface", type: "string" }] }
+                        },
+                    ],
+                },
+                {
+                    id: "collectiveSolarThermalSensorSurface",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Surface du capteur (en m²)",
+                    errorId: "collectiveSolarThermalSensorSurfaceError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Solaire thermique collectif (ECS)"] },
+                    pdfConfig: { dx: -160, dy: - 426, pageIndex: 1 },
+                    mendatory: true,
+                },
+            ]
+        },
+        { //Inst4
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Chauffage au bois',
+                            value: 'Chauffage au bois',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 449, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: {
+                                fields: [
+                                    { id: "woodHeatingPower", type: "string" },
+                                    { id: "woodHeatingDeviceType", type: "string" }
+                                ]
+                            }
+                        },
+                    ],
+                },
+                {
+                    id: "woodHeatingPower",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Puissance (en kW)",
+                    errorId: "woodHeatingPowerError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Chauffage au bois"] },
+                    pdfConfig: { dx: -190, dy: - 447, pageIndex: 1 },
+                    mendatory: true,
+                },
+                {
+                    id: "woodHeatingDeviceType",
+                    type: "picker",
+                    items: [
+                        { label: "Type d'appareil", value: "", pdfConfig: { skip: true } },
+                        { label: "Poêle hydraulique", value: "Poêle hydraulique", pdfConfig: { dx: -545, dy: - 475, pageIndex: 1 } },
+                        { label: "Poêle indépendant", value: "Poêle indépendant", pdfConfig: { dx: -458, dy: - 475, pageIndex: 1 } },
+                        { label: "Insert", value: "Insert", pdfConfig: { dx: -367, dy: - 475, pageIndex: 1 } },
+                        { label: "Chaudière manuelle (bûche)", value: "Chaudière manuelle (bûche)", pdfConfig: { dx: -333, dy: - 475, pageIndex: 1 } },
+                        { label: "Chaudière automatique (granulé, pellet)", value: "Chaudière automatique (granulé, pellet)", pdfConfig: { dx: -210, dy: - 475, pageIndex: 1 } },
+                    ],
+                    label: "Type d’appareil",
+                    mendatory: true,
+                    errorId: "woodHeatingDeviceTypeError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Chauffage au bois"] },
+                },
+            ]
+        },
+        { //Inst5
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Générateur photovoltaïque raccordé au réseau',
+                            value: 'Générateur photovoltaïque raccordé au réseau',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 495, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: {
+                                fields: [
+                                    { id: "photovoltaicPower", type: "string" },
+                                    { id: "photovoltaicWorksType", type: "string" }
+                                ]
+                            }
+                        },
+                    ],
+                },
+                {
+                    id: "photovoltaicPower",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Puissance (en kW)",
+                    errorId: "photovoltaicPowerError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Générateur photovoltaïque raccordé au réseau"] },
+                    pdfConfig: { dx: -190, dy: - 493, pageIndex: 1 },
+                    mendatory: true,
+                },
+                {
+                    id: "photovoltaicWorksType",
+                    type: "picker",
+                    items: [
+                        { label: "Nature des travaux", value: "" },
+                        { label: "Travaux d’intégration au bâti", value: "Travaux d’intégration au bâti", pdfConfig: { dx: -517, dy: - 520, pageIndex: 1 } },
+                        { label: "Travaux d’installation électrique", value: "Travaux d’installation électrique", pdfConfig: { dx: -370, dy: - 520, pageIndex: 1 } },
+                    ],
+                    label: "Nature des travaux réalisés par l’entreprise",
+                    mendatory: true,
+                    errorId: "photovoltaicWorksTypeError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Générateur photovoltaïque raccordé au réseau"] },
+                },
+            ]
+        },
+        { //Inst6
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Pompe à chaleur',
+                            value: 'Pompe à chaleur',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 541, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: {
+                                fields: [
+                                    { id: "heatPumpPower", type: "string" },
+                                    { id: "heatPumpDeviceType", type: "string" }
+                                ]
+                            }
+                        },
+                    ],
+                },
+                {
+                    id: "woodHeatingPower",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Puissance (en kW)",
+                    errorId: "woodHeatingPowerError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Pompe à chaleur"] },
+                    pdfConfig: { dx: -190, dy: - 539, pageIndex: 1 },
+                    mendatory: true,
+                },
+                {
+                    id: "heatPumpDeviceType",
+                    type: "picker",
+                    items: [
+                        { label: "Type d'appareil", value: "" },
+                        { label: "Air/Air", value: "Air/Air", pdfConfig: { dx: -517, dy: - 520, pageIndex: 1 } },
+                        { label: "Air/Eau", value: "Air/Eau", pdfConfig: { dx: -460, dy: - 520, pageIndex: 1 } },
+                        { label: "Eau/Eau", value: "Eau/Eau", pdfConfig: { dx: -400, dy: - 567, pageIndex: 1 } },//400
+                        { label: "Sol/Eau", value: "Sol/Eau", pdfConfig: { dx: -335, dy: - 520, pageIndex: 1 } },
+                        { label: "Sol/Sol", value: "Sol/Sol", pdfConfig: { dx: -275, dy: - 520, pageIndex: 1 } },
+                        { label: "Air/Air multisplit", value: "Air/Air multisplit", pdfConfig: { dx: -215, dy: - 520, pageIndex: 1 } },
+                        { label: "CET", value: "CET", pdfConfig: { dx: -120, dy: - 520, pageIndex: 1 } },
+                    ],
+                    label: "Type d’appareil",
+                    mendatory: true,
+                    errorId: "heatPumpDeviceTypeError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Pompe à chaleur"] },
+                },
+            ]
+        },
+        { //Inst7
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Forage géothermique',
+                            value: 'Forage géothermique',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 588, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: {
+                                fields: [
+                                    { id: "geothermalDrillingDepth", type: "string" },
+                                    { id: "drillingType", type: "string" }
+                                ]
+                            }
+                        },
+                    ],
+                },
+                {
+                    id: "geothermalDrillingDepth",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Profondeur (en m)",
+                    errorId: "geothermalDrillingDepthError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Forage géothermique"] },
+                    pdfConfig: { dx: -190, dy: - 586, pageIndex: 1 },
+                    mendatory: true,
+                },
+                {
+                    id: "drillingType",
+                    type: "picker",
+                    items: [
+                        { label: "Type de forage", value: "" },
+                        { label: "Forage sur Nappe", value: "Forage sur Nappe", pdfConfig: { dx: -517, dy: - 613, pageIndex: 1 } },//517
+                        { label: "Forage sur Sonde", value: "Forage sur Sonde", pdfConfig: { dx: -415, dy: - 613, pageIndex: 1 } },
+                    ],
+                    label: "Type de forage",
+                    mendatory: true,
+                    errorId: "drillingTypeError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Forage géothermique"] },
+                },
+            ]
+        },
+        { //Inst8
+            id: "installations",
+            title: "Cochez la case de l'installation si mise en oeuvre et précisez la puissance ou la surface demandée",
+            fields: [
+                {
+                    id: "installations",
+                    label: "",
+                    type: "options",
+                    isStepMultiOptions: true,
+                    items: [
+                        {
+                            label: 'Chaudière à condensation',
+                            value: 'Chaudière à condensation',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -544, dy: - 634, pageIndex: 1, squareSize: 8 },
+                        },
+                        {
+                            label: 'Non installé, passer.',
+                            value: '',
+                            skip: true,
+                            icon: faQuestionCircle,
+                            pdfConfig: { skip: true },
+                            rollBack: {
+                                fields: [
+                                    { id: "condensingBoilerPower", type: "string" },
+                                    { id: "condensingBoilerDeviceType", type: "string" }
+                                ]
+                            }
+                        },
+                    ],
+                },
+                {
+                    id: "condensingBoilerPower",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Puissance (en kW)",
+                    errorId: "condensingBoilerPowerError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Chaudière à condensation"] },
+                    pdfConfig: { dx: -190, dy: - 634, pageIndex: 1 },
+                    mendatory: true,
+                },
+                {
+                    id: "condensingBoilerDeviceType",
+                    type: "picker",
+                    items: [
+                        { label: "Type d'appareil", value: "" },
+                        { label: "Gaz", value: "Gaz", pdfConfig: { dx: -545, dy: - 660, pageIndex: 1, squareSize: 12 } },
+                        { label: "Fioul", value: "Fioul",pdfConfig: { dx: -516, dy: - 660, pageIndex: 1, squareSize: 12 } },
+                    ],
+                    label: "Type d'appareil",
+                    mendatory: true,
+                    errorId: "condensingBoilerDeviceTypeError",
+                    isConditional: true,
+                    condition: { with: "installations", values: ["Chaudière à condensation"] },
+                },
+            ]
+        },
+
+        //************************************* APPRECIATION
         { //5
             id: "appreciation",
             title: "Appréciation de la prestation",

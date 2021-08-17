@@ -79,6 +79,8 @@ const properties = [
     "phone",
     // "disablePhoneContact",
     "email",
+
+    "project",
     "createdAt",
     "createdBy",
     "editedAt",

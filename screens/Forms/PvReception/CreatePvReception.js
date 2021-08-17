@@ -25,10 +25,31 @@ const properties = [
     "clientName",
     "installationAddress",
     "phone",
-    // "commissioningDate",
+
+    "installations",
+    "solarWaterHeaterSensorSurface",
+    "combinedSolarSystemSensorSurface",
+    "collectiveSolarThermalSensorSurface",
+    "woodHeatingPower",
+    "woodHeatingDeviceType",
+    "photovoltaicPower",
+    "photovoltaicWorksType",
+    "woodHeatingPower",
+    "heatPumpDeviceType",
+    "geothermalDrillingDepth",
+    "drillingType",
+    "condensingBoilerPower",
+    "condensingBoilerDeviceType",
+
     "appreciation",
-    // "appreciationDate",
     "signatoryName",
+
+    "project",
+    "createdAt",
+    "createdBy",
+    "editedAt",
+    "editedBy",    
+    "isSubmitted" //used to tag drafts (not submitted)
 ]
 
 const initialState = {
@@ -40,9 +61,21 @@ const initialState = {
     clientName: "",
     installationAddress: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
     phone: "",
-    // commissioningDate: new Date(),
+    //Installations
+    installations: [],
+    solarWaterHeaterSensorSurface: "",
+    combinedSolarSystemSensorSurface: "",
+    collectiveSolarThermalSensorSurface: "",
+    woodHeatingPower: "",
+    woodHeatingDeviceType: "",
+    photovoltaicPower: "",
+    photovoltaicWorksType: "",
+    woodHeatingPower: "",
+    heatPumpDeviceType: "",
+    geothermalDrillingDepth: "",
+    drillingType: "",
+
     appreciation: "",
-    // appreciationDate: new Date(),
     signatoryName: "",
 }
 

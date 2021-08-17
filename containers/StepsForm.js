@@ -18,7 +18,7 @@ import SquareOption from '../components/SquareOption';
 import { constants } from '../core/constants';
 
 import * as theme from '../core/theme'
-import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile, setAddress, refreshAddress, displayError } from '../core/utils';
+import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile, setAddress, refreshAddress, displayError, arrayIntersection } from '../core/utils';
 import { db } from '../firebase';
 import ModalHeader from '../components/ModalHeader';
 import { ScrollView } from 'react-native';
@@ -199,12 +199,12 @@ class StepsForm extends Component {
 
             const value = this.state[field.id]
             const error = this.state[field.errorId]
-            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, mendatory, maxLength } = field
-            const asterisk = mendatory ? ' *' : ''
+            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, isStepMultiOptions, mendatory, maxLength } = field
+            const asterisk = mendatory && field.label !== "" ? ' *' : ''
             const label = field.label + asterisk
 
             const emptyString = condition && !condition.values && !this.state[condition.with]
-            const optionNotSelected = condition && condition.values && !condition.values.includes(this.state[condition.with])
+            const optionNotSelected = condition && condition.values && !arrayIntersection(this.state[condition.with], condition.values)
             const hidePage = isConditional && (emptyString || optionNotSelected)
 
             if (hidePage) {
@@ -293,7 +293,7 @@ class StepsForm extends Component {
                     break;
 
                 case "options":
-                    if (isMultiOptions) {
+                    if (isMultiOptions || isStepMultiOptions) {
                         items.forEach((e) => e.selected = this.state[id].includes(e.label))
                     }
                     else items.forEach((e) => e.selected = e.label === this.state[id])
@@ -304,8 +304,13 @@ class StepsForm extends Component {
                             {this.renderLabel(label, items)}
                             <View style={[containerStyle, { justifyContent: items && items.length > 1 ? 'space-between' : 'center' }]}>
                                 {items.map((item, index) => {
-                                    if (item.isConditional && !item.condition.values.includes(this.state[item.condition.with])) {
-                                        return null
+                                    const { isConditional, condition } = item
+
+                                    if (isConditional) {
+                                        const conditionVerified = arrayIntersection(this.state[condition.with], condition.values)
+                                        if (!conditionVerified) {
+                                            return null
+                                        }
                                     }
 
                                     else return (
@@ -340,23 +345,39 @@ class StepsForm extends Component {
                                                 const { value } = item
                                                 var selectedOptions = this.state[id]
 
-                                                if (isMultiOptions) {
+                                                if (isMultiOptions || isStepMultiOptions) {
+                                                    //Remove value onPress if already selected
                                                     if (selectedOptions.includes(value)) {
                                                         selectedOptions = selectedOptions.filter((option) => option !== value)
                                                     }
-                                                    else selectedOptions.push(value)
+
+                                                    else {
+                                                        if (isStepMultiOptions) {
+                                                            //Remove other options of same page
+                                                            const itemsValues = items.map((item) => item.value)
+                                                            selectedOptions = selectedOptions.filter((option) => !itemsValues.includes(option))
+                                                        }
+
+                                                        //Push value
+                                                        if (isMultiOptions || !item.skip)
+                                                            selectedOptions.push(value)
+                                                    }
                                                 }
+
                                                 else {
                                                     if (this.state[id] === value)
                                                         selectedOptions = ""
                                                     else selectedOptions = value
                                                 }
+
                                                 update[id] = selectedOptions
 
-                                                if (pages[pageIndex].fields.length === 1 && !isMultiOptions)
-                                                    this.setState(update, () => this.goNext())
-
-                                                else this.setState(update)
+                                                this.setState(update, () => {
+                                                    //Auto goNext
+                                                    const isPageWithSingleField = pages[pageIndex].fields.length === 1
+                                                    if (isPageWithSingleField && !isMultiOptions || item.skip)
+                                                        this.goNext()
+                                                })
                                             }}
                                         />
                                     )
@@ -527,12 +548,15 @@ class StepsForm extends Component {
 
     //##Handlers
     async goNext() {
+        console.log('Go next..........')
         const { pageIndex, pagesDone, stepIndex } = this.state
         const { pages, collection } = this.props
 
         //Verify fields
         const isValid = this.verifyFields(pageIndex)
         if (!isValid) return
+
+        console.log('123123123')
 
         //Add Page browsed
         pagesDone.push(pageIndex)
@@ -591,6 +615,7 @@ class StepsForm extends Component {
     verifyFields(pageIndex) {
         const { pages } = this.props
         const { fields } = pages[pageIndex]
+        let isValid = true
 
         let error = ""
 
@@ -628,20 +653,20 @@ class StepsForm extends Component {
                     if (error !== "") {
                         const isHandleError = !isConditional
                             || isConditional && !condition.values && this.state[condition.with] !== ""
-                            || isConditional && condition.values && condition.values.includes(this.state[condition.with])
+                            || isConditional && condition.values && arrayIntersection(this.state[condition.with], condition.values)
 
                         if (isHandleError) {
                             let errorUpdate = {}
                             errorUpdate[errorId] = error
                             this.setState(errorUpdate)
-                            return false
+                            isValid = false
                         }
                     }
                 }
             }
         }
 
-        return true
+        return isValid
     }
 
     removeErrors() {
@@ -1058,6 +1083,9 @@ class StepsForm extends Component {
             showSummary = colorCat !== "" && products !== [] && estimation > 0
         }
 
+
+        let redundantFields = []
+
         return (
             <View style={{ flex: 1 }}>
                 <Text style={[theme.customFontMSbold.body, { backgroundColor: theme.colors.primary, width: "100%", textAlign: 'center', color: theme.colors.white, alignSelf: "center", paddingVertical: theme.padding * 0.8, letterSpacing: 1 }]}>
@@ -1089,8 +1117,16 @@ class StepsForm extends Component {
 
                         {pages.map((page, index) => {
 
-                            return page.fields.map((field) => {
+                            return page.fields.map((field, key) => {
 
+                                //Avoid repetition of same field (isStepMultiOptions)
+                                if (redundantFields.includes(field.id))
+                                    return null
+
+                                if (field.isStepMultiOptions)
+                                    redundantFields.push(field.id)
+
+                                //Values definition
                                 if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
 
                                     //String fields
@@ -1106,7 +1142,7 @@ class StepsForm extends Component {
                                     }
 
                                     //Address field
-                                    else if (form[field.id].description) {
+                                    else if (field.type === "address") {
                                         var values = form[field.id].description
                                     }
 
