@@ -599,10 +599,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               }
 
               else {
-                console.log('.888', formInputs[field.id], field.id)
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
-                console.log('index???', index)
-
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   positions.push({ dx, dy })
@@ -636,10 +633,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               }
 
               else { //Picker = Options
-                console.log('.........', formInputs[field.id], field.id)
-
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
-              console.log('index:::', index)
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   var pageIndex = field.items[index].pdfConfig.pageIndex

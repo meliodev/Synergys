@@ -79,13 +79,6 @@ const properties = [
     "phone",
     // "disablePhoneContact",
     "email",
-
-    "project",
-    "createdAt",
-    "createdBy",
-    "editedAt",
-    "editedBy",    
-    "isSubmitted" //used to tag drafts (not submitted)
 ]
 
 const initialState = {

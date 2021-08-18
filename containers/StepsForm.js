@@ -1,50 +1,70 @@
-import { faBuilding, faCheck, faHouse, faTimes, faUser } from '@fortawesome/pro-light-svg-icons';
+import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
-import { Platform, StyleSheet, Text, View, Image, FlatList, BackHandler, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { ProgressBar, Checkbox } from "react-native-paper";
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
 import DatePicker from 'react-native-date-picker'
+import TextInputMask from 'react-native-text-input-mask';
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { AddressInput, Appbar, Button, CustomIcon, EmptyList, LoadDialog, Loading, Picker, TextInput, Toast } from '../components';
-import NumberInput from '../components/NumberInput';
-import SquareOption from '../components/SquareOption';
-import { constants } from '../core/constants';
+import {
+    AddressInput,
+    Appbar,
+    Button,
+    CustomIcon,
+    EmptyList,
+    LoadDialog,
+    Loading,
+    ModalHeader,
+    NumberInput,
+    SquareOption,
+    Picker,
+    TextInput,
+    Toast
+} from '../components';
 
+import {
+    nameValidator,
+    positiveNumberValidator,
+    emailValidator,
+    generateId,
+    chunk,
+    formatDocument,
+    myAlert,
+    saveFile,
+    setAddress,
+    refreshAddress,
+    displayError,
+    arrayIntersection
+} from '../core/utils';
+
+import { constants } from '../core/constants';
 import * as theme from '../core/theme'
-import { nameValidator, positiveNumberValidator, emailValidator, generateId, chunk, formatDocument, myAlert, saveFile, setAddress, refreshAddress, displayError, arrayIntersection } from '../core/utils';
-import { db } from '../firebase';
-import ModalHeader from '../components/ModalHeader';
-import { ScrollView } from 'react-native';
 import { ficheEEBBase64 } from '../core/files';
 import { setStatusBarColor } from '../core/redux';
-import TextInputMask from 'react-native-text-input-mask';
+import { db } from '../firebase';
 import { fetchDocument } from '../api/firestore-api';
-import StepIndicator from 'react-native-step-indicator';
-import { SafeAreaView } from 'react-native';
-import { Alert } from 'react-native';
-import { read } from 'react-native-fs';
 
 class StepsForm extends Component {
     constructor(props) {
         super(props)
 
-        this.handleSubmit = this.handleSubmit.bind(this)
         this.goNext = this.goNext.bind(this)
         this.goBack = this.goBack.bind(this)
+        this.handleSubmit = this.handleSubmit.bind(this)
+        this.handleSave = this.handleSave.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         this.myAlert = myAlert.bind(this)
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
         this.isEdit = this.props.DocId !== "" && this.props.DocId !== undefined
-        console.log(this.props.DocId)
         this.DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
 
         this.project = this.props.navigation.getParam('project', '')
@@ -60,6 +80,7 @@ class StepsForm extends Component {
             progress: 0,
             isPdfModalVisible: false,
             pdfBase64: "",
+            initialLoading: true,
             loading: false,
             toastMessage: "",
             toastType: "",
@@ -67,7 +88,6 @@ class StepsForm extends Component {
             submitted: false,
             readOnly: this.isEdit,
             isEdit: this.isEdit,
-            initialLoading: true,
             ...this.props.initialState
         }
     }
@@ -102,7 +122,9 @@ class StepsForm extends Component {
         if (!document)
             this.setState({ docNotFound: true })
         else {
-            document = formatDocument(document, this.props.stateProperties)
+            const defaultProps = ["project", "createdAt", "createdBy", "editedAt", "editedBy", "deleted", "isSubmitted"]
+            let properties = [...this.props.stateProperties, ...defaultProps]
+            document = formatDocument(document, properties)
             this.setState(document)
         }
         return document
@@ -110,7 +132,6 @@ class StepsForm extends Component {
 
     //##Steps
     renderSteps(pages, steps) {
-
         return (
             <View style={styles.stepsContainer}>
                 {steps.map((step, index) => {
@@ -131,9 +152,10 @@ class StepsForm extends Component {
     renderStep(step, index) {
         const { stepIndex } = this.state
         const isSelected = stepIndex === index
-        const backgroundColor = isSelected ? theme.colors.primary : theme.colors.white
-        const borderColor = isSelected ? theme.colors.white : theme.colors.gray_medium
-        const color = isSelected ? theme.colors.white : theme.colors.gray_medium
+        const { primary, white, gray_medium } = theme.colors
+        const backgroundColor = isSelected ? primary : white
+        const borderColor = isSelected ? white : gray_medium
+        const color = isSelected ? white : gray_medium
 
         return (
             <View style={[styles.step, { backgroundColor }]}>
@@ -144,7 +166,8 @@ class StepsForm extends Component {
 
     renderProgression(pages) {
         const { pagesDone } = this.state
-        const progress = Math.round((pagesDone.length / (pages.length - 1)) * 100)
+        const pagesCount = this.props.collection === "Simulations" ? pages.length - 1 : pages.length - 2
+        const progress = Math.round((pagesDone.length / pagesCount) * 100)
 
         return (
             <View style={{ marginTop: 16, backgroundColor: '#003250' }}>
@@ -165,7 +188,7 @@ class StepsForm extends Component {
         const { pageIndex } = this.state
         const { title } = pages[pageIndex]
         return (
-            <Text style={[theme.customFontMSmedium.header, { textAlign: 'center', marginTop: 16, letterSpacing: 1 }]}>
+            <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', marginTop: 16, color: theme.colors.gray_dark }]}>
                 {title}
             </Text>
         )
@@ -182,7 +205,7 @@ class StepsForm extends Component {
     renderForm(pages) {
         const { pageIndex } = this.state
 
-        if (pages[pageIndex].id === "submit")
+        if (pages[pageIndex].id === "submit") //Only for Simulations
             return this.successMessage()
 
         else return (
@@ -199,16 +222,18 @@ class StepsForm extends Component {
 
             const value = this.state[field.id]
             const error = this.state[field.errorId]
-            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, isStepMultiOptions, mendatory, maxLength } = field
+            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, isStepMultiOptions, mendatory, maxLength, rollBack } = field
             const asterisk = mendatory && field.label !== "" ? ' *' : ''
             const label = field.label + asterisk
 
-            const emptyString = condition && !condition.values && !this.state[condition.with]
-            const optionNotSelected = condition && condition.values && !arrayIntersection(this.state[condition.with], condition.values)
-            const hidePage = isConditional && (emptyString || optionNotSelected)
+            if (isConditional) {
+                const emptyString = !condition.values && !this.state[condition.with]
+                const optionNotSelected = condition.values && !arrayIntersection(this.state[condition.with], condition.values)
+                const hideField = emptyString || optionNotSelected
 
-            if (hidePage) {
-                return null
+                if (hideField) {
+                    return null
+                }
             }
 
             switch (field.type) {
@@ -221,7 +246,7 @@ class StepsForm extends Component {
                                 keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
                                 value={value}
                                 onChangeText={value => {
-                                    this.removeErrors()
+                                    this.removeErrors(errorId)
                                     let update = {}
                                     update[id] = value
                                     this.setState(update)
@@ -244,7 +269,7 @@ class StepsForm extends Component {
                             keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
                             value={value}
                             onChangeText={value => {
-                                this.removeErrors()
+                                this.removeErrors(errorId)
                                 let update = {}
                                 update[id] = value
                                 this.setState(update)
@@ -269,8 +294,8 @@ class StepsForm extends Component {
                                 let update = {}
 
                                 //0. Rollback
-                                if (field.rollBack) {
-                                    for (const f of field.rollBack.fields) {
+                                if (rollBack) {
+                                    for (const f of rollBack.fields) {
                                         if (f.type === "string")
                                             update[f.id] = ""
                                         else if (f.type === "array")
@@ -293,16 +318,16 @@ class StepsForm extends Component {
                     break;
 
                 case "options":
+                    //Green highlight selection
                     if (isMultiOptions || isStepMultiOptions) {
                         items.forEach((e) => e.selected = this.state[id].includes(e.label))
                     }
                     else items.forEach((e) => e.selected = e.label === this.state[id])
-                    const containerStyle = { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', paddingHorizontal: 10 }
 
                     return (
                         <View>
                             {this.renderLabel(label, items)}
-                            <View style={[containerStyle, { justifyContent: items && items.length > 1 ? 'space-between' : 'center' }]}>
+                            <View style={[styles.formOptionsContainer, { justifyContent: items && items.length > 1 ? 'space-between' : 'center' }]}>
                                 {items.map((item, index) => {
                                     const { isConditional, condition } = item
 
@@ -343,17 +368,19 @@ class StepsForm extends Component {
 
                                                 //1. Update value & Go Next
                                                 const { value } = item
+
+                                                //Get initial value
                                                 var selectedOptions = this.state[id]
 
                                                 if (isMultiOptions || isStepMultiOptions) {
-                                                    //Remove value onPress if already selected
+                                                    //onPress: Remove value if already selected
                                                     if (selectedOptions.includes(value)) {
                                                         selectedOptions = selectedOptions.filter((option) => option !== value)
                                                     }
 
                                                     else {
                                                         if (isStepMultiOptions) {
-                                                            //Remove other options of same page
+                                                            //onPress: Remove all selected items of SAME PAGE (only one can be selected per page)
                                                             const itemsValues = items.map((item) => item.value)
                                                             selectedOptions = selectedOptions.filter((option) => !itemsValues.includes(option))
                                                         }
@@ -365,8 +392,10 @@ class StepsForm extends Component {
                                                 }
 
                                                 else {
+                                                    //Case1: Unselect option if pressed twice
                                                     if (this.state[id] === value)
                                                         selectedOptions = ""
+                                                    //Case2: select option
                                                     else selectedOptions = value
                                                 }
 
@@ -374,6 +403,7 @@ class StepsForm extends Component {
 
                                                 this.setState(update, () => {
                                                     //Auto goNext
+                                                    if (this.isEdit) return
                                                     const isPageWithSingleField = pages[pageIndex].fields.length === 1
                                                     if (isPageWithSingleField && !isMultiOptions || item.skip)
                                                         this.goNext()
@@ -417,7 +447,7 @@ class StepsForm extends Component {
                                     update[id] = value
                                     this.setState(update)
                                 }}
-                                placeholder={field.placeholder && field.placeholder || ""}
+                                placeholder={field.placeholder || ""}
                                 error={error}
                                 errorText={error}
                                 editable={true}
@@ -509,17 +539,29 @@ class StepsForm extends Component {
         })
 
         const arr = fieldsComponents.filter((e) => e !== null)
-        const noField = arr.length === 0
-        if (noField) this.setState({ pageIndex: this.state.pageIndex + 1 })
+        const emptyPage = arr.length === 0
+        if (emptyPage) this.setState({ pageIndex: this.state.pageIndex + 1 })
 
         return fieldsComponents
     }
 
-    renderButtons(pages) {
+    renderButtons(pages, isEdit) {
         const { pageIndex } = this.state
         const isSubmit = pages[pageIndex].id === 'submit'
         const isLastFormPage = pageIndex === pages.length - 2
         const title = isSubmit ? "Soumettre" : isLastFormPage ? "Terminer" : "Continuer"
+
+        if (isEdit)
+            return (
+                <View style={styles.buttonsContainer}>
+                    <Button
+                        mode="contained"
+                        style={{ width: constants.ScreenWidth - theme.padding * 2, backgroundColor: theme.colors.primary }}
+                        onPress={this.handleSave}>
+                        Modifier
+                    </Button>
+                </View>
+            )
 
         return (
             <View style={styles.buttonsContainer}>
@@ -548,31 +590,29 @@ class StepsForm extends Component {
 
     //##Handlers
     async goNext() {
-        console.log('Go next..........')
         const { pageIndex, pagesDone, stepIndex } = this.state
         const { pages, collection } = this.props
 
         //Verify fields
-        const isValid = this.verifyFields(pageIndex)
+        const isValid = this.verifyFields(pages, pageIndex)
         if (!isValid) return
-
-        console.log('123123123')
 
         //Add Page browsed
         pagesDone.push(pageIndex)
         this.setState({ pagesDone })
 
         //Remove errors
-        this.removeErrors()
+        this.removeErrors(false)
 
         //Increment step
         if (pages[pageIndex].isLast)
             this.setState({ stepIndex: stepIndex + 1 })
 
-        //Show results or submit
+        //Show results (Simulation) or submit
         const isLastFormPage = pageIndex === pages.length - 2
-        const isSubmit = pages[pageIndex].id === 'submit'
+        const isLastPage = pageIndex === pages.length - 1
 
+        //Set & Show simulation results
         if (isLastFormPage) {
             if (collection === "Simulations") {
                 await this.setResults()
@@ -582,11 +622,10 @@ class StepsForm extends Component {
                     loading: false
                 })
             }
-
-            else this.handleSubmit(true)
         }
 
-        else if (isSubmit) {
+        //Submit
+        else if (isLastPage) {
             this.handleSubmit(true)
         }
 
@@ -598,11 +637,12 @@ class StepsForm extends Component {
         let { pageIndex, pagesDone, stepIndex } = this.state
         const { pages } = this.props
 
+        //Hide success message
         if (pageIndex === pages.length - 1)
             this.setState({ showSuccessMessage: false })
 
-        //Pop page browsed
         this.setState({ pageIndex: pagesDone[pagesDone.length - 1] }, () => {
+            //Pop current page from browsed pages
             pagesDone.pop()
             this.setState({ pagesDone })
         })
@@ -612,11 +652,10 @@ class StepsForm extends Component {
             this.setState({ stepIndex: stepIndex - 1 })
     }
 
-    verifyFields(pageIndex) {
-        const { pages } = this.props
+    verifyFields(pages, pageIndex) {
+
         const { fields } = pages[pageIndex]
         let isValid = true
-
         let error = ""
 
         if (pages[pageIndex].exclusiveMendatory) {
@@ -669,12 +708,14 @@ class StepsForm extends Component {
         return isValid
     }
 
-    removeErrors() {
+    removeErrors(errorId) {
+
         const { pageIndex, pagesDone, stepIndex } = this.state
 
         for (const field of this.props.pages[pageIndex].fields) {
             let errorUpdate = {}
-            if (field.errorId) {
+
+            if (errorId && field.errorId === errorId || !errorId) {
                 errorUpdate[field.errorId] = ""
                 this.setState(errorUpdate)
             }
@@ -683,11 +724,11 @@ class StepsForm extends Component {
 
     //##Logic: Submit
     async handleSubmit(isSubmitted) {
-
+        console.log('33333333')
         this.setState({ loading: true })
 
         //Verify onPress Check icon
-        const isValid = this.verifyFields(this.state.pageIndex)
+        const isValid = this.verifyFields(this.props.pages, this.state.pageIndex)
         if (!isValid) {
             this.setState({ loading: false })
             return
@@ -697,7 +738,7 @@ class StepsForm extends Component {
         const DocId = this.state.isEdit ? this.DocId : generateId(idPattern)
         let form = this.unformatDocument()
         form = this.addFormLogs(form)
-        form.isSubmitted = form.isSubmitted ? true : isSubmitted
+        form.isSubmitted = form.isSubmitted || isSubmitted
 
         db.collection(collection).doc(DocId).set(form)
 
@@ -756,14 +797,14 @@ class StepsForm extends Component {
         if (!this.state.isEdit) {
             form.createdAt = moment().format()
             form.createdBy = this.props.currentUser
-            //Add project reference if we are on process context
+            form.deleted = false
+            //Add project reference if available
             if (this.project)
                 form.project = this.project
         }
 
         form.editedAt = moment().format()
         form.editedBy = this.props.currentUser
-        form.deleted = false
 
         return form
     }
@@ -1115,7 +1156,7 @@ class StepsForm extends Component {
 
                     <View style={{ marginBottom: 16, backgroundColor: 'white' }}>
 
-                        {pages.map((page, index) => {
+                        {pages.map((page, pageIndex) => {
 
                             return page.fields.map((field, key) => {
 
@@ -1158,7 +1199,7 @@ class StepsForm extends Component {
                                         <TouchableOpacity
                                             onPress={() => {
                                                 if (field.type === "autogen") return
-                                                this.setState({ pageIndex: index, readOnly: false, submitted: false })
+                                                this.setState({ pageIndex, readOnly: false, submitted: false })
                                             }}
                                             style={styles.overviewRow}>
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
@@ -1212,9 +1253,21 @@ class StepsForm extends Component {
                     {this.renderForm(pages)}
                 </View>
 
-                {!submitted && this.renderButtons(pages)}
+                {!submitted && this.renderButtons(pages, this.isEdit)}
             </View>
         )
+    }
+
+    async handleSave() {
+        const { collection, pages } = this.props
+        const { pageIndex } = this.state
+
+        if (collection === "Simulations")
+            await this.setResults()
+
+        const isLastPage = this.state.pageIndex === pages.length - 1
+        const isSubmitted = isLastPage
+        this.handleSubmit(isSubmitted)
     }
 
     render() {
@@ -1263,18 +1316,9 @@ class StepsForm extends Component {
                     close
                     title
                     check={!showWelcomeMessage && !readOnly}
-                    handleSubmit={async () => {
-                        if (collection === "Simulations")
-                            await this.setResults()
-
-                        const isSubmit = this.props.pages[pageIndex].id === 'submit'
-                        const isLastFormPage = pageIndex === this.props.pages.length - 2
-                        const isSubmitted = collection === "Simulations" ? isSubmit : isLastFormPage
-
-                        this.handleSubmit(isSubmitted)
-                    }}
-                    edit={isEdit && readOnly}
-                    handleEdit={() => this.setState({ submitted: false, readOnly: false })}
+                    handleSubmit={this.handleSave}
+                    // edit={isEdit && readOnly}
+                    // handleEdit={() => this.setState({ submitted: false, readOnly: false })}
                     titleText={this.props.titleText}
                     customBackHandler={this.handleBackButtonClick}
                 />
@@ -1308,7 +1352,7 @@ class StepsForm extends Component {
                 />
 
                 <Toast
-                    duration={3500}
+                    duration={2500}
                     message={toastMessage}
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })}
@@ -1455,6 +1499,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: 'white',
     },
+    formOptionsContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        paddingHorizontal: 10
+    }
 })
 
 const modalStyles = StyleSheet.create({

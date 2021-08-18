@@ -789,6 +789,8 @@ export const processModel = {
                         responsable: 'Commercial',
                         status: 'pending',
                     },
+                    //Montant de l'acompte? (zone de saisie)
+                    //Reste à payer: (zone de saisie)
                     {
                         id: 'quoteValidation',
                         title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
@@ -888,7 +890,7 @@ export const processModel = {
             },
             'technicalVisitChoice2': {
                 title: 'Cloturation de la visite technique',
-                instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
+                instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
                     {

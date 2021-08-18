@@ -1117,11 +1117,6 @@ export const mandatMPRModel = [
         ],
         isLast: true,
     },
-    //#task: Generate createdAt & print it on pdf
-    {
-        id: "submit",
-        fields: []
-    },
 ]
 
 export const mandatSynergysModel = [
@@ -1474,10 +1469,6 @@ export const mandatSynergysModel = [
         ],
         isLast: true
     },
-    {
-        id: "submit",
-        fields: []
-    }
 ]
 
 export const pvReceptionModel = (params) => {
@@ -2169,10 +2160,6 @@ export const pvReceptionModel = (params) => {
                 },
             ],
         },
-        {
-            id: "submit",
-            fields: []
-        }
     ]
 
     return model

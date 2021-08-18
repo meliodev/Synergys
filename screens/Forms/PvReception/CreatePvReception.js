@@ -43,13 +43,6 @@ const properties = [
 
     "appreciation",
     "signatoryName",
-
-    "project",
-    "createdAt",
-    "createdBy",
-    "editedAt",
-    "editedBy",    
-    "isSubmitted" //used to tag drafts (not submitted)
 ]
 
 const initialState = {
