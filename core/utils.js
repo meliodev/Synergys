@@ -522,7 +522,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
     if (pdfType === "PvReception") {
       var originalPdfBase64 = pvReceptionBase64
-      var formPages = pvReceptionModel(params)
+      var { model: formPages, globalConfig } = pvReceptionModel(params)
     }
     else if (pdfType === "Simulations") {
       var originalPdfBase64 = ficheEEBBase64
@@ -702,10 +702,18 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       }
     }
 
+    if (globalConfig) {
+      //Apply page duplication
+      if (globalConfig.pageDuplication) {
+        const { pageDuplication } = globalConfig
+        const { pageIndexSource, pageIndexTarget } = pageDuplication
+        const copiedPage = await pdfDoc.copyPages(pdfDoc, [pageIndexSource])
+        pdfDoc.insertPage(pageIndexTarget, copiedPage[0])
+      }
+    }
 
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
-
     return pdfBase64
   }
   catch (e) {
@@ -1012,7 +1020,3 @@ export function refreshProject(projectObject, setState = true) {
   if (setState) this.setState({ project, address, client, projectError: '', addressError: '' })
   return project
 }
-
-
-
-

@@ -1120,7 +1120,7 @@ export const mandatMPRModel = [
 ]
 
 export const mandatSynergysModel = [
-    { //1 DONE
+    { //1 
         id: "service",
         title: "PRESTATION",
         fields: [
@@ -1139,7 +1139,7 @@ export const mandatSynergysModel = [
         isFirst: true,
         stepIndex: 0,
     },
-    { //1 DONE
+    { //2
         id: "service",
         title: "PRESTATION",
         fields: [
@@ -1188,7 +1188,7 @@ export const mandatSynergysModel = [
         isConditional: true,
         condition: { with: "serviceProvider", values: ["Synergys"] },
     },
-    { //1 DONE
+    { //3
         id: "service",
         title: "PRESTATION",
         fields: [
@@ -1474,6 +1474,13 @@ export const mandatSynergysModel = [
 export const pvReceptionModel = (params) => {
 
     const { clientFullName, billingDate } = params
+
+    const globalConfig = {
+        pageDuplication: {
+            pageIndexSource: 0,
+            pageIndexTarget: 1
+        }
+    }
 
     const model = [
         //---------------------------  Page 1
@@ -2096,7 +2103,7 @@ export const pvReceptionModel = (params) => {
                     items: [
                         { label: "Type d'appareil", value: "" },
                         { label: "Gaz", value: "Gaz", pdfConfig: { dx: -545, dy: - 660, pageIndex: 1, squareSize: 12 } },
-                        { label: "Fioul", value: "Fioul",pdfConfig: { dx: -516, dy: - 660, pageIndex: 1, squareSize: 12 } },
+                        { label: "Fioul", value: "Fioul", pdfConfig: { dx: -516, dy: - 660, pageIndex: 1, squareSize: 12 } },
                     ],
                     label: "Type d'appareil",
                     mendatory: true,
@@ -2162,5 +2169,5 @@ export const pvReceptionModel = (params) => {
         },
     ]
 
-    return model
+    return { model, globalConfig }
 }

@@ -98,6 +98,7 @@ class CreatePvReception extends Component {
     render() {
 
         const { clientFullName, billingDate } = this
+        const { model } = pvReceptionModel({ clientFullName, billingDate })
 
         return (
             <StepsForm
@@ -110,7 +111,7 @@ class CreatePvReception extends Component {
                 collection={"PvReception"}
                 //welcomeMessage={this.welcomeMessage}
                 steps={["RÉSERVES", "", "CHANTIER", "", "INSTALLATIONS"]}
-                pages={pvReceptionModel({ clientFullName, billingDate })}
+                pages={model}
                 generatePdf={(formInputs) => generatePdfForm(formInputs, "PvReception", { clientFullName, billingDate })}
                 genButtonTitle="Générer un PV réception"
                 fileName="PV Réception"
