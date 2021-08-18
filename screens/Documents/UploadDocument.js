@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert } from 'react-native';
 import { Card, Title, TextInput } from 'react-native-paper'
 import DocumentPicker from 'react-native-document-picker';
-import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages, faInfoCircle, faSignature, faFileSignature, } from '@fortawesome/pro-light-svg-icons'
+import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages, faInfoCircle, faSignature, faFileSignature, faTrumpet, } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 
@@ -183,6 +183,12 @@ class UploadDocument extends Component {
 
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode(this.DocumentId)
+        //Auto refresh
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => {
+            this.setState({ initialLoading: faTrumpet })
+            await this.initEditMode(this.DocumentId)
+            this.setState({ initialLoading: false })
+        })
         this.initialState = _.cloneDeep(this.state)
         this.setState({ initialLoading: false })
     }
@@ -190,9 +196,11 @@ class UploadDocument extends Component {
     componentWillUnmount() {
         this.resetModalOptions()
         this.unsubscribeAttachmentListener && this.unsubscribeAttachmentListener()
+        this.willFocusSubscription && this.willFocusSubscription.remove()
     }
 
     async initEditMode(DocumentId) {
+        if (!this.isEdit) return
         let document = await fetchDocument('Documents', DocumentId)
         document = await this.setDocument(document)
         if (!document) return
