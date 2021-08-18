@@ -716,6 +716,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     const pdfBase64 = uint8ToBase64(pdfBytes)
     return pdfBase64
   }
+  
   catch (e) {
     console.log(e)
     throw new Error(errorMessages.pdfGen)

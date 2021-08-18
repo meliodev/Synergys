@@ -545,23 +545,11 @@ class StepsForm extends Component {
         return fieldsComponents
     }
 
-    renderButtons(pages, isEdit) {
+    renderButtons(pages) {
         const { pageIndex } = this.state
         const isSubmit = pages[pageIndex].id === 'submit'
         const isLastFormPage = pageIndex === pages.length - 2
         const title = isSubmit ? "Soumettre" : isLastFormPage ? "Terminer" : "Continuer"
-
-        if (isEdit)
-            return (
-                <View style={styles.buttonsContainer}>
-                    <Button
-                        mode="contained"
-                        style={{ width: constants.ScreenWidth - theme.padding * 2, backgroundColor: theme.colors.primary }}
-                        onPress={this.handleSave}>
-                        Modifier
-                    </Button>
-                </View>
-            )
 
         return (
             <View style={styles.buttonsContainer}>
@@ -1253,7 +1241,7 @@ class StepsForm extends Component {
                     {this.renderForm(pages)}
                 </View>
 
-                {!submitted && this.renderButtons(pages, this.isEdit)}
+                {!submitted && this.renderButtons(pages)}
             </View>
         )
     }
