@@ -178,10 +178,15 @@ class CreateProject extends Component {
         load(this, false)
     }
 
+    componentWillUnmount() {
+        if (this.projectListener)
+            this.projectListener()
+    }
+
     async initEditMode() {
         let query = db.collection("Projects").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
-            query.onSnapshot(async (doc) => {
+            this.projectListener = query.onSnapshot(async (doc) => {
                 if (!doc.exists) return null
                 let project = doc.data()
                 project.id = doc.id
@@ -203,7 +208,6 @@ class CreateProject extends Component {
         else {
             this.setWorkTypes(project)
             project = formatDocument(project, properties, [])
-            console.log('Fire listener: Setting project..............................')
             this.setState(project)
         }
         return project
@@ -725,7 +729,7 @@ class CreateProject extends Component {
                                 <ProcessAction
                                     process={this.state.process}
                                     project={this.project}
-                                    clientId={client.id} 
+                                    clientId={client.id}
                                     step={step}
                                     canUpdate={canWrite && !this.isClient}
                                     isAllProcess={false}

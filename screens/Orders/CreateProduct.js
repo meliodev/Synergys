@@ -41,7 +41,7 @@ import SquarePlus from '../../components/SquarePlus';
 class CreateProduct extends Component {
     constructor(props) {
         super(props)
-        //this.fetchDocs = fetchDocs.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
         this.fetchProduct = this.fetchProduct.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.pickNewBrandLogo = this.pickNewBrandLogo.bind(this)
@@ -118,8 +118,17 @@ class CreateProduct extends Component {
         load(this, false)
     }
 
+    componentWillUnmount() {
+        if (this.categoriesListener) {
+            this.categoriesListener()
+        }
+        if (this.unsubscribe) {
+            this.unsubscribe()
+        }
+    }
+
     fetchCategories() {
-        db.collection('ProductCategories').get().then((querysnapshot) => {
+        this.categoriesListener = db.collection('ProductCategories').onSnapshot((querysnapshot) => {
             let categories = [{ label: 'Selectionnez une catégorie', value: '' }]
 
             if (querysnapshot.empty) return
@@ -138,9 +147,11 @@ class CreateProduct extends Component {
     //Brands suggestions
     async fetchSuggestions() {
         const query = db.collection('Brands')
-        // this.fetchDocs(query, 'suggestions', '', () => { })
-        const suggestions = await fetchDocuments(query)
-        this.setState({ suggestions, loading: false })
+        this.fetchDocs(query, 'suggestions', '', () => {
+            this.setState({ loading: false })
+        })
+        // const suggestions = await fetchDocuments(query)
+        // this.setState({ suggestions, loading: false })
     }
 
     //on Edit

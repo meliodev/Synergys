@@ -19,7 +19,7 @@ import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 class AddItem extends Component {
     constructor(props) {
         super(props)
-        //  this.fetchDocs = fetchDocs.bind(this)
+        this.fetchDocs = fetchDocs.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleDelete = this.handleDelete.bind(this)
         this.refreshProduct = this.refreshProduct.bind(this)
@@ -58,11 +58,17 @@ class AddItem extends Component {
         this.fetchSuggestions()
     }
 
+    componentWillUnmount() {
+        if (this.unsubscribe) {
+            this.unsubscribe()
+        }
+    }
+
     async fetchSuggestions() {
         const query = db.collection('Products')
-        //this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
-        const suggestions = await fetchDocuments(query)
-        this.setState({ suggestions, loading: false })
+        this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
+        // const suggestions = await fetchDocuments(query)
+        // this.setState({ suggestions, loading: false })
     }
 
     validateInputs() {
