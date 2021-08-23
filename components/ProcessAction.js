@@ -87,6 +87,9 @@ class ProcessAction extends Component {
         if (prevProps.process !== this.props.process) {
             await this.initializer()
         }
+        if (prevProps.processModels !== this.props.processModels) {
+            this.processModel = this.setProcessModel(this.props.process)
+        }
     }
 
     async initializer() {

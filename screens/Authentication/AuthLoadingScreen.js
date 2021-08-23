@@ -152,122 +152,134 @@ class AuthLoadingScreen extends Component {
   onAuthStateChanged() {
 
     firebase.auth().onAuthStateChanged(async user => {
-      if (user) {
 
-        const { currentUser } = firebase.auth()
-        const { isConnected } = this.props.network
+      try {
+        if (user) {
 
-        if (isConnected) {
-          //1. Set role
-          const idTokenResult = await currentUser.getIdTokenResult()
+          const { currentUser } = firebase.auth()
+          const { isConnected } = this.props.network
 
-          if (!idTokenResult) {
-            displayError({ message: errorMessages.appInit })
-            return
-          }
+          if (isConnected) {
+            //1. Set role
+            const idTokenResult = await currentUser.getIdTokenResult()
 
-          for (const role of roles) {
-            if (idTokenResult.claims[role.id]) {
-              setRole(this, role)
-              var roleValue = role.value
+            if (!idTokenResult) {
+              throw new Error(errorMessages.appInit)
+            }
+
+            for (const role of roles) {
+              if (idTokenResult.claims[role.id]) {
+                setRole(this, role)
+                var roleValue = role.value
+              }
+            }
+
+            //2. Set privilleges
+            console.log('fetching user privilleges...')
+            const remotePermissions = await this.configurePrivileges(roleValue)
+            if (!remotePermissions) {
+              throw new Error(errorMessages.appInit)
+            }
+            const action = { type: "SET_PERMISSIONS", value: remotePermissions }
+            this.props.dispatch(action)
+
+            console.log('User privilleges fetched and set on redux state !')
+
+            //3. Set processModel
+            console.log('Fetching process model...')
+            await this.fetchProcessModels()
+            console.log('Process models fetched and set on redux state !')
+
+            this.updateProgress(90)
+
+            //4. Set currentUser
+            const currUser = {
+              id: user.uid,
+              fullName: user.displayName,
+              email: user.email,
+              role: roleValue,
+            }
+            setCurrentUser(this, currUser)
+
+            //5. Set fcm token
+            const enabled = await this.requestUserPermission() //iOS only
+            const res = await this.configureFcmToken()
+            if (!res) {
+              throw new Error(errorMessages.appInit)
             }
           }
 
-          //2. Set privilleges
-          console.log('fetching user privilleges...')
-          const remotePermissions = await this.configurePrivileges(roleValue)
-          if (!remotePermissions) {
-            displayError({ message: errorMessages.appInit })
-            return
+          //4. Navigation
+          const { initialNotification } = this.state //Notification
+          const { params } = this.props.navigation.state //Dynamic link
+
+          //Dynamic link (email)
+          if (params && params.routeName) {
+            var { routeName, ...routeParams } = params
           }
-          const action = { type: "SET_PERMISSIONS", value: remotePermissions }
-          this.props.dispatch(action)
 
-          console.log('User privilleges fetched and set on redux state !')
-
-          //3. Set processModel
-          console.log('Fetching process model...')
-          const processModels = await this.fetchProcessModels()
-          if (!processModels) {
-            displayError({ message: errorMessages.appInit })
-            return
+          //Dynamic link (notification)
+          else if (initialNotification) {
+            var { routeName, routeParams } = this.state
           }
-          setProcessModel(this, processModels)
-          console.log('Process models fetched and set on redux state !')
 
-          this.updateProgress(90)
-
-          //4. Set currentUser
-          const currUser = {
-            id: user.uid,
-            fullName: user.displayName,
-            email: user.email,
-            role: roleValue,
+          else {
+            var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
+            var routeParams = {}
           }
-          setCurrentUser(this, currUser)
-
-          //5. Set fcm token
-          const enabled = await this.requestUserPermission() //iOS only
-          const res = await this.configureFcmToken()
-          if (!res) {
-            displayError({ message: errorMessages.appInit })
-            return
-          }
-        }
-
-        //4. Navigation
-        const { initialNotification } = this.state //Notification
-        const { params } = this.props.navigation.state //Dynamic link
-
-        //Dynamic link (email)
-        if (params && params.routeName) {
-          var { routeName, ...routeParams } = params
-        }
-
-        //Dynamic link (notification)
-        else if (initialNotification) {
-          var { routeName, routeParams } = this.state
         }
 
         else {
-          var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
+          resetState(this)
+          const { type, isConnected } = await NetInfo.fetch()
+          const network = { type, isConnected }
+          setNetwork(this, network)
+          var routeName = "LoginScreen"
           var routeParams = {}
+        }
+
+        let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
+        if (startApp) {
+          this.updateProgress(1)
+          this.props.navigation.navigate(routeName, routeParams)
         }
       }
 
-      else {
-        resetState(this)
-        const { type, isConnected } = await NetInfo.fetch()
-        const network = { type, isConnected }
-        setNetwork(this, network)
-        var routeName = "LoginScreen"
-        var routeParams = {}
+      catch (e) {
+        displayError({ message: e.message })
       }
 
-      let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
-      if (startApp) {
-        this.updateProgress(1)
-        this.props.navigation.navigate(routeName, routeParams)
-      }
     })
   }
 
+  //Make it onsnapshot
   async fetchProcessModels() {
 
-    const querySnapshot = await db.collection('Process').get()
+    return new Promise((resolve, reject) => {
 
-    if (querySnapshot.empty) {
-      return undefined
-    }
+      db.collection('Process').onSnapshot((querySnapshot) => {
+        if (querySnapshot.empty) {
+          return undefined
+        }
 
-    let processModels = {}
-    for (const doc of querySnapshot.docs) {
-      const version = doc.id
-      const model = doc.data()
-      processModels[version] = model
-    }
+        let processModels = {}
 
-    return processModels
+        for (const doc of querySnapshot.docs) {
+          const version = doc.id
+          const model = doc.data()
+          processModels[version] = model
+        }
+
+        if (_.isEqual(processModels, {}) || !processModels || processModels === undefined) {
+          reject(errorMessages.appInit)
+        }
+
+        else {
+          setProcessModel(this, processModels)
+          resolve(true)
+        }
+      })
+    })
   }
 
   async configurePrivileges(role) {
