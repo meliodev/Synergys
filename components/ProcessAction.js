@@ -66,10 +66,10 @@ class ProcessAction extends Component {
             loadingDialog: false,
             loadingModal: false,
             loading: true,
-            loadingMessage: this.initialLoadingMessage
+            loadingMessage: this.initialLoadingMessage,
+            skipProcessHandler: false
         }
 
-        this.processModel = this.setProcessModel(this.props.process)
     }
 
     setProcessModel(process) {
@@ -80,7 +80,18 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
-        await this.mainHandler(this.state.process)
+        await this.initializer()
+    }
+
+    async componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.process !== this.props.process) {
+            await this.initializer()
+        }
+    }
+
+    async initializer() {
+        this.processModel = this.setProcessModel(this.props.process)
+        await this.mainHandler(this.props.process)
             .catch((e) => displayError({ message: e.message }))
     }
 
@@ -109,7 +120,7 @@ class ProcessAction extends Component {
         return updatedProcess
     }
 
-    updateProcess(updatedProcess) {
+    updateProcess(updatedProcess, process) {
         return db
             .collection('Projects')
             .doc(this.props.project.id)

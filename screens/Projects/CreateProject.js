@@ -203,6 +203,7 @@ class CreateProject extends Component {
         else {
             this.setWorkTypes(project)
             project = formatDocument(project, properties, [])
+            console.log('Fire listener: Setting project..............................')
             this.setState(project)
         }
         return project
@@ -724,7 +725,7 @@ class CreateProject extends Component {
                                 <ProcessAction
                                     process={this.state.process}
                                     project={this.project}
-                                    clientId={client.id}
+                                    clientId={client.id} 
                                     step={step}
                                     canUpdate={canWrite && !this.isClient}
                                     isAllProcess={false}

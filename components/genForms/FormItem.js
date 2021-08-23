@@ -34,7 +34,7 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={styles.header}>
                 <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
-                {estimation && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation}</Text>}
+                {estimation > 0 && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation.toString()}</Text>}
             </View>
 
             <View style={styles.body}>

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import FormItem from './FormItem';
-
+import { Text } from 'react-native'
 import { withNavigation } from 'react-navigation'
 
 const SimulationItem = ({ simulation, onPress, navigation, nameSir, nameMiss, ...props }) => {

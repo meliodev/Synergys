@@ -53,8 +53,6 @@ class ListSimulations extends React.Component {
         )
     }
 
-    //
-
     onPressItem(item) {
         if (this.isRoot)
             this.props.navigation.navigate('CreateSimulation', {

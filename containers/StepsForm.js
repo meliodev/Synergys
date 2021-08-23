@@ -330,15 +330,19 @@ class StepsForm extends Component {
                             <View style={[styles.formOptionsContainer, { justifyContent: items && items.length > 1 ? 'space-between' : 'center' }]}>
                                 {items.map((item, index) => {
                                     const { isConditional, condition } = item
+                                    let hideOption = false
 
                                     if (isConditional) {
                                         const conditionVerified = arrayIntersection(this.state[condition.with], condition.values)
                                         if (!conditionVerified) {
-                                            return null
+                                            hideOption = true
                                         }
                                     }
 
-                                    else return (
+                                    if (hideOption)
+                                        return null
+
+                                    return (
                                         <SquareOption
                                             element={item}
                                             index={index}
@@ -411,6 +415,7 @@ class StepsForm extends Component {
                                             }}
                                         />
                                     )
+
                                 })}
                             </View>
                             {error ? <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, textAlign: 'center', marginTop: 8 }]}>{error}</Text> : null}
@@ -712,7 +717,6 @@ class StepsForm extends Component {
 
     //##Logic: Submit
     async handleSubmit(isSubmitted) {
-        console.log('33333333')
         this.setState({ loading: true })
 
         //Verify onPress Check icon
@@ -805,6 +809,10 @@ class StepsForm extends Component {
             const products = this.setProducts(form)
             const colorCat = this.setColorCat(form)
             const estimation = this.setEstimation(products, colorCat)
+
+            console.log("PRODUCTS", products)
+            console.log("COLOR", colorCat)
+            console.log("ESTIMATION", estimation)
 
             this.setState({
                 products,

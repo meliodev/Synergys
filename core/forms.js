@@ -671,7 +671,7 @@ export const ficheEEBModel = [
                 id: "transmittersTypes",
                 label: "Types d'émetteurs",
                 type: "options",
-                isMultiOptions: true,
+                isMultiOptions: true, 
                 items: [
                     { label: 'Radiateurs électriques', value: 'Radiateurs électriques', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -453, dy: - 536, pageIndex: 0 } },
                     { label: 'Clim réversible', value: 'Clim réversible', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -311, dy: - 554, pageIndex: 0 } },
