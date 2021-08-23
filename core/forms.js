@@ -2171,3 +2171,99 @@ export const pvReceptionModel = (params) => {
 
     return { model, globalConfig }
 }
+
+export const technicalVisitModel = [
+    {//1
+        id: "",
+        title: "",
+        fields: [
+            {
+                id: "electricMeterPicture",
+                type: "attachment",
+                label: "Photo du compteur électrique",
+                errorId: "electricMeterPictureError",
+                pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
+                mendatory: true,
+            },
+        ]
+    },
+    {//2
+        id: "subscribingPower",
+        title: "",
+        fields: [
+            {
+                id: "subscribingPower",
+                type: "textInput",
+                label: "Quelle est la puissance de l'abonnement souscrit ?",
+                errorId: "subscribingPowerError",
+                pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
+                mendatory: true,
+            },
+        ],
+    },
+    { //3
+        id: "phaseType",
+        title: "",
+        fields: [
+            {
+                id: "phaseType",
+                label: "Type de phase",
+                type: "options",
+                items: [
+                    {
+                        label: 'Monophasé',
+                        value: 'Monophasé',
+                        icon: faQuestionCircle,
+                        pdfConfig: { dx: -492, dy: - 226, pageIndex: 0 },
+                    },
+                    {
+                        label: 'Triphasé',
+                        value: 'Triphasé',
+                        icon: faQuestionCircle,
+                        pdfConfig: { dx: -492, dy: - 250, pageIndex: 0 },
+                    },
+                ],
+                errorId: "phaseTypeError",
+                mendatory: true,
+            },
+        ]
+    },
+    {//4
+        id: "",
+        title: "",
+        fields: [
+            {
+                id: "switchBoardPicture",
+                type: "attachment",
+                label: "Photo du tableau électrique existant",
+                errorId: "switchBoardPictureError",
+                pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
+                mendatory: true,
+            },
+            {
+                id: "switchBoardComment",
+                type: "textInput",
+                label: "Commentaire",
+                errorId: "switchBoardCommentError",
+                pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
+                mendatory: true,
+            },
+        ]
+    },
+    {//5
+        id: "",
+        title: "",
+        fields: [
+            {
+                id: "switchBoardSize",
+                label: "Taille de tableau électrique à installer",
+                type: "number",
+                placeholder: "Exemple: 8 modules",
+                style: { marginTop: 50 },
+                pdfConfig: { dx: -515, dy: - 794, pageIndex: 0 },
+                mendatory: true,
+                errorId: "switchBoardSizeError",
+            },
+        ]
+    },
+]

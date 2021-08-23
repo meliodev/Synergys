@@ -8,6 +8,7 @@ import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
 import DatePicker from 'react-native-date-picker'
 import TextInputMask from 'react-native-text-input-mask';
+import RNFS from 'react-native-fs'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -26,7 +27,8 @@ import {
     SquareOption,
     Picker,
     TextInput,
-    Toast
+    Toast,
+    SquarePlus
 } from '../components';
 
 import {
@@ -41,7 +43,8 @@ import {
     setAddress,
     refreshAddress,
     displayError,
-    arrayIntersection
+    arrayIntersection,
+    pickImage
 } from '../core/utils';
 
 import { constants } from '../core/constants';
@@ -532,6 +535,25 @@ class StepsForm extends Component {
                     )
                     break;
 
+                case "attachment":
+                    return (
+                        <View>
+                            {this.renderLabel(label)}
+                            <SquarePlus
+                                style={{ alignSelf: "center", marginTop: theme.padding * 2
+                             }}
+                                onPress={async () => {
+                                    const attachments = await pickImage([], false, false)
+                                    const attachment = attachments[0]
+                                    const attachmentBase64 = await RNFS.readFile(attachment.path, 'base64')
+                                    let update = attachment
+                                    update.attachmentBase64 = attachmentBase64
+                                    update[id] = attachmentBase64 //used to embbed on generated pdf; Don't store it on firestore; Store it later on Firebase storage & get downloadURL
+                                }} />
+                        </View>
+                    )
+
+                    break;
                 case "autogen":
                     return null
                     break;
@@ -712,7 +734,6 @@ class StepsForm extends Component {
 
     //##Logic: Submit
     async handleSubmit(isSubmitted) {
-        console.log('33333333')
         this.setState({ loading: true })
 
         //Verify onPress Check icon
@@ -728,10 +749,13 @@ class StepsForm extends Component {
         form = this.addFormLogs(form)
         form.isSubmitted = form.isSubmitted || isSubmitted
 
+        //2. Persist data
         db.collection(collection).doc(DocId).set(form)
 
+        //3. Generate pdf
         const pdfBase64 = await this.props.generatePdf(form, this.props.collection)
 
+        //4. Refresh state
         this.DocId = DocId
         this.setState({
             pdfBase64,
@@ -1333,6 +1357,18 @@ class StepsForm extends Component {
                         {this.renderBottomCenterButton(`Valider la ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64))}
                     </View>
                 </Modal>
+
+                {/* <ModalOptions
+                    title= "Source"
+                    columns={2}
+                    isLoading={modalLoading}
+                    modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                    isVisible={showModal}
+                    toggleModal={() => this.toggleModal()}
+                    elements={elements}
+                    autoValidation={true}
+                    handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                /> */}
 
                 <LoadDialog
                     message={"Traitement en cours"}

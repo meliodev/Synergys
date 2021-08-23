@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Image } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Image, ScrollView } from "react-native";
 import Modal from 'react-native-modal'
 import { Title } from 'react-native-paper'
 import { faTimes, faUserAlt } from '@fortawesome/pro-light-svg-icons'
@@ -41,6 +41,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 width: elementSize,
                 height: elementSize,
                 elevation: 2,
+                paddingHorizontal: theme.padding,
                 backgroundColor: theme.colors.white,
             }
         }
@@ -59,13 +60,16 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
         const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
 
         return (
-            <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
+            <TouchableOpacity
+                style={[elementStaticStyle(), elementDynamicStyle(element.selected)]}
+                onPress={() => onPressElement(element, index)}
+            >
                 <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
                     {element.icon && <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />}
                     {element.image && <Image style={{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }} source={element.image} />}
                 </View>
-                <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
-                    <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
+                <View style={{ height: elementSize * 0.45, paddingTop: theme.padding/2, paddingHorizontal: 3 }}>
+                    <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.caption, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -215,14 +219,21 @@ const ModalOptions = ({
                         <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
                     </TouchableOpacity>
                     <Title style={[theme.customFontMSregular.header, { marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>{title}</Title>
-
-                    <ModalForm elements={elements} elementSize={elementSize} handleSelectElement={handleSelectElement} autoValidation={autoValidation} isReview={isReview} />
-                    {!autoValidation &&
-                        <View style={styles.buttonsContainer}>
-                            <Button mode="outlined" onPress={handleCancel} style={{ width: '40%' }}>Annuler</Button>
-                            <Button mode="contained" onPress={handleConfirm} style={{ width: '45%' }}>Confirmer</Button>
-                        </View>
-                    }
+                    <ScrollView contentContainerStyle={{ paddingBottom: theme.padding }}>
+                        <ModalForm
+                            elements={elements}
+                            elementSize={elementSize}
+                            handleSelectElement={handleSelectElement}
+                            autoValidation={autoValidation}
+                            isReview={isReview}
+                        />
+                        {!autoValidation &&
+                            <View style={styles.buttonsContainer}>
+                                <Button mode="outlined" onPress={handleCancel} style={{ width: '40%' }}>Annuler</Button>
+                                <Button mode="contained" onPress={handleConfirm} style={{ width: '45%' }}>Confirmer</Button>
+                            </View>
+                        }
+                    </ScrollView>
                 </View>
             }
         </Modal>

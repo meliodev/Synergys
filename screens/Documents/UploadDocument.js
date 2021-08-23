@@ -30,7 +30,7 @@ import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants, errorMessages, highRoles } from "../../core/constants";
+import { constants, docGenNavigationConfig, docTypesIds, errorMessages, generableDocTypes, highRoles, imageSources, masculinsDocTypes } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -44,11 +44,6 @@ const states = [
 const docSources = [
     { label: 'Importer', value: 'upload', icon: faCloudUploadAlt },
     { label: 'Générer', value: 'generate', icon: faMagic }
-]
-
-const imageSources = [
-    { label: 'Caméra', value: 'upload', icon: faCamera },
-    { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
 
 const genOrderSources = [
@@ -302,7 +297,7 @@ class UploadDocument extends Component {
             document = this.unformatDocument_conversion(document)
 
         await this.persistDocument(document, DocumentId)
-        this.documentListener()
+        this.documentListener() //listener to await local writes
         this.refreshState(document, DocumentId, isConversion)
 
         //5. Upload
@@ -369,13 +364,13 @@ class UploadDocument extends Component {
         if (!isConnected)
             this.setState({ loading: false, loadingConversion: false })
 
-        const fileUploaded = await this.uploadFile(isConversion, DocumentId)
+        const fileUploaded = await this.uploadFile(DocumentId)
         if (!fileUploaded)
             setToast(this, 'e', errorMessages.documents.upload) //#task: put it on redux store
         return fileUploaded
     }
 
-    async uploadFile(isConversion, DocumentId) {
+    async uploadFile(DocumentId) {
         var { project, type, attachment } = this.state
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
@@ -410,8 +405,7 @@ class UploadDocument extends Component {
         else { //this.isEdit || !this.isEdit && this.documentType 
             let modalContent = ''
             const { type } = this.state
-            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
-            let isGenerable = generableTypes.includes(type)
+            let isGenerable = generableDocTypes.includes(type)
             if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
             this.setState({ modalContent, showModal: true })
@@ -493,9 +487,8 @@ class UploadDocument extends Component {
         }
 
         else if (modalContent === 'docSources') {
-            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
             return {
-                title: `Créer ${articles_fr('un', masculins, type)} ${type.toLowerCase()}`,
+                title: `Créer ${articles_fr('un', masculinsDocTypes, type)} ${type.toLowerCase()}`,
                 columns: 2,
                 elements: this.docSources,
             }
@@ -510,9 +503,8 @@ class UploadDocument extends Component {
         }
 
         else if (modalContent === 'genOrderSources') {
-            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
             return {
-                title: `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`,
+                title: `Générer ${articles_fr('un', masculinsDocTypes, type)} ${type.toLowerCase()} à partir de:`,
                 columns: 2,
                 elements: this.genOrderSources,
             }
@@ -528,7 +520,7 @@ class UploadDocument extends Component {
 
         else if (modalContent === 'genFormSources') {
             return {
-                title: `Générer un ${type} à partir de:`,
+                title: `Générer un ${articles_fr('un', masculinsDocTypes, type)} ${type.toLowerCase()} à partir de:`,
                 columns: 2,
                 elements: this.genFormSources,
             }
@@ -570,8 +562,7 @@ class UploadDocument extends Component {
     configDocTypes(index) {
         const type = this.types[index].value
         this.setState({ type })
-        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
-        let isGenerable = generableTypes.includes(type)
+        let isGenerable = generableDocTypes.includes(type)
         if (isGenerable) this.setState({ modalContent: 'docSources' })
         else this.setState({ modalContent: 'imageSources' })
     }
@@ -588,7 +579,7 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
-            if (type === 'PV réception' || type === 'Mandat MaPrimeRénov' || type === 'Mandat Synergys')
+            if (generableDocTypes.includes(type))
                 this.setState({ modalContent: 'genFormSources' })
             else if (type === 'Devis')
                 this.startGenPdf(1)
@@ -666,52 +657,24 @@ class UploadDocument extends Component {
             onGoBack: this.getGenPdf
         }
 
-        if (type === "Devis" || type === "Facture") {
-            var titleText = "Choix de la commande"
-            var listScreen = "ListOrders"
-            var creationScreen = "CreateOrder"
-            var popCount = index === 0 ? 3 : 2
+        for (const id in docTypesIds) {
+            if (docTypesIds[id] === type)
+                var typeId = id
         }
+        const { titleText, listScreen, creationScreen, popCount } = docGenNavigationConfig[typeId]
+        var pop_Count = index === 0 ? popCount.fromList : popCount.fromCreation
 
-        else if (type === "Fiche EEB") {
-            var titleText = "Choix de la simulation"
-            var listScreen = "ListSimulations"
-            var creationScreen = "CreateSimulation"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        else if (type === "Mandat MaPrimeRénov") {
-            var titleText = "Choix du formulaire"
-            var listScreen = "ListMandatsMPR"
-            var creationScreen = "CreateMandatMPR"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        else if (type === "Mandat Synergys") {
-            var titleText = "Choix du formulaire"
-            var listScreen = "ListMandatsSynergys"
-            var creationScreen = "CreateMandatSynergys"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        else if (type === "PV réception") {
-            var titleText = "Choix du formulaire"
-            var listScreen = "ListPvReceptions"
-            var creationScreen = "CreatePvReception"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        //Existing order
+        //Existing form
         if (index === 0) {
             navParams.isRoot = false
             navParams.titleText = titleText
-            navParams.popCount = popCount
+            navParams.popCount = pop_Count
             this.props.navigation.navigate(listScreen, navParams)
         }
 
-        //New order
+        //New form
         else if (index === 1) {
-            navParams.popCount = popCount
+            navParams.popCount = pop_Count
             this.props.navigation.navigate(creationScreen, navParams)
         }
     }

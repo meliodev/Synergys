@@ -3,7 +3,7 @@ Questions:
 1. Qui doit confirmer la remise dans une commande? L'admin, RC ou RT (qui doit être notifier)
 2. Ou est comment montrer (differencier) les clients en cours ?
 3. Il faudrait pouvoir renommer les documents et photos inséré dans l'app 
-4 - il faudra donc ajouter la remise aussi sur cette ligne 1.1, cf image
+4. Il faudra donc ajouter la remise aussi sur cette ligne 1.1, cf image
 
 REPONSES
 - Comment calculer les taxes (à partir des prix avant ou après remises/primes ?): Voir les pieces jointes
@@ -18,20 +18,21 @@ Questions
 --------------------------------------
 Taches:
 VERSION BETA:
-1 - A la signature du devis, 2 documents devront signer en plus du devis :
-* Mandat maprimerénov (pdf à généré ; ci-joint) 
-* Mandat synergys (pdf à généré ; ci-joint) 
-2 - Attention nous remarquons qu'à la signature du devis le cerfa attestation simplifié ne se met pas à jour avec les infos client 
-et date.
-4 - Version ios
+2- Attention nous remarquons qu'à la signature du devis le cerfa attestation simplifié ne se met pas à jour avec 
+les infos client et date.
+4- Version ios
 
 DONE:
-1 - Voir la pièce jointe concernant devis remise pour ajuster le calcul des taxes. 
-2 - Aussi, lorsqu'on signe le devis, nous pouvons ensuite sortir de l'écran par la croix. Le problème est que la signature ne se sauvegarde pas. Ce serait bien d'avoir un message de confirmation de sortie 
-3 - Sort OrderLines to get product before services (current sort function is wrong..)
-4 - Si oui: On proposera 2 liens de sites internet: 
+1- Voir la pièce jointe concernant devis remise pour ajuster le calcul des taxes. 
+2- Aussi, lorsqu'on signe le devis, nous pouvons ensuite sortir de l'écran par la croix. Le problème est que la signature ne se sauvegarde pas. Ce serait bien d'avoir un message de confirmation de sortie 
+3- Sort OrderLines to get product before services (current sort function is wrong..)
+4- Si oui: On proposera 2 liens de sites internet: 
 * www.adhefi.com
 * www.moncofidispro.fr
+5- A la signature du devis, 2 documents devront signer en plus du devis :
+* Mandat maprimerénov (pdf à généré ; ci-joint) 
+* Mandat synergys (pdf à généré ; ci-joint) 
+
 ---------------------------------------------------
 OTHERS:
 1.
@@ -117,9 +118,7 @@ BUGS:
 
 - La gestion des conflits ne se déclenche plus
 - Lorsque l'on crée un client ou un projet  il n'y a pas de retour en arrière
-- Crash pendant la simulation (essayer de reproduire)
 - La progresse bar semble mal synchroniser 
-
 
 -------------------------------------------------------
 Questions du client:

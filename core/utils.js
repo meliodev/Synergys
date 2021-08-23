@@ -10,7 +10,7 @@ import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
 import { PDFDocument, degrees, PageSizes, StandardFonts, rgb } from 'pdf-lib'
 import _ from 'lodash'
-import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave } from '@fortawesome/pro-light-svg-icons'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave, faUserHardHat } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -173,7 +173,7 @@ export const configChoiceIcon = (choice) => {
 }
 
 export const articles_fr = (masc, masculins, target) => {
-
+  if (masculins === undefined) return "un"
   let resp
   if (masc === 'du') {
     resp = masculins.includes(target) ? 'du' : 'de la'
@@ -695,6 +695,22 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               )
               break;
 
+            case "attachment":
+              if (formInputs[field.id] === "image/jpeg")
+                var image = await pdfDoc.embedJpg(formInputs[field.id].attachmentBase64)
+              else if (formInputs[field.id] === "image/png")
+                var image = await pdfDoc.embedPng(formInputs[field.id].attachmentBase64)
+
+              const imageScaledHeight = image.height * pages[field.pdfConfig.pageIndex].getWidth() / image.width
+
+              pages[field.pdfConfig.pageIndex].drawImage(image, {
+                x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
+                y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
+                width: pages[field.pdfConfig.pageIndex].getWidth() - theme.padding * 2,
+                height: imageScaledHeight,
+              })
+              break;
+
             default: break;
           }
 
@@ -716,7 +732,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     const pdfBase64 = uint8ToBase64(pdfBytes)
     return pdfBase64
   }
-  
+
   catch (e) {
     console.log(e)
     throw new Error(errorMessages.pdfGen)
@@ -724,7 +740,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 }
 
 //##IMAGE PICKER
-export const pickImage = (previousAttachments, isCamera = false, addPathSuffix = true) => {
+export const pickImage = (previousAttachments, isCamera = false, addPathPrefix = true) => {
   const options = {
     title: 'Selectionner une image',
     takePhotoButtonTitle: 'Prendre une photo',
@@ -760,8 +776,8 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
 
       let { path, uri } = response
       if (Platform.OS === 'android') {
-        const pathSuffix = addPathSuffix ? 'file://' : ''
-        path = pathSuffix + path
+        const pathPrefix = addPathPrefix ? 'file://' : ''
+        path = pathPrefix + path
         image.path = path
       }
       else image.uri = uri
@@ -869,6 +885,7 @@ const allDocTypes = [
   { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
   { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
   { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
+  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 

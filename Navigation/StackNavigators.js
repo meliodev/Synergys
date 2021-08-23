@@ -75,6 +75,8 @@ import ListMandatsMPR from '../screens/Forms/MandatMaPrimeRenov/ListMandatsMPR'
 //Mandat Synergys
 import CreateMandatSynergys from '../screens/Forms/MandatSynergys/CreateMandatSynergys'
 import ListMandatsSynergys from '../screens/Forms/MandatSynergys/ListMandatsSynergys'
+//Technical Visit
+import CreateTechnicalVisit from '../screens/Forms/TechnicalVisits/CreateTechnicalVisit'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -240,6 +242,7 @@ const ProfileStack = createStackNavigator({
         screen: CreateSimulation,
         navigationOptions: hideHeader
     },
+    //Mandats MPR
     CreateMandatMPR: {
         screen: CreateMandatMPR,
         navigationOptions: hideHeader
@@ -248,6 +251,7 @@ const ProfileStack = createStackNavigator({
         screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
+    //Mandats Synergys
     ListMandatsSynergys: {
         screen: ListMandatsSynergys,
         navigationOptions: hideHeader
@@ -265,6 +269,11 @@ const ProfileStack = createStackNavigator({
         screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
+    //Technical Visit
+    CreateTechnicalVisit: {
+        screen: CreateTechnicalVisit,
+        navigationOptions: hideHeader
+    }
 })
 
 const UsersManagementStack = createStackNavigator({
@@ -463,6 +472,11 @@ const ClientsManagementStack = createStackNavigator({
         screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
+    //Technical Visit
+    CreateTechnicalVisit: {
+        screen: CreateTechnicalVisit,
+        navigationOptions: hideHeader
+    }
 })
 
 const RequestsManagementStack = createStackNavigator({
@@ -812,6 +826,11 @@ const ProjectsStack = createStackNavigator({
         screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
+    //Technical Visit
+    CreateTechnicalVisit: {
+        screen: CreateTechnicalVisit,
+        navigationOptions: hideHeader
+    }
 })
 
 const DocumentsStack = createStackNavigator({
@@ -888,6 +907,11 @@ const DocumentsStack = createStackNavigator({
     },
     ListPvReceptions: {
         screen: ListPvReceptions,
+        navigationOptions: hideHeader
+    },
+    //Technical Visit
+    CreateTechnicalVisit: {
+        screen: CreateTechnicalVisit,
         navigationOptions: hideHeader
     },
     //Profile screens
