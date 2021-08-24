@@ -85,6 +85,7 @@ class ListProjects extends Component {
 
     async componentDidMount() {
         await this.fetchProjects()
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => await this.fetchProjects())
     }
 
     //#task: put lazy fetching: https://github.com/patrickleemsantos/react-native-food-panther/blob/master/App.js

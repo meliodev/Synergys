@@ -235,7 +235,7 @@ class CreateTask extends Component {
         const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
         if (assignedToError || endDateError || dueHourError) {
             isValid1 = false
-            this.setState({ nameError, assignedToError, loading: false })
+            this.setState({ assignedToError, loading: false })
         }
         const isValid2 = this.validateSchedule()
         const isValid = isValid1 && isValid2
@@ -392,13 +392,13 @@ class CreateTask extends Component {
                 return
             }
 
-            //6. Handle conflicts
-            const overlappingTasks = await this.checkTasksConflicts(tasks)
-            if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
-                load(this, false)
-                this.handleConflicts(overlappingTasks, task)
-                return
-            }
+            // //6. Handle conflicts
+            // const overlappingTasks = await this.checkTasksConflicts(tasks)
+            // if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+            //     load(this, false)
+            //     this.handleConflicts(overlappingTasks, task)
+            //     return
+            // }
 
             //7. Persist task(s)
             await this.persistTasks(tasks)

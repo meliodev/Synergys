@@ -18,20 +18,42 @@ Questions
 --------------------------------------
 Taches:
 VERSION BETA:
-1 - A la signature du devis, 2 documents devront signer en plus du devis :
-* Mandat maprimerénov (pdf à généré ; ci-joint) 
-* Mandat synergys (pdf à généré ; ci-joint) 
 2 - Attention nous remarquons qu'à la signature du devis le cerfa attestation simplifié ne se met pas à jour avec les infos client 
 et date.
 4 - Version ios
 
 DONE:
+1 - A la signature du devis, 2 documents devront signer en plus du devis :
+* Mandat maprimerénov (pdf à généré ; ci-joint) 
+* Mandat synergys (pdf à généré ; ci-joint) 
 1 - Voir la pièce jointe concernant devis remise pour ajuster le calcul des taxes. 
 2 - Aussi, lorsqu'on signe le devis, nous pouvons ensuite sortir de l'écran par la croix. Le problème est que la signature ne se sauvegarde pas. Ce serait bien d'avoir un message de confirmation de sortie 
 3 - Sort OrderLines to get product before services (current sort function is wrong..)
 4 - Si oui: On proposera 2 liens de sites internet: 
 * www.adhefi.com
 * www.moncofidispro.fr
+
+DEPLOYMENT TASKS:
+- Activate Twilio
+- Schedule db backups
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ---------------------------------------------------
 OTHERS:
 1.

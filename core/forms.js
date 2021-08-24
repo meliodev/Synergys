@@ -671,7 +671,7 @@ export const ficheEEBModel = [
                 id: "transmittersTypes",
                 label: "Types d'émetteurs",
                 type: "options",
-                isMultiOptions: true, 
+                isMultiOptions: true,
                 items: [
                     { label: 'Radiateurs électriques', value: 'Radiateurs électriques', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -453, dy: - 536, pageIndex: 0 } },
                     { label: 'Clim réversible', value: 'Clim réversible', icon: faQuestionCircle, isConditional: true, condition: { with: "heaters", values: ["Electrique", "Poéle", "Bois", "Autre"] }, pdfConfig: { dx: -311, dy: - 554, pageIndex: 0 } },
@@ -2114,6 +2114,20 @@ export const pvReceptionModel = (params) => {
             ]
         },
 
+        {//6
+            id: "appreciationDate",
+            title: "Appréciation de la prestation",
+            fields: [
+                {
+                    id: "signatoryName",
+                    type: "textInput",
+                    label: "Nom du signataire",
+                    errorId: "signatoryNameError",
+                    pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
+                    mendatory: true,
+                },
+            ],
+        },
         //************************************* APPRECIATION
         { //5
             id: "appreciation",
@@ -2151,21 +2165,8 @@ export const pvReceptionModel = (params) => {
                     ],
                     mendatory: true,
                 },
-            ]
-        },
-        {//6
-            id: "appreciationDate",
-            title: "Appréciation de la prestation",
-            fields: [
-                {
-                    id: "signatoryName",
-                    type: "textInput",
-                    label: "Nom du signataire",
-                    errorId: "signatoryNameError",
-                    pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
-                    mendatory: true,
-                },
             ],
+            isLast: true
         },
     ]
 

@@ -66,10 +66,10 @@ class ProcessAction extends Component {
             loadingDialog: false,
             loadingModal: false,
             loading: true,
-            loadingMessage: this.initialLoadingMessage,
-            skipProcessHandler: false
+            loadingMessage: this.initialLoadingMessage
         }
 
+        this.processModel = this.setProcessModel(this.props.process)
     }
 
     setProcessModel(process) {
@@ -80,49 +80,25 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
-        await this.initializer()
-    }
-
-    async componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.process !== this.props.process) {
-            if (this.state.skipProcessHandler) {
-                // console.log('SKIP PROCESS HANDLER...............')
-                this.setState({ skipProcessHandler: false })
-            }
-
-            else {
-                // console.log('RUN PROCESS HANDLER__________________')
-                await this.initializer()
-                this.setState({ skipProcessHandler: false })
-            }
-        }
-
-        if (prevProps.processModels !== this.props.processModels) {
-            this.processModel = this.setProcessModel(this.props.process)
-        }
-    }
-
-    async initializer() {
-        this.processModel = this.setProcessModel(this.props.process)
-        await this.mainHandler(this.props.process, true)
+        await this.mainHandler(this.state.process)
             .catch((e) => displayError({ message: e.message }))
     }
 
-    async mainHandler(process, skipProcessHandler) {
-        return new Promise(async (resolve, reject) => {
+    async mainHandler(process) {
+        try {
             load(this, true)
             const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
-
-            this.setState({ skipProcessHandler }, async () => {
-                await this.updateProcess(updatedProcess)
-                await this.refreshProcess(updatedProcess)
-                if (isAllProcess) {
-                    this.refreshProcessHistory(updatedProcess)
-                }
-                resolve(true)
-            })
-        })
+            await this.updateProcess(updatedProcess)
+            await this.refreshProcess(updatedProcess)
+            if (isAllProcess) {
+                this.refreshProcessHistory(updatedProcess)
+            }
+        }
+        catch (e) {
+            console.log("ERROR", e.message)
+            throw new Error(e)
+        }
     }
 
     async runProcessHandler(process) {
@@ -133,7 +109,7 @@ class ProcessAction extends Component {
         return updatedProcess
     }
 
-    updateProcess(updatedProcess, process) {
+    updateProcess(updatedProcess) {
         return db
             .collection('Projects')
             .doc(this.props.project.id)
@@ -218,6 +194,7 @@ class ProcessAction extends Component {
     onPressAction = async (canUpdate, currentAction) => {
 
         try {
+            console.log("Action Pressed ******************************")
             if (!canUpdate) return
             const loadingMessage = "Traitement en cours..."
             this.setState({
@@ -240,6 +217,7 @@ class ProcessAction extends Component {
                 }
 
                 if (type === 'auto') {
+
                     //Modal
                     if (currentAction.choices) {
                         this.setState({
@@ -251,7 +229,6 @@ class ProcessAction extends Component {
 
                     //Sroll to item
                     else if (scrollTo) {
-                        console.log('9999999999999999999')
                         const { screen, itemId } = scrollTo
                         this.setState({
                             loading: false,
@@ -265,7 +242,7 @@ class ProcessAction extends Component {
                         let { screenParams, screenName, screenPush } = currentAction
                         if (screenParams) {
                             screenParams.isProcess = true
-                            screenParams.onGoBack = () => this.mainHandler(process, true)
+                            screenParams.onGoBack = () => this.mainHandler(process)
                         }
                         if (screenName) {
                             if (screenPush)
@@ -336,7 +313,7 @@ class ProcessAction extends Component {
             const { process, currentPhaseId } = this.state
             let processTemp = _.cloneDeep(process)
             delete processTemp[currentPhaseId]
-            await this.mainHandler(processTemp, true)
+            await this.mainHandler(processTemp)
         }
         catch (e) {
             throw new Error(e)
@@ -353,7 +330,7 @@ class ProcessAction extends Component {
                     action.status = "pending"
                 }
             })
-            await this.mainHandler(processTemp, true)
+            await this.mainHandler(processTemp)
         }
         catch (e) {
             throw new Error(e)
@@ -390,7 +367,7 @@ class ProcessAction extends Component {
                 if (onSelectType === 'navigation') {
                     if (screenParams) {
                         screenParams.isProcess = true
-                        screenParams.onGoBack = () => this.mainHandler(process, true)
+                        screenParams.onGoBack = () => this.mainHandler(process)
                     }
                     this.setState({ showModal: false, loadingModal: false })
                     this.props.navigation.navigate(screenName, screenParams)
@@ -509,7 +486,7 @@ class ProcessAction extends Component {
                 processTemp = transitionRes.process
             }
 
-            await this.mainHandler(processTemp, true)
+            await this.mainHandler(processTemp)
         }
 
         catch (e) {
@@ -528,7 +505,7 @@ class ProcessAction extends Component {
                     action.status = "pending"
                 }
             })
-            await this.mainHandler(processTemp, true)
+            await this.mainHandler(processTemp)
         }
         catch (e) {
             throw new Error(e)
@@ -671,7 +648,7 @@ class ProcessAction extends Component {
                 <View style={styles.progressionLinks}>
                     <TouchableOpacity>
                         <CustomIcon
-                            onPress={() => this.mainHandler(process, true)}
+                            onPress={() => this.mainHandler(process)}
                             icon={faRedo}
                             size={18}
                             color={theme.colors.primary}

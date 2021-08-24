@@ -606,6 +606,7 @@ class StepsForm extends Component {
         const isLastPage = pageIndex === pages.length - 1
 
         //Set & Show simulation results
+        console.log(isLastFormPage, isLastFormPage, "...")
         if (isLastFormPage) {
             if (collection === "Simulations") {
                 await this.setResults()
@@ -619,6 +620,7 @@ class StepsForm extends Component {
 
         //Submit
         else if (isLastPage) {
+            console.log('LAST PAGE')
             this.handleSubmit(true)
         }
 
@@ -717,6 +719,7 @@ class StepsForm extends Component {
 
     //##Logic: Submit
     async handleSubmit(isSubmitted) {
+        console.log('11111111111')
         this.setState({ loading: true })
 
         //Verify onPress Check icon
@@ -1297,8 +1300,8 @@ class StepsForm extends Component {
                     />
                     <EmptyList
                         icon={faTimes}
-                        header='Simulation introuvable'
-                        description="La simulation est introuvable dans la base de données. Il se peut qu'elle ait été supprimé."
+                        header='Formulaire introuvable'
+                        description="Le formulaire est introuvable dans la base de données. Il se peut qu'il ait été supprimé."
                         offLine={!this.props.network.isConnected}
                     />
                 </View>

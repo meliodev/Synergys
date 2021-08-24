@@ -184,6 +184,8 @@ class CreateProject extends Component {
     }
 
     async initEditMode() {
+        this.isEdit = true
+        this.title = 'Modifier le projet'
         let query = db.collection("Projects").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
             this.projectListener = query.onSnapshot(async (doc) => {
@@ -307,11 +309,6 @@ class CreateProject extends Component {
         return true
     }
 
-    catch(e) {
-        const { message } = e
-        displayError({ message })
-    }
-
     //#OOS
     async handleSubmit() {
         Keyboard.dismiss()
@@ -360,35 +357,38 @@ class CreateProject extends Component {
         project.workTypes = selectedWorkTypesValues
 
         db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-        await this.refreshState(project)
+        //await this.refreshState(project)
+        if (!this.isEdit)
+            await this.initEditMode()
+        load(this, false)
+        const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
+        setToast(this, 's', toastMessage)
     }
 
-    async refreshState(project) {
-        try {
-            const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
-            if (!this.isEdit) {
-                const { createdAt, createdBy } = project
-                this.setState({ createdAt, createdBy }, async () => {
-                    this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
-                    this.project.id = this.ProjectId
-                    this.title = 'Modifier le projet'
-                    this.isEdit = true
-                    this.setState({ process: project.process }) //re-rendering (showing process)
-                    this.setImageCarousel(project.attachments)
-                    this.setUserAccess(project.step)
-                    await this.fetchOtherData()
-                })
-            }
+    // async refreshState(project) {
+    //     try {
+    //         if (!this.isEdit) {
+    //             const { createdAt, createdBy } = project
+    //             this.setState({ createdAt, createdBy }, async () => {
+    //                 this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+    //                 this.project.id = this.ProjectId
+    //                 this.title = 'Modifier le projet'
+    //                 this.isEdit = true
+    //                 this.setState({ process: project.process }) //re-rendering (showing process)
+    //                 this.setImageCarousel(project.attachments)
+    //                 this.setUserAccess(project.step)
+    //                 await this.fetchOtherData()
+    //             })
+    //         }
 
-            load(this, false)
-            setToast(this, 's', toastMessage)
-            this.initialState = _.cloneDeep(this.state)
-        }
-        catch (e) {
-            const { message } = e
-            displayError({ message })
-        }
-    }
+    //         load(this, false)
+    //         this.initialState = _.cloneDeep(this.state)
+    //     }
+    //     catch (e) {
+    //         const { message } = e
+    //         displayError({ message })
+    //     }
+    // }
 
     showAlert() {
         const title = "Supprimer le projet"
