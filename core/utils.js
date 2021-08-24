@@ -187,8 +187,16 @@ export const articles_fr = (masc, masculins, target) => {
   else if (masc === 'le') {
     resp = masculins.includes(target) ? 'le' : 'la'
   }
+  else if (masc === 'e') {
+    resp = masculins.includes(target) ? '' : 'e'
+  }
 
+  console.log('RESP', resp)
   return resp
+}
+
+export const isMasculin = (item, mascItems) => {
+  return mascItems.includes(item)
 }
 
 export const checkPlural = (arrayLength, string) => {
@@ -559,6 +567,8 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
           let positions = []
           let text = ""
 
+          console.log(field.id, field.items)
+
           switch (field.type) {
             case "textInput":
               text = formInputs[field.id]
@@ -634,6 +644,8 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
               else { //Picker = Options
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
+                console.log('ITEMS:::', field.items)
+                console.log('INDEX:::', index, formInputs[field.id])
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   var pageIndex = field.items[index].pdfConfig.pageIndex
@@ -716,7 +728,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     const pdfBase64 = uint8ToBase64(pdfBytes)
     return pdfBase64
   }
-  
+
   catch (e) {
     console.log(e)
     throw new Error(errorMessages.pdfGen)

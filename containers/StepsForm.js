@@ -41,7 +41,8 @@ import {
     setAddress,
     refreshAddress,
     displayError,
-    arrayIntersection
+    arrayIntersection,
+    articles_fr,
 } from '../core/utils';
 
 import { constants } from '../core/constants';
@@ -50,6 +51,8 @@ import { ficheEEBBase64 } from '../core/files';
 import { setStatusBarColor } from '../core/redux';
 import { db } from '../firebase';
 import { fetchDocument } from '../api/firestore-api';
+
+const mascCollections = ["PvReception", "MandatsMPR", "MandatsSynergys"]
 
 class StepsForm extends Component {
     constructor(props) {
@@ -72,7 +75,7 @@ class StepsForm extends Component {
         this.popCount = this.props.navigation.getParam('popCount', 1)
 
         this.state = {
-            showWelcomeMessage: !this.isEdit,
+            showWelcomeMessage: this.props.collection === "Simulations" && !this.isEdit,
             showSuccessMessage: false,
             pagesDone: [],
             pageIndex: 0,
@@ -553,8 +556,9 @@ class StepsForm extends Component {
     renderButtons(pages) {
         const { pageIndex } = this.state
         const isSubmit = pages[pageIndex].id === 'submit'
-        const isLastFormPage = pageIndex === pages.length - 2
-        const title = isSubmit ? "Soumettre" : isLastFormPage ? "Terminer" : "Continuer"
+        const isLastPage = pageIndex === pages.length - 1
+        // const isLastFormPage = pageIndex === pages.length - 2
+        const title = isSubmit ? "Soumettre" : isLastPage ? "Terminer" : "Continuer"
 
         return (
             <View style={styles.buttonsContainer}>
@@ -606,26 +610,24 @@ class StepsForm extends Component {
         const isLastPage = pageIndex === pages.length - 1
 
         //Set & Show simulation results
-        console.log(isLastFormPage, isLastFormPage, "...")
-        if (isLastFormPage) {
-            if (collection === "Simulations") {
-                await this.setResults()
-                this.setState({
-                    showSuccessMessage: true,
-                    pageIndex: this.state.pageIndex + 1,
-                    loading: false
-                })
-            }
+        if (collection === "Simulations" && isLastFormPage) {
+            await this.setResults()
+            this.setState({
+                showSuccessMessage: true,
+                pageIndex: this.state.pageIndex + 1,
+                loading: false
+            })
         }
 
         //Submit
         else if (isLastPage) {
-            console.log('LAST PAGE')
             this.handleSubmit(true)
         }
 
         //Increment page
-        else this.setState({ pageIndex: pageIndex + 1 })
+        else {
+            this.setState({ pageIndex: pageIndex + 1 })
+        }
     }
 
     goBack() {
@@ -719,7 +721,7 @@ class StepsForm extends Component {
 
     //##Logic: Submit
     async handleSubmit(isSubmitted) {
-        console.log('11111111111')
+
         this.setState({ loading: true })
 
         //Verify onPress Check icon
@@ -1333,7 +1335,7 @@ class StepsForm extends Component {
                 >
                     <View style={styles.scrollableModal}>
                         <ModalHeader
-                            title={`${this.props.fileName} générée`}
+                            title={`${this.props.fileName} généré${articles_fr("e", mascCollections, collection)}`}
                             toggleModal={this.toggleModal}
                         />
                         {pdfBase64 !== "" &&
@@ -1341,7 +1343,7 @@ class StepsForm extends Component {
                                 <Pdf source={source} style={modalStyles.pdf} />
                             </View>
                         }
-                        {this.renderBottomCenterButton(`Valider la ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64))}
+                        {this.renderBottomCenterButton(`Valider ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64))}
                     </View>
                 </Modal>
 

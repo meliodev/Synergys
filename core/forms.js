@@ -34,7 +34,7 @@ export const ficheEEBModel = [
                 id: "proSituationSir",
                 type: "picker",
                 items: [
-                    { label: "Situation professionnelle Mr", value: "" },
+                    { label: "Situation professionnelle Mr", value: "", pdfConfig: { skip: true }  },
                     { label: "Salarié privé", value: "Salarié privé" },
                     { label: "Salarié public", value: "Salarié public" },
                     { label: "Retraité", value: "Retraité" },
@@ -66,7 +66,7 @@ export const ficheEEBModel = [
                 id: "proSituationMiss",
                 type: "picker",
                 items: [
-                    { label: "Situation professionnelle Mme", value: "" },
+                    { label: "Situation professionnelle Mme", value: "", pdfConfig: { skip: true }  },
                     { label: "Salarié privé", value: "Salarié privé" },
                     { label: "Salarié public", value: "Salarié public" },
                     { label: "Retraité", value: "Retraité" },
@@ -186,7 +186,7 @@ export const ficheEEBModel = [
                 id: "aidAndSubWorksType",
                 type: "picker",
                 items: [
-                    { label: "Nature des travaux", value: "" },
+                    { label: "Nature des travaux", value: "", pdfConfig: { skip: true }  },
                     { label: "Chauffage", value: "Chauffage" },
                     { label: "Eau chaude", value: "Eau chaude" },
                     { label: "Isolation", value: "Isolation" },
@@ -651,7 +651,7 @@ export const ficheEEBModel = [
                 id: "heaters",
                 type: "picker",
                 items: [
-                    { label: "Selectionner un type", value: "" },
+                    { label: "Selectionner un type", value: "", pdfConfig: { skip: true }  },
                     { label: "Electrique", value: "Electrique", pdfConfig: { dx: -453, dy: - 499, pageIndex: 0 } },
                     { label: "Gaz", value: "Gaz", pdfConfig: { dx: -375, dy: - 499, pageIndex: 0 } },
                     { label: "Fioul", value: "Fioul", pdfConfig: { dx: -311, dy: - 499, pageIndex: 0 } },
@@ -1922,7 +1922,7 @@ export const pvReceptionModel = (params) => {
                     id: "photovoltaicWorksType",
                     type: "picker",
                     items: [
-                        { label: "Nature des travaux", value: "" },
+                        { label: "Nature des travaux", value: "", pdfConfig: { skip: true } },
                         { label: "Travaux d’intégration au bâti", value: "Travaux d’intégration au bâti", pdfConfig: { dx: -517, dy: - 520, pageIndex: 1 } },
                         { label: "Travaux d’installation électrique", value: "Travaux d’installation électrique", pdfConfig: { dx: -370, dy: - 520, pageIndex: 1 } },
                     ],
@@ -1980,7 +1980,7 @@ export const pvReceptionModel = (params) => {
                     id: "heatPumpDeviceType",
                     type: "picker",
                     items: [
-                        { label: "Type d'appareil", value: "" },
+                        { label: "Type d'appareil", value: "", pdfConfig: { skip: true }  },
                         { label: "Air/Air", value: "Air/Air", pdfConfig: { dx: -517, dy: - 520, pageIndex: 1 } },
                         { label: "Air/Eau", value: "Air/Eau", pdfConfig: { dx: -460, dy: - 520, pageIndex: 1 } },
                         { label: "Eau/Eau", value: "Eau/Eau", pdfConfig: { dx: -400, dy: - 567, pageIndex: 1 } },//400
@@ -2043,7 +2043,7 @@ export const pvReceptionModel = (params) => {
                     id: "drillingType",
                     type: "picker",
                     items: [
-                        { label: "Type de forage", value: "" },
+                        { label: "Type de forage", value: "", pdfConfig: { skip: true }  },
                         { label: "Forage sur Nappe", value: "Forage sur Nappe", pdfConfig: { dx: -517, dy: - 613, pageIndex: 1 } },//517
                         { label: "Forage sur Sonde", value: "Forage sur Sonde", pdfConfig: { dx: -415, dy: - 613, pageIndex: 1 } },
                     ],
@@ -2101,7 +2101,7 @@ export const pvReceptionModel = (params) => {
                     id: "condensingBoilerDeviceType",
                     type: "picker",
                     items: [
-                        { label: "Type d'appareil", value: "" },
+                        { label: "Type d'appareil", value: "", pdfConfig: { skip: true }  },
                         { label: "Gaz", value: "Gaz", pdfConfig: { dx: -545, dy: - 660, pageIndex: 1, squareSize: 12 } },
                         { label: "Fioul", value: "Fioul", pdfConfig: { dx: -516, dy: - 660, pageIndex: 1, squareSize: 12 } },
                     ],
@@ -2113,22 +2113,6 @@ export const pvReceptionModel = (params) => {
                 },
             ]
         },
-
-        {//6
-            id: "appreciationDate",
-            title: "Appréciation de la prestation",
-            fields: [
-                {
-                    id: "signatoryName",
-                    type: "textInput",
-                    label: "Nom du signataire",
-                    errorId: "signatoryNameError",
-                    pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
-                    mendatory: true,
-                },
-            ],
-        },
-        //************************************* APPRECIATION
         { //5
             id: "appreciation",
             title: "Appréciation de la prestation",
@@ -2163,6 +2147,21 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { dx: -94, dy: - 723, pageIndex: 1, squareSize: 12 },
                         },
                     ],
+                    mendatory: true,
+                },
+            ],
+        },
+        //************************************* APPRECIATION
+        {//6
+            id: "appreciationDate",
+            title: "Appréciation de la prestation",
+            fields: [
+                {
+                    id: "signatoryName",
+                    type: "textInput",
+                    label: "Nom du signataire",
+                    errorId: "signatoryNameError",
+                    pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
                     mendatory: true,
                 },
             ],

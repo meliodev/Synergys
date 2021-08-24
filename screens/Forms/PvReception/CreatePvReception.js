@@ -67,6 +67,8 @@ const initialState = {
     heatPumpDeviceType: "",
     geothermalDrillingDepth: "",
     drillingType: "",
+    condensingBoilerPower: "",
+    condensingBoilerDeviceType: "",
 
     appreciation: "",
     signatoryName: "",
