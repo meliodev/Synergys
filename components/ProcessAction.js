@@ -440,8 +440,10 @@ class ProcessAction extends Component {
             const operation = choice && choice.operation || pressedAction.operation || null
             if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
 
+            console.log('1111111')
             await this.runOperation(operation, pressedAction)
             await this.validateAction(comment, null, false, nextStep, nextPhase)
+            console.log('2222222')
 
             this.setState({ loadingDialog: false, showDialog: false })
             clearComment()
@@ -487,6 +489,7 @@ class ProcessAction extends Component {
                         action.choices = choices
                     //Update action status
                     if (!stay && nextPhase !== 'cancelProject') {
+                        console.log('99999999999999999999999')
                         action.status = "done"
                         action.doneAt = moment().format()
                         //set start time of next action

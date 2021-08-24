@@ -6,7 +6,7 @@ import { db, functions } from '../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
 import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from './utils'
-import { errorMessages, phases } from './constants';
+import { errorMessages, lastAction, phases } from './constants';
 
 //#PROCESS ALGORITHM/LOGIC
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
@@ -592,6 +592,8 @@ const getPhaseFirstStep = (steps) => {
 }
 
 const resumeMaintainance = (processModel, process) => {
+
+    //Initialize maintainance phase
     process['maintainance'] = {}
     process['maintainance'].title = _.clone(processModel['maintainance'].title)
     process['maintainance'].instructions = _.clone(processModel['maintainance'].instructions)
@@ -599,17 +601,22 @@ const resumeMaintainance = (processModel, process) => {
     process['maintainance'].steps = {}
     process['maintainance'].steps['maintainanceContract'] = _.cloneDeep(process['installation'].steps['maintainanceContract'])
 
-    const currentActions = _.cloneDeep(process['maintainance'].steps['maintainanceContract'].actions)
-    currentActions.sort((a, b) => (a.actionOrder < b.actionOrder) ? 1 : -1)
-    if (currentActions[0].nextStep) delete currentActions[0].nextStep
-    if (currentActions[0].nextPhase) delete currentActions[0].nextPhase
+    //Configure maintainance phase actions
+    process['maintainance'].steps['maintainanceContract'].actions.forEach((action, actionIndex) => {
+        if (action.nextStep)
+            delete action.nextStep
+        if (action.nextPhase)
+            delete action.nextPhase
+        if (action.choices)
+            action.choices = action.choices.filter((choice) => choice.id !== "cancel" && choice.id !== "skip")
+    })
+    const actionOrder = process['maintainance'].steps['maintainanceContract'].actions.length
+    process['maintainance'].steps['maintainanceContract'].actions.push(lastAction(actionOrder))
 
-    const { actions } = _.cloneDeep(processModel['maintainance'].steps['maintainanceContract'])
-    actions.sort((a, b) => (a.actionOrder < b.actionOrder) ? 1 : -1)
-    const lastAction = actions[0]
-    currentActions.push(lastAction)
-
-    process['maintainance'].steps['maintainanceContract'].actions = currentActions
+    //Remove pending actions from installation.maintainanceContract (because it is duplicated to maintainance phase)
+    let { actions } = process['installation'].steps['maintainanceContract']
+    actions = actions.filter((action) => action.status !== "pending")
+    process['installation'].steps['maintainanceContract'].actions = actions
 
     return process
 }

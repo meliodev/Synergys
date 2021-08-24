@@ -351,6 +351,7 @@ class CreateProject extends Component {
         project.attachments = attachments
         project.process = {
             version: getLatestProcessModelVersion(this.props.processModels)
+            //version: "version0" //Used for testing new models
         }
         const selectedWorkTypes = this.state.workTypes.filter((wt) => wt.selected === true)
         const selectedWorkTypesValues = selectedWorkTypes.map((wt) => wt.value)

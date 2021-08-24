@@ -25,7 +25,7 @@ class Wrapper extends Component {
 
     componentDidMount() {
         this.networkListener()
-      //  this.persistProcessModel()
+        this.persistProcessModel()
     }
 
     networkListener() {

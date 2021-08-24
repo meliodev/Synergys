@@ -65,3 +65,18 @@ export const items_scrollTo = {
         "comContact": { x: 0, y: 1000, animated: true },
     }
 }
+
+export const lastAction = (actionOrder) => {
+    return {
+        id: 'endProject',
+        title: "Finaliser le projet",
+        instructions: "",
+        actionOrder,
+        type: 'manual',
+        verificationType: 'validation',
+        comment: '',
+        responsable: 'ADV',
+        status: 'pending',
+        nextPhase: 'endProject',
+    }
+}
