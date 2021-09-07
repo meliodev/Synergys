@@ -16,14 +16,19 @@ const FormSection = ({
     iconSize,
     iconSecondaryColor,
     showSection = true,
-    hide = false
+    hide = false,
+    isExpanded = true,
+    onPressSection
 }) => {
+
+    const showForm = form && isExpanded
 
     if (hide) return null
 
     return (
         <View style={[containerStyle, styles.container]}>
             {showSection &&
+
                 <Section
                     text={sectionTitle}
                     icon={sectionIcon}
@@ -32,10 +37,11 @@ const FormSection = ({
                     iconSecondaryColor={iconSecondaryColor}
                     iconSize={iconSize}
                     rightComponent={sectionRightComponent}
+                    onPress={onPressSection}
                 />
             }
 
-            {form &&
+            {showForm &&
                 <View style={[styles.formContainer, formContainerStyle]}>
                     {form}
                 </View>

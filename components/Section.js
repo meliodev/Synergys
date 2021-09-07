@@ -8,9 +8,20 @@ import { CustomIcon } from './CustomIcon'
 import * as theme from "../core/theme"
 import { constants } from '../core/constants'
 
-const Section = ({ style, text, icon, onPressIcon, iconColor = theme.colors.gray_dark, iconSecondaryColor = undefined, rightComponent = null, iconSize = 21, textStyle }) => {
+const Section = ({
+  style,
+  text,
+  icon,
+  onPressIcon,
+  iconColor = theme.colors.gray_dark,
+  iconSecondaryColor = undefined,
+  rightComponent = null,
+  iconSize = 21,
+  textStyle,
+  onPress
+}) => {
   return (
-    <View style={[styles.section, style]}>
+    <TouchableOpacity style={[styles.section, style]} onPress={onPress}>
       <Text style={[theme.customFontMSregular.header, textStyle]}>{text}</Text>
       {rightComponent ?
         rightComponent()
@@ -21,8 +32,7 @@ const Section = ({ style, text, icon, onPressIcon, iconColor = theme.colors.gray
           </TouchableOpacity>
         )
       }
-
-    </View>
+    </TouchableOpacity>
   )
 }
 

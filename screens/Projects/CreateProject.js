@@ -168,7 +168,17 @@ class CreateProject extends Component {
             //Specific privileges (poseur & commercial)
             isBlockedUpdates: false,
 
-            scrollViewRef: null
+            scrollViewRef: null,
+            sectionsExpansion: {
+                generalInfo: false,
+                client: false,
+                contacts: false,
+                documents: false,
+                facturation: false,
+                tasks: false,
+                activity: false,
+                photos: false
+            }
         }
     }
 
@@ -491,7 +501,7 @@ class CreateProject extends Component {
 
     renderPlacePictures(canWrite, isConnected) {
 
-        const { isImageViewVisible, imageIndex, imagesView, imagesCarousel, newAttachments, loading } = this.state
+        const { isImageViewVisible, imageIndex, imagesView, imagesCarousel, newAttachments, sectionsExpansion, loading } = this.state
 
         return (
             <FormSection
@@ -499,6 +509,8 @@ class CreateProject extends Component {
                 sectionTitle='Photos et plan du lieu'
                 sectionIcon={faImage}
                 showSection={!loading}
+                isExpanded={sectionsExpansion["photos"]}
+                onPressSection={() => this.toggleSection("photos")}
                 form={
                     <View style={{ flex: 1, justifyContent: 'flex-start' }}>
                         {imagesView.length > 0 &&
@@ -572,7 +584,20 @@ class CreateProject extends Component {
 
     renderTasksForm() {
         const canCreateTasks = this.props.permissions.tasks.canCreate
-        const { tasksList, taskTypes, expandedTaskId, name, client, step, address, comContact, techContact, intervenant, hasPriorTechVisitError } = this.state
+        const {
+            tasksList,
+            taskTypes,
+            expandedTaskId,
+            name,
+            client,
+            step,
+            address,
+            comContact,
+            techContact,
+            intervenant,
+            hasPriorTechVisitError,
+            sectionsExpansion
+        } = this.state
 
         const onPressLink1 = () => {
             this.props.navigation.navigate('Agenda', {
@@ -600,6 +625,8 @@ class CreateProject extends Component {
             <FormSection
                 sectionTitle='Tâches'
                 sectionIcon={faTasks}
+                isExpanded={sectionsExpansion["tasks"]}
+                onPressSection={() => this.toggleSection("tasks")}
                 form={tasksList.length > 0 ?
                     <View style={{ flex: 1 }}>
 
@@ -666,13 +693,19 @@ class CreateProject extends Component {
         else this.props.navigation.goBack()
     }
 
+    toggleSection(sectionId) {
+        let { sectionsExpansion } = this.state
+        sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
+        this.setState({ sectionsExpansion })
+    }
+
     render() {
         let {
             client, name, workTypes, note, address, state, step, bill, color, process,
             createdAt, createdBy, editedAt, editedBy,
             documentsList, documentTypes, taskTypes, comContact, techContact,
             nameError, loading, docNotFound, toastMessage, toastType,
-            isBlockedUpdates
+            isBlockedUpdates, sectionsExpansion
         } = this.state
         const { isConnected } = this.props.network
 
@@ -747,6 +780,8 @@ class CreateProject extends Component {
                                 editedBy={editedBy}
                                 editedAt={editedAt}
                                 navigation={this.props.navigation}
+                                isExpanded={sectionsExpansion["activity"]}
+                                onPressSection={() => this.toggleSection("activity")}
                             />
                         }
 
@@ -754,6 +789,8 @@ class CreateProject extends Component {
                             sectionTitle='Informations générales'
                             sectionIcon={faInfoCircle}
                             isLoading={loading}
+                            isExpanded={sectionsExpansion["generalInfo"]}
+                            onPressSection={() => this.toggleSection("generalInfo")}
                             form={
                                 <View style={{ flex: 1 }}>
 
@@ -835,6 +872,8 @@ class CreateProject extends Component {
                         <FormSection
                             sectionTitle='Client'
                             sectionIcon={faUser}
+                            isExpanded={sectionsExpansion["client"]}
+                            onPressSection={() => this.toggleSection("client")}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
@@ -873,6 +912,8 @@ class CreateProject extends Component {
                         <FormSection
                             sectionTitle='Contacts'
                             sectionIcon={faAddressBook}
+                            isExpanded={sectionsExpansion["contacts"]}
+                            onPressSection={() => this.toggleSection("contacts")}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <ItemPicker
@@ -916,6 +957,8 @@ class CreateProject extends Component {
                             <FormSection
                                 sectionTitle='Documents'
                                 sectionIcon={faFolder}
+                                isExpanded={sectionsExpansion["documents"]}
+                                onPressSection={() => this.toggleSection("documents")}
                                 form={
                                     <View style={{ flex: 1 }}>
                                         {canCreateDocument && canWrite &&
@@ -934,7 +977,6 @@ class CreateProject extends Component {
                                             }}>
                                             {documentTypes.map((type) => {
                                                 let filteredDocuments = documentsList.filter((doc) => doc.type === type)
-
                                                 return (
                                                     <List.Accordion showArrow title={type} id={type} titleStyle={theme.customFontMSregular.body}>
                                                         {this.renderAttachments(filteredDocuments, 'pdf', false)}
@@ -948,26 +990,30 @@ class CreateProject extends Component {
 
                         {showTasksForm && this.renderTasksForm()}
 
-                        {showBillSection && < FormSection
-                            sectionTitle='Facturation'
-                            sectionIcon={faEuroSign}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    <MyInput
-                                        label="Montant facturé (€)*"
-                                        returnKeyType="done"
-                                        keyboardType='numeric'
-                                        value={bill.amount}
-                                        onChangeText={amount => {
-                                            bill.amount = amount
-                                            this.setState({ bill })
-                                        }}
-                                        editable={canWrite && !this.isClient}
-                                    // error={!!price.error}
-                                    // errorText={price.error}
-                                    />
-                                </View>
-                            } />
+                        {showBillSection &&
+                            <FormSection
+                                sectionTitle='Facturation'
+                                sectionIcon={faEuroSign}
+                                isExpanded={sectionsExpansion["facturation"]}
+                                onPressSection={() => this.toggleSection("facturation")}
+                                form={
+                                    <View style={{ flex: 1 }}>
+                                        <MyInput
+                                            label="Montant facturé (€)*"
+                                            returnKeyType="done"
+                                            keyboardType='numeric'
+                                            value={bill.amount}
+                                            onChangeText={amount => {
+                                                bill.amount = amount
+                                                this.setState({ bill })
+                                            }}
+                                            editable={canWrite && !this.isClient}
+                                        // error={!!price.error}
+                                        // errorText={price.error}
+                                        />
+                                    </View>
+                                }
+                            />
                         }
 
                         <FormSection
