@@ -13,7 +13,17 @@ import MyInput from '../components/TextInput'
 import * as theme from "../core/theme";
 import { getRoleIdFromValue } from "../core/utils";
 
-const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navigation, isExpanded, onPressSection, ...props }) => {
+const ActivitySection = ({
+    createdBy,
+    createdAt,
+    editedBy,
+    editedAt,
+    navigation,
+    isExpanded,
+    onPressSection,
+    formSectionContainerStyle,
+    ...props
+}) => {
 
     navigateToProfile = (user) => navigation.navigate('Profile', { user: { id: user.id, roleId: getRoleIdFromValue(user.role) } })
     const showEditedAt = editedAt !== '' && editedAt !== undefined
@@ -25,6 +35,7 @@ const ActivitySection = ({ createdBy, createdAt, editedBy, editedAt, navigation,
             sectionIcon={faChartLine}
             isExpanded={isExpanded}
             onPressSection={onPressSection}
+            containerStyle={formSectionContainerStyle}
             form={
                 <View style={{ flex: 1 }}>
                     <MyInput

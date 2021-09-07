@@ -170,14 +170,14 @@ class CreateProject extends Component {
 
             scrollViewRef: null,
             sectionsExpansion: {
-                generalInfo: false,
-                client: false,
-                contacts: false,
-                documents: false,
-                facturation: false,
-                tasks: false,
-                activity: false,
-                photos: false
+                generalInfo: !this.isEdit,
+                client: !this.isEdit,
+                contacts: !this.isEdit,
+                documents: !this.isEdit,
+                facturation: !this.isEdit,
+                tasks: !this.isEdit,
+                activity: !this.isEdit,
+                photos: !this.isEdit
             }
         }
     }
@@ -193,9 +193,18 @@ class CreateProject extends Component {
             this.projectListener()
     }
 
+    initSectionsExpansion() {
+        let { sectionsExpansion } = this.state
+        for (const key in sectionsExpansion) {
+            sectionsExpansion[key] = false
+        }
+        this.setState({ sectionsExpansion })
+    }
+
     async initEditMode() {
         this.isEdit = true
         this.title = 'Modifier le projet'
+        this.initSectionsExpansion()
         let query = db.collection("Projects").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
             this.projectListener = query.onSnapshot(async (doc) => {
@@ -627,6 +636,7 @@ class CreateProject extends Component {
                 sectionIcon={faTasks}
                 isExpanded={sectionsExpansion["tasks"]}
                 onPressSection={() => this.toggleSection("tasks")}
+                containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                 form={tasksList.length > 0 ?
                     <View style={{ flex: 1 }}>
 
@@ -768,7 +778,10 @@ class CreateProject extends Component {
                                     canUpdate={canWrite && !this.isClient}
                                     isAllProcess={false}
                                     role={this.props.role}
-                                    scrollTo={(position) => this.scrollView.scrollTo(position)}
+                                    scrollTo={(position) => {
+                                        this.toggleSection("contacts") //##solution provisoire
+                                        this.scrollView.scrollTo(position)
+                                    }}
                                 />
                             </View>
                         }
@@ -782,6 +795,7 @@ class CreateProject extends Component {
                                 navigation={this.props.navigation}
                                 isExpanded={sectionsExpansion["activity"]}
                                 onPressSection={() => this.toggleSection("activity")}
+                                formSectionContainerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                             />
                         }
 
@@ -791,6 +805,7 @@ class CreateProject extends Component {
                             isLoading={loading}
                             isExpanded={sectionsExpansion["generalInfo"]}
                             onPressSection={() => this.toggleSection("generalInfo")}
+                           // containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                             form={
                                 <View style={{ flex: 1 }}>
 
@@ -874,6 +889,7 @@ class CreateProject extends Component {
                             sectionIcon={faUser}
                             isExpanded={sectionsExpansion["client"]}
                             onPressSection={() => this.toggleSection("client")}
+                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
@@ -914,6 +930,7 @@ class CreateProject extends Component {
                             sectionIcon={faAddressBook}
                             isExpanded={sectionsExpansion["contacts"]}
                             onPressSection={() => this.toggleSection("contacts")}
+                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <ItemPicker
@@ -959,6 +976,7 @@ class CreateProject extends Component {
                                 sectionIcon={faFolder}
                                 isExpanded={sectionsExpansion["documents"]}
                                 onPressSection={() => this.toggleSection("documents")}
+                                containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                                 form={
                                     <View style={{ flex: 1 }}>
                                         {canCreateDocument && canWrite &&
@@ -996,6 +1014,7 @@ class CreateProject extends Component {
                                 sectionIcon={faEuroSign}
                                 isExpanded={sectionsExpansion["facturation"]}
                                 onPressSection={() => this.toggleSection("facturation")}
+                                containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                                 form={
                                     <View style={{ flex: 1 }}>
                                         <MyInput

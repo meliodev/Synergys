@@ -191,6 +191,11 @@ class UploadDocument extends Component {
         })
         this.initialState = _.cloneDeep(this.state)
         this.setState({ initialLoading: false })
+
+        if (this.project.id !== "" && !this.isEdit) {
+            const { canUpdate } = this.props.permissions.documents
+            this.onPressAttachment(canUpdate)
+        }
     }
 
     componentWillUnmount() {

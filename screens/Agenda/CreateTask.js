@@ -99,7 +99,8 @@ class CreateTask extends Component {
             color: theme.colors.primary,
 
             //Screens
-            assignedTo: defaultState.assignedTo || { email: "com1@eqx-software.com", fullName: "Commercial 1", id: "GS-US-zzEg", role: "Commercial" },
+            assignedTo: defaultState.assignedTo || { email: "", fullName: "", id: "", role: "" },
+            //|| { email: "com1@eqx-software.com", fullName: "Commercial 1", id: "GS-US-zzEg", role: "Commercial" },
             //{ id: '', fullName: '' },
             // { email: "bo2@eqx-software.com", fullName: "Back Office 2", id: "GS-US-nnqS", role: "Back office" },
             assignedToError: '',
@@ -335,7 +336,7 @@ class CreateTask extends Component {
     }
 
     //##POST
-    async handleSubmit(isConflictHandler = false) {
+    async handleSubmit(ignoreConflicts = false) {
         try {
             Keyboard.dismiss()
             //1. Check network (disable edit offline)
@@ -394,7 +395,7 @@ class CreateTask extends Component {
 
             //6. Handle conflicts
             const overlappingTasks = await this.checkTasksConflicts(tasks)
-            if (!_.isEmpty(overlappingTasks) || isConflictHandler && _.isEmpty(overlappingTasks)) {
+            if (!_.isEmpty(overlappingTasks) && !ignoreConflicts) {
                 load(this, false)
                 this.handleConflicts(overlappingTasks, task)
                 return
@@ -413,7 +414,7 @@ class CreateTask extends Component {
         }
         catch (e) {
             const { message } = e
-            displayError({ message }) 
+            displayError({ message })
         }
     }
 
@@ -624,6 +625,7 @@ class CreateTask extends Component {
                 tasks={overlappingTasks}
                 toggleModal={() => this.setState({ showTasksConflicts: !showTasksConflicts })}
                 refreshConflicts={async () => await this.handleSubmit(false)}
+                onIgnore={async () => await this.handleSubmit(true)}
                 isEdit={this.isEdit}
                 newTask={newTask}
 
@@ -645,6 +647,10 @@ class CreateTask extends Component {
                 isConnected={isConnected}
             />
         )
+    }
+
+    onIgnoreConflicts() {
+
     }
 
     render() {

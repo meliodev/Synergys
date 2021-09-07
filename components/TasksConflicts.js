@@ -20,7 +20,30 @@ import EmptyList from './EmptyList'
 import Section from "./Section"
 import Loading from "./Loading"
 
-const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTask, isEdit, startDate, endDate, handleDate, handleStartHour, handleDueHour, initPickedTaskSelectedItems, parentSelectedIsAllDay, parentPickedDate, parentPickedTask, parentSelectedDate, parentSelectedStartHour, parentSelectedDueHour, loading, isConnected, ...props }) => {
+const TasksConflicts = ({
+    isVisible,
+    toggleModal,
+    refreshConflicts,
+    tasks,
+    newTask,
+    isEdit,
+    startDate,
+    endDate,
+    handleDate,
+    handleStartHour,
+    handleDueHour,
+    initPickedTaskSelectedItems,
+    parentSelectedIsAllDay,
+    parentPickedDate,
+    parentPickedTask,
+    parentSelectedDate,
+    parentSelectedStartHour,
+    parentSelectedDueHour,
+    loading,
+    isConnected,
+    onIgnore,
+    ...props
+}) => {
     const firstTaskId = Object.keys(tasks)[0]
     const [pickedDate, setPickedDate] = React.useState('')
     const [pickedTask, setPickedTask] = React.useState(null)
@@ -60,6 +83,9 @@ const TasksConflicts = ({ isVisible, toggleModal, refreshConflicts, tasks, newTa
                     <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
                 </TouchableOpacity>
                 <Text style={[theme.customFontMSregular.h3, { marginLeft: theme.padding }]}>Oupss</Text>
+                <Text
+                    onPress={onIgnore}
+                    style={[theme.customFontMSregular.body, { position: "absolute", top: theme.padding, right: theme.padding, color: theme.colors.error }]}>Ignorer</Text>
             </View>
         )
     }
