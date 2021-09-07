@@ -60,6 +60,7 @@ const properties = [
     "hotWaterProduction",
     "yearInstallationHotWater",
     "heaters",
+    "energySource",
     "transmittersTypes",
     "yearInstallationHeaters",
     "idealTemperature",
@@ -131,6 +132,7 @@ const initialState = {
     hotWaterProduction: [],
     yearInstallationHotWater: "",
     heaters: "",
+    energySource: "",
     transmittersTypes: [],
     yearInstallationHeaters: "",
     idealTemperature: "",
@@ -151,14 +153,13 @@ const initialState = {
     // disablePhoneContact: true,
     email: "",
 }
- 
+
 class CreateSimulation extends Component {
     constructor(props) {
         super(props)
         this.SimulationId = this.props.navigation.getParam('SimulationId', '')
 
         this.state = {
-
         }
     }
 
@@ -233,7 +234,7 @@ class CreateSimulation extends Component {
                 pages={ficheEEBModel}
                 generatePdf={(formInputs) => generatePdfForm(formInputs, "Simulations")}
                 genButtonTitle="Générer une fiche EEB"
-                fileName = "Fiche EEB"
+                fileName="Fiche EEB"
             />
         )
     }

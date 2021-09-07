@@ -36,6 +36,7 @@ DONE:
 DEPLOYMENT TASKS:
 - Activate Twilio
 - Schedule db backups
+- Change emails destination of attestation fluide + Facture 
 
 
 

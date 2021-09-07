@@ -128,7 +128,7 @@ class CreateProject extends Component {
             color: theme.colors.primary,
             process: null,
 
-            comContact: { id: '', fullName: '', email: '', role: '' },
+            comContact: this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' },
             techContact: { id: '', fullName: '', email: '', role: '' },
             intervenant: null,
 

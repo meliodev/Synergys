@@ -1,10 +1,11 @@
+import { faInfoCircle } from "@fortawesome/pro-light-svg-icons";
 import React, { memo, useEffect, useRef } from "react";
-import { View, StyleSheet, Text } from "react-native";
-import { TextInput as NativeTextInput } from 'react-native';
+import { View, StyleSheet, Text, Alert, TextInput as NativeTextInput } from "react-native";
 import { TextInput as Input } from "react-native-paper";
 import * as theme from "../core/theme";
+import CustomIcon from "./CustomIcon";
 
-const TextInput = ({ errorText, disabled, whiteTheme, link, maxLength, ...props }) => {
+const TextInput = ({ errorText, disabled, whiteTheme, link, maxLength, right, ...props }) => {
 
   return (
     <View style={styles.container}>
@@ -13,6 +14,7 @@ const TextInput = ({ errorText, disabled, whiteTheme, link, maxLength, ...props 
         selectionColor={whiteTheme ? '#fff' : theme.colors.primary}
         underlineColor={theme.colors.gray_extraLight}
         maxLength={maxLength}
+        right={right}
         theme={
           {
             colors: {
@@ -35,7 +37,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingTop: 5,
     // marginBottom: 10,
-    //backgroundColor: 'yellow'
+    // backgroundColor: 'yellow'
   },
   input: {
     width: "100%",

@@ -567,9 +567,10 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
           let positions = []
           let text = ""
 
-          console.log(field.id, field.items)
+          if (field.pdfConfig && field.pdfConfig.skip)
+            console.log('Skip drawing pdf...')
 
-          switch (field.type) {
+          else switch (field.type) {
             case "textInput":
               text = formInputs[field.id]
 
@@ -617,6 +618,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               }
 
               for (const position of positions) {
+                console.log(field.id, "555")
                 pages[field.items[0].pdfConfig.pageIndex].drawSquare({
                   x: pages[field.items[0].pdfConfig.pageIndex].getWidth() + position.dx,
                   y: pages[field.items[0].pdfConfig.pageIndex].getHeight() + position.dy,
@@ -644,8 +646,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
               else { //Picker = Options
                 const index = field.items.findIndex(item => item.value === formInputs[field.id]) //Index of the selected option
-                console.log('ITEMS:::', field.items)
-                console.log('INDEX:::', index, formInputs[field.id])
+
                 if (!field.items[index].pdfConfig.skip) {
                   const { dx, dy } = field.items[index].pdfConfig
                   var pageIndex = field.items[index].pdfConfig.pageIndex

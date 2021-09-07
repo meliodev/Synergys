@@ -103,18 +103,6 @@ export const processModel = {
                         verificationType: 'data-fill',
                         verificationValue: true, //check if fieldValue !== verificationValue
                     },
-                    {
-                        id: 'comment',
-                        title: 'Commentaire',
-                        instructions: "Veuillez renseigner des informations utiles (exp: Informations sur l'habitation)",
-                        actionOrder: 6,
-                        type: 'manual',
-                        verificationType: 'comment',
-                        comment: '',
-                        responsable: 'Commercial',
-                        status: 'pending',
-                        nextPhase: '' //#dynamic
-                    },
                 ]
             },
         }

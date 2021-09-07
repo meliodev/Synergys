@@ -587,6 +587,7 @@ class Profile extends Component {
 
         const showGoalsSection = this.userParam.roleId === 'com' && highRoles.includes(this.roleId) && !isProfileOwner
         const showMenu = isProfileOwner && this.isRoot
+        const showConversionButton = this.isClient && isProspect && !loading && clientProjectsList.length > 0
 
         return (
             <View style={{ flex: 1 }}>
@@ -770,7 +771,7 @@ class Profile extends Component {
                             }
                         </ScrollView >
 
-                        {this.isClient && isProspect && !loading &&
+                        {showConversionButton &&
                             <Button
                                 mode="contained"
                                 onPress={this.clientConversion}

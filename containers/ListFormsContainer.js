@@ -58,7 +58,13 @@ class ListFormsContainer extends Component {
 
     async componentDidMount() {
         await this.fetchItems()
+        // this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => console.log('123456789'))
     }
+
+    // componentWillUnmount() {
+    //     if (this.willFocusSubscription)
+    //         this.willFocusSubscription.remove()
+    // }
 
     async fetchItems(count) {
         this.setState({ refreshing: true })

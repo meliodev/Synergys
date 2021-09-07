@@ -4,7 +4,8 @@ import { Appbar as appbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { withNavigation } from 'react-navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faArrowLeft, faTimes, faBars, faRedo, faPaperclip, faEllipsisVv, faTrash, faCheck, faPaperPlane, faPen, faSearch } from '@fortawesome/pro-light-svg-icons'
+import { faArrowLeft, faTimes, faBars, faRedo, faPaperclip, faEllipsisVv, faTrash, faPaperPlane, faPen, faSearch } from '@fortawesome/pro-light-svg-icons'
+import { faCheck } from '@fortawesome/pro-solid-svg-icons'
 
 import CustomIcon from "./CustomIcon"
 import Loading from './Loading'
@@ -50,9 +51,9 @@ const Appbar = ({
             {dots && <AppBarIcon icon={faEllipsisVv} onPress={handleMore} />}
             {del && <AppBarIcon icon={faTrash} onPress={handleDelete} />}
             {loading && <Loading size='small' color='#fff' style={{ position: 'absolute', right: 15 }} />}
-            {check && <AppBarIcon icon={faCheck} onPress={handleSubmit} iconColor={iconsColor || theme.colors.secondary}/>}
+            {check && <AppBarIcon icon={faCheck} onPress={handleSubmit} iconColor={iconsColor || theme.colors.primary} />}
             {send && <AppBarIcon icon={faPaperPlane} onPress={handleSend} />}
-            {edit && <AppBarIcon icon={faPen} onPress={handleEdit}  iconColor={iconsColor || theme.colors.secondary}/>}
+            {edit && <AppBarIcon icon={faPen} onPress={handleEdit} iconColor={iconsColor || theme.colors.secondary} />}
             {controller && <appbar.Action icon={controllerIcon} onPress={handleAction} />}
         </appbar.Header>
     )

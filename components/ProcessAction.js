@@ -251,7 +251,6 @@ class ProcessAction extends Component {
 
                     //Sroll to item
                     else if (scrollTo) {
-                        console.log('9999999999999999999')
                         const { screen, itemId } = scrollTo
                         this.setState({
                             loading: false,
@@ -265,7 +264,11 @@ class ProcessAction extends Component {
                         let { screenParams, screenName, screenPush } = currentAction
                         if (screenParams) {
                             screenParams.isProcess = true
-                            screenParams.onGoBack = () => this.mainHandler(process, true)
+                            screenParams.onGoBack = async () => {
+                                await this.mainHandler(process, true)
+                                //Auto trigger next action
+                                await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+                            }
                         }
                         if (screenName) {
                             if (screenPush)
@@ -390,7 +393,11 @@ class ProcessAction extends Component {
                 if (onSelectType === 'navigation') {
                     if (screenParams) {
                         screenParams.isProcess = true
-                        screenParams.onGoBack = () => this.mainHandler(process, true)
+                        screenParams.onGoBack = async () => {
+                            await this.mainHandler(process, true)
+                            //Auto trigger next action
+                            await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+                        }
                     }
                     this.setState({ showModal: false, loadingModal: false })
                     this.props.navigation.navigate(screenName, screenParams)
@@ -440,10 +447,8 @@ class ProcessAction extends Component {
             const operation = choice && choice.operation || pressedAction.operation || null
             if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
 
-            console.log('1111111')
             await this.runOperation(operation, pressedAction)
             await this.validateAction(comment, null, false, nextStep, nextPhase)
-            console.log('2222222')
 
             this.setState({ loadingDialog: false, showDialog: false })
             clearComment()
@@ -489,7 +494,6 @@ class ProcessAction extends Component {
                         action.choices = choices
                     //Update action status
                     if (!stay && nextPhase !== 'cancelProject') {
-                        console.log('99999999999999999999999')
                         action.status = "done"
                         action.doneAt = moment().format()
                         //set start time of next action
@@ -513,6 +517,9 @@ class ProcessAction extends Component {
             }
 
             await this.mainHandler(processTemp, true)
+
+            //Auto trigger next action
+            await this.onPressAction(this.props.canUpdate, this.state.currentAction)
         }
 
         catch (e) {

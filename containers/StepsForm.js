@@ -1,7 +1,7 @@
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { ProgressBar, Checkbox } from "react-native-paper";
+import { ProgressBar, Checkbox, TextInput as Input } from "react-native-paper";
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import Modal from 'react-native-modal'
@@ -43,6 +43,7 @@ import {
     displayError,
     arrayIntersection,
     articles_fr,
+    setToast,
 } from '../core/utils';
 
 import { constants } from '../core/constants';
@@ -70,7 +71,7 @@ class StepsForm extends Component {
         this.isEdit = this.props.DocId !== "" && this.props.DocId !== undefined
         this.DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
 
-        this.project = this.props.navigation.getParam('project', '')
+        this.project = this.props.navigation.getParam('project', null)
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.popCount = this.props.navigation.getParam('popCount', 1)
 
@@ -87,10 +88,15 @@ class StepsForm extends Component {
             loading: false,
             toastMessage: "",
             toastType: "",
+            toastMessageModal: "",
+            toastTypeModal: "",
             docNotFound: false,
             submitted: false,
             readOnly: this.isEdit,
             isEdit: this.isEdit,
+
+            deleted: false,
+            project: this.project ? this.project : null,
             ...this.props.initialState
         }
     }
@@ -225,7 +231,22 @@ class StepsForm extends Component {
 
             const value = this.state[field.id]
             const error = this.state[field.errorId]
-            const { id, errorId, type, items, isConditional, condition, isNumeric, isEmail, isMultiOptions, isStepMultiOptions, mendatory, maxLength, rollBack } = field
+            const {
+                id,
+                errorId,
+                type,
+                items,
+                isConditional,
+                condition,
+                isNumeric,
+                isEmail,
+                isMultiOptions,
+                isStepMultiOptions,
+                mendatory,
+                maxLength,
+                rollBack,
+                instruction
+            } = field
             const asterisk = mendatory && field.label !== "" ? ' *' : ''
             const label = field.label + asterisk
 
@@ -263,6 +284,14 @@ class StepsForm extends Component {
                                         {...(field.mask && { mask: field.mask })}
                                     />
                                 }
+                                right={instruction ?
+                                    <Input.Icon
+                                        name="information"
+                                        onPress={() => Alert.alert("IMPORTANT", instruction.message)}
+                                    />
+                                    :
+                                    null
+                                }
                             />
                         )
                     else return (
@@ -281,6 +310,14 @@ class StepsForm extends Component {
                             errorText={error}
                             editable={true}
                             maxLength={maxLength}
+                            right={instruction ?
+                                <Input.Icon
+                                    name="information"
+                                    onPress={() => Alert.alert("Important", instruction.message)}
+                                />
+                                :
+                                null
+                            }
                         />
                     )
                     break;
@@ -773,6 +810,8 @@ class StepsForm extends Component {
         delete state.loading
         delete state.toastMessage
         delete state.toastType
+        delete state.toastMessageModal
+        delete state.toastTypeModal
         delete state.docNotFound
         delete state.initialLoading
         delete state.submitted
@@ -792,12 +831,11 @@ class StepsForm extends Component {
     addFormLogs(form) {
 
         if (!this.state.isEdit) {
-            form.createdAt = moment().format()
-            form.createdBy = this.props.currentUser
-            form.deleted = false
-            //Add project reference if available
-            if (this.project)
-                form.project = this.project
+            const createdAt = moment().format()
+            const createdBy = this.props.currentUser
+            form.createdAt = createdAt
+            form.createdBy = createdBy
+            this.setState({ createdAt, createdBy }) //Used if draft saved multiple times.
         }
 
         form.editedAt = moment().format()
@@ -993,9 +1031,12 @@ class StepsForm extends Component {
                     <View style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth }} />
 
                     <View style={{ flex: 1, padding: theme.padding }}>
-                        <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message2}</Text>
-                        {this.renderTrackingSteps()}
-                        <Image source={require('../assets/images/maprimerenove.jpg')} style={{ width: constants.ScreenWidth - theme.padding * 2, height: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }} />
+                        {/* <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message2}</Text>
+                        {this.renderTrackingSteps()} */}
+                        <Image
+                            source={require('../assets/images/maprimerenove.jpg')}
+                            style={{ width: constants.ScreenWidth - theme.padding * 2, height: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center' }}
+                        />
                     </View>
                 </ScrollView>
 
@@ -1078,16 +1119,25 @@ class StepsForm extends Component {
         this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
     }
 
-    async savePdfBase64(pdfBase64) {
-        const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
+    async savePdfBase64(pdfBase64, isProcess) {
+        const now = moment().format('DD-MM-YYYY HHmmss')
+        const pdfName = `Scan généré ${now}.pdf`
+        if (!isProcess)
+            this.setState({
+                toastMessageModal: 'Début du téléchargement...',
+                toastTypeModal: 'info'
+            })
+
         saveFile(pdfBase64, pdfName, 'base64')
             .then((destPath) => {
-                this.props.navigation.state.params.onGoBack({
-                    pdfBase64Path: destPath,
-                    pdfName,
-                    DocumentId: this.DocumentId
-                })
-                this.props.navigation.pop(this.popCount)
+                if (isProcess) {
+                    this.props.navigation.state.params.onGoBack({
+                        pdfBase64Path: destPath,
+                        pdfName,
+                        DocumentId: this.DocumentId
+                    })
+                    this.props.navigation.pop(this.popCount)
+                }
             })
             .catch((e) => {
                 Alert.alert('', e.message)
@@ -1195,7 +1245,7 @@ class StepsForm extends Component {
                                     }
                                 }
 
-                                if (values)
+                                if (values) {
                                     return (
                                         <TouchableOpacity
                                             onPress={() => {
@@ -1207,6 +1257,7 @@ class StepsForm extends Component {
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
                                         </TouchableOpacity>
                                     )
+                                }
 
                                 //Empty fields
                                 else return null
@@ -1285,9 +1336,13 @@ class StepsForm extends Component {
             initialLoading,
             docNotFound,
             toastMessage,
-            toastType
+            toastType,
+            toastMessageModal,
+            toastTypeModal,
         } = this.state
         const { collection } = this.props
+
+        const isProcess = this.props.navigation.state.params && this.props.navigation.state.params.onGoBack
 
         if (pdfBase64)
             var source = { uri: `data:application/pdf;base64,${pdfBase64}` }
@@ -1318,8 +1373,8 @@ class StepsForm extends Component {
                     title
                     check={!showWelcomeMessage && !readOnly}
                     handleSubmit={this.handleSave}
-                    // edit={isEdit && readOnly}
-                    // handleEdit={() => this.setState({ submitted: false, readOnly: false })}
+                    edit={isEdit && readOnly}
+                    handleEdit={() => this.setState({ submitted: false, readOnly: false })}
                     titleText={this.props.titleText}
                     customBackHandler={this.handleBackButtonClick}
                 />
@@ -1343,7 +1398,20 @@ class StepsForm extends Component {
                                 <Pdf source={source} style={modalStyles.pdf} />
                             </View>
                         }
-                        {this.renderBottomCenterButton(`Valider ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64))}
+                        {isProcess ?
+                            this.renderBottomCenterButton(`Valider ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
+                            :
+                            this.renderBottomCenterButton(`Télécharger ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
+                        }
+
+                        <Toast
+                            duration={2500}
+                            message={toastMessageModal}
+                            type={toastTypeModal}
+                            onDismiss={() => this.setState({ toastMessageModal: '' })}
+                            containerStyle={{ bottom: constants.ScreenHeight * 0.1 }}
+                        />
+
                     </View>
                 </Modal>
 
