@@ -68,7 +68,13 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             }
 
             //3'. Found nextStep/nextPhase -> All actions valid -> Transition
+            for (const action of actions) {
+                console.log("next phase...", action.id, action.nextPhase)
+            }
+
+            console.log('NEXT PHASE::::::::::::::::::', nextPhase)
             if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
+                console.log('TRANSITION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
                 const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
                 process = transitionRes.process
                 const { processEnded } = transitionRes
@@ -76,7 +82,10 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             }
 
             //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
-            else loopHandler = false
+            else {
+                console.log('NO TRANSITION.................')
+                loopHandler = false
+            }
         }
 
         return process || currentProcess
@@ -319,6 +328,8 @@ const verifyActions = async (actions, attributes, process) => {
             var res3 = verifyActions_manual(actions_manual)
             allActionsValid_manual = res3.allActionsValid_manual
             actions_manual = res3.verifiedActions_manual
+            // nextStep = res3.nextStep
+            // nextPhase = res3.nextPhase
         }
 
         allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_manual
@@ -458,14 +469,21 @@ const verifyActions_docCreation = async (actions) => {
 
 const verifyActions_manual = (actions) => {
     let allActionsValid_manual = true
+    let nextStep = ''
+    let nextPhase = ''
 
     for (let action of actions) {
         if (action.status === 'pending')
             allActionsValid_manual = false
+
+        else {
+            nextStep = stringifyUndefined(action.nextStep)
+            nextPhase = stringifyUndefined(action.nextPhase)
+        }
     }
 
     const verifiedActions_manual = actions
-    return { allActionsValid_manual, verifiedActions_manual }
+    return { allActionsValid_manual, verifiedActions_manual, nextStep, nextPhase }
 }
 
 const setActionTimeLog = (actions) => {

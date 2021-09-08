@@ -29,31 +29,33 @@ React Native.
 
 
 
-1. le bouton valider n'est toujours pas assez visible 
++ le bouton valider n'est toujours pas assez visible 
 --> Vert, Gras, plus grand.
 
-2. il n'ya pas de retour lorsque l'on crée un client 
++ il n'ya pas de retour lorsque l'on crée un client 
 --> Tester les scénarios de navigation
 
-3. Le prospect ne peut être convertible en client tant qu'il n'ya pas de projet crée pour lui 
++ Le prospect ne peut être convertible en client tant qu'il n'ya pas de projet crée pour lui 
 --> Ajouter une condition (projects.length > 0) pour afficher le boutton de conversion
 
-4. De manière générale, il faut que les étape s'affiche sans avoir besoin de cliquer dessus
---> Appuie automatique sur la prochaine action.
-
-5. Dans le use case du commercial, le contact commercial devra être prérempli, """nous devrons pouvoir en mettre plusieurs""".
---> Préremplir l'utilisateur courrant dans le contact commercial s'il est de type commercial
-
-6. Les sections en dessous du process doivent être de base pliés et avoir un petit "+" pour les déplier" sauf pour le bloc note (cela perturbe les utilisateurs)
---> Multi Toggle System show/hide
-
-7. L'action commentaire au début doit être supprimé 
++ L'action commentaire au début doit être supprimé 
 --> Changer le process (penser aux implications sur les projets existants)
 
-8. Renommer "Créer la fiche EEB (Fiche d'étude d'évaluations des besoins)"
++ Renommer "Créer la fiche EEB (Fiche d'étude d'évaluations des besoins)"
 --> Renomer dans le model
 
-9. Lorsque l'on nous propose de créer la fiche, il faudrait ne pas passer par l'insertion du document mais que l'on nous 
++ De manière générale, il faut que les étape s'affiche sans avoir besoin de cliquer dessus
+--> Appuie automatique sur la prochaine action.
+
++ Dans le use case du commercial, le contact commercial devra être prérempli.
+--> Préremplir l'utilisateur courrant dans le contact commercial s'il est de type commercial
+
+5.1  Nous devrons pouvoir en mettre plusieurs (contacts commerciaux) ??.
+
++ Les sections en dessous du process doivent être de base pliés et avoir un petit "+" pour les déplier" sauf pour le bloc note (cela perturbe les utilisateurs)
+--> Multi Toggle System show/hide
+
++ Lorsque l'on nous propose de créer la fiche, il faudrait ne pas passer par l'insertion du document mais que l'on nous 
 propose directement l'écran "importer ou générer" 
 --> Beaucoup de modifications à faire (à penser soigneusement...)
 

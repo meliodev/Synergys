@@ -760,7 +760,7 @@ export const processModel = {
             'payModeValidation': {
                 title: "Validation modalité paiement",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 6,
+                stepOrder: 4,
                 actions: [
                     {
                         id: 'payModeChoice',
