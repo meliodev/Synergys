@@ -24,7 +24,7 @@ const UserItem = ({ isTeam, userType, onPress, item, controller, itemStyle, opti
         var normalUser = (!isPro && item.role !== 'Admin' && role !== 'Back office') //Poseur, Comercial, DC
     }
 
-    const color = theme.colors.primary
+    const color = theme.colors.white
     const title = isTeam ? name : isPro ? denom : `${prenom} ${nom}`
     const description = isTeam ? membersCount : userType === 'utilisateur' ? role : (item.phone || item.email)
 
@@ -52,8 +52,8 @@ const UserItem = ({ isTeam, userType, onPress, item, controller, itemStyle, opti
             </View>
 
             <View style={[styles.primaryTextContainer]}>
-                <Text style={[theme.customFontMSregular.body, { marginBottom: 5 }]}>{title}</Text>
-                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{description}</Text>
+                <Text style={[theme.customFontMSbold.body, { marginBottom: 5, color: theme.colors.white }]}>{title}</Text>
+                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.white }]}>{description}</Text>
             </View>
 
             <View style={styles.controller}>

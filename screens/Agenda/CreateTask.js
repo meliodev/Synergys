@@ -52,6 +52,7 @@ const properties = ["name", "assignedTo", "description", "project", "type", "pri
 class CreateTask extends Component {
     constructor(props) {
         super(props)
+        this.myAlert = myAlert.bind(this)
         this.refreshTaskConflictDate = this.refreshTaskConflictDate.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
         this.refreshAssignedTo = refreshAssignedTo.bind(this)
@@ -64,7 +65,6 @@ class CreateTask extends Component {
         this.addExtraTaskFields = this.addExtraTaskFields.bind(this)
         this.buildTasks = this.buildTasks.bind(this)
         this.persistTasks = this.persistTasks.bind(this)
-        this.myAlert = myAlert.bind(this)
         this.alertDeleteTask = this.alertDeleteTask.bind(this)
 
         this.initialState = {}
@@ -75,6 +75,8 @@ class CreateTask extends Component {
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined)
+
+        console.log('PROJECT', this.project)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.TaskId = this.props.navigation.getParam('TaskId', '')
@@ -192,10 +194,6 @@ class CreateTask extends Component {
             task = formatDocument(task, properties, [])
             task.startDate = moment(task.date, 'YYYY-MM-DD').format()
             this.setState(task)
-            // console.log("Start Date", task.startDate)
-            // console.log("End Date", task.endDate)
-            // console.log("Start Hour", task.startHour)
-            // console.log("Due Hour", task.dueHour)
         }
         return task
     }
@@ -339,7 +337,6 @@ class CreateTask extends Component {
 
             //3.1 Validate inputs 
             const isValid = this.validateInputs()
-            console.log(isValid, "isValid")
             if (!isValid) return
 
             //3.2 POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
@@ -393,7 +390,10 @@ class CreateTask extends Component {
             //7. Persist task(s)
             await this.persistTasks(tasks)
 
-            //8. Go back
+            //8. Verify if contact technique/commercial changed
+            this.checkAndUpdateProjectContacts()
+
+            //9. Go back
             if (this.props.navigation.state.params.onGoBack) {
                 const refreshAgenda = true
                 this.props.navigation.state.params.onGoBack(refreshAgenda, tasks[0])
@@ -404,6 +404,36 @@ class CreateTask extends Component {
         catch (e) {
             const { message } = e
             displayError({ message })
+        }
+    }
+
+    checkAndUpdateProjectContacts() {
+        if (!this.isProcess) return
+
+        const { project, assignedTo, type } = this.state
+        const { comContact, techContact } = project
+        const typeNature = this.checkTypeNature(type)
+        const isComContactEdited = typeNature === "commercial" && comContact !== assignedTo
+        const isTechContactEdited = typeNature === "technic" && techContact !== assignedTo
+        const isContactEdited = isComContactEdited || isTechContactEdited
+
+        if (isContactEdited) {
+            console.log('contact edited')
+            let update = {}
+            let fieldId = ""
+
+            if (isComContactEdited) {
+                console.log("commercial edited")
+                fieldId = "comContact"
+            }
+            else if (isTechContactEdited) {
+                console.log("poseur edited")
+                fieldId = "techContact"
+            }
+            update[fieldId] = assignedTo
+
+            console.log('updating contact........')
+            db.collection('Projects').doc(project.id).update(update)
         }
     }
 
@@ -483,27 +513,33 @@ class CreateTask extends Component {
     }
 
     //##HELPERS
-    setListEmployeesQuery() {
-        const { type } = this.state
-        let query
+    checkTypeNature(type) {
         let natures = []
         this.types.forEach((t) => { if (t.value === type) natures = t.natures })
         const neutral = _.isEqual(natures, ['com', 'tech'])
+        const isCom = _.isEqual(natures, ['com'])
+        const isTech = _.isEqual(natures, ['tech'])
+        if (neutral) return "neutral"
+        if (isCom) return "commercial"
+        if (isTech) return "technic"
+    }
 
-        if (neutral) {
+    setListEmployeesQuery() {
+        let query
+        const nature = this.checkTypeNature(this.state.type)
+
+        if (nature === "neutral") {
             query = db.collection('Users').where('deleted', '==', false)
         }
 
         else {
-            const isCom = _.isEqual(natures, ['com'])
-            const isTech = _.isEqual(natures, ['tech'])
-            if (isCom)
+            if (nature === "commercial")
                 var queryFilter = 'Commercial'
-            else if (isTech)
+            else if (nature === "technic")
                 var queryFilter = 'Poseur'
+
             query = db.collection('Users').where('role', '==', queryFilter).where('deleted', '==', false)
         }
-
         return query
     }
 
@@ -569,11 +605,66 @@ class CreateTask extends Component {
         )
     }
 
-    render() {
+    renderTimeslotForm(canWrite) {
         const { startDate, endDate, startHour, dueHour } = this.state
-        let { name, description, assignedTo, project, type, priority, status, address, color, showTasksConflicts, toastMessage, toastType } = this.state
+        return (
+            <TimeslotForm
+                role={this.props.role}
+                canWrite={canWrite}
+                startDate={startDate}
+                endDate={endDate}
+                startHour={moment(startHour, "HH:mm").format()}
+                dueHour={moment(dueHour, "HH:mm").format()}
+                showEndDate={!this.isEdit && this.props.role.id !== "com"}
+                setParentState={
+                    (mode, dateId, value) => {
+                        let update = {}
+                        update[dateId] = mode === "date" ? moment(value).format() : moment(value).format('HH:mm')
+                        this.setState(update)
+                    }
+                }
+            />
+        )
+    }
+
+    renderAssignedTo(canWrite) {
+        const { assignedTo, assignedToError } = this.state
+
+        return (
+            <ItemPicker
+                onPress={() => {
+                    const nav = () => navigateToScreen(this, 'ListEmployees', {
+                        onGoBack: this.refreshAssignedTo,
+                        prevScreen: 'CreateTask',
+                        isRoot: false,
+                        titleText: 'Attribuer la tâche à',
+                        query: this.setListEmployeesQuery()
+                    })
+
+                    if (this.isProcess) {
+                        const title = "IMPORTANT"
+                        const message = 'Cette action causera la modification du contact commercial ou technique du projet.'
+                        const handleConfirm = () => nav()
+                        const handleCancel = () => console.log('...')
+                        this.myAlert(title, message, handleConfirm, handleCancel, "Continuer")
+                        return
+                    }
+                    else nav()
+                }}
+
+                label="Attribuée à *"
+                value={assignedTo.fullName}
+                error={!!assignedToError}
+                errorText={assignedToError}
+                editable={canWrite}
+            />
+        )
+    }
+
+    render() {
+        let { name, description, project, type, priority, status, address, color, showTasksConflicts, toastMessage, toastType } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading, docNotFound } = this.state
-        let { nameError, assignedToError } = this.state
+        let { nameError } = this.state
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.tasks
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
@@ -611,33 +702,20 @@ class CreateTask extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
+                    this.isProcess ?
+                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ paddingHorizontal: theme.padding }}>
+                            {this.renderAssignedTo(canWrite)}
+                            {this.renderTimeslotForm(canWrite)}
+                        </ScrollView>
+                        :
+                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
 
-                        {<FormSection
-                            sectionTitle='Créneau horaire'
-                            sectionIcon={faCalendar}
-                            form={
-                                <TimeslotForm
-                                    role={this.props.role}
-                                    canWrite={canWrite}
-                                    startDate={startDate}
-                                    endDate={endDate}
-                                    startHour={moment(startHour, "HH:mm").format()}
-                                    dueHour={moment(dueHour, "HH:mm").format()}
-                                    setParentState={
-                                        (mode, dateId, value) => {
-                                            let update = {}
-                                            update[dateId] = mode === "date" ? moment(value).format() : moment(value).format('HH:mm')
-                                            this.setState(update)
-                                        }
-                                    }
-                                />
-                            }
-                        />}
+                            <FormSection
+                                sectionTitle='Créneau horaire'
+                                sectionIcon={faCalendar}
+                                form={this.renderTimeslotForm()}
+                            />
 
-                        {this.isProcess && !this.isEdit ?
-                            null
-                            :
                             <FormSection
                                 sectionTitle='Informations générales'
                                 sectionIcon={faInfoCircle}
@@ -653,20 +731,7 @@ class CreateTask extends Component {
                                             />
                                         }
 
-                                        <ItemPicker
-                                            onPress={() => navigateToScreen(this, 'ListEmployees', {
-                                                onGoBack: this.refreshAssignedTo,
-                                                prevScreen: 'CreateTask',
-                                                isRoot: false,
-                                                titleText: 'Attribuer la tâche à',
-                                                query: this.setListEmployeesQuery()
-                                            })}
-                                            label="Attribuée à *"
-                                            value={assignedTo.fullName}
-                                            error={!!assignedToError}
-                                            errorText={assignedToError}
-                                            editable={canWrite}
-                                        />
+                                        {this.renderAssignedTo(canWrite)}
 
                                         <Picker
                                             returnKeyType="next"
@@ -739,10 +804,7 @@ class CreateTask extends Component {
                                     </View>
                                 }
                             />
-                        }
 
-
-                        {!this.isProcess &&
                             <FormSection
                                 sectionTitle='Références'
                                 sectionIcon={faRetweet}
@@ -773,27 +835,25 @@ class CreateTask extends Component {
                                     </View>
                                 }
                             />
-                        }
 
+                            {this.isEdit &&
+                                <ActivitySection
+                                    createdBy={createdBy}
+                                    createdAt={createdAt}
+                                    editedBy={editedBy}
+                                    editedAt={editedAt}
+                                    navigation={this.props.navigation}
+                                />
+                            }
 
-                        {this.isEdit &&
-                            <ActivitySection
-                                createdBy={createdBy}
-                                createdAt={createdAt}
-                                editedBy={editedBy}
-                                editedAt={editedAt}
-                                navigation={this.props.navigation}
-                            />
-                        }
+                            {showTasksConflicts && this.renderTasksConflicts()}
 
-                        {showTasksConflicts && this.renderTasksConflicts()}
-
-                        <Toast
-                            containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
-                            message={toastMessage}
-                            type={toastType}
-                            onDismiss={() => this.setState({ toastMessage: '' })} />
-                    </ScrollView>
+                            <Toast
+                                containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                                message={toastMessage}
+                                type={toastType}
+                                onDismiss={() => this.setState({ toastMessage: '' })} />
+                        </ScrollView>
                 }
             </View>
         )

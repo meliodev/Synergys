@@ -267,7 +267,9 @@ class ProcessAction extends Component {
                             screenParams.onGoBack = async () => {
                                 await this.mainHandler(process, true)
                                 //Auto trigger next action
-                                await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+                                const { verificationType } = this.state.currentAction
+                                if (verificationType !== 'validation')
+                                    await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                             }
                         }
                         if (screenName) {
@@ -396,7 +398,9 @@ class ProcessAction extends Component {
                         screenParams.onGoBack = async () => {
                             await this.mainHandler(process, true)
                             //Auto trigger next action
-                            await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+                            const { verificationType } = this.state.currentAction
+                            if (verificationType !== 'validation')
+                                await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                         }
                     }
                     this.setState({ showModal: false, loadingModal: false })
@@ -519,7 +523,9 @@ class ProcessAction extends Component {
             await this.mainHandler(processTemp, true)
 
             //Auto trigger next action
-            await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+            const { verificationType } = this.state.currentAction
+            if (verificationType !== 'validation')
+                await this.onPressAction(this.props.canUpdate, this.state.currentAction)
         }
 
         catch (e) {
@@ -677,7 +683,7 @@ class ProcessAction extends Component {
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>
-                <Text style={[theme.customFontMSsemibold.caption, styles.headerBarText, { color: theme.colors.white }]}>SUIVI DU PROJET</Text>
+                <Text style={[theme.customFontMSbold.header, styles.headerBarText]}>Suivi du projet</Text>
                 <View style={styles.progressionLinks}>
                     <TouchableOpacity>
                         <CustomIcon
@@ -781,7 +787,7 @@ class ProcessAction extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        elevation: 5,
+        elevation: 10,
         borderRadius: 5,
         backgroundColor: theme.colors.white,
         margin: 15,
@@ -797,9 +803,8 @@ const styles = StyleSheet.create({
         // justifyContent: 'center'
     },
     headerBarText: {
-        letterSpacing: 2.5,
-        //opacity: 0.7,
-        textAlign: 'center'
+        textAlign: 'center',
+        color: theme.colors.white
     },
     stepContainer: {
         flexDirection: 'row',

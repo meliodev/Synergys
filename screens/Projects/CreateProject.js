@@ -890,7 +890,7 @@ class CreateProject extends Component {
                             sectionIcon={faUser}
                             isExpanded={sectionsExpansion["client"]}
                             onPressSection={() => this.toggleSection("client")}
-                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth}}
+                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
@@ -1036,6 +1036,8 @@ class CreateProject extends Component {
                             />
                         }
 
+                        {this.renderPlacePictures(canWrite, isConnected)}
+
                         <FormSection
                             hide={!this.isEdit}
                             sectionTitle='Bloc Notes'
@@ -1057,8 +1059,6 @@ class CreateProject extends Component {
                                 </View>
                             }
                         />
-
-                        {this.renderPlacePictures(canWrite, isConnected)}
                     </ScrollView>
                 }
 

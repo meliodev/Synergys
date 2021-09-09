@@ -22,7 +22,7 @@ const Section = ({
 }) => {
   return (
     <TouchableOpacity style={[styles.section, style]} onPress={onPress}>
-      <Text style={[theme.customFontMSmedium.header, textStyle, { color: theme.colors.white }]}>{text}</Text>
+      <Text style={[theme.customFontMSbold.header, textStyle, { color: theme.colors.white }]}>{text}</Text>
       {rightComponent ?
         rightComponent()
         :
@@ -43,8 +43,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: constants.ScreenHeight * 0.02,
     paddingHorizontal: theme.padding,
-    //marginBottom: theme.padding / 2,
-    backgroundColor: theme.colors.section
+   backgroundColor: theme.colors.section
   }
 })
 

@@ -1,7 +1,7 @@
 
 
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, ScrollView, Keyboard, Alert } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, Keyboard, Alert, TouchableOpacity } from 'react-native'
 import { Switch } from 'react-native-paper'
 import DatePicker from 'react-native-date-picker'
 import { faCalendarPlus, faClock } from '@fortawesome/pro-light-svg-icons'
@@ -14,6 +14,7 @@ import ItemPicker from '../components/ItemPicker'
 
 import { navigateToScreen } from '../core/utils'
 import * as theme from '../core/theme'
+import { constants } from '../core/constants'
 
 export default class TimeslotForm extends Component {
     constructor(props) {
@@ -52,9 +53,8 @@ export default class TimeslotForm extends Component {
     }
 
     renderTimeForm() {
-        const { isAllDay, startDate, endDate, startHour, dueHour, togglePickers } = this.state
-        const { startDateError, endDateError, startHourError, dueHourError } = this.state
-        const showEndDate = !isAllDay && !this.isEdit && this.props.role.id !== "com" //#task: make it as prop 
+        const { isAllDay, startHour, dueHour, togglePickers } = this.state
+        const { startHourError, dueHourError } = this.state
         const { canWrite } = this.props
 
         return (
@@ -72,35 +72,8 @@ export default class TimeslotForm extends Component {
                     </View>
                 </View>
 
-                {this.renderItemPicker("startDate", "Date de début *", startDate, startDateError, "date")}
-
-                {togglePickers["startDate"] &&
-                    this.renderDatePicker("date", "startDate", startDate)
-                }
-
-                {showEndDate &&
-                    this.renderItemPicker("endDate", "Date de fin *", endDate, endDateError, "date")
-                }
-
-                {togglePickers["endDate"] &&
-                    this.renderDatePicker("date", "endDate", endDate)
-                }
-
-                {!isAllDay &&
-                    this.renderItemPicker("startHour", "Heure de début *", startHour, startHourError, "time")
-                }
-
-                {togglePickers["startHour"] &&
-                    this.renderDatePicker("time", "startHour", startHour)
-                }
-
-                {!isAllDay &&
-                    this.renderItemPicker("dueHour", "Heure d'échéance *", dueHour, dueHourError, "time")
-                }
-
-                {togglePickers["dueHour"] &&
-                    this.renderDatePicker("time", "dueHour", dueHour)
-                }
+                {this.renderDates(togglePickers)}
+                {this.renderHours(togglePickers)}
 
             </View>
         )
@@ -127,16 +100,72 @@ export default class TimeslotForm extends Component {
 
     renderItemPicker(id, label, value, error, mode) {
         const { canWrite } = this.props
+        const { togglePickers } = this.state
+
         return (
-            <ItemPicker
-                onPress={() => this.togglePicker(id)}
-                label={label}
-                value={mode === "date" ? moment(value).format('ll') : moment(value).format('HH:mm')}
-                editable={canWrite}
-                showAvatarText={false}
-                icon={mode === "date" ? faCalendarPlus : faClock}
-                errorText={error}
-            />
+            <View style={{ borderBottomWidth: togglePickers[id] ? 5 : 0, borderBottomColor: theme.colors.section }}>
+                <ItemPicker
+                    onPress={() => this.togglePicker(id)}
+                    label={label}
+                    value={mode === "date" ? moment(value).format('ll') : moment(value).format('HH:mm')}
+                    editable={canWrite}
+                    showAvatarText={false}
+                    icon={mode === "date" ? faCalendarPlus : faClock}
+                    errorText={error}
+                    style={{ width: constants.ScreenWidth * 0.4 }}
+                />
+            </View>
+        )
+    }
+
+    renderDates(togglePickers) {
+
+        const { isAllDay, startDate, endDate, startDateError, endDateError } = this.state
+        const showEndDate = !isAllDay && this.props.showEndDate
+
+        return (
+            <View>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: theme.padding }}>
+                    {this.renderItemPicker("startDate", "Date de début *", startDate, startDateError, "date")}
+
+                    {showEndDate &&
+                        this.renderItemPicker("endDate", "Date de fin *", endDate, endDateError, "date")
+                    }
+                </View>
+
+                {togglePickers["startDate"] &&
+                    this.renderDatePicker("date", "startDate", startDate)
+                }
+                {togglePickers["endDate"] &&
+                    this.renderDatePicker("date", "endDate", endDate)
+                }
+            </View>
+        )
+    }
+
+    renderHours(togglePickers) {
+
+        const { isAllDay, startHour, dueHour, startHourError, dueHourError } = this.state
+
+        return (
+            <View>
+
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: theme.padding }}>
+                    {!isAllDay &&
+                        this.renderItemPicker("startHour", "Heure de début *", startHour, startHourError, "time")
+                    }
+
+                    {!isAllDay &&
+                        this.renderItemPicker("dueHour", "Heure d'échéance *", dueHour, dueHourError, "time")
+                    }
+                </View>
+                {togglePickers["startHour"] &&
+                    this.renderDatePicker("time", "startHour", startHour)
+                }
+                {togglePickers["dueHour"] &&
+                    this.renderDatePicker("time", "dueHour", dueHour)
+                }
+            </View>
         )
     }
 
@@ -149,7 +178,7 @@ const styles = StyleSheet.create({
     isAllDayContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 15
+        marginTop: theme.padding*2
     },
     isAllDaySwitchContainer: {
         flexDirection: 'row',
