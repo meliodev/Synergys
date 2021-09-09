@@ -26,11 +26,13 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
-import { constants, adminId } from "../../core/constants"
+import { constants, adminId, errorMessages } from "../../core/constants"
 import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { fetchDocument } from '../../api/firestore-api';
+import TimeslotForm from '../../components/TimeslotForm'
+import { Toast } from '../../components'
 
 const priorities = [
     { label: 'Urgente', value: 'Urgente' },
@@ -51,7 +53,6 @@ class CreateTask extends Component {
     constructor(props) {
         super(props)
         this.refreshTaskConflictDate = this.refreshTaskConflictDate.bind(this)
-        this.refreshDate = this.refreshDate.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
         this.refreshAssignedTo = refreshAssignedTo.bind(this)
         this.refreshProject = refreshProject.bind(this)
@@ -65,7 +66,6 @@ class CreateTask extends Component {
         this.persistTasks = this.persistTasks.bind(this)
         this.myAlert = myAlert.bind(this)
         this.alertDeleteTask = this.alertDeleteTask.bind(this)
-        this.renderTimeForm = this.renderTimeForm.bind(this)
 
         this.initialState = {}
         this.isInit = true
@@ -112,7 +112,7 @@ class CreateTask extends Component {
             startDate: moment().format(),
             endDate: moment().format(),
             startHour: moment().format('HH:mm'),
-            dueHour: moment().add(1, 'hour').format('HH:mm'),
+            dueHour: moment().format('HH:mm'),
 
             startDateError: '',
             endDateError: '',
@@ -140,6 +140,8 @@ class CreateTask extends Component {
             error: '',
             loading: true,
             docNotFound: false,
+            toastMessage: "",
+            toastType: ""
         }
     }
 
@@ -190,26 +192,12 @@ class CreateTask extends Component {
             task = formatDocument(task, properties, [])
             task.startDate = moment(task.date, 'YYYY-MM-DD').format()
             this.setState(task)
+            // console.log("Start Date", task.startDate)
+            // console.log("End Date", task.endDate)
+            // console.log("Start Hour", task.startHour)
+            // console.log("Due Hour", task.dueHour)
         }
         return task
-    }
-
-    //##UPDATE
-    async refreshDate(output, field, isAllDay) {
-        if (field === 'startDate') this.setState({ startDateError: '' })
-        else if (field === 'endDate') this.setState({ endDateError: '' })
-        else if (field === 'startHour') this.setState({ startHourError: '' })
-        else if (field === 'dueHour') this.setState({ dueHourError: '' })
-
-        let update = {}
-        update[field] = output
-
-        if (field === 'startDate' && isAllDay) {
-            update['startDate'] = output
-            update['endDate'] = output
-        }
-
-        this.setState(update, () => this.validateSchedule())
     }
 
     //##VALIDATE
@@ -236,7 +224,7 @@ class CreateTask extends Component {
         const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
         if (assignedToError || endDateError || dueHourError) {
             isValid1 = false
-            this.setState({ assignedToError, loading: false })
+            this.setState({ assignedToError, toastMessage: errorMessages.invalidFields, toastType: "error", loading: false })
         }
         const isValid2 = this.validateSchedule()
         const isValid = isValid1 && isValid2
@@ -351,6 +339,7 @@ class CreateTask extends Component {
 
             //3.1 Validate inputs 
             const isValid = this.validateInputs()
+            console.log(isValid, "isValid")
             if (!isValid) return
 
             //3.2 POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
@@ -519,75 +508,6 @@ class CreateTask extends Component {
     }
 
     //##RENDERERS
-    renderTimeForm(canWrite) {
-        const { isAllDay, startDate, endDate, startHour, dueHour } = this.state
-        const { startDateError, endDateError, startHourError, dueHourError } = this.state
-        const showEndDate = !this.isEdit && !isAllDay && this.props.role.id !== "com"
-
-        return (
-            <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 15 }}>
-                    <Text style={theme.customFontMSregular.body}>Toute la journée</Text>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Switch
-                            value={isAllDay}
-                            onValueChange={(isAllDay) => this.setState({ isAllDay })}
-                            color={theme.colors.primary}
-                            disabled={!canWrite}
-                        />
-                    </View>
-                </View>
-
-                <ItemPicker
-                    onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début', isAllDay, showTimePicker: false, targetField: 'startDate' })}
-                    label={this.props.role.id === "com" ? "Date" : 'Date de début *'}
-                    value={moment(startDate).format('ll')}
-                    editable={canWrite}
-                    showAvatarText={false}
-                    icon={faCalendarPlus}
-                    errorText={startDateError}
-                />
-
-                {showEndDate &&
-                    <ItemPicker
-                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: "de fin", isAllDay, showTimePicker: false, targetField: 'endDate' })}
-                        label="Date de fin *"
-                        value={moment(endDate).format('ll')}
-                        editable={canWrite}
-                        showAvatarText={false}
-                        icon={faCalendarPlus}
-                        errorText={endDateError}
-                    />
-                }
-
-                {!isAllDay &&
-                    <ItemPicker
-                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début', isAllDay, showDayPicker: false, targetField: 'startHour' })}
-                        label={'Heure de début *'}
-                        value={startHour}
-                        editable={canWrite}
-                        showAvatarText={false}
-                        icon={faClock}
-                        errorText={startHourError}
-                    />
-                }
-
-                {!isAllDay &&
-                    <ItemPicker
-                        onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de fin', isAllDay, showDayPicker: false, targetField: 'dueHour' })}
-                        label={"Heure d'échéance *"}
-                        value={dueHour}
-                        editable={canWrite}
-                        showAvatarText={false}
-                        icon={faClock}
-                        errorText={dueHourError}
-                        style={{ marginBottom: 15 }}
-                    />
-                }
-            </View>
-        )
-    }
-
     refreshTaskConflictDate(output, field, isAllDay) {
         let update = {}
         update[field] = output
@@ -649,12 +569,9 @@ class CreateTask extends Component {
         )
     }
 
-    onIgnoreConflicts() {
-
-    }
-
     render() {
-        let { name, description, assignedTo, project, type, priority, status, address, color, showTasksConflicts } = this.state
+        const { startDate, endDate, startHour, dueHour } = this.state
+        let { name, description, assignedTo, project, type, priority, status, address, color, showTasksConflicts, toastMessage, toastType } = this.state
         let { createdAt, createdBy, editedAt, editedBy, loading, docNotFound } = this.state
         let { nameError, assignedToError } = this.state
 
@@ -699,7 +616,23 @@ class CreateTask extends Component {
                         {<FormSection
                             sectionTitle='Créneau horaire'
                             sectionIcon={faCalendar}
-                            form={this.renderTimeForm(canWrite)}
+                            form={
+                                <TimeslotForm
+                                    role={this.props.role}
+                                    canWrite={canWrite}
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    startHour={moment(startHour, "HH:mm").format()}
+                                    dueHour={moment(dueHour, "HH:mm").format()}
+                                    setParentState={
+                                        (mode, dateId, value) => {
+                                            let update = {}
+                                            update[dateId] = mode === "date" ? moment(value).format() : moment(value).format('HH:mm')
+                                            this.setState(update)
+                                        }
+                                    }
+                                />
+                            }
                         />}
 
                         {this.isProcess && !this.isEdit ?
@@ -719,6 +652,21 @@ class CreateTask extends Component {
                                                 disabled
                                             />
                                         }
+
+                                        <ItemPicker
+                                            onPress={() => navigateToScreen(this, 'ListEmployees', {
+                                                onGoBack: this.refreshAssignedTo,
+                                                prevScreen: 'CreateTask',
+                                                isRoot: false,
+                                                titleText: 'Attribuer la tâche à',
+                                                query: this.setListEmployeesQuery()
+                                            })}
+                                            label="Attribuée à *"
+                                            value={assignedTo.fullName}
+                                            error={!!assignedToError}
+                                            errorText={assignedToError}
+                                            editable={canWrite}
+                                        />
 
                                         <Picker
                                             returnKeyType="next"
@@ -743,21 +691,6 @@ class CreateTask extends Component {
                editable={canWrite}
            // autoFocus={!this.isEdit}
            /> */}
-
-                                        <ItemPicker
-                                            onPress={() => navigateToScreen(this, 'ListEmployees', {
-                                                onGoBack: this.refreshAssignedTo,
-                                                prevScreen: 'CreateTask',
-                                                isRoot: false,
-                                                titleText: 'Attribuer la tâche à',
-                                                query: this.setListEmployeesQuery()
-                                            })}
-                                            label="Attribuée à *"
-                                            value={assignedTo.fullName}
-                                            error={!!assignedToError}
-                                            errorText={assignedToError}
-                                            editable={canWrite}
-                                        />
 
                                         <MyInput
                                             label="Description"
@@ -854,6 +787,12 @@ class CreateTask extends Component {
                         }
 
                         {showTasksConflicts && this.renderTasksConflicts()}
+
+                        <Toast
+                            containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                            message={toastMessage}
+                            type={toastType}
+                            onDismiss={() => this.setState({ toastMessage: '' })} />
                     </ScrollView>
                 }
             </View>

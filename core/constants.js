@@ -48,7 +48,8 @@ export const errorMessages = {
         passwordUpdate: "Erreur lors de la modification du mot de passe. Veuillez réessayer."
     },
     documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." },
-    pdfGen: "Erreur lors de la génération du document. Veuillez réessayer."
+    pdfGen: "Erreur lors de la génération du document. Veuillez réessayer.",
+    invalidFields: "Erreur, veuillez remplir les champs obligatoires"
 }
 
 export const phases = [
