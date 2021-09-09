@@ -1,6 +1,6 @@
 package com.synergys;
 
-//import com.microsoft.codepush.react.CodePush;
+import com.microsoft.codepush.react.CodePush;
 import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
@@ -35,13 +35,13 @@ public class MainApplication extends Application implements ReactApplication {
           return "index";
         }
 
-        // // 2. Override the getJSBundleFile method to let
-        // // the CodePush runtime determine where to get the JS
-        // // bundle location from on each app start
-        // @Override
-        // protected String getJSBundleFile() {
-        //     return CodePush.getJSBundleFile();
-        // }
+        // 2. Override the getJSBundleFile method to let
+        // the CodePush runtime determine where to get the JS
+        // bundle location from on each app start
+        @Override
+        protected String getJSBundleFile() {
+            return CodePush.getJSBundleFile();
+        }
       };
 
   @Override
