@@ -31,6 +31,7 @@ import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateF
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
 import { setCurrentUser } from '../../core/redux'
+import { SquarePlus } from '../../components'
 
 const fields = ['denom', 'nom', 'prenom', 'email', 'phone']
 
@@ -455,10 +456,41 @@ class Profile extends Component {
         )
     }
 
-    renderProject(project) {
+    addProjectComponent() {
+
+        const { address, isPro, denom, prenom, nom, email } = this.state
+        const client = {
+            id: this.userParam.id,
+            fullName: isPro ? denom.value : `${prenom.value} ${nom.value}`,
+            email: email.value,
+            role: 'Client',
+        }
+
+        return (
+            <View>
+                <SquarePlus onPress={() => this.props.navigation.navigate('CreateProject', { client, address, onGoBack: () => this.fetchProfile(1000) })} />
+                <Text style={[theme.customFontMSregular.caption, { marginTop: theme.padding / 2, color: theme.colors.gray_dark }]}>
+                    Nouveau projet
+                </Text>
+            </View>
+        )
+    }
+
+    renderProject(project, index) {
         if (project.empty)
             return <View style={styles.invisibleItem} />
-        else return <ProjectItem2 project={project} onPress={() => this.onPressProject(project.id)} />
+
+        else {
+            if (index === 0)
+                return this.addProjectComponent()
+
+            else return (
+                <ProjectItem2
+                    project={project}
+                    onPress={() => this.onPressProject(project.id)}
+                />
+            )
+        }
     }
 
     onPressProject(ProjectId) {
@@ -470,13 +502,6 @@ class Profile extends Component {
         const mes = isProfileOwner ? 'Mes ' : ''
         const { loadingClientProjects, clientProjectsList, isPro, denom, nom, prenom, email, address } = this.state
 
-        const client = {
-            id: this.userParam.id,
-            fullName: isPro ? denom.value : `${prenom.value} ${nom.value}`,
-            email: email.value,
-            role: 'Client',
-        }
-
         return (
             <View style={{ flex: 1, marginTop: 16 }}>
                 <FormSection
@@ -487,17 +512,9 @@ class Profile extends Component {
                                 <View style={{ flexDirection: 'row' }}>
                                     <CustomIcon
                                         icon={faRedo}
-                                        size={28}
-                                        color={theme.colors.primary}
-                                        onPress={this.fetchClientProjects}
-                                        style={{ marginRight: theme.padding * 1.5 }}
-                                    />
-                                    <CustomIcon
-                                        icon={faPlusCircle}
-                                        size={28}
+                                        size={24}
                                         color={theme.colors.white}
-                                        secondaryColor={theme.colors.primary}
-                                        onPress={() => this.props.navigation.navigate('CreateProject', { client, address, onGoBack: () => this.fetchProfile(1000) })}
+                                        onPress={this.fetchClientProjects}
                                     />
                                 </View>
                             )
@@ -509,13 +526,16 @@ class Profile extends Component {
                 {loadingClientProjects ?
                     <Loading style={{ marginTop: 33 }} />
                     :
-                    <FlatList
-                        data={formatRow(true, clientProjectsList, 3)}
-                        keyExtractor={item => item.id.toString()}
-                        renderItem={({ item }) => this.renderProject(item)}
-                        style={{ zIndex: 1 }}
-                        numColumns={3}
-                        columnWrapperStyle={{ justifyContent: 'space-between' }} />
+                    clientProjectsList.length > 0 ?
+                        <FlatList
+                            data={formatRow(true, clientProjectsList, 3)}
+                            keyExtractor={item => item.id.toString()}
+                            renderItem={({ item, index }) => this.renderProject(item, index)}
+                            style={{ zIndex: 1 }}
+                            numColumns={3}
+                            columnWrapperStyle={{ justifyContent: 'space-between' }} />
+                        :
+                        this.addProjectComponent()
                 }
 
             </View>

@@ -790,8 +790,9 @@ const styles = StyleSheet.create({
         elevation: 10,
         borderRadius: 5,
         backgroundColor: theme.colors.white,
-        margin: 15,
-        marginVertical: 35
+        marginHorizontal: 15,
+        marginTop: theme.padding * 3,
+        marginBottom: theme.padding * 4
     },
     headerBarContainer: {
         backgroundColor: theme.colors.section,

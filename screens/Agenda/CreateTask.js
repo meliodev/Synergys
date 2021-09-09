@@ -418,21 +418,17 @@ class CreateTask extends Component {
         const isContactEdited = isComContactEdited || isTechContactEdited
 
         if (isContactEdited) {
-            console.log('contact edited')
             let update = {}
             let fieldId = ""
 
             if (isComContactEdited) {
-                console.log("commercial edited")
                 fieldId = "comContact"
             }
             else if (isTechContactEdited) {
-                console.log("poseur edited")
                 fieldId = "techContact"
             }
             update[fieldId] = assignedTo
 
-            console.log('updating contact........')
             db.collection('Projects').doc(project.id).update(update)
         }
     }

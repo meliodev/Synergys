@@ -45,8 +45,8 @@ const styles = StyleSheet.create({
     imagesBox: {
         justifyContent: 'center',
         alignItems: 'center',
-        width: 90,
-        height: 90,
+        width: constants.ScreenWidth * 0.24,
+        height: constants.ScreenWidth * 0.24,
         backgroundColor: theme.colors.background,
         borderWidth: 1,
         borderStyle: 'dashed',
