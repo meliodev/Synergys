@@ -70,17 +70,17 @@ class CreateTask extends Component {
         this.initialState = {}
         this.isInit = true
 
-        this.prevScreen = this.props.navigation.getParam('prevScreen', '')
-        this.TaskId = this.props.navigation.getParam('TaskId', '')
-        this.isEdit = this.TaskId ? true : false
-        this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
-        this.title = this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
-
+        this.isProcess = this.props.navigation.getParam('isProcess', false)
         //Params (task properties)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined)
-        this.isProcess = this.props.navigation.getParam('isProcess', false)
+
+        this.prevScreen = this.props.navigation.getParam('prevScreen', '')
+        this.TaskId = this.props.navigation.getParam('TaskId', '')
+        this.isEdit = this.TaskId ? true : false
+        this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
+        this.title = this.isProcess ? this.taskType.value : this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 
         const currentRole = this.props.role.id
         this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
@@ -522,7 +522,7 @@ class CreateTask extends Component {
     renderTimeForm(canWrite) {
         const { isAllDay, startDate, endDate, startHour, dueHour } = this.state
         const { startDateError, endDateError, startHourError, dueHourError } = this.state
-        const showEndDate = !this.isEdit && !isAllDay
+        const showEndDate = !this.isEdit && !isAllDay && this.props.role.id !== "com"
 
         return (
             <View style={{ flex: 1 }}>
@@ -540,7 +540,7 @@ class CreateTask extends Component {
 
                 <ItemPicker
                     onPress={() => navigateToScreen(this, 'DatePicker', { onGoBack: this.refreshDate, label: 'de début', isAllDay, showTimePicker: false, targetField: 'startDate' })}
-                    label={'Date de début *'}
+                    label={this.props.role.id === "com" ? "Date" : 'Date de début *'}
                     value={moment(startDate).format('ll')}
                     editable={canWrite}
                     showAvatarText={false}
@@ -702,138 +702,146 @@ class CreateTask extends Component {
                             form={this.renderTimeForm(canWrite)}
                         />}
 
-                        <FormSection
-                            sectionTitle='Informations générales'
-                            sectionIcon={faInfoCircle}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    {this.isEdit &&
-                                        <MyInput
-                                            label="Numéro de la tâche"
-                                            returnKeyType="done"
-                                            value={this.TaskId}
-                                            editable={false}
-                                            disabled
-                                        />
-                                    }
+                        {this.isProcess && !this.isEdit ?
+                            null
+                            :
+                            <FormSection
+                                sectionTitle='Informations générales'
+                                sectionIcon={faInfoCircle}
+                                form={
+                                    <View style={{ flex: 1 }}>
+                                        {this.isEdit &&
+                                            <MyInput
+                                                label="Numéro de la tâche"
+                                                returnKeyType="done"
+                                                value={this.TaskId}
+                                                editable={false}
+                                                disabled
+                                            />
+                                        }
 
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={type}
-                                        error={!!type.error}
-                                        errorText={type.error}
-                                        selectedValue={type}
-                                        onValueChange={(type) => this.setState({ type })}
-                                        title="Type *"
-                                        elements={this.types}
-                                        enabled={canWrite && enableTypePicker} //pre-defined task type
-                                        containerStyle={{ marginBottom: 10 }}
-                                    />
-
-                                    {/* <MyInput
-                                        label="Nom de la tâche *"
-                                        returnKeyType="done"
-                                        value={name}
-                                        onChangeText={name => this.setState({ name, nameError: "" })}
-                                        error={!!nameError}
-                                        errorText={nameError}
-                                        editable={canWrite}
-                                    // autoFocus={!this.isEdit}
-                                    /> */}
-
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'ListEmployees', {
-                                            onGoBack: this.refreshAssignedTo,
-                                            prevScreen: 'CreateTask',
-                                            isRoot: false,
-                                            titleText: 'Attribuer la tâche à',
-                                            query: this.setListEmployeesQuery()
-                                        })}
-                                        label="Attribuée à *"
-                                        value={assignedTo.fullName}
-                                        error={!!assignedToError}
-                                        errorText={assignedToError}
-                                        editable={canWrite}
-                                    />
-
-                                    <MyInput
-                                        label="Description"
-                                        returnKeyType="done"
-                                        value={description}
-                                        onChangeText={description => this.setState({ description })}
-                                        multiline={true}
-                                        // error={!!description.error}
-                                        // errorText={description.error}
-                                        editable={canWrite}
-                                    />
-
-                                    {/* <Picker
-                                        returnKeyType="next"
-                                        value={priority}
-                                        error={!!priority.error}
-                                        errorText={priority.error}
-                                        selectedValue={priority}
-                                        onValueChange={(priority) => this.setState({ priority })}
-                                        title="Priorité *"
-                                        elements={priorities}
-                                        enabled={canWrite}
-                                        containerStyle={{ marginBottom: 10 }}
-                                    /> */}
-
-                                    {this.isEdit &&
                                         <Picker
                                             returnKeyType="next"
-                                            value={status}
-                                            error={!!status.error}
-                                            errorText={status.error}
-                                            selectedValue={status}
-                                            onValueChange={(status) => this.setState({ status })}
-                                            title="État *"
-                                            elements={statuses}
-                                            enabled={canWrite}
+                                            value={type}
+                                            error={!!type.error}
+                                            errorText={type.error}
+                                            selectedValue={type}
+                                            onValueChange={(type) => this.setState({ type })}
+                                            title="Type *"
+                                            elements={this.types}
+                                            enabled={canWrite && enableTypePicker} //pre-defined task type
                                             containerStyle={{ marginBottom: 10 }}
                                         />
-                                    }
 
-                                    {/* <ColorPicker
-                                        label='Couleur de la tâche'
-                                        selectedColor={color}
-                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite} /> */}
-                                </View>
-                            }
-                        />
+                                        {/* <MyInput
+               label="Nom de la tâche *"
+               returnKeyType="done"
+               value={name}
+               onChangeText={name => this.setState({ name, nameError: "" })}
+               error={!!nameError}
+               errorText={nameError}
+               editable={canWrite}
+           // autoFocus={!this.isEdit}
+           /> */}
 
-                        <FormSection
-                            sectionTitle='Références'
-                            sectionIcon={faRetweet}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    <ItemPicker
-                                        onPress={() => {
-                                            if (this.project || this.isEdit) return //pre-defined project
-                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
-                                        }}
-                                        label="Projet concerné"
-                                        value={project.name}
-                                        error={!!project.error}
-                                        errorText={project.error}
-                                        showAvatarText={false}
-                                        editable={canWrite}
-                                    />
-                                    <AddressInput
-                                        label='Adresse postale'
-                                        offLine={!isConnected}
-                                        onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                                        onChangeText={this.setAddress}
-                                        clearAddress={() => this.setAddress('')}
-                                        address={address}
-                                        addressError={address.error}
-                                        editable={canWrite}
-                                        isEdit={this.isEdit} />
-                                </View>
-                            }
-                        />
+                                        <ItemPicker
+                                            onPress={() => navigateToScreen(this, 'ListEmployees', {
+                                                onGoBack: this.refreshAssignedTo,
+                                                prevScreen: 'CreateTask',
+                                                isRoot: false,
+                                                titleText: 'Attribuer la tâche à',
+                                                query: this.setListEmployeesQuery()
+                                            })}
+                                            label="Attribuée à *"
+                                            value={assignedTo.fullName}
+                                            error={!!assignedToError}
+                                            errorText={assignedToError}
+                                            editable={canWrite}
+                                        />
+
+                                        <MyInput
+                                            label="Description"
+                                            returnKeyType="done"
+                                            value={description}
+                                            onChangeText={description => this.setState({ description })}
+                                            multiline={true}
+                                            // error={!!description.error}
+                                            // errorText={description.error}
+                                            editable={canWrite}
+                                        />
+
+                                        {/* <Picker
+               returnKeyType="next"
+               value={priority}
+               error={!!priority.error}
+               errorText={priority.error}
+               selectedValue={priority}
+               onValueChange={(priority) => this.setState({ priority })}
+               title="Priorité *"
+               elements={priorities}
+               enabled={canWrite}
+               containerStyle={{ marginBottom: 10 }}
+           /> */}
+
+                                        {this.isEdit &&
+                                            <Picker
+                                                returnKeyType="next"
+                                                value={status}
+                                                error={!!status.error}
+                                                errorText={status.error}
+                                                selectedValue={status}
+                                                onValueChange={(status) => this.setState({ status })}
+                                                title="État *"
+                                                elements={statuses}
+                                                enabled={canWrite}
+                                                containerStyle={{ marginBottom: 10 }}
+                                            />
+                                        }
+
+                                        {/* <ColorPicker
+               label='Couleur de la tâche'
+               selectedColor={color}
+               updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+               editable={canWrite} /> */}
+                                    </View>
+                                }
+                            />
+                        }
+
+
+                        {!this.isProcess &&
+                            <FormSection
+                                sectionTitle='Références'
+                                sectionIcon={faRetweet}
+                                form={
+                                    <View style={{ flex: 1 }}>
+                                        <ItemPicker
+                                            onPress={() => {
+                                                if (this.project || this.isEdit) return //pre-defined project
+                                                navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
+                                            }}
+                                            label="Projet concerné"
+                                            value={project.name}
+                                            error={!!project.error}
+                                            errorText={project.error}
+                                            showAvatarText={false}
+                                            editable={canWrite}
+                                        />
+                                        <AddressInput
+                                            label='Adresse postale'
+                                            offLine={!isConnected}
+                                            onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                            onChangeText={this.setAddress}
+                                            clearAddress={() => this.setAddress('')}
+                                            address={address}
+                                            addressError={address.error}
+                                            editable={canWrite}
+                                            isEdit={this.isEdit} />
+                                    </View>
+                                }
+                            />
+                        }
+
 
                         {this.isEdit &&
                             <ActivitySection

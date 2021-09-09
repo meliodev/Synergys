@@ -13,7 +13,7 @@ const Section = ({
   text,
   icon,
   onPressIcon,
-  iconColor = theme.colors.gray_dark,
+  iconColor = theme.colors.white,
   iconSecondaryColor = undefined,
   rightComponent = null,
   iconSize = 21,
@@ -22,7 +22,7 @@ const Section = ({
 }) => {
   return (
     <TouchableOpacity style={[styles.section, style]} onPress={onPress}>
-      <Text style={[theme.customFontMSregular.header, textStyle]}>{text}</Text>
+      <Text style={[theme.customFontMSmedium.header, textStyle, { color: theme.colors.white }]}>{text}</Text>
       {rightComponent ?
         rightComponent()
         :

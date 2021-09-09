@@ -591,11 +591,11 @@ class Signature extends Component {
                     <View>
                         {newPdfSaved &&
                             <View style={styles.buttonsContainer}>
-                                <TouchableOpacity onPress={this.retrySign} style={styles.button1}>
-                                    <Text style={[theme.customFontMSsemibold.body, { color: '#fff', marginLeft: 5 }]}>RÉESSAYER</Text>
+                                <TouchableOpacity onPress={this.retrySign} style={[styles.button1, { backgroundColor: theme.colors.white, borderWidth: StyleSheet.hairlineWidth, borderColor: theme.colors.gray_dark }]}>
+                                    <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.gray_dark, marginLeft: 5 }]}>RÉESSAYER</Text>
                                 </TouchableOpacity>
 
-                                <TouchableOpacity onPress={this.confirmSign} style={styles.button1}>
+                                <TouchableOpacity onPress={this.confirmSign} style={[styles.button1, { backgroundColor: theme.colors.primary }]}>
                                     <Text style={[theme.customFontMSsemibold.body, { color: '#fff', marginLeft: 5 }]}>VALIDER</Text>
                                 </TouchableOpacity>
                             </View>}
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
         height: constants.ScreenWidth * 0.1,
         borderRadius: 5,
         alignItems: "center",
-        backgroundColor: theme.colors.primary,
+        //backgroundColor: theme.colors.primary,
         padding: 10,
         marginVertical: 10,
         flexDirection: 'row',

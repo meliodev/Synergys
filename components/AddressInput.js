@@ -60,9 +60,10 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
     }
 
     const renderAddressInput = (editable) => {
+
         return (
             <MyInput
-                label={label || "Emplacement"}
+                label={label || "Adresse"}
                 value={address.description}
                 onChangeText={onChangeText}
                 error={!!addressError}
@@ -108,10 +109,10 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
         return (
             <View>
                 {checked ?
-                    renderAddressInput(true)
+                    renderAddressInput(editable)
                     :
                     <TouchableOpacity onPress={openMap}>
-                        {renderAddressInput(false)}
+                        {renderAddressInput(editable)}
                     </TouchableOpacity>
                 }
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>

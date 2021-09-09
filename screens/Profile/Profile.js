@@ -54,6 +54,7 @@ class Profile extends Component {
         this.isRoot = this.props.navigation.getParam('isRoot', false)
         this.roleId = this.props.role.id
         this.userParam = this.props.navigation.getParam('user', { id: firebase.auth().currentUser.uid, roleId: this.roleId })
+        this.isEdit = this.props.navigation.getParam("isEdit", false)
         this.isClient = this.userParam.roleId === 'client'
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
         this.isProcess = this.props.navigation.getParam('isProcess', false)
@@ -411,7 +412,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, denom, text)}
                         error={!!denom.error}
                         errorText={denom.error}
-                        editable={isConnected && canUpdate || this.isProcess}
+                        editable={this.isEdit && (isConnected && canUpdate || this.isProcess)}
                     />
                     :
                     <MyInput
@@ -421,7 +422,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, prenom, text)}
                         error={!!prenom.error}
                         errorText={prenom.error}
-                        editable={isConnected && canUpdate || this.isProcess}
+                        editable={this.isEdit && (isConnected && canUpdate || this.isProcess)}
                         disabled={!isConnected}
                     />
                 }
@@ -434,7 +435,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, siret, text)}
                         error={!!siret.error}
                         errorText={siret.error}
-                        editable={isConnected && canUpdate || this.isProcess}
+                        editable={this.isEdit && (isConnected && canUpdate || this.isProcess)}
                     />
                     :
                     < MyInput
@@ -444,7 +445,7 @@ class Profile extends Component {
                         onChangeText={text => updateField(this, nom, text)}
                         error={!!nom.error}
                         errorText={nom.error}
-                        editable={isConnected && canUpdate || this.isProcess}
+                        editable={this.isEdit && (isConnected && canUpdate || this.isProcess)}
                         disabled={!isConnected}
                     />
                 }
@@ -645,7 +646,7 @@ class Profile extends Component {
                                             autoCapitalize="none"
                                             textContentType='emailAddress'
                                             keyboardType='email-address'
-                                            editable={this.isClient && isProspect}
+                                            editable={this.isEdit && this.isClient && isProspect}
                                             disabled={false}
                                         />
 
@@ -678,7 +679,7 @@ class Profile extends Component {
                                             textContentType='telephoneNumber'
                                             keyboardType='phone-pad'
                                             dataDetectorTypes='phoneNumber'
-                                            editable={canUpdate || this.isProcess}
+                                            editable={this.isEdit && (canUpdate || this.isProcess)}
                                             render={props =>
                                                 <TextInputMask
                                                     {...props}
@@ -694,7 +695,7 @@ class Profile extends Component {
                                             onChangeText={this.setAddress}
                                             clearAddress={() => this.setAddress('')}
                                             addressError={addressError}
-                                            editable={canUpdate || this.isProcess}
+                                            editable={this.isEdit && (canUpdate || this.isProcess)}
                                             isEdit={true}
                                         />
 

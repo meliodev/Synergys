@@ -106,6 +106,8 @@ class UploadDocument extends Component {
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         //Process params
+        this.isProcess = this.props.navigation.getParam('isProcess', false)
+        this.isSignature = this.props.navigation.getParam('isSignature', false)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined) //Not editable
@@ -192,9 +194,18 @@ class UploadDocument extends Component {
         this.initialState = _.cloneDeep(this.state)
         this.setState({ initialLoading: false })
 
-        if (this.project.id !== "" && !this.isEdit) {
+        const isProcessDocCreation = this.isProcess && !this.isSignature && !this.isEdit
+        if (isProcessDocCreation) {
             const { canUpdate } = this.props.permissions.documents
             this.onPressAttachment(canUpdate)
+        }
+
+        if (this.isSignature) {
+            let { canUpdate } = this.props.permissions.documents
+            //Client is allowed to update his own documents
+            canUpdate = canUpdate || this.props.role.id === 'client' && createdBy.id === auth.uid
+            const allowSign = canUpdate || this.props.role.id === 'client'
+            this.navigateToSignature(true, this.props.network.isConnected, allowSign)
         }
     }
 
@@ -433,7 +444,7 @@ class UploadDocument extends Component {
         else Alert.alert("", "Ce document est en cours d'exportation. Le document sera bientôt disponible, veuillez patienter...")
     }
 
-    renderAttachment(canWrite) {
+    renderAttachment(canWrite, isProcess) {
         const { attachment } = this.state
 
         //upload task is running -> show progress for local user
@@ -474,10 +485,11 @@ class UploadDocument extends Component {
         else if (!attachment) {
             return (
                 <View style={{ marginVertical: 10, marginTop: 15 }}>
-                    <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>
+                    {!isProcess && <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>}
                     <SquarePlus
                         style={{ marginTop: 5 }}
                         onPress={() => this.onPressAttachment(canWrite)}
+                        isBig={isProcess}
                     />
                 </View>
             )
@@ -498,7 +510,7 @@ class UploadDocument extends Component {
         }
 
         else if (modalContent === 'docSources') {
-            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
+            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE', "Mandat Synergys", "Mandat MaPrimeRénov", "PV réception"]
             return {
                 title: `Créer ${articles_fr('un', masculins, type)} ${type.toLowerCase()}`,
                 columns: 2,
@@ -515,7 +527,7 @@ class UploadDocument extends Component {
         }
 
         else if (modalContent === 'genOrderSources') {
-            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE']
+            const masculins = ['Devis', 'Bon de commande', 'Dossier CEE', "Mandat Synergys", "Mandat MaPrimeRénov", "PV réception"]
             return {
                 title: `Générer ${articles_fr('un', masculins, type)} ${type.toLowerCase()} à partir de:`,
                 columns: 2,
@@ -832,6 +844,7 @@ class UploadDocument extends Component {
         const allowConversion = isGeneratedQuote && this.isHighRole
         const allowSign = canUpdate || this.props.role.id === 'client'
         const showType = type !== '' && project.id !== "" && attachment
+        const titleText = loading ? 'Exportation du document...' : this.isEdit ? 'Modifier le document' : this.isProcess ? type : 'Nouveau document'
 
         if (initialLoading)
             return (
@@ -861,175 +874,210 @@ class UploadDocument extends Component {
             <View style={styles.container}>
                 <Appbar
                     close title
-                    titleText={loading ? 'Exportation du document...' : this.isEdit ? 'Modifier le document' : 'Nouveau document'}
+                    titleText={titleText}
                     loading={loading}
-                    check={canWrite}
-                    handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
+                    // check={canWrite}
+                    // handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
                     del={canDelete}
                     handleDelete={this.showAlert} />
 
-                <View style={{ flex: 1 }}>
-                    {allowViewDocument &&
-                        <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature()}>
-                            <Text style={[theme.customFontMSmedium.body, styles.viewDocumentButton]}>VOIR LE DOCUMENT</Text>
+                {this.isProcess ?
+                    <View style={{ flex: 1, paddingHorizontal: theme.padding }}>
+                        {this.renderAttachment(canWrite, true)}
+                        {attachmentError !== "" &&
+                            <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3, alignSelf: "center" }]}>
+                                {attachmentError}
+                            </Text>
+                        }
+                        <ModalOptions
+                            title={title}
+                            columns={columns}
+                            isLoading={modalLoading}
+                            modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                            isVisible={showModal}
+                            toggleModal={() => this.toggleModal()}
+                            elements={elements}
+                            autoValidation={true}
+                            handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                        />
+                        <Button
+                            mode="contained"
+                            style={[{
+                                position: "absolute",
+                                right: theme.padding,
+                                bottom: 0,
+                                width: constants.ScreenWidth * 0.4,
+                                backgroundColor: !attachment ? "#f2f3f5" : theme.colors.primary
+                            }]}
+                            onPress={() => this.handleSubmit(false, this.DocumentId)}>
+                            <Text style={[theme.customFontMSmedium.body, { color: !attachment ? theme.colors.gray_medium : "#fff" }]}>Importer</Text>
                         </Button>
-                    }
+                    </View>
+                    :
+                    <View style={{ flex: 1 }}>
+                        {allowViewDocument &&
+                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature()}>
+                                <Text style={[theme.customFontMSmedium.body, styles.viewDocumentButton]}>VOIR LE DOCUMENT</Text>
+                            </Button>
+                        }
 
-                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: constants.ScreenWidth * 0.02 }}>
+                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: constants.ScreenWidth * 0.02 }}>
 
+                            {showSignatures &&
+                                <FormSection
+                                    sectionTitle='Signatures'
+                                    sectionIcon={faSignature}
+                                    form={
+                                        <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+                                            {this.renderSignees()}
+                                        </View>
+                                    }
+                                />
+                            }
 
-                        {showSignatures &&
                             <FormSection
-                                sectionTitle='Signatures'
-                                sectionIcon={faSignature}
+                                sectionTitle='Informations générales'
+                                sectionIcon={faInfoCircle}
                                 form={
                                     <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                                        {this.renderSignees()}
+                                        {this.isEdit &&
+                                            <MyInput
+                                                label="Numéro du document"
+                                                returnKeyType="done"
+                                                value={this.DocumentId}
+                                                editable={false}
+                                                disabled
+                                            />
+                                        }
+
+                                        <ItemPicker
+                                            onPress={() => {
+                                                if (this.project || this.isEdit || loading) return //pre-defined project
+                                                navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
+                                            }}
+                                            label="Projet concerné *"
+                                            value={project.name}
+                                            error={!!projectError}
+                                            errorText={projectError}
+                                            editable={canWrite}
+                                            showAvatarText={false}
+                                        />
+
+
+                                        {project.id !== "" &&
+                                            <View>
+                                                {this.renderAttachment(canWrite, false)}
+                                                {attachmentError !== "" &&
+                                                    <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3 }]}>
+                                                        {attachmentError}
+                                                    </Text>
+                                                }
+                                            </View>
+                                        }
+
+                                        {showType &&
+                                            <MyInput
+                                                label="Type *"
+                                                returnKeyType="done"
+                                                value={type}
+                                                editable={false}
+                                                disabled
+                                            />}
+
+                                        <ModalOptions
+                                            title={title}
+                                            columns={columns}
+                                            isLoading={modalLoading}
+                                            modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                                            isVisible={showModal}
+                                            toggleModal={() => this.toggleModal()}
+                                            elements={elements}
+                                            autoValidation={true}
+                                            handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                                        />
+
+                                        <MyInput
+                                            label="Nom du document *"
+                                            returnKeyType="done"
+                                            value={name}
+                                            onChangeText={name => this.setState({ name, nameError })}
+                                            error={!!nameError}
+                                            errorText={nameError}
+                                            multiline={true}
+                                            editable={canWrite}
+                                        />
+
+                                        <MyInput
+                                            label="Description"
+                                            returnKeyType="done"
+                                            value={description}
+                                            onChangeText={description => this.setState({ description })}
+                                            // error={!!description.error}
+                                            // errorText={description.error}
+                                            multiline={true}
+                                            editable={canWrite}
+                                        />
+
+                                        <Picker
+                                            returnKeyType="next"
+                                            value={state}
+                                            error={!!state.error}
+                                            errorText={state.error}
+                                            selectedValue={state}
+                                            onValueChange={(state) => this.setState({ state })}
+                                            title="Etat"
+                                            elements={states}
+                                            enabled={canWrite}
+                                            containerStyle={{ marginBottom: 0 }}
+                                        />
                                     </View>
                                 }
                             />
+
+                            {this.isEdit &&
+                                <ActivitySection
+                                    createdBy={createdBy}
+                                    createdAt={createdAt}
+                                    editedBy={editedBy}
+                                    editedAt={editedAt}
+                                    navigation={this.props.navigation}
+                                />
+                            }
+
+
+                        </ScrollView>
+
+                        {showDocOperations &&
+                            <View style={styles.footerContainer}>
+                                {allowConversion ?
+                                    <Button
+                                        mode="contained"
+                                        style={[styles.signButton, { width: constants.ScreenWidth * 0.6, backgroundColor: theme.colors.primary }]}
+                                        onPress={() => this.convertProposalToBill(isConnected, true)}>
+                                        <Text style={[theme.customFontMSmedium.caption, { color: '#fff' }]}>Convertir en facture</Text>
+                                    </Button>
+                                    :
+                                    <View />
+                                }
+
+                                {allowSign &&
+                                    <Button
+                                        mode="contained"
+                                        style={[styles.signButton, { backgroundColor: theme.colors.primary }]}
+                                        onPress={() => this.navigateToSignature(true, isConnected, allowSign)}>
+                                        <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Signer</Text>
+                                    </Button>
+                                }
+                            </View>
                         }
 
-                        <FormSection
-                            sectionTitle='Informations générales'
-                            sectionIcon={faInfoCircle}
-                            form={
-                                <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                                    {this.isEdit &&
-                                        <MyInput
-                                            label="Numéro du document"
-                                            returnKeyType="done"
-                                            value={this.DocumentId}
-                                            editable={false}
-                                            disabled
-                                        />
-                                    }
+                        <Toast
+                            message={toastMessage}
+                            type={toastType}
+                            onDismiss={() => this.setState({ toastMessage: '' })} />
+                    </View>
 
-                                    <ItemPicker
-                                        onPress={() => {
-                                            if (this.project || this.isEdit || loading) return //pre-defined project
-                                            navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
-                                        }}
-                                        label="Projet concerné *"
-                                        value={project.name}
-                                        error={!!projectError}
-                                        errorText={projectError}
-                                        editable={canWrite}
-                                        showAvatarText={false}
-                                    />
-
-                                    {project.id !== "" &&
-                                        <View>
-                                            {this.renderAttachment(canWrite)}
-                                            {attachmentError !== "" &&
-                                                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3 }]}>
-                                                    {attachmentError}
-                                                </Text>
-                                            }
-                                        </View>
-                                    }
-
-                                    {showType &&
-                                        <MyInput
-                                            label="Type *"
-                                            returnKeyType="done"
-                                            value={type}
-                                            editable={false}
-                                            disabled
-                                        />}
-
-                                    <ModalOptions
-                                        title={title}
-                                        columns={columns}
-                                        isLoading={modalLoading}
-                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
-                                        isVisible={showModal}
-                                        toggleModal={() => this.toggleModal()}
-                                        elements={elements}
-                                        autoValidation={true}
-                                        handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
-                                    />
-
-                                    <MyInput
-                                        label="Nom du document *"
-                                        returnKeyType="done"
-                                        value={name}
-                                        onChangeText={name => this.setState({ name, nameError })}
-                                        error={!!nameError}
-                                        errorText={nameError}
-                                        multiline={true}
-                                        editable={canWrite}
-                                    />
-
-                                    <MyInput
-                                        label="Description"
-                                        returnKeyType="done"
-                                        value={description}
-                                        onChangeText={description => this.setState({ description })}
-                                        // error={!!description.error}
-                                        // errorText={description.error}
-                                        multiline={true}
-                                        editable={canWrite}
-                                    />
-
-                                    <Picker
-                                        returnKeyType="next"
-                                        value={state}
-                                        error={!!state.error}
-                                        errorText={state.error}
-                                        selectedValue={state}
-                                        onValueChange={(state) => this.setState({ state })}
-                                        title="Etat"
-                                        elements={states}
-                                        enabled={canWrite}
-                                        containerStyle={{ marginBottom: 0 }}
-                                    />
-                                </View>
-                            }
-                        />
-
-                        {this.isEdit &&
-                            <ActivitySection
-                                createdBy={createdBy}
-                                createdAt={createdAt}
-                                editedBy={editedBy}
-                                editedAt={editedAt}
-                                navigation={this.props.navigation}
-                            />
-                        }
-
-
-                    </ScrollView>
-
-                    {showDocOperations &&
-                        <View style={styles.footerContainer}>
-                            {allowConversion ?
-                                <Button
-                                    mode="contained"
-                                    style={[styles.signButton, { width: constants.ScreenWidth * 0.6, backgroundColor: theme.colors.primary }]}
-                                    onPress={() => this.convertProposalToBill(isConnected, true)}>
-                                    <Text style={[theme.customFontMSmedium.caption, { color: '#fff' }]}>Convertir en facture</Text>
-                                </Button>
-                                :
-                                <View />
-                            }
-
-                            {allowSign &&
-                                <Button
-                                    mode="contained"
-                                    style={[styles.signButton, { backgroundColor: theme.colors.primary }]}
-                                    onPress={() => this.navigateToSignature(true, isConnected, allowSign)}>
-                                    <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Signer</Text>
-                                </Button>
-                            }
-                        </View>
-                    }
-
-                    <Toast
-                        message={toastMessage}
-                        type={toastType}
-                        onDismiss={() => this.setState({ toastMessage: '' })} />
-                </View>
+                }
 
             </View>
         )

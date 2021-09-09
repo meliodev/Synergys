@@ -8,6 +8,7 @@ import { PersistGate } from 'redux-persist/es/integration/react'
 import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-native-paper';
 import { MenuProvider } from 'react-native-popup-menu';
 import SplashScreen from 'react-native-splash-screen'
+//import codePush from 'react-native-code-push'
 
 import PdfGen from './PdfGen'
 import Wrapper from './Wrapper'
@@ -74,6 +75,8 @@ class App extends Component {
     this.foregroundMessages && this.foregroundMessages()
   }
 
+
+
   render() {
     let persistor = persistStore(Store)
     //  persistor.purge()
@@ -96,4 +99,10 @@ class App extends Component {
 
 LogBox.ignoreAllLogs(true)
 
+
+// const codePushOptions = {
+//   checkFrequency: codePush.CheckFrequency.ON_APP_START
+// }
+
 export default App
+//export default codePush(codePushOptions)(App)

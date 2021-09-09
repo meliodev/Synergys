@@ -106,9 +106,13 @@ class ListUsers extends Component {
     const isClient = userType === 'client' || userType === 'prospect'
 
     const roleId = getRoleIdFromValue(user.role)
-    const viewProfile = () => this.props.navigation.navigate('Profile', { user: { id: user.id, roleId }, isClient })
-    const viewUser = viewProfile
-    const editUser = viewProfile
+
+    const viewProfile = (isEdit) => {
+      this.props.navigation.navigate('Profile', { user: { id: user.id, roleId }, isClient, isEdit })
+    }
+
+    const viewUser = () => viewProfile(false)
+    const editUser = () => viewProfile(true)
     const deleteUser = () => {
       if (offLine) Alert.alert('', 'Impossible de supprimer un utilisateur en mode hors-ligne')
       else this.alertDeleteUser(user)

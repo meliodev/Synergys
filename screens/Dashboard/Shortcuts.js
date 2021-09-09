@@ -29,7 +29,10 @@ const shortcutsModel = {
         value: '',
         icon: faAddressCard,
         colors: { primary: '#926fff', secondary: '#f1edfe' },
-        navigation: { screen: 'CreateClient', params: { prevScreen: 'Shortcuts', isProspect: false } }
+        navigation: {
+            screen: 'CreateClient',
+            params: { prevScreen: 'Shortcuts', isProspect: false }
+        }
     },
     createUser: {
         label: 'Nouvel utilisateur',
@@ -96,7 +99,11 @@ class Shortcuts extends Component {
         const { isConnected } = this.props.network
 
         const elementSize = constants.ScreenWidth * 0.42
-        const handleSelectElement = (element, index) => this.props.navigation.navigate(element.navigation.screen, element.navigation.params)
+
+        const handleSelectElement = (element, index) => {
+            const { screen, params } = element.navigation
+            this.props.navigation.navigate(screen, params)
+        }
 
         return (
             <View style={styles.mainContainer}>

@@ -677,14 +677,14 @@ class ProcessAction extends Component {
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>
-                <Text style={[theme.customFontMSmedium.caption, styles.headerBarText]}>SUIVI DU PROJET</Text>
+                <Text style={[theme.customFontMSsemibold.caption, styles.headerBarText, { color: theme.colors.white }]}>SUIVI DU PROJET</Text>
                 <View style={styles.progressionLinks}>
                     <TouchableOpacity>
                         <CustomIcon
                             onPress={() => this.mainHandler(process, true)}
                             icon={faRedo}
                             size={18}
-                            color={theme.colors.primary}
+                            color={theme.colors.white}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity>
@@ -692,7 +692,7 @@ class ProcessAction extends Component {
                             onPress={onPressEye}
                             icon={faEye}
                             size={19}
-                            color={theme.colors.primary}
+                            color={theme.colors.white}
                         />
                     </TouchableOpacity>
                 </View>
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
     },
     headerBarText: {
         letterSpacing: 2.5,
-        opacity: 0.7,
+        //opacity: 0.7,
         textAlign: 'center'
     },
     stepContainer: {

@@ -562,7 +562,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -616,7 +616,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -670,7 +670,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat Synergys', value: 'Mandat Synergys', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat Synergys', value: 'Mandat Synergys', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
@@ -1179,7 +1179,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [
@@ -1238,7 +1238,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [
@@ -1345,7 +1345,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isSignature: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [
@@ -1593,7 +1593,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat SEPA', value: 'Mandat SEPA', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         choices: [
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
@@ -1650,7 +1650,7 @@ export const processModel = {
                             { filter: 'deleted', operation: '==', value: false },
                         ],
                         screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [

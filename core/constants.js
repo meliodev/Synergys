@@ -80,3 +80,16 @@ export const lastAction = (actionOrder) => {
         nextPhase: 'endProject',
     }
 }
+
+export const workTypes = [
+    { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', selected: false },
+    { label: 'PAC AIR/AIR (climatisation)', value: 'PAC AIR/AIR (climatisation)', selected: false },
+    { label: 'BALLON THERMODYNAMIQUE', value: 'BALLON THERMODYNAMIQUE', selected: false },
+    { label: 'BALLON SOLAIRE THERMIQUE', value: 'BALLON SOLAIRE THERMIQUE', selected: false },
+    { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', selected: false },
+    { label: 'PHOTOVOLTAÏQUE HYBRIDE', value: 'PHOTOVOLTAÏQUE HYBRIDE', selected: false },
+    { label: 'ISOLATION ', value: 'ISOLATION ', selected: false },
+    { label: 'VMC DOUBLE FLUX ', value: 'VMC DOUBLE FLUX ', selected: false },
+    { label: 'POÊLE A GRANULES ', value: 'POÊLE A GRANULES ', selected: false },
+    { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
+]

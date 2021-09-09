@@ -13,7 +13,8 @@ const colors = {
   secondary: "#1B2331",
   surface: '#F5F5F5',
   appBar: '#FFFFFF',
-  section: baseColors.gray1,
+  section: "#33aa78", //Dark green: #33aa78, Dark blue: #01192b, light green: 
+  //section: "#33aa78",
   tabs: baseColors.gray1,
   attachment: baseColors.gray1,
   appBarIcon: "#1B2331",

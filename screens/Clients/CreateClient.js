@@ -59,6 +59,8 @@ class CreateClient extends Component {
         }
     }
 
+
+
     componentDidMount() {
         this.initialState = _.cloneDeep(this.state)
         load(this, false)
@@ -88,10 +90,10 @@ class CreateClient extends Component {
             setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
                 this.setState({ loadingDialog: false })
                 if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
-                    const user = {
+                    var user = {
                         id: this.ClientId,
                         isPro,
-                        denom: denom.value, 
+                        denom: denom.value,
                         nom: nom.value,
                         prenom: prenom.value,
                         role: 'Client',
@@ -100,7 +102,10 @@ class CreateClient extends Component {
                     }
                     this.props.navigation.state.params.onGoBack(user)
                 }
-                this.props.navigation.navigate(this.prevScreen)
+
+                var navScreen = this.prevScreen === "CreateProject" ? this.prevScreen : "Profile"
+                var navParams = this.prevScreen === "CreateProject" ? {} : { user: { id: this.ClientId, roleId: 'client' } }
+                this.props.navigation.navigate(navScreen, navParams)
             }, 6000)
         }
     }

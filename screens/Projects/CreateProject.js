@@ -19,7 +19,7 @@ import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomI
 
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, adminId, highRoles } from "../../core/constants";
+import { constants, adminId, highRoles, workTypes } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
@@ -45,19 +45,6 @@ const steps = [
     { label: 'Visite technique', value: 'Visite technique' },
     { label: 'Installation', value: 'Installation' },
     { label: 'Maintenance', value: 'Maintenance' },
-]
-
-const workTypes = [
-    { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', selected: false },
-    { label: 'PAC AIR/AIR (climatisation)', value: 'PAC AIR/AIR (climatisation)', selected: false },
-    { label: 'BALLON THERMODYNAMIQUE', value: 'BALLON THERMODYNAMIQUE', selected: false },
-    { label: 'BALLON SOLAIRE THERMIQUE', value: 'BALLON SOLAIRE THERMIQUE', selected: false },
-    { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', selected: false },
-    { label: 'PHOTOVOLTAÏQUE HYBRIDE', value: 'PHOTOVOLTAÏQUE HYBRIDE', selected: false },
-    { label: 'ISOLATION ', value: 'ISOLATION ', selected: false },
-    { label: 'VMC DOUBLE FLUX ', value: 'VMC DOUBLE FLUX ', selected: false },
-    { label: 'POÊLE A GRANULES ', value: 'POÊLE A GRANULES ', selected: false },
-    { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
 ]
 
 const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
@@ -114,7 +101,7 @@ class CreateProject extends Component {
             //TEXTINPUTS
             name: "",
             nameError: "",
-            workTypes: workTypes,
+            workTypes,
             isModalVisible: false,
             note: "",
 
@@ -184,6 +171,7 @@ class CreateProject extends Component {
 
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
+        else this.setWorkTypes()
         this.initialState = _.cloneDeep(this.state)
         load(this, false)
     }
@@ -236,10 +224,15 @@ class CreateProject extends Component {
 
     setWorkTypes(project) {
         let { workTypes } = this.state
+
         for (let wt of workTypes) {
-            if (project.workTypes && project.workTypes.includes(wt.value))
-                wt.selected = true
+            if (this.isEdit) {
+                if (project.workTypes && project.workTypes.includes(wt.value))
+                    wt.selected = true
+            }
+            else wt.selected = false
         }
+
         this.setState({ workTypes })
     }
 
@@ -732,7 +725,7 @@ class CreateProject extends Component {
         const fields = [name, client.id, address.description, comContact.id]
         let showTasksForm = !fields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
         showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
-        // const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
+        //const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
         const showContactTechnic = this.isEdit
 
         if (docNotFound)
@@ -745,6 +738,14 @@ class CreateProject extends Component {
                         description="Le projet est introuvable dans la base de données. Il se peut qu'il ait été supprimé."
                         offLine={!isConnected}
                     />
+                </View>
+            )
+
+        else if (loading)
+            return (
+                <View style={styles.mainContainer}>
+                    <Appbar close title titleText={this.title} />
+                    <Loading />
                 </View>
             )
 
@@ -805,7 +806,7 @@ class CreateProject extends Component {
                             isLoading={loading}
                             isExpanded={sectionsExpansion["generalInfo"]}
                             onPressSection={() => this.toggleSection("generalInfo")}
-                           // containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
                             form={
                                 <View style={{ flex: 1 }}>
 
@@ -889,7 +890,7 @@ class CreateProject extends Component {
                             sectionIcon={faUser}
                             isExpanded={sectionsExpansion["client"]}
                             onPressSection={() => this.toggleSection("client")}
-                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth}}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
