@@ -83,6 +83,11 @@ class ListProjects extends Component {
     }
 
 
+    componentWillUnmount() {
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
+    }
+
     async componentDidMount() {
         await this.fetchProjects()
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => await this.fetchProjects())

@@ -648,8 +648,11 @@ class StepsForm extends Component {
 
         //Set & Show simulation results
         if (collection === "Simulations" && isLastFormPage) {
-            await this.setResults()
+            const { products, colorCat, estimation } = this.setResults()
             this.setState({
+                products,
+                colorCat,
+                estimation,
                 showSuccessMessage: true,
                 pageIndex: this.state.pageIndex + 1,
                 loading: false
@@ -845,24 +848,13 @@ class StepsForm extends Component {
     }
 
     //##Logic: Results
-    async setResults() {
-        return new Promise((resolve, reject) => {
-            this.setState({ loading: true })
-            const form = this.unformatDocument()
-            const products = this.setProducts(form)
-            const colorCat = this.setColorCat(form)
-            const estimation = this.setEstimation(products, colorCat)
-
-            console.log("PRODUCTS", products)
-            console.log("COLOR", colorCat)
-            console.log("ESTIMATION", estimation)
-
-            this.setState({
-                products,
-                colorCat,
-                estimation,
-            }, () => resolve())
-        })
+    setResults() {
+        this.setState({ loading: true })
+        const form = this.unformatDocument()
+        const products = this.setProducts(form)
+        const colorCat = this.setColorCat(form)
+        const estimation = this.setEstimation(products, colorCat)
+        return { products, colorCat, estimation }
     }
 
     setProducts(form) {
@@ -1314,8 +1306,10 @@ class StepsForm extends Component {
         const { collection, pages } = this.props
         const { pageIndex } = this.state
 
-        if (collection === "Simulations")
-            await this.setResults()
+        if (collection === "Simulations") {
+            const { products, colorCat, estimation } = this.setResults()
+            this.setState({ products, colorCat, estimation })
+        }
 
         const isLastPage = this.state.pageIndex === pages.length - 1
         const isSubmitted = isLastPage
@@ -1393,7 +1387,7 @@ class StepsForm extends Component {
                             title={`${this.props.fileName} généré${articles_fr("e", mascCollections, collection)}`}
                             toggleModal={this.toggleModal}
                         />
-                        {pdfBase64 !== "" &&
+                        {pdfBase64 !== "" && //#task: test isPdfModalVisible && pdfBase64 (to avoid crash)
                             <View style={{ flex: 1 }}>
                                 <Pdf source={source} style={modalStyles.pdf} />
                             </View>

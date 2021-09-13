@@ -63,7 +63,7 @@ class ListFormsContainer extends Component {
 
     // componentWillUnmount() {
     //     if (this.willFocusSubscription)
-    //         this.willFocusSubscription.remove()
+    //         this.willFocusSubscription()
     // }
 
     async fetchItems(count) {

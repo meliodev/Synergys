@@ -212,7 +212,8 @@ class UploadDocument extends Component {
     componentWillUnmount() {
         this.resetModalOptions()
         this.unsubscribeAttachmentListener && this.unsubscribeAttachmentListener()
-        this.willFocusSubscription && this.willFocusSubscription.remove()
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
     }
 
     async initEditMode(DocumentId) {

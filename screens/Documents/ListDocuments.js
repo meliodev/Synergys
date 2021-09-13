@@ -10,7 +10,7 @@ import SearchBar from '../../components/SearchBar'
 import ActiveFilter from '../../components/ActiveFilter'
 import ListSubHeader from '../../components/ListSubHeader'
 import Filter from '../../components/Filter'
-import DocumentItem from '../../components/DocumentItem'
+import DocumentItem from '../../components/DocumentItem' 
 import MyFAB from '../../components/MyFAB'
 import EmptyList from '../../components/EmptyList'
 import Loading from '../../components/Loading'
@@ -80,7 +80,8 @@ class ListDocuments extends Component {
     }
 
     componentWillUnmount() {
-        this.willFocusSubscription.remove()
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
     }
 
     async componentDidMount() {

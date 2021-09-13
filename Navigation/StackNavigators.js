@@ -1,15 +1,9 @@
-import React, { Component } from 'react'
-import { View, Text, Alert } from 'react-native'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as theme from "../core/theme";
-
-import { createAppContainer, createSwitchNavigator, NavigationEvents } from 'react-navigation';
+import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 
-//Auth screens
-import { LoginScreen, ForgotPasswordScreen, AuthLoadingScreen } from "../screens/Authentication";
-
-//SCREENS
+//Import screens
+//Auth
+import { LoginScreen, ForgotPasswordScreen } from "../screens/Authentication";
 
 //Dashboard
 import Dashboard from '../screens/Dashboard/Dashboard'
@@ -96,8 +90,8 @@ const hideHeader = () => ({
     headerShown: false
 })
 
-//2. All modules STACKS
-const DashboardStack = createStackNavigator({
+const appScreens = {
+    //DASHBOARD
     Dashboard: {
         screen: Dashboard,
         navigationOptions: hideHeader
@@ -106,168 +100,8 @@ const DashboardStack = createStackNavigator({
         screen: AddGoal,
         navigationOptions: hideHeader
     },
-    //Notifications Links
-    Inbox: {
-        screen: Inbox,
-        navigationOptions: hideHeader
-    },
-    ListMessages: {
-        screen: ListMessages,
-        navigationOptions: hideHeader
-    },
-    ViewMessage: {
-        screen: ViewMessage,
-        navigationOptions: hideHeader
-    },
-    NewMessage: {
-        screen: NewMessage,
-        navigationOptions: hideHeader
-    },
-    ListNotifications: {
-        screen: ListNotifications,
-        navigationOptions: hideHeader
-    },
-    //Screens to navigate through navigation
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    CreateUser: {
-        screen: CreateUser,
-        navigationOptions: hideHeader
-    },
-    CreateTeam: {
-        screen: CreateTeam,
-        navigationOptions: hideHeader
-    },
-    CreateClient: {
-        screen: CreateClient,
-        navigationOptions: hideHeader
-    },
-    CreateProjectReq: {
-        screen: CreateProjectReq,
-        navigationOptions: hideHeader
-    },
-    CreateTicketReq: {
-        screen: CreateTicketReq,
-        navigationOptions: hideHeader
-    },
-    CreateTask: {
-        screen: CreateTask,
-        navigationOptions: hideHeader
-    },
-    DatePicker: {
-        screen: DatePicker,
-        navigationOptions: hideHeader
-    },
-    CreateOrder: {
-        screen: CreateOrder,
-        navigationOptions: hideHeader
-    },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-    //Agenda link
-    Agenda: {
-        screen: Agenda,
-        navigationOptions: hideHeader
-    },
-    Chat: {
-        screen: Chat,
-        navigationOptions: hideHeader
-    },
-})
 
-const ProfileStack = createStackNavigator({
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-    //Fiche EEB
-    ListSimulations: {
-        screen: ListSimulations,
-        navigationOptions: hideHeader
-    },
-    CreateSimulation: {
-        screen: CreateSimulation,
-        navigationOptions: hideHeader
-    },
-    CreateMandatMPR: {
-        screen: CreateMandatMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsMPR: {
-        screen: ListMandatsMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsSynergys: {
-        screen: ListMandatsSynergys,
-        navigationOptions: hideHeader
-    },
-    CreateMandatSynergys: {
-        screen: CreateMandatSynergys,
-        navigationOptions: hideHeader
-    },
-    //PV reception
-    CreatePvReception: {
-        screen: CreatePvReception,
-        navigationOptions: hideHeader
-    },
-    ListPvReceptions: {
-        screen: ListPvReceptions,
-        navigationOptions: hideHeader
-    },
-})
-
-const UsersManagementStack = createStackNavigator({
+    //USERS
     UsersManagement: {
         screen: UsersManagement,
         navigationOptions: hideHeader
@@ -288,54 +122,10 @@ const UsersManagementStack = createStackNavigator({
         screen: ViewTeam,
         navigationOptions: hideHeader
     },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-})
 
-const ClientsManagementStack = createStackNavigator({
+    //CLIENTS
     ClientsManagement: {
         screen: ClientsManagement,
-        navigationOptions: hideHeader
-    },
-    CreateClient: {
-        screen: CreateClient,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    Progression: {
-        screen: Progression,
         navigationOptions: hideHeader
     },
     ListClients: {
@@ -346,126 +136,8 @@ const ClientsManagementStack = createStackNavigator({
         screen: CreateClient,
         navigationOptions: hideHeader
     },
-    UploadDocument: { //access documents
-        screen: UploadDocument,
-        navigationOptions: hideHeader
-    },
-    Signature: {
-        screen: Signature,
-        navigationOptions: hideHeader
-    },
-    PdfGeneration: {
-        screen: PdfGeneration,
-        navigationOptions: hideHeader
-    },
-    ListProjects: {
-        screen: ListProjects,
-        navigationOptions: hideHeader
-    },
-    ListOrders: {
-        screen: ListOrders,
-        navigationOptions: hideHeader
-    },
-    CreateOrder: {
-        screen: CreateOrder,
-        navigationOptions: hideHeader
-    },
-    AddItem: {
-        screen: AddItem,
-        navigationOptions: hideHeader
-    },
-    CreateProduct: {
-        screen: CreateProduct,
-        navigationOptions: hideHeader
-    },
-    PdfGeneration: {
-        screen: PdfGeneration,
-        navigationOptions: hideHeader
-    },
-    //Agenda screens
-    Agenda: {
-        screen: Agenda,
-        navigationOptions: hideHeader
-    },
-    CreateTask: { //access tasks
-        screen: CreateTask,
-        navigationOptions: hideHeader
-    },
-    ListEmployees: {
-        screen: ListEmployees,
-        navigationOptions: hideHeader
-    },
-    DatePicker: {
-        screen: DatePicker,
-        navigationOptions: hideHeader
-    },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-    //Fiche EEB
-    ListSimulations: {
-        screen: ListSimulations,
-        navigationOptions: hideHeader
-    },
-    CreateSimulation: {
-        screen: CreateSimulation,
-        navigationOptions: hideHeader
-    },
-    CreateMandatMPR: {
-        screen: CreateMandatMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsMPR: {
-        screen: ListMandatsMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsSynergys: {
-        screen: ListMandatsSynergys,
-        navigationOptions: hideHeader
-    },
-    CreateMandatSynergys: {
-        screen: CreateMandatSynergys,
-        navigationOptions: hideHeader
-    },
-    //PV reception
-    CreatePvReception: {
-        screen: CreatePvReception,
-        navigationOptions: hideHeader
-    },
-    ListPvReceptions: {
-        screen: ListPvReceptions,
-        navigationOptions: hideHeader
-    },
-})
 
-const RequestsManagementStack = createStackNavigator({
+    //REQUESTS
     RequestsManagement: {
         screen: RequestsManagement,
         navigationOptions: hideHeader
@@ -478,61 +150,8 @@ const RequestsManagementStack = createStackNavigator({
         screen: CreateTicketReq,
         navigationOptions: hideHeader
     },
-    ListProjects: {
-        screen: ListProjects,
-        navigationOptions: hideHeader
-    },
-    ListClients: {
-        screen: ListClients,
-        navigationOptions: hideHeader
-    },
-    Chat: {
-        screen: Chat,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    VideoPlayer: {
-        screen: VideoPlayer,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    CreateProduct: {
-        screen: CreateProduct,
-        navigationOptions: hideHeader
-    },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-})
 
-const InboxStack = createStackNavigator({
+    //INBOX
     Inbox: {
         screen: Inbox,
         navigationOptions: hideHeader
@@ -553,73 +172,8 @@ const InboxStack = createStackNavigator({
         screen: ListNotifications,
         navigationOptions: hideHeader
     },
-    //Screens to navigate through navigation
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    CreateUser: {
-        screen: CreateUser,
-        navigationOptions: hideHeader
-    },
-    CreateTeam: {
-        screen: CreateTeam,
-        navigationOptions: hideHeader
-    },
-    CreateClient: {
-        screen: CreateClient,
-        navigationOptions: hideHeader
-    },
-    CreateProjectReq: {
-        screen: CreateProjectReq,
-        navigationOptions: hideHeader
-    },
-    CreateTicketReq: {
-        screen: CreateTicketReq,
-        navigationOptions: hideHeader
-    },
-    CreateTask: {
-        screen: CreateTask,
-        navigationOptions: hideHeader
-    },
-    CreateOrder: {
-        screen: CreateOrder,
-        navigationOptions: hideHeader
-    },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-})
 
-const AgendaStack = createStackNavigator({
+    //AGENDA
     Agenda: {
         screen: Agenda,
         navigationOptions: hideHeader
@@ -632,50 +186,15 @@ const AgendaStack = createStackNavigator({
         screen: ListEmployees,
         navigationOptions: hideHeader
     },
-    ListProjects: {
-        screen: ListProjects,
-        navigationOptions: hideHeader
-    },
     DatePicker: {
         screen: DatePicker,
         navigationOptions: hideHeader
     },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
 
-})
-
-const ProjectsStack = createStackNavigator({
+    //PROJECTS
     ListProjects: {
         screen: ListProjects,
+        path: 'projects',
         navigationOptions: hideHeader
     },
     CreateProject: {
@@ -687,134 +206,8 @@ const ProjectsStack = createStackNavigator({
         screen: Progression,
         navigationOptions: hideHeader
     },
-    ListClients: {
-        screen: ListClients,
-        navigationOptions: hideHeader
-    },
-    CreateClient: {
-        screen: CreateClient,
-        navigationOptions: hideHeader
-    },
-    UploadDocument: { //access documents
-        screen: UploadDocument,
-        navigationOptions: hideHeader
-    },
-    Signature: {
-        screen: Signature,
-        navigationOptions: hideHeader
-    },
-    PdfGeneration: {
-        screen: PdfGeneration,
-        navigationOptions: hideHeader
-    },
-    ListProjects: {
-        screen: ListProjects,
-        navigationOptions: hideHeader
-    },
-    ListOrders: {
-        screen: ListOrders,
-        navigationOptions: hideHeader
-    },
-    CreateOrder: {
-        screen: CreateOrder,
-        navigationOptions: hideHeader
-    },
-    AddItem: {
-        screen: AddItem,
-        navigationOptions: hideHeader
-    },
-    CreateProduct: {
-        screen: CreateProduct,
-        navigationOptions: hideHeader
-    },
-    PdfGeneration: {
-        screen: PdfGeneration,
-        navigationOptions: hideHeader
-    },
-    //Agenda screens
-    Agenda: {
-        screen: Agenda,
-        navigationOptions: hideHeader
-    },
-    CreateTask: { //access tasks
-        screen: CreateTask,
-        navigationOptions: hideHeader
-    },
-    ListEmployees: {
-        screen: ListEmployees,
-        navigationOptions: hideHeader
-    },
-    DatePicker: {
-        screen: DatePicker,
-        navigationOptions: hideHeader
-    },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-    // //Fiche EEB
-    ListSimulations: {
-        screen: ListSimulations,
-        navigationOptions: hideHeader
-    },
-    CreateSimulation: {
-        screen: CreateSimulation,
-        navigationOptions: hideHeader
-    },
-    CreateMandatMPR: {
-        screen: CreateMandatMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsMPR: {
-        screen: ListMandatsMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsSynergys: {
-        screen: ListMandatsSynergys,
-        navigationOptions: hideHeader
-    },
-    CreateMandatSynergys: {
-        screen: CreateMandatSynergys,
-        navigationOptions: hideHeader
-    },
-    //PV reception
-    CreatePvReception: {
-        screen: CreatePvReception,
-        navigationOptions: hideHeader
-    },
-    ListPvReceptions: {
-        screen: ListPvReceptions,
-        navigationOptions: hideHeader
-    },
-})
 
-const DocumentsStack = createStackNavigator({
+    //DOCUMENTS
     ListDocuments: {
         screen: ListDocuments,
         navigationOptions: hideHeader
@@ -831,17 +224,10 @@ const DocumentsStack = createStackNavigator({
         screen: PdfGeneration,
         navigationOptions: hideHeader
     },
-    ListProjects: {
-        screen: ListProjects,
-        navigationOptions: hideHeader
-    },
-    //Orders
+
+    //ORDERS
     ListOrders: {
         screen: ListOrders,
-        navigationOptions: hideHeader
-    },
-    CreateOrder: {
-        screen: CreateOrder,
         navigationOptions: hideHeader
     },
     AddItem: {
@@ -852,36 +238,20 @@ const DocumentsStack = createStackNavigator({
         screen: CreateProduct,
         navigationOptions: hideHeader
     },
-    PdfGeneration: {
-        screen: PdfGeneration,
+    CreateOrder: {
+        screen: CreateOrder,
         navigationOptions: hideHeader
     },
-    //Fiche EEB
-    ListSimulations: {
-        screen: ListSimulations,
-        navigationOptions: hideHeader
-    },
+
+    //FORMS
     CreateSimulation: {
         screen: CreateSimulation,
         navigationOptions: hideHeader
     },
-    CreateMandatMPR: {
-        screen: CreateMandatMPR,
+    ListSimulations: {
+        screen: ListSimulations,
         navigationOptions: hideHeader
     },
-    ListMandatsMPR: {
-        screen: ListMandatsMPR,
-        navigationOptions: hideHeader
-    },
-    ListMandatsSynergys: {
-        screen: ListMandatsSynergys,
-        navigationOptions: hideHeader
-    },
-    CreateMandatSynergys: {
-        screen: CreateMandatSynergys,
-        navigationOptions: hideHeader
-    },
-    //PV reception
     CreatePvReception: {
         screen: CreatePvReception,
         navigationOptions: hideHeader
@@ -890,133 +260,24 @@ const DocumentsStack = createStackNavigator({
         screen: ListPvReceptions,
         navigationOptions: hideHeader
     },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-})
-
-const OrdersStack = createStackNavigator({
-    ListOrders: {
-        screen: ListOrders,
-        navigationOptions: hideHeader
-    },
-    AddItem: {
-        screen: AddItem,
-        navigationOptions: hideHeader
-    },
-    CreateProduct: {
-        screen: CreateProduct,
-        navigationOptions: hideHeader
-    },
-    CreateOrder: {
-        screen: CreateOrder,
-        navigationOptions: hideHeader
-    },
-    ListProjects: {
-        screen: ListProjects,
-        navigationOptions: hideHeader
-    },
-    ListClients: {
-        screen: ListClients,
-        navigationOptions: hideHeader
-    },
-    //Profile screens
-    Profile: {
-        screen: Profile,
-        path: 'profile',
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    AddGoal: {
-        screen: AddGoal,
-        navigationOptions: hideHeader
-    },
-    CreateProject: {
-        screen: CreateProject,
-        path: 'project/:ProjectId',
-        navigationOptions: hideHeader
-    },
-    EditEmail: {
-        screen: EditEmail,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    EditRole: {
-        screen: EditRole,
-        navigationOptions: hideHeader
-        // navigationOptions: navOptionsBackCheck
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-})
-
-const SimulatorStack = createStackNavigator({
-    ListSimulations: {
-        screen: ListSimulations,
-        navigationOptions: hideHeader
-    },
-    CreateSimulation: {
-        screen: CreateSimulation,
-        navigationOptions: hideHeader
-    },
-    Address: {
-        screen: Address,
-        navigationOptions: hideHeader
-    },
-})
-
-const MandatMPRStack = createStackNavigator({
-    ListMandatsMPR: {
-        screen: ListMandatsMPR,
-        navigationOptions: hideHeader
-    },
     CreateMandatMPR: {
         screen: CreateMandatMPR,
         navigationOptions: hideHeader
     },
-})
-
-const MandatSynergysStack = createStackNavigator({
-    ListMandatsSynergys: {
-        screen: ListMandatsSynergys,
+    ListMandatsMPR: {
+        screen: ListMandatsMPR,
         navigationOptions: hideHeader
     },
     CreateMandatSynergys: {
         screen: CreateMandatSynergys,
         navigationOptions: hideHeader
     },
-})
+    ListMandatsSynergys: {
+        screen: ListMandatsSynergys,
+        navigationOptions: hideHeader
+    },
 
-const NewsStack = createStackNavigator({
+    //NEWS
     ListNews: {
         screen: ListNews,
         navigationOptions: hideHeader
@@ -1025,11 +286,36 @@ const NewsStack = createStackNavigator({
         screen: ViewNews,
         navigationOptions: hideHeader
     },
-})
 
-//3. USER MAIN STACKS (APP & AUTH)
-//Authentification navigation
-export const AuthStack = createStackNavigator({
+    //OTHERS
+    Chat: {
+        screen: Chat,
+        navigationOptions: hideHeader
+    },
+    Profile: {
+        screen: Profile,
+        path: 'profile',
+        navigationOptions: hideHeader
+    },
+    EditEmail: {
+        screen: EditEmail,
+        navigationOptions: hideHeader
+    },
+    EditRole: {
+        screen: EditRole,
+        navigationOptions: hideHeader
+    },
+    Address: {
+        screen: Address,
+        navigationOptions: hideHeader
+    },
+    VideoPlayer: {
+        screen: VideoPlayer,
+        navigationOptions: hideHeader
+    },
+}
+
+const authScreens = {
     LoginScreen: {
         screen: LoginScreen,
         navigationOptions: hideHeader
@@ -1038,17 +324,24 @@ export const AuthStack = createStackNavigator({
         screen: ForgotPasswordScreen,
         navigationOptions: hideHeader
     },
-    AuthLoadingScreen: {
-        screen: AuthLoadingScreen,
-        navigationOptions: hideHeader
-    },
-},
-    {
-        initialRouteName: 'AuthLoadingScreen',
-    })
+}
 
-//App modules
-export const AppStack = createSwitchNavigator({
+const DashboardStack = createStackNavigator(appScreens, { initialRouteName: "Dashboard" })
+const ProfileStack = createStackNavigator(appScreens, { initialRouteName: "Profile" })
+const UsersManagementStack = createStackNavigator(appScreens, { initialRouteName: "UsersManagement" })
+const ClientsManagementStack = createStackNavigator(appScreens, { initialRouteName: "ClientsManagement" })
+const RequestsManagementStack = createStackNavigator(appScreens, { initialRouteName: "RequestsManagement" })
+const InboxStack = createStackNavigator(appScreens, { initialRouteName: "Inbox" })
+const AgendaStack = createStackNavigator(appScreens, { initialRouteName: "Agenda" })
+const ProjectsStack = createStackNavigator(appScreens, { initialRouteName: "ListProjects" })
+const DocumentsStack = createStackNavigator(appScreens, { initialRouteName: "ListDocuments" })
+const OrdersStack = createStackNavigator(appScreens, { initialRouteName: "ListOrders" })
+const SimulatorStack = createStackNavigator(appScreens, { initialRouteName: "ListSimulations" })
+const MandatMPRStack = createStackNavigator(appScreens, { initialRouteName: "ListMandatsMPR" })
+const MandatSynergysStack = createStackNavigator(appScreens, { initialRouteName: "ListMandatsSynergys" })
+const NewsStack = createStackNavigator(appScreens, { initialRouteName: "ListNews" })
+
+const stacks = {
     DashboardStack: {
         screen: DashboardStack,
         navigationOptions: hideHeader
@@ -1107,4 +400,13 @@ export const AppStack = createSwitchNavigator({
         screen: NewsStack,
         navigationOptions: hideHeader
     },
-})
+}
+
+export const AuthStack = createStackNavigator(authScreens, { initialRouteName: "LoginScreen" })
+export const AppStack = createSwitchNavigator(stacks)
+
+
+
+
+
+

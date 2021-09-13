@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { View, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, ActivityIndicator, Alert } from "react-native"
+import { View, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, ActivityIndicator, Alert, Linking } from "react-native"
 import firebase, { db, auth } from '../firebase'
 import _ from 'lodash'
 import { faCheckCircle, faExclamationCircle, faInfoCircle, faRedo, faTimesCircle } from '@fortawesome/pro-light-svg-icons'
@@ -22,8 +22,8 @@ import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
 import { constants, errorMessages, items_scrollTo } from "../core/constants"
+import { processModels } from '../core/processModels/index'
 import ProcessContainer from "../screens/src/container/ProcessContainer"
-import { Linking } from "react-native"
 
 //component
 class ProcessAction extends Component {
@@ -73,9 +73,8 @@ class ProcessAction extends Component {
     }
 
     setProcessModel(process) {
-        const { processModels } = this.props
         const { version } = process
-        const processModel = processModels[version].process
+        const processModel = processModels[version]
         return processModel
     }
 
@@ -85,21 +84,17 @@ class ProcessAction extends Component {
 
     async componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.process !== this.props.process) {
-            if (this.state.skipProcessHandler) {
-                // console.log('SKIP PROCESS HANDLER...............')
-                this.setState({ skipProcessHandler: false })
-            }
-
-            else {
-                // console.log('RUN PROCESS HANDLER__________________')
+            if (!this.state.skipProcessHandler) {
+                // console.log('RUN PROCESS HANDLER...............')
                 await this.initializer()
-                this.setState({ skipProcessHandler: false })
             }
+            this.setState({ skipProcessHandler: false })
         }
 
-        if (prevProps.processModels !== this.props.processModels) {
-            this.processModel = this.setProcessModel(this.props.process)
-        }
+        //--old
+        // if (prevProps.processModels !== this.props.processModels) {
+        //     this.processModel = this.setProcessModel(this.props.process)
+        // }
     }
 
     async initializer() {
@@ -854,7 +849,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
-        processModels: state.process.processModels
+        //processModels: state.process.processModels
         //fcmToken: state.fcmtoken
     }
 }

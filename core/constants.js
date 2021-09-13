@@ -10,6 +10,7 @@ export const constants = {
 }
 
 export const appVersion = "1.2.24.1"
+export const latestProcessVersion = "version5"
 
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },
@@ -49,7 +50,7 @@ export const errorMessages = {
     },
     documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer.",
-    invalidFields: "Erreur, veuillez remplir les champs obligatoires"
+    invalidFields: "Erreur de saisie, veuillez verifier les champs."
 }
 
 export const phases = [

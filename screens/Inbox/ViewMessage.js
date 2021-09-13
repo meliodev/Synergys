@@ -42,9 +42,15 @@ export default class ViewMessage extends Component {
         }
     }
 
+
+    componentWillUnmount() {
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
+    }
+
     async componentDidMount() {
         await this.fetchMessages()
-        this.props.navigation.addListener('willFocus', async () => {
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => {
             await this.fetchMessages()
         })
     }

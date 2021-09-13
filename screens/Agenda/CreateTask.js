@@ -71,6 +71,7 @@ class CreateTask extends Component {
         this.isInit = true
 
         this.isProcess = this.props.navigation.getParam('isProcess', false)
+        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false)
         //Params (task properties)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
@@ -82,7 +83,7 @@ class CreateTask extends Component {
         this.TaskId = this.props.navigation.getParam('TaskId', '')
         this.isEdit = this.TaskId ? true : false
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
-        this.title = this.isProcess ? this.taskType.value : this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
+        this.title = this.isProcess && this.taskType ? this.taskType.value : this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
 
         const currentRole = this.props.role.id
         this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
@@ -193,6 +194,7 @@ class CreateTask extends Component {
         else {
             task = formatDocument(task, properties, [])
             task.startDate = moment(task.date, 'YYYY-MM-DD').format()
+            console.log('IS ALL DAY', task.isAllDay)
             this.setState(task)
         }
         return task
@@ -220,12 +222,16 @@ class CreateTask extends Component {
         let isValid1 = true
         // const nameError = nameValidator(name, '"Nom de la tâche"')
         const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
-        if (assignedToError || endDateError || dueHourError) {
+        if (assignedToError) {
             isValid1 = false
-            this.setState({ assignedToError, toastMessage: errorMessages.invalidFields, toastType: "error", loading: false })
+            this.setState({ assignedToError })
         }
         const isValid2 = this.validateSchedule()
         const isValid = isValid1 && isValid2
+        if (!isValid) {
+            this.setState({ toastMessage: errorMessages.invalidFields, toastType: "error", loading: false })
+        }
+
         return isValid
     }
 
@@ -477,6 +483,14 @@ class CreateTask extends Component {
         var dateIterator = moment(startDateFormated).format('YYYY-MM-DD')
         let predicate = moment(dateIterator).isSameOrBefore(endDateFormated, 'day')
 
+        if (isAllDay) {
+            task.id = generateId('GS-TC-')
+            task.date = dateIterator
+            task.startHour = startHour
+            task.dueHour = dueHour
+            return [task]
+        }
+
         while (predicate) {
             let tempTask = _.cloneDeep(task)
             tempTask.id = generateId('GS-TC-')
@@ -602,16 +616,19 @@ class CreateTask extends Component {
     }
 
     renderTimeslotForm(canWrite) {
-        const { startDate, endDate, startHour, dueHour } = this.state
+        const { isAllDay, startDate, endDate, startHour, dueHour, startDateError, endDateError } = this.state
         return (
             <TimeslotForm
                 role={this.props.role}
                 canWrite={canWrite}
+                isAllDay={isAllDay}
                 startDate={startDate}
                 endDate={endDate}
                 startHour={moment(startHour, "HH:mm").format()}
                 dueHour={moment(dueHour, "HH:mm").format()}
-                showEndDate={!this.isEdit && this.props.role.id !== "com"}
+                startDateError={startDateError}
+                endDateError={endDateError}
+                showEndDate={!this.isEdit}
                 setParentState={
                     (mode, dateId, value) => {
                         let update = {}
@@ -619,6 +636,7 @@ class CreateTask extends Component {
                         this.setState(update)
                     }
                 }
+                setIsAllDayParent={(isAllDay) => this.setState({ isAllDay })}
             />
         )
     }
@@ -699,9 +717,15 @@ class CreateTask extends Component {
                     <Loading size='large' />
                     :
                     this.isProcess ?
-                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ paddingHorizontal: theme.padding }}>
-                            {this.renderAssignedTo(canWrite)}
+                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ flex: 1, paddingHorizontal: theme.padding }}>
+                            {!this.hideAssignedTo && this.renderAssignedTo(canWrite)}
                             {this.renderTimeslotForm(canWrite)}
+                            {showTasksConflicts && this.renderTasksConflicts()}
+                            <Toast
+                                containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                                message={toastMessage}
+                                type={toastType}
+                                onDismiss={() => this.setState({ toastMessage: '' })} />
                         </ScrollView>
                         :
                         <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
@@ -709,7 +733,7 @@ class CreateTask extends Component {
                             <FormSection
                                 sectionTitle='Créneau horaire'
                                 sectionIcon={faCalendar}
-                                form={this.renderTimeslotForm()}
+                                form={this.renderTimeslotForm(canWrite)}
                             />
 
                             <FormSection

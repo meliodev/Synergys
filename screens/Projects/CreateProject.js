@@ -19,7 +19,7 @@ import { Appbar, AutoCompleteUsers, Button, UploadProgress, FormSection, CustomI
 
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, adminId, highRoles, workTypes } from "../../core/constants";
+import { constants, adminId, highRoles, workTypes, errorMessages, latestProcessVersion } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils";
 import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions';
@@ -314,7 +314,7 @@ class CreateProject extends Component {
             techContact.error = techContactError
             address.error = addressError
             this.setState({ client, nameError, address, comContact, techContact, hasPriorTechVisitError, loading: false })
-            setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
+            setToast(this, 'e', errorMessages.invalidFields)
             return false
         }
 
@@ -362,7 +362,7 @@ class CreateProject extends Component {
         let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
         project.process = {
-            version: getLatestProcessModelVersion(this.props.processModels)
+            version: latestProcessVersion
             //version: "version0" //Used for testing new models
         }
         const selectedWorkTypes = this.state.workTypes.filter((wt) => wt.selected === true)
@@ -375,7 +375,7 @@ class CreateProject extends Component {
             await this.initEditMode()
         load(this, false)
         const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
-        setToast(this, 's', toastMessage)
+        setToast(this, 'i', toastMessage)
     }
 
     // async refreshState(project) {
@@ -484,7 +484,7 @@ class CreateProject extends Component {
     renderTasks(tasksList) {
 
         const onPressTask = (taskDate, TaskId) => {
-            this.props.navigation.navigate('CreateTask', { isEdit: true, title: 'Modifier la tâche', TaskId })
+            this.props.navigation.navigate('CreateTask', { isEdit: true, title: 'Modifier la tâche', TaskId, isProcess: true, hideAssignedTo: true })
         }
 
         return tasksList.map((task, key) => {
@@ -611,6 +611,8 @@ class CreateProject extends Component {
 
         const onPressLink2 = () => {
             this.props.navigation.navigate('CreateTask', {
+                isProcess: true,
+                hideAssignedTo: true,
                 project: { id: this.ProjectId, name, client, step, address, comContact, techContact, intervenant },
                 dynamicType: true,
                 taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] },
@@ -633,14 +635,16 @@ class CreateProject extends Component {
                 form={tasksList.length > 0 ?
                     <View style={{ flex: 1 }}>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10 }}>
-                            <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
-                            <Text
-                                onPress={onPressLink1}
-                                style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>
-                                {this.props.role.level === 1 ? "Voir mon agenda pour ce projet" : "Voir le planning du projet"}
-                            </Text>
-                        </View>
+                        {this.isEdit &&
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 5, marginTop: 10 }}>
+                                <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
+                                <Text
+                                    onPress={onPressLink1}
+                                    style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>
+                                    {this.props.role.level === 1 ? "Voir mon agenda pour ce projet" : "Voir le planning du projet"}
+                                </Text>
+                            </View>
+                        }
 
                         <List.AccordionGroup
                             expandedId={expandedTaskId}
@@ -1078,7 +1082,7 @@ const mapStateToProps = (state) => {
         role: state.roles.role,
         permissions: state.permissions,
         network: state.network,
-        processModels: state.process.processModels,
+        //processModels: state.process.processModels,
         currentUser: state.currentUser
         //fcmToken: state.fcmtoken
     }

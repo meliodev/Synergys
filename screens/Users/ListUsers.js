@@ -38,7 +38,9 @@ class ListUsers extends Component {
   }
 
   componentWillUnmount() {
-    this.willFocusSubscription.remove()
+    if (this.willFocusSubscription) {
+      this.willFocusSubscription.remove()
+    }
   }
 
   async componentDidMount() {

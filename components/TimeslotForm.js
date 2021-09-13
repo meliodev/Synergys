@@ -22,14 +22,14 @@ export default class TimeslotForm extends Component {
 
         this.state = {
             //Schedule
-            isAllDay: false,
+            isAllDay: this.props.isAllDay,
             startDate: moment(this.props.startDate).toDate(),
             endDate: moment(this.props.endDate).toDate(),
             startHour: moment(this.props.startHour).toDate(),
             dueHour: moment(this.props.dueHour).toDate(),
 
-            startDateError: '',
-            endDateError: '',
+            // startDateError: '',
+            // endDateError: '',
             startHourError: '',
             dueHourError: '',
 
@@ -65,7 +65,10 @@ export default class TimeslotForm extends Component {
                     <View style={styles.isAllDaySwitchContainer}>
                         <Switch
                             value={isAllDay}
-                            onValueChange={(isAllDay) => this.setState({ isAllDay })}
+                            onValueChange={(isAllDay) => {
+                                this.setState({ isAllDay })
+                                this.props.setIsAllDayParent(isAllDay)
+                            }}
                             color={theme.colors.primary}
                             disabled={!canWrite}
                         />
@@ -94,6 +97,8 @@ export default class TimeslotForm extends Component {
                 androidVariant="nativeAndroid"
                 fadeToColor={theme.colors.primary}
                 style={{ alignSelf: "center" }}
+                textColor={theme.colors.section}
+
             />
         )
     }
@@ -120,16 +125,16 @@ export default class TimeslotForm extends Component {
 
     renderDates(togglePickers) {
 
-        const { isAllDay, startDate, endDate, startDateError, endDateError } = this.state
+        const { isAllDay, startDate, endDate } = this.state
         const showEndDate = !isAllDay && this.props.showEndDate
 
         return (
             <View>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: theme.padding }}>
-                    {this.renderItemPicker("startDate", "Date de début *", startDate, startDateError, "date")}
+                    {this.renderItemPicker("startDate", "Date de début *", startDate, this.props.startDateError, "date")}
 
                     {showEndDate &&
-                        this.renderItemPicker("endDate", "Date de fin *", endDate, endDateError, "date")
+                        this.renderItemPicker("endDate", "Date de fin *", endDate, this.props.endDateError, "date")
                     }
                 </View>
 
@@ -178,7 +183,7 @@ const styles = StyleSheet.create({
     isAllDayContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: theme.padding*2
+        marginTop: theme.padding * 2
     },
     isAllDaySwitchContainer: {
         flexDirection: 'row',

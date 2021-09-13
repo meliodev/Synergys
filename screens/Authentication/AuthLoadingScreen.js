@@ -8,7 +8,6 @@ import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import NetInfo from "@react-native-community/netinfo"
-import SplashScreen from 'react-native-splash-screen'
 
 import Button from "../../components/Button"
 import Background from "../../components/NewBackground"
@@ -19,8 +18,8 @@ import { uploadFileNew } from '../../api/storage-api'
 import * as theme from "../../core/theme"
 import { setRole, setPermissions, userLoggedOut, resetState, setCurrentUser, setNetwork, setProcessModel } from '../../core/redux'
 import { appVersion, constants, errorMessages } from "../../core/constants"
+import { privilleges } from "../../core/privillegesConfig"
 import { displayError } from "../../core/utils"
-
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -56,7 +55,6 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
-    SplashScreen.hide()
 
     // //1. Notification action listeners
     // const isUpToDate = this.checkAppVersion()
@@ -78,7 +76,6 @@ class AuthLoadingScreen extends Component {
 
   checkAppVersion() {
     const minAppVersion = remoteConfig.getValue('minAppVersion')
-    console.log("", minAppVersion.asString())
 
     if (minAppVersion.asString() > appVersion) {
       return false
@@ -175,20 +172,21 @@ class AuthLoadingScreen extends Component {
             }
 
             //2. Set privilleges
-            console.log('fetching user privilleges...')
-            const remotePermissions = await this.configurePrivileges(roleValue)
-            if (!remotePermissions) {
-              throw new Error(errorMessages.appInit)
-            }
-            const action = { type: "SET_PERMISSIONS", value: remotePermissions }
+            // console.log('fetching user privilleges...')
+            // const remotePermissions = await this.configurePrivileges(roleValue)
+            // if (!remotePermissions) {
+            //   throw new Error(errorMessages.appInit)
+            // }
+            const action = { type: "SET_PERMISSIONS", value: privilleges[roleValue] }
             this.props.dispatch(action)
 
-            console.log('User privilleges fetched and set on redux state !')
+            // console.log('User privilleges fetched and set on redux state !')
 
-            //3. Set processModel
-            console.log('Fetching process model...')
-            await this.fetchProcessModels()
-            console.log('Process models fetched and set on redux state !')
+            //--old: We integrated Process Models inApp. Process Models are now updated using CodePush
+            // //3. Set processModel
+            // console.log('Fetching process model...')
+            // await this.fetchProcessModels()
+            // console.log('Process models fetched and set on redux state !')
 
             this.updateProgress(90)
 
@@ -252,35 +250,37 @@ class AuthLoadingScreen extends Component {
     })
   }
 
-  //Make it onsnapshot
-  async fetchProcessModels() {
+  // //Make it onsnapshot
+  // async fetchProcessModels() {
 
-    return new Promise((resolve, reject) => {
+  //   return new Promise((resolve, reject) => {
 
-      db.collection('Process').onSnapshot((querySnapshot) => {
-        if (querySnapshot.empty) {
-          return undefined
-        }
+  //     db.collection('Process').onSnapshot((querySnapshot) => {
+  //       if (querySnapshot.empty) {
+  //         return undefined
+  //       }
 
-        let processModels = {}
+  //       let processModels = {}
 
-        for (const doc of querySnapshot.docs) {
-          const version = doc.id
-          const model = doc.data()
-          processModels[version] = model
-        }
+  //       for (const doc of querySnapshot.docs) {
+  //         const version = doc.id
+  //         const model = doc.data()
+  //         processModels[version] = model
+  //         if (version === "version1")
+  //           console.log(JSON.stringify(model))
+  //       }
 
-        if (_.isEqual(processModels, {}) || !processModels || processModels === undefined) {
-          reject(errorMessages.appInit)
-        }
+  //       if (_.isEqual(processModels, {}) || !processModels || processModels === undefined) {
+  //         reject(errorMessages.appInit)
+  //       }
 
-        else {
-          setProcessModel(this, processModels)
-          resolve(true)
-        }
-      })
-    })
-  }
+  //       else {
+  //         setProcessModel(this, processModels)
+  //         resolve(true)
+  //       }
+  //     })
+  //   })
+  // }
 
   async configurePrivileges(role) {
     const query = db.collection('Permissions').doc(role)

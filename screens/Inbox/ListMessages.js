@@ -35,12 +35,13 @@ class ListMessages extends Component {
     }
 
     componentWillUnmount() {
-        this.willFocusListener.remove()
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
     }
 
     async componentDidMount() {
         await this.fetchMessages()
-        this.willFocusListener = this.props.navigation.addListener('willFocus', async () => {
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => {
             await this.fetchMessages()
         })
     }

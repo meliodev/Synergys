@@ -100,7 +100,8 @@ class Profile extends Component {
     }
 
     componentWillUnmount() {
-        this.willFocusSubscription.remove()
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
     }
 
     //##GET
@@ -185,7 +186,8 @@ class Profile extends Component {
             .where('deleted', '==', false)
             .orderBy('createdAt', 'DESC')
 
-        const clientProjectsList = await fetchDocuments(query)
+
+        const clientProjectsList = [...[{ id: "addNewProject" }], ...await fetchDocuments(query)]
         this.setState({
             clientProjectsList,
             clientProjectsCount: clientProjectsList.length,
@@ -477,6 +479,7 @@ class Profile extends Component {
     }
 
     renderProject(project, index) {
+
         if (project.empty)
             return <View style={styles.invisibleItem} />
 
@@ -526,16 +529,13 @@ class Profile extends Component {
                 {loadingClientProjects ?
                     <Loading style={{ marginTop: 33 }} />
                     :
-                    clientProjectsList.length > 0 ?
-                        <FlatList
-                            data={formatRow(true, clientProjectsList, 3)}
-                            keyExtractor={item => item.id.toString()}
-                            renderItem={({ item, index }) => this.renderProject(item, index)}
-                            style={{ zIndex: 1 }}
-                            numColumns={3}
-                            columnWrapperStyle={{ justifyContent: 'space-between' }} />
-                        :
-                        this.addProjectComponent()
+                    <FlatList
+                        data={formatRow(true, clientProjectsList, 3)}
+                        keyExtractor={item => item.id.toString()}
+                        renderItem={({ item, index }) => this.renderProject(item, index)}
+                        style={{ zIndex: 1 }}
+                        numColumns={3}
+                        columnWrapperStyle={{ justifyContent: 'space-between' }} />
                 }
 
             </View>
@@ -608,7 +608,7 @@ class Profile extends Component {
 
         const showGoalsSection = this.userParam.roleId === 'com' && highRoles.includes(this.roleId) && !isProfileOwner
         const showMenu = isProfileOwner && this.isRoot
-        const showConversionButton = this.isClient && isProspect && !loading && clientProjectsList.length > 0
+        const showConversionButton = this.isClient && isProspect && !loading && clientProjectsList.length > 1
 
         return (
             <View style={{ flex: 1 }}>

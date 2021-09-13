@@ -303,7 +303,13 @@ class Agenda2 extends Component {
                     />
                 }
 
-                {isHighrole && <PlanningTabs isAgenda={isAgenda} onPress1={() => this.togglePlanningTabs(true)} onPress2={() => this.togglePlanningTabs(false)} />}
+                {isHighrole &&
+                    <PlanningTabs
+                        isAgenda={isAgenda}
+                        onPress1={() => this.togglePlanningTabs(true)}
+                        onPress2={() => this.togglePlanningTabs(false)}
+                    />
+                }
 
                 {filterActivated && <ActiveFilter />}
 

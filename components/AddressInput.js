@@ -109,10 +109,10 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
         return (
             <View>
                 {checked ?
-                    renderAddressInput(editable)
+                    renderAddressInput(true)
                     :
                     <TouchableOpacity onPress={openMap}>
-                        {renderAddressInput(editable)}
+                        {renderAddressInput(false)}
                     </TouchableOpacity>
                 }
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
