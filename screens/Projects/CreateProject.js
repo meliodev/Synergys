@@ -513,6 +513,7 @@ class CreateProject extends Component {
                 showSection={!loading}
                 isExpanded={sectionsExpansion["photos"]}
                 onPressSection={() => this.toggleSection("photos")}
+                containerStyle={{ marginBottom: 1 }}
                 form={
                     <View style={{ flex: 1, justifyContent: 'flex-start' }}>
                         {imagesView.length > 0 &&
@@ -631,7 +632,7 @@ class CreateProject extends Component {
                 sectionIcon={faTasks}
                 isExpanded={sectionsExpansion["tasks"]}
                 onPressSection={() => this.toggleSection("tasks")}
-                containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                containerStyle={{ marginBottom: 1 }}
                 form={tasksList.length > 0 ?
                     <View style={{ flex: 1 }}>
 
@@ -800,7 +801,7 @@ class CreateProject extends Component {
                                 navigation={this.props.navigation}
                                 isExpanded={sectionsExpansion["activity"]}
                                 onPressSection={() => this.toggleSection("activity")}
-                                formSectionContainerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                                formSectionContainerStyle={{ marginBottom: 1 }}
                             />
                         }
 
@@ -810,7 +811,7 @@ class CreateProject extends Component {
                             isLoading={loading}
                             isExpanded={sectionsExpansion["generalInfo"]}
                             onPressSection={() => this.toggleSection("generalInfo")}
-                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                            containerStyle={{ marginBottom: 1 }}
                             form={
                                 <View style={{ flex: 1 }}>
 
@@ -894,7 +895,7 @@ class CreateProject extends Component {
                             sectionIcon={faUser}
                             isExpanded={sectionsExpansion["client"]}
                             onPressSection={() => this.toggleSection("client")}
-                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                            containerStyle={{ marginBottom: 1 }}
                             form={
                                 <View style={{ flex: 1 }}>
                                     {!this.isClient &&
@@ -935,7 +936,7 @@ class CreateProject extends Component {
                             sectionIcon={faAddressBook}
                             isExpanded={sectionsExpansion["contacts"]}
                             onPressSection={() => this.toggleSection("contacts")}
-                            containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                            containerStyle={{ marginBottom: 1 }}
                             form={
                                 <View style={{ flex: 1 }}>
                                     <ItemPicker
@@ -981,7 +982,7 @@ class CreateProject extends Component {
                                 sectionIcon={faFolder}
                                 isExpanded={sectionsExpansion["documents"]}
                                 onPressSection={() => this.toggleSection("documents")}
-                                containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                                containerStyle={{ marginBottom: 1 }}
                                 form={
                                     <View style={{ flex: 1 }}>
                                         {canCreateDocument && canWrite &&
@@ -1019,7 +1020,7 @@ class CreateProject extends Component {
                                 sectionIcon={faEuroSign}
                                 isExpanded={sectionsExpansion["facturation"]}
                                 onPressSection={() => this.toggleSection("facturation")}
-                                containerStyle={{ marginBottom: StyleSheet.hairlineWidth }}
+                                containerStyle={{ marginBottom: 1 }}
                                 form={
                                     <View style={{ flex: 1 }}>
                                         <MyInput

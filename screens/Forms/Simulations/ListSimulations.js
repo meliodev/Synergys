@@ -11,7 +11,7 @@ import EmptyList from "../../../components/EmptyList";
 import ListUsers from '../../Users/ListUsers'
 
 import { db } from '../../../firebase'
-import * as theme from "../../../core/theme";
+import * as theme from "../../../core/theme"; 
 import { constants } from "../../../core/constants";
 import ListFormsContainer from "../../../containers/ListFormsContainer";
 import SimulationItem from "../../../components/genForms/SimulationItem";

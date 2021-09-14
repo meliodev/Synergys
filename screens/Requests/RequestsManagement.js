@@ -25,6 +25,7 @@ class RequestsManagement extends React.Component {
 
     constructor(props) {
         super(props)
+        this.isRoot = this.props.navigation.getParam('isRoot', true)
 
         this.state = {
             index: 0,
@@ -49,6 +50,7 @@ class RequestsManagement extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
+                    menu={this.isRoot}
                     main={this}
                     title={!showInput}
                     titleText={showTabs ? 'Demandes' : 'Tickets'}

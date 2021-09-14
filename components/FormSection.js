@@ -28,7 +28,6 @@ const FormSection = ({
     return (
         <View style={[containerStyle, styles.container]}>
             {showSection &&
-
                 <Section
                     text={sectionTitle}
                     icon={sectionIcon}

@@ -42,6 +42,14 @@ export default class TimeslotForm extends Component {
         }
     }
 
+    setAllTogglePickers(bool) {
+        let { togglePickers } = this.state
+        for (let key in togglePickers) {
+            togglePickers[key] = bool
+        }
+        this.setState({ togglePickers })
+    }
+
     togglePicker(pickerId) {
         let { togglePickers } = this.state
         for (let key in togglePickers) {
@@ -68,6 +76,7 @@ export default class TimeslotForm extends Component {
                             onValueChange={(isAllDay) => {
                                 this.setState({ isAllDay })
                                 this.props.setIsAllDayParent(isAllDay)
+                                this.setAllTogglePickers(false)
                             }}
                             color={theme.colors.primary}
                             disabled={!canWrite}

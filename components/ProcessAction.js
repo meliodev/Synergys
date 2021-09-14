@@ -79,27 +79,27 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
-        await this.initializer()
+        await this.initializer(true)
     }
 
     async componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.process !== this.props.process) {
-            if (!this.state.skipProcessHandler) {
-                // console.log('RUN PROCESS HANDLER...............')
-                await this.initializer()
-            }
-            this.setState({ skipProcessHandler: false })
-        }
 
-        //--old
-        // if (prevProps.processModels !== this.props.processModels) {
-        //     this.processModel = this.setProcessModel(this.props.process)
-        // }
+            //DON'T SKIP (Syncing updates comming from server; example: Another user just updated the process)
+            if (!this.state.skipProcessHandler) {
+                await this.initializer(true)
+            }
+
+            //SKIP (Skip to avoid unfinite loop due to triggering the listener)
+            else {
+                this.setState({ skipProcessHandler: false })
+            }
+        }
     }
 
-    async initializer() {
+    async initializer(skipProcessHandler) {
         this.processModel = this.setProcessModel(this.props.process)
-        await this.mainHandler(this.props.process, true)
+        await this.mainHandler(this.props.process, skipProcessHandler)
             .catch((e) => displayError({ message: e.message }))
     }
 
@@ -132,7 +132,11 @@ class ProcessAction extends Component {
         return db
             .collection('Projects')
             .doc(this.props.project.id)
-            .update({ process: updatedProcess })
+            .update({
+                process: updatedProcess,
+                editedAt: moment().format(),
+                editedBy: this.props.currentUser
+            })
             .catch((e) => { throw new Error(errorMessages.firestore.update) })
     }
 
@@ -849,6 +853,7 @@ const styles = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        currentUser: state.currentUser,
         //processModels: state.process.processModels
         //fcmToken: state.fcmtoken
     }

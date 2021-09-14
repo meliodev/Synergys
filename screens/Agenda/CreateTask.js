@@ -518,8 +518,10 @@ class CreateTask extends Component {
         load(this, true)
         db.collection('Agenda').doc(this.TaskId).delete()
         load(this, false)
-        this.props.navigation.state.params.onGoBack(true) //Refresh manually tasks in agenda because onSnapshot doesn't listen to delete operations.
-        this.props.navigation.goBack()
+        const { navigation } = this.props
+        if (navigation.state.params && navigation.state.params.onGoBack)
+            navigation.state.params.onGoBack(true) //Refresh manually tasks in agenda because onSnapshot doesn't listen to delete operations.
+        navigation.goBack()
     }
 
     //##HELPERS

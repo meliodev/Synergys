@@ -21,6 +21,7 @@ class UsersManagement extends React.Component {
 
     constructor(props) {
         super(props)
+        this.isRoot = this.props.navigation.getParam('isRoot', true)
 
         this.state = {
             index: 0,
@@ -52,6 +53,7 @@ class UsersManagement extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
+                    menu={this.isRoot}
                     main={this}
                     title={!this.state.showInput}
                     placeholder={index === 0 ? 'Rechercher par nom, id, ou rôle' : 'Rechercher une équipe'}
@@ -66,7 +68,7 @@ class UsersManagement extends React.Component {
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
                     icon1={faUser}
                     icon2={faUsers}
-                    Tab1={ 
+                    Tab1={
                         <ListUsers
                             searchInput={searchInput}
                             prevScreen='UsersManagement'

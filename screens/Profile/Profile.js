@@ -6,7 +6,7 @@ import NetInfo from "@react-native-community/netinfo"
 import _ from 'lodash'
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-duotone-svg-icons'
-import { faBullseyeArrow, faConstruction, faLock, faRedo } from '@fortawesome/pro-light-svg-icons'
+import { faBullseyeArrow, faConstruction, faInfo, faLock, faRedo } from '@fortawesome/pro-light-svg-icons'
 import { connect } from 'react-redux'
 
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
@@ -55,7 +55,8 @@ class Profile extends Component {
         this.isRoot = this.props.navigation.getParam('isRoot', false)
         this.roleId = this.props.role.id
         this.userParam = this.props.navigation.getParam('user', { id: firebase.auth().currentUser.uid, roleId: this.roleId })
-        this.isEdit = this.props.navigation.getParam("isEdit", false)
+        this.isProfileOwner = this.userParam.id === firebase.auth().currentUser.uid
+        this.isEdit = this.props.navigation.getParam("isEdit", false) || this.isProfileOwner
         this.isClient = this.userParam.roleId === 'client'
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
         this.isProcess = this.props.navigation.getParam('isProcess', false)
@@ -86,6 +87,15 @@ class Profile extends Component {
             loadingClientProjects: true,
             clientProjectsList: [],
             monthlyGoals: [],
+
+            //Show/hide info
+            sectionsExpansion: {
+                info: true,
+                pw: true,
+                turnoverGoals: true,
+                projects: true
+            },
+            viewProfileDetails: false,
 
             refreshing: false,
             loading: true,
@@ -501,12 +511,12 @@ class Profile extends Component {
     }
 
     renderClientProjects(currentUser) {
-        const isProfileOwner = this.userParam.id === currentUser.uid
-        const mes = isProfileOwner ? 'Mes ' : ''
+        const mes = this.isProfileOwner ? 'Mes ' : ''
         const { loadingClientProjects, clientProjectsList, isPro, denom, nom, prenom, email, address } = this.state
+        const { sectionsExpansion } = this.state
 
         return (
-            <View style={{ flex: 1, marginTop: 16 }}>
+            <View style={{ flex: 1 }}>
                 <FormSection
                     sectionTitle={`${mes}Projets`}
                     sectionRightComponent={
@@ -523,20 +533,23 @@ class Profile extends Component {
                             )
                         }
                     }
-                    form={null}
+                    formContainerStyle={{ paddingTop: theme.padding * 1.5 }}
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 15 }}
+                    isExpanded={sectionsExpansion["project"]}
+                    onPressSection={() => this.toggleSection("projects")}
+                    form={
+                        loadingClientProjects ?
+                            <Loading style={{ marginTop: 33 }} />
+                            :
+                            <FlatList
+                                data={formatRow(true, clientProjectsList, 3)}
+                                keyExtractor={item => item.id.toString()}
+                                renderItem={({ item, index }) => this.renderProject(item, index)}
+                                style={{ zIndex: 1 }}
+                                numColumns={3}
+                                columnWrapperStyle={{ justifyContent: 'space-between' }} />
+                    }
                 />
-                {loadingClientProjects ?
-                    <Loading style={{ marginTop: 33 }} />
-                    :
-                    <FlatList
-                        data={formatRow(true, clientProjectsList, 3)}
-                        keyExtractor={item => item.id.toString()}
-                        renderItem={({ item, index }) => this.renderProject(item, index)}
-                        style={{ zIndex: 1 }}
-                        numColumns={3}
-                        columnWrapperStyle={{ justifyContent: 'space-between' }} />
-                }
 
             </View>
         )
@@ -573,48 +586,76 @@ class Profile extends Component {
     }
 
     renderCommercialGoals(monthlyGoals, isCom) {
+        const { sectionsExpansion } = this.state
         return (
             <View>
                 <FormSection
                     sectionTitle='Objectifs'
                     sectionIcon={faBullseyeArrow}
-                    form={null}
+                    isExpanded={sectionsExpansion["turnoverGoals"]}
+                    onPressSection={() => this.toggleSection("turnoverGoals")}
+                    form={
+                        <TurnoverGoalsContainer
+                            monthlyGoals={monthlyGoals}
+                            onPressNewGoal={this.onPressNewGoal.bind(this)}
+                            onPressGoal={this.onPressGoal.bind(this)}
+                            navigation={this.props.navigation}
+                            isCom={isCom}
+                        />
+                    }
                     containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 20 }}
-                />
-                <TurnoverGoalsContainer
-                    monthlyGoals={monthlyGoals}
-                    onPressNewGoal={this.onPressNewGoal.bind(this)}
-                    onPressGoal={this.onPressGoal.bind(this)}
-                    navigation={this.props.navigation}
-                    isCom={isCom}
                 />
             </View>
         )
     }
 
+    toggleSection(sectionId) {
+        let { sectionsExpansion } = this.state
+        sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
+        this.setState({ sectionsExpansion })
+    }
+
     render() {
-        let { id, email, phone, address, addressError, newPass, currentPass, role, toastMessage, error, loading, loadingDialog, loadingSignOut, clientProjectsList, monthlyGoals, isProspect, userNotFound } = this.state
+        let {
+            id,
+            email,
+            phone,
+            address,
+            addressError,
+            newPass,
+            currentPass,
+            role,
+            toastMessage,
+            error,
+            loading,
+            loadingDialog,
+            loadingSignOut,
+            clientProjectsList,
+            monthlyGoals,
+            isProspect,
+            userNotFound,
+            sectionsExpansion,
+            viewProfileDetails
+        } = this.state
         const { isConnected } = this.props.network
 
         const { currentUser } = firebase.auth()
         if (currentUser) var { uid } = currentUser
 
-        const isProfileOwner = this.userParam.id === uid
         const isAdmin = this.roleId === 'admin'
         const isCom = this.roleId === 'com'
 
         let { canUpdate } = this.props.permissions.users
-        canUpdate = (canUpdate || isProfileOwner)
+        canUpdate = (canUpdate || this.isProfileOwner)
 
-        const showGoalsSection = this.userParam.roleId === 'com' && highRoles.includes(this.roleId) && !isProfileOwner
-        const showMenu = isProfileOwner && this.isRoot
+        const showGoalsSection = this.userParam.roleId === 'com' && highRoles.includes(this.roleId) && !this.isProfileOwner
         const showConversionButton = this.isClient && isProspect && !loading && clientProjectsList.length > 1
 
         return (
             <View style={{ flex: 1 }}>
                 <Appbar
-                    menu={showMenu}
-                    back={!showMenu}
+                    menu={this.isRoot}
+                    back={!this.isRoot}
                     title
                     titleText='Profil'
                     check={!userNotFound && (canUpdate || this.isClient)}
@@ -637,156 +678,183 @@ class Profile extends Component {
                             {loading ?
                                 <Loading style={{ marginTop: constants.ScreenHeight * 0.4 }} size='large' />
                                 :
-                                <View style={{ paddingHorizontal: theme.padding }}>
-                                    <View style={{ height: 130, flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-                                        {this.renderAvatar()}
-                                        {this.renderMetadata(canUpdate, isConnected)}
-                                    </View>
+                                <View>
 
-                                    <View style={{ flex: 1 }}>
-                                        <MyInput
-                                            label="Numéro utilisateur"
-                                            returnKeyType="done"
-                                            value={id}
-                                            onChangeText={text => console.log(text)}
-                                            autoCapitalize="none"
-                                            editable={false}
-                                            disabled
-                                        />
+                                    <FormSection
+                                        sectionTitle='Informations'
+                                        sectionIcon={faInfo}
+                                        showSection={!loading}
+                                        isExpanded={sectionsExpansion["info"]}
+                                        onPressSection={() => this.toggleSection("info")}
+                                        formContainerStyle={{ paddingTop: theme.padding }}
+                                        containerStyle={{ marginBottom: 0.5 }}
+                                        form={
+                                            <View style={{ flex: 1 }}>
+                                                <View style={{ height: 130, flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                                                    {this.renderAvatar()}
+                                                    {this.renderMetadata(canUpdate, isConnected)}
+                                                </View>
 
-                                        <MyInput
-                                            label="Email"
-                                            returnKeyType="done"
-                                            value={email.value}
-                                            multiline={true}
-                                            onChangeText={text => updateField(this, email, text)}
-                                            autoCapitalize="none"
-                                            error={!!email.error}
-                                            errorText={email.error}
-                                            autoCapitalize="none"
-                                            textContentType='emailAddress'
-                                            keyboardType='email-address'
-                                            editable={this.isEdit && this.isClient && isProspect}
-                                            disabled={false}
-                                        />
+                                                {!viewProfileDetails &&
+                                                    <Text
+                                                        onPress={() => this.setState({ viewProfileDetails: true })}
+                                                        style={[theme.customFontMSmedium.body, { color: theme.colors.primary, textAlign: "center", marginTop: theme.padding }]}>
+                                                        Voir plus...
+                                                    </Text>
+                                                }
 
-                                        {isAdmin && !isProspect &&
-                                            <TouchableOpacity onPress={() => {
-                                                if (!isConnected || !isAdmin || this.isClient) return
-                                                navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
-                                            }}>
-                                                <MyInput
-                                                    label="Role"
-                                                    returnKeyType="done"
-                                                    value={role}
-                                                    autoCapitalize="none"
-                                                    editable={false}
-                                                    right={isAdmin && isConnected && !this.isClient && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
-                                                        navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
-                                                    } />}
-                                                />
-                                            </TouchableOpacity>
-                                        }
-
-                                        <MyInput
-                                            label="Téléphone"
-                                            returnKeyType="done"
-                                            value={phone.value}
-                                            onChangeText={text => updateField(this, phone, text)}
-                                            error={!!phone.error}
-                                            errorText={phone.error}
-                                            autoCapitalize="none"
-                                            textContentType='telephoneNumber'
-                                            keyboardType='phone-pad'
-                                            dataDetectorTypes='phoneNumber'
-                                            editable={this.isEdit && (canUpdate || this.isProcess)}
-                                            render={props =>
-                                                <TextInputMask
-                                                    {...props}
-                                                    mask="+[00] [0] [00] [00] [00] [00]"
-                                                />
-                                            }
-                                        />
-
-                                        <AddressInput
-                                            offLine={!isConnected}
-                                            onPress={() => navigateToScreen(this, 'Address', { currentAddress: this.state.address, onGoBack: this.refreshAddress })}
-                                            address={address}
-                                            onChangeText={this.setAddress}
-                                            clearAddress={() => this.setAddress('')}
-                                            addressError={addressError}
-                                            editable={this.isEdit && (canUpdate || this.isProcess)}
-                                            isEdit={true}
-                                        />
-
-                                        {isProfileOwner &&
-                                            <Button
-                                                loading={loadingSignOut}
-                                                mode="contained"
-                                                onPress={this.handleSignout.bind(this)}
-                                                backgroundColor='#ff5153'
-                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginVertical: 24 }}>
-                                                Se déconnecter
-                                            </Button>
-                                        }
-
-                                        {this.isClient && this.renderClientProjects(currentUser)}
-                                        {showGoalsSection && this.renderCommercialGoals(monthlyGoals, isCom)}
-
-                                        {isProfileOwner &&
-                                            <FormSection
-                                                sectionTitle='Modification du mot de passe'
-                                                sectionIcon={faLock}
-                                                containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center' }}
-                                                form={
-                                                    <View>
-                                                        <View style={{ paddingTop: 15 }}>
-                                                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
-                                                        </View>
-
+                                                {viewProfileDetails &&
+                                                    <View style={{ flex: 1 }}>
                                                         <MyInput
-                                                            label="Ancien mot de passe"
+                                                            label="Numéro utilisateur"
                                                             returnKeyType="done"
-                                                            value={currentPass.value}
-                                                            onChangeText={text => updateField(this, currentPass, text)}
-                                                            error={!!currentPass.error}
-                                                            errorText={currentPass.error}
+                                                            value={id}
+                                                            onChangeText={text => console.log(text)}
                                                             autoCapitalize="none"
-                                                            secureTextEntry={!currentPass.show}
-                                                            right={<TextInput.Icon name={currentPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                                                                currentPass.show = !currentPass.show
-                                                                this.setState({ currentPass })
-                                                            }} />}
+                                                            editable={false}
+                                                            disabled
                                                         />
 
                                                         <MyInput
-                                                            label="Nouveau mot de passe"
+                                                            label="Email"
                                                             returnKeyType="done"
-                                                            value={newPass.value}
-                                                            onChangeText={text => updateField(this, newPass, text)}
-                                                            error={!!newPass.error}
-                                                            errorText={newPass.error}
+                                                            value={email.value}
+                                                            multiline={true}
+                                                            onChangeText={text => updateField(this, email, text)}
                                                             autoCapitalize="none"
-                                                            secureTextEntry={!newPass.show}
-                                                            right={<TextInput.Icon name={newPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                                                                newPass.show = !newPass.show
-                                                                this.setState({ newPass })
-                                                            }} />}
+                                                            error={!!email.error}
+                                                            errorText={email.error}
+                                                            autoCapitalize="none"
+                                                            textContentType='emailAddress'
+                                                            keyboardType='email-address'
+                                                            editable={this.isEdit && this.isClient && isProspect}
+                                                            disabled={false}
                                                         />
 
-                                                        <Button
-                                                            loading={loading}
-                                                            mode="contained"
-                                                            onPress={this.changePassword}
-                                                            style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 24 }}>
-                                                            Modifier le mot de passe
-                                                        </Button>
+                                                        {isAdmin && !isProspect &&
+                                                            <TouchableOpacity onPress={() => {
+                                                                if (!isConnected || !isAdmin || this.isClient) return
+                                                                navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
+                                                            }}>
+                                                                <MyInput
+                                                                    label="Role"
+                                                                    returnKeyType="done"
+                                                                    value={role}
+                                                                    autoCapitalize="none"
+                                                                    editable={false}
+                                                                    right={isAdmin && isConnected && !this.isClient && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
+                                                                        navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
+                                                                    } />}
+                                                                />
+                                                            </TouchableOpacity>
+                                                        }
+
+                                                        <MyInput
+                                                            label="Téléphone"
+                                                            returnKeyType="done"
+                                                            value={phone.value}
+                                                            onChangeText={text => updateField(this, phone, text)}
+                                                            error={!!phone.error}
+                                                            errorText={phone.error}
+                                                            autoCapitalize="none"
+                                                            textContentType='telephoneNumber'
+                                                            keyboardType='phone-pad'
+                                                            dataDetectorTypes='phoneNumber'
+                                                            editable={this.isEdit && (canUpdate || this.isProcess)}
+                                                            render={props =>
+                                                                <TextInputMask
+                                                                    {...props}
+                                                                    mask="+[00] [0] [00] [00] [00] [00]"
+                                                                />
+                                                            }
+                                                        />
+
+                                                        <AddressInput
+                                                            offLine={!isConnected}
+                                                            onPress={() => navigateToScreen(this, 'Address', { currentAddress: this.state.address, onGoBack: this.refreshAddress })}
+                                                            address={address}
+                                                            onChangeText={this.setAddress}
+                                                            clearAddress={() => this.setAddress('')}
+                                                            addressError={addressError}
+                                                            editable={this.isEdit && (canUpdate || this.isProcess)}
+                                                            isEdit={true}
+                                                        />
+
+                                                        {this.isProfileOwner &&
+                                                            <Button
+                                                                loading={loadingSignOut}
+                                                                mode="contained"
+                                                                onPress={this.handleSignout.bind(this)}
+                                                                backgroundColor='#ff5153'
+                                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginVertical: 24 }}>
+                                                                Se déconnecter
+                                                            </Button>
+                                                        }
+
                                                     </View>
                                                 }
-                                            />
-                                        }
 
-                                    </View>
+                                            </View>
+                                        }
+                                    />
+
+                                    {this.isClient && this.renderClientProjects(currentUser)}
+                                    {showGoalsSection && this.renderCommercialGoals(monthlyGoals, isCom)}
+
+                                    {this.isProfileOwner &&
+                                        <FormSection
+                                            sectionTitle='Modification du mot de passe'
+                                            sectionIcon={faLock}
+                                            containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center' }}
+                                            isExpanded={sectionsExpansion["pw"]}
+                                            onPressSection={() => this.toggleSection("pw")}
+                                            form={
+                                                <View>
+                                                    <View style={{ paddingTop: 15 }}>
+                                                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
+                                                    </View>
+
+                                                    <MyInput
+                                                        label="Ancien mot de passe"
+                                                        returnKeyType="done"
+                                                        value={currentPass.value}
+                                                        onChangeText={text => updateField(this, currentPass, text)}
+                                                        error={!!currentPass.error}
+                                                        errorText={currentPass.error}
+                                                        autoCapitalize="none"
+                                                        secureTextEntry={!currentPass.show}
+                                                        right={<TextInput.Icon name={currentPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
+                                                            currentPass.show = !currentPass.show
+                                                            this.setState({ currentPass })
+                                                        }} />}
+                                                    />
+
+                                                    <MyInput
+                                                        label="Nouveau mot de passe"
+                                                        returnKeyType="done"
+                                                        value={newPass.value}
+                                                        onChangeText={text => updateField(this, newPass, text)}
+                                                        error={!!newPass.error}
+                                                        errorText={newPass.error}
+                                                        autoCapitalize="none"
+                                                        secureTextEntry={!newPass.show}
+                                                        right={<TextInput.Icon name={newPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
+                                                            newPass.show = !newPass.show
+                                                            this.setState({ newPass })
+                                                        }} />}
+                                                    />
+
+                                                    <Button
+                                                        loading={loading}
+                                                        mode="contained"
+                                                        onPress={this.changePassword}
+                                                        style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 24 }}>
+                                                        Modifier le mot de passe
+                                                    </Button>
+                                                </View>
+                                            }
+                                        />
+                                    }
 
                                 </View>
                             }

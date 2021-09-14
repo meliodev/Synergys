@@ -32,25 +32,30 @@ class Inbox extends React.Component {
         ]
 
         let { index } = this.state
-        const { isConnected } = this.props.network 
+        const { isConnected } = this.props.network
         const { role } = this.props
         const permissionsMessages = this.props.permissions.messages
 
         return (
             <View style={{ flex: 1 }}>
-                <Appbar menu= {this.isRoot} back= {!this.isRoot} title titleText='Boîte de réception' />
+                <Appbar
+                    menu={this.isRoot}
+                    back={!this.isRoot}
+                    title
+                    titleText='Boîte de réception'
+                />
 
                 <TabView
                     navigationState={{ index, routes }}
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
                     icon1={faBell}
                     icon2={faEnvelope}
-                    Tab1={<ListNotifications offLine={!isConnected}/>}
-                    Tab2={<ListMessages offLine={!isConnected} role={role} permissions={permissionsMessages}/>} />
+                    Tab1={<ListNotifications offLine={!isConnected} />}
+                    Tab2={<ListMessages offLine={!isConnected} role={role} permissions={permissionsMessages} />} />
             </View>
         )
     }
-} 
+}
 
 const mapStateToProps = (state) => {
     return {

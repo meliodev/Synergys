@@ -171,22 +171,8 @@ class AuthLoadingScreen extends Component {
               }
             }
 
-            //2. Set privilleges
-            // console.log('fetching user privilleges...')
-            // const remotePermissions = await this.configurePrivileges(roleValue)
-            // if (!remotePermissions) {
-            //   throw new Error(errorMessages.appInit)
-            // }
             const action = { type: "SET_PERMISSIONS", value: privilleges[roleValue] }
             this.props.dispatch(action)
-
-            // console.log('User privilleges fetched and set on redux state !')
-
-            //--old: We integrated Process Models inApp. Process Models are now updated using CodePush
-            // //3. Set processModel
-            // console.log('Fetching process model...')
-            // await this.fetchProcessModels()
-            // console.log('Process models fetched and set on redux state !')
 
             this.updateProgress(90)
 
@@ -247,45 +233,6 @@ class AuthLoadingScreen extends Component {
         displayError({ message: e.message })
       }
 
-    })
-  }
-
-  // //Make it onsnapshot
-  // async fetchProcessModels() {
-
-  //   return new Promise((resolve, reject) => {
-
-  //     db.collection('Process').onSnapshot((querySnapshot) => {
-  //       if (querySnapshot.empty) {
-  //         return undefined
-  //       }
-
-  //       let processModels = {}
-
-  //       for (const doc of querySnapshot.docs) {
-  //         const version = doc.id
-  //         const model = doc.data()
-  //         processModels[version] = model
-  //         if (version === "version1")
-  //           console.log(JSON.stringify(model))
-  //       }
-
-  //       if (_.isEqual(processModels, {}) || !processModels || processModels === undefined) {
-  //         reject(errorMessages.appInit)
-  //       }
-
-  //       else {
-  //         setProcessModel(this, processModels)
-  //         resolve(true)
-  //       }
-  //     })
-  //   })
-  // }
-
-  async configurePrivileges(role) {
-    const query = db.collection('Permissions').doc(role)
-    return query.get().then((doc) => {
-      return doc.data()
     })
   }
 

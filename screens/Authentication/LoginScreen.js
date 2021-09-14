@@ -35,7 +35,7 @@ class LoginScreen extends Component {
   }
 
   //Re-initialize inputs
-  componentWillUnmount() {
+  reinitializeInputs() {
     let { email, password } = this.state
     email = { value: "", error: "" }
     password = { value: "", error: "", show: false }
@@ -58,28 +58,22 @@ class LoginScreen extends Component {
       return false
     }
 
-    console.log('invalid..')
-
     return true
   }
 
   handleLogin = async () => {
+    Keyboard.dismiss()
+
     let { loading, email, password, error } = this.state
     if (loading) return
     load(this, true)
 
-    console.log('555')
     //Inputs validation
     const isValid = this.validateInputs()
-    console.log('888')
     if (!isValid) {
-      console.log('invalid')
       load(this, false)
       return
     }
-
-    console.log('999')
-
 
     console.log("Starting logging...", moment().format('HH:mm:ss'))
     const response = await loginUser({ email: email.value, password: password.value })

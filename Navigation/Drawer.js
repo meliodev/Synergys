@@ -91,7 +91,7 @@ class DrawerMenu extends React.Component {
         const showChatIcon = role !== "Client" && role !== ""
 
         return (
-            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isRoot: true })}>
+            <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isRoot: false })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
                     <AvatarText size={45} label={fullName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>

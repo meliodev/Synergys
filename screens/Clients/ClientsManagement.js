@@ -17,6 +17,7 @@ class ClientsManagement extends React.Component {
 
     constructor(props) {
         super(props)
+        this.isRoot = this.props.navigation.getParam('isRoot', true)
 
         this.state = {
             index: 0,
@@ -47,6 +48,7 @@ class ClientsManagement extends React.Component {
         return (
             <View style={{ flex: 1 }}>
                 <SearchBar
+                    menu={this.isRoot}
                     main={this}
                     title={!showInput}
                     showBar={showInput}
@@ -66,7 +68,7 @@ class ClientsManagement extends React.Component {
                             searchInput={searchInput}
                             prevScreen='ClientsManagement'
                             userType='client'
-                            menu 
+                            menu
                             offLine={!isConnected}
                             permissions={permissionsClients}
                             query={queryClients}
