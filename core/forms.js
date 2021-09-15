@@ -1,4 +1,7 @@
+
 import { faBuilding, faCheck, faHouse, faTimes, faQuestionCircle, faMars, faVenus } from "@fortawesome/pro-light-svg-icons";
+import { rgb } from 'pdf-lib'
+
 import moment from "moment";
 import * as theme from './theme'
 
@@ -877,7 +880,7 @@ export const ficheEEBModel = [
                 label: "Largeur Utile",
                 type: "number",
                 placeholder: "Exemple: 5m",
-                style: { marginTop: 35 },
+                style: { marginTop: 20 },
                 pdfConfig: { dx: -515, dy: - 794, pageIndex: 0 }
             },
             {
@@ -885,7 +888,7 @@ export const ficheEEBModel = [
                 label: "Inclinaison",
                 type: "number",
                 placeholder: "Exemple: 10°C",
-                style: { marginTop: 35 },
+                style: { marginTop: 20 },
                 pdfConfig: { dx: -150, dy: - 794, pageIndex: 0 }
             },
         ],
@@ -988,7 +991,7 @@ export const mandatMPRModel = [
                     { label: 'Monsieur', value: 'Monsieur', icon: faMars, pdfConfig: { dx: -511, dy: - 401, pageIndex: 0 } },
                     { label: 'Madame', value: 'Madame', icon: faVenus, pdfConfig: { dx: -473, dy: - 401, pageIndex: 0 } },
                 ],
-                mendatory: true,
+                //mendatory: true,
             }
         ],
         isFirst: true,
@@ -1017,7 +1020,6 @@ export const mandatMPRModel = [
                 mendatory: true
             },
         ],
-        isLast: true,
     },
     {
         id: "property",
@@ -1033,41 +1035,39 @@ export const mandatMPRModel = [
                 mendatory: true,
             },
         ],
-        isFirst: true,
-        stepIndex: 2,
+        isLast: true,
     },
-    {
-        id: "property",
-        title: "PROPRIÉTÉ DU MANDANT",
-        fields: [
-            {
-                id: "addressCode",
-                type: "textInput",
-                mask: "[0][0][0][0][0]",
-                label: "Code Postal",
-                isNumeric: true,
-                errorId: "addressCodeError",
-                mendatory: true,
-                pdfConfig: { dx: -478, dy: - 456, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
-            },
-        ]
-    },
-    {
-        id: "property",
-        title: "PROPRIÉTÉ DU MANDANT",
-        fields: [
-            {
-                id: "commune",
-                type: "textInput",
-                maxLength: 31,
-                label: "Commune",
-                errorId: "communeError",
-                pdfConfig: { dx: -386, dy: - 456, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
-                mendatory: true,
-            },
-        ],
-        isLast: true
-    },
+    // {
+    //     id: "property",
+    //     title: "PROPRIÉTÉ DU MANDANT",
+    //     fields: [
+    //         {
+    //             id: "addressCode",
+    //             type: "textInput",
+    //             mask: "[0][0][0][0][0]",
+    //             label: "Code Postal",
+    //             isNumeric: true,
+    //             errorId: "addressCodeError",
+    //             mendatory: true,
+    //             pdfConfig: { dx: -478, dy: - 456, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
+    //         },
+    //     ]
+    // },
+    // {
+    //     id: "property",
+    //     title: "PROPRIÉTÉ DU MANDANT",
+    //     fields: [
+    //         {
+    //             id: "commune",
+    //             type: "textInput",
+    //             maxLength: 31,
+    //             label: "Commune",
+    //             errorId: "communeError",
+    //             pdfConfig: { dx: -386, dy: - 456, pageIndex: 0, spaces: { afterEach: 1, str: '  ' } }, //add spaces
+    //             mendatory: true,
+    //         },
+    //     ],
+    // },
     {
         id: "property",
         title: "COORDONNÉES DU MANDANT",
@@ -1083,7 +1083,7 @@ export const mandatMPRModel = [
             },
         ],
         isFirst: true,
-        stepIndex: 3,
+        stepIndex: 2,
     },
     {
         id: "property",
@@ -1155,357 +1155,403 @@ export const mandatMPRModel = [
     },
 ]
 
-export const mandatSynergysModel = [
-    { //1 
-        id: "service",
-        title: "PRESTATION",
-        fields: [
+export const mandatSynergysModel = () => {
+
+    const globalConfig = {
+        rectangles: [
             {
-                id: "serviceProvider",
-                label: "Synergys ou Sous-Traitance",
-                type: "options",
-                items: [
-                    { label: 'Synergys', value: 'Synergys', icon: faQuestionCircle, pdfConfig: { dx: -471, dy: - 174, squareSize: 12, pageIndex: 0 } },
-                    { label: 'Sous-Traitance', value: 'Sous-Traitance', icon: faQuestionCircle, pdfConfig: { dx: -278, dy: - 174, squareSize: 12, pageIndex: 0 } },
-                ],
-                errorId: "serviceProviderError",
-                mendatory: true,
-            }
-        ],
-        isFirst: true,
-        stepIndex: 0,
-    },
-    { //2
-        id: "service",
-        title: "PRESTATION",
-        fields: [
-            {
-                id: "serviceType",
-                label: "Type de prestation",
-                type: "options",
-                items: [
-                    {
-                        label: 'Installation',
-                        value: 'Installation (Synergys)',
-                        icon: faQuestionCircle,
-                        pdfConfig: { dx: -444, dy: - 197, squareSize: 8, pageIndex: 0 },
-                        isConditional: true,
-                        condition: { with: "serviceProvider", values: ["Synergys"] },
-                    },
-                    {
-                        label: 'SAV',
-                        value: 'SAV (Synergys)',
-                        icon: faQuestionCircle,
-                        pdfConfig: { dx: -362, dy: - 197, squareSize: 8, pageIndex: 0 },
-                        isConditional: true,
-                        condition: { with: "serviceProvider", values: ["Synergys"] },
-                    },
-                    {
-                        label: 'Installation',
-                        value: 'Installation (Sous-Traitance)',
-                        icon: faQuestionCircle,
-                        pdfConfig: { dx: -252, dy: - 197, squareSize: 8, pageIndex: 0 },
-                        isConditional: true,
-                        condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
-                    },
-                    {
-                        label: 'SAV',
-                        value: 'SAV (Sous-Traitance)',
-                        icon: faQuestionCircle,
-                        pdfConfig: { dx: -169, dy: - 197, squareSize: 8, pageIndex: 0 },
-                        isConditional: true,
-                        condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
-                    },
-                ],
-                errorId: "serviceTypeError",
-                mendatory: true,
-            }
-        ],
-        isConditional: true,
-        condition: { with: "serviceProvider", values: ["Synergys"] },
-    },
-    { //3
-        id: "service",
-        title: "PRESTATION",
-        fields: [
-            {
-                id: "productTypes",
-                label: "Type de produits",
-                type: "options",
-                isMultiOptions: true,
-                items: [
-                    { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 253, squareSize: 8, pageIndex: 0 } },
-                    { label: 'PAC AIR/AIR', value: 'PAC AIR/AIR', icon: faQuestionCircle, pdfConfig: { dx: -430, dy: - 253, squareSize: 8, pageIndex: 0 } },
-                    { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 253, squareSize: 8, pageIndex: 0 } },
-                    { label: 'ISOLATION', value: 'ISOLATION', icon: faQuestionCircle, pdfConfig: { dx: -183, dy: - 252, squareSize: 8, pageIndex: 0 } },
-                    { label: 'CHAUFFE-EAU THERMODYNAMIQUE', value: 'CHAUFFE-EAU THERMODYNAMIQUE', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 271, squareSize: 8, pageIndex: 0 } },
-                    { label: 'VMC', value: 'VMC', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 271, squareSize: 8, pageIndex: 0 } },
-                ],
-                errorId: "productTypesError",
-                mendatory: true,
-            }
-        ],
-        isLast: true
-    },
-    {//2 DONE
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "clientFirstName",
-                type: "textInput",
-                maxLength: 15,
-                label: "Prénom",
-                errorId: "clientFirstNameError",
-                pdfConfig: { dx: -490, dy: - 339, pageIndex: 0 }, //add spaces
-                mendatory: true
+                pageIndex: 0,
+                form: {
+                    x: 50,
+                    y: 380,
+                    width: 85,
+                    height: 20,
+                    color: rgb(1, 1, 1),
+                    opacity: 1,
+                }
             },
             {
-                id: "clientLastName",
-                type: "textInput",
-                maxLength: 24,
-                label: "Nom",
-                errorId: "clientLastNameError", //add max lenght
-                pdfConfig: { dx: -235, dy: - 339, pageIndex: 0 }, //add spaces
-                mendatory: true
+                pageIndex: 0,
+                form: {
+                    x: 295,
+                    y: 380,
+                    width: 85,
+                    height: 20,
+                    color: rgb(1, 1, 1),
+                    opacity: 1,
+                }
+            },
+            {
+                pageIndex: 0,
+                form: {
+                    x: 50,
+                    y: 140,
+                    width: 85,
+                    height: 20,
+                    color: rgb(1, 1, 1),
+                    opacity: 1,
+                }
             },
         ],
-        isFirst: true,
-        stepIndex: 1,
-    },
-    {//2 DONE
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "addressClient",
-                type: "textInput",
-                label: "Adresse",
-                errorId: "addressClientError",
-                maxLength: 100,
-                pdfConfig: { dx: -475, dy: - 374, pageIndex: 0 }, //add spaces
-                mendatory: true,
-            },
-        ],
-    },
-    {//2 DONE
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "addressCodeClient",
-                type: "textInput",
-                mask: "[0][0][0][0][0]",
-                label: "Code Postal",
-                isNumeric: true,
-                errorId: "addressCodeClientError",
-                mendatory: true,
-                pdfConfig: { dx: -453, dy: - 445, pageIndex: 0 }
-            },
+        signaturePositions: [
+            { pageIndex: 0, dx: 300, dy: 300 }
         ]
-    },
-    {//2 DONE
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "addressCityClient",
-                type: "textInput",
-                label: "Ville",
-                errorId: "addressCityClientError",
-                mendatory: true,
-                pdfConfig: { dx: -257, dy: - 445, pageIndex: 0 }
-            },
-        ]
-    },
-    {//2 DONE
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "fixedPhoneClient",
-                type: "textInput",
-                mask: "[00][00][00][00][00]",
-                isNumeric: true,
-                label: "Téléphone fixe",
-                errorId: "fixedPhoneClientError",
-                pdfConfig: { dx: -500, dy: - 487, pageIndex: 0 }
-            },
-            {
-                id: "mobilePhoneClient",
-                type: "textInput",
-                mask: "[00][00][00][00][00]",
-                isNumeric: true,
-                label: "Téléphone mobile",
-                errorId: "mobilePhoneClientError",
-                mendatory: true,
-                pdfConfig: { dx: -260, dy: - 487, pageIndex: 0 }
-            },
-        ]
-    },
-    {//37
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "emailClient",
-                type: "textInput",
-                isEmail: true,
-                label: "Adresse email",
-                errorId: "emailClientError",
-                mendatory: true,
-                pdfConfig: { dx: -500, dy: - 530, pageIndex: 0, splitArobase: true }
-            },
-        ],
-        isLast: true
-    },
-    {//37
-        id: "client",
-        title: "COORDONNÉES CLIENT",
-        fields: [
-            {
-                id: "isSiteInfoEqualToClientInfo",
-                label: "Est-ce que les coordonnées du chantier sont différentes de celle du client ?",
-                type: "options",
-                items: [
-                    {
-                        label: 'Non',
-                        value: 'Non',
-                        icon: faTimes,
-                        iconColor: theme.colors.error,
-                        pdfConfig: { skip: true },
-                        autoCopy: [
-                            { id: "siteName", copyFrom: "clientLastName" },
-                            { id: "addressSite", copyFrom: "addressClient" },
-                            { id: "addressCodeSite", copyFrom: "addressCodeClient" },
-                            { id: "phoneSite", copyFrom: "mobilePhoneClient" },
-                            { id: "emailSite", copyFrom: "emailClient" },
-                        ]
-                    },
-                    {
-                        label: 'Oui',
-                        value: 'Oui',
-                        icon: faCheck,
-                        iconColor: "green",
-                        pdfConfig: { skip: true }
-                    },
-                ],
-                errorId: "isSiteInfoEqualToClientInfoError",
-                mendatory: true
-            },
-        ]
-    },
-    {//37
-        id: "site",
-        title: "COORDONNÉES CHANTIER",
-        fields: [
-            {
-                id: "siteName",
-                type: "textInput",
-                maxLength: 15,
-                label: "Nom",
-                errorId: "siteNameError",
-                pdfConfig: { dx: -492, dy: - 587, pageIndex: 0 }, //add spaces
-                mendatory: true,
-                isConditional: true,
-                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
-            }
-        ]
-    },
-    {//37
-        id: "site",
-        title: "COORDONNÉES CHANTIER",
-        fields: [
-            {
-                id: "addressSite",
-                type: "textInput",
-                label: "Adresse",
-                errorId: "addressSiteError",
-                maxLength: 40,
-                pdfConfig: { dx: -480, dy: - 622, pageIndex: 0 }, //add spaces
-                mendatory: true,
-                isConditional: true,
-                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
-            }
-        ]
-    },
-    {//2 DONE
-        id: "site",
-        title: "COORDONNÉES CHANTIER",
-        fields: [
-            {
-                id: "addressCodeSite",
-                type: "textInput",
-                mask: "[0][0][0][0][0]",
-                label: "Code Postal",
-                isNumeric: true,
-                errorId: "addressCodeSiteError",
-                mendatory: true,
-                isConditional: true,
-                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
-                pdfConfig: { dx: -455, dy: - 693, pageIndex: 0 }
-            }
-        ]
-    },
-    {//2 DONE
-        id: "site",
-        title: "COORDONNÉES CHANTIER",
-        fields: [
-            {
-                id: "phoneSite",
-                type: "textInput",
-                mask: "[00][00][00][00][00]",
-                isNumeric: true,
-                label: "Téléphone mobile",
-                errorId: "phoneSiteError",
-                mendatory: true,
-                isConditional: true,
-                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
-                pdfConfig: { dx: -500, dy: - 737, pageIndex: 0 }
-            },
-        ]
-    },
-    {//2 DONE
-        id: "site",
-        title: "COORDONNÉES CHANTIER",
-        fields: [
-            {
-                id: "emailSite",
-                type: "textInput",
-                isEmail: true,
-                label: "Adresse email",
-                errorId: "emailSiteError",
-                mendatory: true,
-                isConditional: true,
-                condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
-                pdfConfig: { dx: -502, dy: - 779, pageIndex: 0 }
-            },
-        ]
-    },
-    {
-        id: "site",
-        title: "COORDONNÉES CHANTIER",
-        fields: [
-            {
-                id: "financingAids",
-                label: "A sélectionner si présent",
-                type: "options",
-                isMultiOptions: true,
-                items: [
-                    { label: 'ACTION LOGEMENT', value: 'ACTION LOGEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 615, pageIndex: 0 } },
-                    { label: 'CHEQUE REGION', value: 'CHEQUE REGION', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 648, pageIndex: 0 } },
-                    { label: 'MA PRIME RENOV', value: 'MA PRIME RENOV', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 684, pageIndex: 0 } }, //#task scroll to error offset_y
-                    { label: 'CEE', value: 'CEE', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 719, pageIndex: 0 } }, //#task scroll to error offset_y
-                    { label: 'FINANCEMENT', value: 'FINANCEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 754, pageIndex: 0 } }, //#task scroll to error offset_y
-                ],
-                style: { marginTop: 100 },
-                // isConditional: true,
-                // condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
-            },
-        ],
-        isLast: true
-    },
-]
+    }
+
+    const model = [
+        { //1 
+            id: "service",
+            title: "PRESTATION",
+            fields: [
+                {
+                    id: "serviceProvider",
+                    label: "Synergys ou Sous-Traitance",
+                    type: "options",
+                    items: [
+                        { label: 'Synergys', value: 'Synergys', icon: faQuestionCircle, pdfConfig: { dx: -471, dy: - 174, squareSize: 12, pageIndex: 0 } },
+                        { label: 'Sous-Traitance', value: 'Sous-Traitance', icon: faQuestionCircle, pdfConfig: { dx: -278, dy: - 174, squareSize: 12, pageIndex: 0 } },
+                    ],
+                    errorId: "serviceProviderError",
+                    mendatory: true,
+                }
+            ],
+            isFirst: true,
+            stepIndex: 0,
+        },
+        { //2
+            id: "service",
+            title: "PRESTATION",
+            fields: [
+                {
+                    id: "serviceType",
+                    label: "Type de prestation",
+                    type: "options",
+                    items: [
+                        {
+                            label: 'Installation',
+                            value: 'Installation (Synergys)',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -444, dy: - 197, squareSize: 8, pageIndex: 0 },
+                            isConditional: true,
+                            condition: { with: "serviceProvider", values: ["Synergys"] },
+                        },
+                        {
+                            label: 'SAV',
+                            value: 'SAV (Synergys)',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -362, dy: - 197, squareSize: 8, pageIndex: 0 },
+                            isConditional: true,
+                            condition: { with: "serviceProvider", values: ["Synergys"] },
+                        },
+                        {
+                            label: 'Installation',
+                            value: 'Installation (Sous-Traitance)',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -252, dy: - 197, squareSize: 8, pageIndex: 0 },
+                            isConditional: true,
+                            condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
+                        },
+                        {
+                            label: 'SAV',
+                            value: 'SAV (Sous-Traitance)',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -169, dy: - 197, squareSize: 8, pageIndex: 0 },
+                            isConditional: true,
+                            condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
+                        },
+                    ],
+                    errorId: "serviceTypeError",
+                    mendatory: true,
+                }
+            ],
+            isConditional: true,
+            condition: { with: "serviceProvider", values: ["Synergys"] },
+        },
+        { //3
+            id: "service",
+            title: "PRESTATION",
+            fields: [
+                {
+                    id: "productTypes",
+                    label: "Type de produits",
+                    type: "options",
+                    isMultiOptions: true,
+                    items: [
+                        { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                        { label: 'PAC AIR/AIR', value: 'PAC AIR/AIR', icon: faQuestionCircle, pdfConfig: { dx: -430, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                        { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                        { label: 'ISOLATION', value: 'ISOLATION', icon: faQuestionCircle, pdfConfig: { dx: -183, dy: - 252, squareSize: 8, pageIndex: 0 } },
+                        { label: 'CHAUFFE-EAU THERMODYNAMIQUE', value: 'CHAUFFE-EAU THERMODYNAMIQUE', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 271, squareSize: 8, pageIndex: 0 } },
+                        { label: 'VMC', value: 'VMC', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 271, squareSize: 8, pageIndex: 0 } },
+                    ],
+                    errorId: "productTypesError",
+                    mendatory: true,
+                }
+            ],
+            isLast: true
+        },
+        {//2 DONE
+            id: "client",
+            title: "COORDONNÉES CLIENT",
+            fields: [
+                {
+                    id: "clientFirstName",
+                    type: "textInput",
+                    maxLength: 15,
+                    label: "Prénom",
+                    errorId: "clientFirstNameError",
+                    pdfConfig: { dx: -490, dy: - 339, pageIndex: 0 }, //add spaces
+                    mendatory: true
+                },
+                {
+                    id: "clientLastName",
+                    type: "textInput",
+                    maxLength: 24,
+                    label: "Nom",
+                    errorId: "clientLastNameError", //add max lenght
+                    pdfConfig: { dx: -235, dy: - 339, pageIndex: 0 }, //add spaces
+                    mendatory: true
+                },
+            ],
+            isFirst: true,
+            stepIndex: 1,
+        },
+        {//2 DONE
+            id: "client",
+            title: "ADRESSE",
+            fields: [
+                {
+                    id: "addressClient",
+                    type: "textInput",
+                    label: "Adresse",
+                    errorId: "addressClientError",
+                    maxLength: 100,
+                    pdfConfig: { dx: -475, dy: - 374, pageIndex: 0 }, //add spaces
+                    mendatory: true,
+                },
+            ],
+        },
+        // {//2 DONE
+        //     id: "client",
+        //     title: "COORDONNÉES CLIENT",
+        //     fields: [
+        //         {
+        //             id: "addressCodeClient",
+        //             type: "textInput",
+        //             mask: "[0][0][0][0][0]",
+        //             label: "Code Postal",
+        //             isNumeric: true,
+        //             errorId: "addressCodeClientError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -453, dy: - 445, pageIndex: 0 }
+        //         },
+        //     ]
+        // },
+        // {//2 DONE
+        //     id: "client",
+        //     title: "COORDONNÉES CLIENT",
+        //     fields: [
+        //         {
+        //             id: "addressCityClient",
+        //             type: "textInput",
+        //             label: "Ville",
+        //             errorId: "addressCityClientError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -257, dy: - 445, pageIndex: 0 }
+        //         },
+        //     ]
+        // },
+        {//2 DONE
+            id: "client",
+            title: "COORDONNÉES CLIENT",
+            fields: [
+                {
+                    id: "fixedPhoneClient",
+                    type: "textInput",
+                    mask: "[00][00][00][00][00]",
+                    isNumeric: true,
+                    label: "Téléphone fixe",
+                    errorId: "fixedPhoneClientError",
+                    pdfConfig: { dx: -500, dy: - 487, pageIndex: 0 }
+                },
+                {
+                    id: "mobilePhoneClient",
+                    type: "textInput",
+                    mask: "[00][00][00][00][00]",
+                    isNumeric: true,
+                    label: "Téléphone mobile",
+                    errorId: "mobilePhoneClientError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 487, pageIndex: 0 }
+                },
+            ]
+        },
+        {//37
+            id: "client",
+            title: "COORDONNÉES CLIENT",
+            fields: [
+                {
+                    id: "emailClient",
+                    type: "textInput",
+                    isEmail: true,
+                    label: "Adresse email",
+                    errorId: "emailClientError",
+                    mendatory: true,
+                    pdfConfig: { dx: -500, dy: - 530, pageIndex: 0, splitArobase: true }
+                },
+            ],
+            isLast: true
+        },
+        {//37
+            id: "client",
+            title: "COORDONNÉES CLIENT",
+            fields: [
+                {
+                    id: "isSiteInfoEqualToClientInfo",
+                    label: "Est-ce que les coordonnées du chantier et du client sont identiques ?",
+                    type: "options",
+                    items: [
+                        {
+                            label: 'Oui',
+                            value: 'Oui',
+                            icon: faCheck,
+                            iconColor: "green",
+                            pdfConfig: { skip: true },
+                            autoCopy: [
+                                { id: "siteName", copyFrom: "clientLastName" },
+                                { id: "addressSite", copyFrom: "addressClient" },
+                                { id: "addressCodeSite", copyFrom: "addressCodeClient" },
+                                { id: "phoneSite", copyFrom: "mobilePhoneClient" },
+                                { id: "emailSite", copyFrom: "emailClient" },
+                            ]
+                        },
+                        {
+                            label: 'Non',
+                            value: 'Non',
+                            icon: faTimes,
+                            iconColor: theme.colors.error,
+                            pdfConfig: { skip: true }
+                        },
+                    ],
+                    errorId: "isSiteInfoEqualToClientInfoError",
+                    mendatory: true
+                },
+            ]
+        },
+        {//37
+            id: "site",
+            title: "COORDONNÉES CHANTIER",
+            fields: [
+                {
+                    id: "siteName",
+                    type: "textInput",
+                    maxLength: 15,
+                    label: "Nom",
+                    errorId: "siteNameError",
+                    pdfConfig: { dx: -492, dy: - 587, pageIndex: 0 }, //add spaces
+                    mendatory: true,
+                    isConditional: true,
+                    condition: { with: "isSiteInfoEqualToClientInfo", values: ["Non"] },
+                }
+            ]
+        },
+        {//37
+            id: "site",
+            title: "COORDONNÉES CHANTIER",
+            fields: [
+                {
+                    id: "addressSite",
+                    type: "textInput",
+                    label: "Adresse",
+                    errorId: "addressSiteError",
+                    maxLength: 40,
+                    pdfConfig: { dx: -480, dy: - 622, pageIndex: 0 }, //add spaces
+                    mendatory: true,
+                    isConditional: true,
+                    condition: { with: "isSiteInfoEqualToClientInfo", values: ["Non"] },
+                }
+            ]
+        },
+        // {//2 DONE
+        //     id: "site",
+        //     title: "COORDONNÉES CHANTIER",
+        //     fields: [
+        //         {
+        //             id: "addressCodeSite",
+        //             type: "textInput",
+        //             mask: "[0][0][0][0][0]",
+        //             label: "Code Postal",
+        //             isNumeric: true,
+        //             errorId: "addressCodeSiteError",
+        //             mendatory: true,
+        //             isConditional: true,
+        //             condition: { with: "isSiteInfoEqualToClientInfo", values: ["Non"] },
+        //             pdfConfig: { dx: -455, dy: - 693, pageIndex: 0 }
+        //         }
+        //     ]
+        // },
+        {//2 DONE
+            id: "site",
+            title: "COORDONNÉES CHANTIER",
+            fields: [
+                {
+                    id: "phoneSite",
+                    type: "textInput",
+                    mask: "[00][00][00][00][00]",
+                    isNumeric: true,
+                    label: "Téléphone mobile",
+                    errorId: "phoneSiteError",
+                    mendatory: true,
+                    isConditional: true,
+                    condition: { with: "isSiteInfoEqualToClientInfo", values: ["Non"] },
+                    pdfConfig: { dx: -500, dy: - 737, pageIndex: 0 }
+                },
+            ]
+        },
+        {//2 DONE
+            id: "site",
+            title: "COORDONNÉES CHANTIER",
+            fields: [
+                {
+                    id: "emailSite",
+                    type: "textInput",
+                    isEmail: true,
+                    label: "Adresse email",
+                    errorId: "emailSiteError",
+                    mendatory: true,
+                    isConditional: true,
+                    condition: { with: "isSiteInfoEqualToClientInfo", values: ["Non"] },
+                    pdfConfig: { dx: -502, dy: - 779, pageIndex: 0 }
+                },
+            ]
+        },
+        {
+            id: "site",
+            title: "FINANCEMENT",
+            fields: [
+                {
+                    id: "financingAids",
+                    label: "A sélectionner si présent",
+                    type: "options",
+                    isMultiOptions: true,
+                    items: [
+                        { label: 'ACTION LOGEMENT', value: 'ACTION LOGEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 615, pageIndex: 0 } },
+                        { label: 'CHEQUE REGION', value: 'CHEQUE REGION', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 648, pageIndex: 0 } },
+                        { label: 'MA PRIME RENOV', value: 'MA PRIME RENOV', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 684, pageIndex: 0 } }, //#task scroll to error offset_y
+                        { label: 'CEE', value: 'CEE', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 719, pageIndex: 0 } }, //#task scroll to error offset_y
+                        { label: 'FINANCEMENT', value: 'FINANCEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 754, pageIndex: 0 } }, //#task scroll to error offset_y
+                    ],
+                    style: { marginTop: 100 },
+                    // isConditional: true,
+                    // condition: { with: "isSiteInfoEqualToClientInfo", values: ["Oui"] },
+                },
+            ],
+            isLast: true
+        },
+    ]
+
+    return { model, globalConfig }
+}
 
 export const pvReceptionModel = (params) => {
 
@@ -1640,7 +1686,20 @@ export const pvReceptionModel = (params) => {
                     type: "textInput",
                     label: "Nature des réserves",
                     errorId: "reservesNatureError",
-                    pdfConfig: { dx: -335, dy: - 267, pageIndex: 0 }, //#task: split in 4lines: make a split lenght pattern
+                    pdfConfig: {
+                        dx: -335,
+                        dy: - 267,
+                        pageIndex: 0,
+                        breakLines: {
+                            linesWidths: [300, 410, 410, 410],
+                            linesStarts: [
+                                { dx: -335, dy: -267 },
+                                { dx: -465, dy: -287 },
+                                { dx: -465, dy: -307 },
+                                { dx: -465, dy: -327 },
+                            ]
+                        }
+                    },
                     mendatory: true,
                 },
             ],
@@ -1654,7 +1713,20 @@ export const pvReceptionModel = (params) => {
                     type: "textInput",
                     label: "Travaux à exécuter",
                     errorId: "worksToExecuteError",
-                    pdfConfig: { dx: -337, dy: - 348, pageIndex: 0 },
+                    pdfConfig: {
+                        dx: -337,
+                        dy: - 348,
+                        pageIndex: 0,
+                        breakLines: {
+                            linesWidths: [300, 410, 410, 410],
+                            linesStarts: [
+                                { dx: -335, dy: -347 },
+                                { dx: -465, dy: -367 },
+                                { dx: -465, dy: -387 },
+                                { dx: -465, dy: -407 },
+                            ]
+                        }
+                    },
                     mendatory: true,
                 },
             ],
@@ -1728,7 +1800,7 @@ export const pvReceptionModel = (params) => {
                     label: "Téléphone du client",
                     errorId: "phoneError",
                     mendatory: true,
-                    pdfConfig: { dx: -450, dy: - 314, pageIndex: 1, spaces: { afterEach: 2, str: '          ' } }, //task: make spacing pattern to be more dynamic
+                    pdfConfig: { dx: -453, dy: - 314, pageIndex: 1 }, //task: make spacing pattern to be more dynamic
                     mendatory: true,
                 },
             ]
@@ -1756,7 +1828,12 @@ export const pvReceptionModel = (params) => {
                             skip: true,
                             icon: faQuestionCircle,
                             pdfConfig: { skip: true },
-                            rollBack: { fields: [{ id: "solarWaterHeaterSensorSurface", type: "string" }] }
+                            rollBack: {
+                                fields: [
+                                    { id: "installations", type: "array", value: "Chauffe‐eau solaire individuel" },
+                                    { id: "solarWaterHeaterSensorSurface", type: "string" }
+                                ]
+                            }
                         },
                     ],
                 },
@@ -1795,7 +1872,12 @@ export const pvReceptionModel = (params) => {
                             skip: true,
                             icon: faQuestionCircle,
                             pdfConfig: { skip: true },
-                            rollBack: { fields: [{ id: "combinedSolarSystemSensorSurface", type: "string" }] }
+                            rollBack: {
+                                fields: [
+                                    { id: "installations", type: "array", value: "Système solaire combiné" },
+                                    { id: "combinedSolarSystemSensorSurface", type: "string" }
+                                ]
+                            }
                         },
                     ],
                 },
@@ -1834,7 +1916,13 @@ export const pvReceptionModel = (params) => {
                             skip: true,
                             icon: faQuestionCircle,
                             pdfConfig: { skip: true },
-                            rollBack: { fields: [{ id: "collectiveSolarThermalSensorSurface", type: "string" }] }
+                            rollBack: {
+                                fields:
+                                    [
+                                        { id: "installations", type: "array", value: "Solaire thermique collectif (ECS)" },
+                                        { id: "collectiveSolarThermalSensorSurface", type: "string" }
+                                    ]
+                            }
                         },
                     ],
                 },
@@ -1875,6 +1963,7 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
+                                    { id: "installations", type: "array", value: "Chauffage au bois" },
                                     { id: "woodHeatingPower", type: "string" },
                                     { id: "woodHeatingDeviceType", type: "string" }
                                 ]
@@ -1897,7 +1986,7 @@ export const pvReceptionModel = (params) => {
                     id: "woodHeatingDeviceType",
                     type: "picker",
                     items: [
-                        { label: "Type d'appareil", value: "", pdfConfig: { skip: true } },
+                        { label: "Choisir", value: "", pdfConfig: { skip: true } },
                         { label: "Poêle hydraulique", value: "Poêle hydraulique", pdfConfig: { dx: -545, dy: - 475, pageIndex: 1 } },
                         { label: "Poêle indépendant", value: "Poêle indépendant", pdfConfig: { dx: -458, dy: - 475, pageIndex: 1 } },
                         { label: "Insert", value: "Insert", pdfConfig: { dx: -367, dy: - 475, pageIndex: 1 } },
@@ -1936,6 +2025,7 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
+                                    { id: "installations", type: "array", value: "Générateur photovoltaïque raccordé au réseau" },
                                     { id: "photovoltaicPower", type: "string" },
                                     { id: "photovoltaicWorksType", type: "string" }
                                 ]
@@ -1958,7 +2048,7 @@ export const pvReceptionModel = (params) => {
                     id: "photovoltaicWorksType",
                     type: "picker",
                     items: [
-                        { label: "Nature des travaux", value: "", pdfConfig: { skip: true } },
+                        { label: "Choisir", value: "", pdfConfig: { skip: true } },
                         { label: "Travaux d’intégration au bâti", value: "Travaux d’intégration au bâti", pdfConfig: { dx: -517, dy: - 520, pageIndex: 1 } },
                         { label: "Travaux d’installation électrique", value: "Travaux d’installation électrique", pdfConfig: { dx: -370, dy: - 520, pageIndex: 1 } },
                     ],
@@ -1994,6 +2084,7 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
+                                    { id: "installations", type: "array", value: "Pompe à chaleur" },
                                     { id: "heatPumpPower", type: "string" },
                                     { id: "heatPumpDeviceType", type: "string" }
                                 ]
@@ -2016,14 +2107,14 @@ export const pvReceptionModel = (params) => {
                     id: "heatPumpDeviceType",
                     type: "picker",
                     items: [
-                        { label: "Type d'appareil", value: "", pdfConfig: { skip: true } },
-                        { label: "Air/Air", value: "Air/Air", pdfConfig: { dx: -517, dy: - 520, pageIndex: 1 } },
-                        { label: "Air/Eau", value: "Air/Eau", pdfConfig: { dx: -460, dy: - 520, pageIndex: 1 } },
+                        { label: "Choisir", value: "", pdfConfig: { skip: true } },
+                        { label: "Air/Air", value: "Air/Air", pdfConfig: { dx: -517, dy: - 567, pageIndex: 1 } },
+                        { label: "Air/Eau", value: "Air/Eau", pdfConfig: { dx: -460, dy: - 567, pageIndex: 1 } },
                         { label: "Eau/Eau", value: "Eau/Eau", pdfConfig: { dx: -400, dy: - 567, pageIndex: 1 } },//400
-                        { label: "Sol/Eau", value: "Sol/Eau", pdfConfig: { dx: -335, dy: - 520, pageIndex: 1 } },
-                        { label: "Sol/Sol", value: "Sol/Sol", pdfConfig: { dx: -275, dy: - 520, pageIndex: 1 } },
-                        { label: "Air/Air multisplit", value: "Air/Air multisplit", pdfConfig: { dx: -215, dy: - 520, pageIndex: 1 } },
-                        { label: "CET", value: "CET", pdfConfig: { dx: -120, dy: - 520, pageIndex: 1 } },
+                        { label: "Sol/Eau", value: "Sol/Eau", pdfConfig: { dx: -335, dy: - 567, pageIndex: 1 } },
+                        { label: "Sol/Sol", value: "Sol/Sol", pdfConfig: { dx: -275, dy: - 567, pageIndex: 1 } },
+                        { label: "Air/Air multisplit", value: "Air/Air multisplit", pdfConfig: { dx: -215, dy: - 567, pageIndex: 1 } },
+                        { label: "CET", value: "CET", pdfConfig: { dx: -120, dy: - 567, pageIndex: 1 } },
                     ],
                     label: "Type d’appareil",
                     mendatory: true,
@@ -2057,6 +2148,7 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
+                                    { id: "installations", type: "array", value: "Forage géothermique" },
                                     { id: "geothermalDrillingDepth", type: "string" },
                                     { id: "drillingType", type: "string" }
                                 ]
@@ -2079,7 +2171,7 @@ export const pvReceptionModel = (params) => {
                     id: "drillingType",
                     type: "picker",
                     items: [
-                        { label: "Type de forage", value: "", pdfConfig: { skip: true } },
+                        { label: "Choisir", value: "", pdfConfig: { skip: true } },
                         { label: "Forage sur Nappe", value: "Forage sur Nappe", pdfConfig: { dx: -517, dy: - 613, pageIndex: 1 } },//517
                         { label: "Forage sur Sonde", value: "Forage sur Sonde", pdfConfig: { dx: -415, dy: - 613, pageIndex: 1 } },
                     ],
@@ -2115,6 +2207,7 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
+                                    { id: "installations", type: "array", value: "Chaudière à condensation" },
                                     { id: "condensingBoilerPower", type: "string" },
                                     { id: "condensingBoilerDeviceType", type: "string" }
                                 ]
@@ -2137,7 +2230,7 @@ export const pvReceptionModel = (params) => {
                     id: "condensingBoilerDeviceType",
                     type: "picker",
                     items: [
-                        { label: "Type d'appareil", value: "", pdfConfig: { skip: true } },
+                        { label: "Choisir", value: "", pdfConfig: { skip: true } },
                         { label: "Gaz", value: "Gaz", pdfConfig: { dx: -545, dy: - 660, pageIndex: 1, squareSize: 12 } },
                         { label: "Fioul", value: "Fioul", pdfConfig: { dx: -516, dy: - 660, pageIndex: 1, squareSize: 12 } },
                     ],
@@ -2183,21 +2276,6 @@ export const pvReceptionModel = (params) => {
                             pdfConfig: { dx: -94, dy: - 723, pageIndex: 1, squareSize: 12 },
                         },
                     ],
-                    mendatory: true,
-                },
-            ],
-        },
-        //************************************* APPRECIATION
-        {//6
-            id: "appreciationDate",
-            title: "Appréciation de la prestation",
-            fields: [
-                {
-                    id: "signatoryName",
-                    type: "textInput",
-                    label: "Nom du signataire",
-                    errorId: "signatoryNameError",
-                    pdfConfig: { dx: -450, dy: - 768, pageIndex: 1 },
                     mendatory: true,
                 },
             ],

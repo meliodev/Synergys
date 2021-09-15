@@ -606,9 +606,9 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
-            if (type === 'PV réception' || type === 'Mandat MaPrimeRénov' || type === 'Mandat Synergys')
+            if (type === 'PV réception' || type === 'Mandat Synergys')
                 this.setState({ modalContent: 'genFormSources' })
-            else if (type === 'Devis')
+            else if (type === 'Devis' || type === 'Mandat MaPrimeRénov')
                 this.startGenPdf(1)
         }
     }
@@ -665,7 +665,7 @@ class UploadDocument extends Component {
             return attachment
         }
         catch (e) {
-            return e
+            throw new Error(e)
         }
     }
 
@@ -877,8 +877,8 @@ class UploadDocument extends Component {
                     close title
                     titleText={titleText}
                     loading={loading}
-                    // check={canWrite}
-                    // handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
+                    check={canWrite && !this.isProcess}
+                    handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
                     del={canDelete}
                     handleDelete={this.showAlert} />
 

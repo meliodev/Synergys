@@ -104,49 +104,53 @@ class ListFormsContainer extends Component {
         return (
             <View style={styles.container}>
 
-                {loading ?
-                    <Loading size='large' />
-                    :
-                    <Background showMotif={filterCount < 4} style={styles.container}>
-                        <SearchBar
-                            menu={this.props.isRoot}
-                            title={!showInput}
-                            titleText={titleText}
-                            showBar={showInput}
-                            placeholder='Rechercher un élément'
-                            handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
-                            searchInput={searchInput}
-                            searchUpdated={(searchInput) => this.setState({ searchInput })}
-                        />
+                <Background showMotif={filterCount < 4} style={styles.container}>
 
-                        {filterActivated && <ActiveFilter />}
-                        {Count > 0 && <ListSubHeader>{filterCount} {countTitle}{s}</ListSubHeader>}
+                    <SearchBar
+                        menu={this.props.isRoot}
+                        title={!showInput}
+                        titleText={titleText}
+                        showBar={showInput}
+                        placeholder='Rechercher un élément'
+                        handleSearch={() => this.setState({ searchInput: '', showInput: !showInput })}
+                        searchInput={searchInput}
+                        searchUpdated={(searchInput) => this.setState({ searchInput })}
+                    />
 
-                        {Count > 0 ?
-                            <FlatList
-                                enableEmptySections={true}
-                                data={this.filteredItems}
-                                keyExtractor={item => item.id.toString()}
-                                renderItem={({ item }) => this.props.renderItem(item)}
-                                style={{ zIndex: 1 }}
-                                contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }}
-                                refreshControl={
-                                    <RefreshControl
-                                        refreshing={this.state.refreshing}
-                                        onRefresh={this.fetchItems}
-                                    />
-                                }
-                            />
-                            :
-                            this.props.emptyList
-                        }
+                    {loading ?
+                        <Loading size='large' />
+                        :
+                        <View>
+                            {filterActivated && <ActiveFilter />}
+                            {Count > 0 && <ListSubHeader>{filterCount} {countTitle}{s}</ListSubHeader>}
 
-                        {canCreate && this.showFAB &&
-                            <MyFAB onPress={() => this.props.navigation.navigate(creationScreen, { onGoBack: () => this.fetchItems(2000) })} />
-                        }
+                            {Count > 0 ?
+                                <FlatList
+                                    enableEmptySections={true}
+                                    data={this.filteredItems}
+                                    keyExtractor={item => item.id.toString()}
+                                    renderItem={({ item }) => this.props.renderItem(item)}
+                                    style={{ zIndex: 1 }}
+                                    contentContainerStyle={{ paddingBottom: constants.ScreenHeight * 0.12, paddingHorizontal: theme.padding }}
+                                    refreshControl={
+                                        <RefreshControl
+                                            refreshing={this.state.refreshing}
+                                            onRefresh={this.fetchItems}
+                                        />
+                                    }
+                                />
+                                :
+                                this.props.emptyList
+                            }
 
-                    </Background>
-                }
+                        </View>
+                    }
+
+                    {!loading && canCreate && this.showFAB &&
+                        <MyFAB onPress={() => this.props.navigation.navigate(creationScreen, { onGoBack: () => this.fetchItems(2000) })} />
+                    }
+
+                </Background>
             </View>
         )
     }

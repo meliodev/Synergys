@@ -26,6 +26,9 @@ const properties = [
     "installationAddress",
     "phone",
 
+    "projectOwner",
+    "billingDate",
+
     "installations",
     "solarWaterHeaterSensorSurface",
     "combinedSolarSystemSensorSurface",
@@ -45,7 +48,7 @@ const properties = [
     "signatoryName",
 ]
 
-const initialState = {
+let initialState = {
     acceptReception: "",
     reservesNature: "",
     worksToExecute: "",
@@ -72,6 +75,7 @@ const initialState = {
 
     appreciation: "",
     signatoryName: "",
+    version: 1
 }
 
 class CreatePvReception extends Component {
@@ -80,21 +84,18 @@ class CreatePvReception extends Component {
 
         this.PvReceptionId = this.props.navigation.getParam('PvReceptionId', '')
         this.project = this.props.navigation.getParam('project', null)
-        this.clientFullName = ""
-        this.billingDate = ""
-        if (this.project) {
-            this.clientFullName = this.project.client.fullName
-            this.billingDate = moment().format('DD/MM/YYYY') //Info not available: Billing date is registred only after filling Billing amount during the process
-        }
+        this.clientFullName = this.project ? this.project.client.fullName : ""
+        this.clientPhone = this.project ? this.project.client.phone : ""
+        this.clientAddress = this.project ? this.project.address : ""
+        this.billingDate = moment().format('DD/MM/YYYY')  //Info not available: Billing date is registred only after filling Billing amount during the process
+
+        initialState.clientName = this.clientFullName
+        initialState.installationAddress = this.clientAddress
+        initialState.phone = this.clientPhone
+        initialState.signatoryName = this.clientFullName
 
         this.state = {
         }
-    }
-
-    renderOverview() {
-        return (
-            <Text>Hello World !</Text>
-        )
     }
 
     render() {
@@ -162,3 +163,17 @@ const styles = StyleSheet.create({
 })
 
 export default CreatePvReception
+
+
+
+
+   // //Auto fields
+        // initialState.projectOwner = this.clientFullName
+        // initialState.billingDate = this.billingDate
+        // initialState.reserveDate1 = moment().format('DD/MM/YYYY')
+        // initialState.reserveDate2 = moment().format('DD/MM/YYYY')
+        // initialState.todayDate1 = moment().format('DD/MM/YYYY')
+        // initialState.appreciationDate = moment().format('DD/MM/YYYY')
+        // initialState.dayNow = moment().format('DD')
+        // initialState.monthNow = moment().format('MM')
+        // initialState.yearNow = moment().format('YYYY')

@@ -151,7 +151,8 @@ const initialState = {
     addressCity: "",
     phone: "",
     // disablePhoneContact: true,
-    email: "",
+    email: "", 
+    version: 1
 }
 
 class CreateSimulation extends Component {

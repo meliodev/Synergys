@@ -75,6 +75,7 @@ class ProcessAction extends Component {
     setProcessModel(process) {
         const { version } = process
         const processModel = processModels[version]
+        console.log(processModels)
         return processModel
     }
 
@@ -678,7 +679,7 @@ class ProcessAction extends Component {
     renderHeaderBar() {
         const { process } = this.state
         const { project, clientId, step, canUpdate, role } = this.props
-        const navParams = { process, project, clientId, step, canUpdate, role }
+        const navParams = { process, project, clientId, step, canUpdate, role } 
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>

@@ -570,7 +570,7 @@ export const version5 = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le devis', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Commercial',
+                        responsable: 'Client',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -624,7 +624,7 @@ export const version5 = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat MaPrimeRénov', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Commercial',
+                        responsable: 'Client',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -678,37 +678,38 @@ export const version5 = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat Synergys', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Commercial',
+                        responsable: 'Client',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
-                    {
-                        id: 'isQuoteFinanced',
-                        title: "Le devis est-il accompagné d'un financement ?",
-                        instructions: 'Lorem ipsum dolor',
-                        actionOrder: 11,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //#task: comments are joined (separated by ;)
-                        choices: [
-                            { label: 'NON', id: 'comment', nextStep: 'technicalVisitCreation', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                            { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
+                    //info: Removed because currently user can't go back on process (for example after a mistake)
+                    // {
+                    //     id: 'isQuoteFinanced',
+                    //     title: "Le devis est-il accompagné d'un financement ?",
+                    //     instructions: 'Lorem ipsum dolor',
+                    //     actionOrder: 11,
+                    //     type: 'manual',
+                    //     verificationType: 'multiple-choices',
+                    //     comment: '', //#task: comments are joined (separated by ;)
+                    //     choices: [
+                    //         { label: 'NON', id: 'comment', nextStep: 'technicalVisitCreation', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                    //         { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
+                    //     ],
+                    //     responsable: 'Commercial',
+                    //     status: 'pending',
+                    // },
                     {
                         id: 'financingWebsite',
                         title: 'Propositions de financement',
                         instructions: "Lorem ipsum dolor",
-                        actionOrder: 12,
+                        actionOrder: 11,
                         type: 'manual',
                         comment: '',
                         verificationType: 'multiple-choices',
                         choices: [
                             { label: 'www.adhefi.com', id: 'cashPayment', onSelectType: 'openLink', link: 'https://www.adhefi.com' },
                             { label: 'www.moncofidispro.fr', id: 'financing', onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
-                            { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
+                            { label: 'Continuer', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
@@ -725,15 +726,26 @@ export const version5 = {
                         //General
                         id: 'checkTechContact',
                         title: 'Renseigner un contact technique pour le projet', //#add refresh before scrollto
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: 'Renseigner un contact technique pour le projet',
                         actionOrder: 1,
                         //Verification
                         collection: 'Projects',
                         documentId: '', //#dynamic
                         properties: ['techContact', 'id'],
-                        //Verification
+                        //Navigation
+                        screenName: 'ListEmployees',
+                        screenParams: {
+                            project: null,
+                            prevScreen: 'CreateProject',
+                            isRoot: false,
+                            titleText: 'Choisir un poseur',
+                            //Filter List (new param type)
+                            queryFilters: [ //Filter list
+                                { filter: 'role', operation: '==', value: 'Poseur' },
+                                { filter: 'deleted', operation: '==', value: false }
+                            ]
+                        },
                         type: 'auto',
-                        scrollTo: { screen: "CreateProject", itemId: 'comContact' },
                         verificationType: 'data-fill',
                         verificationValue: '',
                         responsable: 'Commercial',
@@ -1188,7 +1200,7 @@ export const version5 = {
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Client',
                         status: 'pending',
                     },
                     {
@@ -1247,7 +1259,7 @@ export const version5 = {
                             { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Client',
                         status: 'pending',
                         nextStep: 'facturationOption1'
                     },
@@ -1354,7 +1366,7 @@ export const version5 = {
                             { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Client',
                         status: 'pending',
                         nextStep: 'paymentStatus'
                     },
@@ -1599,7 +1611,7 @@ export const version5 = {
                         choices: [
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Client',
                         status: 'pending',
                         verificationType: 'doc-creation',
                     },
@@ -1657,7 +1669,7 @@ export const version5 = {
                         choices: [
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Client',
                         status: 'pending',
                     },
                     {

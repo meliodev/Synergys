@@ -97,6 +97,8 @@ class StepsForm extends Component {
 
             deleted: false,
             project: this.project ? this.project : null,
+
+            isBack: false,
             ...this.props.initialState
         }
     }
@@ -106,6 +108,9 @@ class StepsForm extends Component {
         try {
             setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
             if (this.state.isEdit) await this.initEditMode()
+            else if (this.props.autoGen) {
+                this.handleSubmit(true)
+            }
             this.initialState = _.cloneDeep(this.state)
             this.setState({ initialLoading: false })
         }
@@ -139,40 +144,7 @@ class StepsForm extends Component {
         return document
     }
 
-    //##Steps
-    renderSteps(pages, steps) {
-        return (
-            <View style={styles.stepsContainer}>
-                {steps.map((step, index) => {
-                    if (step === "")
-                        return <View style={styles.stepsSeparator} />
-
-                    else return (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
-                            {this.renderStep(step, index)}
-                        </View>
-                    )
-                })
-                }
-            </View >
-        )
-    }
-
-    renderStep(step, index) {
-        const { stepIndex } = this.state
-        const isSelected = stepIndex === index
-        const { primary, white, gray_medium } = theme.colors
-        const backgroundColor = isSelected ? primary : white
-        const borderColor = isSelected ? white : gray_medium
-        const color = isSelected ? white : gray_medium
-
-        return (
-            <View style={[styles.step, { backgroundColor }]}>
-                <Text style={[theme.customFontMSregular.caption, { color }]}>{step}</Text>
-            </View>
-        )
-    }
-
+    //##Progression
     renderProgression(pages) {
         const { pagesDone } = this.state
         const pagesCount = this.props.collection === "Simulations" ? pages.length - 1 : pages.length - 2
@@ -192,7 +164,40 @@ class StepsForm extends Component {
         )
     }
 
+    renderStep(step, index) {
+        const { stepIndex } = this.state
+        const isSelected = stepIndex === index
+        const { primary, white, gray_medium } = theme.colors
+        const backgroundColor = isSelected ? primary : white
+        const borderColor = isSelected ? white : gray_medium
+        const color = isSelected ? white : gray_medium
+
+        return (
+            <View style={[styles.step, { backgroundColor }]}>
+                <Text style={[theme.customFontMSregular.caption, { color }]}>{step}</Text>
+            </View>
+        )
+    }
+
     //##Form
+    renderSteps(pages, steps) {
+        return (
+            <View style={styles.stepsContainer}>
+                {steps.map((step, index) => {
+                    if (step === "")
+                        return <View style={styles.stepsSeparator} />
+
+                    else return (
+                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                            {this.renderStep(step, index)}
+                        </View>
+                    )
+                })
+                }
+            </View >
+        )
+    }
+
     renderTitle(pages) {
         const { pageIndex } = this.state
         const { title } = pages[pageIndex]
@@ -338,8 +343,16 @@ class StepsForm extends Component {
                                     for (const f of rollBack.fields) {
                                         if (f.type === "string")
                                             update[f.id] = ""
-                                        else if (f.type === "array")
-                                            update[f.id] = []
+                                        else if (f.type === "array") {
+                                            //Remove element
+                                            if (f.value) {
+                                                const index = update[f.id].findIndex((e) => e === f.value)
+                                                if (index !== -1)
+                                                    update[f.id].splice(index, 1)
+                                            }
+                                            //Empty array
+                                            else update[f.id] = []
+                                        }
                                         else if (f.type === "date")
                                             update[f.id] = new Date()
                                     }
@@ -396,8 +409,17 @@ class StepsForm extends Component {
                                                     for (const field of item.rollBack.fields) {
                                                         if (field.type === "string")
                                                             update[field.id] = ""
-                                                        else if (field.type === "array")
-                                                            update[field.id] = []
+                                                        else if (field.type === "array") {
+                                                            //Remove element
+                                                            if (field.value) {
+                                                                update[field.id] = this.state[field.id]
+                                                                const index = update[field.id].findIndex((e) => e === field.value)
+                                                                if (index !== -1)
+                                                                    update[field.id].splice(index, 1)
+                                                            }
+                                                            //Empty array
+                                                            else update[field.id] = []
+                                                        }
                                                         else if (field.type === "date")
                                                             update[field.id] = new Date()
                                                     }
@@ -406,7 +428,7 @@ class StepsForm extends Component {
                                                 //0.2 AUTO COPY-PASTE
                                                 if (item.autoCopy) {
                                                     for (const element of item.autoCopy) {
-                                                        update[element.id] = this.state.[element.copyFrom]
+                                                        update[element.id] = this.state[element.copyFrom]
                                                     }
                                                 }
 
@@ -447,7 +469,7 @@ class StepsForm extends Component {
 
                                                 this.setState(update, () => {
                                                     //Auto goNext
-                                                    if (this.isEdit) return
+                                                    //if (this.isEdit) return
                                                     const isPageWithSingleField = pages[pageIndex].fields.length === 1
                                                     if (isPageWithSingleField && !isMultiOptions || item.skip)
                                                         this.goNext()
@@ -585,7 +607,10 @@ class StepsForm extends Component {
 
         const arr = fieldsComponents.filter((e) => e !== null)
         const emptyPage = arr.length === 0
-        if (emptyPage) this.setState({ pageIndex: this.state.pageIndex + 1 })
+        if (emptyPage) {
+            var delta = this.state.isBack ? -1 : 1 //Update pageIndex depending on if is it going next or back.
+            this.setState({ pageIndex: this.state.pageIndex + delta })
+        }
 
         return fieldsComponents
     }
@@ -626,6 +651,9 @@ class StepsForm extends Component {
     async goNext() {
         const { pageIndex, pagesDone, stepIndex } = this.state
         const { pages, collection } = this.props
+
+        //Set direction (useful for handling pageIndex/pagesDone update)
+        this.setState({ isBack: false })
 
         //Verify fields
         const isValid = this.verifyFields(pages, pageIndex)
@@ -674,11 +702,16 @@ class StepsForm extends Component {
         let { pageIndex, pagesDone, stepIndex } = this.state
         const { pages } = this.props
 
+        //Set direction (useful for handling pageIndex/pagesDone update)
+        this.setState({ isBack: true })
+
         //Hide success message
         if (pageIndex === pages.length - 1)
             this.setState({ showSuccessMessage: false })
 
-        this.setState({ pageIndex: pagesDone[pagesDone.length - 1] }, () => {
+        pageIndex = this.state.isEdit ? pageIndex - 1 : pagesDone[pagesDone.length - 1]
+
+        this.setState({ pageIndex }, () => {
             //Pop current page from browsed pages
             pagesDone.pop()
             this.setState({ pagesDone })
@@ -820,6 +853,7 @@ class StepsForm extends Component {
         delete state.submitted
         delete state.readOnly
         delete state.isEdit
+        delete state.isBack
 
         for (const key in state) {
             const isErrorField = key.toLowerCase().includes('error')
@@ -847,7 +881,7 @@ class StepsForm extends Component {
         return form
     }
 
-    //##Logic: Results
+    //##Logic: Simulation Results
     setResults() {
         this.setState({ loading: true })
         const form = this.unformatDocument()
@@ -1203,6 +1237,8 @@ class StepsForm extends Component {
 
                             return page.fields.map((field, key) => {
 
+                                let values = ""
+
                                 //Avoid repetition of same field (isStepMultiOptions)
                                 if (redundantFields.includes(field.id))
                                     return null
@@ -1216,43 +1252,45 @@ class StepsForm extends Component {
                                     //String fields
                                     if (typeof (form[field.id]) === "string") {
                                         if (form[field.id] !== "") {
-                                            var values = form[field.id]
+                                            values = form[field.id]
                                         }
                                     }
 
                                     //Boolean fields
                                     else if (typeof (form[field.id]) === 'boolean') {
-                                        var values = form[field.id] === false ? "Oui" : "Non"
+                                        values = !form[field.id] ? "Oui" : "Non"
                                     }
 
                                     //Address field
                                     else if (field.type === "address") {
-                                        var values = form[field.id].description
+                                        values = form[field.id].description
                                     }
 
                                     //Array fields
                                     else if (Array.isArray(form[field.id]) && form[field.id] !== []) {
-                                        var values = ""
-                                        var values = form[field.id].join(', ')
+                                        values = ""
+                                        values = form[field.id].join(', ')
                                     }
                                 }
 
-                                if (values) {
+                                if (field.type === "autogen")
+                                    return null
+
+                                else {
+                                    const empty = !values
+                                    const emptyAndConditional = empty && field.isConditional
                                     return (
                                         <TouchableOpacity
                                             onPress={() => {
-                                                if (field.type === "autogen") return
+                                                if (emptyAndConditional) return
                                                 this.setState({ pageIndex, readOnly: false, submitted: false })
                                             }}
                                             style={styles.overviewRow}>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_dark }]}>{field.label}</Text>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: theme.colors.gray_googleAgenda }]}>{values}</Text>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_dark }]}>{field.label}</Text>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{empty ? "-" : values}</Text>
                                         </TouchableOpacity>
                                     )
                                 }
-
-                                //Empty fields
-                                else return null
                             })
 
                         })
@@ -1399,7 +1437,7 @@ class StepsForm extends Component {
                         }
 
                         <Toast
-                            duration={2500}
+                            duration={1500}
                             message={toastMessageModal}
                             type={toastTypeModal}
                             onDismiss={() => this.setState({ toastMessageModal: '' })}
@@ -1415,7 +1453,7 @@ class StepsForm extends Component {
                 />
 
                 <Toast
-                    duration={2500}
+                    duration={1500}
                     message={toastMessage}
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })}

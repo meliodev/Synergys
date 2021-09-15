@@ -128,6 +128,15 @@ export const navigateToScreen = (main, screen, params) => {
 
 //##HELPERS
 
+//We suppose that firstName can be composed of many strings. And lastName only one string.
+export const retrieveFirstAndLastNameFromFullName = (fullName) => {
+  let fullNameArr = fullName.split(' ')
+  const lastName = fullNameArr[fullNameArr.length - 1]
+  fullNameArr.pop()
+  const firstName = fullNameArr.join(' ')
+  return { firstName, lastName }
+}
+
 export const getMinObjectProp = (arrObjects, property) => {
   return arrObjects.reduce((min, object) => object[property] < min ? object[property] : min, arrObjects[0][property])
 }
@@ -191,7 +200,6 @@ export const articles_fr = (masc, masculins, target) => {
     resp = masculins.includes(target) ? '' : 'e'
   }
 
-  console.log('RESP', resp)
   return resp
 }
 
@@ -482,6 +490,8 @@ export const convertImageToPdf = async (attachment) => {
   }
 
   catch (e) {
+    if (e === "The input is not a PNG file!")
+      errorMessage = "Fichier corrompu ou incompatible."
     throw new Error(errorMessage || "Erreur lors de la conversion de l'image en pdf.")
   }
 }
@@ -525,6 +535,61 @@ export const chunk = (str, n) => {
   return ret
 }
 
+
+const lineBreaker = (dataArray, font, size, linesWidths, maxNumberOflLines) => {
+
+  let dataArrayFormated = []
+  const line_Height = font.heightAtSize(size)
+
+  for (var line of dataArray) {
+    const lineWidth = font.widthOfTextAtSize(line, size)
+    let i = 0
+
+    if (lineWidth > linesWidths[i]) {
+
+      var lineLength = line.length
+      var lastCharIndex = linesWidths[i] * lineLength / lineWidth
+
+      //Avoid spliting words
+      while (line.charAt(lastCharIndex) !== ' ') {
+        lastCharIndex = lastCharIndex - 1
+      }
+
+      var slicedLine = line.slice(0, lastCharIndex)
+      dataArrayFormated.push(slicedLine)
+
+      var restOfLine = line.slice(lastCharIndex)
+      var restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
+
+      i += 1
+      while (restOfLineWidth > linesWidths[i]) {
+        if (i <= maxNumberOflLines) {
+          lineLength = restOfLine.length
+          lastCharIndex = linesWidths[i] * lineLength / restOfLineWidth
+
+          //Avoid spliting words
+          while (restOfLine.charAt(lastCharIndex) !== ' ') {
+            lastCharIndex = lastCharIndex - 1
+          }
+
+          slicedLine = restOfLine.slice(0, lastCharIndex)
+          dataArrayFormated.push(slicedLine)
+
+          restOfLine = restOfLine.slice(lastCharIndex)
+          restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
+          i += 1
+        }
+      }
+
+      dataArrayFormated.push(restOfLine)
+    }
+
+    else dataArrayFormated.push(line)
+  }
+
+  return dataArrayFormated
+}
+
 export const generatePdfForm = async (formInputs, pdfType, params) => {
   try {
 
@@ -542,7 +607,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
     else if (pdfType === "MandatsSynergys") {
       var originalPdfBase64 = mandatSynergysBase64
-      var formPages = mandatSynergysModel
+      var { model: formPages, globalConfig } = mandatSynergysModel()
     }
 
     const pdfDoc = await PDFDocument.load(originalPdfBase64)
@@ -562,45 +627,63 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
 
-        if (field.isMultiOptions && formInputs[field.id].length > 0 || formInputs[field.id] !== "") {
+        const { id, isMultiOptions, isStepMultiOptions, pdfConfig, type, splitArobase } = field
+        const isHandleField = isMultiOptions && formInputs[id].length > 0 || formInputs[id] !== ""
+
+        if (isHandleField) {
 
           let positions = []
           let text = ""
 
-          if (field.pdfConfig && field.pdfConfig.skip)
+          if (pdfConfig && pdfConfig.skip)
             console.log('Skip drawing pdf...')
 
-          else switch (field.type) {
+          else switch (type) {
             case "textInput":
-              text = formInputs[field.id]
+              text = formInputs[id]
+              let dataTextArray = [text]
 
+              //Specific cases (spaces, email spli)
               if (typeof (text) !== "undefined") {
-                if (field.pdfConfig.spaces) {
-                  const { afterEach, str } = field.pdfConfig.spaces
+                if (pdfConfig.spaces) {
+                  const { afterEach, str } = pdfConfig.spaces
                   text = chunk(text, afterEach).join(str)
                 }
 
-                if (field.id === "email" && field.splitArobase) {
+                if (id === "email" && splitArobase) {
                   text = text.split('@')
                   text = text.join('                                                               ')
                 }
               }
-
               else text = ""
 
-              pages[field.pdfConfig.pageIndex].drawText(text,
-                {
-                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
-                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
-                  size: caption,
-                  font: timesRomanFont,
-                  color: colors.black,
-                })
+              //Break line if longer than field space
+              if (pdfConfig.breakLines) {
+                const lineWidth = timesRomanFont.widthOfTextAtSize(text, caption)
+                dataTextArray = lineBreaker(dataTextArray, timesRomanFont, caption, pdfConfig.breakLines.linesWidths, 4)
+              }
+
+              dataTextArray.forEach((text, key) => {
+                const isDrawText = !pdfConfig.breakLines || (pdfConfig.breakLines && key < pdfConfig.breakLines.linesStarts.length)
+                if (isDrawText) {
+                  const dx = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dx : pdfConfig.dx
+                  const dy = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dy : pdfConfig.dy
+                  pages[pdfConfig.pageIndex].drawText(text,
+                    {
+                      x: pages[pdfConfig.pageIndex].getWidth() + dx,
+                      y: pages[pdfConfig.pageIndex].getHeight() + dy,
+                      size: caption,
+                      font: timesRomanFont,
+                      color: colors.black,
+                    })
+                }
+              })
+
               break;
 
             case "options":
 
-              if (field.isMultiOptions || field.isStepMultiOptions) {
+              if (isMultiOptions || isStepMultiOptions) {
                 for (const item of field.items) {
                   if (!item.skip && formInputs[field.id].includes(item.value)) {
                     const { dx, dy } = item.pdfConfig
@@ -618,7 +701,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               }
 
               for (const position of positions) {
-                console.log(field.id, "555")
                 pages[field.items[0].pdfConfig.pageIndex].drawSquare({
                   x: pages[field.items[0].pdfConfig.pageIndex].getWidth() + position.dx,
                   y: pages[field.items[0].pdfConfig.pageIndex].getHeight() + position.dy,
@@ -716,12 +798,20 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
 
     if (globalConfig) {
+      const { pageDuplication, rectangles } = globalConfig
       //Apply page duplication
-      if (globalConfig.pageDuplication) {
-        const { pageDuplication } = globalConfig
+      if (pageDuplication) {
         const { pageIndexSource, pageIndexTarget } = pageDuplication
         const copiedPage = await pdfDoc.copyPages(pdfDoc, [pageIndexSource])
         pdfDoc.insertPage(pageIndexTarget, copiedPage[0])
+      }
+
+      if (rectangles) {
+        for (const rect of rectangles) {
+          pages[rect.pageIndex].drawRectangle(rect.form)
+          console.log('................', rect.pageIndex)
+          console.log('-------------', rect.form)
+        }
       }
     }
 
@@ -1009,9 +1099,9 @@ export function refreshAssignedTo(user) {
 }
 
 export const refreshUser = (user) => {
-  const { isPro, id, denom, nom, prenom, role, email } = user
+  const { isPro, id, denom, nom, prenom, role, email, phone } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
-  const userObject = { id, fullName, email, role }
+  const userObject = { id, fullName, email, role, phone }
   return userObject
 }
 

@@ -87,7 +87,7 @@ const PickerBar = ({
                     { id: 0, type: 'picker', title: "Type", values: types, value: type, field: 'type' },
                     { id: 1, type: 'picker', title: "État", values: statuses, value: status, field: 'status' },
                     { id: 2, type: 'picker', title: "Priorité", values: priorities, value: priority, field: 'priority' },
-                    { id: 3, type: 'screen', title: "Projet", value: project.name.value, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
+                    { id: 3, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet' },
                     { id: 4, type: 'screen', title: "Affecté à", value: assignedTo.fullName, field: 'assignedTo', screen: 'ListEmployees', titleText: 'Filtre par utilisateur' },
                 ]}
             />

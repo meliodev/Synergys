@@ -170,6 +170,7 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
+        db.collection('Projects').where
         if (this.isEdit) await this.initEditMode()
         else this.setWorkTypes()
         this.initialState = _.cloneDeep(this.state)
@@ -199,7 +200,7 @@ class CreateProject extends Component {
                 if (!doc.exists) return null
                 let project = doc.data()
                 project.id = doc.id
-                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address']) 
                 project = this.setProject(project)
                 if (!project) return
                 this.setImageCarousel(project.attachments)
@@ -641,7 +642,7 @@ class CreateProject extends Component {
                                 <CustomIcon icon={faEye} color={theme.colors.primary} size={14} />
                                 <Text
                                     onPress={onPressLink1}
-                                    style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginLeft: 5 }]}>
+                                    style={[theme.customFontMSmedium.caption, { color: theme.colors.primary, marginLeft: 5 }]}>
                                     {this.props.role.level === 1 ? "Voir mon agenda pour ce projet" : "Voir le planning du projet"}
                                 </Text>
                             </View>

@@ -82,7 +82,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
     const renderOption = (option) => {
 
-        if (option.type === 'picker')
+        if (option.type === 'picker') {
             return (
                 <Picker
                     title={option.title}
@@ -91,6 +91,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     onValueChange={(value) => setFilter(option.field, value)}
                     elements={option.values} />
             )
+        }
 
         else if (option.type === 'screen') {
             return (

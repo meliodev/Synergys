@@ -610,9 +610,11 @@ class Profile extends Component {
     }
 
     toggleSection(sectionId) {
-        let { sectionsExpansion } = this.state
+        let { sectionsExpansion, viewProfileDetails } = this.state
         sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
-        this.setState({ sectionsExpansion })
+        if (sectionId === "info")
+            viewProfileDetails = false
+        this.setState({ sectionsExpansion, viewProfileDetails })
     }
 
     render() {

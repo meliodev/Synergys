@@ -74,6 +74,7 @@ export default class PdfGeneration extends Component {
 
         for (var line of dataArray) {
             const lineWidth = font.widthOfTextAtSize(line, size)
+            
             if (lineWidth > maxWidth) {
 
                 var lineLength = line.length
