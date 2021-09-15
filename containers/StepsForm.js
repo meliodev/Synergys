@@ -1277,8 +1277,7 @@ class StepsForm extends Component {
                                     return null
 
                                 else {
-                                    const empty = !values
-                                    const emptyAndConditional = empty && field.isConditional
+                                    const emptyAndConditional = !values && field.isConditional
                                     return (
                                         <TouchableOpacity
                                             onPress={() => {
@@ -1287,7 +1286,7 @@ class StepsForm extends Component {
                                             }}
                                             style={styles.overviewRow}>
                                             <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_dark }]}>{field.label}</Text>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{empty ? "-" : values}</Text>
+                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{values || "-"}</Text>
                                         </TouchableOpacity>
                                     )
                                 }

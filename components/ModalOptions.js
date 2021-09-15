@@ -227,13 +227,13 @@ const ModalOptions = ({
             }
         </Modal>
     )
-}
+} 
 
 
 const styles = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
-        marginTop: constants.ScreenHeight * 0.55,
+        marginTop: constants.ScreenHeight * 0.6,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,

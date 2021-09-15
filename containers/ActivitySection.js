@@ -25,7 +25,7 @@ const ActivitySection = ({
     ...props
 }) => {
 
-    navigateToProfile = (user) => navigation.navigate('Profile', { user: { id: user.id, roleId: getRoleIdFromValue(user.role) } })
+    const navigateToProfile = (user) => navigation.navigate('Profile', { user: { id: user.id, roleId: getRoleIdFromValue(user.role) } })
     const showEditedAt = editedAt !== '' && editedAt !== undefined
     const showEditedBy = editedBy.id !== '' && editedBy.id !== undefined
 

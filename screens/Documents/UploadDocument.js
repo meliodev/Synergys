@@ -108,6 +108,7 @@ class UploadDocument extends Component {
         //Process params
         this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.isSignature = this.props.navigation.getParam('isSignature', false)
+        console.log('sign', this.isSignature)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined) //Not editable
@@ -822,6 +823,28 @@ class UploadDocument extends Component {
         })
     }
 
+    renderSignButton(isConnected, allowSign) {
+        return (
+            <Button
+                mode="contained"
+                style={[styles.bottomButton, { backgroundColor: theme.colors.primary }]}
+                onPress={() => this.navigateToSignature(true, isConnected, allowSign)}>
+                <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Signer</Text>
+            </Button>
+        )
+    }
+
+    renderUploadButton(attachment) {
+        return (
+            <Button
+                mode="contained"
+                style={[styles.bottomButton, { backgroundColor: !attachment ? "#f2f3f5" : theme.colors.primary }]}
+                onPress={() => this.handleSubmit(false, this.DocumentId)}>
+                <Text style={[theme.customFontMSmedium.body, { color: !attachment ? theme.colors.gray_medium : "#fff" }]}>Importer</Text>
+            </Button>
+        )
+    }
+
     render() {
         let { project, name, description, type, state, attachment, orderData } = this.state
         let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
@@ -901,18 +924,12 @@ class UploadDocument extends Component {
                             autoValidation={true}
                             handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
                         />
-                        <Button
-                            mode="contained"
-                            style={[{
-                                position: "absolute",
-                                right: theme.padding,
-                                bottom: 0,
-                                width: constants.ScreenWidth * 0.4,
-                                backgroundColor: !attachment ? "#f2f3f5" : theme.colors.primary
-                            }]}
-                            onPress={() => this.handleSubmit(false, this.DocumentId)}>
-                            <Text style={[theme.customFontMSmedium.body, { color: !attachment ? theme.colors.gray_medium : "#fff" }]}>Importer</Text>
-                        </Button>
+                        {attachment.downloadURL ?
+                            this.renderSignButton(isConnected, allowSign)
+                            :
+                            this.renderUploadButton(attachment)
+                        }
+
                     </View>
                     :
                     <View style={{ flex: 1 }}>
@@ -1061,14 +1078,7 @@ class UploadDocument extends Component {
                                     <View />
                                 }
 
-                                {allowSign &&
-                                    <Button
-                                        mode="contained"
-                                        style={[styles.signButton, { backgroundColor: theme.colors.primary }]}
-                                        onPress={() => this.navigateToSignature(true, isConnected, allowSign)}>
-                                        <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Signer</Text>
-                                    </Button>
-                                }
+                                {allowSign && this.renderSignButton(isConnected, allowSign)}
                             </View>
                         }
 
@@ -1127,13 +1137,12 @@ const styles = StyleSheet.create({
         paddingLeft: constants.ScreenWidth * 0.025,
         backgroundColor: '#DCEDC8'
     },
-    signButton: {
-        width: constants.ScreenWidth * 0.25,
-        height: constants.ScreenWidth * 0.09,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 15
-    }
+    bottomButton: {
+        position: "absolute",
+        right: theme.padding,
+        bottom: 0,
+        width: constants.ScreenWidth * 0.4,
+    },
 })
 
 const modalStyles1 = StyleSheet.create({
