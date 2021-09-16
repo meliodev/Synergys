@@ -170,7 +170,6 @@ class CreateProject extends Component {
     }
 
     async componentDidMount() {
-        db.collection('Projects').where
         if (this.isEdit) await this.initEditMode()
         else this.setWorkTypes()
         this.initialState = _.cloneDeep(this.state)
@@ -200,7 +199,7 @@ class CreateProject extends Component {
                 if (!doc.exists) return null
                 let project = doc.data()
                 project.id = doc.id
-                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address']) 
+                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
                 project = this.setProject(project)
                 if (!project) return
                 this.setImageCarousel(project.attachments)

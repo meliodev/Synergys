@@ -44,6 +44,7 @@ export default class PdfGeneration extends Component {
     constructor(props) {
         super(props)
         this.savePdfBase64 = this.savePdfBase64.bind(this)
+        this.project = this.props.navigation.getParam('project', '')
         this.order = this.props.navigation.getParam('order', '')
         this.docType = this.props.navigation.getParam('docType', '') //Devis ou Facture (Proposal or Bill)
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
@@ -156,8 +157,8 @@ export default class PdfGeneration extends Component {
 
             //Dynamic data
             const createdAt = moment().format('DD/MM/YYYY')
-            const { subTotal, subTotalProducts, taxes, project, primeCEE, primeRenov, aidRegion, discount, editedBy } = this.order
-            const client = await db.collection('Clients').doc(project.client.id).get().then((doc) => { return doc.data() })
+            const { subTotal, subTotalProducts, taxes, primeCEE, primeRenov, aidRegion, discount, editedBy } = this.order
+            const { client, workTypes } = this.project
             const responsable = await db.collection('Users').doc(editedBy.id).get().then((doc) => { return doc.data() })
             const orderLines = this.sortOrderLines(this.order.orderLines)
             const taxeValues = taxes.map((taxeItem) => taxeItem.value)
@@ -224,10 +225,10 @@ export default class PdfGeneration extends Component {
             //4. HeaderRight: Client contact
             const clientContactArray = [
                 'Chantier : ' + client.fullName,
-                client.address.description,
+                this.project.address.description,
                 'Mobile : ' + client.phone,
                 'Email : ' + client.email,
-                'Travaux : ' + 'client.works'
+                'Travaux : ' + workTypes.join(', ')
             ]
 
             //Linebreaker
@@ -304,7 +305,7 @@ export default class PdfGeneration extends Component {
             marginTop_R += clientNameHeight + cste
 
             //6.2 Client address
-            const clientAddressArray = [client.address.description]
+            const clientAddressArray = [this.project.address.description]
 
             maxWidth = width * 0.5 - marginRight - padding * 2 //paddingLeft & paddingRigth
             let clientSummaryBoxHeight = padding * 2 + clientNameHeight
@@ -1116,7 +1117,6 @@ export default class PdfGeneration extends Component {
         const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
         saveFile(pdfBase64, pdfName, 'base64')
             .then((destPath) => {
-                console.log("Saved facture.....", destPath, pdfName)
                 const genPdf = {
                     pdfBase64Path: destPath,
                     pdfName,

@@ -313,6 +313,7 @@ class CreateOrder extends Component {
     generatePdf(order, docType) {
         const navParams = {
             order,
+            project: this.state.project,
             docType,
             DocumentId: this.props.navigation.getParam('DocumentId', ''),
             popCount: this.popCount,

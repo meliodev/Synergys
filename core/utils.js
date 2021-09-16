@@ -1119,8 +1119,8 @@ export function setAddress(description) {
 }
 
 export function refreshProject(projectObject, setState = true) {
-  const { id, name, client, step, address, comContact, techContact, intervenant } = projectObject
-  const project = { id, name, client, step, address, comContact, techContact, intervenant }
+  const { id, name, client, step, address, comContact, techContact, intervenant, workTypes } = projectObject
+  const project = { id, name, client, step, address, comContact, techContact, intervenant, workTypes }
   if (setState) this.setState({ project, address, client, projectError: '', addressError: '' })
   return project
 }
