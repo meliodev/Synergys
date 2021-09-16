@@ -1,5 +1,6 @@
 import { Dimensions, Platform } from 'react-native'
 import RNFetchBlob from 'rn-fetch-blob'
+import { rgb } from "pdf-lib"
 
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
@@ -95,3 +96,79 @@ export const workTypes = [
     { label: 'POÊLE A GRANULES ', value: 'POÊLE A GRANULES ', selected: false },
     { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
 ]
+
+export const autoSignDocs = ["Devis", "Mandat MaPrimeRénov", "Mandat Synergys", "Mandat SEPA", "Contrat CGU-CGV", "Facture"]
+export const signPositions = {
+    "Devis": [
+        {
+            pageIndex: 1,
+            position: {
+                x: 200,
+                y: 300,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        }
+    ],
+    "Mandat MaPrimeRénov": [
+        {
+            pageIndex: 0,
+            position: {
+                x: 200,
+                y: 300,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        }
+    ],
+    "Mandat Synergys": [
+        {
+            pageIndex: 0,
+            position: {
+                x: 200,
+                y: 300,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        }
+    ],
+    "Mandat SEPA": [
+        {
+            pageIndex: 0,
+            position: {
+                x: 200,
+                y: 300,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        }
+    ],
+    "Contrat CGU-CGV": [
+        {
+            pageIndex: 0,
+            position: {
+                x: 200,
+                y: 300,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        }
+    ],
+    "Facture": [
+        {
+            pageIndex: 0,
+            position: {
+                x: 200,
+                y: 300,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        }
+    ],
+}

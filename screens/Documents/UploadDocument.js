@@ -108,7 +108,6 @@ class UploadDocument extends Component {
         //Process params
         this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.isSignature = this.props.navigation.getParam('isSignature', false)
-        console.log('sign', this.isSignature)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined) //Not editable
@@ -166,6 +165,7 @@ class UploadDocument extends Component {
         }
     }
 
+    //##INITIALIZE
     setDefaultState() {
         let defaultState = {}
 
@@ -204,9 +204,10 @@ class UploadDocument extends Component {
         if (this.isSignature) {
             let { canUpdate } = this.props.permissions.documents
             //Client is allowed to update his own documents
-            canUpdate = canUpdate || this.props.role.id === 'client' && createdBy.id === auth.uid
-            const allowSign = canUpdate || this.props.role.id === 'client'
-            this.navigateToSignature(true, this.props.network.isConnected, allowSign)
+            canUpdate = canUpdate || this.props.role.id === 'client' && this.state.createdBy.id === auth.uid
+            const allowSign = canUpdate
+            if (allowSign)
+                this.navigateToSignature(true, this.props.network.isConnected)
         }
     }
 
@@ -268,7 +269,7 @@ class UploadDocument extends Component {
         })
     }
 
-    //SUBMISSION
+    //##SUBMISSION
     validateInputs() {
         let { project, name, attachment } = this.state
         let projectError = nameValidator(project.id, '"Projet"')
@@ -400,7 +401,7 @@ class UploadDocument extends Component {
         return fileUploaded
     }
 
-    //DELETION
+    //##DELETION
     showAlert() {
         const title = "Supprimer le document"
         const message = 'Etes-vous sûr de vouloir supprimer ce document ? Cette opération est irreversible.'
@@ -417,7 +418,7 @@ class UploadDocument extends Component {
         this.props.navigation.goBack()
     }
 
-    //ATTACHMENT COMPONENT
+    //##ATTACHMENT COMPONENT
     async onPressAttachment(canWrite) {
         if (!canWrite) return
 
@@ -498,7 +499,7 @@ class UploadDocument extends Component {
         }
     }
 
-    //*********************** Pdf generation/upload flow *************************** 
+    //##PDF GENERATION/UPLOAD PROCESS
     //0.
     modalOptionsConfig() {
         const { modalContent, type } = this.state
@@ -768,14 +769,296 @@ class UploadDocument extends Component {
 
     //********************************************************************************************************************* */
     //Signature
-    navigateToSignature(signMode, isConnected, allowSign) {
+    renderSignees() {
+        const { signatures } = this.state
 
+        return signatures.map((signature, index) => {
+            const { signedAt, signedBy } = signature
+            const signDate = moment(signedAt).format('ll')
+            const signTime = moment(signedAt).format('HH:mm')
+
+            return (
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
+                    <CustomIcon icon={faFileSignature} size={21} color={theme.colors.placeholder} />
+                    <View>
+                        <Text numberOfLines={1} style={[theme.customFontMSregular.body, { marginLeft: 15 }]}>
+                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>{signedBy.fullName} </Text>
+                            a signé le document</Text>
+                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {signDate} à {signTime}</Text>
+                    </View>
+                </View>
+            )
+        })
+    }
+
+    //1. Footer (action buttons)
+    renderFooter(isConnected, upload, sign, quoteToBillConversion) {
+        const isSingleButtonShown = !upload.show && !quoteToBillConversion.show || !sign.show && !quoteToBillConversion.show
+        return (
+            <View style={{ flexDirection: "row", paddingHorizontal: theme.padding, justifyContent: isSingleButtonShown ? 'flex-end' : "space-between" }}>
+                {quoteToBillConversion.show && this.renderFooterButton("conversion", "Convertir en facture", quoteToBillConversion.allow, isConnected)}
+                {sign.show && this.renderFooterButton("sign", "Signer", sign.allow, isConnected)}
+                {upload.show && this.renderFooterButton("upload", "Importer", upload.allow, isConnected)}
+            </View>
+        )
+    }
+
+    renderFooterButton(type, title, enable, isConnected) {
+        const backgroundColor = enable ? theme.colors.primary : "#f2f3f5"
+        const color = enable ? "#fff" : theme.colors.gray_medium
+
+        return (
+            <Button
+                mode="contained"
+                style={{ backgroundColor }}
+                onPress={() => this.onPressFooterButton(type, isConnected, this.DocumentId, enable, isConnected)}>
+                <Text style={[theme.customFontMSmedium.caption, { color }]}>
+                    {title}
+                </Text>
+            </Button>
+        )
+    }
+
+    onPressFooterButton(type, isConnected, DocumentId, enable) {
+        if (!enable) return
+
+        if (type === "upload") {
+            this.handleSubmit(false, DocumentId)
+        }
+        if (type === "sign") {
+            this.navigateToSignature(true, isConnected)
+        }
+        if (type === "conversion") {
+            this.convertProposalToBill(isConnected, true)
+        }
+    }
+
+    setAllowedActions(canWrite) {
+        const { type, orderData, attachment } = this.state
+
+        const isGeneratedQuote = type === 'Devis' && orderData //orderData existing means Devis was generated
+
+        const isAttachmentSelected = attachment !== null
+        const isAttachmentLocal = isAttachmentSelected && attachment.downloadURL === ""
+        const isAttachmentRemote = isAttachmentSelected && attachment.downloadURL !== "" && !attachment.pending
+
+        //Actions autorization
+        const allowSign = isAttachmentRemote && (canWrite || this.props.role.id === 'client')
+        const allowUpload = isAttachmentLocal && canWrite
+        const allowQuoteToBillConversion = isGeneratedQuote && this.isHighRole
+
+        //Show buttons
+        const showSign = allowSign
+        const showUpload = attachment === null || isAttachmentLocal
+        const showQuoteToBillConversion = allowQuoteToBillConversion
+
+        const upload = { show: showUpload, allow: allowUpload }
+        const sign = { show: showSign, allow: allowSign }
+        const quoteToBillConversion = { show: showQuoteToBillConversion, allow: allowQuoteToBillConversion }
+        return { upload, sign, quoteToBillConversion }
+    }
+
+    //##Main renderers (2 models)
+    renderProcessView(canWrite, isConnected) {
+
+        const { modalContent, showModal, modalLoading, attachmentError } = this.state
+        const { title, columns, elements } = this.modalOptionsConfig()
+        const { upload, sign, quoteToBillConversion } = this.setAllowedActions(canWrite)
+
+        return (
+            <View style={{ flex: 1, paddingHorizontal: theme.padding }}>
+                <View style={{ flex: 1, backgroundColor: 'pink' }}>
+                    {this.renderAttachment(canWrite, true)}
+                    {attachmentError !== "" &&
+                        <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3, alignSelf: "center" }]}>
+                            {attachmentError}
+                        </Text>
+                    }
+                </View>
+
+                {this.renderFooter(isConnected, upload, sign, quoteToBillConversion)}
+
+                <ModalOptions
+                    title={title}
+                    columns={columns}
+                    isLoading={modalLoading}
+                    modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                    isVisible={showModal}
+                    toggleModal={() => this.toggleModal()}
+                    elements={elements}
+                    autoValidation={true}
+                    handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                />
+            </View>
+        )
+    }
+
+    renderStandardView(canWrite, isConnected) {
+        const {
+            modalContent,
+            showModal,
+            modalLoading,
+            project,
+            name,
+            description,
+            state,
+            attachment,
+            type,
+            signatures,
+            createdBy,
+            createdAt,
+            editedBy,
+            editedAt,
+            loading,
+            nameError,
+            projectError,
+            attachmentError,
+            toastMessage,
+            toastType
+        } = this.state
+
+        const showSignatures = signatures.length > 0
+        const showAttachmentField = project.id !== ""
+        const showType = type !== '' && project.id !== "" && attachment !== null
+        const { title, columns, elements } = this.modalOptionsConfig()
+        const { upload, sign, quoteToBillConversion } = this.setAllowedActions(canWrite)
+
+        return (
+            <View style={{ flex: 1 }}>
+
+                <ScrollView
+                    style={{ flex: 0.8 }}
+                    keyboardShouldPersistTaps="always"
+                    contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: theme.padding }}
+                >
+                    <View>
+                        {showSignatures &&
+                            <FormSection
+                                sectionTitle='Signatures'
+                                sectionIcon={faSignature}
+                                form={
+                                    <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+                                        {this.renderSignees()}
+                                    </View>
+                                }
+                            />
+                        }
+
+                        <FormSection
+                            sectionTitle='Informations générales'
+                            sectionIcon={faInfoCircle}
+                            form={
+                                <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
+                                    {this.isEdit &&
+                                        <MyInput
+                                            label="Numéro du document"
+                                            returnKeyType="done"
+                                            value={this.DocumentId}
+                                            editable={false}
+                                            disabled
+                                        />
+                                    }
+
+                                    <ItemPicker
+                                        onPress={() => {
+                                            if (this.project || this.isEdit || loading) return //pre-defined project
+                                            navigateToScreen(this,
+                                                'ListProjects',
+                                                {
+                                                    onGoBack: this.refreshProject,
+                                                    isRoot: false,
+                                                    prevScreen: 'UploadDocument',
+                                                    titleText: 'Choix du projet',
+                                                    showFAB: false
+                                                })
+                                        }}
+                                        label="Projet concerné *"
+                                        value={project.name}
+                                        error={!!projectError}
+                                        errorText={projectError}
+                                        editable={canWrite}
+                                        showAvatarText={false}
+                                    />
+
+
+                                    {showAttachmentField &&
+                                        <View>
+                                            {this.renderAttachment(canWrite, false)}
+                                            {attachmentError !== "" &&
+                                                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3 }]}>
+                                                    {attachmentError}
+                                                </Text>
+                                            }
+                                        </View>
+                                    }
+
+                                    {showType &&
+                                        <MyInput
+                                            label="Type *"
+                                            returnKeyType="done"
+                                            value={type}
+                                            editable={false}
+                                            disabled
+                                        />
+                                    }
+
+                                    <MyInput
+                                        label="Nom du document *"
+                                        returnKeyType="done"
+                                        value={name}
+                                        onChangeText={name => this.setState({ name, nameError })}
+                                        error={!!nameError}
+                                        errorText={nameError}
+                                        multiline={true}
+                                        editable={canWrite}
+                                    />
+
+                                    <ModalOptions
+                                        title={title}
+                                        columns={columns}
+                                        isLoading={modalLoading}
+                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                                        isVisible={showModal}
+                                        toggleModal={() => this.toggleModal()}
+                                        elements={elements}
+                                        autoValidation={true}
+                                        handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                                    />
+
+                                </View>
+                            }
+                        />
+
+                        {this.isEdit &&
+                            <ActivitySection
+                                createdBy={createdBy}
+                                createdAt={createdAt}
+                                editedBy={editedBy}
+                                editedAt={editedAt}
+                                navigation={this.props.navigation}
+                            />
+                        }
+
+                    </View>
+                </ScrollView>
+
+                {this.renderFooter(isConnected, upload, sign, quoteToBillConversion)}
+
+                <Toast
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })} />
+            </View>
+        )
+    }
+
+    //##HELPERS
+    navigateToSignature(signMode, isConnected) {
         if (signMode) {
             if (!isConnected) {
                 Alert.alert('', 'La signature digitale est indisponible en mode hors-ligne.')
                 return
             }
-            if (!allowSign) return
         }
 
         const { project, type, attachment } = this.initialState
@@ -801,73 +1084,15 @@ class UploadDocument extends Component {
         navigateToScreen(this, 'Signature', params)
     }
 
-    renderSignees() {
-        const { signatures } = this.state
-
-        return signatures.map((signature, index) => {
-            const { signedAt, signedBy } = signature
-            const signDate = moment(signedAt).format('ll')
-            const signTime = moment(signedAt).format('HH:mm')
-
-            return (
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 15 }}>
-                    <CustomIcon icon={faFileSignature} size={21} color={theme.colors.placeholder} />
-                    <View>
-                        <Text numberOfLines={1} style={[theme.customFontMSregular.body, { marginLeft: 15 }]}>
-                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>{signedBy.fullName} </Text>
-                            a signé le document</Text>
-                        <Text style={[theme.customFontMSregular.caption, { marginLeft: 15, color: theme.colors.placeholder }]}>le {signDate} à {signTime}</Text>
-                    </View>
-                </View>
-            )
-        })
-    }
-
-    renderSignButton(isConnected, allowSign) {
-        return (
-            <Button
-                mode="contained"
-                style={[styles.bottomButton, { backgroundColor: theme.colors.primary }]}
-                onPress={() => this.navigateToSignature(true, isConnected, allowSign)}>
-                <Text style={[theme.customFontMSmedium.body, { color: '#fff' }]}>Signer</Text>
-            </Button>
-        )
-    }
-
-    renderUploadButton(attachment) {
-        return (
-            <Button
-                mode="contained"
-                style={[styles.bottomButton, { backgroundColor: !attachment ? "#f2f3f5" : theme.colors.primary }]}
-                onPress={() => this.handleSubmit(false, this.DocumentId)}>
-                <Text style={[theme.customFontMSmedium.body, { color: !attachment ? theme.colors.gray_medium : "#fff" }]}>Importer</Text>
-            </Button>
-        )
-    }
-
     render() {
-        let { project, name, description, type, state, attachment, orderData } = this.state
-        let { createdAt, createdBy, editedAt, editedBy, signatures } = this.state
-        let { initialLoading, loading, docNotFound, loadingConversion, modalLoading, toastType, toastMessage, projectError, nameError, attachmentError } = this.state
-        const { checked, modalContent, showModal, attachmentSource } = this.state
-        const { isConnected } = this.props.network
-
-        let { canCreate, canUpdate, canDelete } = this.props.permissions.documents
+        const { type, createdBy, initialLoading, loading, docNotFound, loadingConversion } = this.state
+        const { network, permissions } = this.props
+        const { isConnected } = network
+        let { canCreate, canUpdate, canDelete } = permissions.documents
         canUpdate = canUpdate || this.props.role.id === 'client' && createdBy.id === auth.uid
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit) && !loading
         canDelete = canDelete && this.isEdit && !loading
 
-        const { title, columns, elements } = this.modalOptionsConfig()
-        const attachmentUploaded = attachment && !attachment.pending
-        const isEditAndAttachmentUploaded = this.isEdit && attachmentUploaded
-        const allowViewDocument = isEditAndAttachmentUploaded
-        const showSignatures = signatures.length > 0
-        //Valider la date de la visite technique
-        const showDocOperations = isEditAndAttachmentUploaded
-        const isGeneratedQuote = type === 'Devis' && orderData
-        const allowConversion = isGeneratedQuote && this.isHighRole
-        const allowSign = canUpdate || this.props.role.id === 'client'
-        const showType = type !== '' && project.id !== "" && attachment
         const titleText = loading ? 'Exportation du document...' : this.isEdit ? 'Modifier le document' : this.isProcess ? type : 'Nouveau document'
 
         if (initialLoading)
@@ -900,194 +1125,15 @@ class UploadDocument extends Component {
                     close title
                     titleText={titleText}
                     loading={loading}
-                    check={canWrite && !this.isProcess}
-                    handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
+                    // check={canWrite && !this.isProcess}
+                    // handleSubmit={() => this.handleSubmit(false, this.DocumentId)}
                     del={canDelete}
                     handleDelete={this.showAlert} />
 
                 {this.isProcess ?
-                    <View style={{ flex: 1, paddingHorizontal: theme.padding }}>
-                        {this.renderAttachment(canWrite, true)}
-                        {attachmentError !== "" &&
-                            <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3, alignSelf: "center" }]}>
-                                {attachmentError}
-                            </Text>
-                        }
-                        <ModalOptions
-                            title={title}
-                            columns={columns}
-                            isLoading={modalLoading}
-                            modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
-                            isVisible={showModal}
-                            toggleModal={() => this.toggleModal()}
-                            elements={elements}
-                            autoValidation={true}
-                            handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
-                        />
-                        {attachment.downloadURL ?
-                            this.renderSignButton(isConnected, allowSign)
-                            :
-                            this.renderUploadButton(attachment)
-                        }
-
-                    </View>
+                    this.renderProcessView(canWrite, isConnected)
                     :
-                    <View style={{ flex: 1 }}>
-                        {allowViewDocument &&
-                            <Button mode="outlined" style={{ marginTop: 0 }} onPress={() => this.navigateToSignature()}>
-                                <Text style={[theme.customFontMSmedium.body, styles.viewDocumentButton]}>VOIR LE DOCUMENT</Text>
-                            </Button>
-                        }
-
-                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: constants.ScreenWidth * 0.02 }}>
-
-                            {showSignatures &&
-                                <FormSection
-                                    sectionTitle='Signatures'
-                                    sectionIcon={faSignature}
-                                    form={
-                                        <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                                            {this.renderSignees()}
-                                        </View>
-                                    }
-                                />
-                            }
-
-                            <FormSection
-                                sectionTitle='Informations générales'
-                                sectionIcon={faInfoCircle}
-                                form={
-                                    <View style={{ flex: 1, backgroundColor: theme.colors.white }}>
-                                        {this.isEdit &&
-                                            <MyInput
-                                                label="Numéro du document"
-                                                returnKeyType="done"
-                                                value={this.DocumentId}
-                                                editable={false}
-                                                disabled
-                                            />
-                                        }
-
-                                        <ItemPicker
-                                            onPress={() => {
-                                                if (this.project || this.isEdit || loading) return //pre-defined project
-                                                navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, isRoot: false, prevScreen: 'UploadDocument', titleText: 'Choix du projet', showFAB: false })
-                                            }}
-                                            label="Projet concerné *"
-                                            value={project.name}
-                                            error={!!projectError}
-                                            errorText={projectError}
-                                            editable={canWrite}
-                                            showAvatarText={false}
-                                        />
-
-
-                                        {project.id !== "" &&
-                                            <View>
-                                                {this.renderAttachment(canWrite, false)}
-                                                {attachmentError !== "" &&
-                                                    <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3 }]}>
-                                                        {attachmentError}
-                                                    </Text>
-                                                }
-                                            </View>
-                                        }
-
-                                        {showType &&
-                                            <MyInput
-                                                label="Type *"
-                                                returnKeyType="done"
-                                                value={type}
-                                                editable={false}
-                                                disabled
-                                            />}
-
-                                        <ModalOptions
-                                            title={title}
-                                            columns={columns}
-                                            isLoading={modalLoading}
-                                            modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
-                                            isVisible={showModal}
-                                            toggleModal={() => this.toggleModal()}
-                                            elements={elements}
-                                            autoValidation={true}
-                                            handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
-                                        />
-
-                                        <MyInput
-                                            label="Nom du document *"
-                                            returnKeyType="done"
-                                            value={name}
-                                            onChangeText={name => this.setState({ name, nameError })}
-                                            error={!!nameError}
-                                            errorText={nameError}
-                                            multiline={true}
-                                            editable={canWrite}
-                                        />
-
-                                        <MyInput
-                                            label="Description"
-                                            returnKeyType="done"
-                                            value={description}
-                                            onChangeText={description => this.setState({ description })}
-                                            // error={!!description.error}
-                                            // errorText={description.error}
-                                            multiline={true}
-                                            editable={canWrite}
-                                        />
-
-                                        <Picker
-                                            returnKeyType="next"
-                                            value={state}
-                                            error={!!state.error}
-                                            errorText={state.error}
-                                            selectedValue={state}
-                                            onValueChange={(state) => this.setState({ state })}
-                                            title="Etat"
-                                            elements={states}
-                                            enabled={canWrite}
-                                            containerStyle={{ marginBottom: 0 }}
-                                        />
-                                    </View>
-                                }
-                            />
-
-                            {this.isEdit &&
-                                <ActivitySection
-                                    createdBy={createdBy}
-                                    createdAt={createdAt}
-                                    editedBy={editedBy}
-                                    editedAt={editedAt}
-                                    navigation={this.props.navigation}
-                                />
-                            }
-
-
-                        </ScrollView>
-
-                        {showDocOperations &&
-                            <View style={styles.footerContainer}>
-                                {allowConversion ?
-                                    <Button
-                                        mode="contained"
-                                        style={[styles.signButton, { width: constants.ScreenWidth * 0.6, backgroundColor: theme.colors.primary }]}
-                                        onPress={() => this.convertProposalToBill(isConnected, true)}>
-                                        <Text style={[theme.customFontMSmedium.caption, { color: '#fff' }]}>Convertir en facture</Text>
-                                    </Button>
-                                    :
-                                    <View />
-                                }
-
-                                {allowSign && this.renderSignButton(isConnected, allowSign)}
-                            </View>
-                        }
-
-                        <Toast
-                            message={toastMessage}
-                            type={toastType}
-                            onDismiss={() => this.setState({ toastMessage: '' })} />
-                    </View>
-
+                    this.renderStandardView(canWrite, isConnected)
                 }
 
             </View>
@@ -1129,13 +1175,14 @@ const styles = StyleSheet.create({
         color: theme.colors.primary
     },
     footerContainer: {
+        flex: 0.1,
         flexDirection: 'row',
         borderColor: theme.colors.gray100,
         borderWidth: 1,
         alignItems: 'flex-start',
         justifyContent: 'space-between',
         paddingLeft: constants.ScreenWidth * 0.025,
-        backgroundColor: '#DCEDC8'
+        backgroundColor: 'white'
     },
     bottomButton: {
         position: "absolute",

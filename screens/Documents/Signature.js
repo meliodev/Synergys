@@ -21,7 +21,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 import { PDFDocument, rgb } from "pdf-lib";
 
 import * as theme from '../../core/theme'
-import { constants, downloadDir, errorMessages, termsDir, termsUrl } from '../../core/constants'
+import { autoSignDocs, constants, downloadDir, errorMessages, signPositions, termsDir, termsUrl } from '../../core/constants'
 import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator, displayError } from '../../core/utils'
 import { uploadFile } from "../../api/storage-api";
 import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
@@ -320,7 +320,7 @@ class Signature extends Component {
         return paddingTop
     }
 
-    handleSingleTap = async (page, x, y) => {
+    handleSingleTap = async (page, x, y, isAuto) => {
         const { pdfEditMode } = this.state
         if (!pdfEditMode) return
         loadLog(this, true, 'Début du processus de signature...')
@@ -343,10 +343,12 @@ class Signature extends Component {
                 const signedAt = moment().format('Do/MM/YYYY, HH:mm')
                 this.setState({ signee, signedAt, ref, motif })
 
-                if (Platform.OS == 'android') {
-                    firstPage.drawText(` Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`, {
-                        x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
-                        y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight * 0.005,
+                const signature = `Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`
+
+                if (isAuto) {
+                    firstPage.drawText(signature, {
+                        x,
+                        y,
                         size: 10,
                         lineHeight: 10,
                         color: rgb(0, 0, 0),
@@ -354,12 +356,24 @@ class Signature extends Component {
                 }
 
                 else {
-                    firstPage.drawText(`APPROUVÉ LE ${moment().format()} \n Signé electroniquement par: Synergys`, {
-                        x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
-                        y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 16 * 2,
-                        size: 12,
-                        color: rgb(0.95, 0.1, 0.1),
-                    })
+                    if (Platform.OS == 'android') {
+                        firstPage.drawText(signature, {
+                            x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
+                            y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight * 0.005,
+                            size: 10,
+                            lineHeight: 10,
+                            color: rgb(0, 0, 0),
+                        })
+                    }
+
+                    else {
+                        firstPage.drawText(signature, {
+                            x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
+                            y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 16 * 2,
+                            size: 12,
+                            color: rgb(0.95, 0.1, 0.1),
+                        })
+                    }
                 }
 
                 this.setState({ loadingMessage: 'Génération du document signé...' })
@@ -538,6 +552,19 @@ class Signature extends Component {
         return true
     }
 
+    onAcceptTerms() {
+        //Auto Sign
+        const isAutoSign = autoSignDocs.includes(this.DocumentType)
+
+        if (isAutoSign) {
+            const { page, position } = signPositions[this.DocumentType]
+            const { x, y } = position
+            this.handleSingleTap(page, x, y, true)
+        }
+
+        else this.startSignature()
+        //#task: Replace this.startSignature by this.verifyUser
+    }
 
     render() {
         let { fileDownloaded, filePath, pdfEditMode, newPdfSaved, showDialog, showTerms, uploading, loading, loadingMessage, toastType, toastMessage } = this.state
@@ -582,7 +609,7 @@ class Signature extends Component {
                                 this.setState({ pageWidth: width, pageHeight: height })
                             }}
                             onPageSingleTap={(page, x, y) => {
-                                this.handleSingleTap(page, x, y)
+                                this.handleSingleTap(page, x, y, false)
                             }}
                             style={[styles.pdf]} />
                     </View>
@@ -613,7 +640,7 @@ class Signature extends Component {
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
                         //acceptTerms={this.verifyUser}
-                        acceptTerms={this.startSignature}
+                        acceptTerms={this.onAcceptTerms}
                         downloadPdf={() => {
                             setToast(this, 'i', 'Début du téléchargement...')
                             this.downloadFile(termsDir, termsUrl)
