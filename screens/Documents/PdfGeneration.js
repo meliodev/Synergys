@@ -74,7 +74,7 @@ export default class PdfGeneration extends Component {
 
         for (var line of dataArray) {
             const lineWidth = font.widthOfTextAtSize(line, size)
-            
+
             if (lineWidth > maxWidth) {
 
                 var lineLength = line.length
@@ -466,7 +466,7 @@ export default class PdfGeneration extends Component {
                     textArrayFormated.forEach((text) => {
                         pages[pageIndex].drawText(text,
                             {
-                                x: secondVerticalLine_x + padding/2.5,
+                                x: secondVerticalLine_x + padding / 2.5,
                                 y: height - marginTop,
                                 size: caption,
                                 font: timesRomanBoldFont,
@@ -1116,13 +1116,15 @@ export default class PdfGeneration extends Component {
         const pdfName = `Scan généré ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
         saveFile(pdfBase64, pdfName, 'base64')
             .then((destPath) => {
-                this.props.navigation.state.params.onGoBack({
+                console.log("Saved facture.....", destPath, pdfName)
+                const genPdf = {
                     pdfBase64Path: destPath,
                     pdfName,
                     order: this.order,
                     isConversion: this.isConversion,
                     DocumentId: this.DocumentId
-                })
+                }
+                this.props.navigation.state.params.onGoBack(genPdf)
                 this.props.navigation.pop(this.popCount)
             })
             .catch((e) => {

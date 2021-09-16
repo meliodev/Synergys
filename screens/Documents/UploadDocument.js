@@ -115,6 +115,7 @@ class UploadDocument extends Component {
 
         this.currentRole = this.props.role.id
         this.isHighrole = highRoles.includes(this.currentRole)
+
         this.types = setPickerDocTypes(this.currentRole, this.dynamicType, this.documentType)
         this.docSources = docSources
         this.imageSources = imageSources
@@ -294,7 +295,10 @@ class UploadDocument extends Component {
         //1. Is loading or no edit ?
         const loadingOrNoEdit = this.state.loading || _.isEqual(this.state, this.initialState)
         if (loadingOrNoEdit) return
-        this.setState({ loading: true, loadingConversion: isConversion })
+        this.setState({
+            loading: true,
+            loadingConversion: isConversion
+        })
 
         //2. POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
         const isBlockedUpdates = blockRoleUpdateOnPhase(this.currentRole, this.state.project.step)
@@ -312,13 +316,18 @@ class UploadDocument extends Component {
         const props = ["project", "name", "description", "type", "state", "attachment", "attachmentSource", "orderData"]
         let document = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         const { attachment } = this.state
-        const isNewAttachment = attachment && !attachment.downloadURL
+
+        //Verify if attachment is still in local
+        const isAttachmentSelected = attachment !== null
+        const noDownloadUrl = isAttachmentSelected && (attachment.downloadURL === "" || attachment.downloadURL === undefined)
+        const isNewAttachment = isAttachmentSelected && noDownloadUrl
 
         if (isNewAttachment)
             document.attachment.pending = true
 
-        if (isConversion)
+        if (isConversion) {
             document = this.unformatDocument_conversion(document)
+        }
 
         await this.persistDocument(document, DocumentId)
         this.documentListener()
@@ -331,13 +340,15 @@ class UploadDocument extends Component {
         this.initialState = _.cloneDeep(this.state)
 
         //6. Go back (Process context only)
-        // if (this.documentType && fileUploaded) {
         const { onGoBack } = this.props.navigation.state.params
-        if (onGoBack) onGoBack()
+        if (onGoBack)
+            onGoBack()
         this.props.navigation.goBack()
-        // }
 
-        this.setState({ loading: false, loadingConversion: false })
+        this.setState({
+            loading: false,
+            loadingConversion: false
+        })
     }
 
     //1. Persist
@@ -386,16 +397,19 @@ class UploadDocument extends Component {
             await this.attachmentListener(DocumentId)
 
         if (!isConnected)
-            this.setState({ loading: false, loadingConversion: false })
+            this.setState({
+                loading: false,
+                loadingConversion: false
+            })
 
-        const fileUploaded = await this.uploadFile(isConversion, DocumentId)
+        const fileUploaded = await this.uploadFile(isConversion, DocumentId, document)
         if (!fileUploaded)
             setToast(this, 'e', errorMessages.documents.upload) //#task: put it on redux store
         return fileUploaded
     }
 
-    async uploadFile(isConversion, DocumentId) {
-        var { project, type, attachment } = this.state
+    async uploadFile(isConversion, DocumentId, document) {
+        var { project, type, attachment } = document
         const storageRefPath = `Projects/${project.id}/Documents/${type}/${DocumentId}/${moment().format('ll')}/${attachment.name}`
         const fileUploaded = await this.uploadFileNew(attachment, storageRefPath, DocumentId, false)
         return fileUploaded
@@ -749,7 +763,15 @@ class UploadDocument extends Component {
     }
 
     getGenPdf(genPdf) {
-        const { pdfBase64Path: path, pdfName: name, order, isConversion } = genPdf //#todo:  order is specific to devis/facture
+        const {
+            pdfBase64Path: path,
+            pdfName: name,
+            order: orderData,
+            isConversion,
+            DocumentId
+        } = genPdf
+
+        //#todo: order is specific to devis/facture
         //order: The order from which this "Devis" was generated
         //isConversion: Conversion from Devis to Facture (boolean)
         const attachment = {
@@ -757,12 +779,15 @@ class UploadDocument extends Component {
             type: 'application/pdf',
             name,
             size: 100,
+            downloadURL: "",
             progress: 0,
         }
 
-        this.setState({ attachment, orderData: order || null }, () => {
+
+
+        this.setState({ attachment, orderData }, () => {
             if (!isConversion) return
-            var DocumentId = genPdf.DocumentId
+            //Handle conversion
             this.handleSubmit(isConversion, DocumentId)
         })
     }
@@ -836,16 +861,18 @@ class UploadDocument extends Component {
     setAllowedActions(canWrite) {
         const { type, orderData, attachment } = this.state
 
-        const isGeneratedQuote = type === 'Devis' && orderData //orderData existing means Devis was generated
+        const isGeneratedQuote = type === 'Devis' && orderData !== null //orderData existing means Devis was generated
 
         const isAttachmentSelected = attachment !== null
-        const isAttachmentLocal = isAttachmentSelected && attachment.downloadURL === ""
-        const isAttachmentRemote = isAttachmentSelected && attachment.downloadURL !== "" && !attachment.pending
+        const noDownloadUrl = isAttachmentSelected && (attachment.downloadURL === "" || attachment.downloadURL === undefined)
+        const isDownloadUrl = isAttachmentSelected && (attachment.downloadURL !== "" && attachment.downloadURL !== undefined)
+        const isAttachmentLocal = isAttachmentSelected && noDownloadUrl
+        const isAttachmentRemote = isAttachmentSelected && isDownloadUrl && !attachment.pending
 
         //Actions autorization
         const allowSign = isAttachmentRemote && (canWrite || this.props.role.id === 'client')
         const allowUpload = isAttachmentLocal && canWrite
-        const allowQuoteToBillConversion = isGeneratedQuote && this.isHighRole
+        const allowQuoteToBillConversion = isGeneratedQuote && this.isHighrole
 
         //Show buttons
         const showSign = allowSign
@@ -855,6 +882,7 @@ class UploadDocument extends Component {
         const upload = { show: showUpload, allow: allowUpload }
         const sign = { show: showSign, allow: allowSign }
         const quoteToBillConversion = { show: showQuoteToBillConversion, allow: allowQuoteToBillConversion }
+
         return { upload, sign, quoteToBillConversion }
     }
 

@@ -50,6 +50,7 @@ class Signature extends Component {
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', '') //Navigation pop times when  signature is done
         this.canSign = this.props.navigation.getParam('canSign', false)
 
+        this.onAcceptTerms = this.onAcceptTerms.bind(this)
         this.tick = this.tick.bind(this)
         this.readFile = this.readFile.bind(this)
         this.toggleTerms = this.toggleTerms.bind(this)
@@ -320,7 +321,8 @@ class Signature extends Component {
         return paddingTop
     }
 
-    handleSingleTap = async (page, x, y, isAuto) => {
+    handleSingleTap = async (page, x, y, isAuto, signatures) => {
+        console.log("signatures", signatures)
         const { pdfEditMode } = this.state
         if (!pdfEditMode) return
         loadLog(this, true, 'Début du processus de signature...')
@@ -330,7 +332,6 @@ class Signature extends Component {
                 //Getting tapped page
                 const pdfDoc = await PDFDocument.load(this.state.pdfArrayBuffer)
                 const pages = pdfDoc.getPages()
-                const firstPage = pages[page - 1]
 
                 //Adjust paddingTop
                 const paddingTop = this.calculatePaddingTop(pdfDoc)
@@ -346,16 +347,22 @@ class Signature extends Component {
                 const signature = `Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`
 
                 if (isAuto) {
-                    firstPage.drawText(signature, {
-                        x,
-                        y,
-                        size: 10,
-                        lineHeight: 10,
-                        color: rgb(0, 0, 0),
-                    })
+                    for (const s of signatures) {
+                        const { pageIndex, position } = s
+                        const { x, y } = position
+                        pages[pageIndex].drawText(signature, {
+                            x,
+                            y,
+                            size: 10,
+                            lineHeight: 10,
+                            color: rgb(0, 0, 0),
+                        })
+                    }
                 }
 
                 else {
+                    const firstPage = pages[page - 1]
+
                     if (Platform.OS == 'android') {
                         firstPage.drawText(signature, {
                             x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
@@ -382,11 +389,18 @@ class Signature extends Component {
                 const path = `${downloadDir}/Synergys/Documents/Scan signé ${moment().format('DD-MM-YYYY HHmmss')}.pdf`
                 this.setState({ loadingMessage: 'Enregistrement du document signé...' })
                 RNFS.writeFile(path, pdfBase64, "base64")
-                    .then((success) => this.setState({ newPdfSaved: true, newPdfPath: path, pdfBase64, pdfArrayBuffer: base64ToArrayBuffer(pdfBase64), filePath: path }))
+                    .then((success) => this.setState({
+                        newPdfSaved: true,
+                        newPdfPath: path,
+                        pdfBase64,
+                        pdfArrayBuffer: base64ToArrayBuffer(pdfBase64),
+                        filePath: path
+                    }))
                     .catch((err) => setToast(this, 'e', 'Erreur inattendue, veuillez réessayer.'))
                     .finally(() => loadLog(this, false, ''))
             }
             catch (e) {
+                console.log('error...', e)
                 displayError({ message: errorMessages.pdfGen })
             }
         }, 1000)
@@ -557,9 +571,13 @@ class Signature extends Component {
         const isAutoSign = autoSignDocs.includes(this.DocumentType)
 
         if (isAutoSign) {
-            const { page, position } = signPositions[this.DocumentType]
-            const { x, y } = position
-            this.handleSingleTap(page, x, y, true)
+            const signatures = signPositions[this.DocumentType]
+            this.setState({
+                showTerms: false,
+                pdfEditMode: true,
+                // toastType: 'info',
+                // toastMessage: "Touchez à l'endroit où vous voulez placer la signature."
+            }, () => this.handleSingleTap(null, null, null, true, signatures))
         }
 
         else this.startSignature()
@@ -609,7 +627,7 @@ class Signature extends Component {
                                 this.setState({ pageWidth: width, pageHeight: height })
                             }}
                             onPageSingleTap={(page, x, y) => {
-                                this.handleSingleTap(page, x, y, false)
+                                this.handleSingleTap(page, x, y, false, [])
                             }}
                             style={[styles.pdf]} />
                     </View>

@@ -270,6 +270,7 @@ class StepsForm extends Component {
                     if (field.mask)
                         return (
                             <TextInput
+                                key={field.id.toString()}
                                 label={label}
                                 returnKeyType="done"
                                 keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
@@ -301,6 +302,7 @@ class StepsForm extends Component {
                         )
                     else return (
                         <TextInput
+                            key={field.id.toString()}
                             label={label}
                             returnKeyType="done"
                             keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
@@ -330,6 +332,7 @@ class StepsForm extends Component {
                 case "picker":
                     return (
                         <Picker
+                            key={field.id.toString()}
                             returnKeyType="next"
                             value={value}
                             error={error}
@@ -378,7 +381,7 @@ class StepsForm extends Component {
                     else items.forEach((e) => e.selected = e.label === this.state[id])
 
                     return (
-                        <View>
+                        <View key={field.id.toString()}>
                             {this.renderLabel(label, items)}
                             <View style={[styles.formOptionsContainer, { justifyContent: items && items.length > 1 ? 'space-between' : 'center' }]}>
                                 {items.map((item, index) => {
@@ -487,7 +490,7 @@ class StepsForm extends Component {
 
                 case "number":
                     return (
-                        <View style={field.style}>
+                        <View key={field.id.toString()} style={field.style}>
                             {this.renderLabel(label)}
                             <NumberInput
                                 changeValue={(operation) => {
@@ -526,6 +529,7 @@ class StepsForm extends Component {
                 case "address":
                     return (
                         <AddressInput
+                            key={field.id.toString()}
                             label={label}
                             offLine={!this.props.network.isConnected}
                             onPress={() => this.props.navigation.navigate('Address', {
@@ -565,7 +569,7 @@ class StepsForm extends Component {
                 case "checkbox":
                     const onPressCheckBox = () => this.setState({ disablePhoneContact: !this.state.disablePhoneContact })
                     return (
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
+                        <View key={field.id.toString()} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
                             <Checkbox
                                 status={this.state.disablePhoneContact ? 'unchecked' : 'checked'}
                                 onPress={onPressCheckBox}
@@ -580,7 +584,7 @@ class StepsForm extends Component {
 
                 case "datePicker":
                     return (
-                        <View>
+                        <View key={field.id.toString()}>
                             {this.renderLabel(label)}
                             <DatePicker
                                 date={value}
@@ -628,7 +632,6 @@ class StepsForm extends Component {
                     <Button
                         mode="outlined"
                         icon="arrow-left"
-                        style={{ width: constants.ScreenWidth * 0.45 }}
                         outlinedColor={theme.colors.primary}
                         onPress={this.goBack}
                     >
@@ -639,7 +642,6 @@ class StepsForm extends Component {
                 }
                 <Button
                     mode="contained"
-                    style={{ width: constants.ScreenWidth * 0.45, backgroundColor: theme.colors.primary }}
                     onPress={this.goNext}>
                     {title}
                 </Button>
@@ -810,7 +812,7 @@ class StepsForm extends Component {
         form = this.addFormLogs(form)
         form.isSubmitted = form.isSubmitted || isSubmitted
 
-        db.collection(collection).doc(DocId).set(form)
+        //  db.collection(collection).doc(DocId).set(form)
 
         const pdfBase64 = await this.props.generatePdf(form, this.props.collection)
 
@@ -1142,7 +1144,8 @@ class StepsForm extends Component {
 
     //##Helpers
     toggleModal() {
-        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
+        console.log("1....", moment().format())
+        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible }, () => console.log("2....", moment().format()))
     }
 
     async savePdfBase64(pdfBase64, isProcess) {
@@ -1175,8 +1178,9 @@ class StepsForm extends Component {
         return (
             <Button
                 mode="contained"
-                style={styles.bottomCenterButton}
-                onPress={onPress}>
+                containerStyle={styles.bottomCenterButton}
+                onPress={onPress}
+            >
                 {title}
             </Button>
         )
@@ -1235,62 +1239,69 @@ class StepsForm extends Component {
 
                         {pages.map((page, pageIndex) => {
 
-                            return page.fields.map((field, key) => {
+                            return (
+                                <View key={pageIndex}>
+                                    {
+                                        page.fields.map((field, key) => {
 
-                                let values = ""
+                                            let values = ""
 
-                                //Avoid repetition of same field (isStepMultiOptions)
-                                if (redundantFields.includes(field.id))
-                                    return null
+                                            //Avoid repetition of same field (isStepMultiOptions)
+                                            if (redundantFields.includes(field.id))
+                                                return null
 
-                                if (field.isStepMultiOptions)
-                                    redundantFields.push(field.id)
+                                            if (field.isStepMultiOptions)
+                                                redundantFields.push(field.id)
 
-                                //Values definition
-                                if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
+                                            //Values definition
+                                            if (typeof (form[field.id]) !== 'undefined' && form[field.id] !== null) {
 
-                                    //String fields
-                                    if (typeof (form[field.id]) === "string") {
-                                        if (form[field.id] !== "") {
-                                            values = form[field.id]
-                                        }
+                                                //String fields
+                                                if (typeof (form[field.id]) === "string") {
+                                                    if (form[field.id] !== "") {
+                                                        values = form[field.id]
+                                                    }
+                                                }
+
+                                                //Boolean fields
+                                                else if (typeof (form[field.id]) === 'boolean') {
+                                                    values = !form[field.id] ? "Oui" : "Non"
+                                                }
+
+                                                //Address field
+                                                else if (field.type === "address") {
+                                                    values = form[field.id].description
+                                                }
+
+                                                //Array fields
+                                                else if (Array.isArray(form[field.id]) && form[field.id] !== []) {
+                                                    values = ""
+                                                    values = form[field.id].join(', ')
+                                                }
+                                            }
+
+                                            if (field.type === "autogen")
+                                                return null
+
+                                            else {
+                                                const emptyAndConditional = !values && field.isConditional
+                                                return (
+                                                    <TouchableOpacity
+                                                        key={field.id.toString()}
+                                                        onPress={() => {
+                                                            if (emptyAndConditional) return
+                                                            this.setState({ pageIndex, readOnly: false, submitted: false })
+                                                        }}
+                                                        style={styles.overviewRow}>
+                                                        <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_dark }]}>{field.label}</Text>
+                                                        <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{values || "-"}</Text>
+                                                    </TouchableOpacity>
+                                                )
+                                            }
+                                        })
                                     }
-
-                                    //Boolean fields
-                                    else if (typeof (form[field.id]) === 'boolean') {
-                                        values = !form[field.id] ? "Oui" : "Non"
-                                    }
-
-                                    //Address field
-                                    else if (field.type === "address") {
-                                        values = form[field.id].description
-                                    }
-
-                                    //Array fields
-                                    else if (Array.isArray(form[field.id]) && form[field.id] !== []) {
-                                        values = ""
-                                        values = form[field.id].join(', ')
-                                    }
-                                }
-
-                                if (field.type === "autogen")
-                                    return null
-
-                                else {
-                                    const emptyAndConditional = !values && field.isConditional
-                                    return (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                if (emptyAndConditional) return
-                                                this.setState({ pageIndex, readOnly: false, submitted: false })
-                                            }}
-                                            style={styles.overviewRow}>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_dark }]}>{field.label}</Text>
-                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{values || "-"}</Text>
-                                        </TouchableOpacity>
-                                    )
-                                }
-                            })
+                                </View>
+                            )
 
                         })
                         }
@@ -1429,11 +1440,6 @@ class StepsForm extends Component {
                                 <Pdf source={source} style={modalStyles.pdf} />
                             </View>
                         }
-                        {isProcess ?
-                            this.renderBottomCenterButton(`Valider ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
-                            :
-                            this.renderBottomCenterButton(`Télécharger ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
-                        }
 
                         <Toast
                             duration={1500}
@@ -1442,7 +1448,14 @@ class StepsForm extends Component {
                             onDismiss={() => this.setState({ toastMessageModal: '' })}
                             containerStyle={{ bottom: constants.ScreenHeight * 0.1 }}
                         />
+                    </View>
 
+                    <View style={{ backgroundColor: "white" }}>
+                        {isProcess ?
+                            this.renderBottomCenterButton(`Valider ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
+                            :
+                            this.renderBottomCenterButton(`Télécharger ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
+                        }
                     </View>
                 </Modal>
 
@@ -1522,11 +1535,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     bottomCenterButton: {
-        position: "absolute",
-        bottom: 0,
         alignSelf: "center",
-        width: constants.ScreenWidth - theme.padding * 2,
-        backgroundColor: theme.colors.primary
     },
     sucessMessageContent: {
         flexDirection: 'row',
@@ -1573,6 +1582,7 @@ const styles = StyleSheet.create({
         margin: 0,
     },
     scrollableModal: {
+        flex: 1,
         height: constants.ScreenHeight * 0.93,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
         borderTopRightRadius: constants.ScreenWidth * 0.03,

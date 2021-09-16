@@ -3,8 +3,8 @@ import { StyleSheet, View } from "react-native";
 import { Button as PaperButton } from "react-native-paper";
 import * as theme from "../core/theme";
 
-const Button = ({ mode, style, labelStyle, children, outlinedColor = theme.colors.primary, ...props }) => (
-  <View style={[{ display: "flex", flexDirection: "row" }, styles.button]}>
+const Button = ({ mode, containerStyle, style, labelStyle, children, outlinedColor = theme.colors.primary, ...props }) => (
+  <View style={[{ display: "flex", flexDirection: "row" }, styles.button, containerStyle]}>
     <PaperButton
       style={[
         mode === "outlined" && { backgroundColor: theme.colors.surface },
@@ -27,7 +27,6 @@ const Button = ({ mode, style, labelStyle, children, outlinedColor = theme.color
 
 const styles = StyleSheet.create({
   button: {
-    //width: "100%",
     marginVertical: 10
   },
 });

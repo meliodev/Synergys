@@ -97,14 +97,25 @@ export const workTypes = [
     { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
 ]
 
-export const autoSignDocs = ["Devis", "Mandat MaPrimeRénov", "Mandat Synergys", "Mandat SEPA", "Contrat CGU-CGV", "Facture"]
+//Auto-Sign docs
+export const autoSignDocs = ["Devis", "Mandat MaPrimeRénov", "Mandat Synergys", "Facture"]
 export const signPositions = {
     "Devis": [
         {
             pageIndex: 1,
             position: {
-                x: 200,
-                y: 300,
+                x: 75,
+                y: 440,
+                size: 10,
+                lineHeight: 10,
+                color: rgb(0, 0, 0),
+            }
+        },
+        {
+            pageIndex: 5,
+            position: {
+                x: 250,
+                y: 137,
                 size: 10,
                 lineHeight: 10,
                 color: rgb(0, 0, 0),
@@ -113,10 +124,10 @@ export const signPositions = {
     ],
     "Mandat MaPrimeRénov": [
         {
-            pageIndex: 0,
+            pageIndex: 1,
             position: {
-                x: 200,
-                y: 300,
+                x: 60,
+                y: 90,
                 size: 10,
                 lineHeight: 10,
                 color: rgb(0, 0, 0),
@@ -127,32 +138,8 @@ export const signPositions = {
         {
             pageIndex: 0,
             position: {
-                x: 200,
-                y: 300,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
-            }
-        }
-    ],
-    "Mandat SEPA": [
-        {
-            pageIndex: 0,
-            position: {
-                x: 200,
-                y: 300,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
-            }
-        }
-    ],
-    "Contrat CGU-CGV": [
-        {
-            pageIndex: 0,
-            position: {
-                x: 200,
-                y: 300,
+                x: 45,
+                y: 180,
                 size: 10,
                 lineHeight: 10,
                 color: rgb(0, 0, 0),
@@ -163,8 +150,8 @@ export const signPositions = {
         {
             pageIndex: 0,
             position: {
-                x: 200,
-                y: 300,
+                x: 45,
+                y: 160,
                 size: 10,
                 lineHeight: 10,
                 color: rgb(0, 0, 0),
