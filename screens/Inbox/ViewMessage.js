@@ -135,13 +135,11 @@ export default class ViewMessage extends Component {
 
                 {/* {selectedMessage.sender.id !== this.currentUser.uid && */}
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: theme.padding, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth * 2, borderBottomColor: theme.colors.gray_light }}>
-                    <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage.sender, messagesRendered)}
-                        style={{ width: '39%', alignSelf: 'center' }}>
+                    <Button loading={false} mode="outlined" onPress={() => this.goToReply(selectedMessage.sender, messagesRendered)}>
                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.primary }]}>Répondre</Text>
                     </Button>
 
-                    <Button loading={false} mode="contained" onPress={() => this.goToReplyAll(selectedMessage.speakers, messagesRendered)}
-                        style={{ width: '55%', alignSelf: 'center', marginLeft: 5 }}>
+                    <Button loading={false} mode="contained" onPress={() => this.goToReplyAll(selectedMessage.speakers, messagesRendered)}>
                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.white }]}>Répondre à tous</Text>
                     </Button>
                 </View>

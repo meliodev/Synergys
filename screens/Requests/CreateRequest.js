@@ -420,7 +420,7 @@ class CreateRequest extends Component {
                         <Button
                             mode="contained"
                             onPress={() => this.handleConfirmModal(productsList, otherProducts)}
-                            style={modalStyles.confirmButton}>
+                            containerStyle={modalStyles.confirmButton}>
                             Confirmer
                         </Button>
                     </View>
@@ -673,8 +673,7 @@ const modalStyles = StyleSheet.create({
         borderBottomColor: theme.colors.gray_light
     },
     confirmButton: {
-        alignSelf: 'center',
-        backgroundColor: theme.colors.primary
+        alignSelf: 'flex-end',
     }
 })
 

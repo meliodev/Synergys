@@ -12,6 +12,7 @@ export const version5 = {
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 1,
                 actions: [
+                    //Task make all verifications of same document on SAME ACTION (to avoid function verifyDataFill_sameDoc)
                     {
                         //General
                         id: 'nom',
@@ -87,23 +88,6 @@ export const version5 = {
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: ''
-                    },
-                    {
-                        id: 'conversionClient',
-                        title: 'Convertir le prospect en client',
-                        instructions: 'Appuyez sur le bouton "Convertir en client"',
-                        actionOrder: 5,
-                        collection: 'Clients',
-                        documentId: '', // dynamic
-                        properties: ['isProspect'],
-                        screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                        screenParams: { user: { id: '', roleId: 'client' }, project: null },
-                        screenPush: true,
-                        type: 'auto',
-                        responsable: 'Commercial',
-                        status: 'pending',
-                        verificationType: 'data-fill',
-                        verificationValue: true, //check if fieldValue !== verificationValue
                     },
                 ]
             },
@@ -702,13 +686,13 @@ export const version5 = {
                         id: 'financingWebsite',
                         title: 'Propositions de financement',
                         instructions: "Lorem ipsum dolor",
-                        actionOrder: 11,
+                        actionOrder: 0,
                         type: 'manual',
                         comment: '',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'www.adhefi.com', id: 'cashPayment', onSelectType: 'openLink', link: 'https://www.adhefi.com' },
-                            { label: 'www.moncofidispro.fr', id: 'financing', onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
+                            { label: 'Adhefi.com', id: 'cashPayment', image: "sofincoLogo", onSelectType: 'openLink', link: 'https://www.adhefi.com' },
+                            { label: 'Moncofidispro.fr', id: 'financing', image: "cofidisLogo", onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
                             { label: 'Continuer', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
                         ],
                         responsable: 'Commercial',
@@ -853,7 +837,7 @@ export const version5 = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'poseurAffectation', operation: { collection: "Clients", docId: "", type: 'update', field: 'status', value: "activated" } },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'poseurAffectation', operation: { collection: "Clients", docId: "", type: 'update', field: 'status', value: "active" } },
                             { label: 'Modifier la date', id: 'edit', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
@@ -1744,3 +1728,23 @@ export const version5 = {
 }
 
 
+
+
+
+          // {
+                    //     id: 'conversionClient',
+                    //     title: 'Convertir le prospect en client',
+                    //     instructions: 'Appuyez sur le bouton "Convertir en client"',
+                    //     actionOrder: 5,
+                    //     collection: 'Clients',
+                    //     documentId: '', // dynamic
+                    //     properties: ['isProspect'],
+                    //     screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
+                    //     screenParams: { user: { id: '', roleId: 'client' }, project: null },
+                    //     screenPush: true,
+                    //     type: 'auto',
+                    //     responsable: 'Commercial',
+                    //     status: 'pending',
+                    //     verificationType: 'data-fill',
+                    //     verificationValue: true, //check if fieldValue !== verificationValue
+                    // },

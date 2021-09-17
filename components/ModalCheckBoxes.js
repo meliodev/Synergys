@@ -17,6 +17,7 @@ export default class ModalCheckBoxes extends Component {
     constructor(props) {
         super(props)
         this.toggleModal = this.toggleModal.bind(this)
+        this.onPressItem = this.onPressItem.bind(this)
 
         this.state = {
             isModalVisible: false,
@@ -25,11 +26,11 @@ export default class ModalCheckBoxes extends Component {
 
     renderItem(items, item, key) {
 
-        onPressItem = () => {
+        const onPressItem = () => {
             items[key].selected = !items[key].selected
             this.props.updateItems(items)
         }
-        
+
         return (
             <View style={modalStyles.item}>
                 <Checkbox
@@ -82,13 +83,17 @@ export default class ModalCheckBoxes extends Component {
                         <Button
                             mode="contained"
                             onPress={() => this.handleConfirmModal(items)}
-                            style={modalStyles.confirmButton}>
+                            containerStyle={{ alignSelf: "flex-end" }}>
                             Confirmer
-                    </Button>
+                        </Button>
                     </View>
                 </View>
             </Modal >
         )
+    }
+
+    onPressItem(item) {
+        this.props.onPressItem(item)
     }
 
     renderItems() {
@@ -97,10 +102,6 @@ export default class ModalCheckBoxes extends Component {
         const textStyle = theme.customFontMSregular.caption
         const selectedItems = items.filter((workType) => workType.selected === true)
         const anyItemSelected = selectedItems.length === 0
-
-        const onPressItem = (item) => {
-            this.props.onPressItem(item)
-        }
 
         if (anyItemSelected)
             return (
@@ -119,7 +120,7 @@ export default class ModalCheckBoxes extends Component {
                 {selectedItems.map((item, index) => {
                     return (
                         <TouchableOpacity
-                            onPress={onPressItem.bind(this, item)}
+                            onPress={() => this.onPressItem(item)}
                             style={styles.itemsListRow}>
                             <Text style={[textStyle, { color: theme.colors.gray_dark, marginBottom: index === selectedItems.length - 1 ? 0 : 5 }]}>
                                 {item.label}

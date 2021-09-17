@@ -207,7 +207,7 @@ const TasksConflicts = ({
                         :
                         <View style={{ paddingHorizontal: theme.padding, borderRadius, backgroundColor: theme.colors.white }}>
                             {renderTimeForm(null, true, true)}
-                            <Button mode="contained" onPress={updateTask} style={{ alignSelf: 'center', width: constants.ScreenWidth * 0.9 - theme.padding * 3.5 }} outlinedColor={theme.colors.primary}>
+                            <Button mode="contained" onPress={updateTask} containerStyle={{ alignSelf: 'center' }} outlinedColor={theme.colors.primary}>
                                 modifier
                             </Button>
                         </View>

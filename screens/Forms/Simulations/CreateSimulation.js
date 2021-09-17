@@ -151,7 +151,7 @@ const initialState = {
     addressCity: "",
     phone: "",
     // disablePhoneContact: true,
-    email: "", 
+    email: "",
     version: 1
 }
 
@@ -211,7 +211,8 @@ class CreateSimulation extends Component {
 
                 <Button
                     mode="contained"
-                    style={styles.bottomCenterButton}
+                    containerStyle={styles.bottomCenterButton}
+                    style={{ width: constants.ScreenWidth - theme.padding * 2 }}
                     onPress={callBack}>
                     Commencer
                 </Button>
@@ -274,9 +275,7 @@ const styles = StyleSheet.create({
     bottomCenterButton: {
         position: "absolute",
         bottom: 0,
-        alignSelf: "center",
-        width: constants.ScreenWidth - theme.padding * 2,
-        backgroundColor: theme.colors.primary
+        alignSelf: "center"
     },
 })
 

@@ -17,7 +17,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { downloadDir, errorMessages, roles } from './constants'
+import { downloadDir, errorMessages, roles, constants } from './constants'
 import { ficheEEBModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
 
 //##VALIDATORS
@@ -164,20 +164,36 @@ export const stringifyUndefined = (data) => {
 
 export const configChoiceIcon = (choice) => {
   const element = _.cloneDeep(choice)
-  if (element.id === 'confirm') { element.icon = faCheck; element.iconColor = theme.colors.primary }
-  else if (element.id === 'finish') { element.icon = faFlag; element.iconColor = theme.colors.primary }
-  else if (element.id === 'cancel') { element.icon = faTimes; element.iconColor = theme.colors.error }
-  else if (element.id === 'skip') { element.icon = faTimes; element.iconColor = theme.colors.error }
-  else if (element.id === 'comment') { element.icon = faTimes; element.iconColor = theme.colors.error }
-  else if (element.id === 'postpone') { element.icon = faClock; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'upload') { element.icon = faUpload; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'view') { element.icon = faEye; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'edit') { element.icon = faPen; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'sign') { element.icon = faFileSignature; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'cashPayment') { element.icon = faSackDollar; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'financing') { element.icon = faEnvelopeOpenDollar; element.iconColor = theme.colors.secondary }
-  else if (element.id === 'block') { element.icon = faBan; element.iconColor = theme.colors.error }
-  else if (element.id === 'pending') { element.icon = faPauseCircle; element.iconColor = theme.colors.gray_dark }
+  const width = constants.ScreenWidth * 0.45 * 0.45
+
+  if (element.image) {
+    if (element.image === "sofincoLogo") {
+      element.image = require("../assets/icons/sofincoLogo.png")
+      element.imageStyle = { width, height: width / (990 / 228) }
+    }
+    else if (element.image === "cofidisLogo") {
+      element.image = require("../assets/icons/cofidisLogo.png")
+      element.imageStyle = { width, height: width / (5000 / 2749) }
+    }
+  }
+
+  else {
+    if (element.id === 'confirm') { element.icon = faCheck; element.iconColor = theme.colors.primary }
+    else if (element.id === 'finish') { element.icon = faFlag; element.iconColor = theme.colors.primary }
+    else if (element.id === 'cancel') { element.icon = faTimes; element.iconColor = theme.colors.error }
+    else if (element.id === 'skip') { element.icon = faTimes; element.iconColor = theme.colors.error }
+    else if (element.id === 'comment') { element.icon = faTimes; element.iconColor = theme.colors.error }
+    else if (element.id === 'postpone') { element.icon = faClock; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'upload') { element.icon = faUpload; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'view') { element.icon = faEye; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'edit') { element.icon = faPen; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'sign') { element.icon = faFileSignature; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'cashPayment') { element.icon = faSackDollar; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'financing') { element.icon = faEnvelopeOpenDollar; element.iconColor = theme.colors.secondary }
+    else if (element.id === 'block') { element.icon = faBan; element.iconColor = theme.colors.error }
+    else if (element.id === 'pending') { element.icon = faPauseCircle; element.iconColor = theme.colors.gray_dark }
+  }
+
   return element
 }
 

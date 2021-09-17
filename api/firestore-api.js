@@ -2,7 +2,7 @@
 import { Alert, Keyboard } from 'react-native'
 import { auth, db } from '../firebase'
 import { checkEmailExistance } from './auth-api'
-import { sortMonths, nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen } from "../core/utils"
+import { sortMonths, nameValidator, emailValidator, passwordValidator, phoneValidator, generateId, updateField, setToast, load, myAlert, navigateToScreen, displayError } from "../core/utils"
 import moment from 'moment'
 import 'moment/locale/fr'
 import { errorMessages } from '../core/constants'
@@ -88,108 +88,83 @@ export const deleteTeam = async (team) => {
 }
 
 //#CLIENTS 
-export const validateClientInputs = function validateClientInputs(userData, checkPassord = true) {
-  let denomError = ''
-  let siretError = ''
-  let nomError = ''
-  let prenomError = ''
+export const validateClientInputs = function validateClientInputs(user, checkPassword = true) {
+  // let denomError = ''
+  // let siretError = ''
+  // let nomError = ''
+  // let prenomError = ''
 
-  let { isPro, denom, siret, nom, prenom, phone, email, password, address } = userData
+  // console.log("45645646")
+  // let { isPro, denom, siret, nom, prenom, phone, email, password, address } = user
 
-  if (isPro) {
-    denomError = nameValidator(denom.value, '"Dénomination sociale"')
-    siretError = nameValidator(siret.value, 'Siret')
-  }
+  // if (isPro) {
+  //   denomError = nameValidator(denom.value, '"Dénomination sociale"')
+  //   siretError = nameValidator(siret.value, 'Siret')
+  // }
 
-  else {
-    nomError = nameValidator(nom.value, '"Nom"')
-    prenomError = nameValidator(prenom.value, '"Prénom"')
-  }
+  // else {
+  //   nomError = nameValidator(nom.value, '"Nom"')
+  //   prenomError = nameValidator(prenom.value, '"Prénom"')
+  // }
 
-  const phoneError = nameValidator(phone.value, '"Téléphone"')
-  const emailError = emailValidator(email.value)
-  const passwordError = checkPassord ? passwordValidator(password.value) : ""
-  const addressError = nameValidator(address.description, '"Adresse"')
+  // console.log('23265656+5')
 
-  if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError || addressError) {
+  // const phoneError = nameValidator(phone.value, '"Téléphone"')
+  // const emailError = emailValidator(email.value)
+  // const passwordError = checkPassword ? passwordValidator(password.value) : ""
+  // const addressError = nameValidator(address.description, '"Adresse"')
 
-    phone.error = phoneError
-    email.error = emailError
-    password.error = passwordError
+  // if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError || addressError) {
 
-    if (isPro) {
-      denom.error = denomError
-      siret.error = siretError
-      this.setState({ denom, siret, phone, email, password, addressError, loading: false })
-    }
+  //   phone.error = phoneError
+  //   email.error = emailError
+  //   password.error = passwordError
 
-    else {
-      nom.error = nomError
-      prenom.error = prenomError
-      this.setState({ nom, prenom, phone, email, password, addressError, loading: false })
-    }
+  //   if (isPro) {
+  //     denom.error = denomError
+  //     siret.error = siretError
+  //     this.setState({ denom, siret, phone, email, password, addressError, loading: false })
+  //   }
 
-    setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
-    return false
-  }
+  //   else {
+  //     nom.error = nomError
+  //     prenom.error = prenomError
+  //     this.setState({ nom, prenom, phone, email, password, addressError, loading: false })
+  //   }
+
+  //   setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
+  //   return false
+  // }
 
   return true
 }
 
-export const createClient = async function createClient(userData, ClientId, isConnected, isConversion, isProspect) {
-  let { isPro, nom, prenom, denom, siret, address, phone, email, password } = userData
+export const createClient = async function createClient(client, isConnected) {
 
-  //2. ADDING USER DOCUMENT
-  let client = {
-    address,
-    phone: phone.value,
-    email: email.value.toLowerCase(),
-    isProspect,
-    password: password.value,
-    userType: 'client',
-    createdBy: { id: auth.currentUser.uid, fullName: auth.currentUser.displayName },
-    createdAt: moment().format(),
-    isPro,
-    deleted: false
+  const { email, isProspect, ClientId } = client
+
+  //1. Check if email has an account (works only ONLINE)
+  const emailExist = await checkEmailExistance(email, isConnected)
+  if (emailExist.error) {
+    return { error: emailExist.error }
   }
 
-  if (isPro) {
-    client.denom = denom.value
-    client.siret = siret.value
-    client.fullName = denom.value
-  }
-
-  else if (!isPro) {
-    client.nom = nom.value
-    client.prenom = prenom.value
-    client.fullName = `${prenom.value} ${nom.value}`
-  }
-
-  //3'. CREATE CLIENT or CONVERT PROSPECT TO CLIENT (account + document)
-  if (!isProspect || isConversion) {
-
-    if (!isConnected) {
-      return { error: { title: "Pas de connection internet", message: "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur." } }
-    }
-
-    //Validate if email address already exist
-    const emailExist = await checkEmailExistance(email.value)
-    if (emailExist) {
-      return { error: { title: "", message: "L'adresse email que vous avez saisi est déjà associé à un compte." } }
-    }
-
-    if (!isConnected) {
-      return { error: { title: "Pas de connection internet", message: "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur." } }
-    }
-
-    client.role = 'Client'
-    await db.collection('newUsers').doc(ClientId).set(client)
-  }
-
-  //3". CREATE PROSPECT (document only)
-  else {
+  //2'. CREATE PROSPECT (document only)
+  if (isProspect) {
     db.collection('Clients').doc(ClientId).set(client)
   }
+
+  //2". CREATE CLIENT (document only) + TF will create account for the user
+  else {
+    const batch = db.batch()
+    const clientRef = db.collection('Clients').doc(ClientId)
+    const newUserRef = db.collection('newUsers').doc(ClientId)
+    batch.set(clientRef, client)
+    batch.set(newUserRef, client)
+    batch.commit()
+  }
+
+  return true
 }
 
 export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects, userId) {

@@ -362,14 +362,15 @@ class CreateProject extends Component {
         let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
         project.process = {
-            version: latestProcessVersion
-            //version: "version0" //Used for testing new models
+            //version: latestProcessVersion
+            version: "version0" //Used for testing new models
         }
         const selectedWorkTypes = this.state.workTypes.filter((wt) => wt.selected === true)
         const selectedWorkTypesValues = selectedWorkTypes.map((wt) => wt.value)
         project.workTypes = selectedWorkTypesValues
 
-        db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
+        this.persistData(project)
+
         //await this.refreshState(project)
         if (!this.isEdit)
             await this.initEditMode()
@@ -378,30 +379,20 @@ class CreateProject extends Component {
         setToast(this, 'i', toastMessage)
     }
 
-    // async refreshState(project) {
-    //     try {
-    //         if (!this.isEdit) {
-    //             const { createdAt, createdBy } = project
-    //             this.setState({ createdAt, createdBy }, async () => {
-    //                 this.project = _.pick(project, ['name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
-    //                 this.project.id = this.ProjectId
-    //                 this.title = 'Modifier le projet'
-    //                 this.isEdit = true
-    //                 this.setState({ process: project.process }) //re-rendering (showing process)
-    //                 this.setImageCarousel(project.attachments)
-    //                 this.setUserAccess(project.step)
-    //                 await this.fetchOtherData()
-    //             })
-    //         }
+    persistData(project) {
+        if (this.isEdit)
+            db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
 
-    //         load(this, false)
-    //         this.initialState = _.cloneDeep(this.state)
-    //     }
-    //     catch (e) {
-    //         const { message } = e
-    //         displayError({ message })
-    //     }
-    // }
+        else {
+            const batch = db.batch()
+            const projectRef = db.collection('Projects').doc(this.ProjectId)
+            const clientRef = db.collection('Clients').doc(project.client.id)
+            batch.set(projectRef, project)
+            batch.update(clientRef, { isProspect: false }) //For offline support
+            batch.commit()
+            //TF should be now running to create user account for the client...
+        }
+    }
 
     showAlert() {
         const title = "Supprimer le projet"

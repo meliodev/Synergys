@@ -110,7 +110,7 @@ export const version0 = {
         }
     },
     'rd1': {
-        title: 'Visite technique préalable',
+        title: 'Visite technique',
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 2,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
@@ -120,41 +120,11 @@ export const version0 = {
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 1,
                 actions: [
-                    //Check 
                     {
-                        //General
-                        id: 'checkTechContact',
-                        title: 'Renseigner un contact technique pour le projet', //#add refresh before scrollto
-                        instructions: 'Renseigner un contact technique pour le projet',
-                        actionOrder: 1,
-                        //Verification
-                        collection: 'Projects',
-                        documentId: '', //#dynamic
-                        properties: ['techContact', 'id'],
-                        //Navigation
-                        screenName: 'ListEmployees',
-                        screenParams: {
-                            project: null,
-                            prevScreen: 'CreateProject',
-                            isRoot: false,
-                            titleText: 'Choisir un poseur',
-                            //Filter List (new param type)
-                            queryFilters: [ //Filter list
-                                { filter: 'role', operation: '==', value: 'Poseur' },
-                                { filter: 'deleted', operation: '==', value: false }
-                            ]
-                        },
-                        type: 'auto',
-                        verificationType: 'data-fill',
-                        verificationValue: '',
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'technicalVisitCreation', //1. verify if RD2 exists
+                        id: 'technicalVisitCreation', //1. verify if Visite Technique exists
                         title: 'Créer une visite technique',
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 2,
+                        actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
@@ -163,11 +133,32 @@ export const version0 = {
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
                         type: 'auto',
-                        verificationType: 'doc-creation',
-                        responsable: 'Commercial',
+                        responsable: 'Poseur',
                         status: 'pending',
-                        nextStep: 'payModeValidation',
-                    }
+                        verificationType: 'doc-creation',
+                    },
+                    {
+                        id: 'technicalVisitValidation',
+                        title: "Valider la date de la visite technique",
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 2,
+                        collection: 'Agenda',
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Visite technique' }
+                        ],
+                        screenName: 'CreateTask', //creation
+                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'Valider', id: 'confirm', onSelectType: 'transition', nextStep: 'poseurAffectation', operation: { collection: "Clients", docId: "", type: 'update', field: 'status', value: "active" } },
+                            { label: 'Modifier la date', id: 'edit', onSelectType: 'navigation' },
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
+                    },
                 ]
             },
         }

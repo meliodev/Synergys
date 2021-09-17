@@ -51,7 +51,10 @@ export const errorMessages = {
     },
     documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer.",
-    invalidFields: "Erreur de saisie, veuillez verifier les champs."
+    invalidFields: "Erreur de saisie, veuillez verifier les champs.",
+    network: {
+        newUser: "La création d'un nouvel utilisateur nécessite une connection réseau."
+    }
 }
 
 export const phases = [

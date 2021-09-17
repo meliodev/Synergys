@@ -35,7 +35,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
             var callback = (project) => {
                 project = refreshProject(project, false)
                 return { project }
-            } 
+            }
 
         else if (option.screen === 'ListEmployees')
             var callback = (assignedTo) => {
@@ -108,10 +108,10 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
     const renderFooter = () => {
         return (
             <View style={styles.buttonsContainer}>
-                <Button mode="outlined" onPress={resetFilter} style={{ width: constants.ScreenWidth * 0.45 }} outlinedColor={theme.colors.primary}>
+                <Button mode="outlined" onPress={resetFilter} outlinedColor={theme.colors.primary}>
                     Réinitialiser
                 </Button>
-                <Button mode="contained" onPress={toggleFilter} style={{ width: constants.ScreenWidth * 0.4, backgroundColor: theme.colors.primary }} >
+                <Button mode="contained" onPress={toggleFilter}>
                     Confirmer
                 </Button>
             </View>

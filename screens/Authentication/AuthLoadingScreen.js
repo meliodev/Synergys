@@ -340,7 +340,7 @@ class AuthLoadingScreen extends Component {
           <Button
             mode="contained"
             onPress={this.downloadApp}
-            style={{ position: 'absolute', bottom: constants.ScreenHeight * 0.2, width: constants.ScreenWidth * 0.75, alignSelf: 'center' }}
+            containerStyle={{ position: 'absolute', bottom: constants.ScreenHeight * 0.2, alignSelf: 'center' }}
             outlinedColor={theme.colors.primary}
           >
             Mettre à jour

@@ -1170,7 +1170,7 @@ export default class PdfGeneration extends Component {
                 </View>
 
                 <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                    <Button mode="contained" onPress={() => this.savePdfBase64(pdfBase64)} style={{ width: constants.ScreenWidth * 0.8, backgroundColor: theme.colors.primary }} >
+                    <Button mode="contained" onPress={() => this.savePdfBase64(pdfBase64)}>
                         Valider
                     </Button>
                 </View>

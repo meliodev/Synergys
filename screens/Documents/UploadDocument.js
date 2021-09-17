@@ -783,8 +783,6 @@ class UploadDocument extends Component {
             progress: 0,
         }
 
-
-
         this.setState({ attachment, orderData }, () => {
             if (!isConversion) return
             //Handle conversion
@@ -872,7 +870,7 @@ class UploadDocument extends Component {
         //Actions autorization
         const allowSign = isAttachmentRemote && (canWrite || this.props.role.id === 'client')
         const allowUpload = isAttachmentLocal && canWrite
-        const allowQuoteToBillConversion = isGeneratedQuote && this.isHighrole
+        const allowQuoteToBillConversion = isGeneratedQuote && isAttachmentRemote && this.isHighrole
 
         //Show buttons
         const showSign = allowSign

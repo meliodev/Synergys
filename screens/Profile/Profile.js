@@ -26,7 +26,7 @@ import EmptyList from "../../components/EmptyList"
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
-import { fetchDocs, fetchTurnoverData, validateClientInputs, createClient, fetchDocument, fetchDocuments } from '../../api/firestore-api'
+import { fetchDocs, fetchTurnoverData, validateClientInputs, fetchDocument, fetchDocuments } from '../../api/firestore-api'
 import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError, countDown } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
@@ -41,7 +41,6 @@ class Profile extends Component {
         super(props)
         this.fetchProfile = this.fetchProfile.bind(this)
         this.fetchClientProjects = this.fetchClientProjects.bind(this)
-        this.clientConversion = this.clientConversion.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
         this.changePassword = this.changePassword.bind(this)
         this.passwordValidation = this.passwordValidation.bind(this)
@@ -300,41 +299,6 @@ class Profile extends Component {
 
         load(this, false)
         this.setState({ toastType: 'success', toastMessage: 'Modifications efféctuées !' })
-    }
-
-    //##CONVERT PROSPECT TO CLIENT
-    async clientConversion() {
-
-        const resp = this.handleSubmit()
-        if (resp && resp.error) return
-
-        const { isConnected } = this.props.network
-        const { isPro, nom, prenom, denom, siret, address, phone, email, loading } = this.state
-        const userData = { isPro, nom, prenom, denom, siret, address, phone, email, password: { value: '' } }
-        userData.password.value = generateId('', 6)
-
-        this.setState({ loadingDialog: true })
-        const response = await createClient(userData, this.userParam.id, isConnected, true, true)
-        if (response && response.error) {
-            this.setState({ loadingDialog: false })
-            const { title, message } = response.error
-            Alert.alert(title, message)
-        }
-
-        else {
-            setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-                this.setState({ loadingDialog: false })
-
-                if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
-                    this.props.navigation.state.params.onGoBack()
-                }
-
-                if (this.project)
-                    this.props.navigation.pop()
-
-                this.props.navigation.goBack()
-            }, 6000) //We can reduce this timeout later on...
-        }
     }
 
     //##PASSWORD CHANGE
@@ -653,6 +617,8 @@ class Profile extends Component {
         const showGoalsSection = this.userParam.roleId === 'com' && highRoles.includes(this.roleId) && !this.isProfileOwner
         const showConversionButton = this.isClient && isProspect && !loading && clientProjectsList.length > 1
 
+        const changePwButtonColor = newPass.value === "" || currentPass.value === "" ? theme.colors.gray_medium : theme.colors.primary
+
         return (
             <View style={{ flex: 1 }}>
                 <Appbar
@@ -788,7 +754,8 @@ class Profile extends Component {
                                                                 mode="contained"
                                                                 onPress={this.handleSignout.bind(this)}
                                                                 backgroundColor='#ff5153'
-                                                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginVertical: 24 }}>
+                                                                containerStyle={{ alignSelf: 'center', marginVertical: 24 }}
+                                                                style={{ width: constants.ScreenWidth - theme.padding * 2 }}>
                                                                 Se déconnecter
                                                             </Button>
                                                         }
@@ -850,7 +817,8 @@ class Profile extends Component {
                                                         loading={loading}
                                                         mode="contained"
                                                         onPress={this.changePassword}
-                                                        style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 24 }}>
+                                                        containerStyle={{ alignSelf: 'center', marginVertical: 24 }}
+                                                        style={{ width: constants.ScreenWidth - theme.padding * 2, backgroundColor: changePwButtonColor }}>
                                                         Modifier le mot de passe
                                                     </Button>
                                                 </View>
@@ -862,15 +830,6 @@ class Profile extends Component {
                             }
                         </ScrollView >
 
-                        {showConversionButton &&
-                            <Button
-                                mode="contained"
-                                onPress={this.clientConversion}
-                                backgroundColor={theme.colors.primary}
-                                style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
-                                Convertir en client
-                            </Button>
-                        }
                         <LoadDialog loading={loadingDialog} message="Conversion du prospect en client en cours..." />
 
                     </View>

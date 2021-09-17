@@ -5,6 +5,10 @@ import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
 import _ from 'lodash'
 
+import moment from 'moment'
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import Appbar from "../../components/Appbar"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
@@ -15,10 +19,11 @@ import Button from "../../components/Button"
 import Toast from "../../components/Toast"
 import { CustomIcon } from "../../components";
 
+import { auth } from "../../firebase";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
 import { createClient, validateClientInputs } from "../../api/firestore-api";
-import { generateId, updateField, load, navigateToScreen, setAddress } from "../../core/utils"
+import { generateId, updateField, load, navigateToScreen, setAddress, displayError } from "../../core/utils"
 import { faMagic } from "@fortawesome/pro-light-svg-icons";
 
 class CreateClient extends Component {
@@ -42,17 +47,17 @@ class CreateClient extends Component {
         this.state = {
             checked: 'first', //professional/Particular
             isPro: false,
-            nom: { value: '', error: '' },
-            prenom: { value: '', error: '' },
+            nom: { value: 'ddd', error: '' },
+            prenom: { value: 'fff', error: '' },
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
 
-            address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+            address: { description: 'qsrf', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            email: { value: "", error: "" },
-            phone: { value: "", error: '' },
+            email: { value: "test19@digital-french-touch.com", error: "" },
+            phone: { value: "+33 55 55 55", error: '' },
 
-            password: { value: '', error: '', show: false },
+            password: { value: 'srfqdrf', error: '', show: false },
 
             loading: true,
             loadingDialog: false,
@@ -66,47 +71,74 @@ class CreateClient extends Component {
         load(this, false)
     }
 
-    handleSubmit = async (isConversion) => {
-        Keyboard.dismiss()
-
+    formatClient() {
         const { isPro, nom, prenom, denom, siret, address, phone, email, password, loading } = this.state
 
-        let userData = { isPro, nom, prenom, denom, siret, address, phone, email, password }
+        let user = {
+            isPro,
+            address,
+            phone: phone.value,
+            email: email.value.toLowerCase(),
+            password: password.value,
+            ClientId: this.ClientId,
+            isProspect: this.isProspect,
+            createdBy: {
+                id: auth.currentUser.uid,
+                fullName: auth.currentUser.displayName
+            },
+            createdAt: moment().format(),
+            userType: 'client',
+            status: "pending",
+            deleted: false
+        }
+
+        if (isPro) {
+            user.denom = denom.value
+            user.siret = siret.value
+            user.fullName = denom.value
+        }
+
+        else if (!isPro) {
+            user.nom = nom.value
+            user.prenom = prenom.value
+            user.fullName = `${prenom.value} ${nom.value}`
+        }
+
+        if (!this.isProspect)
+            user.role = 'Client'
+
+        return user
+    }
+
+    handleSubmit = async () => {
+        Keyboard.dismiss()
+
+        const user = this.formatClient()
         const { isConnected } = this.props.network
 
-        const isValid = this.validateClientInputs(userData)
+        const isValid = this.validateClientInputs(user)
         if (!isValid) return
 
         this.setState({ loadingDialog: true })
 
-        const response = await createClient(userData, this.ClientId, isConnected, isConversion, this.isProspect)
-        if (response && response.error) {
+        const response = await createClient(user, isConnected)
+        const { error } = response
+
+        if (error) {
             this.setState({ loadingDialog: false })
-            const { title, message } = response.error
-            Alert.alert(title, message)
+            displayError(error)
         }
 
         else {
-            setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-                this.setState({ loadingDialog: false })
-                if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
-                    var user = {
-                        id: this.ClientId,
-                        isPro,
-                        denom: denom.value,
-                        nom: nom.value,
-                        prenom: prenom.value,
-                        role: 'Client',
-                        email: email.value,
-                        address
-                    }
-                    this.props.navigation.state.params.onGoBack(user)
-                }
-
-                var navScreen = this.prevScreen === "CreateProject" ? this.prevScreen : "Profile"
-                var navParams = this.prevScreen === "CreateProject" ? {} : { user: { id: this.ClientId, roleId: 'client' } }
+            const { navigation } = this.props
+            if (navigation.state.params && navigation.state.params.onGoBack) {
+                navigation.state.params.onGoBack(user)
+            }
+            var navScreen = this.prevScreen === "CreateProject" ? this.prevScreen : "Profile"
+            var navParams = this.prevScreen === "CreateProject" ? {} : { user: { id: this.ClientId, roleId: 'client' } }
+            this.setState({ loadingDialog: false }, () => {
                 this.props.navigation.navigate(navScreen, navParams)
-            }, 6000)
+            })
         }
     }
 
@@ -250,9 +282,9 @@ class CreateClient extends Component {
 
                 <Button
                     mode="contained"
-                    onPress={() => this.handleSubmit(false)}
+                    onPress={this.handleSubmit}
                     backgroundColor={theme.colors.primary}
-                    style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', marginTop: 25 }}>
+                    containerStyle={{ alignSelf: 'flex-end', marginTop: 25, marginRight: theme.padding }}>
                     Valider
                 </Button>
             </View>

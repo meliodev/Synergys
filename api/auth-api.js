@@ -1,4 +1,5 @@
 
+import { errorMessages } from '../core/constants';
 import firebase, { functions } from '../firebase'
 
 export const loginUser = async ({ email, password }) => {
@@ -64,8 +65,17 @@ export const sendEmailWithPassword = async email => {
   }
 }
 
-export const checkEmailExistance = async (email) => {
+export const checkEmailExistance = async (email, isConnected) => {
+  if (!isConnected) {
+    return { error: { message: errorMessages.network.newUser } }
+  }
+
   const methods = await firebase.auth().fetchSignInMethodsForEmail(email)
   const emailExist = methods.length > 0
-  return emailExist
+
+  if (emailExist) {
+    return { error: { message: errorMessages.auth.emailExist } }
+  }
+
+  else return emailExist
 }

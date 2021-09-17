@@ -75,7 +75,6 @@ class ProcessAction extends Component {
     setProcessModel(process) {
         const { version } = process
         const processModel = processModels[version]
-        console.log(processModels)
         return processModel
     }
 

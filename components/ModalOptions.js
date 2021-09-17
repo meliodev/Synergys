@@ -55,17 +55,24 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
             else return {}
         }
 
-        const iconColor = element.selected ? theme.colors.primary : element.iconColor
-        const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
+        const { label, selected, icon, image, imageStyle } = element
+        let { iconColor } = element
+        iconColor = selected ? theme.colors.primary : iconColor
+        const textColor = selected ? theme.colors.primary : theme.colors.secondary
 
         return (
-            <TouchableOpacity style={[elementStaticStyle(), elementDynamicStyle(element.selected)]} onPress={() => onPressElement(element, index)}>
+            <TouchableOpacity
+                style={[elementStaticStyle(), elementDynamicStyle(selected)]}
+                onPress={() => onPressElement(element, index)}
+            >
                 <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
-                    {element.icon && <CustomIcon icon={element.icon} size={elementSize * 0.3} color={iconColor} />}
-                    {element.image && <Image style={{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }} source={element.image} />}
+                    {icon && <CustomIcon icon={icon} size={elementSize * 0.3} color={iconColor} />}
+                    {image && <Image style={[{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }, imageStyle]} source={image} />}
                 </View>
                 <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
-                    <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
+                    <Text style={[label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>
+                        {label}
+                    </Text>
                 </View>
             </TouchableOpacity>
         )
@@ -214,20 +221,29 @@ const ModalOptions = ({
                     <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: theme.padding, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
                         <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
                     </TouchableOpacity>
-                    <Title style={[theme.customFontMSregular.header, { marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>{title}</Title>
+                    <Title style={[theme.customFontMSmedium.header, { marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>
+                        {title}
+                    </Title>
 
-                    <ModalForm elements={elements} elementSize={elementSize} handleSelectElement={handleSelectElement} autoValidation={autoValidation} isReview={isReview} />
+                    <ModalForm
+                        elements={elements}
+                        elementSize={elementSize}
+                        handleSelectElement={handleSelectElement}
+                        autoValidation={autoValidation}
+                        isReview={isReview}
+                    />
+
                     {!autoValidation &&
                         <View style={styles.buttonsContainer}>
-                            <Button mode="outlined" onPress={handleCancel} style={{ width: '40%' }}>Annuler</Button>
-                            <Button mode="contained" onPress={handleConfirm} style={{ width: '45%' }}>Confirmer</Button>
+                            <Button mode="outlined" onPress={handleCancel}>Annuler</Button>
+                            <Button mode="contained" onPress={handleConfirm}>Confirmer</Button>
                         </View>
                     }
                 </View>
             }
         </Modal>
     )
-} 
+}
 
 
 const styles = StyleSheet.create({
