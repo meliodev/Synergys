@@ -89,7 +89,10 @@ class ListProjects extends Component {
     }
 
     async componentDidMount() {
+        console.log('1111111')
         await this.fetchProjects()
+        console.log('2222222222')
+
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => await this.fetchProjects())
     }
 
@@ -98,13 +101,17 @@ class ListProjects extends Component {
         this.setState({ refreshing: true })
 
         const { queryFilters } = this.props.permissions.projects
+        console.log(queryFilters)
+
         if (queryFilters === []) {
             this.setState({ projectsList: [], projectsCount: 0 })
         }
         else {
+
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
             const projectsList = await fetchDocuments(query)
+
             this.setState({
                 projectsList,
                 projectsCount: projectsList.length,

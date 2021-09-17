@@ -43,6 +43,7 @@ export function fetchDocuments(query) {
   return query.get()
     .then((querySnapshot) => {
       let documents = []
+
       if (querySnapshot.empty) return documents
       for (const doc of querySnapshot.docs) {
         let data = doc.data()
@@ -87,61 +88,103 @@ export const deleteTeam = async (team) => {
   return await batch.commit()
 }
 
-//#CLIENTS 
-export const validateClientInputs = function validateClientInputs(user, checkPassword = true) {
-  // let denomError = ''
-  // let siretError = ''
-  // let nomError = ''
-  // let prenomError = ''
+//#USERS/CLIENTS
+export const validateUserInputs = function validateUserInputs(thisState, checkPassword = true) {
 
-  // console.log("45645646")
-  // let { isPro, denom, siret, nom, prenom, phone, email, password, address } = user
+  let { isPro, denom, siret, nom, prenom, phone, email, password, address } = thisState
 
-  // if (isPro) {
-  //   denomError = nameValidator(denom.value, '"Dénomination sociale"')
-  //   siretError = nameValidator(siret.value, 'Siret')
-  // }
+  if (isPro) {
+    var denomError = nameValidator(denom.value, '"Dénomination sociale"')
+    var siretError = nameValidator(siret.value, 'Siret')
+  }
 
-  // else {
-  //   nomError = nameValidator(nom.value, '"Nom"')
-  //   prenomError = nameValidator(prenom.value, '"Prénom"')
-  // }
+  else {
+    var nomError = nameValidator(nom.value, '"Nom"')
+    var prenomError = nameValidator(prenom.value, '"Prénom"')
+  }
 
-  // console.log('23265656+5')
+  const phoneError = nameValidator(phone.value, '"Téléphone"')
+  const emailError = emailValidator(email.value)
+  const passwordError = checkPassword ? passwordValidator(password.value) : ""
+  const addressError = nameValidator(address.description, '"Adresse"')
 
-  // const phoneError = nameValidator(phone.value, '"Téléphone"')
-  // const emailError = emailValidator(email.value)
-  // const passwordError = checkPassword ? passwordValidator(password.value) : ""
-  // const addressError = nameValidator(address.description, '"Adresse"')
+  if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError || addressError) {
 
-  // if (denomError || siretError || nomError || prenomError || phoneError || emailError || passwordError || addressError) {
+    phone.error = phoneError
+    email.error = emailError
+    password.error = passwordError
 
-  //   phone.error = phoneError
-  //   email.error = emailError
-  //   password.error = passwordError
+    if (isPro) {
+      denom.error = denomError
+      siret.error = siretError
+      var updateErrors = { denom, siret, phone, email, password, addressError, loadingDialog: false }
+    }
 
-  //   if (isPro) {
-  //     denom.error = denomError
-  //     siret.error = siretError
-  //     this.setState({ denom, siret, phone, email, password, addressError, loading: false })
-  //   }
+    else {
+      nom.error = nomError
+      prenom.error = prenomError
+      var updateErrors = { nom, prenom, phone, email, password, addressError, loadingDialog: false }
+    }
 
-  //   else {
-  //     nom.error = nomError
-  //     prenom.error = prenomError
-  //     this.setState({ nom, prenom, phone, email, password, addressError, loading: false })
-  //   }
+    return { isValid: false, updateErrors }
+  }
 
-  //   setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
-  //   return false
-  // }
-
-  return true
+  return { isValid: true }
 }
 
-export const createClient = async function createClient(client, isConnected) {
+export const formatNewUser = function formatNewUser(thisState) {
 
-  const { email, isProspect, ClientId } = client
+  const { isPro, nom, prenom, denom, siret, address, phone, email, password, role, userType, ClientId, userId, isProspect } = thisState
+
+  let user = {
+    isPro,
+    address,
+    phone: phone.value,
+    email: email.value.toLowerCase(),
+    password: password.value,
+
+    createdBy: {
+      id: auth.currentUser.uid,
+      fullName: auth.currentUser.displayName
+    },
+    createdAt: moment().format(),
+    userType,
+    deleted: false
+  }
+
+  if (isPro) {
+    user.denom = denom.value
+    user.siret = siret.value
+    user.fullName = denom.value
+  }
+
+  else if (!isPro) {
+    user.nom = nom.value
+    user.prenom = prenom.value
+    user.fullName = `${prenom.value} ${nom.value}`
+  }
+
+
+  if (userType === "client") {
+    user.ClientId = ClientId
+    user.isProspect = isProspect
+    user.status = "pending"
+    if (!isProspect)
+      user.role = 'Client'
+  }
+
+  else if (userType === "utilisateur") {
+    user.userId = userId
+    user.role = role
+    user.hasTeam = false
+  }
+
+  return user
+}
+
+export const createUser = async function createUser(user, isConnected) {
+
+  const { email, isProspect, ClientId, userId, userType } = user
 
   //1. Check if email has an account (works only ONLINE)
   const emailExist = await checkEmailExistance(email, isConnected)
@@ -149,24 +192,35 @@ export const createClient = async function createClient(client, isConnected) {
     return { error: emailExist.error }
   }
 
-  //2'. CREATE PROSPECT (document only)
-  if (isProspect) {
-    db.collection('Clients').doc(ClientId).set(client)
+  //2. Set collection
+  if (userType === "client") {
+    var collection = "Clients"
+    var id = ClientId
+  }
+  else if (userType === "utilisateur") {
+    var collection = "Users"
+    var id = userId
   }
 
-  //2". CREATE CLIENT (document only) + TF will create account for the user
+  //2'. CREATE PROSPECT (document only)
+  if (isProspect) {
+    db.collection('Clients').doc(ClientId).set(user)
+  }
+
+  //2". CREATE USER/CLIENT (document only) + TF will create account for the user
   else {
     const batch = db.batch()
-    const clientRef = db.collection('Clients').doc(ClientId)
+    const userRef = db.collection(collection).doc(id)
     const newUserRef = db.collection('newUsers').doc(ClientId)
-    batch.set(clientRef, client)
-    batch.set(newUserRef, client)
+    batch.set(userRef, user)
+    batch.set(newUserRef, user)
     batch.commit()
   }
 
   return true
 }
 
+//#DASHBOARD
 export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects, userId) {
   try {
     let turnoverdata = []

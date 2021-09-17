@@ -26,7 +26,7 @@ import EmptyList from "../../components/EmptyList"
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
 import { constants, highRoles } from '../../core/constants'
-import { fetchDocs, fetchTurnoverData, validateClientInputs, fetchDocument, fetchDocuments } from '../../api/firestore-api'
+import { fetchDocs, fetchTurnoverData, fetchDocument, fetchDocuments } from '../../api/firestore-api'
 import { sortMonths, navigateToScreen, nameValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError, countDown } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from '../Dashboard/helpers'
@@ -46,7 +46,6 @@ class Profile extends Component {
         this.passwordValidation = this.passwordValidation.bind(this)
         this.refreshToast = this.refreshToast.bind(this)
         // this.fetchDocs = fetchDocs.bind(this)
-        this.validateClientInputs = validateClientInputs.bind(this)
         this.refreshMonthlyGoals = this.refreshMonthlyGoals.bind(this)
         this.refreshAddress = refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)

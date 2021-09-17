@@ -22,7 +22,7 @@ const shortcutsModel = {
         value: '',
         icon: faClipboardUser,
         colors: { primary: '#6cc2ff', secondary: '#edf8fe' },
-        navigation: { screen: 'CreateClient', params: { prevScreen: 'Shortcuts', isProspect: true } }
+        navigation: { screen: 'CreateClient', params: { prevScreen: 'Dashboard', isProspect: true } }
     },
     createClient: {
         label: 'Nouveau client',
@@ -31,7 +31,7 @@ const shortcutsModel = {
         colors: { primary: '#926fff', secondary: '#f1edfe' },
         navigation: {
             screen: 'CreateClient',
-            params: { prevScreen: 'Shortcuts', isProspect: false }
+            params: { prevScreen: 'Dashboard', isProspect: false }
         }
     },
     createUser: {
@@ -39,28 +39,28 @@ const shortcutsModel = {
         value: '',
         icon: faUserAlt,
         colors: { primary: '#ff79e8', secondary: '#feeefb' },
-        navigation: { screen: 'CreateUser', params: { prevScreen: 'Shortcuts' } }
+        navigation: { screen: 'CreateUser', params: { prevScreen: 'Dashboard' } }
     },
     createProject: {
         label: 'Nouveau projet',
         value: '',
         icon: faConstruction,
         colors: { primary: '#fd9e64', secondary: '#faefe9' },
-        navigation: { screen: 'ClientsManagement', params: { isRoot: false, prevScreen: 'Shortcuts' } }
+        navigation: { screen: 'ClientsManagement', params: { isRoot: false, prevScreen: 'Dashboard' } }
     },
     createTask: {
         label: 'Nouvelle tâche',
         value: '',
         icon: faCalendarAlt,
         colors: { primary: '#577eff', secondary: '#edf1fd' },
-        navigation: { screen: 'CreateTask', params: { prevScreen: 'Shortcuts' } }
+        navigation: { screen: 'CreateTask', params: { prevScreen: 'Dashboard' } }
     },
     createDocument: {
         label: 'Nouveau document',
         value: '',
         icon: faFolder,
         colors: { primary: '#30de62', secondary: '#e7fceb' },
-        navigation: { screen: 'UploadDocument', params: { prevScreen: 'Shortcuts' } }
+        navigation: { screen: 'UploadDocument', params: { prevScreen: 'Dashboard' } }
     }
 }
 

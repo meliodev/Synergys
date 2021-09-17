@@ -16,7 +16,7 @@ import RadioButton from "../../components/RadioButton"
 import MyInput from "../../components/TextInput"
 import Toast from "../../components/Toast"
 import LoadDialog from "../../components/LoadDialog"
-import { CustomIcon } from "../../components";
+import { Button, CustomIcon } from "../../components";
 
 import { auth, db } from '../../firebase'
 import * as theme from "../../core/theme";
@@ -24,6 +24,7 @@ import { constants, errorMessages, roles as allRoles } from "../../core/constant
 import { nameValidator, emailValidator, passwordValidator, generateId, updateField, setToast, load, setAddress, displayError } from "../../core/utils"
 import { checkEmailExistance } from "../../api/auth-api";
 import { faMagic } from "@fortawesome/pro-light-svg-icons";
+import { validateUserInputs, formatNewUser, createUser } from "../../api/firestore-api";
 
 const rolesPicker = {
   3: [
@@ -46,7 +47,7 @@ class CreateUser extends Component {
   constructor(props) {
     super(props)
 
-    this.addUser = this.addUser.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
     this.refreshAddress = this.refreshAddress.bind(this)
     this.setAddress = setAddress.bind(this)
 
@@ -56,18 +57,22 @@ class CreateUser extends Component {
     this.userId = generateId('GS-US-')
 
     this.state = {
-      role: 'Admin',
+      userId: this.userId,
+      role: 'Poseur',
       checked: 'first', //professional/Particular
       isPro: false,
-      nom: { value: '', error: '' },
-      prenom: { value: '', error: '' },
+      nom: { value: 'abc', error: '' },
+      prenom: { value: 'def', error: '' },
       denom: { value: "", error: "" },
       siret: { value: "", error: "" },
-      address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
+      address: { description: 'qfgqefv', place_id: '', marker: { latitude: '', longitude: '' } },
       addressError: '',
-      email: { value: "", error: "" },
-      phone: { value: "", error: '' },
-      password: { value: '', error: '', show: false },
+      email: { value: "hicham@digital-french-touch.com", error: "" },
+      //"poseur123456@eqx-software.com"
+      phone: { value: "+33 55 55 55", error: '' },
+      password: { value: '123456789', error: '', show: false },
+
+      userType: "utilisateur",
 
       loading: false,
       loadingDialog: false,
@@ -123,74 +128,41 @@ class CreateUser extends Component {
     return true
   }
 
-  async addUser(uid, overWrite) {
+  async handleSubmit(uid, overWrite) {
     Keyboard.dismiss()
 
-    const { isConnected } = this.props.network
-    if (!isConnected) {
-      Alert.alert('Pas de connection internet', "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur.")
-      return
-    }
-
     this.setState({ loadingDialog: true })
-    let { role, isPro, nom, prenom, denom, siret, address, phone, email, password } = this.state
 
-    //1. Validate inputs
-    const isValid = await this.validateInputs()
+    //1. Verify
+    const { isValid, updateErrors } = validateUserInputs(this.state) //#readyToExternalize
     if (!isValid) {
-      this.setState({ loadingDialog: false })
+      this.setState(updateErrors)
+      setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
       return
     }
 
-    //Validate if email address already exist
-    const emailExist = await checkEmailExistance(email.value)
-    if (emailExist) {
+    //2. Format user
+    const user = formatNewUser(this.state)
+    const { isConnected } = this.props.network
+
+    //3. Create user doc
+    const response = await createUser(user, isConnected) //#readyToExternalize
+    const { error } = response
+
+    if (error) {
       this.setState({ loadingDialog: false })
-      displayError({ message: errorMessages.auth.emailExist })
-      return
+      displayError(error)
     }
 
-    //2. ADDING USER DOCUMENT
-    let user = {
-      address,
-      phone: phone.value,
-      email: email.value.toLowerCase(),
-      role,
-      password: password.value,
-      userType: 'utilisateur',
-      createdBy: this.props.currentUser,
-      createdAt: moment().format(),
-    }
-
-    if (isPro) {
-      user.denom = denom.value
-      user.siret = siret.value
-      user.isPro = true
-      user.fullName = denom.value
-    }
-
-    else if (!isPro) {
-      user.nom = nom.value
-      user.prenom = prenom.value
-      user.isPro = false
-      user.fullName = prenom.value + ' ' + nom.value
-    }
-
-    if (!isConnected) {
-      Alert.alert('Pas de connection internet', "Veuillez vous connecter au réseau pour pouvoir créer un nouvel utilisateur.")
-      return
-    }
-
-    await db.collection('newUsers').doc(this.userId).set(user)
-    setTimeout(() => { //wait for a triggered cloud function to end (creating user...)
-      this.setState({ loadingDialog: false })
-
-      if (this.props.navigation.state.params && this.props.navigation.state.params.onGoBack) {
-        this.props.navigation.state.params.onGoBack()
+    else {
+      const { navigation } = this.props
+      if (navigation.state.params && navigation.state.params.onGoBack) {
+        navigation.state.params.onGoBack()
       }
-
-      this.props.navigation.navigate(this.prevScreen)
-    }, 6000)
+      this.setState({ loadingDialog: false }, () => {
+        navigation.navigate(this.prevScreen)
+      })
+    }
   }
 
   refreshAddress(address) {
@@ -208,8 +180,14 @@ class CreateUser extends Component {
     const roles = rolesPicker[roleLevel]
 
     return (
-      <View style={{ flex: 1 }}>
-        <Appbar close={!loading} title titleText={this.title} check={!loading} handleSubmit={this.addUser} />
+      <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        <Appbar
+          close={!loading}
+          title
+          titleText={this.title}
+        // check={!loading}
+        // handleSubmit={this.handleSubmit}
+        />
 
         {loading ?
           <Loading size='large' />
@@ -217,7 +195,7 @@ class CreateUser extends Component {
           <ScrollView
             keyboardShouldPersistTaps="always"
             style={{ backgroundColor: theme.colors.white }}
-            contentContainerStyle={{ backgroundColor: '#fff', padding: constants.ScreenWidth * 0.05 }}
+            contentContainerStyle={{ backgroundColor: '#fff', padding: theme.padding }}
           >
             <MyInput
               label="Identifiant utilisateur"
@@ -353,6 +331,14 @@ class CreateUser extends Component {
 
           </ScrollView >
         }
+
+        <Button
+          mode="contained"
+          onPress={this.handleSubmit}
+          backgroundColor={theme.colors.primary}
+          containerStyle={{ alignSelf: 'flex-end', marginTop: 25, marginRight: theme.padding }}>
+          Valider
+        </Button>
       </View>
     )
   }

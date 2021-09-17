@@ -22,7 +22,7 @@ import { CustomIcon } from "../../components";
 import { auth } from "../../firebase";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { createClient, validateClientInputs } from "../../api/firestore-api";
+import { validateUserInputs, formatNewUser, createUser } from "../../api/firestore-api";
 import { generateId, updateField, load, navigateToScreen, setAddress, displayError } from "../../core/utils"
 import { faMagic } from "@fortawesome/pro-light-svg-icons";
 
@@ -33,9 +33,6 @@ class CreateClient extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.refreshAddress = this.refreshAddress.bind(this)
         this.setAddress = setAddress.bind(this)
-        this.validateClientInputs = validateClientInputs.bind(this)
-        this.createClient = createClient.bind(this)
-
         this.prevScreen = this.props.navigation.getParam('prevScreen', 'UsersManagement')
         this.ClientId = generateId('GS-CL-')
 
@@ -45,19 +42,23 @@ class CreateClient extends Component {
         this.titleText = this.isProspect ? this.titleText : `${this.titleText} en cours`
 
         this.state = {
+            isProspect: this.isProspect,
+            ClientId: this.ClientId,
             checked: 'first', //professional/Particular
             isPro: false,
-            nom: { value: 'ddd', error: '' },
-            prenom: { value: 'fff', error: '' },
+            nom: { value: '000', error: '' },
+            prenom: { value: 'Prospect', error: '' },
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
 
             address: { description: 'qsrf', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            email: { value: "test19@digital-french-touch.com", error: "" },
+            email: { value: "prospect000@digital-french-touch.com", error: "" },
             phone: { value: "+33 55 55 55", error: '' },
 
             password: { value: 'srfqdrf', error: '', show: false },
+
+            userType: "client",
 
             loading: true,
             loadingDialog: false,
@@ -71,57 +72,25 @@ class CreateClient extends Component {
         load(this, false)
     }
 
-    formatClient() {
-        const { isPro, nom, prenom, denom, siret, address, phone, email, password, loading } = this.state
-
-        let user = {
-            isPro,
-            address,
-            phone: phone.value,
-            email: email.value.toLowerCase(),
-            password: password.value,
-            ClientId: this.ClientId,
-            isProspect: this.isProspect,
-            createdBy: {
-                id: auth.currentUser.uid,
-                fullName: auth.currentUser.displayName
-            },
-            createdAt: moment().format(),
-            userType: 'client',
-            status: "pending",
-            deleted: false
-        }
-
-        if (isPro) {
-            user.denom = denom.value
-            user.siret = siret.value
-            user.fullName = denom.value
-        }
-
-        else if (!isPro) {
-            user.nom = nom.value
-            user.prenom = prenom.value
-            user.fullName = `${prenom.value} ${nom.value}`
-        }
-
-        if (!this.isProspect)
-            user.role = 'Client'
-
-        return user
-    }
-
     handleSubmit = async () => {
         Keyboard.dismiss()
 
-        const user = this.formatClient()
-        const { isConnected } = this.props.network
-
-        const isValid = this.validateClientInputs(user)
-        if (!isValid) return
-
         this.setState({ loadingDialog: true })
 
-        const response = await createClient(user, isConnected)
+        //1. Verify
+        const { isValid, updateErrors } = validateUserInputs(this.state) //#readyToExternalize
+        if (!isValid) {
+            this.setState(updateErrors)
+            setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
+            return
+        }
+
+        //2. Format user
+        const user = formatNewUser(this.state) //#readyToExternalize
+        const { isConnected } = this.props.network
+
+        //3. Create user doc
+        const response = await createUser(user, isConnected) //#readyToExternalize
         const { error } = response
 
         if (error) {
