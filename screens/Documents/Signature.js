@@ -322,7 +322,7 @@ class Signature extends Component {
     }
 
     handleSingleTap = async (page, x, y, isAuto, signatures) => {
-        console.log("signatures", signatures)
+
         const { pdfEditMode } = this.state
         if (!pdfEditMode) return
         loadLog(this, true, 'Début du processus de signature...')
@@ -350,13 +350,14 @@ class Signature extends Component {
                     for (const s of signatures) {
                         const { pageIndex, position } = s
                         const { x, y } = position
-                        pages[pageIndex].drawText(signature, {
-                            x,
-                            y,
-                            size: 10,
-                            lineHeight: 10,
-                            color: rgb(0, 0, 0),
-                        })
+                        if (pageIndex < pages.length)
+                            pages[pageIndex].drawText(signature, {
+                                x,
+                                y,
+                                size: 10,
+                                lineHeight: 10,
+                                color: rgb(0, 0, 0),
+                            })
                     }
                 }
 
@@ -568,7 +569,7 @@ class Signature extends Component {
 
     onAcceptTerms() {
         //Auto Sign
-        const isAutoSign = false && autoSignDocs.includes(this.DocumentType) //#task: add isGenerated as condition
+        const isAutoSign = autoSignDocs.includes(this.DocumentType) //#task: add isGenerated as condition
 
         if (isAutoSign) {
             const signatures = signPositions[this.DocumentType]

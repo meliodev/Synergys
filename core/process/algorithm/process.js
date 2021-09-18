@@ -2,20 +2,20 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { db, functions } from '../firebase'
+import { db, functions } from '../../../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
-import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from './utils'
-import { errorMessages, lastAction, phases } from './constants';
+import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from '../../utils'
+import { errorMessages, lastAction, phases } from '../../constants';
 
 //#PROCESS ALGORITHM/LOGIC
 export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
 
     try {
-        if (!processModel || processModel === undefined || currentProcess === undefined) {
+        if (!processModel || processModel === undefined || !currentProcess || currentProcess === undefined) {
             Alert.alert(
                 'Erreur inattendue',
-                "Le model du process n'a pas été initialisé. Veuillez redémarrer l'application."
+                "Le model du process n'a pas été initialisé."
             )
             return currentProcess
         }
@@ -24,14 +24,18 @@ export const processHandler = async (processModel, currentProcess, projectSecond
         let process = _.cloneDeep(currentProcess)
 
         let loopHandler = true
+
         while (loopHandler) {
+
             //0. Initialize process with 1st phase/1st step
             if (Object.keys(process).length === 1) {
                 process = initProcess(processModel, process, projectSecondPhase)
             }
 
             var { currentPhaseId, currentStepId } = getCurrentStep(process)
-            let { actions } = process[currentPhaseId].steps[currentStepId] //Actions of current step
+
+            //Actions of current step
+            let { actions } = process[currentPhaseId].steps[currentStepId]
             let allActionsValid = true
             let nextStep = ''
             let nextPhase = ''
@@ -41,40 +45,32 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             actions = actions.filter((a) => a !== null)
             if (actions.length > 0) {
 
-                actions = await configureActions(actions, attributes, process) //fill empty params (projectId, clienId, TaskId...)
+                //Fill empty params (projectId, clienId, TaskId...)
+                actions = await configureActions(actions, attributes, process)
 
-                if (actions[0].cloudFunction) {
-                    const sendEmail = functions.httpsCallable('sendEmail')
-                    const { subject, dest, projectId, attachments } = actions[0].cloudFunction.params
-                    const html = `<b>${subject} du projet ${attributes.project.name}</b>`
-                    const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
-                    if (isSent.data)
-                        await db.collection(actions[0].collection).doc(projectId).update({ finalBillSentViaEmail: true })
-                    else {
-                        throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
-                        return currentProcess
-                    }
+                //Send Bill & Attestation fluide
+                const firstAction = actions[0]
+                if (firstAction.cloudFunction) {
+                    const projectName = attributes.project.name
+                    await handleSendBillEmail(firstAction, projectName)
                 }
 
                 var verif_res = await verifyActions(actions, attributes, process)
 
+                //Update actions of current step
                 actions = verif_res.verifiedActions
-                allActionsValid = verif_res.allActionsValid
-                nextStep = verif_res.nextStep
-                nextPhase = verif_res.nextPhase
-
                 actions = setActionTimeLog(actions)
                 process[currentPhaseId].steps[currentStepId].actions = actions
+
+                //Get nextStep/nextPhase (if available)
+                nextStep = verif_res.nextStep
+                nextPhase = verif_res.nextPhase
+                //allActionsValid = verif_res.allActionsValid
             }
 
             //3'. Found nextStep/nextPhase -> All actions valid -> Transition
-            for (const action of actions) {
-                console.log("next phase...", action.id, action.nextPhase)
-            }
-
-            console.log('NEXT PHASE::::::::::::::::::', nextPhase)
-            if (nextStep || nextPhase) { //Next step/phase found means we are on last action of current step -> we do transition.
-                console.log('TRANSITION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+            //ie: Next step/phase found means we are on last action of current step -> we do transition.
+            if (nextStep || nextPhase) {
                 const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
                 process = transitionRes.process
                 const { processEnded } = transitionRes
@@ -82,10 +78,7 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             }
 
             //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
-            else {
-                console.log('NO TRANSITION.................')
-                loopHandler = false
-            }
+            else loopHandler = false
         }
 
         return process || currentProcess
@@ -99,6 +92,21 @@ export const processHandler = async (processModel, currentProcess, projectSecond
 
 }
 
+const handleSendBillEmail = async (action, projectName) => {
+    try {
+        const sendEmail = functions.httpsCallable('sendEmail')
+        const { subject, dest, projectId, attachments } = action.cloudFunction.params
+        const html = `<b>${subject} du projet ${projectName}</b>`
+        const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
+        if (isSent.data)
+            await db.collection(action.collection).doc(projectId).update({ finalBillSentViaEmail: true })
+
+        else throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
+    }
+    catch (e) {
+        throw new Error(e)
+    }
+}
 
 export const checkForcedValidations = (actions) => {
     for (let action of actions) {
@@ -168,6 +176,7 @@ const configureActions = async (actions, attributes, process) => {
 
     try {
         let query
+
         for (let action of actions) {
 
             let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav, choices } = action
@@ -239,8 +248,9 @@ const configureActions = async (actions, attributes, process) => {
 
             const selectedQueryFilters = queryFiltersUpdateNav || queryFilters || null
 
-            if (collection && collection !== '' && selectedQueryFilters && selectedQueryFilters.length > 0) {
+            if (selectedQueryFilters && selectedQueryFilters.length > 0) {
 
+                //Set query
                 query = db.collection(collection)
                 selectedQueryFilters.forEach(({ filter, operation, value }) => {
                     query = query.where(filter, operation, value)
@@ -249,26 +259,26 @@ const configureActions = async (actions, attributes, process) => {
 
                 //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
-                    if (queryFiltersUpdateNav) {
-                        if (collection === 'Agenda')
-                            action.screenParams.TaskId = ''
-                        if (collection === 'Documents')
-                            action.screenParams.DocumentId = ''
-                    }
+                    if (collection === 'Agenda')
+                        action.screenParams.TaskId = ''
+                    if (collection === 'Documents')
+                        action.screenParams.DocumentId = ''
+                    action.documentId === ''
                 }
 
+                //Set Navigation Params (exp: temporary access before upload completes)
                 else {
+                    const docId = querysnapshot.docs[0].id
                     if (action.screenParams) {
                         if (collection === 'Agenda')
-                            action.screenParams.TaskId = querysnapshot.docs[0].id
+                            action.screenParams.TaskId = docId
                         if (collection === 'Documents')
-                            action.screenParams.DocumentId = querysnapshot.docs[0].id
+                            action.screenParams.DocumentId = docId
                     }
-                    if (documentId === '') {
-                        action.documentId = querysnapshot.docs[0].id
-                    }
+                    action.documentId = docId
                 }
             }
+
         }
 
         return actions
@@ -378,6 +388,7 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     try {
         const collection = actionsSameDoc[0]['collection']
         const documentId = actionsSameDoc[0]['documentId']
+        console.log('********', actionsSameDoc[0].id, actionsSameDoc[0]['documentId'])
         let allActionsSameDocValid = true
         let nextStep = ''
         let nextPhase = ''
@@ -388,6 +399,7 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         for (let action of actionsSameDoc) {
 
             if (!doc.exists) {
+                console.log('123456', documentId)
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }

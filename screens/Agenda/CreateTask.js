@@ -79,6 +79,7 @@ class CreateTask extends Component {
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.TaskId = this.props.navigation.getParam('TaskId', '')
+
         this.isEdit = this.TaskId ? true : false
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
         this.title = this.isProcess && this.taskType ? this.taskType.value : this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
@@ -389,7 +390,7 @@ class CreateTask extends Component {
                 load(this, false)
                 this.handleConflicts(overlappingTasks, task)
                 return
-            }
+            } 
 
             //7. Persist task(s)
             await this.persistTasks(tasks)
@@ -692,14 +693,17 @@ class CreateTask extends Component {
                 contentContainerStyle={{ flex: 1, paddingHorizontal: theme.padding }
                 }
             >
+
                 {!this.hideAssignedTo && this.renderAssignedTo(canWrite)}
                 {this.renderTimeslotForm(canWrite)}
                 {showTasksConflicts && this.renderTasksConflicts(canWrite)}
+
                 <Toast
                     containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
                     message={toastMessage}
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })} />
+                    
             </ScrollView >
         )
     }

@@ -23,7 +23,7 @@ import { sizes } from '../../core/theme'
 import * as theme from '../../core/theme'
 import { constants, errorMessages } from "../../core/constants"
 import { Alert } from "react-native"
-import { groupBy } from "../../core/process"
+import { groupBy } from "../../core/process/algorithm/process"
 
 //urls
 const urlForm = "https://firebasestorage.googleapis.com/v0/b/projectmanagement-b9677.appspot.com/o/Templates%2Fdod_character.pdf?alt=media&token=b2c00766-4377-4d31-ad38-fad84eac5376"
@@ -1097,6 +1097,49 @@ export default class PdfGeneration extends Component {
                 copiedPagesA.forEach((page) => mergedPdf.addPage(page))
                 const copiedPagesB = await mergedPdf.copyPages(termsPdf, termsPdf.getPageIndices())
                 copiedPagesB.forEach((page) => mergedPdf.addPage(page))
+                
+                //CERFA: Delete existing data (put white square) & set instead Client info
+                const lastPageIndex = mergedPdf.getPages().length - 1
+                const cerfaClient = [
+                    {
+                        pdfConfig: {
+                            x: 125,
+                            y: 689,
+                            width: 90,
+                            height: 10,
+                        },
+                        text: client.fullName
+                    },
+                    {
+                        pdfConfig: {
+                            x: 100,
+                            y: 678,
+                            width: 90,
+                            height: 10,
+                        },
+                        text: this.project.address.description
+                    },
+                    {
+                        pdfConfig: {
+                            x: 228,
+                            y: 678,
+                            width: 242,
+                            height: 10,
+                        }
+                    }
+                ]
+
+                for (const item of cerfaClient) {
+                    const color = { color: rgb(1, 1, 1) }
+                    const rectangle = { ...item.pdfConfig, ...color }
+                    mergedPdf.getPages()[lastPageIndex].drawRectangle(rectangle)
+                    if (item.text) {
+                        const moreConfig = { size: caption, font: timesRomanFont }
+                        const textConfig = { ...item.pdfConfig, ...moreConfig }
+                        mergedPdf.getPages()[lastPageIndex].drawText(item.text, textConfig)
+                    }
+                }
+
                 pdfBytes = await mergedPdf.save()
             }
 

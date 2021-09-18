@@ -112,10 +112,16 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique préalable' }
+                            { filter: 'type', operation: '==', value: 'Visite technique préalable' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, dynamicType: true },
+                        screenParams: {
+                            project: null,
+                            taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] },
+                            dynamicType: true
+                        },
                         type: 'auto',
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
@@ -131,7 +137,9 @@ export const version5 = {
                         properties: ['address', 'description'],
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique préalable' }
+                            { filter: 'type', operation: '==', value: 'Visite technique préalable' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true }, //#dynamic
@@ -150,7 +158,9 @@ export const version5 = {
                         documentId: '',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique préalable' }
+                            { filter: 'type', operation: '==', value: 'Visite technique préalable' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['tech'] }, dynamicType: true },
@@ -293,7 +303,9 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Présentation étude' }
+                            { filter: 'type', operation: '==', value: 'Présentation étude' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, dynamicType: true },
@@ -361,7 +373,8 @@ export const version5 = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Présentation étude' },
-                            { filter: 'status', operation: '!=', value: 'Annulé' } //Check if there is an active RDN
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, dynamicType: true },
@@ -740,7 +753,7 @@ export const version5 = {
                 title: "Création d'une visite technique",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 4,
-                actions: [ 
+                actions: [
                     {
                         //General
                         id: 'checkTechContact',
@@ -778,7 +791,9 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' }
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
@@ -811,7 +826,9 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' }
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
@@ -828,7 +845,9 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' }
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
@@ -857,7 +876,9 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' }
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask',
                         screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
@@ -888,6 +909,8 @@ export const version5 = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
@@ -922,7 +945,9 @@ export const version5 = {
                         collection: 'Agenda',
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Installation' }
+                            { filter: 'type', operation: '==', value: 'Installation' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Installation', value: 'Installation', natures: ['tech'] }, dynamicType: true },
@@ -949,6 +974,8 @@ export const version5 = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
@@ -970,6 +997,8 @@ export const version5 = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Installation' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         type: 'manual',
                         verificationType: 'multiple-choices',
@@ -1054,7 +1083,8 @@ export const version5 = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Rattrapage' },
-                            { filter: 'status', operation: '==', value: 'En cours' }
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: { project: null, taskType: { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, dynamicType: true },
@@ -1073,7 +1103,8 @@ export const version5 = {
                         queryFilters: [
                             { filter: 'project.id', operation: '==', value: '' },
                             { filter: 'type', operation: '==', value: 'Rattrapage' },
-                            { filter: 'status', operation: '==', value: 'En cours' }
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'status', operation: '!=', value: 'Annulé' },
                         ],
                         type: 'manual',
                         verificationType: 'multiple-choices',

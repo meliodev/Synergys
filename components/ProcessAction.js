@@ -17,12 +17,12 @@ import CustomIcon from './CustomIcon'
 import StepProgress from './process/StepProgress'
 import Loading from './Loading'
 
-import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, checkForcedValidations } from '../core/process'
+import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, processHandler, checkForcedValidations } from '../core/process/algorithm/process'
 import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
-import { constants, errorMessages, items_scrollTo } from "../core/constants"
-import { processModels } from '../core/processModels/index'
+import { constants, errorMessages } from "../core/constants"
+import { processModels } from '../core/process/models/index'
 import ProcessContainer from "../screens/src/container/ProcessContainer"
 
 //component
@@ -225,7 +225,7 @@ class ProcessAction extends Component {
                 pressedAction: currentAction
             }, async () => {
                 await countDown(500)
-                const { responsable, type, scrollTo } = currentAction
+                const { responsable, type } = currentAction
                 const { process, currentPhase } = this.state
 
                 //Check user privilleges on action
@@ -246,16 +246,6 @@ class ProcessAction extends Component {
                             loadingMessage: this.initialLoadingMessage,
                             showModal: true
                         })
-                    }
-
-                    //Sroll to item
-                    else if (scrollTo) {
-                        const { screen, itemId } = scrollTo
-                        this.setState({
-                            loading: false,
-                            loadingMessage: this.initialLoadingMessage
-                        })
-                        this.props.scrollTo(items_scrollTo[screen][itemId])
                     }
 
                     //Navigation

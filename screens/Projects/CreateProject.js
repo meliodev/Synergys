@@ -26,7 +26,7 @@ import { notAvailableOffline, handleFirestoreError } from '../../core/exceptions
 
 import { fetchDocs, fetchDocument } from "../../api/firestore-api";
 import { uploadFiles } from "../../api/storage-api";
-import { getLatestProcessModelVersion } from '../../core/process'
+import { getLatestProcessModelVersion } from '../../core/process/algorithm/process'
 
 import { connect } from 'react-redux'
 import ModalCheckBoxes from '../../components/ModalCheckBoxes';
@@ -84,18 +84,21 @@ class CreateProject extends Component {
 
         this.initialState = {}
         this.isInit = true
+
+        //User/Role
         this.currentUser = firebase.auth().currentUser
         this.isCurrentHighRole = highRoles.includes(this.props.role.id)
+        this.isClient = this.props.role.id === 'client'
 
         this.ProjectId = this.props.navigation.getParam('ProjectId', '')
         this.isEdit = this.ProjectId !== ""
         this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-PR-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
-        this.isClient = this.props.role.id === 'client'
-        this.storageRefPath = `/Projects/${this.ProjectId}/Images/`
 
+        //Pre-fill fields
         this.client = this.props.navigation.getParam('client', { id: '', fullName: '', email: '', role: '' })
         this.address = this.props.navigation.getParam('address', { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' })
+        this.comContact = this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' }
 
         this.state = {
             //TEXTINPUTS
@@ -115,7 +118,7 @@ class CreateProject extends Component {
             color: theme.colors.primary,
             process: null,
 
-            comContact: this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' },
+            comContact: this.comContact,
             techContact: { id: '', fullName: '', email: '', role: '' },
             intervenant: null,
 
@@ -165,7 +168,7 @@ class CreateProject extends Component {
                 tasks: !this.isEdit,
                 activity: !this.isEdit,
                 photos: !this.isEdit
-            }
+            },
         }
     }
 
@@ -347,7 +350,8 @@ class CreateProject extends Component {
             const { newAttachments } = this.state
             if (newAttachments.length > 0) {
                 this.title = 'Exportation des images...'
-                const uploadedImages = await this.uploadFiles(newAttachments, this.storageRefPath)
+                const storageRefPath = `/Projects/${this.ProjectId}/Images/`
+                const uploadedImages = await this.uploadFiles(newAttachments, storageRefPath)
                 this.title = this.isEdit ? "Modifier le projet" : "Nouveau projet"
                 if (uploadedImages) {
                     attachments = attachments.concat(uploadedImages)
@@ -576,7 +580,7 @@ class CreateProject extends Component {
         load(this, false)
     }
 
-    renderTasksForm() {
+    renderTasksSection() {
         const canCreateTasks = this.props.permissions.tasks.canCreate
         const {
             tasksList,
@@ -698,31 +702,345 @@ class CreateProject extends Component {
         this.setState({ sectionsExpansion })
     }
 
-    render() {
+    renderProcessView() {
+
+    }
+
+    renderStandardView(canWrite, isConnected) {
+
         let {
-            client, name, workTypes, note, address, state, step, bill, color, process,
+            client, name, workTypes, note, address, state, step, bill, color,
             createdAt, createdBy, editedAt, editedBy,
             documentsList, documentTypes, taskTypes, comContact, techContact,
-            nameError, loading, docNotFound, toastMessage, toastType,
+            nameError, loading,
             isBlockedUpdates, sectionsExpansion
         } = this.state
+
+        //Privilleges
+        const canCreateDocument = this.props.permissions.documents.canCreate
+        const canReadTasks = this.props.permissions.tasks.canRead
+
+        //Sections
+        const showProcessAction = this.isEdit && this.project && this.state.process
+        const showBillSection = this.isEdit && bill
+        const showContactsSection = this.comContact.id === "" || this.isEdit
+
+        const isStepTech = techSteps.includes(step)
+        const prerequiredFields = [name, client.id, address.description, comContact.id]
+        let showTasksSection = !prerequiredFields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
+        showTasksSection = canReadTasks && (this.isEdit || !this.isEdit && showTasksSection)
+
+        //Fields
+        const showTechContact = this.isEdit
+        const showClient = !this.isClient && (this.client.id === "" || this.isEdit)
+        const showAddress = !this.isClient && (this.client.id === "" || this.isEdit)
+
+        return (
+            <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="always">
+
+                {showProcessAction &&
+                    <ProcessAction
+                        process={this.state.process}
+                        project={this.project}
+                        clientId={client.id}
+                        step={step}
+                        canUpdate={canWrite && !this.isClient}
+                        isAllProcess={false}
+                        role={this.props.role}
+                    />
+                }
+
+                {this.isEdit &&
+                    <ActivitySection
+                        createdBy={createdBy}
+                        createdAt={createdAt}
+                        editedBy={editedBy}
+                        editedAt={editedAt}
+                        navigation={this.props.navigation}
+                        isExpanded={sectionsExpansion["activity"]}
+                        onPressSection={() => this.toggleSection("activity")}
+                        formSectionContainerStyle={{ marginBottom: 1 }}
+                    />
+                }
+
+                <FormSection
+                    sectionTitle='Informations générales'
+                    sectionIcon={faInfoCircle}
+                    isLoading={loading}
+                    isExpanded={sectionsExpansion["generalInfo"]}
+                    onPressSection={() => this.toggleSection("generalInfo")}
+                    containerStyle={{ marginBottom: 1 }}
+                    form={
+                        <View style={{ flex: 1 }}>
+
+                            {this.isEdit &&
+                                <MyInput
+                                    label="Numéro du projet"
+                                    returnKeyType="done"
+                                    value={this.ProjectId}
+                                    editable={false}
+                                    disabled
+                                />
+                            }
+
+                            <MyInput
+                                label="Nom du projet *"
+                                returnKeyType="done"
+                                value={name}
+                                onChangeText={name => this.setState({ name, nameError: '' })}
+                                error={nameError}
+                                errorText={nameError}
+                                multiline={true}
+                                editable={canWrite && !this.isClient}
+                            // autoFocus={!this.isEdit}
+                            />
+
+                            {!this.isClient &&
+                                <Picker
+                                    returnKeyType="next"
+                                    value={step}
+                                    error={!!step.error}
+                                    errorText={step.error}
+                                    selectedValue={step}
+                                    onValueChange={(step) => this.setState({ step })}
+                                    title="Étape *"
+                                    elements={steps}
+                                    enabled={canWrite && !this.isClient}
+                                />
+                            }
+
+                            {!this.isClient && this.isEdit &&
+                                <Picker
+                                    returnKeyType="next"
+                                    value={state}
+                                    selectedValue={state}
+                                    onValueChange={(state) => this.setState({ state })}
+                                    title="État *"
+                                    elements={states}
+                                    enabled={canWrite && !this.isClient}
+                                />
+                            }
+
+                            {this.isClient &&
+                                <MyInput
+                                    label="Phase *"
+                                    value={step + ' ' + state}
+                                    // error={nameError}
+                                    // errorText={nameError}
+                                    multiline={true}
+                                    editable={false}
+                                />
+                            }
+
+                            <ModalCheckBoxes
+                                items={workTypes}
+                                itemsFetched={true}
+                                updateItems={(workTypes) => this.setState({ workTypes })}
+                                onPressItem={(item) => console.log(item)}
+                            />
+
+                            {/* <ColorPicker
+                            label='Couleur du projet'
+                            selectedColor={color}
+                            updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
+                            editable={canWrite}
+                        /> */}
+                        </View>
+                    } />
+
+
+                {showClient && showAddress &&
+                    <FormSection
+                        sectionTitle='Client'
+                        sectionIcon={faUser}
+                        isExpanded={sectionsExpansion["client"]}
+                        onPressSection={() => this.toggleSection("client")}
+                        containerStyle={{ marginBottom: 1 }}
+                        form={
+                            <View style={{ flex: 1 }}>
+                                {showClient &&
+                                    <ItemPicker
+                                        onPress={() => {
+                                            navigateToScreen(
+                                                this,
+                                                'ListClients',
+                                                { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false }
+                                            )
+                                        }}
+                                        label='Client concerné *'
+                                        value={client.fullName}
+                                        errorText={client.error}
+                                        editable={canWrite && !this.isEdit && this.client.id === ""}
+                                    />
+                                }
+
+                                {showAddress &&
+                                    <AddressInput
+                                        offLine={!isConnected}
+                                        onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
+                                        onChangeText={this.setAddress}
+                                        clearAddress={() => this.setAddress('')}
+                                        address={address}
+                                        addressError={address.error}
+                                        editable={canWrite}
+                                        isEdit={this.isEdit}
+                                    />
+                                }
+
+                            </View>
+                        }
+                    />
+                }
+
+                {showContactsSection &&
+                    < FormSection
+                        sectionTitle='Contacts'
+                        sectionIcon={faAddressBook}
+                        isExpanded={sectionsExpansion["contacts"]}
+                        onPressSection={() => this.toggleSection("contacts")}
+                        containerStyle={{ marginBottom: 1 }}
+                        form={
+                            <View style={{ flex: 1 }}>
+                                <ItemPicker
+                                    onPress={() => navigateToScreen(this, 'ListEmployees', {
+                                        onGoBack: this.refreshComContact,
+                                        prevScreen: 'CreateProject',
+                                        isRoot: false,
+                                        titleText: 'Choisir un commercial',
+                                        query: db.collection('Users').where('role', '==', 'Commercial').where('deleted', '==', false)
+                                    })
+                                    }
+                                    label="Contact commercial *"
+                                    value={comContact.fullName || ''}
+                                    error={!!comContact.error}
+                                    errorText={comContact.error}
+                                    editable={canWrite && !this.isClient}
+                                />
+
+                                {showTechContact &&
+                                    <ItemPicker
+                                        onPress={() => navigateToScreen(this, 'ListEmployees', {
+                                            onGoBack: this.refreshTechContact,
+                                            prevScreen: 'CreateProject',
+                                            isRoot: false,
+                                            titleText: 'Choisir un poseur',
+                                            query: db.collection('Users').where('role', '==', 'Poseur').where('deleted', '==', false)
+                                        })
+                                        }
+                                        label="Contact technique *"
+                                        value={techContact.fullName || ''}
+                                        error={!!techContact.error}
+                                        errorText={techContact.error}
+                                        editable={canWrite && highRoles.includes(this.props.role.id)}
+                                    />
+                                }
+                            </View>
+                        }
+                    />
+                }
+
+                {this.isEdit &&
+                    <FormSection
+                        sectionTitle='Documents'
+                        sectionIcon={faFolder}
+                        isExpanded={sectionsExpansion["documents"]}
+                        onPressSection={() => this.toggleSection("documents")}
+                        containerStyle={{ marginBottom: 1 }}
+                        form={
+                            <View style={{ flex: 1 }}>
+                                {canCreateDocument && canWrite &&
+                                    <Text
+                                        onPress={() => this.props.navigation.navigate('UploadDocument', { project: this.project })}
+                                        style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 16 }]}>+ Ajouter un document</Text>
+                                }
+
+                                <List.AccordionGroup
+                                    expandedId={this.state.expandedId}
+                                    onAccordionPress={(expandedId) => {
+                                        if (this.state.expandedId === expandedId)
+                                            this.setState({ expandedId: '' })
+                                        else
+                                            this.setState({ expandedId })
+                                    }}>
+                                    {documentTypes.map((type) => {
+                                        let filteredDocuments = documentsList.filter((doc) => doc.type === type)
+                                        return (
+                                            <List.Accordion showArrow title={type} id={type} titleStyle={theme.customFontMSregular.body}>
+                                                {this.renderAttachments(filteredDocuments, 'pdf', false)}
+                                            </List.Accordion>
+                                        )
+                                    })}
+                                </List.AccordionGroup>
+                            </View>
+                        }
+                    />
+                }
+
+                {showTasksSection && this.renderTasksSection()}
+
+                {showBillSection &&
+                    <FormSection
+                        sectionTitle='Facturation'
+                        sectionIcon={faEuroSign}
+                        isExpanded={sectionsExpansion["facturation"]}
+                        onPressSection={() => this.toggleSection("facturation")}
+                        containerStyle={{ marginBottom: 1 }}
+                        form={
+                            <View style={{ flex: 1 }}>
+                                <MyInput
+                                    label="Montant facturé (€)*"
+                                    returnKeyType="done"
+                                    keyboardType='numeric'
+                                    value={bill.amount}
+                                    onChangeText={amount => {
+                                        bill.amount = amount
+                                        this.setState({ bill })
+                                    }}
+                                    editable={canWrite && this.isCurrentHighRole}
+                                // error={!!price.error}
+                                // errorText={price.error}
+                                />
+                            </View>
+                        }
+                    />
+                }
+
+                {this.renderPlacePictures(canWrite, isConnected)}
+
+                <FormSection
+                    hide={!this.isEdit}
+                    sectionTitle='Bloc Notes'
+                    sectionIcon={faQuoteRight}
+                    formContainerStyle={{ paddingTop: 25 }}
+                    form={
+                        <View style={{ flex: 1 }}>
+                            <TextInput
+                                underlineColorAndroid="transparent"
+                                placeholder="Rapportez des notes utiles..."
+                                placeholderTextColor={theme.colors.gray_dark}
+                                numberOfLines={7}
+                                multiline={true}
+                                onChangeText={note => this.setState({ note })}
+                                value={note}
+                                style={styles.note}
+                                autoCapitalize='sentences'
+                                editable={canWrite} />
+                        </View>
+                    }
+                />
+
+            </ScrollView>
+
+        )
+    }
+
+    render() {
+        const { loading, docNotFound, toastMessage, toastType, isBlockedUpdates } = this.state
         const { isConnected } = this.props.network
 
         //Privilleges
         let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
         const canWrite = (canUpdate && this.isEdit && !isBlockedUpdates || canCreate && !this.isEdit && !isBlockedUpdates)
-        const canCreateDocument = this.props.permissions.documents.canCreate
-        const canReadTasks = this.props.permissions.tasks.canRead
-
-        const showBillSection = this.isEdit && (this.isCurrentHighRole || bill)
-        const showProcessAction = this.isEdit && this.project && process
-
-        const isStepTech = techSteps.includes(step)
-        const fields = [name, client.id, address.description, comContact.id]
-        let showTasksForm = !fields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
-        showTasksForm = canReadTasks && (this.isEdit || !this.isEdit && showTasksForm)
-        //const showContactTechnic = isStepTech || (process && process.rdn && process.rdn.steps.technicalVisitCreation) //Step containing tech contact definition (before VT Phase)
-        const showContactTechnic = this.isEdit
 
         if (docNotFound)
             return (
@@ -754,308 +1072,18 @@ class CreateProject extends Component {
                     check={this.isEdit ? canWrite && !loading : !loading}
                     handleSubmit={this.handleSubmit}
                     del={canDelete && this.isEdit && !loading}
-                    handleDelete={this.showAlert} loading={loading}
+                    handleDelete={this.showAlert}
+                    loading={loading}
                     refresh={this.isEdit && !loading}
                     handleRefresh={this.handleRefresh}
                     customBackHandler={this.customBackHandler}
                 />
 
                 {loading ?
+                    //Display pictures upload progression (if available)
                     this.renderPlacePictures(canWrite, isConnected)
                     :
-                    <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="always" ref={ref => this.scrollView = ref}>
-
-                        {showProcessAction &&
-                            <View>
-                                <ProcessAction
-                                    process={this.state.process}
-                                    project={this.project}
-                                    clientId={client.id}
-                                    step={step}
-                                    canUpdate={canWrite && !this.isClient}
-                                    isAllProcess={false}
-                                    role={this.props.role}
-                                    scrollTo={(position) => {
-                                        this.toggleSection("contacts") //##solution provisoire
-                                        this.scrollView.scrollTo(position)
-                                    }}
-                                />
-                            </View>
-                        }
-
-                        {this.isEdit &&
-                            <ActivitySection
-                                createdBy={createdBy}
-                                createdAt={createdAt}
-                                editedBy={editedBy}
-                                editedAt={editedAt}
-                                navigation={this.props.navigation}
-                                isExpanded={sectionsExpansion["activity"]}
-                                onPressSection={() => this.toggleSection("activity")}
-                                formSectionContainerStyle={{ marginBottom: 1 }}
-                            />
-                        }
-
-                        <FormSection
-                            sectionTitle='Informations générales'
-                            sectionIcon={faInfoCircle}
-                            isLoading={loading}
-                            isExpanded={sectionsExpansion["generalInfo"]}
-                            onPressSection={() => this.toggleSection("generalInfo")}
-                            containerStyle={{ marginBottom: 1 }}
-                            form={
-                                <View style={{ flex: 1 }}>
-
-                                    {this.isEdit &&
-                                        <MyInput
-                                            label="Numéro du projet"
-                                            returnKeyType="done"
-                                            value={this.ProjectId}
-                                            editable={false}
-                                            disabled
-                                        />
-                                    }
-
-                                    <MyInput
-                                        label="Nom du projet *"
-                                        returnKeyType="done"
-                                        value={name}
-                                        onChangeText={name => this.setState({ name, nameError: '' })}
-                                        error={nameError}
-                                        errorText={nameError}
-                                        multiline={true}
-                                        editable={canWrite && !this.isClient}
-                                    // autoFocus={!this.isEdit}
-                                    />
-
-                                    {!this.isClient &&
-                                        <Picker
-                                            returnKeyType="next"
-                                            value={step}
-                                            error={!!step.error}
-                                            errorText={step.error}
-                                            selectedValue={step}
-                                            onValueChange={(step) => this.setState({ step })}
-                                            title="Étape *"
-                                            elements={steps}
-                                            enabled={canWrite && !this.isClient}
-                                        />
-                                    }
-
-                                    {!this.isClient && this.isEdit &&
-                                        <Picker
-                                            returnKeyType="next"
-                                            value={state}
-                                            selectedValue={state}
-                                            onValueChange={(state) => this.setState({ state })}
-                                            title="État *"
-                                            elements={states}
-                                            enabled={canWrite && !this.isClient}
-                                        />
-                                    }
-
-                                    {this.isClient &&
-                                        <MyInput
-                                            label="Phase *"
-                                            value={step + ' ' + state}
-                                            // error={nameError}
-                                            // errorText={nameError}
-                                            multiline={true}
-                                            editable={false}
-                                        />
-                                    }
-
-                                    <ModalCheckBoxes
-                                        items={workTypes}
-                                        itemsFetched={true}
-                                        updateItems={(workTypes) => this.setState({ workTypes })}
-                                        onPressItem={(item) => console.log(item)}
-                                    />
-
-                                    {/* <ColorPicker
-                                        label='Couleur du projet'
-                                        selectedColor={color}
-                                        updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-                                        editable={canWrite}
-                                    /> */}
-                                </View>
-                            } />
-
-                        <FormSection
-                            sectionTitle='Client'
-                            sectionIcon={faUser}
-                            isExpanded={sectionsExpansion["client"]}
-                            onPressSection={() => this.toggleSection("client")}
-                            containerStyle={{ marginBottom: 1 }}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    {!this.isClient &&
-                                        <ItemPicker
-                                            onPress={() => {
-                                                navigateToScreen(
-                                                    this,
-                                                    'ListClients',
-                                                    { onGoBack: this.refreshClient, prevScreen: 'CreateProject', isRoot: false }
-                                                )
-                                            }}
-                                            label='Client concerné *'
-                                            value={client.fullName}
-                                            errorText={client.error}
-                                            editable={canWrite && !this.isEdit && this.client.id === ""}
-                                        />
-                                    }
-
-                                    {client.id !== "" &&
-                                        <AddressInput
-                                            offLine={!isConnected}
-                                            onPress={() => navigateToScreen(this, 'Address', { onGoBack: this.refreshAddress, currentAddress: address })}
-                                            onChangeText={this.setAddress}
-                                            clearAddress={() => this.setAddress('')}
-                                            address={address}
-                                            addressError={address.error}
-                                            editable={canWrite}
-                                            isEdit={this.isEdit}
-                                        />
-                                    }
-
-                                </View>
-                            }
-                        />
-
-                        <FormSection
-                            sectionTitle='Contacts'
-                            sectionIcon={faAddressBook}
-                            isExpanded={sectionsExpansion["contacts"]}
-                            onPressSection={() => this.toggleSection("contacts")}
-                            containerStyle={{ marginBottom: 1 }}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    <ItemPicker
-                                        onPress={() => navigateToScreen(this, 'ListEmployees', {
-                                            onGoBack: this.refreshComContact,
-                                            prevScreen: 'CreateProject',
-                                            isRoot: false,
-                                            titleText: 'Choisir un commercial',
-                                            query: db.collection('Users').where('role', '==', 'Commercial').where('deleted', '==', false)
-                                        })
-                                        }
-                                        label="Contact commercial *"
-                                        value={comContact.fullName || ''}
-                                        error={!!comContact.error}
-                                        errorText={comContact.error}
-                                        editable={canWrite && !this.isClient}
-                                    />
-
-                                    {showContactTechnic &&
-                                        <ItemPicker
-                                            onPress={() => navigateToScreen(this, 'ListEmployees', {
-                                                onGoBack: this.refreshTechContact,
-                                                prevScreen: 'CreateProject',
-                                                isRoot: false,
-                                                titleText: 'Choisir un poseur',
-                                                query: db.collection('Users').where('role', '==', 'Poseur').where('deleted', '==', false)
-                                            })
-                                            }
-                                            label="Contact technique *"
-                                            value={techContact.fullName || ''}
-                                            error={!!techContact.error}
-                                            errorText={techContact.error}
-                                            editable={canWrite && highRoles.includes(this.props.role.id)}
-                                        />
-                                    }
-                                </View>
-                            } />
-
-
-                        {this.isEdit &&
-                            <FormSection
-                                sectionTitle='Documents'
-                                sectionIcon={faFolder}
-                                isExpanded={sectionsExpansion["documents"]}
-                                onPressSection={() => this.toggleSection("documents")}
-                                containerStyle={{ marginBottom: 1 }}
-                                form={
-                                    <View style={{ flex: 1 }}>
-                                        {canCreateDocument && canWrite &&
-                                            <Text
-                                                onPress={() => this.props.navigation.navigate('UploadDocument', { project: this.project })}
-                                                style={[theme.customFontMSregular.caption, { color: theme.colors.primary, marginBottom: 5, marginTop: 16 }]}>+ Ajouter un document</Text>
-                                        }
-
-                                        <List.AccordionGroup
-                                            expandedId={this.state.expandedId}
-                                            onAccordionPress={(expandedId) => {
-                                                if (this.state.expandedId === expandedId)
-                                                    this.setState({ expandedId: '' })
-                                                else
-                                                    this.setState({ expandedId })
-                                            }}>
-                                            {documentTypes.map((type) => {
-                                                let filteredDocuments = documentsList.filter((doc) => doc.type === type)
-                                                return (
-                                                    <List.Accordion showArrow title={type} id={type} titleStyle={theme.customFontMSregular.body}>
-                                                        {this.renderAttachments(filteredDocuments, 'pdf', false)}
-                                                    </List.Accordion>
-                                                )
-                                            })}
-                                        </List.AccordionGroup>
-                                    </View>
-                                } />
-                        }
-
-                        {showTasksForm && this.renderTasksForm()}
-
-                        {showBillSection &&
-                            <FormSection
-                                sectionTitle='Facturation'
-                                sectionIcon={faEuroSign}
-                                isExpanded={sectionsExpansion["facturation"]}
-                                onPressSection={() => this.toggleSection("facturation")}
-                                containerStyle={{ marginBottom: 1 }}
-                                form={
-                                    <View style={{ flex: 1 }}>
-                                        <MyInput
-                                            label="Montant facturé (€)*"
-                                            returnKeyType="done"
-                                            keyboardType='numeric'
-                                            value={bill.amount}
-                                            onChangeText={amount => {
-                                                bill.amount = amount
-                                                this.setState({ bill })
-                                            }}
-                                            editable={canWrite && !this.isClient}
-                                        // error={!!price.error}
-                                        // errorText={price.error}
-                                        />
-                                    </View>
-                                }
-                            />
-                        }
-
-                        {this.renderPlacePictures(canWrite, isConnected)}
-
-                        <FormSection
-                            hide={!this.isEdit}
-                            sectionTitle='Bloc Notes'
-                            sectionIcon={faQuoteRight}
-                            formContainerStyle={{ paddingTop: 25 }}
-                            form={
-                                <View style={{ flex: 1 }}>
-                                    <TextInput
-                                        underlineColorAndroid="transparent"
-                                        placeholder="Rapportez des notes utiles..."
-                                        placeholderTextColor={theme.colors.gray_dark}
-                                        numberOfLines={7}
-                                        multiline={true}
-                                        onChangeText={note => this.setState({ note })}
-                                        value={note}
-                                        style={styles.note}
-                                        autoCapitalize='sentences'
-                                        editable={canWrite} />
-                                </View>
-                            }
-                        />
-                    </ScrollView>
+                    this.renderStandardView(canWrite, isConnected)
                 }
 
                 <Toast

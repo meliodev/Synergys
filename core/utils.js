@@ -825,8 +825,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       if (rectangles) {
         for (const rect of rectangles) {
           pages[rect.pageIndex].drawRectangle(rect.form)
-          console.log('................', rect.pageIndex)
-          console.log('-------------', rect.form)
         }
       }
     }
