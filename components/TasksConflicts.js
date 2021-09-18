@@ -1,5 +1,5 @@
 import React from "react"
-import { View, StyleSheet, Text, TouchableOpacity, FlatList, Alert } from "react-native"
+import { View, StyleSheet, Text, TouchableOpacity, FlatList, Alert, ScrollView } from "react-native"
 import { Switch } from "react-native-paper"
 import Modal from 'react-native-modal'
 import { faInfoCircle, faTimes, faCalendarPlus, faClock, faShieldCheck, faChevronUp, faChevronDown } from '@fortawesome/pro-light-svg-icons'
@@ -19,8 +19,12 @@ import Button from './Button'
 import EmptyList from './EmptyList'
 import Section from "./Section"
 import Loading from "./Loading"
+import TimeslotForm from "./TimeslotForm"
 
 const TasksConflicts = ({
+    role,
+    canWrite,
+
     isVisible,
     toggleModal,
     refreshConflicts,
@@ -90,7 +94,74 @@ const TasksConflicts = ({
         )
     }
 
-    //DATES
+    const TaskItem = ({ task, isPicked }) => {
+
+        const { id, name, color, isAllDay, startHour, dueHour } = task
+        const timerange = isAllDay ? 'Toute la journée' : `${task.startHour} - ${task.dueHour}`
+
+        const onPressTask = () => {
+            if (!task || !_.isEqual(task, pickedTask)) {
+                setPickedTask(task)
+                setSelectedIsAllDay(task.isAllDay)
+                setSelectedDate(task.date)
+                setSelectedStartHour(task.startHour)
+                setSelectedDueHour(task.dueHour)
+                //set selected items on parent
+                initPickedTaskSelectedItems(task.isAllDay, task.date, task.startHour, task.dueHour)
+            }
+            else initSelectedTask()
+        }
+
+        return (
+            <TouchableOpacity style={[styles.task, { borderRadius: 5, backgroundColor: task.color }]} onPress={onPressTask} >
+                <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
+                    <Text style={[theme.customFontMSregular.body, { color: '#fff' }]} numberOfLines={1}>
+                        {task.name}
+                    </Text>
+                </View>
+                <View style={{ flex: 0.5, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingLeft: 5 }}>
+                    <Text style={[theme.customFontMSregular.caption, { color: '#fff', marginRight: 10 }]} numberOfLines={1}>
+                        {timerange}
+                    </Text>
+                    <CustomIcon
+                        icon={isPicked ? faChevronDown : faChevronUp}
+                        color={theme.colors.white} size={12}
+                    />
+                </View>
+            </TouchableOpacity>
+        )
+    }
+
+    //##HEADERS
+    const renderHeader = (title, onPressInfo) => {
+        return (
+            <View style={styles.header}>
+                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginRight: 7 }]}>{title}</Text>
+                <CustomIcon icon={faInfoCircle} color={theme.colors.gray_dark} size={15} onPress={onPressInfo} />
+            </View>
+        )
+    }
+
+    const renderDatesHeader = () => {
+        const title = "Dates en conflit"
+        const onPressInfo = () => Alert.alert('Dates en conflit', `Selectionnez une date pour voir la liste des tâches en conflit avec celle que vous essayez de créer.`)
+        return renderHeader(title, onPressInfo)
+    }
+
+    const renderTasksHeader = (tasksCount) => {
+        const s = tasksCount > 1 ? 's' : ''
+        const title = `${tasksCount} tâche${s} en conflit`
+        const onPressInfo = () => Alert.alert('Tâches en conflit', `Liste des tâches déjà affectées à l'utilisateur à qui vous voulez assigner une tâche, pendant le créneau horaire que vous avez choisi.`)
+        return renderHeader(title, onPressInfo)
+    }
+
+    const renderCurrentTaskHeader = () => {
+        const title = `Tâche en cours pour ${newTask.assignedTo.fullName} `
+        const onPressInfo = () => Alert.alert('Tâche en cours', `Tâche que vous essayez de ${isEdit ? 'modifier' : 'créer'}.`)
+        return renderHeader(title, onPressInfo)
+    }
+
+    //##DATES
     const renderDates = () => {
 
         let dates = []
@@ -100,7 +171,7 @@ const TasksConflicts = ({
         }
 
         return (
-            <View style={styles.datesContainer}>
+            <View>
                 {renderDatesHeader()}
                 <FlatList
                     horizontal={true}
@@ -108,7 +179,7 @@ const TasksConflicts = ({
                     keyExtractor={date => date.toString()}
                     ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
                     renderItem={({ item }) => renderDate(item)}
-                    style={{ marginTop: 15 }}
+                    style={{ marginTop: theme.padding / 1.25, marginBottom: theme.padding * 2 }}
                 />
             </View>
         )
@@ -133,16 +204,7 @@ const TasksConflicts = ({
         )
     }
 
-    const renderDatesHeader = () => {
-        return (
-            <View style={styles.header}>
-                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginRight: 7 }]}>Dates en conflit</Text>
-                <CustomIcon icon={faInfoCircle} color={theme.colors.gray_dark} size={15} onPress={() => Alert.alert('Dates en conflit', `Selectionnez une date pour voir la liste des tâches en conflit avec celle que vous essayez de créer.`)} />
-            </View>
-        )
-    }
-
-    //TASKS
+    //##TASKS
     const renderTasks = () => {
 
         let conflictingTasks = []
@@ -154,76 +216,45 @@ const TasksConflicts = ({
         const tasksCount = conflictingTasks.length
 
         return (
-            <View style={styles.tasksContainer}>
+            <View>
                 {renderTasksHeader(tasksCount)}
                 <FlatList
                     data={conflictingTasks}
                     keyExtractor={task => task.id.toString()}
-                    renderItem={({ item }) => renderTask(item)}
-                    style={{ margin: 10 }}
+                    renderItem={({ item, index }) => renderTask(item, index)}
+                    style={{ marginTop: theme.padding / 1.25, marginBottom: theme.padding * 2 }}
                 />
             </View>
         )
     }
 
-    const renderTask = (task) => {
+    const renderTask = (task, index) => {
 
-        const { id, name, color, isAllDay, startHour, dueHour } = task
-        const TaskId = id
-
-        const onPressTask = () => {
-            if (!task || !_.isEqual(task, pickedTask)) {
-                setPickedTask(task)
-                setSelectedIsAllDay(task.isAllDay)
-                setSelectedDate(task.date)
-                setSelectedStartHour(task.startHour)
-                setSelectedDueHour(task.dueHour)
-                //set selected items on parent
-                initPickedTaskSelectedItems(task.isAllDay, task.date, task.startHour, task.dueHour)
-            }
-
-            else initSelectedTask()
-        }
-
-        const timerange = isAllDay ? 'Toute la journée' : `${task.startHour} - ${task.dueHour}`
         const isPickedTask = _.isEqual(task, pickedTask)
-        const borderRadius = 5
 
         return (
-            <View style={{ flex: 1, borderRadius, backgroundColor: theme.colors.white, elevation: 2, margin: 10 }}>
-                <TouchableOpacity style={[styles.task, { borderRadius, backgroundColor: color }]} onPress={onPressTask} >
-                    <View style={{ flex: 0.5, justifyContent: 'center', paddingRight: 5 }}>
-                        <Text style={[theme.customFontMSregular.body, { color: '#fff' }]} numberOfLines={1}>{task.name}</Text>
-                    </View>
-                    <View style={{ flex: 0.5, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', paddingLeft: 5 }}>
-                        <Text style={[theme.customFontMSregular.caption, { color: '#fff', marginRight: 10 }]} numberOfLines={1}>{timerange}</Text>
-                        <CustomIcon icon={isPickedTask ? faChevronDown : faChevronUp} color={theme.colors.white} size={12} />
-                    </View>
-                </TouchableOpacity>
+            <View style={{ flex: 1, borderRadius: 5, backgroundColor: theme.colors.white, marginTop: index === 0 ? 0 : theme.padding }}>
+                <TaskItem task={task} isPicked={isPickedTask} />
 
                 {isPickedTask ?
                     updateTaskLoading ?
                         renderUpdateTaskLoading()
                         :
-                        <View style={{ paddingHorizontal: theme.padding, borderRadius, backgroundColor: theme.colors.white }}>
+                        <View style={{ borderRadius: 5, backgroundColor: theme.colors.white }}>
                             {renderTimeForm(null, true, true)}
-                            <Button mode="contained" onPress={updateTask} containerStyle={{ alignSelf: 'center' }} outlinedColor={theme.colors.primary}>
+                            <Button
+                                mode="contained"
+                                onPress={updateTask}
+                                containerStyle={{ alignSelf: 'flex-end' }}
+                                outlinedColor={theme.colors.primary}
+                            >
                                 modifier
                             </Button>
                         </View>
                     : null
                 }
             </View>
-        )
-    }
 
-    const renderTasksHeader = (tasksCount) => {
-        const s = tasksCount > 1 ? 's' : ''
-        return (
-            <View style={styles.header}>
-                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, marginRight: 7 }]}>{tasksCount} tâche{s} en conflit</Text>
-                <CustomIcon icon={faInfoCircle} color={theme.colors.gray_dark} size={15} onPress={() => Alert.alert('Tâches en conflit', `Liste des tâches déjà affectées à l'utilisateur à qui vous voulez assigner une tâche, pendant le créneau horaire que vous avez choisi.`)} />
-            </View>
         )
     }
 
@@ -379,9 +410,55 @@ const TasksConflicts = ({
 
         return (
             <View style={{ flex: 1 }}>
-                {isAllDaySwitch(editable, isAllDay)}
+                <TimeslotForm
+                    role={role}
+                    canWrite={canWrite}
+                    isAllDay={isAllDay}
+                    startDate={startDate}
+                    endDate={endDate}
+                    startHour={moment(startHour, "HH:mm").format()}
+                    dueHour={moment(dueHour, "HH:mm").format()}
+
+                    hideEndDate={true}
+                    setParentState={
+                        (mode, dateId, value) => {
+                            //#task: adapt this..
+                            const update = mode === "date" ? moment(value).format() : moment(value).format('HH:mm')
+                            // if(dateId === "startDate")
+                            // if(dateId === "endDate")
+                            // if(dateId === "startHour")
+                            // if(dateId === "dueHour")
+                        }
+                    }
+                    setIsAllDayParent={(isAllDay) => setSelectedIsAllDay(isAllDay)}
+                />
+                {/* {isAllDaySwitch(editable, isAllDay)}
                 {datesForm(editable, isEdit, isAllDay, startDate, endDate)}
-                {!isAllDay && timesForm(editable, isEdit, isAllDay, startHour, dueHour)}
+                {!isAllDay && timesForm(editable, isEdit, isAllDay, startHour, dueHour)} */}
+            </View>
+        )
+    }
+
+    //##PENDING TASK
+    const renderCurrentTask = () => {
+        const isPickedTask = _.isEqual(newTask, pickedTask)
+        return (
+            <View>
+                {renderCurrentTaskHeader()}
+                <View style={{ marginTop: theme.padding / 1.25 }}>
+                    <TaskItem task={newTask} isPicked={isPickedTask} />
+                    {isPickedTask && props.children}
+                    {isPickedTask &&
+                        <Button
+                            mode="contained"
+                            onPress={refreshConflicts}
+                            containerStyle={{ alignSelf: 'flex-end' }}
+                            outlinedColor={theme.colors.primary}
+                        >
+                            Modifier
+                        </Button>
+                    }
+                </View>
             </View>
         )
     }
@@ -405,16 +482,13 @@ const TasksConflicts = ({
                         />
                     </View>
                     :
-                    <View style={{ flex: 1 }}>
+                    <ScrollView style={{ flex: 1 }}>
                         <View style={styles.conflictsContainer}>
                             {renderDates()}
                             {isPickedDate && renderTasks()}
+                            {renderCurrentTask()}
                         </View>
-                        <View style={styles.updatesContainer}>
-                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>Tâche à {isEdit ? 'modifier' : 'créer'} pour {newTask.assignedTo.fullName} :</Text>
-                            {renderTimeForm(newTask, false, isEdit, startDate, endDate)}
-                        </View>
-                    </View>
+                    </ScrollView>
                 }
             </View>
         </Modal>
@@ -435,10 +509,10 @@ const styles = StyleSheet.create({
     },
     //conflicts
     conflictsContainer: {
-        flex: 0.55
+        flex: 1,
+        paddingHorizontal: theme.padding
     },
     datesContainer: {
-        paddingHorizontal: theme.padding,
     },
     date: {
         paddingVertical: theme.padding / 1.75,
@@ -453,9 +527,9 @@ const styles = StyleSheet.create({
         // backgroundColor: 'pink'
     },
     header: {
-        marginTop: 5,
+        // marginTop: 5,
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     task: {
         flex: 1,

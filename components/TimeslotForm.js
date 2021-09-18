@@ -42,6 +42,24 @@ export default class TimeslotForm extends Component {
         }
     }
 
+    async componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.isAllDay !== this.props.isAllDay) {
+            this.setState({ isAllDay: this.props.isAllDay })
+        }
+        if (prevProps.startDate !== this.props.startDate) {
+            this.setState({ startDate: moment(this.props.startDate).toDate() })
+        }
+        if (prevProps.endDate !== this.props.endDate) {
+            this.setState({ endDate: moment(this.props.endDate).toDate() })
+        }
+        if (prevProps.startHour !== this.props.startHour) {
+            this.setState({ startHour: moment(this.props.startHour).toDate() })
+        }
+        if (prevProps.dueHour !== this.props.dueHour) {
+            this.setState({ dueHour: moment(this.props.dueHour).toDate() })
+        }
+    }
+
     setAllTogglePickers(bool) {
         let { togglePickers } = this.state
         for (let key in togglePickers) {
@@ -60,7 +78,8 @@ export default class TimeslotForm extends Component {
         this.setState({ togglePickers })
     }
 
-    renderTimeForm() {
+    //Renderers
+    renderForm() {
         const { isAllDay, startHour, dueHour, togglePickers } = this.state
         const { startHourError, dueHourError } = this.state
         const { canWrite } = this.props
@@ -96,10 +115,17 @@ export default class TimeslotForm extends Component {
             <DatePicker
                 date={date}
                 onDateChange={(newDate) => {
-                    let update = {}
-                    update[dateId] = newDate
-                    this.setState(update)
-                    this.props.setParentState(mode, dateId, newDate)
+                    if (this.props.hideEndDate && mode === "date") {
+                        this.setState({ startDate: newDate, endDate: newDate })
+                        this.props.setParentState(mode, "startDate", newDate)
+                        this.props.setParentState(mode, "endDate", newDate)
+                    }
+                    else {
+                        let update = {}
+                        update[dateId] = newDate
+                        this.setState(update, () => console.log('Start date of TimeslotForm !', this.state.startDate))
+                        this.props.setParentState(mode, dateId, newDate)
+                    }
                 }}
                 mode={mode}
                 locale='fr'
@@ -126,7 +152,7 @@ export default class TimeslotForm extends Component {
                     showAvatarText={false}
                     icon={mode === "date" ? faCalendarPlus : faClock}
                     errorText={error}
-                    style={{ width: constants.ScreenWidth * 0.4 }}
+                    style={{ width: this.props.hideEndDate && mode === "date" ? constants.ScreenWidth - theme.padding * 2 : constants.ScreenWidth * 0.4 }}
                 />
             </View>
         )
@@ -135,12 +161,13 @@ export default class TimeslotForm extends Component {
     renderDates(togglePickers) {
 
         const { isAllDay, startDate, endDate } = this.state
-        const showEndDate = !isAllDay && this.props.showEndDate
+        const showEndDate = !isAllDay && !this.props.hideEndDate
+        const startDateTitle = this.props.hideEndDate ? "Date *" : "Date de début *"
 
         return (
             <View>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: theme.padding }}>
-                    {this.renderItemPicker("startDate", "Date de début *", startDate, this.props.startDateError, "date")}
+                    {this.renderItemPicker("startDate", startDateTitle, startDate, this.props.startDateError, "date")}
 
                     {showEndDate &&
                         this.renderItemPicker("endDate", "Date de fin *", endDate, this.props.endDateError, "date")
@@ -184,7 +211,7 @@ export default class TimeslotForm extends Component {
     }
 
     render() {
-        return this.renderTimeForm()
+        return this.renderForm()
     }
 }
 

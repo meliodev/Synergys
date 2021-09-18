@@ -568,7 +568,7 @@ class Signature extends Component {
 
     onAcceptTerms() {
         //Auto Sign
-        const isAutoSign = autoSignDocs.includes(this.DocumentType)
+        const isAutoSign = false && autoSignDocs.includes(this.DocumentType) //#task: add isGenerated as condition
 
         if (isAutoSign) {
             const signatures = signPositions[this.DocumentType]

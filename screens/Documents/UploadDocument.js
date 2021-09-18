@@ -870,7 +870,7 @@ class UploadDocument extends Component {
         //Actions autorization
         const allowSign = isAttachmentRemote && (canWrite || this.props.role.id === 'client')
         const allowUpload = isAttachmentLocal && canWrite
-        const allowQuoteToBillConversion = isGeneratedQuote && isAttachmentRemote && this.isHighrole
+        const allowQuoteToBillConversion = isGeneratedQuote && isAttachmentRemote && this.isHighrole && canWrite
 
         //Show buttons
         const showSign = allowSign
@@ -893,7 +893,7 @@ class UploadDocument extends Component {
 
         return (
             <View style={{ flex: 1, paddingHorizontal: theme.padding }}>
-                <View style={{ flex: 1, backgroundColor: 'pink' }}>
+                <View style={{ flex: 1 }}>
                     {this.renderAttachment(canWrite, true)}
                     {attachmentError !== "" &&
                         <Text style={[theme.customFontMSregular.caption, { color: theme.colors.error, marginTop: 3, alignSelf: "center" }]}>

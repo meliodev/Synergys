@@ -308,7 +308,7 @@ export const version5 = {
             'quoteCreation': {
                 title: "Création d'un devis",
                 instructions: 'Lorem ipsum dolor',
-                stepOrder: 5,
+                stepOrder: 4,
                 actions: [
                     {
                         id: 'quoteCreation',
@@ -686,7 +686,7 @@ export const version5 = {
                         id: 'financingWebsite',
                         title: 'Propositions de financement',
                         instructions: "Lorem ipsum dolor",
-                        actionOrder: 0,
+                        actionOrder: 11,
                         type: 'manual',
                         comment: '',
                         verificationType: 'multiple-choices',
@@ -700,12 +700,47 @@ export const version5 = {
                     },
                 ]
             },
-            'technicalVisitCreation': {
-                title: "Création d'une visite technique",
+            'payModeValidation': {
+                title: "Validation modalité paiement",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
-                    //Check 
+                    {
+                        id: 'payModeChoice',
+                        title: 'Modalité de paiement',
+                        instructions: "Lorem ipsum dolor",
+                        actionOrder: 1,
+                        type: 'manual',
+                        comment: '',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker' },
+                            { label: 'Financement', id: 'financing', onSelectType: 'commentPicker' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    //Montant de l'acompte? (zone de saisie)
+                    //Reste à payer: (zone de saisie)
+                    {
+                        id: 'quoteValidation',
+                        title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+                        instructions: "",
+                        actionOrder: 2,
+                        type: 'manual',
+                        verificationType: 'validation',
+                        comment: '',
+                        responsable: 'ADV',
+                        status: 'pending',
+                        nextPhase: 'technicalVisitManagement',
+                    },
+                ]
+            },
+            'technicalVisitCreation': {
+                title: "Création d'une visite technique",
+                instructions: 'Lorem ipsum dolor',
+                stepOrder: 4,
+                actions: [ 
                     {
                         //General
                         id: 'checkTechContact',
@@ -755,42 +790,6 @@ export const version5 = {
                     }
                 ]
             },
-            'payModeValidation': {
-                title: "Validation modalité paiement",
-                instructions: 'Lorem ipsum dolor',
-                stepOrder: 4,
-                actions: [
-                    {
-                        id: 'payModeChoice',
-                        title: 'Modalité de paiement',
-                        instructions: "Lorem ipsum dolor",
-                        actionOrder: 1,
-                        type: 'manual',
-                        comment: '',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker' },
-                            { label: 'Financement', id: 'financing', onSelectType: 'commentPicker' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
-                    },
-                    //Montant de l'acompte? (zone de saisie)
-                    //Reste à payer: (zone de saisie)
-                    {
-                        id: 'quoteValidation',
-                        title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
-                        instructions: "",
-                        actionOrder: 2,
-                        type: 'manual',
-                        verificationType: 'validation',
-                        comment: '',
-                        responsable: 'ADV',
-                        status: 'pending',
-                        nextPhase: 'technicalVisitManagement',
-                    },
-                ]
-            }
         }
     },
     'technicalVisitManagement': {

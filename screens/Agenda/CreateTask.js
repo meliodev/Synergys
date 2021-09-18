@@ -32,7 +32,7 @@ import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
 import { fetchDocument } from '../../api/firestore-api';
 import TimeslotForm from '../../components/TimeslotForm'
-import { Toast } from '../../components'
+import { Button, Toast } from '../../components'
 
 const priorities = [
     { label: 'Urgente', value: 'Urgente' },
@@ -76,8 +76,6 @@ class CreateTask extends Component {
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined)
-
-        console.log('PROJECT', this.project)
 
         this.prevScreen = this.props.navigation.getParam('prevScreen', '')
         this.TaskId = this.props.navigation.getParam('TaskId', '')
@@ -532,8 +530,9 @@ class CreateTask extends Component {
         const isCom = _.isEqual(natures, ['com'])
         const isTech = _.isEqual(natures, ['tech'])
         if (neutral) return "neutral"
-        if (isCom) return "commercial"
-        if (isTech) return "technic"
+        else if (isCom) return "commercial"
+        else if (isTech) return "technic"
+        else return ""
     }
 
     setListEmployeesQuery() {
@@ -563,7 +562,7 @@ class CreateTask extends Component {
         this.setState({ showTasksConflicts: !this.state.showTasksConflicts })
     }
 
-    renderTasksConflicts() {
+    renderTasksConflicts(canWrite) {
         const { showTasksConflicts, overlappingTasks, newTask, isAllDay, startDate, endDate, startDateError } = this.state
         const { selectedDate, selectedStartHour, selectedDueHour, pickedDate, pickedTask, selectedIsAllDay } = this.state
         const { isConnected } = this.props.network
@@ -589,11 +588,14 @@ class CreateTask extends Component {
 
         return (
             <TasksConflicts
+                role={this.props.role}
+                canWrite= {canWrite}
                 isVisible={showTasksConflicts}
                 tasks={overlappingTasks}
                 toggleModal={() => this.setState({ showTasksConflicts: !showTasksConflicts })}
                 refreshConflicts={async () => await this.handleSubmit(false)}
                 onIgnore={async () => await this.handleSubmit(true)}
+
                 isEdit={this.isEdit}
                 newTask={newTask}
 
@@ -613,12 +615,16 @@ class CreateTask extends Component {
 
                 loading={this.state.loading}
                 isConnected={isConnected}
-            />
+            >
+                {this.renderTimeslotForm(canWrite)}
+            </TasksConflicts>
         )
     }
 
     renderTimeslotForm(canWrite) {
-        const { isAllDay, startDate, endDate, startHour, dueHour, startDateError, endDateError } = this.state
+        const { isAllDay, startDate, endDate, startHour, dueHour, startDateError, endDateError, type } = this.state
+        const isCommercialNature = this.checkTypeNature(type) === "commercial"
+
         return (
             <TimeslotForm
                 role={this.props.role}
@@ -630,7 +636,7 @@ class CreateTask extends Component {
                 dueHour={moment(dueHour, "HH:mm").format()}
                 startDateError={startDateError}
                 endDateError={endDateError}
-                showEndDate={!this.isEdit}
+                hideEndDate={this.isEdit || isCommercialNature}
                 setParentState={
                     (mode, dateId, value) => {
                         let update = {}
@@ -638,7 +644,7 @@ class CreateTask extends Component {
                         this.setState(update)
                     }
                 }
-                setIsAllDayParent={(isAllDay) => this.setState({ isAllDay })}
+                setIsAllDayParent={(isAllDay) => this.setState({ isAllDay }, () => console.log("isALLDAY", this.state.isAllDay))}
             />
         )
     }
@@ -677,18 +683,156 @@ class CreateTask extends Component {
         )
     }
 
-    render() {
-        let { name, description, project, type, priority, status, address, color, showTasksConflicts, toastMessage, toastType } = this.state
-        let { createdAt, createdBy, editedAt, editedBy, loading, docNotFound } = this.state
-        let { nameError } = this.state
+    renderProcessView(canWrite) {
+        const { showTasksConflicts, toastMessage, toastType } = this.state
+        return (
+            < ScrollView
+                keyboardShouldPersistTaps="always"
+                style={styles.container}
+                contentContainerStyle={{ flex: 1, paddingHorizontal: theme.padding }
+                }
+            >
+                {!this.hideAssignedTo && this.renderAssignedTo(canWrite)}
+                {this.renderTimeslotForm(canWrite)}
+                {showTasksConflicts && this.renderTasksConflicts(canWrite)}
+                <Toast
+                    containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })} />
+            </ScrollView >
+        )
+    }
 
+    renderStandardView(canWrite, isConnected) {
+
+        const { description, project, type, status, address, createdAt, createdBy, editedAt, editedBy, showTasksConflicts, toastMessage, toastType } = this.state
+        const enableTypePicker = !this.isEdit && !this.taskType
+
+        return (
+            <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
+
+                <FormSection
+                    sectionTitle='Créneau horaire'
+                    sectionIcon={faCalendar}
+                    form={this.renderTimeslotForm(canWrite)}
+                />
+
+                <FormSection
+                    sectionTitle='Informations générales'
+                    sectionIcon={faInfoCircle}
+                    form={
+                        <View style={{ flex: 1 }}>
+                            {this.isEdit &&
+                                <MyInput
+                                    label="Numéro de la tâche"
+                                    returnKeyType="done"
+                                    value={this.TaskId}
+                                    editable={false}
+                                    disabled
+                                />
+                            }
+
+                            {this.renderAssignedTo(canWrite)}
+
+                            <Picker
+                                returnKeyType="next"
+                                value={type}
+                                error={!!type.error}
+                                errorText={type.error}
+                                selectedValue={type}
+                                onValueChange={(type) => this.setState({ type })}
+                                title="Type *"
+                                elements={this.types}
+                                enabled={canWrite && enableTypePicker} //pre-defined task type
+                                containerStyle={{ marginBottom: 10 }}
+                            />
+
+                            <MyInput
+                                label="Description"
+                                returnKeyType="done"
+                                value={description}
+                                onChangeText={description => this.setState({ description })}
+                                multiline={true}
+                                editable={canWrite}
+                            />
+
+                            {this.isEdit &&
+                                <Picker
+                                    returnKeyType="next"
+                                    value={status}
+                                    error={!!status.error}
+                                    errorText={status.error}
+                                    selectedValue={status}
+                                    onValueChange={(status) => this.setState({ status })}
+                                    title="État *"
+                                    elements={statuses}
+                                    enabled={canWrite}
+                                    containerStyle={{ marginBottom: 10 }}
+                                />
+                            }
+                        </View>
+                    }
+                />
+
+                <FormSection
+                    sectionTitle='Références'
+                    sectionIcon={faRetweet}
+                    form={
+                        <View style={{ flex: 1 }}>
+                            <ItemPicker
+                                onPress={() => {
+                                    if (this.project || this.isEdit) return //pre-defined project
+                                    navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
+                                }}
+                                label="Projet concerné"
+                                value={project.name}
+                                error={!!project.error}
+                                errorText={project.error}
+                                showAvatarText={false}
+                                editable={canWrite}
+                            />
+                            <AddressInput
+                                label='Adresse postale'
+                                offLine={!isConnected}
+                                onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                                onChangeText={this.setAddress}
+                                clearAddress={() => this.setAddress('')}
+                                address={address}
+                                addressError={address.error}
+                                editable={canWrite}
+                                isEdit={this.isEdit} />
+                        </View>
+                    }
+                />
+
+                {this.isEdit &&
+                    <ActivitySection
+                        createdBy={createdBy}
+                        createdAt={createdAt}
+                        editedBy={editedBy}
+                        editedAt={editedAt}
+                        navigation={this.props.navigation}
+                    />
+                }
+
+                {showTasksConflicts && this.renderTasksConflicts(canWrite)}
+
+                <Toast
+                    containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
+                    message={toastMessage}
+                    type={toastType}
+                    onDismiss={() => this.setState({ toastMessage: '' })} />
+
+            </ScrollView>
+        )
+    }
+
+    render() {
+        const { loading, docNotFound } = this.state
         let { canCreate, canUpdate, canDelete } = this.props.permissions.tasks
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
-
         const { isConnected } = this.props.network
-
-        const enableTypePicker = !this.isEdit && !this.taskType
-        const enableAssignedToPicker = !this.isEdit && !this.isProcess //#task: add this restriction to avoid assigning task to a wrong person
 
         if (docNotFound)
             return (
@@ -709,8 +853,8 @@ class CreateTask extends Component {
                     close
                     title
                     titleText={this.title}
-                    check={this.isEdit ? canWrite && !loading : !loading}
-                    handleSubmit={() => this.handleSubmit(false)}
+                    // check={this.isEdit ? canWrite && !loading : !loading}
+                    // handleSubmit={() => this.handleSubmit(false)}
                     del={canDelete && this.isEdit && !loading}
                     handleDelete={this.alertDeleteTask}
                 />
@@ -719,164 +863,21 @@ class CreateTask extends Component {
                     <Loading size='large' />
                     :
                     this.isProcess ?
-                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ flex: 1, paddingHorizontal: theme.padding }}>
-                            {!this.hideAssignedTo && this.renderAssignedTo(canWrite)}
-                            {this.renderTimeslotForm(canWrite)}
-                            {showTasksConflicts && this.renderTasksConflicts()}
-                            <Toast
-                                containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
-                                message={toastMessage}
-                                type={toastType}
-                                onDismiss={() => this.setState({ toastMessage: '' })} />
-                        </ScrollView>
+                        this.renderProcessView(canWrite)
                         :
-                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
-
-                            <FormSection
-                                sectionTitle='Créneau horaire'
-                                sectionIcon={faCalendar}
-                                form={this.renderTimeslotForm(canWrite)}
-                            />
-
-                            <FormSection
-                                sectionTitle='Informations générales'
-                                sectionIcon={faInfoCircle}
-                                form={
-                                    <View style={{ flex: 1 }}>
-                                        {this.isEdit &&
-                                            <MyInput
-                                                label="Numéro de la tâche"
-                                                returnKeyType="done"
-                                                value={this.TaskId}
-                                                editable={false}
-                                                disabled
-                                            />
-                                        }
-
-                                        {this.renderAssignedTo(canWrite)}
-
-                                        <Picker
-                                            returnKeyType="next"
-                                            value={type}
-                                            error={!!type.error}
-                                            errorText={type.error}
-                                            selectedValue={type}
-                                            onValueChange={(type) => this.setState({ type })}
-                                            title="Type *"
-                                            elements={this.types}
-                                            enabled={canWrite && enableTypePicker} //pre-defined task type
-                                            containerStyle={{ marginBottom: 10 }}
-                                        />
-
-                                        {/* <MyInput
-               label="Nom de la tâche *"
-               returnKeyType="done"
-               value={name}
-               onChangeText={name => this.setState({ name, nameError: "" })}
-               error={!!nameError}
-               errorText={nameError}
-               editable={canWrite}
-           // autoFocus={!this.isEdit}
-           /> */}
-
-                                        <MyInput
-                                            label="Description"
-                                            returnKeyType="done"
-                                            value={description}
-                                            onChangeText={description => this.setState({ description })}
-                                            multiline={true}
-                                            // error={!!description.error}
-                                            // errorText={description.error}
-                                            editable={canWrite}
-                                        />
-
-                                        {/* <Picker
-               returnKeyType="next"
-               value={priority}
-               error={!!priority.error}
-               errorText={priority.error}
-               selectedValue={priority}
-               onValueChange={(priority) => this.setState({ priority })}
-               title="Priorité *"
-               elements={priorities}
-               enabled={canWrite}
-               containerStyle={{ marginBottom: 10 }}
-           /> */}
-
-                                        {this.isEdit &&
-                                            <Picker
-                                                returnKeyType="next"
-                                                value={status}
-                                                error={!!status.error}
-                                                errorText={status.error}
-                                                selectedValue={status}
-                                                onValueChange={(status) => this.setState({ status })}
-                                                title="État *"
-                                                elements={statuses}
-                                                enabled={canWrite}
-                                                containerStyle={{ marginBottom: 10 }}
-                                            />
-                                        }
-
-                                        {/* <ColorPicker
-               label='Couleur de la tâche'
-               selectedColor={color}
-               updateParentColor={(selectedColor) => this.setState({ color: selectedColor })}
-               editable={canWrite} /> */}
-                                    </View>
-                                }
-                            />
-
-                            <FormSection
-                                sectionTitle='Références'
-                                sectionIcon={faRetweet}
-                                form={
-                                    <View style={{ flex: 1 }}>
-                                        <ItemPicker
-                                            onPress={() => {
-                                                if (this.project || this.isEdit) return //pre-defined project
-                                                navigateToScreen(this, 'ListProjects', { onGoBack: this.refreshProject, prevScreen: 'CreateTask', isRoot: false, titleText: 'Choix du projet', showFAB: false })
-                                            }}
-                                            label="Projet concerné"
-                                            value={project.name}
-                                            error={!!project.error}
-                                            errorText={project.error}
-                                            showAvatarText={false}
-                                            editable={canWrite}
-                                        />
-                                        <AddressInput
-                                            label='Adresse postale'
-                                            offLine={!isConnected}
-                                            onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-                                            onChangeText={this.setAddress}
-                                            clearAddress={() => this.setAddress('')}
-                                            address={address}
-                                            addressError={address.error}
-                                            editable={canWrite}
-                                            isEdit={this.isEdit} />
-                                    </View>
-                                }
-                            />
-
-                            {this.isEdit &&
-                                <ActivitySection
-                                    createdBy={createdBy}
-                                    createdAt={createdAt}
-                                    editedBy={editedBy}
-                                    editedAt={editedAt}
-                                    navigation={this.props.navigation}
-                                />
-                            }
-
-                            {showTasksConflicts && this.renderTasksConflicts()}
-
-                            <Toast
-                                containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
-                                message={toastMessage}
-                                type={toastType}
-                                onDismiss={() => this.setState({ toastMessage: '' })} />
-                        </ScrollView>
+                        this.renderStandardView(canWrite, isConnected)
                 }
+
+                {canWrite &&
+                    <Button
+                        mode="contained"
+                        onPress={() => this.handleSubmit(false)}
+                        backgroundColor={theme.colors.primary}
+                        containerStyle={{ alignSelf: 'flex-end', marginTop: 25, marginRight: theme.padding }}>
+                        Valider
+                    </Button>
+                }
+
             </View>
         )
     }
