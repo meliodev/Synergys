@@ -10,7 +10,7 @@ import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
 import { PDFDocument, degrees, PageSizes, StandardFonts, rgb } from 'pdf-lib'
 import _ from 'lodash'
-import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave } from '@fortawesome/pro-light-svg-icons'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave, faUserHardHat } from '@fortawesome/pro-light-svg-icons'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, errorMessages, roles, constants } from './constants'
-import { ficheEEBModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
+import { ficheEEBModel, ficheTechModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -469,6 +469,10 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
+const getImageType = () => {
+
+}
+
 export const convertImageToPdf = async (attachment) => {
 
   let errorMessage = null
@@ -608,7 +612,6 @@ const lineBreaker = (dataArray, font, size, linesWidths, maxNumberOflLines) => {
 
 export const generatePdfForm = async (formInputs, pdfType, params) => {
   try {
-
     if (pdfType === "PvReception") {
       var originalPdfBase64 = pvReceptionBase64
       var { model: formPages, globalConfig } = pvReceptionModel(params)
@@ -626,7 +629,14 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var { model: formPages, globalConfig } = mandatSynergysModel()
     }
 
-    const pdfDoc = await PDFDocument.load(originalPdfBase64)
+    else if (pdfType === "FichesTech") {
+
+      var originalPdfBase64 = ficheTechBase64
+      var { model: formPages } = ficheTechModel()
+    }
+
+    let pdfDoc = await PDFDocument.load(originalPdfBase64)
+
     const pages = pdfDoc.getPages()
 
     //Theme config
@@ -806,6 +816,19 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               )
               break;
 
+            case "image":
+              const mergedPdf = await PDFDocument.create()
+              const imagePdfBase64 = await convertImageToPdf(formInputs[id])
+              const imagePdf = await PDFDocument.load(imagePdfBase64)
+
+              const copiedPagesA = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())
+              const copiedPagesB = await mergedPdf.copyPages(imagePdf, imagePdf.getPageIndices())
+              copiedPagesA.forEach((p) => mergedPdf.addPage(p))
+              copiedPagesB.forEach((p) => mergedPdf.addPage(p))
+
+              pdfDoc = mergedPdf
+              break;
+
             default: break;
           }
 
@@ -963,10 +986,12 @@ import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
 import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
 import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
 import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
+import { ficheTechBase64 } from '../assets/files/ficheTechBase64';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
+  { label: 'Fiche technique', value: 'Fiche technique', icon: faUserHardHat },
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 
@@ -986,6 +1011,8 @@ const allDocTypes = [
   { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
   { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
   { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
+  { label: 'Fiche technique', value: 'Fiche technique', icon: faUserHardHat },
+
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 

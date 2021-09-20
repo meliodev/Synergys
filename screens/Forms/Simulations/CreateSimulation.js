@@ -231,6 +231,7 @@ class CreateSimulation extends Component {
                 idPattern={"GS-EEB-"}
                 DocId={this.SimulationId}
                 collection={"Simulations"}
+                pdfType={"Simulations"}
                 welcomeMessage={this.welcomeMessage}
                 steps={["Votre Foyer", "", "Votre Habitation", "", "Votre Bilan"]}
                 pages={ficheEEBModel}

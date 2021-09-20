@@ -10,24 +10,28 @@ import CustomIcon from "./CustomIcon";
 const squareSize = constants.ScreenWidth * 0.8
 
 const SquarePlus = ({
-    style,
+    style, 
     onPress,
     icon,
     title = '',
     isBig = false,
+    errorText,
     ...props
 }) => {
 
     if (isBig) {
         return (
-            <TouchableOpacity style={[styles.bigImageBox]} onPress={onPress}>
-                <View style={[styles.dashedBigImageBox]}>
-                    <View style={{ alignItems: 'center' }}>
-                        <CustomIcon icon={faFileUpload} color={theme.colors.primary} size={constants.ScreenWidth * 0.15} />
-                        <Text style={[theme.customFontMSsemibold.header, { color: theme.colors.primary, marginTop: theme.padding * 1.5, letterSpacing: 0.5 }]}>Ajouter un document</Text>
+            <View style= {style}>
+                <TouchableOpacity style={[styles.bigImageBox]} onPress={onPress}>
+                    <View style={[styles.dashedBigImageBox]}>
+                        <View style={{ alignItems: 'center' }}>
+                            <CustomIcon icon={faFileUpload} color={theme.colors.primary} size={constants.ScreenWidth * 0.15} />
+                            <Text style={[theme.customFontMSsemibold.header, { color: theme.colors.primary, marginTop: theme.padding * 1.5, letterSpacing: 0.5 }]}>{title !== "" ? title : "Ajouter un document"}</Text>
+                        </View>
                     </View>
-                </View>
-            </TouchableOpacity>
+                </TouchableOpacity>
+                {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
+            </View>
         )
     }
 
@@ -70,13 +74,19 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         justifyContent: 'center',
         alignItems: 'center',
-        width: squareSize*0.9,
-        height: squareSize*0.9,
+        width: squareSize * 0.9,
+        height: squareSize * 0.9,
         backgroundColor: "#f2f3f5",
         borderWidth: 5,
         borderStyle: 'dashed',
         borderColor: "#dbdce0",
         borderRadius: 5
+    },
+    error: {
+        // paddingHorizontal: 4,
+        paddingTop: theme.padding,
+        color: theme.colors.error,
+        textAlign: "center"
     }
 })
 

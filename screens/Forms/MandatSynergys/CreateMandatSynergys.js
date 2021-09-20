@@ -92,6 +92,7 @@ class CreateMandatSynergys extends Component {
                 idPattern={"GS-MSYN-"}
                 DocId={this.MandatSynergysId}
                 collection={"MandatsSynergys"}
+                pdfType={"MandatsSynergys"}
                 //welcomeMessage={this.welcomeMessage}
                 steps={["PRESTATION", "", "CLIENT", "", "CHANTIER"]}
                 pages={model}

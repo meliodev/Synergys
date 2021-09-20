@@ -21,7 +21,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 import { PDFDocument, rgb } from "pdf-lib";
 
 import * as theme from '../../core/theme'
-import { autoSignDocs, constants, downloadDir, errorMessages, signPositions, termsDir, termsUrl } from '../../core/constants'
+import { autoSignDocs, constants, downloadDir, errorMessages, docsConfig, termsDir, termsUrl } from '../../core/constants'
 import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, load, updateField, myAlert, uuidGenerator, displayError } from '../../core/utils'
 import { uploadFile } from "../../api/storage-api";
 import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
@@ -572,7 +572,8 @@ class Signature extends Component {
         const isAutoSign = autoSignDocs.includes(this.DocumentType) //#task: add isGenerated as condition
 
         if (isAutoSign) {
-            const signatures = signPositions[this.DocumentType]
+            const config = docsConfig(0)
+            const { signatures } = config[this.DocumentType]
             this.setState({
                 showTerms: false,
                 pdfEditMode: true,

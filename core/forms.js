@@ -2286,6 +2286,85 @@ export const pvReceptionModel = (params) => {
     return { model, globalConfig }
 }
 
+export const ficheTechModel = () => {
+
+    const model = [
+        {//2
+            id: "subPower",
+            title: "",
+            fields: [{
+                id: "subPower",
+                type: "textInput",
+                isNumeric: true,
+                label: "Puissance de l'abonnement souscrit",
+                errorId: "subPowerError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 187, pageIndex: 0 }
+            }]
+        },
+        {//3
+            id: "phaseType",
+            title: "",
+            fields: [{
+                id: "phaseType",
+                label: "Type de phase",
+                type: "options",
+                items: [
+                    { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -520, dy: - 270, squareSize: 10, pageIndex: 0 } },
+                    { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -520, dy: - 300, squareSize: 10, pageIndex: 0 } },
+                ],
+                mendatory: true,
+            }]
+        },
+        {//6
+            id: "eletricPanelSize",
+            title: "",
+            fields: [{
+                id: "eletricPanelSize",
+                type: "textInput",
+                isNumeric: true,
+                label: "Taille du tableau électrique à installer",
+                instruction: { priority: "low", message: "Renseigner le nombre de modules" },
+                errorId: "eletricPanelSizeError",
+                mendatory: true,
+                pdfConfig: { dx: -240, dy: - 339, pageIndex: 0 }
+            }]
+        },
+        //5 Checklist produits (autoGen)
+        //7 Montant accompte (autoGen)
+        { //1
+            id: "electricMeterPicture",
+            title: "",
+            fields: [
+                {
+                    id: "electricMeterPicture",
+                    label: "Photo du compteur électrique",
+                    type: "image",
+                    errorId: "electricMeterPictureError",
+                    mendatory: true,
+                    pdfConfig: { dx: -10, dy: - 10, pageIndex: 0 }
+                },
+            ]
+        },
+        { //4
+            id: "electricPanelPicture",
+            title: "",
+            fields: [
+                {
+                    id: "electricPanelPicture",
+                    label: "Photo du tableau électrique existant",
+                    type: "image",
+                    errorId: "electricPanelPictureError",
+                    mendatory: true,
+                    pdfConfig: { dx: -10, dy: - 10, pageIndex: 0 }
+                },
+            ]
+        },
+    ]
+
+    return { model }
+}
+
 //VERSIONNING:
 
 // export const pvReceptionModels = {

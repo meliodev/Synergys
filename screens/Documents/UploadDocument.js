@@ -30,7 +30,7 @@ import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants, errorMessages, highRoles } from "../../core/constants";
+import { constants, docsConfig, errorMessages, highRoles } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -443,7 +443,7 @@ class UploadDocument extends Component {
         else { //this.isEdit || !this.isEdit && this.documentType 
             let modalContent = ''
             const { type } = this.state
-            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
+            const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', "Fiche technique"]
             let isGenerable = generableTypes.includes(type)
             if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
@@ -464,42 +464,7 @@ class UploadDocument extends Component {
     renderAttachment(canWrite, isProcess) {
         const { attachment } = this.state
 
-        //upload task is running -> show progress for local user
-        if (attachment) {
-            var reduxAttachment = this.props.documents.newAttachments[this.DocumentId] || null
-            attachment.progress = reduxAttachment ? reduxAttachment.progress : null
-            var uploadNotRunning = (!reduxAttachment || reduxAttachment && reduxAttachment.progress === 0) //remote user & local user before upload starts
-        }
-
-        if (attachment && attachment.pending) { //local & remote 
-            return (
-                <TouchableOpacity style={{ marginTop: 15 }}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>Pièce jointe</Text>
-                    <UploadProgress
-                        attachment={attachment}
-                        showProgress={reduxAttachment}
-                        pending={uploadNotRunning}
-                        onPress={() => this.onPressUploadPending(!uploadNotRunning)}
-                    />
-                </TouchableOpacity>
-            )
-        }
-
-        else if (attachment && !attachment.pending) {
-            return (
-                <TouchableOpacity onPress={() => this.onPressAttachment(canWrite)}>
-                    <MyInput
-                        label="Pièce jointe"
-                        value={attachment && attachment.name}
-                        editable={false}
-                        multiline
-                        right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.onPressAttachment(canWrite)} />}
-                    />
-                </TouchableOpacity>
-            )
-        }
-
-        else if (!attachment) {
+        if (!attachment) {
             return (
                 <View style={{ marginVertical: 10, marginTop: 15 }}>
                     {!isProcess && <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>}
@@ -510,6 +475,42 @@ class UploadDocument extends Component {
                     />
                 </View>
             )
+        }
+
+        else {
+            //upload task is running -> show progress for local user
+            var reduxAttachment = this.props.documents.newAttachments[this.DocumentId] || null
+            attachment.progress = reduxAttachment ? reduxAttachment.progress : null
+            var uploadNotRunning = (!reduxAttachment || reduxAttachment && reduxAttachment.progress === 0) //remote user & local user before upload starts
+
+            //local & remote 
+            if (attachment.pending) {
+                return (
+                    <TouchableOpacity style={{ marginTop: 15 }}>
+                        <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder }]}>Pièce jointe</Text>
+                        <UploadProgress
+                            attachment={attachment}
+                            showProgress={reduxAttachment}
+                            pending={uploadNotRunning}
+                            onPress={() => this.onPressUploadPending(!uploadNotRunning)}
+                        />
+                    </TouchableOpacity>
+                )
+            }
+
+            else {
+                return (
+                    <TouchableOpacity onPress={() => this.onPressAttachment(canWrite)}>
+                        <MyInput
+                            label="Pièce jointe"
+                            value={attachment && attachment.name}
+                            editable={false}
+                            multiline
+                            right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.onPressAttachment(canWrite)} />}
+                        />
+                    </TouchableOpacity>
+                )
+            }
         }
     }
 
@@ -604,7 +605,7 @@ class UploadDocument extends Component {
     configDocTypes(index) {
         const type = this.types[index].value
         this.setState({ type })
-        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
+        const generableTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', "Fiche technique"]
         let isGenerable = generableTypes.includes(type)
         if (isGenerable) this.setState({ modalContent: 'docSources' })
         else this.setState({ modalContent: 'imageSources' })
@@ -624,7 +625,7 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genFicheEEBSources' })
             if (type === 'PV réception' || type === 'Mandat Synergys')
                 this.setState({ modalContent: 'genFormSources' })
-            else if (type === 'Devis' || type === 'Mandat MaPrimeRénov')
+            else if (type === 'Devis' || type === 'Mandat MaPrimeRénov' || type === "Fiche technique")
                 this.startGenPdf(1)
         }
     }
@@ -691,63 +692,22 @@ class UploadDocument extends Component {
         const { type, project } = this.state
         this.toggleModal()
 
-        const navParams = {
+        let navParams = {
             autoGenPdf: true,
             docType: type,
             DocumentId: this.DocumentId,
             project,
             isConversion: false,
+            isRoot: false,
             onGoBack: this.getGenPdf
         }
 
-        if (type === "Devis" || type === "Facture") {
-            var titleText = "Choix de la commande"
-            var listScreen = "ListOrders"
-            var creationScreen = "CreateOrder"
-            var popCount = index === 0 ? 3 : 2
-        }
-
-        else if (type === "Fiche EEB") {
-            var titleText = "Choix de la simulation"
-            var listScreen = "ListSimulations"
-            var creationScreen = "CreateSimulation"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        else if (type === "Mandat MaPrimeRénov") {
-            var titleText = "Choix du formulaire"
-            var listScreen = "ListMandatsMPR"
-            var creationScreen = "CreateMandatMPR"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        else if (type === "Mandat Synergys") {
-            var titleText = "Choix du formulaire"
-            var listScreen = "ListMandatsSynergys"
-            var creationScreen = "CreateMandatSynergys"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        else if (type === "PV réception") {
-            var titleText = "Choix du formulaire"
-            var listScreen = "ListPvReceptions"
-            var creationScreen = "CreatePvReception"
-            var popCount = index === 0 ? 2 : 1
-        }
-
-        //Existing order
-        if (index === 0) {
-            navParams.isRoot = false
-            navParams.titleText = titleText
-            navParams.popCount = popCount
-            this.props.navigation.navigate(listScreen, navParams)
-        }
-
-        //New order
-        else if (index === 1) {
-            navParams.popCount = popCount
-            this.props.navigation.navigate(creationScreen, navParams)
-        }
+        const config = docsConfig(index)
+        const { genNavigation } = config[type]
+        navParams = { ...navParams, ...genNavigation }
+        const navScreen = index === 0 ? navParams.listScreen : navParams.creationScreen
+        console.log(navScreen, navParams)
+        this.props.navigation.navigate(navScreen, navParams)
     }
 
     convertProposalToBill() {

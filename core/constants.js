@@ -102,63 +102,122 @@ export const workTypes = [
 
 //Auto-Sign docs
 export const autoSignDocs = ["Devis", "Mandat MaPrimeRénov", "Mandat Synergys", "Facture"]
-export const signPositions = {
-    "Devis": [
-        {
-            pageIndex: 1,
-            position: {
-                x: 75,
-                y: 440,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
+export const docsConfig = (index) => {
+
+    const config = {
+        "Devis": {
+            signatures: [
+                {
+                    pageIndex: 1,
+                    position: {
+                        x: 75,
+                        y: 440,
+                        size: 10,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
+                    }
+                },
+                {
+                    signature: {
+                        pageIndex: 5,
+                        position: {
+                            x: 250,
+                            y: 137,
+                            size: 10,
+                            lineHeight: 10,
+                            color: rgb(0, 0, 0),
+                        }
+                    }
+                }
+            ],
+            genNavigation: {
+                titleText: "Choix de la commande",
+                listScreen: "ListOrders",
+                creationScreen: "CreateOrder",
+                popCount: index === 0 ? 3 : 2,
             }
         },
-        {
-            pageIndex: 5,
-            position: {
-                x: 250,
-                y: 137,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
+        "Mandat MaPrimeRénov": {
+            signatures: [{
+                pageIndex: 1,
+                position: {
+                    x: 60,
+                    y: 90,
+                    size: 10,
+                    lineHeight: 10,
+                    color: rgb(0, 0, 0),
+                }
+            }],
+            genNavigation: {
+                titleText: "Choix du formulaire",
+                listScreen: "ListMandatsMPR",
+                creationScreen: "CreateMandatMPR",
+                popCount: index === 0 ? 2 : 1,
             }
-        }
-    ],
-    "Mandat MaPrimeRénov": [
-        {
-            pageIndex: 1,
-            position: {
-                x: 60,
-                y: 90,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
+        },
+        "Mandat Synergys": {
+            signatures: [{
+                pageIndex: 0,
+                position: {
+                    x: 45,
+                    y: 180,
+                    size: 10,
+                    lineHeight: 10,
+                    color: rgb(0, 0, 0),
+                }
+            }]
+        },
+        "Facture": {
+            signatures: [{
+                pageIndex: 0,
+                position: {
+                    x: 45,
+                    y: 160,
+                    size: 10,
+                    lineHeight: 10,
+                    color: rgb(0, 0, 0),
+                }
+            }],
+            genNavigation: {
+                titleText: "Choix de la commande",
+                listScreen: "ListOrders",
+                creationScreen: "CreateOrder",
+                popCount: index === 0 ? 3 : 2,
             }
-        }
-    ],
-    "Mandat Synergys": [
-        {
-            pageIndex: 0,
-            position: {
-                x: 45,
-                y: 180,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
+        },
+        "Fiche EEB": {
+            genNavigation: {
+                titleText: "Choix de la simulation",
+                listScreen: "ListSimulations",
+                creationScreen: "CreateSimulation",
+                popCount: index === 0 ? 2 : 1,
             }
-        }
-    ],
-    "Facture": [
-        {
-            pageIndex: 0,
-            position: {
-                x: 45,
-                y: 160,
-                size: 10,
-                lineHeight: 10,
-                color: rgb(0, 0, 0),
-            }
-        }
-    ],
+        },
+        "Mandat Synergys": {
+            genNavigation: {
+                titleText: "Choix du formulaire",
+                listScreen: "ListMandatsSynergys",
+                creationScreen: "CreateMandatSynergys",
+                popCount: index === 0 ? 2 : 1,
+            },
+        },
+        "PV réception": {
+            genNavigation: {
+                titleText: "Choix du formulaire",
+                listScreen: "ListPvReceptions",
+                creationScreen: "CreatePvReception",
+                popCount: index === 0 ? 2 : 1,
+            },
+        },
+        "Fiche technique": {
+            genNavigation: {
+                titleText: "Choix du formulaire",
+                listScreen: "",
+                creationScreen: "CreateFicheTech",
+                popCount: index === 0 ? 2 : 1,
+            },
+        },
+    }
+
+    return config
 }

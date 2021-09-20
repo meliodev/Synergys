@@ -1,6 +1,6 @@
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
 import { ProgressBar, Checkbox, TextInput as Input } from "react-native-paper";
 import { connect } from 'react-redux'
 import _ from 'lodash'
@@ -8,6 +8,8 @@ import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
 import DatePicker from 'react-native-date-picker'
 import TextInputMask from 'react-native-text-input-mask';
+import RNFS from 'react-native-fs'
+
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -26,7 +28,8 @@ import {
     SquareOption,
     Picker,
     TextInput,
-    Toast
+    Toast,
+    SquarePlus
 } from '../components';
 
 import {
@@ -44,6 +47,7 @@ import {
     arrayIntersection,
     articles_fr,
     setToast,
+    pickImage,
 } from '../core/utils';
 
 import { constants } from '../core/constants';
@@ -69,7 +73,7 @@ class StepsForm extends Component {
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
         this.isEdit = this.props.DocId !== "" && this.props.DocId !== undefined
-        this.DocId = this.isEdit ? this.props.DocId : generateId(this.props.idPattern)
+        this.DocId = this.isEdit ? this.props.DocId : this.props.idPattern ? generateId(this.props.idPattern) : ""
 
         this.project = this.props.navigation.getParam('project', null)
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
@@ -147,7 +151,7 @@ class StepsForm extends Component {
     //##Progression
     renderProgression(pages) {
         const { pagesDone } = this.state
-        const pagesCount = this.props.collection === "Simulations" ? pages.length - 1 : pages.length - 2
+        const pagesCount = pages.length - 1
         const progress = Math.round((pagesDone.length / pagesCount) * 100)
 
         return (
@@ -293,7 +297,10 @@ class StepsForm extends Component {
                                 right={instruction ?
                                     <Input.Icon
                                         name="information"
-                                        onPress={() => Alert.alert("IMPORTANT", instruction.message)}
+                                        onPress={() => {
+                                            const title = instruction.priority === "high" ? "IMPORTANT" : "Instruction"
+                                            Alert.alert(title, instruction.message)
+                                        }}
                                     />
                                     :
                                     null
@@ -320,7 +327,10 @@ class StepsForm extends Component {
                             right={instruction ?
                                 <Input.Icon
                                     name="information"
-                                    onPress={() => Alert.alert("Important", instruction.message)}
+                                    onPress={() => {
+                                        const title = instruction.priority === "high" ? "IMPORTANT" : "Instruction"
+                                        Alert.alert(title, instruction.message)
+                                    }}
                                 />
                                 :
                                 null
@@ -603,6 +613,9 @@ class StepsForm extends Component {
                     )
                     break;
 
+                case "image":
+                    return this.renderImageField(field)
+
                 case "autogen":
                     return null
                     break;
@@ -617,6 +630,92 @@ class StepsForm extends Component {
         }
 
         return fieldsComponents
+    }
+
+    renderImageField(field) {
+        const { id, label, errorId } = field
+
+        if (!this.state[id])
+            return (
+                <View>
+                    {this.renderLabel(label)}
+                    <SquarePlus
+                        style={{ marginTop: theme.padding }}
+                        onPress={() => this.handleImage(id)}
+                        title="Ajouter une photo"
+                        isBig={true}
+                        errorText={this.state[errorId]}
+                    />
+                </View>
+            )
+
+        else {
+            return (
+                <View style={{ borderWidth: 1, borderColor: theme.colors.gray_light, justifyContent: "center", alignItems: "center" }}>
+                    <Image
+                        source={{ uri: this.state[field.id].path }}
+                        resizeMode="contain"
+                        style={{ alignSelf: "center", width: this.state[field.id].width, height: this.state[field.id].height }}
+                    />
+                    <TouchableOpacity
+                        onPress={() => this.removeImage(id)}
+                        style={{ position: "absolute", right: theme.padding / 2, top: theme.padding / 2, borderRadius: 15, width: 30, height: 30, backgroundColor: "#000", opacity: 0.7, justifyContent: 'center', alignItems: "center" }}>
+                        <CustomIcon icon={faTimes} color="#fff" size={24} />
+                    </TouchableOpacity>
+                </View>
+            )
+        }
+    }
+
+    removeImage(fieldId) {
+        let update = {}
+        update[fieldId] = null
+        this.setState(update)
+    }
+
+    async handleImage(fieldId) {
+        try {
+            //1. Pick/Take picture
+            const attachments = await pickImage([], false, true)
+            if (attachments.length === 0) throw new Error("ignore")
+            let attachment = attachments[0]
+
+            // //2. Convert to base64
+            // const attachmentBase64 = await RNFS.readFile(attachment.path, "base64")
+            // attachment.base64 = attachmentBase64
+
+            //3. Set imageSize/ratio
+            const { width, height } = await this.setImageSize(attachment.path)
+            attachment.width = width
+            attachment.height = height
+
+            //4. Update state
+            let update = {}
+            update[fieldId] = attachment
+            this.setState(update)
+        }
+        catch (e) {
+            console.log(e)
+            throw new Error(e)
+        }
+    }
+
+    async setImageSize(uri) {
+        return new Promise((resolve, reject) => {
+            Image.getSize(uri, (srcWidth, srcHeight) => {
+                const maxHeight = constants.ScreenWidth - theme.padding * 2; // or something else
+                const maxWidth = constants.ScreenHeight / 2;
+
+                const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+                const width = srcWidth * ratio
+                const height = srcHeight * ratio
+                const size = { width, height }
+                resolve(size)
+            }, error => {
+                console.log(error)
+                reject("Erreur lors de l'initialisation de la photo.")
+            })
+        })
     }
 
     renderButtons(pages) {
@@ -757,6 +856,8 @@ class StepsForm extends Component {
                         error = positiveNumberValidator(this.state[id], `"${label}"`)
                     else if (type === "address")
                         error = nameValidator(this.state[id].description, `"${label}"`)
+                    else if (type === "image")
+                        error = !this.state[id] ? `Le champs "${label}" est obligatoire` : ""
                     else if (isEmail)
                         error = emailValidator(this.state[id])
                     else error = nameValidator(this.state[id], `"${label}"`)
@@ -799,6 +900,7 @@ class StepsForm extends Component {
 
         this.setState({ loading: true })
 
+        console.log('111111111111111111111')
         //Verify onPress Check icon
         const isValid = this.verifyFields(this.props.pages, this.state.pageIndex)
         if (!isValid) {
@@ -807,14 +909,19 @@ class StepsForm extends Component {
         }
 
         const { idPattern, collection } = this.props
-        const DocId = this.state.isEdit ? this.DocId : generateId(idPattern)
+
+        //Set form
         let form = this.unformatDocument()
         form = this.addFormLogs(form)
         form.isSubmitted = form.isSubmitted || isSubmitted
+        const DocId = this.state.isEdit ? this.DocId : idPattern ? generateId(idPattern) : ""
 
-        //  db.collection(collection).doc(DocId).set(form)
+        //Persist
+        if (collection) {
+            // db.collection(collection).doc(DocId).set(form)
+        }
 
-        const pdfBase64 = await this.props.generatePdf(form, this.props.collection)
+        const pdfBase64 = await this.props.generatePdf(form, this.props.pdfType)
 
         this.DocId = DocId
         this.setState({

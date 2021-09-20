@@ -74,6 +74,7 @@ class CreateMandatMPR extends Component {
                 idPattern={"GS-MMPR-"}
                 DocId={this.MandatMPRId}
                 collection={"MandatsMPR"}
+                pdfType={"MandatsMPR"}
                 //welcomeMessage={this.welcomeMessage}
                 steps={["Identité", "", "Habitation", "", "Coordonnées"]}
                 pages={mandatMPRModel}

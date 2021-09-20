@@ -112,6 +112,7 @@ class CreatePvReception extends Component {
                 idPattern={"GS-PV-"}
                 DocId={this.PvReceptionId}
                 collection={"PvReception"}
+                pdfType={"PvReception"}
                 //welcomeMessage={this.welcomeMessage}
                 steps={["RÉSERVES", "", "CHANTIER", "", "INSTALLATIONS"]}
                 pages={model}

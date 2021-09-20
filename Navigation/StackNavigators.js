@@ -69,6 +69,8 @@ import ListMandatsMPR from '../screens/Forms/MandatMaPrimeRenov/ListMandatsMPR'
 //Mandat Synergys
 import CreateMandatSynergys from '../screens/Forms/MandatSynergys/CreateMandatSynergys'
 import ListMandatsSynergys from '../screens/Forms/MandatSynergys/ListMandatsSynergys'
+//Fiche Technique
+import CreateFicheTech from '../screens/Forms/FicheTechnique/CreateFicheTech'
 
 //News
 import ListNews from '../screens/News/ListNews'
@@ -274,6 +276,10 @@ const appScreens = {
     },
     ListMandatsSynergys: {
         screen: ListMandatsSynergys,
+        navigationOptions: hideHeader
+    },
+    CreateFicheTech: {
+        screen: CreateFicheTech,
         navigationOptions: hideHeader
     },
 
