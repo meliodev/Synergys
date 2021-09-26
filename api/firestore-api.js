@@ -211,7 +211,7 @@ export const createUser = async function createUser(user, isConnected) {
   else {
     const batch = db.batch()
     const userRef = db.collection(collection).doc(id)
-    const newUserRef = db.collection('newUsers').doc(ClientId)
+    const newUserRef = db.collection('newUsers').doc(id)
     batch.set(userRef, user)
     batch.set(newUserRef, user)
     batch.commit()

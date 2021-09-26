@@ -397,6 +397,7 @@ class CreateOrder extends Component {
 
                     return (
                         <TouchableOpacity
+                            key={key.toString()}
                             onPress={() => {
                                 if (!canWrite) return
                                 navigateToScreen(this, 'AddItem', { orderLine, orderKey: key, onGoBack: this.refreshOrderLine })
@@ -454,8 +455,8 @@ class CreateOrder extends Component {
 
                 {this.renderTaxes()}
                 <SummaryRow label="Total T.T.C" valuePrefix="€" value={totalTTC} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
-                <SummarySeparator />
 
+                {primeCEE > 0 || primeRenov > 0 || aidRegion > 0 && <SummarySeparator />}
                 {primeCEE > 0 && <SummaryRow label="Prime Cee" valuePrefix="- €" value={primeCEE} />}
                 {primeRenov > 0 && <SummaryRow label="Maprimerévov" valuePrefix="- €" value={primeRenov} />}
                 {aidRegion > 0 && <SummaryRow label="Aides région" valuePrefix="- €" value={aidRegion} />}
@@ -604,8 +605,6 @@ class CreateOrder extends Component {
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
 
         const { isConnected } = this.props.network
-
-        const pdfGenButtonLabel = `Générer ${articles_fr('le', masculins, docType)} ${docType}`
 
         if (docNotFound)
             return (
@@ -779,7 +778,8 @@ class CreateOrder extends Component {
                                                 if (!canWrite) return
                                                 navigateToScreen(this, 'AddItem', { onGoBack: this.refreshOrderLine })
                                             }}
-                                            style={{ borderWidth: 1, borderColor: theme.colors.primary }}>
+                                            style={{ borderWidth: 1, borderColor: theme.colors.primary }}
+                                            containerStyle={{ alignSelf: "center" }}>
                                             <Text style={theme.customFontMSmedium.caption}>Ajouter une ligne de commande</Text>
                                         </Button>
 
@@ -812,8 +812,8 @@ class CreateOrder extends Component {
                         {discountValidationStep !== "" && this.renderAdminValidationPopUp()}
 
                         {this.autoGenPdf && validated &&
-                            <Button mode="contained" onPress={() => this.handleSubmit(false)} style={{ width: constants.ScreenWidth, backgroundColor: theme.colors.primary }} >
-                                {pdfGenButtonLabel}
+                            <Button mode="contained" onPress={() => this.handleSubmit(false)} containerStyle={{ alignSelf: "flex-end", marginRight: theme.padding }} style={{ backgroundColor: theme.colors.primary }} >
+                                Générer
                             </Button>
                         }
 

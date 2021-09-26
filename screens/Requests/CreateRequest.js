@@ -317,6 +317,7 @@ class CreateRequest extends Component {
                     const color = product.manual ? theme.colors.secondary : theme.colors.primary
                     return (
                         <TouchableOpacity
+                            key={index.toString()}
                             onPress={onPressProduct.bind(this, product)}
                             style={styles.productsListRow}>
                             <Text style={[textStyle, { color }]}>{product.name}</Text>

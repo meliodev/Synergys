@@ -259,10 +259,14 @@ const configureActions = async (actions, attributes, process) => {
 
                 //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
-                    if (collection === 'Agenda')
-                        action.screenParams.TaskId = ''
-                    if (collection === 'Documents')
-                        action.screenParams.DocumentId = ''
+
+                    if (action.screenParams) {
+                        if (collection === 'Agenda')
+                            action.screenParams.TaskId = ''
+                        if (collection === 'Documents')
+                            action.screenParams.DocumentId = ''
+                    }
+
                     action.documentId === ''
                 }
 
@@ -280,6 +284,9 @@ const configureActions = async (actions, attributes, process) => {
             }
 
         }
+
+        console.log('END..')
+
 
         return actions
     }

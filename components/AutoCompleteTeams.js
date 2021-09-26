@@ -33,7 +33,7 @@ export default class AutoCompleteInput extends React.Component {
                 {this.props.tagsSelected.map((t, i) => {
                     return (
                         <TouchableHighlight
-                            key={i}
+                            key={i.toString()}
                             onPress={() => this.handleDelete(i)}>
                             <View style={styles.customTag}>
                                 <Text style={{ color: "white" }}> {t}</Text>
@@ -90,11 +90,11 @@ export default class AutoCompleteInput extends React.Component {
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
                 createTagOnSpace
-                style={{ backgroundColor: '#fff', marginLeft: -constants.ScreenWidth*0.025, paddingBottom: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.gray }}
+                style={{ backgroundColor: '#fff', marginLeft: -constants.ScreenWidth * 0.025, paddingBottom: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.gray }}
                 autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
-                createTagOnSpace = {false}
-               // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+                createTagOnSpace={false}
+            // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }

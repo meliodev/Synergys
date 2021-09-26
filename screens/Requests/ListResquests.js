@@ -48,10 +48,17 @@ class ListRequests extends Component {
         }
         const { queryFilters } = this.props.permissions
         if (queryFilters === [])
-            this.setState({ requestsList: [], requestsCount: 0, loading: false, refreshing: false })
+            this.setState({
+                requestsList: [],
+                requestsCount: 0,
+                loading: false,
+                refreshing: false
+            })
+
         else {
             const params = { type: this.props.requestType }
             var query = configureQuery('Requests', queryFilters, params)
+
             const requestsList = await fetchDocuments(query)
             this.setState({
                 requestsList,

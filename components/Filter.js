@@ -77,14 +77,15 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
     }
 
     const renderOptions = () => {
-        return options.map((option) => renderOption(option))
+        return options.map((option, index) => renderOption(option, index))
     }
 
-    const renderOption = (option) => {
+    const renderOption = (option, index) => {
 
         if (option.type === 'picker') {
             return (
                 <Picker
+                    key={index.toString()}
                     title={option.title}
                     value={option.value}
                     selectedValue={option.value}
@@ -95,7 +96,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
         else if (option.type === 'screen') {
             return (
-                <TouchableOpacity onPress={() => onPressScreenPicker(option)}>
+                <TouchableOpacity key={index.toString()} onPress={() => onPressScreenPicker(option)}>
                     <TextInput
                         label={option.title}
                         value={option.value}

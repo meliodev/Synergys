@@ -31,10 +31,9 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
     })
 
     const onPressRightIcon = () => {
-        if (isAddressMarked) {
-            //Display 2 options (waze/google map) pop up
+        if (isAddressMarked)
             setShowModal(true)
-        }
+
         else openMap()
     }
 
@@ -59,7 +58,9 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
         await Linking.openURL(url)
     }
 
-    const renderAddressInput = (editable) => {
+    const renderAddressInput = (isTextInput) => {
+
+        const isEditable = isTextInput && editable
 
         return (
             <MyInput
@@ -68,16 +69,11 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
                 onChangeText={onChangeText}
                 error={!!addressError}
                 errorText={addressError}
-                editable={editable}
+                editable={isEditable}
                 //multiline={true}
-                right={!editable &&
+                right={!isTextInput &&
                     <TextInput.Icon
-                        name={
-                            <CustomIcon
-                                icon={isAddressMarked ? faEye : faMapMarkerAlt}
-                                color={theme.colors.inpuIcon}
-                            />
-                        }
+                        name={<CustomIcon icon={isAddressMarked ? faEye : faMapMarkerAlt} color={theme.colors.inpuIcon} />}
                         onPress={onPressRightIcon}
                     />
                 }

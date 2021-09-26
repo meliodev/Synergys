@@ -115,6 +115,7 @@ export const version5 = {
                             { filter: 'type', operation: '==', value: 'Visite technique préalable' },
                             { filter: 'deleted', operation: '==', value: false },
                             { filter: 'status', operation: '!=', value: 'Annulé' },
+                            //#task: add orderBy createdAt to get only the latest document (ignore old ones)
                         ],
                         screenName: 'CreateTask', //creation
                         screenParams: {
@@ -706,7 +707,7 @@ export const version5 = {
                         choices: [
                             { label: 'Adhefi.com', id: 'cashPayment', image: "sofincoLogo", onSelectType: 'openLink', link: 'https://www.adhefi.com' },
                             { label: 'Moncofidispro.fr', id: 'financing', image: "cofidisLogo", onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
-                            { label: 'Continuer', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
+                            { label: 'Continuer', id: 'confirm', nextStep: 'payModeValidation', onSelectType: 'transition' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
@@ -733,7 +734,7 @@ export const version5 = {
                         responsable: 'Commercial',
                         status: 'pending',
                     },
-                    //Montant de l'acompte? (zone de saisie)
+                    //Montant de l'acompte? (zone de saisie) //operation: add it to bill sub attributes
                     //Reste à payer: (zone de saisie)
                     {
                         id: 'quoteValidation',
@@ -741,11 +742,14 @@ export const version5 = {
                         instructions: "",
                         actionOrder: 2,
                         type: 'manual',
-                        verificationType: 'validation',
                         comment: '',
                         responsable: 'ADV',
                         status: 'pending',
-                        nextPhase: 'technicalVisitManagement',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+                            { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
+                        ],
                     },
                 ]
             },
@@ -801,7 +805,7 @@ export const version5 = {
                         verificationType: 'doc-creation',
                         responsable: 'Commercial',
                         status: 'pending',
-                        nextStep: 'payModeValidation',
+                        nextPhase: 'technicalVisitManagement',
                     }
                 ]
             },
@@ -899,6 +903,7 @@ export const version5 = {
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
+                    //#task: add fiche technique (montant de l'accompte available) (dynamic: false, public: true)
                     {
                         id: 'technicalVisitChoice',
                         title: "Voulez-vous cloturer la visite technique",
@@ -1130,7 +1135,7 @@ export const version5 = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Décidez plus tard', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            { label: 'Décider plus tard, passer à la facturation', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
                             { label: 'OUI', id: 'confirm', nextStep: 'maintainanceContract', onSelectType: 'transition' },
                         ],
                         responsable: 'Poseur',
@@ -1152,7 +1157,7 @@ export const version5 = {
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
+                            { label: 'Décider plus tard, passer à la facturation', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
                             { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
                         ],
                         responsable: 'Poseur',
@@ -1183,7 +1188,7 @@ export const version5 = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
+                            { label: 'Décider plus tard, passer à la facturation', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
                             { label: 'Importer le document', id: 'upload', onSelectType: 'navigation' },
                         ],
                         responsable: 'Poseur',
@@ -1211,7 +1216,7 @@ export const version5 = {
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Décider plus tard, passer à la facturation', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le mandat SEPA', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Client',
@@ -1244,7 +1249,7 @@ export const version5 = {
                         verificationType: 'doc-creation',
                         comment: '', //motif
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
+                            { label: 'Décider plus tard, passer à la facturation', id: 'skip', nextStep: 'facturationOption1', onSelectType: 'transition' },
                             { label: 'Importer le contrat', id: 'upload', onSelectType: 'navigation' },
                         ]
                     },
@@ -1270,7 +1275,7 @@ export const version5 = {
                         type: 'auto',
                         verificationType: 'doc-creation',
                         choices: [
-                            { label: 'Ignorer (Passer à la facturation)', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Décider plus tard, passer à la facturation', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true },
                             { label: 'Signer le contrat', id: 'sign', onSelectType: 'navigation' },
                         ],
                         responsable: 'Client',
@@ -1415,10 +1420,15 @@ export const version5 = {
                         instructions: "",
                         actionOrder: 2,
                         type: 'manual',
-                        verificationType: 'validation',
+                        //verificationType: 'validation',
                         comment: '',
                         responsable: 'ADV',
                         status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                        ],
                     },
                     {
                         id: 'billAmount',

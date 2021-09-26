@@ -668,29 +668,18 @@ class ProcessAction extends Component {
     renderHeaderBar() {
         const { process } = this.state
         const { project, clientId, step, canUpdate, role } = this.props
-        const navParams = { process, project, clientId, step, canUpdate, role } 
+        const navParams = { process, project, clientId, step, canUpdate, role }
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>
-                <Text style={[theme.customFontMSbold.header, styles.headerBarText]}>Suivi du projet</Text>
-                <View style={styles.progressionLinks}>
-                    <TouchableOpacity>
-                        <CustomIcon
-                            onPress={() => this.mainHandler(process, true)}
-                            icon={faRedo}
-                            size={18}
-                            color={theme.colors.white}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity>
-                        <CustomIcon
-                            onPress={onPressEye}
-                            icon={faEye}
-                            size={19}
-                            color={theme.colors.white}
-                        />
-                    </TouchableOpacity>
-                </View>
+                <Text style={[theme.customFontMSmedium.header, styles.headerBarText]}>Suivi du projet</Text>
+                <CustomIcon
+                    onPress={onPressEye}
+                    icon={faEye}
+                    size={21}
+                    color={theme.colors.white}
+                    style={styles.eye}
+                />
             </View>
         )
     }
@@ -781,7 +770,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         marginHorizontal: 15,
         marginTop: theme.padding * 3,
-        marginBottom: theme.padding * 4
+        marginBottom: theme.padding * 2
     },
     headerBarContainer: {
         backgroundColor: theme.colors.section,
@@ -802,15 +791,11 @@ const styles = StyleSheet.create({
         marginTop: theme.padding,
         marginBottom: theme.padding * 4
     },
-    progressionLinks: {
-        flexDirection: 'row',
+    eye: {
         zIndex: 1,
         position: 'absolute',
-        top: theme.padding * 1.2,
-        right: theme.padding / 2,
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: 50
+        top: theme.padding/1.8,
+        right: theme.padding/2,
     },
     accordion: {
         paddingVertical: 10,

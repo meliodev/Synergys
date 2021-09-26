@@ -495,7 +495,7 @@ class Signature extends Component {
         }
 
         catch (e) {
-            setToast(this, 'e', "Erreur lors de l'exportation du document signé, veuillez réessayer.")
+            setToast(this, 'e', "Erreur lors de l'importation du document signé, veuillez réessayer.")
         }
 
         finally {
@@ -574,6 +574,7 @@ class Signature extends Component {
         if (isAutoSign) {
             const config = docsConfig(0)
             const { signatures } = config[this.DocumentType]
+            console.log('SIGNATURES', signatures)
             this.setState({
                 showTerms: false,
                 pdfEditMode: true,
@@ -597,7 +598,7 @@ class Signature extends Component {
                     <Appbar
                         back
                         title
-                        titleText={'Exportation du document signé...'}
+                        titleText={'Importation du document signé...'}
                     />
                     {this.renderAttachment()}
                 </View>

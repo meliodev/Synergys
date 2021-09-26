@@ -44,8 +44,8 @@ class RequestsManagement extends React.Component {
         const { index, showInput, searchInput } = this.state
         const permissionsRequests = this.props.permissions.requests
         const { isConnected } = this.props.network
-        const roleId = this.props.role.id
-        const showTabs = (roleId === 'admin' || roleId === 'backoffice' || roleId === 'dircom' || roleId === 'tech' || roleId === 'client')
+        const { role } = this.props
+        const showTabs = role.isHighRole || role.isClient
 
         return (
             <View style={{ flex: 1 }}>

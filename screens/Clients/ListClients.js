@@ -66,7 +66,7 @@ class ListClients extends Component {
                     permissions={permissions}
                     query={queryClients}
                     onPress={this.getClient}
-                    showButton={this.showButton}
+                    showButton={this.isRoot}
                     emptyListHeader='Aucun client'
                     emptyListDesc='Appuyez sur le boutton, en bas à droite, pour en créer un nouveau.' />
             </View>

@@ -17,9 +17,9 @@ const Menu = ({ options, functions, menuTrigger, ...props }) => (
     </MenuTrigger>
 
     <MenuOptions>
-      {options.map((option) => {
+      {options.map((option, index) => {
         return (
-          <MenuOption onSelect={() => functions[option.id]()}
+          <MenuOption key={index.toString()} onSelect={() => functions[option.id]()}
             style={{ flexDirection: 'row', padding: constants.ScreenWidth * 0.03 }}>
             <Text style={[theme.customFontMSregular.body, { color: theme.colors.secondary }]}>{option.title}</Text>
           </MenuOption>

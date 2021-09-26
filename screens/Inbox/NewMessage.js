@@ -4,6 +4,7 @@ import { List } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/Entypo'
 import { connect } from 'react-redux'
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
+import DocumentPicker from 'react-native-document-picker';
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -80,7 +81,8 @@ class NewMessage extends Component {
     async pickDocs() {
         try {
             var { attachments } = this.state
-            const newAttachments = await pickDocs(attachments)
+            const types = [DocumentPicker.types.pdf, DocumentPicker.types.images]
+            const newAttachments = await pickDocs(attachments, types)
             this.setState({ attachments: newAttachments })
         }
         catch (e) {
@@ -277,7 +279,7 @@ class NewMessage extends Component {
                         const message = msg.message
 
                         return (
-                            <View style={{ borderLeftWidth: 1, borderLeftColor: theme.colors.gray2, marginLeft: key * 5, marginBottom: 5 }}>
+                            <View key={key.toString()} style={{ borderLeftWidth: 1, borderLeftColor: theme.colors.gray2, marginLeft: key * 5, marginBottom: 5 }}>
                                 <MessageInput
                                     style={styles.messageInput}
                                     underlineColor="transparent"
@@ -306,7 +308,16 @@ class NewMessage extends Component {
 
         return (
             <View style={styles.container}>
-                <Appbar close title titleText={this.title} send={!loading} handleSend={this.handleSend} attach={!loading && isConnected} handleAttachement={this.pickDocs.bind(this)} loading={loading} />
+                <Appbar
+                    close
+                    title
+                    titleText={this.title}
+                    send={!loading}
+                    handleSend={this.handleSend}
+                    attach={!loading && isConnected}
+                    handleAttachement={this.pickDocs.bind(this)}
+                    loading={loading}
+                />
                 <ScrollView keyboardShouldPersistTaps="always" style={styles.form}>
 
                     <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>

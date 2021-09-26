@@ -140,7 +140,9 @@ class ListFormsContainer extends Component {
                                     }
                                 />
                                 :
-                                this.props.emptyList
+                                <View style={{ alignSelf: "center" }}>
+                                    {this.props.emptyList}
+                                </View>
                             }
 
                         </View>

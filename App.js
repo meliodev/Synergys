@@ -10,6 +10,8 @@ import { MenuProvider } from 'react-native-popup-menu';
 import SplashScreen from 'react-native-splash-screen'
 //import codePush from 'react-native-code-push'
 
+import AppToast from './components/global/AppToast'
+
 import PdfGen from './PdfGen'
 import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
@@ -75,8 +77,6 @@ class App extends Component {
     this.foregroundMessages && this.foregroundMessages()
   }
 
-
-
   render() {
     let persistor = persistStore(Store)
     //  persistor.purge()
@@ -88,6 +88,7 @@ class App extends Component {
             <MenuProvider>
               <Wrapper>
                 <RootController />
+                <AppToast />
               </Wrapper>
             </MenuProvider>
           </PaperProvider>

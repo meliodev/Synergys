@@ -56,7 +56,7 @@ class CreateClient extends Component {
             email: { value: "prospect000@digital-french-touch.com", error: "" },
             phone: { value: "+33 55 55 55", error: '' },
 
-            password: { value: 'srfqdrf', error: '', show: false },
+            password: { value: '123456', error: '', show: false },
 
             userType: "client",
 

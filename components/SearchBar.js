@@ -26,7 +26,7 @@ const SearchBar = ({
 
     const AppBarIcon = ({ icon, onPress, style }) => {
         const faIcon = <FontAwesomeIcon icon={icon} size={24} />
-        return <appbar.Action icon={faIcon} onPress={onPress} />
+        return <appbar.Action icon={() => <FontAwesomeIcon icon={icon} size={24} />} onPress={onPress} />
     }
 
     const renderLeftIcon = () => {

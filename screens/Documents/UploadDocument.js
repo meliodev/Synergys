@@ -202,13 +202,8 @@ class UploadDocument extends Component {
             this.onPressAttachment(canUpdate)
         }
 
-        if (this.isSignature) {
-            let { canUpdate } = this.props.permissions.documents
-            //Client is allowed to update his own documents
-            canUpdate = canUpdate || this.props.role.id === 'client' && this.state.createdBy.id === auth.uid
-            const allowSign = canUpdate
-            if (allowSign)
-                this.navigateToSignature(true, this.props.network.isConnected)
+        if (this.isSignature && this.isProcess) {
+            this.navigateToSignature(true, this.props.network.isConnected)
         }
     }
 
@@ -454,11 +449,11 @@ class UploadDocument extends Component {
     onPressUploadPending(uploadRunning) {
         if (auth.currentUser.uid === this.state.editedBy.id) {
             if (uploadRunning) return
-            else Alert.alert("", "L'exportation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
+            else Alert.alert("", "L'importation de la pièce jointe va commencer dès que votre appareil se connecte à internet.")
         }
 
         //In case remote user presses the attachment while it is still pending.
-        else Alert.alert("", "Ce document est en cours d'exportation. Le document sera bientôt disponible, veuillez patienter...")
+        else Alert.alert("", "Ce document est en cours d'importation. Le document sera bientôt disponible, veuillez patienter...")
     }
 
     renderAttachment(canWrite, isProcess) {
@@ -778,7 +773,7 @@ class UploadDocument extends Component {
     renderFooter(isConnected, upload, sign, quoteToBillConversion) {
         const isSingleButtonShown = !upload.show && !quoteToBillConversion.show || !sign.show && !quoteToBillConversion.show
         return (
-            <View style={{ flexDirection: "row", paddingHorizontal: theme.padding, justifyContent: isSingleButtonShown ? 'flex-end' : "space-between" }}>
+            <View style={{ flexDirection: "row", justifyContent: isSingleButtonShown ? 'flex-end' : "space-between" }}>
                 {quoteToBillConversion.show && this.renderFooterButton("conversion", "Convertir en facture", quoteToBillConversion.allow, isConnected)}
                 {sign.show && this.renderFooterButton("sign", "Signer", sign.allow, isConnected)}
                 {upload.show && this.renderFooterButton("upload", "Importer", upload.allow, isConnected)}
@@ -1079,7 +1074,7 @@ class UploadDocument extends Component {
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit) && !loading
         canDelete = canDelete && this.isEdit && !loading
 
-        const titleText = loading ? 'Exportation du document...' : this.isEdit ? 'Modifier le document' : this.isProcess ? type : 'Nouveau document'
+        const titleText = loading ? 'Importation du document...' : this.isEdit ? 'Modifier le document' : this.isProcess ? type : 'Nouveau document'
 
         if (initialLoading)
             return (
@@ -1100,7 +1095,7 @@ class UploadDocument extends Component {
         else if (loadingConversion)
             return (
                 <View style={styles.container}>
-                    <Appbar close title titleText='Exportation du document...' />
+                    <Appbar close title titleText='Importation du document...' />
                     <LoadDialog loading={loadingConversion} message="Conversion du document en cours. Veuillez patienter..." />
                 </View>
             )

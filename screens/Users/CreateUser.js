@@ -25,6 +25,7 @@ import { nameValidator, emailValidator, passwordValidator, generateId, updateFie
 import { checkEmailExistance } from "../../api/auth-api";
 import { faMagic } from "@fortawesome/pro-light-svg-icons";
 import { validateUserInputs, formatNewUser, createUser } from "../../api/firestore-api";
+import { setAppToast } from "../../core/redux";
 
 const rolesPicker = {
   3: [
@@ -160,6 +161,8 @@ class CreateUser extends Component {
         navigation.state.params.onGoBack()
       }
       this.setState({ loadingDialog: false }, () => {
+        const toast = { message: "L'utilisateur a été crée !", type: "info" }
+        setAppToast(this, toast)
         navigation.navigate(this.prevScreen)
       })
     }

@@ -93,7 +93,7 @@ class Profile extends Component {
                 turnoverGoals: true,
                 projects: true
             },
-            viewProfileDetails: false,
+            viewMore: false,
 
             refreshing: false,
             loading: true,
@@ -433,12 +433,13 @@ class Profile extends Component {
 
     addProjectComponent() {
 
-        const { address, isPro, denom, prenom, nom, email } = this.state
+        const { address, isPro, denom, prenom, nom, email, phone } = this.state
         const client = {
             id: this.userParam.id,
             fullName: isPro ? denom.value : `${prenom.value} ${nom.value}`,
             email: email.value,
             role: 'Client',
+            phone: phone.value
         }
 
         return (
@@ -548,8 +549,22 @@ class Profile extends Component {
         }
     }
 
-    renderCommercialGoals(monthlyGoals, isCom) {
+
+    toggleSection(sectionId) {
+        let { sectionsExpansion, viewMore } = this.state
+        sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
+        if (sectionId === "info")
+            viewMore = false
+        this.setState({ sectionsExpansion, viewMore })
+    }
+
+    renderCommercialGoals(monthlyGoals) {
+        const { role } = this.props
         const { sectionsExpansion } = this.state
+        const isCom = role.id === "com"
+        const showSection = this.userParam.roleId === 'com' && role.isHighRole && !this.isProfileOwner
+        if (!showSection) return null
+
         return (
             <View>
                 <FormSection
@@ -566,18 +581,54 @@ class Profile extends Component {
                             isCom={isCom}
                         />
                     }
-                    containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 20 }}
+                    containerStyle={{ width: constants.ScreenWidth, alignSelf: 'center', marginBottom: 20, paddingTop: theme.padding / 2 }}
+                    formContainerStyle={{ paddingTop: theme.padding }}
                 />
             </View>
         )
     }
 
-    toggleSection(sectionId) {
-        let { sectionsExpansion, viewProfileDetails } = this.state
-        sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
-        if (sectionId === "info")
-            viewProfileDetails = false
-        this.setState({ sectionsExpansion, viewProfileDetails })
+    //ROLE INPUT
+    renderRoleInput(role, isProspect, isConnected) {
+
+        const isAdmin = this.roleId === "admin"
+
+        if (this.isClient) return null
+
+        return (
+            <TouchableOpacity onPress={() => this.onPressRole(isAdmin, isConnected)}>
+                <MyInput
+                    label="Role"
+                    returnKeyType="done"
+                    value={role}
+                    autoCapitalize="none"
+                    editable={false}
+                    right={
+                        isAdmin &&
+                        <TextInput.Icon
+                            name='pencil'
+                            color={theme.colors.gray_medium}
+                            size={21}
+                            onPress={() => this.onPressRole(isAdmin, isConnected)}
+                        />
+                    }
+                />
+            </TouchableOpacity>
+        )
+    }
+
+    onPressRole(isAdmin, isConnected) {
+        const allowAction = isAdmin && this.isEdit && isConnected && !this.isClient //Client can't become an employee
+        if (!allowAction) return
+
+        const navParams = {
+            onGoBack: this.refreshToast,
+            userId: this.userParam.id,
+            currentRole: this.state.role,
+            dataCollection: this.dataCollection
+        }
+
+        this.props.navigation.navigate("EditRole", navParams)
     }
 
     render() {
@@ -600,22 +651,17 @@ class Profile extends Component {
             isProspect,
             userNotFound,
             sectionsExpansion,
-            viewProfileDetails
+            viewMore
         } = this.state
         const { isConnected } = this.props.network
 
         const { currentUser } = firebase.auth()
         if (currentUser) var { uid } = currentUser
 
-        const isAdmin = this.roleId === 'admin'
-        const isCom = this.roleId === 'com'
-
         let { canUpdate } = this.props.permissions.users
         canUpdate = (canUpdate || this.isProfileOwner)
 
-        const showGoalsSection = this.userParam.roleId === 'com' && highRoles.includes(this.roleId) && !this.isProfileOwner
         const showConversionButton = this.isClient && isProspect && !loading && clientProjectsList.length > 1
-
         const changePwButtonColor = newPass.value === "" || currentPass.value === "" ? theme.colors.gray_medium : theme.colors.primary
 
         return (
@@ -630,7 +676,12 @@ class Profile extends Component {
                 />
 
                 {userNotFound || !currentUser ?
-                    <EmptyList icon={faUserSlash} header='Utilisateur introuvable' description='Cet utilisateur est introuvable dans la base de données.' offLine={!isConnected} />
+                    <EmptyList
+                        icon={faUserSlash}
+                        header='Utilisateur introuvable'
+                        description='Cet utilisateur est introuvable dans la base de données.'
+                        offLine={!isConnected}
+                    />
                     :
                     <View style={{ flex: 1 }}>
                         <ScrollView
@@ -662,15 +713,15 @@ class Profile extends Component {
                                                     {this.renderMetadata(canUpdate, isConnected)}
                                                 </View>
 
-                                                {!viewProfileDetails &&
+                                                {!viewMore &&
                                                     <Text
-                                                        onPress={() => this.setState({ viewProfileDetails: true })}
-                                                        style={[theme.customFontMSmedium.body, { color: theme.colors.primary, textAlign: "center", marginTop: theme.padding }]}>
+                                                        onPress={() => this.setState({ viewMore: true })}
+                                                        style={[theme.customFontMSbold.body, { color: theme.colors.primary, textAlign: "center", marginTop: theme.padding }]}>
                                                         Voir plus...
                                                     </Text>
                                                 }
 
-                                                {viewProfileDetails &&
+                                                {viewMore &&
                                                     <View style={{ flex: 1 }}>
                                                         <MyInput
                                                             label="Numéro utilisateur"
@@ -698,23 +749,7 @@ class Profile extends Component {
                                                             disabled={false}
                                                         />
 
-                                                        {isAdmin && !isProspect &&
-                                                            <TouchableOpacity onPress={() => {
-                                                                if (!isConnected || !isAdmin || this.isClient) return
-                                                                navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
-                                                            }}>
-                                                                <MyInput
-                                                                    label="Role"
-                                                                    returnKeyType="done"
-                                                                    value={role}
-                                                                    autoCapitalize="none"
-                                                                    editable={false}
-                                                                    right={isAdmin && isConnected && !this.isClient && <TextInput.Icon name='pencil' color={theme.colors.gray_medium} size={21} onPress={() =>
-                                                                        navigateToScreen(this, 'EditRole', { onGoBack: this.refreshToast, userId: this.userParam.id, currentRole: role, dataCollection: this.dataCollection })
-                                                                    } />}
-                                                                />
-                                                            </TouchableOpacity>
-                                                        }
+                                                        {this.renderRoleInput(role, isProspect, isConnected)}
 
                                                         <MyInput
                                                             label="Téléphone"
@@ -738,7 +773,9 @@ class Profile extends Component {
 
                                                         <AddressInput
                                                             offLine={!isConnected}
-                                                            onPress={() => navigateToScreen(this, 'Address', { currentAddress: this.state.address, onGoBack: this.refreshAddress })}
+                                                            onPress={() => {
+                                                                navigateToScreen(this, 'Address', { currentAddress: this.state.address, onGoBack: this.refreshAddress })
+                                                            }}
                                                             address={address}
                                                             onChangeText={this.setAddress}
                                                             clearAddress={() => this.setAddress('')}
@@ -767,7 +804,7 @@ class Profile extends Component {
                                     />
 
                                     {this.isClient && this.renderClientProjects(currentUser)}
-                                    {showGoalsSection && this.renderCommercialGoals(monthlyGoals, isCom)}
+                                    {this.renderCommercialGoals(monthlyGoals, role)}
 
                                     {this.isProfileOwner &&
                                         <FormSection

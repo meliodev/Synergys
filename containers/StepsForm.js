@@ -90,8 +90,6 @@ class StepsForm extends Component {
             pdfBase64: "",
             initialLoading: true,
             loading: false,
-            toastMessage: "",
-            toastType: "",
             toastMessageModal: "",
             toastTypeModal: "",
             docNotFound: false,
@@ -113,7 +111,7 @@ class StepsForm extends Component {
             setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
             if (this.state.isEdit) await this.initEditMode()
             else if (this.props.autoGen) {
-                this.handleSubmit(true)
+                await this.handleSubmit(true, false)
             }
             this.initialState = _.cloneDeep(this.state)
             this.setState({ initialLoading: false })
@@ -177,7 +175,7 @@ class StepsForm extends Component {
         const color = isSelected ? white : gray_medium
 
         return (
-            <View style={[styles.step, { backgroundColor }]}>
+            <View key={index.toString()} style={[styles.step, { backgroundColor }]}>
                 <Text style={[theme.customFontMSregular.caption, { color }]}>{step}</Text>
             </View>
         )
@@ -189,10 +187,18 @@ class StepsForm extends Component {
             <View style={styles.stepsContainer}>
                 {steps.map((step, index) => {
                     if (step === "")
-                        return <View style={styles.stepsSeparator} />
+                        return (
+                            <View
+                                key={index.toString()}
+                                style={styles.stepsSeparator}
+                            />
+                        )
 
                     else return (
-                        <View style={{ flexDirection: "row", alignItems: "center" }}>
+                        <View
+                            key={index.toString()}
+                            style={{ flexDirection: "row", alignItems: "center" }}
+                        >
                             {this.renderStep(step, index)}
                         </View>
                     )
@@ -410,6 +416,7 @@ class StepsForm extends Component {
 
                                     return (
                                         <SquareOption
+                                            key={index.toString()}
                                             element={item}
                                             index={index}
                                             elementSize={constants.ScreenWidth * 0.4}
@@ -480,12 +487,12 @@ class StepsForm extends Component {
 
                                                 update[id] = selectedOptions
 
-                                                this.setState(update, () => {
+                                                this.setState(update, async () => {
                                                     //Auto goNext
                                                     //if (this.isEdit) return
                                                     const isPageWithSingleField = pages[pageIndex].fields.length === 1
                                                     if (isPageWithSingleField && !isMultiOptions || item.skip)
-                                                        this.goNext()
+                                                        await this.goNext()
                                                 })
                                             }}
                                         />
@@ -723,80 +730,87 @@ class StepsForm extends Component {
         const isSubmit = pages[pageIndex].id === 'submit'
         const isLastPage = pageIndex === pages.length - 1
         // const isLastFormPage = pageIndex === pages.length - 2
-        const title = isSubmit ? "Soumettre" : isLastPage ? "Terminer" : "Continuer"
+        const title = isSubmit ? "SOUMETTRE" : isLastPage ? "TERMINER" : "CONTINUER"
 
         return (
             <View style={styles.buttonsContainer}>
                 {pageIndex > 0 ?
-                    <Button
-                        mode="outlined"
-                        icon="arrow-left"
-                        outlinedColor={theme.colors.primary}
+                    <TouchableOpacity
+                        style={{ borderRadius: 5, paddingHorizontal: theme.padding, paddingVertical: theme.padding / 2, borderWidth: 1, borderColor: theme.colors.gray_medium, justifyContent: "center", alignItems: "center" }}
                         onPress={this.goBack}
                     >
-                        Retour
-                    </Button>
+                        <Text style={[theme.customFontMSmedium.body, { letterSpacing: 1, color: theme.colors.primary }]}>RETOUR</Text>
+                    </TouchableOpacity>
                     :
                     <View style={{ width: constants.ScreenWidth * 0.45 }} />
                 }
-                <Button
-                    mode="contained"
-                    onPress={this.goNext}>
-                    {title}
-                </Button>
+                <TouchableOpacity
+                    style={{ elevation: 1, borderRadius: 5, paddingHorizontal: theme.padding, paddingVertical: theme.padding / 2, backgroundColor: theme.colors.primary, justifyContent: "center", alignItems: "center" }}
+                    onPress={this.goNext}
+                >
+                    <Text style={[theme.customFontMSregular.body, { letterSpacing: 1, color: theme.colors.white }]}>{title}</Text>
+                </TouchableOpacity>
             </View>
         )
     }
 
     //##Handlers
     async goNext() {
-        const { pageIndex, pagesDone, stepIndex } = this.state
-        const { pages, collection } = this.props
 
-        //Set direction (useful for handling pageIndex/pagesDone update)
-        this.setState({ isBack: false })
+        return new Promise((resolve, reject) => {
+            const { pageIndex, pagesDone, stepIndex } = this.state
+            const { pages, collection } = this.props
+            let update = {}
 
-        //Verify fields
-        const isValid = this.verifyFields(pages, pageIndex)
-        if (!isValid) return
+            //Verify fields
+            const isValid = this.verifyFields(pages, pageIndex)
+            if (!isValid) {
+                return resolve(true)
+            }
 
-        //Add Page browsed
-        pagesDone.push(pageIndex)
-        this.setState({ pagesDone })
+            //Remove errors
+            const errorUpdate = this.removeErrors(false)
+            if (!_.isEmpty(errorUpdate)) {
+                update = { ...update, ...errorUpdate }
+            }
 
-        //Remove errors
-        this.removeErrors(false)
+            //Add Page browsed + Set direction (useful for handling pageIndex/pagesDone update)
+            pagesDone.push(pageIndex)
+            update.pagesDone = pagesDone
+            update.isBack = false
 
-        //Increment step
-        if (pages[pageIndex].isLast)
-            this.setState({ stepIndex: stepIndex + 1 })
+            //Increment step
+            if (pages[pageIndex].isLast)
+                update.stepIndex = stepIndex + 1
 
-        //Show results (Simulation) or submit
-        const isLastFormPage = pageIndex === pages.length - 2
-        const isLastPage = pageIndex === pages.length - 1
+            //Show results (Simulation) or submit
+            const isLastFormPage = pageIndex === pages.length - 2
+            const isLastPage = pageIndex === pages.length - 1
 
-        //Set & Show simulation results
-        if (collection === "Simulations" && isLastFormPage) {
-            const { products, colorCat, estimation } = this.setResults()
-            this.setState({
-                products,
-                colorCat,
-                estimation,
-                showSuccessMessage: true,
-                pageIndex: this.state.pageIndex + 1,
-                loading: false
+            //Set & Show simulation results
+            if (collection === "Simulations" && isLastFormPage) {
+                const { products, colorCat, estimation } = this.setResults()
+                update.products = products
+                update.colorCat = colorCat
+                update.estimation = estimation
+                update.showSuccessMessage = true
+                update.loading = false
+            }
+
+            //Increment page
+            if (!isLastPage)
+                update.pageIndex = pageIndex + 1
+
+            //Update
+            this.setState(update, async () => {
+                if (isLastPage)
+                    await this.handleSubmit(true, true)
+
+                resolve(true)
             })
-        }
 
-        //Submit
-        else if (isLastPage) {
-            this.handleSubmit(true)
-        }
+        })
 
-        //Increment page
-        else {
-            this.setState({ pageIndex: pageIndex + 1 })
-        }
     }
 
     goBack() {
@@ -884,57 +898,80 @@ class StepsForm extends Component {
     removeErrors(errorId) {
 
         const { pageIndex, pagesDone, stepIndex } = this.state
+        let errorUpdate = {}
 
         for (const field of this.props.pages[pageIndex].fields) {
-            let errorUpdate = {}
-
             if (errorId && field.errorId === errorId || !errorId) {
                 errorUpdate[field.errorId] = ""
-                this.setState(errorUpdate)
             }
         }
+
+        return errorUpdate
     }
 
     //##Logic: Submit
-    async handleSubmit(isSubmitted) {
+    async handleSubmit(isSubmitted, ignoreVerification) {
 
-        this.setState({ loading: true })
+        return new Promise(async (resolve, reject) => {
 
-        console.log('111111111111111111111')
-        //Verify onPress Check icon
-        const isValid = this.verifyFields(this.props.pages, this.state.pageIndex)
-        if (!isValid) {
-            this.setState({ loading: false })
-            return
-        }
+            try {
+                console.log('Starting submit....................')
+                this.setState({ loading: true })
 
-        const { idPattern, collection } = this.props
+                //Verify onPress Check icon
+                if (!ignoreVerification) {
+                    const isValid = this.verifyFields(this.props.pages, this.state.pageIndex)
+                    if (!isValid) {
+                        this.setState({ loading: false })
+                        resolve(true)
+                    }
+                }
 
-        //Set form
-        let form = this.unformatDocument()
-        form = this.addFormLogs(form)
-        form.isSubmitted = form.isSubmitted || isSubmitted
-        const DocId = this.state.isEdit ? this.DocId : idPattern ? generateId(idPattern) : ""
+                console.log('Fields verified.....................')
 
-        //Persist
-        if (collection) {
-            // db.collection(collection).doc(DocId).set(form)
-        }
+                const { idPattern, collection } = this.props
 
-        const pdfBase64 = await this.props.generatePdf(form, this.props.pdfType)
+                //Set form
+                let form = this.unformatDocument()
+                form = this.addFormLogs(form)
+                form.isSubmitted = form.isSubmitted || isSubmitted
+                const DocId = this.state.isEdit ? this.DocId : idPattern ? generateId(idPattern) : ""
 
-        this.DocId = DocId
-        this.setState({
-            pdfBase64,
-            pageIndex: 0,
-            pagesDone: [],
-            submitted: true,
-            readOnly: true,
-            isEdit: true,
-            loading: false,
-            toastMessage: "Formulaire enregistré avec succès !",
-            toastType: "success"
+                console.log('Form formated.....................')
+
+                //Persist
+                if (collection) {
+                    db.collection(collection).doc(DocId).set(form)
+                }
+
+                console.log('Ready to Generate form..............')
+                const pdfBase64 = await this.props.generatePdf(form, this.props.pdfType)
+                console.log('FORM GENERATED.................')
+
+                this.DocId = DocId
+                const update = {
+                    pdfBase64,
+                    pageIndex: 0,
+                    pagesDone: [],
+                    submitted: true,
+                    readOnly: true,
+                    isEdit: true,
+                    loading: false,
+                }
+
+                console.log('Ready to update state.............................')
+                this.setState(update, () => {
+                    console.log('STATE UPDATED !')
+                    resolve(true)
+                })
+            }
+
+            catch (e) {
+                console.log("ERROR SUBMIT....................", e.message)
+                reject(e)
+            }
         })
+
     }
 
     unformatDocument() {
@@ -953,8 +990,6 @@ class StepsForm extends Component {
         delete state.isPdfModalVisible
         delete state.pdfBase64
         delete state.loading
-        delete state.toastMessage
-        delete state.toastType
         delete state.toastMessageModal
         delete state.toastTypeModal
         delete state.docNotFound
@@ -1152,9 +1187,9 @@ class StepsForm extends Component {
 
                     <View style={{ padding: theme.padding }}>
                         <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message1}</Text>
-                        {products.map((product) => {
+                        {products.map((product, key) => {
                             return (
-                                <View style={{ flexDirection: "row" }}>
+                                <View key={key.toString()} style={{ flexDirection: "row" }}>
                                     <Image source={this.getImage(product)} style={{ alignSelf: 'center', width: 15, height: 15 }} />
                                     <Text style={[theme.customFontMSregular.body, { marginLeft: 8 }]}>{product}</Text>
                                 </View>
@@ -1175,7 +1210,7 @@ class StepsForm extends Component {
                     </View>
                 </ScrollView>
 
-                {submitted && this.renderBottomCenterButton("Générer une fiche EEB", this.toggleModal)}
+                {submitted && this.renderBottomRightButton("Générer", this.toggleModal)}
             </View>
         )
     }
@@ -1191,7 +1226,7 @@ class StepsForm extends Component {
 
         return steps.map((step, index) => {
             return (
-                <View style={{ flexDirection: 'row' }}>
+                <View key={index.toString()} style={{ flexDirection: 'row' }}>
                     <View style={{ alignItems: 'center' }}>
                         <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: step.circleColor }} />
                         {index !== steps.length - 1 && <View style={{ flex: 1, width: 2, backgroundColor: step.barColor }} />}
@@ -1281,11 +1316,11 @@ class StepsForm extends Component {
             })
     }
 
-    renderBottomCenterButton(title, onPress) {
+    renderBottomRightButton(title, onPress) {
         return (
             <Button
                 mode="contained"
-                containerStyle={styles.bottomCenterButton}
+                containerStyle={styles.bottomRightButton}
                 onPress={onPress}
             >
                 {title}
@@ -1295,9 +1330,12 @@ class StepsForm extends Component {
 
     //##Overview
     renderOverview() {
-        const form = this.unformatDocument()
+        console.log('Rendering overview......................')
         const { readOnly, isEdit } = this.state
         const { pages, collection } = this.props
+        const form = this.unformatDocument()
+        let redundantFields = []
+        console.log('Formated form........................')
 
         let showSummary = false
         if (collection === "Simulations") {
@@ -1312,8 +1350,7 @@ class StepsForm extends Component {
             showSummary = colorCat !== "" && products !== [] && estimation > 0
         }
 
-
-        let redundantFields = []
+        console.log('Show summary..........', showSummary)
 
         return (
             <View style={{ flex: 1 }}>
@@ -1325,9 +1362,9 @@ class StepsForm extends Component {
 
                     {showSummary &&
                         <View style={{ marginBottom: theme.padding / 2, backgroundColor: theme.colors.white }}>
-                            {summary.map((item) => {
+                            {summary.map((item, key) => {
                                 return (
-                                    <View style={styles.overviewRow}>
+                                    <View key={key.toString()} style={styles.overviewRow}>
                                         <Text style={[theme.customFontMSsemibold.caption, styles.overviewText, { opacity: 0.8 }]}>{item.title}</Text>
                                         {item.isColor ?
                                             <View style={styles.overviewText}>
@@ -1347,7 +1384,7 @@ class StepsForm extends Component {
                         {pages.map((page, pageIndex) => {
 
                             return (
-                                <View key={pageIndex}>
+                                <View key={pageIndex.toString()}>
                                     {
                                         page.fields.map((field, key) => {
 
@@ -1416,7 +1453,7 @@ class StepsForm extends Component {
                 </ScrollView>
 
                 {isEdit && readOnly &&
-                    this.renderBottomCenterButton(this.props.genButtonTitle, this.toggleModal)
+                    this.renderBottomRightButton("Générer", this.toggleModal)
                 }
 
             </View>
@@ -1468,7 +1505,7 @@ class StepsForm extends Component {
 
         const isLastPage = this.state.pageIndex === pages.length - 1
         const isSubmitted = isLastPage
-        this.handleSubmit(isSubmitted)
+        await this.handleSubmit(isSubmitted, false)
     }
 
     render() {
@@ -1484,17 +1521,12 @@ class StepsForm extends Component {
             loading,
             initialLoading,
             docNotFound,
-            toastMessage,
-            toastType,
             toastMessageModal,
             toastTypeModal,
         } = this.state
         const { collection } = this.props
 
         const isProcess = this.props.navigation.state.params && this.props.navigation.state.params.onGoBack
-
-        if (pdfBase64)
-            var source = { uri: `data:application/pdf;base64,${pdfBase64}` }
 
         if (docNotFound)
             return (
@@ -1544,10 +1576,9 @@ class StepsForm extends Component {
                         />
                         {pdfBase64 !== "" && //#task: test isPdfModalVisible && pdfBase64 (to avoid crash)
                             <View style={{ flex: 1 }}>
-                                <Pdf source={source} style={modalStyles.pdf} />
+                                <Pdf source={{ uri: `data:application/pdf;base64,${pdfBase64}` }} style={modalStyles.pdf} />
                             </View>
                         }
-
                         <Toast
                             duration={1500}
                             message={toastMessageModal}
@@ -1559,9 +1590,9 @@ class StepsForm extends Component {
 
                     <View style={{ backgroundColor: "white" }}>
                         {isProcess ?
-                            this.renderBottomCenterButton(`Valider ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
+                            this.renderBottomRightButton("Valider", () => this.savePdfBase64(pdfBase64, isProcess))
                             :
-                            this.renderBottomCenterButton(`Télécharger ${articles_fr("le", mascCollections, collection)} ${this.props.fileName}`, () => this.savePdfBase64(pdfBase64, isProcess))
+                            this.renderBottomRightButton("Télécharger", () => this.savePdfBase64(pdfBase64, isProcess))
                         }
                     </View>
                 </Modal>
@@ -1571,13 +1602,6 @@ class StepsForm extends Component {
                     loading={loading}
                 />
 
-                <Toast
-                    duration={1500}
-                    message={toastMessage}
-                    type={toastType}
-                    onDismiss={() => this.setState({ toastMessage: '' })}
-                    containerStyle={{ bottom: constants.ScreenHeight * 0.1 }}
-                />
             </View>
         )
     }
@@ -1604,7 +1628,8 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         flexGrow: 1,
-        justifyContent: 'center',
+        // justifyContent: 'center',
+        paddingTop: constants.ScreenHeight * 0.1,
         paddingBottom: 24,
         paddingHorizontal: theme.padding
     },
@@ -1636,13 +1661,14 @@ const styles = StyleSheet.create({
         backgroundColor: "#003250"
     },
     buttonsContainer: {
-        paddingHorizontal: theme.padding,
+        padding: theme.padding,
         backgroundColor: theme.colors.background,
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
-    bottomCenterButton: {
-        alignSelf: "center",
+    bottomRightButton: {
+        alignSelf: "flex-end",
+        marginRight: theme.padding
     },
     sucessMessageContent: {
         flexDirection: 'row',

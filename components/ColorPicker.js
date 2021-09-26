@@ -42,7 +42,7 @@ const ModalContent = ({ hideModal, updateParentColor, pickedColor, label }) => {
             <View style={{ flexDirection: 'row', marginTop: 25, flexWrap: 'wrap' }}>
                 {theme.colors.project.map((color, index) => {
                     return (
-                        <TouchableOpacity style={{ width: '25%', marginVertical: 10, alignItems: 'center' }}>
+                        <TouchableOpacity key={index.toString()} style={{ width: '25%', marginVertical: 10, alignItems: 'center' }}>
                             <ColorItem color={color} index={index} />
                         </TouchableOpacity>
                     )

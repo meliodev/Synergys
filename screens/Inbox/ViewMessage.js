@@ -113,7 +113,7 @@ export default class ViewMessage extends Component {
                         const sentAtTime = moment(msg.sentAt).format('LT')
 
                         return (
-                            <View>
+                            <View key={key.toString()}>
                                 {key === 0 &&
                                     <View>
                                         <Text style={[theme.customFontMSregular.body, { marginBottom: 20 }]}>{msg.message}</Text>
@@ -207,6 +207,7 @@ export default class ViewMessage extends Component {
 
                     return (
                         <List.Accordion
+                            key={key.toString()}
                             id={message.id}
                             showArrow
                             style={{ paddingVertical: constants.ScreenHeight * 0.015, borderBottomWidth: !isExpanded ? StyleSheet.hairlineWidth * 2 : 0, borderBottomColor: theme.colors.gray_light }}

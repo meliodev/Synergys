@@ -26,7 +26,7 @@ import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 
 import * as theme from "../../core/theme"
-import { constants, adminId, errorMessages } from "../../core/constants"
+import { constants, adminId, errorMessages, lowRoles } from "../../core/constants"
 import { generateId, navigateToScreen, load, myAlert, updateField, nameValidator, compareDates, compareTimes, checkOverlap, isEditOffline, setPickerTaskTypes, refreshAddress, refreshProject, refreshAssignedTo, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils"
 import { blockRoleUpdateOnPhase } from "../../core/privileges"
 
@@ -86,7 +86,7 @@ class CreateTask extends Component {
 
         const currentRole = this.props.role.id
         this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
-        const defaultState = this.setDefaultState()
+        const defaultState = this.setDefaultState(currentRole)
 
         this.state = {
             //TEXTINPUTS
@@ -95,19 +95,19 @@ class CreateTask extends Component {
             description: "",
 
             //PICKERS
-            type: defaultState.type || 'Normale',
+            type: defaultState.type,
             priority: 'Moyenne',
             status: 'En cours',
             color: theme.colors.primary,
 
             //Screens
-            assignedTo: defaultState.assignedTo || { email: "", fullName: "", id: "", role: "" },
+            assignedTo: defaultState.assignedTo,
             //|| { email: "com1@eqx-software.com", fullName: "Commercial 1", id: "GS-US-zzEg", role: "Commercial" },
             //{ id: '', fullName: '' },
             // { email: "bo2@eqx-software.com", fullName: "Back Office 2", id: "GS-US-nnqS", role: "Back office" },
             assignedToError: '',
-            project: defaultState.project || { id: '', name: '' },
-            address: defaultState.address || { description: '', place_id: '' },
+            project: defaultState.project,
+            address: defaultState.address,
 
             //Schedule
             isAllDay: false,
@@ -147,28 +147,48 @@ class CreateTask extends Component {
         }
     }
 
-    setDefaultState() {
+    setDefaultState(currentRole) {
         let defaultState = {}
+        let name = ""
+        let type = 'Normale'
+        let project = { id: '', name: '' }
+        let address = { description: '', place_id: '' }
+        let assignedTo = { email: "", fullName: "", id: "", role: "" }
 
+        //Process
         if (this.project && this.taskType) {
-            const { comContact, techContact, address } = this.project
-            const name = `${this.taskType.value} - ${this.project.id}`
+            const { comContact, techContact } = this.project
+            name = `${this.taskType.value} - ${this.project.id}`
+            type = this.taskType.value
+            project = this.project
+            address = this.project.address
 
-            let assignedTo = {}
-            if (_.isEqual(this.taskType.natures, ['com'])) {
+            //Set assignedTo
+            const isComTask = _.isEqual(this.taskType.natures, ['com'])
+            const isTechTask = _.isEqual(this.taskType.natures, ['tech'])
+
+            if (isComTask) {
                 assignedTo = comContact
             }
-            if (_.isEqual(this.taskType.natures, ['tech'])) {
+            else if (isTechTask) {
                 assignedTo = techContact
             }
+        }
 
-            defaultState = {
-                name,
-                type: this.taskType.value,
-                assignedTo,
-                project: this.project,
-                address
+        //Standard
+        else {
+            const { isLowRole } = this.props.role
+            if (isLowRole) {
+                assignedTo = this.props.currentUser
             }
+        }
+
+        defaultState = {
+            name,
+            type,
+            assignedTo,
+            project,
+            address
         }
 
         return defaultState
@@ -390,7 +410,7 @@ class CreateTask extends Component {
                 load(this, false)
                 this.handleConflicts(overlappingTasks, task)
                 return
-            } 
+            }
 
             //7. Persist task(s)
             await this.persistTasks(tasks)
@@ -590,7 +610,7 @@ class CreateTask extends Component {
         return (
             <TasksConflicts
                 role={this.props.role}
-                canWrite= {canWrite}
+                canWrite={canWrite}
                 isVisible={showTasksConflicts}
                 tasks={overlappingTasks}
                 toggleModal={() => this.setState({ showTasksConflicts: !showTasksConflicts })}
@@ -652,6 +672,8 @@ class CreateTask extends Component {
 
     renderAssignedTo(canWrite) {
         const { assignedTo, assignedToError } = this.state
+        const { role } = this.props
+        const isEditable = canWrite && role.isHighRole
 
         return (
             <ItemPicker
@@ -679,7 +701,7 @@ class CreateTask extends Component {
                 value={assignedTo.fullName}
                 error={!!assignedToError}
                 errorText={assignedToError}
-                editable={canWrite}
+                editable={isEditable}
             />
         )
     }
@@ -703,7 +725,7 @@ class CreateTask extends Component {
                     message={toastMessage}
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })} />
-                    
+
             </ScrollView >
         )
     }
@@ -745,7 +767,12 @@ class CreateTask extends Component {
                                 error={!!type.error}
                                 errorText={type.error}
                                 selectedValue={type}
-                                onValueChange={(type) => this.setState({ type })}
+                                onValueChange={(type) => {
+                                    //Toggle all date pickers
+                                    
+                                    //Sync Date début et date fin
+                                    this.setState({ type, endDate: this.state.startDate })
+                                }}
                                 title="Type *"
                                 elements={this.types}
                                 enabled={canWrite && enableTypePicker} //pre-defined task type

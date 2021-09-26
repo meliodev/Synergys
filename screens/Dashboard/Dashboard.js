@@ -92,7 +92,7 @@ class Dashboard extends Component {
         }
 
         return (
-            <TouchableOpacity style={[styles.menuItem, { borderBottomColor }]} onPress={onPressItem}>
+            <TouchableOpacity key={index.toString()} style={[styles.menuItem, { borderBottomColor }]} onPress={onPressItem}>
                 <View style={[styles.menuItemIconWrapper, menuItemIconWrapperStyle]}>
                     <CustomIcon icon={icon} size={iconSize} color={iconColor} />
                 </View>
@@ -134,6 +134,10 @@ class Dashboard extends Component {
 const mapStateToProps = (state) => {
     return {
         role: state.roles.role,
+        permissions: state.permissions,
+        currentUser: state.currentUser,
+        network: state.network,
+        state: state,
         //fcmToken: state.fcmtoken
     }
 }

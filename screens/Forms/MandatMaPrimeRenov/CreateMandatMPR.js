@@ -51,6 +51,7 @@ class CreateMandatMPR extends Component {
         this.clientPhone = this.project ? this.project.client.phone : ""
         this.clientEmail = this.project ? this.project.client.email : ""
 
+        console.log('PHONE::::', this.project.client)
         const { firstName: clientFirstName, lastName: clientLastName } = retrieveFirstAndLastNameFromFullName(this.clientFullName)
         initialState.applicantFirstName = clientFirstName
         initialState.applicantLastName = clientLastName

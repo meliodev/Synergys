@@ -198,7 +198,7 @@ class CreateSimulation extends Component {
                         instructions.map((instruction, index) => {
                             const count = index + 1
                             return (
-                                <View style={{ flexDirection: 'row' }}>
+                                <View key={index.toString()} style={{ flexDirection: 'row' }}>
                                     <Text style={{ color: theme.colors.primary }}>{count}. </Text>
                                     <Text style={[theme.customFontMSregular.caption, { marginBottom: 12 }]}>
                                         {instruction}

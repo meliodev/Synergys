@@ -25,15 +25,14 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-
 const roles = [
-  { id: 'admin', value: 'Admin', level: 3 },
-  { id: 'backoffice', value: 'Back office', level: 3 },
-  { id: 'dircom', value: 'Directeur commercial', level: 2 },
-  { id: 'com', value: 'Commercial', level: 1 },
-  { id: 'poseur', value: 'Poseur', level: 1 },
-  { id: 'tech', value: 'Responsable technique', level: 2 },
-  { id: 'client', value: 'Client', level: 0 }
+  { id: 'admin', value: 'Admin', level: 3, isHighRole: true, isLowRole: false, isClient: false },
+  { id: 'backoffice', value: 'Back office', level: 3, isHighRole: true, isLowRole: false, isClient: false },
+  { id: 'dircom', value: 'Directeur commercial', level: 2, isHighRole: true, isLowRole: false, isClient: false },
+  { id: 'com', value: 'Commercial', level: 1, isHighRole: false, isLowRole: true, isClient: false },
+  { id: 'poseur', value: 'Poseur', level: 1, isHighRole: false, isLowRole: true, isClient: false },
+  { id: 'tech', value: 'Responsable technique', level: 2, isHighRole: true, isLowRole: false, isClient: false },
+  { id: 'client', value: 'Client', level: 0, isHighRole: false, isLowRole: false, isClient: true }
 ]
 
 class AuthLoadingScreen extends Component {
@@ -63,13 +62,14 @@ class AuthLoadingScreen extends Component {
     //   this.setState({ requiresUpdate: true })
     //   return
     // }
+    // firebase.auth().signOut()
 
     await this.bootstrapNotifications()
-    this.updateProgress(0.25)
+    // this.updateProgress(0.25)
     this.forgroundNotificationListener()
-    this.updateProgress(0.5)
+    // this.updateProgress(0.5)
     this.backgroundNotificationListener()
-    this.updateProgress(0.6)
+    // this.updateProgress(0.6)
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
   }
@@ -151,49 +151,52 @@ class AuthLoadingScreen extends Component {
     firebase.auth().onAuthStateChanged(async user => {
 
       try {
+
+        const { type, isConnected } = await NetInfo.fetch()
+
         if (user) {
 
-          const { currentUser } = firebase.auth()
-          const { isConnected } = this.props.network
-
           if (isConnected) {
-            //1. Set role
-            const idTokenResult = await currentUser.getIdTokenResult()
 
+            //0. Get idTokenResult
+            const idTokenResult = await user.getIdTokenResult()
             if (!idTokenResult) {
               throw new Error(errorMessages.appInit)
             }
 
-            for (const role of roles) {
-              if (idTokenResult.claims[role.id]) {
-                setRole(this, role)
+            //1. Set role
+            for (const r of roles) {
+              if (idTokenResult.claims[r.id]) {
+                var role = r
                 var roleValue = role.value
               }
             }
 
-            const action = { type: "SET_PERMISSIONS", value: privilleges[roleValue] }
-            this.props.dispatch(action)
-
-            this.updateProgress(90)
-
-            //4. Set currentUser
-            const currUser = {
+            //2. Set currentUser
+            const currentUser = {
               id: user.uid,
               fullName: user.displayName,
               email: user.email,
               role: roleValue,
             }
-            setCurrentUser(this, currUser)
 
-            //5. Set fcm token
+            //3. Set fcm token
             const enabled = await this.requestUserPermission() //iOS only
             const res = await this.configureFcmToken()
             if (!res) {
               throw new Error(errorMessages.appInit)
             }
+
+            //4. Set role/permissions/currentUser on redux:
+            const action1 = { type: "ROLE", value: role }
+            const action2 = { type: "SET_PERMISSIONS", value: privilleges[roleValue] }
+            const action3 = { type: "CURRENTUSER", value: currentUser }
+            this.props.dispatch(action1)
+            this.props.dispatch(action2)
+            this.props.dispatch(action3)
           }
 
-          //4. Navigation
+          //5. Navigation
           const { initialNotification } = this.state //Notification
           const { params } = this.props.navigation.state //Dynamic link
 
@@ -207,6 +210,7 @@ class AuthLoadingScreen extends Component {
             var { routeName, routeParams } = this.state
           }
 
+          //Default
           else {
             var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
             var routeParams = {}
@@ -215,18 +219,13 @@ class AuthLoadingScreen extends Component {
 
         else {
           resetState(this)
-          const { type, isConnected } = await NetInfo.fetch()
           const network = { type, isConnected }
           setNetwork(this, network)
           var routeName = "LoginScreen"
           var routeParams = {}
         }
 
-        let startApp = user && this.props.role.id !== '' && this.props.permissions.active || !user
-        if (startApp) {
-          this.updateProgress(1)
-          this.props.navigation.navigate(routeName, routeParams)
-        }
+        this.props.navigation.navigate(routeName, routeParams)
       }
 
       catch (e) {
@@ -328,12 +327,13 @@ class AuthLoadingScreen extends Component {
       <Background>
         <Background style={styles.nestedBackground}>
           <View style={styles.container}>
-            <ProgressBar
+            <Loading />
+            {/* <ProgressBar
               progress={progress}
               color={theme.colors.primary}
               visible={true}
               style={{ alignSelf: "center" }}
-            />
+            /> */}
           </View>
         </Background>
         {requiresUpdate &&

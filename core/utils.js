@@ -650,6 +650,8 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
     const caption = 10
 
+    console.log("Starting PDF GEN........................")
+
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
 
@@ -694,6 +696,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
                 if (isDrawText) {
                   const dx = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dx : pdfConfig.dx
                   const dy = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dy : pdfConfig.dy
+
                   pages[pdfConfig.pageIndex].drawText(text,
                     {
                       x: pages[pdfConfig.pageIndex].getWidth() + dx,
@@ -851,6 +854,8 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
         }
       }
     }
+
+    console.log("Finalizing PDF GEN........................")
 
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
@@ -1143,6 +1148,7 @@ export const refreshUser = (user) => {
   const { isPro, id, denom, nom, prenom, role, email, phone } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
+  console.log('USER OBJECT', userObject)
   return userObject
 }
 

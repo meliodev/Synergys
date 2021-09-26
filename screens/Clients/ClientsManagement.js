@@ -12,6 +12,7 @@ import ListUsers from '../Users/ListUsers'
 import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
+import { configureQuery } from "../../core/privileges";
 
 class ClientsManagement extends React.Component {
 
@@ -33,8 +34,10 @@ class ClientsManagement extends React.Component {
     }
 
     render() {
-        const queryClients = db.collection('Clients').where('isProspect', '==', false).where('deleted', '==', false)
-        const queryProspects = db.collection('Clients').where('isProspect', '==', true).where('deleted', '==', false)
+
+        const { queryFilters } = this.props.permissions.clients
+        const queryClients = configureQuery('Clients', queryFilters, { isProspect: false })
+        const queryProspects = configureQuery('Clients', queryFilters, { isProspect: true })
 
         const routes = [
             { key: 'first', title: 'CLIENTS' },

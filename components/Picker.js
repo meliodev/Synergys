@@ -15,7 +15,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
                 dropdownIconColor={theme.colors.gray_dark}
                 {...props}
             >
-                {elements.map((item) => <Picker.Item label={item.label} value={item.value} />)}
+                {elements.map((item, index) => <Picker.Item key={index.toString()} label={item.label} value={item.value} />)}
             </Picker>
         </View>
 

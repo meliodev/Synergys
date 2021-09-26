@@ -1,3 +1,15 @@
+
+//Dispatch action
+const dispatchAction = (main, type, value) => {
+    const action = { type, value }
+    main.props.dispatch(action)
+}
+
+//App Toast
+export const setAppToast = (main, value) => {
+    dispatchAction(main, "TOAST", value)
+}
+
 //CurrentUser
 export const setStatusBarColor = (main, statusBarProps) => {
     const action = { type: "STATUSBARCOLOR", value: statusBarProps }
@@ -27,7 +39,7 @@ export const setPermissions = (main, permissions) => {
     const action = { type: "SET_PERMISSIONS", value: permissions }
     main.props.dispatch(action)
 }
- 
+
 export const setNetwork = (main, network) => {
     const action = { type: "NET", value: network }
     main.props.dispatch(action)

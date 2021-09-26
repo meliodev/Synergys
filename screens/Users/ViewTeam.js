@@ -92,6 +92,7 @@ export default class ViewTeam extends Component {
             return members.map((member, key) => {
                 return (
                     <ListItem
+                        key={key.toString()}
                         title={member.isPro ? member.denom : member.prenom + ' ' + member.nom}
                         description={member.role}
                         iconRightName='dots-horizontal'

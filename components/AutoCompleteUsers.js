@@ -36,7 +36,7 @@ export default class AutoCompleteUsers extends React.Component {
                 {this.props.tagsSelected.map((t, i) => {
                     return (
                         <TouchableHighlight
-                            key={i}
+                            key={i.toString()}
                             onPress={() => this.handleDelete(i)}>
                             <View style={styles.customTag}>
                                 <Text style={{ color: "white" }}> {t.fullName || t.email}</Text>
@@ -105,8 +105,11 @@ export default class AutoCompleteUsers extends React.Component {
                 editable={this.props.editable}
                 suggestionsBellow={this.props.suggestionsBellow}
                 createTagOnSpace={false}
-                inputContainerStyle={styles.inputContainerStyle}
+
                 containerStyle={styles.containerStyle}
+                inputContainerStyle={styles.inputContainerStyle}
+                listContainerStyle={styles.listContainerStyle}
+                listStyle={styles.listStyle}
             // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
@@ -138,13 +141,25 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
     },
+
     inputContainerStyle: {
-        marginLeft: -5,
+        marginLeft: 5,
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: theme.colors.gray_extraLight
+        borderBottomColor: theme.colors.gray_extraLight,
+        borderWidth: 0
     },
     containerStyle: {
         minWidth: 200,
         maxWidth: constants.ScreenWidth - theme.padding
+    },
+    listContainerStyle: {
+        backgroundColor: "white",
+        borderWidth: 0
+    },
+    listStyle: {
+        backgroundColor: 'white',
+        margin: 0,
+        paddingHorizontal: theme.padding / 2,
+        borderWidth: 0
     }
 })

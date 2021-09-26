@@ -39,13 +39,13 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) 
             </AnimatedCircularProgress>
 
             <View>
-                <Text numberOfLines={1} style={[theme.customFontMSregular.caption, { textAlign: 'center', color: textColor }]}>
+                <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>
                     <NumberFormat
                         value={current}
                         displayType={'text'}
                         thousandSeparator={true}
                         suffix={'€'}
-                        renderText={value => <Text style={[theme.customFontMSregular.caption, { textAlign: 'center', color: textColor }]}>{value}</Text>}
+                        renderText={value => <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{value}</Text>}
                     />
                 /
                 <NumberFormat
@@ -53,12 +53,12 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) 
                         displayType={'text'}
                         thousandSeparator={true}
                         suffix={'€'}
-                        renderText={value => <Text style={[theme.customFontMSregular.caption, { textAlign: 'center', color: textColor }]}>{value}</Text>}
+                        renderText={value => <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{value}</Text>}
                     />
                 </Text>
             </View>
 
-            <Text style={[theme.customFontMSregular.small, { textAlign: 'center', color: textColor, marginTop: 5 }]}>{month}</Text>
+            <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor, marginTop: 5 }]}>{month}</Text>
 
         </TouchableOpacity>
     )

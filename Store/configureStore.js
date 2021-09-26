@@ -12,6 +12,7 @@ import networkReducer from './Reducers/networkReducer'
 import documentsReducer from './Reducers/documentsReducer'
 import processReducer from './Reducers/processReducer'
 import statusBarReducer from './Reducers/statusBarReducer'
+import toastReducer from './Reducers/toastReducer'
 import { resetState } from '../core/redux';
 
 const rootPersistConfig = {
@@ -27,7 +28,8 @@ const appReducer = persistCombineReducers(rootPersistConfig, {
     network: networkReducer,
     documents: documentsReducer,
     process: processReducer,
-    statusBar: statusBarReducer
+    statusBar: statusBarReducer,
+    toast: toastReducer,
 })
 
 const rootReducer = (state, action) => {

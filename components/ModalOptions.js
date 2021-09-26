@@ -156,7 +156,14 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
     if (isReview)
         return (
             <View style={[containerStyle, { justifyContent: 'space-around' }]}>
-                {elements.map((element, index) => <Rate element={element} index={index} length={elements.length} />)}
+                {elements.map((element, index) =>
+                    <Rate
+                        key={index.toString()}
+                        element={element}
+                        index={index}
+                        length={elements.length}
+                    />)
+                }
             </View>
         )
 
@@ -166,6 +173,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 if (model === 'Element1')
                     return (
                         <Element1
+                            key={index.toString()}
                             element={element}
                             index={index}
                             elementSize={elementSize}
@@ -205,7 +213,7 @@ const ModalOptions = ({
         <Modal
             isVisible={isVisible}
             //  onSwipeComplete={!isLoading && toggleModal}
-            swipeDirection={!isLoading ? "down" : ""}
+            //swipeDirection={!isLoading ? "down" : ""}
             animationIn="slideInUp"
             animationOut="slideOutDown"
             onBackdropPress={!isLoading ? toggleModal : () => console.log('No action...')}
@@ -249,7 +257,7 @@ const ModalOptions = ({
 const styles = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
-        marginTop: constants.ScreenHeight * 0.6,
+        marginTop: constants.ScreenHeight * 0.58,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,

@@ -196,9 +196,9 @@ class AddGoal extends Component {
                         </View>
 
                         {this.incomeSources.map((source, index) => {
-                            console.log(source, "..........")
                             return (
                                 <TouchableOpacity
+                                    key={index.toString()}
                                     onPress={() => onPressProjectId(source.projectId)}
                                     style={styles.incSourcesRow}
                                 >

@@ -163,9 +163,12 @@ class Analytics extends Component {
 
         return (
             <View style={styles.summaryContainer}>
-                {summaryData.map((data) => {
+                {summaryData.map((data, index) => {
                     return (
-                        <View style={[styles.summaryColumn, { backgroundColor: data.colors.secondary }]}>
+                        <View
+                            key={index.toString()}
+                            style={[styles.summaryColumn, { backgroundColor: data.colors.secondary }]}
+                        >
                             {emptySpace()}
                             <View style={styles.summaryLabelContainer}>
                                 <Text style={[theme.customFontMSregular.small, styles.summaryLabel]}>{data.label}</Text>

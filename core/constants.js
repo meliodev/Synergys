@@ -24,7 +24,9 @@ export const roles = [
 ]
 
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
+export const lowRoles = ["poseur", "com"]
 export const highRolesValues = ['Admin', 'Back office', 'Directeur commercial', 'Responsable technique']
+
 
 export const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
 export const techSteps = ['Visite technique', 'Installation', 'Maintenance']
@@ -49,7 +51,7 @@ export const errorMessages = {
         roleUpdate: "Erreur lors de la modification du role. Veuillez réessayer.",
         passwordUpdate: "Erreur lors de la modification du mot de passe. Veuillez réessayer."
     },
-    documents: { upload: "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer." },
+    documents: { upload: "Erreur lors de l'importation de la pièce jointe, veuillez réessayer." },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer.",
     invalidFields: "Erreur de saisie, veuillez verifier les champs.",
     network: {
@@ -118,15 +120,13 @@ export const docsConfig = (index) => {
                     }
                 },
                 {
-                    signature: {
-                        pageIndex: 5,
-                        position: {
-                            x: 250,
-                            y: 137,
-                            size: 10,
-                            lineHeight: 10,
-                            color: rgb(0, 0, 0),
-                        }
+                    pageIndex: 5,
+                    position: {
+                        x: 250,
+                        y: 137,
+                        size: 10,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
                     }
                 }
             ],
@@ -194,6 +194,16 @@ export const docsConfig = (index) => {
             }
         },
         "Mandat Synergys": {
+            signatures: [{
+                pageIndex: 0,
+                position: {
+                    x: 45,
+                    y: 170,
+                    size: 10,
+                    lineHeight: 10,
+                    color: rgb(0, 0, 0),
+                }
+            }],
             genNavigation: {
                 titleText: "Choix du formulaire",
                 listScreen: "ListMandatsSynergys",

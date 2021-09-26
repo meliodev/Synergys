@@ -352,7 +352,7 @@ class CreateProduct extends Component {
 
                             if (response === 'failure') {
                                 this.setState({ loadingDialog: false })
-                                setToast(this, 'e', "Erreur lors de l'exportation de la pièce jointe, veuillez réessayer.")
+                                setToast(this, 'e', "Erreur lors de l'importation de la pièce jointe, veuillez réessayer.")
                                 return
                             }
 

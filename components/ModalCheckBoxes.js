@@ -120,6 +120,7 @@ export default class ModalCheckBoxes extends Component {
                 {selectedItems.map((item, index) => {
                     return (
                         <TouchableOpacity
+                            key={index.toString()}
                             onPress={() => this.onPressItem(item)}
                             style={styles.itemsListRow}>
                             <Text style={[textStyle, { color: theme.colors.gray_dark, marginBottom: index === selectedItems.length - 1 ? 0 : 5 }]}>

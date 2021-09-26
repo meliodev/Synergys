@@ -58,6 +58,8 @@ export default class TimeslotForm extends Component {
         if (prevProps.dueHour !== this.props.dueHour) {
             this.setState({ dueHour: moment(this.props.dueHour).toDate() })
         }
+
+       // if(prevState)
     }
 
     setAllTogglePickers(bool) {

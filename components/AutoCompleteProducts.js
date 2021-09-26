@@ -40,7 +40,7 @@ class AutoCompleteProducts extends React.Component {
         return (
             <View style={styles.customTagsContainer}>
                 {this.props.tagsSelected.map((tag, i) => {
-                    return <Text numberOfLines={1} style={{ color: "#000" }}>{tag.name}</Text>
+                    return <Text key={i.toString()} numberOfLines={1} style={{ color: "#000" }}>{tag.name}</Text>
                 })}
                 {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text>}
             </View>
@@ -132,6 +132,11 @@ class AutoCompleteProducts extends React.Component {
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
                 createTagOnSpace={false}
+
+                containerStyle={styles.containerStyle}
+                inputContainerStyle={styles.inputContainerStyle}
+                listContainerStyle={styles.listContainerStyle}
+                listStyle={styles.listStyle}
             // renderTextInput={() => {
             //     return (
             //         <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.secondary }]} {...this.props} />
@@ -192,5 +197,27 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
         paddingTop: 4,
         color: theme.colors.error
+    },
+
+
+    inputContainerStyle: {
+        marginLeft: 5,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_extraLight,
+        borderWidth: 0
+    },
+    containerStyle: {
+        minWidth: 200,
+        maxWidth: constants.ScreenWidth - theme.padding
+    },
+    listContainerStyle: {
+        backgroundColor: "white",
+        borderWidth: 0
+    },
+    listStyle: {
+        backgroundColor: 'white',
+        margin: 0,
+        paddingHorizontal: theme.padding / 2,
+        borderWidth: 0
     }
 })

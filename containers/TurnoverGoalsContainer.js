@@ -23,6 +23,7 @@ class TurnoverGoalsContainer extends Component {
                 {!this.props.isCom && this.addGoal()}
                 {this.props.monthlyGoals.map((goal, index) => (
                     <TurnoverGoal
+                        key={index.toString()}
                         goal={goal}
                         index={index}
                         onPress={this.props.onPressGoal.bind(this)}

@@ -1,0 +1,17 @@
+ 
+ REACT-NATIVE-PAPER
+1.Add support of FontAwesome on appBar icons
+Path: D:\Github\Groupe-Synergys\node_modules\react-native-paper\src\components\Icon.tsx
+ Update:
+ else if (typeof s === "object") {
+    return s
+  }
+
+REACT-NATIVE-TAGS-AUTOCOMPLETE
+1. Make backgroundcolor = white
+Path: D:\Github\Groupe-Synergys\node_modules\react-native-tag-autocomplete\index.js
+update: 
+ style={{ backgroundColor: "#fff" }}
+
+REACT NAVIGATION: 
+1. Deep link handle firebase links

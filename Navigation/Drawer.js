@@ -86,20 +86,23 @@ class DrawerMenu extends React.Component {
     }
 
     renderHeader() {
-        const { currentUser } = this.props
-        const { fullName, role } = currentUser
-        const showChatIcon = role !== "Client" && role !== ""
+        const { currentUser, role } = this.props
+        const showChatIcon = !role.isClient && (role.isHighRole || role.isLowRole) //Employees only
 
         return (
             <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isRoot: false })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
-                    <AvatarText size={45} label={fullName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
+                    <AvatarText size={45} label={currentUser.fullName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>
 
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
                     <View style={{ flex: 0.73 }}>
-                        <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>{fullName}</Text>
-                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{role}</Text>
+                        <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>
+                            {currentUser.fullName}
+                        </Text>
+                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>
+                            {role.value}
+                        </Text>
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                         <CustomIcon icon={faCog} color={theme.colors.gray_dark} />
@@ -154,8 +157,8 @@ class DrawerMenu extends React.Component {
         )
     }
 
-    handleSignout() {
-        firebase.auth().signOut()
+    async handleSignout() {
+        await firebase.auth().signOut()
     }
 
     navigateToScreen(screenName, screenParams) {

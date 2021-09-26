@@ -158,7 +158,8 @@ export default class PdfGeneration extends Component {
             //Dynamic data
             const createdAt = moment().format('DD/MM/YYYY')
             const { subTotal, subTotalProducts, taxes, primeCEE, primeRenov, aidRegion, discount, editedBy } = this.order
-            const { client, workTypes } = this.project
+            const { client } = this.project
+            const workTypes = this.project.workTypes || []
             const responsable = await db.collection('Users').doc(editedBy.id).get().then((doc) => { return doc.data() })
             const orderLines = this.sortOrderLines(this.order.orderLines)
             const taxeValues = taxes.map((taxeItem) => taxeItem.value)
@@ -1097,7 +1098,7 @@ export default class PdfGeneration extends Component {
                 copiedPagesA.forEach((page) => mergedPdf.addPage(page))
                 const copiedPagesB = await mergedPdf.copyPages(termsPdf, termsPdf.getPageIndices())
                 copiedPagesB.forEach((page) => mergedPdf.addPage(page))
-                
+
                 //CERFA: Delete existing data (put white square) & set instead Client info
                 const lastPageIndex = mergedPdf.getPages().length - 1
                 const cerfaClient = [
@@ -1212,7 +1213,7 @@ export default class PdfGeneration extends Component {
                     }
                 </View>
 
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', paddingRight: theme.padding, alignItems: 'center' }}>
                     <Button mode="contained" onPress={() => this.savePdfBase64(pdfBase64)}>
                         Valider
                     </Button>
