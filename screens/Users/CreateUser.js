@@ -59,19 +59,19 @@ class CreateUser extends Component {
 
     this.state = {
       userId: this.userId,
-      role: 'Poseur',
+      role: 'Commercial',
       checked: 'first', //professional/Particular
       isPro: false,
-      nom: { value: 'abc', error: '' },
-      prenom: { value: 'def', error: '' },
+      nom: { value: '', error: '' },
+      prenom: { value: '', error: '' },
       denom: { value: "", error: "" },
       siret: { value: "", error: "" },
-      address: { description: 'qfgqefv', place_id: '', marker: { latitude: '', longitude: '' } },
+      address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
       addressError: '',
-      email: { value: "hicham@digital-french-touch.com", error: "" },
+      email: { value: "", error: "" },
       //"poseur123456@eqx-software.com"
-      phone: { value: "+33 55 55 55", error: '' },
-      password: { value: '123456789', error: '', show: false },
+      phone: { value: "", error: '' },
+      password: { value: '', error: '', show: false },
 
       userType: "utilisateur",
 

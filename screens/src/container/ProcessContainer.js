@@ -25,6 +25,8 @@ class ProcessContainer extends Component {
     let { canUpdate } = this.props
     const { currentPage } = this.state
 
+    console.log("Phaselabels", phaseLabels)
+
     return (
       <View style={{ flex: 1 }}>
         {phaseLabels.length > 0 &&
@@ -36,7 +38,7 @@ class ProcessContainer extends Component {
           />
         }
 
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, marginTop: theme.padding }}>
           <ScrollView >
             {stepsData.length > 0 && stepsData[currentPage].map((item, index) => {
 
@@ -54,7 +56,7 @@ class ProcessContainer extends Component {
                     children={
                       <View style={{ marginLeft: constants.ScreenWidth * 0.035, paddingBottom: 15, borderLeftWidth: index !== stepsData[currentPage].length - 1 ? 2 : 0, borderLeftColor: theme.colors.gray_light }}>
                         {item.actions.map((action, index) => {
-                          const actionStyle = { mainColor: theme.colors.secondary, textFont: theme.customFontMSregular.caption, marginVertical: 50 }
+                          const actionStyle = { mainColor: theme.colors.gray_dark, textFont: theme.customFontMSregular.caption, marginVertical: 50 }
                           const isFirstAction = index === 0
                           const isPreviousActionDone = index > 0 && item.actions[index - 1].status === 'done'
                           const isActionPending = action.status === 'pending'

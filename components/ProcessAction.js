@@ -177,33 +177,35 @@ class ProcessAction extends Component {
         process = this.sortPhases(process)
 
         for (let phaseId in process) {
-            const processData = process[phaseId]
-            phaseLabels.push(processData.title)
+            if (phaseId !== "version") {
+                const processData = process[phaseId]
+                phaseLabels.push(processData.title)
 
-            let phaseSteps = []
-            let phaseStatus = processData.steps ? 'done' : 'grayed'
-            for (let stepId in processData.steps) {
-                let step = processData.steps[stepId]
+                let phaseSteps = []
+                let phaseStatus = processData.steps ? 'done' : 'grayed'
+                for (let stepId in processData.steps) {
+                    let step = processData.steps[stepId]
 
-                let actionsDoneCount = 0
-                for (let action of step.actions) {
-                    if (action.status === 'done')
-                        actionsDoneCount += 1
+                    let actionsDoneCount = 0
+                    for (let action of step.actions) {
+                        if (action.status === 'done')
+                            actionsDoneCount += 1
+                    }
+                    step.actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
+
+                    //Step & Phase progress
+                    step.progress = step.actions.length === 0 ? 100 : actionsDoneCount / step.actions.length * 100
+
+                    if (step.progress < 100)
+                        phaseStatus = 'pending'
+
+                    phaseSteps.push(step)
                 }
-                step.actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
 
-                //Step & Phase progress
-                step.progress = step.actions.length === 0 ? 100 : actionsDoneCount / step.actions.length * 100
-
-                if (step.progress < 100)
-                    phaseStatus = 'pending'
-
-                phaseSteps.push(step)
+                phaseStatuses.push(phaseStatus)
+                phaseSteps.sort((a, b) => (a.stepOrder < b.stepOrder) ? 1 : -1)
+                steps.push(phaseSteps)
             }
-
-            phaseStatuses.push(phaseStatus)
-            phaseSteps.sort((a, b) => (a.stepOrder < b.stepOrder) ? 1 : -1)
-            steps.push(phaseSteps)
         }
 
         this.setState({ phaseLabels, phaseStatuses, stepsData: steps })
@@ -513,7 +515,8 @@ class ProcessAction extends Component {
 
             //Auto trigger next action
             const { verificationType } = this.state.currentAction
-            if (verificationType !== 'validation')
+            const isAutoPress = verificationType !== 'validation' && verificationType !== "phaseRollback"
+            if (isAutoPress)
                 await this.onPressAction(this.props.canUpdate, this.state.currentAction)
         }
 
@@ -673,13 +676,13 @@ class ProcessAction extends Component {
         return (
             <View style={styles.headerBarContainer}>
                 <Text style={[theme.customFontMSmedium.header, styles.headerBarText]}>Suivi du projet</Text>
-                <CustomIcon
-                    onPress={onPressEye}
-                    icon={faEye}
-                    size={21}
-                    color={theme.colors.white}
-                    style={styles.eye}
-                />
+                <TouchableOpacity style={styles.eye} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }} onPress={onPressEye}>
+                    <CustomIcon
+                        icon={faEye}
+                        size={21}
+                        color={theme.colors.white}
+                    />
+                </TouchableOpacity>
             </View>
         )
     }
@@ -739,10 +742,13 @@ class ProcessAction extends Component {
     }
 
     render() {
-        const { pressedAction, currentPhase, currentStep } = this.state
+        const { pressedAction, currentPhase, currentStep, loading } = this.state
         const { canUpdate, isAllProcess } = this.props
 
         if (isAllProcess) {
+            if (loading)
+                return <Loading />
+
             return (
                 <View style={{ flex: 1 }}>
                     {this.renderProcessHistoryContainer(canUpdate)}
@@ -794,8 +800,8 @@ const styles = StyleSheet.create({
     eye: {
         zIndex: 1,
         position: 'absolute',
-        top: theme.padding/1.8,
-        right: theme.padding/2,
+        top: theme.padding,
+        right: theme.padding,
     },
     accordion: {
         paddingVertical: 10,
@@ -813,7 +819,8 @@ const styles = StyleSheet.create({
     actionTitleContainer: {
         flex: 0.8,
         flexDirection: 'row',
-        // backgroundColor: 'brown'
+        paddingLeft: theme.padding*1.9,
+        //backgroundColor: 'brown'
     },
     actionIconsContainer: {
         flex: 0.1,

@@ -14,9 +14,10 @@ export default class Progression extends Component {
     this.step = this.props.navigation.getParam('step', '')
     this.canUpdate = this.props.navigation.getParam('canUpdate', '')
     this.role = this.props.navigation.getParam('role', '')
-  }
+  } 
 
   render() {
+
     return (
       <View style={styles.container} >
         <Appbar back title titleText='Progression' />
@@ -26,8 +27,8 @@ export default class Progression extends Component {
           clientId={this.clientId}
           step={this.step}
           canUpdate={this.canUpdate}
-          isAllProcess={true}
           role={this.role}
+          isAllProcess={true}
         />
       </View>
     )

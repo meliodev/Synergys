@@ -1,5 +1,4 @@
 
-
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, ScrollView, Keyboard, Alert, TouchableOpacity } from 'react-native'
 import { Switch } from 'react-native-paper'
@@ -30,8 +29,8 @@ export default class TimeslotForm extends Component {
 
             // startDateError: '',
             // endDateError: '',
-            startHourError: '',
-            dueHourError: '',
+            endDateError: this.props.endDateError,
+            dueHourError: this.props.dueHourError,
 
             togglePickers: {
                 startDate: false,
@@ -43,6 +42,7 @@ export default class TimeslotForm extends Component {
     }
 
     async componentDidUpdate(prevProps, prevState, snapshot) {
+        
         if (prevProps.isAllDay !== this.props.isAllDay) {
             this.setState({ isAllDay: this.props.isAllDay })
         }
@@ -58,8 +58,13 @@ export default class TimeslotForm extends Component {
         if (prevProps.dueHour !== this.props.dueHour) {
             this.setState({ dueHour: moment(this.props.dueHour).toDate() })
         }
-
-       // if(prevState)
+        //Errors
+        if (prevProps.endDateError !== this.props.endDateError) {
+            this.setState({ endDateError: this.props.endDateError })
+        }
+        if (prevProps.dueHourError !== this.props.dueHourError) {
+            this.setState({ dueHourError: this.props.dueHourError })
+        }
     }
 
     setAllTogglePickers(bool) {
@@ -125,7 +130,7 @@ export default class TimeslotForm extends Component {
                     else {
                         let update = {}
                         update[dateId] = newDate
-                        this.setState(update, () => console.log('Start date of TimeslotForm !', this.state.startDate))
+                        this.setState(update)
                         this.props.setParentState(mode, dateId, newDate)
                     }
                 }}
@@ -135,7 +140,6 @@ export default class TimeslotForm extends Component {
                 fadeToColor={theme.colors.primary}
                 style={{ alignSelf: "center" }}
                 textColor={theme.colors.section}
-
             />
         )
     }
@@ -189,6 +193,7 @@ export default class TimeslotForm extends Component {
     renderHours(togglePickers) {
 
         const { isAllDay, startHour, dueHour, startHourError, dueHourError } = this.state
+
 
         return (
             <View>

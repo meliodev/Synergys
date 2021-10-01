@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
 
     inputContainerStyle: {
-        marginLeft: 5,
+        marginLeft: -5,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.gray_extraLight,
         borderWidth: 0

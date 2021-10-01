@@ -106,7 +106,7 @@ class DrawerMenu extends React.Component {
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                         <CustomIcon icon={faCog} color={theme.colors.gray_dark} />
-                        {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.gray_dark} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
+                        {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.primary} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
                     </View>
                 </View>
             </TouchableOpacity>

@@ -91,13 +91,17 @@ export const compareDates = (date1, date2, operator) => {
 
 export const compareDays = (day1, day2, operator) => {
   if (operator === 'isBefore') {
-    if (moment(day1).isBefore(moment(day2), 'days')) return "Le jour de fin doit être supérieur au jour de début."
+    if (moment(day1).isBefore(moment(day2), 'days'))
+      return "Le jour de fin doit être supérieur au jour de début."
+    return ''
   }
 }
 
 export const compareTimes = (time1, time2, operator) => {
   if (operator === 'isBefore') {
-    if (moment(time1, 'hh:mm').isBefore(moment(time2, 'hh:mm'), 'hour')) return "L'heure d'échéance doit être supérieure à l'heure de début."
+    if (moment(time1, 'HH:mm').isBefore(moment(time2, 'HH:mm'), 'minute'))
+      return "L'heure d'échéance doit être supérieure à l'heure de début."
+    return ""
   }
 }
 

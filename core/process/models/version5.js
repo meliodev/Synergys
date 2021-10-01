@@ -168,7 +168,7 @@ export const version5 = {
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Reporter', id: 'postpone', onSelectType: 'navigation', },
                             { label: 'Confirmer', id: 'confirm', nextStep: 'housingActionFile', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
                         ],
@@ -747,7 +747,7 @@ export const version5 = {
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
                         ],
                     },
@@ -1357,7 +1357,7 @@ export const version5 = {
                         screenParams: { project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true },
                         type: 'auto',
                         verificationType: 'doc-creation',
-                        responsable: 'Commercial',
+                        responsable: 'Poseur',
                         status: 'pending',
                     },
                     {
@@ -1426,7 +1426,7 @@ export const version5 = {
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                         ],
                     },

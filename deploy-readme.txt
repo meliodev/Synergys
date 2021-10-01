@@ -4,6 +4,3 @@ Android:
 3. Increase version
 
 PS: To set up dev environment: change "prod" to "dev".
-
-temp:
-1. Empty CreateClient form

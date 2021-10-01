@@ -8,7 +8,7 @@ import { PersistGate } from 'redux-persist/es/integration/react'
 import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-native-paper';
 import { MenuProvider } from 'react-native-popup-menu';
 import SplashScreen from 'react-native-splash-screen'
-//import codePush from 'react-native-code-push'
+import codePush from 'react-native-code-push'
 
 import AppToast from './components/global/AppToast'
 
@@ -101,9 +101,9 @@ class App extends Component {
 LogBox.ignoreAllLogs(true)
 
 
-// const codePushOptions = {
-//   checkFrequency: codePush.CheckFrequency.ON_APP_START
-// }
+const codePushOptions = {
+  checkFrequency: codePush.CheckFrequency.ON_APP_START
+}
 
-//export default codePush(codePushOptions)(App)
-export default App
+export default codePush(codePushOptions)(App)
+//export default App

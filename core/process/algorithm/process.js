@@ -252,14 +252,15 @@ const configureActions = async (actions, attributes, process) => {
 
                 //Set query
                 query = db.collection(collection)
-                selectedQueryFilters.forEach(({ filter, operation, value }) => {
+                selectedQueryFilters.forEach(({ filter, operation, value }, index) => {
+                    console.log(index, filter, operation, value)
                     query = query.where(filter, operation, value)
                 })
                 const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
 
                 //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
-
+console.log('EMPTY.......................................')
                     if (action.screenParams) {
                         if (collection === 'Agenda')
                             action.screenParams.TaskId = ''
@@ -546,7 +547,6 @@ export const handleTransition = (processModel, process, currentPhaseId, currentS
         //Update project (status/step)
         if (nextPhaseId === 'cancelProject') {
             cancelProject(ProjectId)
-            // processEnded = true
         }
 
         else if (nextPhaseId === 'endProject') {

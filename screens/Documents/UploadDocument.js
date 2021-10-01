@@ -773,7 +773,7 @@ class UploadDocument extends Component {
     renderFooter(isConnected, upload, sign, quoteToBillConversion) {
         const isSingleButtonShown = !upload.show && !quoteToBillConversion.show || !sign.show && !quoteToBillConversion.show
         return (
-            <View style={{ flexDirection: "row", justifyContent: isSingleButtonShown ? 'flex-end' : "space-between" }}>
+            <View style={{ flexDirection: "row", paddingHorizontal: theme.padding, justifyContent: isSingleButtonShown ? 'flex-end' : "space-between" }}>
                 {quoteToBillConversion.show && this.renderFooterButton("conversion", "Convertir en facture", quoteToBillConversion.allow, isConnected)}
                 {sign.show && this.renderFooterButton("sign", "Signer", sign.allow, isConnected)}
                 {upload.show && this.renderFooterButton("upload", "Importer", upload.allow, isConnected)}

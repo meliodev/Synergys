@@ -213,7 +213,6 @@ class CreateTask extends Component {
         else {
             task = formatDocument(task, properties, [])
             task.startDate = moment(task.date, 'YYYY-MM-DD').format()
-            console.log('IS ALL DAY', task.isAllDay)
             this.setState(task)
         }
         return task
@@ -223,17 +222,18 @@ class CreateTask extends Component {
     validateSchedule() {
         let { isAllDay, startDate, endDate, startHour, dueHour, endDateError, dueHourError } = this.state
         const periodicTaskCreation = !this.isEdit && !isAllDay
-        const dateError = periodicTaskCreation ? compareDates(endDate, startDate, 'isBefore') : ''
-        const timeError = isAllDay ? '' : compareTimes(moment(dueHour, 'hh:mm'), moment(startHour, 'hh:mm'), 'isBefore')
+        endDateError = periodicTaskCreation ? compareDates(endDate, startDate, 'isBefore') : ''
+        dueHourError = isAllDay ? '' : compareTimes(moment(dueHour, 'hh:mm'), moment(startHour, 'hh:mm'), 'isBefore')
 
-        if (dateError || timeError) {
-            endDateError = dateError
-            dueHourError = timeError
+        if (endDateError || dueHourError) {
             this.setState({ endDateError, dueHourError })
             return false
         }
 
-        else return true
+        else {
+            this.setState({ endDateError, dueHourError })
+            return true
+        }
     }
 
     validateInputs() {
@@ -643,7 +643,7 @@ class CreateTask extends Component {
     }
 
     renderTimeslotForm(canWrite) {
-        const { isAllDay, startDate, endDate, startHour, dueHour, startDateError, endDateError, type } = this.state
+        const { isAllDay, startDate, endDate, startHour, dueHour, endDateError, dueHourError, type } = this.state
         const isCommercialNature = this.checkTypeNature(type) === "commercial"
 
         return (
@@ -655,7 +655,7 @@ class CreateTask extends Component {
                 endDate={endDate}
                 startHour={moment(startHour, "HH:mm").format()}
                 dueHour={moment(dueHour, "HH:mm").format()}
-                startDateError={startDateError}
+                dueHourError={dueHourError}
                 endDateError={endDateError}
                 hideEndDate={this.isEdit || isCommercialNature}
                 setParentState={
@@ -665,7 +665,7 @@ class CreateTask extends Component {
                         this.setState(update)
                     }
                 }
-                setIsAllDayParent={(isAllDay) => this.setState({ isAllDay }, () => console.log("isALLDAY", this.state.isAllDay))}
+                setIsAllDayParent={(isAllDay) => this.setState({ isAllDay })}
             />
         )
     }
@@ -769,7 +769,7 @@ class CreateTask extends Component {
                                 selectedValue={type}
                                 onValueChange={(type) => {
                                     //Toggle all date pickers
-                                    
+
                                     //Sync Date début et date fin
                                     this.setState({ type, endDate: this.state.startDate })
                                 }}

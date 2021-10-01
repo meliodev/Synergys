@@ -46,17 +46,17 @@ class CreateClient extends Component {
             ClientId: this.ClientId,
             checked: 'first', //professional/Particular
             isPro: false,
-            nom: { value: '000', error: '' },
-            prenom: { value: 'Prospect', error: '' },
+            nom: { value: '', error: '' },
+            prenom: { value: '', error: '' },
             denom: { value: "", error: "" },
             siret: { value: "", error: "" },
 
-            address: { description: 'qsrf', place_id: '', marker: { latitude: '', longitude: '' } },
+            address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
-            email: { value: "prospect000@digital-french-touch.com", error: "" },
-            phone: { value: "+33 55 55 55", error: '' },
+            email: { value: "", error: "" },
+            phone: { value: "", error: '' },
 
-            password: { value: '123456', error: '', show: false },
+            password: { value: '', error: '', show: false },
 
             userType: "client",
 

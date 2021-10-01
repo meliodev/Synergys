@@ -704,12 +704,14 @@ class CreateProject extends Component {
 
     toggleSection(sectionId) {
         let { sectionsExpansion } = this.state
-        sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
+
+        if (!sectionId) {
+            for (const sec in sectionsExpansion)
+                sectionsExpansion[sec] = false
+        }
+
+        else sectionsExpansion[sectionId] = !sectionsExpansion[sectionId]
         this.setState({ sectionsExpansion })
-    }
-
-    renderProcessView() {
-
     }
 
     renderStandardView(canWrite, isConnected) {
@@ -1064,7 +1066,10 @@ class CreateProject extends Component {
 
         return (
             <Text
-                onPress={() => this.setState({ viewMore: !viewMore })}
+                onPress={() => {
+                    this.setState({ viewMore: !viewMore })
+                    this.toggleSection()
+                }}
                 style={[theme.customFontMSbold.body, { color: theme.colors.primary, alignSelf: "center", marginBottom: theme.padding * 2 }]}
             >
                 {text}
