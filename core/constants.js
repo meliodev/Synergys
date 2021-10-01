@@ -59,6 +59,13 @@ export const errorMessages = {
     }
 }
 
+export const imageSources = [
+    { label: 'Caméra', value: 'upload', icon: faCamera },
+    { label: 'Gallerie', value: 'generate', icon: faImages }
+]
+export const generableDocTypes = ['Devis', 'Facture', "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
+export const masculinsDocTypes = ['Devis', 'Bon de commande', 'Dossier CEE', 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
+
 export const phases = [
     { label: 'Prospect', value: 'Prospect', id: 'init' },
     { label: 'Visite technique préalable', value: 'Visite technique préalable', id: 'rd1' },
