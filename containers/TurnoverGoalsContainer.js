@@ -39,10 +39,10 @@ class TurnoverGoalsContainer extends Component {
 
         return (
             <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={onPress}>
-                <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 1, borderColor: theme.colors.gray_dark, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-                    <Text style={[theme.customFontMSregular.h1, { color: theme.colors.gray_dark }]}>+</Text>
+                <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 1, borderColor: theme.colors.gray_medium, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+                    <Text style={[theme.customFontMSregular.h1, { color: theme.colors.gray_medium }]}>+</Text>
                 </View>
-                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark, textAlign: 'center' }]}>Nouvel objectif</Text>
+                <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_medium, textAlign: 'center' }]}>Nouvel objectif</Text>
             </TouchableOpacity>
         )
     }

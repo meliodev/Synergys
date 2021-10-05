@@ -140,22 +140,22 @@ class Analytics extends Component {
 
         const summaryData = [
             {
-                label: 'REVENU TOTAL',
-                value: totalIncome,
-                symbol: '€',
-                colors: { primary: '#555CC4', secondary: '#EEEFFF' }
-            },
-            {
-                label: 'CLIENTS',
+                label: 'Clients',
                 value: totalClients,
                 symbol: '',
                 colors: { primary: '#F5276D', secondary: '#FFEFF4' }
             },
             {
-                label: 'PROJETS',
+                label: 'Projets',
                 value: totalProjects,
                 symbol: '',
                 colors: { primary: '#FF9A27', secondary: '#FFF6E6' }
+            },
+            {
+                label: 'Revenu total',
+                value: totalIncome,
+                symbol: '€',
+                colors: { primary: '#555CC4', secondary: '#EEEFFF' }
             },
         ]
 
@@ -171,10 +171,10 @@ class Analytics extends Component {
                         >
                             {emptySpace()}
                             <View style={styles.summaryLabelContainer}>
-                                <Text style={[theme.customFontMSregular.small, styles.summaryLabel]}>{data.label}</Text>
+                                <Text style={[theme.customFontMSsemibold.caption, styles.summaryLabel]}>{data.label}</Text>
                             </View>
                             <View style={styles.summaryValueContainer}>
-                                <Text style={[theme.customFontMSmedium.body, styles.summaryValue, { color: data.colors.primary }]}>{data.symbol}{data.value.toString()}</Text>
+                                <Text style={[theme.customFontMSsemibold.body, styles.summaryValue, { color: data.colors.primary }]}>{data.symbol} {data.value.toString()}</Text>
                             </View>
                             {emptySpace()}
                         </View>
@@ -201,11 +201,10 @@ class Analytics extends Component {
         }
 
         return (
-            <View>
-
+            <View style={{ marginTop: theme.padding * 1.5, borderTopWidth: 8, borderTopColor: theme.colors.gray_light, paddingHorizontal: theme.padding }}>
                 <View style={styles.chartHeader}>
                     <View style={{ paddingBottom: 10 }}>
-                        <Text style={[theme.customFontMSregular.caption]}>Statistiques</Text>
+                        <Text style={[theme.customFontMSsemibold.caption]}>Statistiques</Text>
                     </View>
                     <Picker
                         showTitle={false}
@@ -306,13 +305,22 @@ class Analytics extends Component {
         const isCom = roleId === 'com'
 
         return (
-            <TurnoverGoalsContainer
-                monthlyGoals={monthlyGoals}
-                onPressNewGoal={this.onPressNewGoal.bind(this)}
-                onPressGoal={this.onPressGoal.bind(this)}
-                navigation={this.props.navigation}
-                isCom={isCom}
-            />
+            <View style={{ borderTopWidth: 8, borderTopColor: theme.colors.gray_light, padding: theme.padding }}>
+                <Text style={[theme.customFontMSsemibold.caption, { marginBottom: theme.padding }]}>Objectifs</Text>
+                <TurnoverGoalsContainer
+                    monthlyGoals={monthlyGoals}
+                    onPressNewGoal={this.onPressNewGoal.bind(this)}
+                    onPressGoal={this.onPressGoal.bind(this)}
+                    navigation={this.props.navigation}
+                    isCom={isCom}
+                />
+            </View>
+        )
+    }
+
+    renderSectionSeparator() {
+        return (
+            <View style={{ width: constants.ScreenWidth, height: theme.padding / 3, backgroundColor: theme.colors.gray_medium }} />
         )
     }
 
@@ -321,7 +329,7 @@ class Analytics extends Component {
         const { isConnected } = this.props.network
 
         return (
-            <View style={styles.mainContainer}>
+            <View style={styles.container}>
                 {loading ?
                     <Loading />
                     :
@@ -348,14 +356,17 @@ const mapStateToProps = (state) => {
 export default connect(mapStateToProps)(Analytics)
 
 const styles = StyleSheet.create({
-    mainContainer: {
+    container: {
         flex: 1,
-        backgroundColor: theme.colors.white
+        backgroundColor: theme.colors.white,
+        // paddingHorizontal: theme.padding,
+        paddingTop: theme.padding
     },
     //Summary
     summaryContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        paddingHorizontal: theme.padding
     },
     summaryColumn: {
         elevation: 4,
@@ -371,7 +382,7 @@ const styles = StyleSheet.create({
     summaryLabel: {
         color: theme.colors.secondary,
         textAlign: 'center',
-        letterSpacing: 1.5
+        opacity: 0.6
     },
     summaryValueContainer: {
         flex: 0.25,

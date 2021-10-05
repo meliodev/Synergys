@@ -1,5 +1,7 @@
 import { Dimensions, Platform } from 'react-native'
 import RNFetchBlob from 'rn-fetch-blob'
+import { faCamera, faImages } from '@fortawesome/pro-light-svg-icons'
+
 import { rgb } from "pdf-lib"
 
 const width = Dimensions.get('window').width

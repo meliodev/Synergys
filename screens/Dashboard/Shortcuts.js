@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native'
-import { faBell, faCalendar, faUserAlt, faAddressCard, faClipboardUser, faConstruction, faCalendarAlt, faFolder } from '@fortawesome/pro-light-svg-icons'
+import { faUserAlt, faAddressCard, faClipboardUser, faConstruction, faCalendarAlt, faFolder } from '@fortawesome/pro-solid-svg-icons'
 import { connect } from 'react-redux'
 
 import moment from 'moment';
@@ -21,14 +21,14 @@ const shortcutsModel = {
         label: 'Nouveau prospect',
         value: '',
         icon: faClipboardUser,
-        colors: { primary: '#6cc2ff', secondary: '#edf8fe' },
+        colors: { primary: '#ff6968', secondary: '#fe8280' },
         navigation: { screen: 'CreateClient', params: { prevScreen: 'Dashboard', isProspect: true } }
     },
     createClient: {
         label: 'Nouveau client',
         value: '',
         icon: faAddressCard,
-        colors: { primary: '#926fff', secondary: '#f1edfe' },
+        colors: { primary: '#7a54ff', secondary: '#946afc' },
         navigation: {
             screen: 'CreateClient',
             params: { prevScreen: 'Dashboard', isProspect: false }
@@ -38,28 +38,28 @@ const shortcutsModel = {
         label: 'Nouvel utilisateur',
         value: '',
         icon: faUserAlt,
-        colors: { primary: '#ff79e8', secondary: '#feeefb' },
+        colors: { primary: '#ff8f61', secondary: '#fea879' },
         navigation: { screen: 'CreateUser', params: { prevScreen: 'Dashboard' } }
     },
     createProject: {
         label: 'Nouveau projet',
         value: '',
         icon: faConstruction,
-        colors: { primary: '#fd9e64', secondary: '#faefe9' },
+        colors: { primary: '#2ac3ff', secondary: '#38d3ff' },
         navigation: { screen: 'ClientsManagement', params: { isRoot: false, prevScreen: 'Dashboard' } }
     },
     createTask: {
         label: 'Nouvelle tâche',
         value: '',
         icon: faCalendarAlt,
-        colors: { primary: '#577eff', secondary: '#edf1fd' },
+        colors: { primary: '#5a65ff', secondary: '#717bff' },
         navigation: { screen: 'CreateTask', params: { prevScreen: 'Dashboard' } }
     },
     createDocument: {
         label: 'Nouveau document',
         value: '',
         icon: faFolder,
-        colors: { primary: '#30de62', secondary: '#e7fceb' },
+        colors: { primary: '#96da45', secondary: '#ace558' },
         navigation: { screen: 'UploadDocument', params: { prevScreen: 'Dashboard' } }
     }
 }
@@ -98,7 +98,7 @@ class Shortcuts extends Component {
         const { loading } = this.state
         const { isConnected } = this.props.network
 
-        const elementSize = constants.ScreenWidth * 0.42
+        const elementSize = constants.ScreenWidth * 0.435
 
         const handleSelectElement = (element, index) => {
             const { screen, params } = element.navigation
@@ -106,8 +106,7 @@ class Shortcuts extends Component {
         }
 
         return (
-            <View style={styles.mainContainer}>
-                {/* <Appbar back title titleText='Raccourcis' /> */}
+            <View style={styles.container}>
                 {loading ?
                     <Loading />
                     :
@@ -141,20 +140,12 @@ export default connect(mapStateToProps)(Shortcuts)
 
 
 const styles = StyleSheet.create({
-    mainContainer: {
+    container: {
+        flex: 1,
+        paddingHorizontal: theme.padding*0.6,
+        paddingTop: theme.padding,
         zIndex: 2,
         backgroundColor: theme.colors.white
     },
-    notificationsList: {
-        paddingVertical: 15
-    },
-    tasksList: {
-        paddingVertical: 15
-    },
-    root: {
-        zIndex: 1,
-        paddingHorizontal: theme.padding,
-        //backgroundColor: 'green',
-    }
 });
 

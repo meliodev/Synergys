@@ -11,7 +11,6 @@ import SplashScreen from 'react-native-splash-screen'
 import codePush from 'react-native-code-push'
 
 import AppToast from './components/global/AppToast'
-
 import PdfGen from './PdfGen'
 import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
@@ -41,7 +40,7 @@ class App extends Component {
   async componentDidMount() {
     SplashScreen.hide()
 
-    await this.initRemoteConfig()
+  //  await this.initRemoteConfig()
 
     //Notification channels
     const channelId = await notifee.createChannel({
@@ -56,16 +55,17 @@ class App extends Component {
   }
 
   async initRemoteConfig() {
-    await remoteConfig.setDefaults({ minAppVersion: '1.2.10' })
+    await remoteConfig.setDefaults({ minAppVersion: '1.2.10', latestAppDownloadLink: "" })
     const fetchedRemotely = await remoteConfig.fetchAndActivate()
     await remoteConfig.fetch(60)
 
-    // if (fetchedRemotely) {
-    //   console.log('Configs were retrieved from the backend and activated.');
-    // }
-    // else {
-    //   console.log('No configs were fetched from the backend, and the local configs were already activated',)
-    // }
+
+    if (fetchedRemotely) {
+      console.log('Configs were retrieved from the backend and activated.');
+    }
+    else {
+      console.log('No configs were fetched from the backend, and the local configs were already activated',)
+    }
   }
 
   //Forground: messages listener
@@ -102,7 +102,9 @@ LogBox.ignoreAllLogs(true)
 
 
 const codePushOptions = {
-  checkFrequency: codePush.CheckFrequency.ON_APP_START
+  checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
+  installMode: codePush.InstallMode.ON_NEXT_RESUME,
+  minimumBackgroundDuration: 10 * 60 // 10 minutes
 }
 
 export default codePush(codePushOptions)(App)

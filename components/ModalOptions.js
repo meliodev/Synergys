@@ -81,29 +81,33 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
     const Element2 = ({ element, index, elementSize }) => {
 
         const elementStyle = {
-            borderRadius: 30,
-            // justifyContent: 'space-evenly',
-            alignItems: 'center',
-            marginBottom: elementSize * 0.1,
+            borderRadius: 20,
+            justifyContent: 'flex-end',
+            marginBottom: elementSize * 0.12,
             width: elementSize,
             height: elementSize,
-            elevation: 3,
-            backgroundColor: theme.colors.white,
+            elevation: 5,
+            backgroundColor: element.colors.primary,
         }
 
         const { primary, secondary } = element.colors
         const textColor = primary
         const iconColor = primary
         const backgroundColor = theme.colors.white
-        const iconSize = element.icon === faUserAlt ? elementSize * 0.18 : elementSize * 0.23
+        const iconSize = element.icon.iconName === "user-alt" ? elementSize * 0.13 : elementSize * 0.16
+
+        const iconContainer = {
+            borderRadius: elementSize * 0.4 / 2,
+            size: elementSize * 0.4
+        }
 
         return (
             <TouchableOpacity style={elementStyle} onPress={() => onPressElement(element, index)}>
-                <View style={{ flex: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <CustomIcon icon={element.icon} size={iconSize} color={iconColor} style={{ marginBottom: elementSize * 0.05 }} />
+                <View style={{ position: "absolute", right: 0, top: 0, backgroundColor: element.colors.secondary, borderBottomRightRadius: iconContainer.borderRadius, borderBottomLeftRadius: iconContainer.borderRadius, borderTopLeftRadius: iconContainer.borderRadius, borderTopRightRadius: 20, width: iconContainer.size, height: iconContainer.size, justifyContent: "center", alignItems: "center" }}>
+                    <CustomIcon icon={element.icon} size={iconSize} color="#fff" />
                 </View>
-                <View style={{ flex: 0.5, justifyContent: 'center', alignItems: 'center', paddingHorizontal: elementSize / 6 }}>
-                    <Text style={[theme.customFontMSregular.body, { textAlign: 'center', color: theme.colors.secondary }]}>{element.label}</Text>
+                <View style={{  margin: elementSize*0.1 }}>
+                    <Text style={[theme.customFontMSsemibold.h3, { color: theme.colors.white }]}>{element.label}</Text>
                 </View>
             </TouchableOpacity>
         )

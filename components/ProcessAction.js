@@ -675,7 +675,7 @@ class ProcessAction extends Component {
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>
-                <Text style={[theme.customFontMSmedium.header, styles.headerBarText]}>Suivi du projet</Text>
+                <Text style={[theme.customFontMSmedium.header, styles.headerBarText]}>Suivi</Text>
                 <TouchableOpacity style={styles.eye} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }} onPress={onPressEye}>
                     <CustomIcon
                         icon={faEye}

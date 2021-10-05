@@ -34,6 +34,7 @@ export const renderSection = (sectionTitle, sectionIcon, listItems, countItems, 
                 keyExtractor={(item) => { return item.id }}
                 ListFooterComponent={viewMoreLink(navigation, navScreen, navParams)}
                 renderItem={renderItem}
+                style={{ paddingHorizontal: theme.padding, paddingTop: theme.padding }}
             />
         )
 

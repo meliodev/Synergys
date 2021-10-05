@@ -2,13 +2,10 @@
  * @format
  */
 import SplashScreen from 'react-native-splash-screen'
-//SplashScreen.show()
-
 import { AppRegistry } from 'react-native';
 import App from './App';
 import { name as appName } from './app.json';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler'
-
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import messaging from '@react-native-firebase/messaging'
 
@@ -22,7 +19,6 @@ async function onBackgroundMessageReceived(message) {
         vibration: true,
         importance: AndroidImportance.HIGH,
     })
-
     await notifee.displayNotification(JSON.parse(message.data.notifee))
 }
 

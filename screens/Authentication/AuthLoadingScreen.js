@@ -8,6 +8,7 @@ import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import NetInfo from "@react-native-community/netinfo"
+import compareVersions from "compare-versions"
 
 import Button from "../../components/Button"
 import Background from "../../components/NewBackground"
@@ -49,42 +50,45 @@ class AuthLoadingScreen extends Component {
       routeName: '',
       routeParams: {},
       progress: 0,
-      requiresUpdate: false
+      requiresUpdate: false,
+      latestAppDownloadLink: "",
+      loading: true,
     }
   }
 
   async componentDidMount() {
 
-    // //1. Notification action listeners
-    // const isUpToDate = this.checkAppVersion()
-    // if (!isUpToDate) {
-    //   Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
-    //   this.setState({ requiresUpdate: true })
-    //   return
-    // }
-    // firebase.auth().signOut()
+    //1. Notification action listeners
+    const { isUpToDate, latestAppDownloadLink } = await this.checkAppVersion()
+    if (!isUpToDate) {
+      Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
+      this.setState({ requiresUpdate: true, loading: false, latestAppDownloadLink })
+      return
+    }
 
     await this.bootstrapNotifications()
-    // this.updateProgress(0.25)
     this.forgroundNotificationListener()
-    // this.updateProgress(0.5)
     this.backgroundNotificationListener()
-    // this.updateProgress(0.6)
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
   }
 
-  checkAppVersion() {
-    const minAppVersion = remoteConfig.getValue('minAppVersion')
+  async checkAppVersion() {
+    await remoteConfig.setDefaults({ minAppVersion: '1.2.10', latestAppDownloadLink: "" })
+    const fetchedRemotely = await remoteConfig.fetchAndActivate()
+    await remoteConfig.fetch(60).catch((e) => console.log(e))
 
-    if (minAppVersion.asString() > appVersion) {
-      return false
+    if (fetchedRemotely) {
+      console.log('Configs were retrieved from the backend and activated.');
     }
-    return true
-  }
+    else {
+      console.log('No configs were fetched from the backend, and the local configs were already activated',)
+    }
 
-  updateProgress(progress) {
-    this.setState({ progress })
+    const minAppVersion = remoteConfig.getValue('minAppVersion').asString()
+    const latestAppDownloadLink = remoteConfig.getValue('latestAppDownloadLink').asString()
+    const isUpToDate = compareVersions.compare(appVersion, minAppVersion, '>=');
+    return { isUpToDate, latestAppDownloadLink }
   }
 
   //User action on a notification has caused app to open
@@ -306,41 +310,36 @@ class AuthLoadingScreen extends Component {
     }
   }
 
-  downloadApp() {
-    //const appDowloadLink = remoteConfig.getValue('minAppVersion')
-    const appDowloadLink = "https://drive.google.com/file/d/1Hnkaf1bFyPyGEMpJ9f5egG2z-jkVpU7n/view?usp=sharing"
-    Linking.openURL(appDowloadLink)
+  downloadApp(latestAppDownloadLink) {
+    Linking.openURL(latestAppDownloadLink)
   }
 
   renderAppVersion() {
     return (
-      <View style={{ position: "absolute", bottom: theme.padding, right: theme.padding }}>
+      <View style={styles.appVersionContainer}>
         <AppVersion />
       </View>
     )
   }
 
   render() {
-    const { progress, requiresUpdate } = this.state
+    const { progress, requiresUpdate, latestAppDownloadLink, loading } = this.state
 
     return (
       <Background>
         <Background style={styles.nestedBackground}>
-          <View style={styles.container}>
-            <Loading />
-            {/* <ProgressBar
-              progress={progress}
-              color={theme.colors.primary}
-              visible={true}
-              style={{ alignSelf: "center" }}
-            /> */}
-          </View>
+
+          {loading &&
+            <View style={styles.container}>
+              <Loading />
+            </View>
+          }
         </Background>
         {requiresUpdate &&
           <Button
             mode="contained"
-            onPress={this.downloadApp}
-            containerStyle={{ position: 'absolute', bottom: constants.ScreenHeight * 0.2, alignSelf: 'center' }}
+            onPress={() => this.downloadApp(latestAppDownloadLink)}
+            containerStyle={styles.updateButton}
             outlinedColor={theme.colors.primary}
           >
             Mettre à jour
@@ -385,6 +384,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: theme.colors.white
   },
+  updateButton: {
+    position: 'absolute',
+    zIndex: 1,
+    bottom: constants.ScreenHeight * 0.2,
+    alignSelf: 'center'
+  },
+  appVersionContainer: {
+    position: "absolute",
+    bottom: theme.padding,
+    right: theme.padding
+  }
 })
 
 export default connect(mapStateToProps)(AuthLoadingScreen)
