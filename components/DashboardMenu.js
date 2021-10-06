@@ -15,7 +15,7 @@ const DashboardMenu = ({ ...props }) => {
   const NotificationsRoute = () => <Notifications navigation={props.navigation} />
   const ShortcutsRoute = () => <Shortcuts navigation={props.navigation} />
 
-  const [index, setIndex] = React.useState(0);
+  const [index, setIndex] = React.useState(3);
   const [routes] = React.useState([
     { key: 'stats', title: 'Stats', icon: 'google-analytics' },
     { key: 'tasks', title: 'Tâches', icon: 'clipboard-check-outline' },

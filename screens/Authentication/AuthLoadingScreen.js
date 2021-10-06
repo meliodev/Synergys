@@ -69,13 +69,14 @@ class AuthLoadingScreen extends Component {
     await this.bootstrapNotifications()
     this.forgroundNotificationListener()
     this.backgroundNotificationListener()
+
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
   }
 
   async checkAppVersion() {
     await remoteConfig.setDefaults({ minAppVersion: '1.2.10', latestAppDownloadLink: "" })
-    const fetchedRemotely = await remoteConfig.fetchAndActivate()
+    const fetchedRemotely = await remoteConfig.fetchAndActivate().catch((e) => console.log(e))
     await remoteConfig.fetch(60).catch((e) => console.log(e))
 
     if (fetchedRemotely) {

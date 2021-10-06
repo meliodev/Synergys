@@ -2,7 +2,9 @@ import React, { Component } from 'react'
 import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faCog, faCommentDots, faScroll, faVials, faHandHoldingUsd } from '@fortawesome/pro-light-svg-icons'
+import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faScroll, faVials, faHandHoldingUsd } from '@fortawesome/pro-light-svg-icons'
+import { faCommentDots, faCog } from "@fortawesome/free-solid-svg-icons"
+
 import firebase, { db } from '../firebase'
 import { connect } from 'react-redux'
 import NetInfo from "@react-native-community/netinfo"
@@ -97,15 +99,15 @@ class DrawerMenu extends React.Component {
 
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
                     <View style={{ flex: 0.73 }}>
-                        <Text numberOfLines={1} style={[theme.customFontMSregular.title, { color: theme.colors.secondary }]}>
+                        <Text numberOfLines={1} style={[theme.customFontMSmedium.title, { color: theme.colors.secondary }]}>
                             {currentUser.fullName}
                         </Text>
-                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>
+                        <Text style={[theme.customFontMSmedium.body, { color: theme.colors.gray_dark }]}>
                             {role.value}
                         </Text>
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
-                        <CustomIcon icon={faCog} color={theme.colors.gray_dark} />
+                        <CustomIcon icon={faCog} color={theme.colors.gray_medium} />
                         {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.primary} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
                     </View>
                 </View>
@@ -119,7 +121,7 @@ class DrawerMenu extends React.Component {
 
         return (
             <FlatList
-                scrollEnabled={!(constants.ScreenHeight >= 667)}
+                //scrollEnabled={!(constants.ScreenHeight >= 5000)}
                 data={arrMenu}
                 keyExtractor={item => item.id.toString()}
                 style={{ paddingTop: theme.padding, paddingLeft: theme.padding }}
@@ -134,7 +136,7 @@ class DrawerMenu extends React.Component {
             return (
                 <TouchableOpacity onPress={this.handleSignout.bind(this)} style={styles.menuItem}>
                     <CustomIcon icon={item.icon} color={item.color} />
-                    <Text style={[styles.menuText, theme.customFontMSregular.body]}>{item.name}</Text>
+                    <Text style={[styles.menuText, theme.customFontMSmedium.body]}>{item.name}</Text>
                 </TouchableOpacity>
             )
 
@@ -143,7 +145,7 @@ class DrawerMenu extends React.Component {
                 <CustomIcon icon={item.icon} color={item.color} />
                 {item.id === 'inbox' ?
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={[styles.menuText, theme.customFontMSregular.body]}>{item.name}</Text>
+                        <Text style={[styles.menuText, theme.customFontMSmedium.body]}>{item.name}</Text>
                         {notificationCount > 0 &&
                             <View style={styles.notificationBadge}>
                                 <Text style={{ fontSize: 8, color: '#fff' }}>{notificationCount}</Text>
@@ -151,7 +153,7 @@ class DrawerMenu extends React.Component {
                         }
                     </View>
                     :
-                    <Text style={[styles.menuText, theme.customFontMSregular.body]}>{item.name}</Text>
+                    <Text style={[styles.menuText, theme.customFontMSmedium.body]}>{item.name}</Text>
                 }
             </TouchableOpacity>
         )
@@ -227,7 +229,7 @@ const styles = StyleSheet.create({
     },
     menuItem: {
         flex: 1,
-        height: constants.ScreenHeight * 0.071,
+        height: constants.ScreenHeight * 0.07,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-start'

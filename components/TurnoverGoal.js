@@ -18,11 +18,12 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) 
     const tintColor = targetReached ? theme.colors.primary : currentLow ? '#F5276D' : 'orange'
     const isFirstColumn = (index + 1) % 3 === 0
     const textColor = goal.isCurrent ? theme.colors.primary : theme.colors.secondary
+    const size = constants.ScreenWidth * 0.26
 
     return (
-        <TouchableOpacity style={[{ width: constants.ScreenWidth * 0.26, marginBottom: 17, marginLeft: !isList ? 0 : isFirstColumn ? 0 : constants.ScreenWidth * 0.06 }, style]} onPress={() => onPress(goal, index)}>
+        <TouchableOpacity style={[{ width: size, marginBottom: 17, marginLeft: !isList ? 0 : isFirstColumn ? 0 : constants.ScreenWidth * 0.06 }, style]} onPress={() => onPress(goal, index)}>
             <AnimatedCircularProgress
-                size={constants.ScreenWidth * 0.26}
+                size={size}
                 width={5}
                 fill={progress}
                 tintColor={tintColor}
@@ -30,35 +31,33 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) 
                 arcSweepAngle={270}
                 rotation={227}
                 backgroundColor={theme.colors.gray_light}
-                style={{ marginBottom: 10, alignSelf: 'center' }}>
+                style={{ alignSelf: 'center' }}>
                 {(fill) => (
-                    <Text style={[theme.customFontMSregular.header]}>
-                        {parseInt(fill)}%
-                    </Text>
+                        <View style={{ justifyContent: 'center' }}>
+                            <NumberFormat
+                                value={current}
+                                displayType={'text'}
+                                thousandSeparator={true}
+                                //suffix={'€'}
+                                renderText={value => <Text style={[theme.customFontMSsemibold.body, { color: tintColor, textAlign: "center" }]}>{value}</Text>}
+                            />
+
+                            <NumberFormat
+                                value={target}
+                                displayType={'text'}
+                                thousandSeparator={true}
+                               // suffix={'€'}
+                                renderText={value => <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: theme.colors.gray_dark }]}>sur {value}</Text>}
+                            />
+
+                            <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_medium, textAlign: "center", marginTop: size * 0.05 }]}>
+                                {parseInt(fill)}%
+                            </Text>
+                        </View>
                 )}
             </AnimatedCircularProgress>
 
-            <View>
-                <Text numberOfLines={1} style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>
-                    <NumberFormat
-                        value={current}
-                        displayType={'text'}
-                        thousandSeparator={true}
-                        suffix={'€'}
-                        renderText={value => <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{value}</Text>}
-                    />
-                /
-                <NumberFormat
-                        value={target}
-                        displayType={'text'}
-                        thousandSeparator={true}
-                        suffix={'€'}
-                        renderText={value => <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{value}</Text>}
-                    />
-                </Text>
-            </View>
-
-            <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor, marginTop: 5 }]}>{month}</Text>
+            <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{month}</Text>
 
         </TouchableOpacity>
     )

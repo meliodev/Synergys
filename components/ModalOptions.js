@@ -106,7 +106,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 <View style={{ position: "absolute", right: 0, top: 0, backgroundColor: element.colors.secondary, borderBottomRightRadius: iconContainer.borderRadius, borderBottomLeftRadius: iconContainer.borderRadius, borderTopLeftRadius: iconContainer.borderRadius, borderTopRightRadius: 20, width: iconContainer.size, height: iconContainer.size, justifyContent: "center", alignItems: "center" }}>
                     <CustomIcon icon={element.icon} size={iconSize} color="#fff" />
                 </View>
-                <View style={{  margin: elementSize*0.1 }}>
+                <View style={{ margin: elementSize * 0.1 }}>
                     <Text style={[theme.customFontMSsemibold.h3, { color: theme.colors.white }]}>{element.label}</Text>
                 </View>
             </TouchableOpacity>
@@ -186,6 +186,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 else if (model === 'Element2')
                     return (
                         <Element2
+                            key={index.toString()}
                             element={element}
                             index={index}
                             elementSize={elementSize}

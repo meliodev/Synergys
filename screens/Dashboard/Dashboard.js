@@ -18,7 +18,7 @@ class Dashboard extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Appbar menu  />
+                <Appbar menu title titleText="Accueil"/>
                 <DashboardMenu navigation={this.props.navigation} />
             </View>
         )

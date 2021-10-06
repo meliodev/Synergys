@@ -34,12 +34,10 @@ class TurnoverGoalsContainer extends Component {
     }
 
     addGoal() {
-        const size = constants.ScreenWidth * 0.26
-        const onPress = this.props.onPressNewGoal
-
+        const size = constants.ScreenWidth * 0.238
         return (
-            <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={onPress}>
-                <View style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 1, borderColor: theme.colors.gray_medium, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
+            <TouchableOpacity style={{ marginBottom: 25, alignItems: 'center' }} onPress={this.props.onPressNewGoal}>
+                <View style={[{ width: size, height: size, borderRadius: size / 2 }, styles.plus]}>
                     <Text style={[theme.customFontMSregular.h1, { color: theme.colors.gray_medium }]}>+</Text>
                 </View>
                 <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_medium, textAlign: 'center' }]}>Nouvel objectif</Text>
@@ -51,5 +49,16 @@ class TurnoverGoalsContainer extends Component {
         return this.renderGoals()
     }
 }
+
+const styles = StyleSheet.create({
+    plus: {
+        borderWidth: 1,
+        borderColor: theme.colors.gray_medium,
+        borderStyle: 'dashed',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 10
+    }
+})
 
 export default TurnoverGoalsContainer

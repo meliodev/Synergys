@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, FlatList, Dimensions, ScrollView } from 'react-
 import { connect } from 'react-redux'
 import { LineChart } from 'react-native-chart-kit'
 //#task: try react-native-responsive-linechart
+import NumberFormat from 'react-number-format';
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -49,14 +50,17 @@ class Analytics extends Component {
 
     async fetchData() {
         try {
+            //Summary
             const totalIncome = await this.fetchTotalIncome(this.queries.turnover)
             const { totalProjects, totalClients } = await this.fetchTotals(this.queries.projects)
-            const initialTurnoverObjects = initTurnoverObjects()
-            let turnoverObjects = initialTurnoverObjects
+            //Stats data format
+            let turnoverObjects = initTurnoverObjects()
             turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects, auth.currentUser.uid)
             let turnoverArr = setTurnoverArr(turnoverObjects)
             turnoverArr = sortMonths(turnoverArr)
+            //Goals
             const monthlyGoals = setMonthlyGoals(turnoverArr)
+            //Chart
             const { chartLabels, chartDataSets } = this.setChart(turnoverArr)
             this.setState({ totalIncome, totalProjects, totalClients, chartDataSets, chartLabels, monthlyGoals })
         }
@@ -174,7 +178,13 @@ class Analytics extends Component {
                                 <Text style={[theme.customFontMSsemibold.caption, styles.summaryLabel]}>{data.label}</Text>
                             </View>
                             <View style={styles.summaryValueContainer}>
-                                <Text style={[theme.customFontMSsemibold.body, styles.summaryValue, { color: data.colors.primary }]}>{data.symbol} {data.value.toString()}</Text>
+                                <NumberFormat
+                                    value={data.value}
+                                    displayType={'text'}
+                                    thousandSeparator={true}
+                                    suffix={data.symbol}
+                                    renderText={value => <Text style={[theme.customFontMSsemibold.body, styles.summaryValue, { color: data.colors.primary }]}>{value.toString()}</Text>}
+                                />
                             </View>
                             {emptySpace()}
                         </View>
@@ -204,7 +214,7 @@ class Analytics extends Component {
             <View style={{ marginTop: theme.padding * 1.5, borderTopWidth: 8, borderTopColor: theme.colors.gray_light, paddingHorizontal: theme.padding }}>
                 <View style={styles.chartHeader}>
                     <View style={{ paddingBottom: 10 }}>
-                        <Text style={[theme.customFontMSsemibold.caption]}>Statistiques</Text>
+                        <Text style={[theme.customFontMSsemibold.body]}>Statistiques</Text>
                     </View>
                     <Picker
                         showTitle={false}
@@ -306,7 +316,7 @@ class Analytics extends Component {
 
         return (
             <View style={{ borderTopWidth: 8, borderTopColor: theme.colors.gray_light, padding: theme.padding }}>
-                <Text style={[theme.customFontMSsemibold.caption, { marginBottom: theme.padding }]}>Objectifs</Text>
+                <Text style={[theme.customFontMSsemibold.body, { marginBottom: theme.padding }]}>Objectifs</Text>
                 <TurnoverGoalsContainer
                     monthlyGoals={monthlyGoals}
                     onPressNewGoal={this.onPressNewGoal.bind(this)}
@@ -319,9 +329,7 @@ class Analytics extends Component {
     }
 
     renderSectionSeparator() {
-        return (
-            <View style={{ width: constants.ScreenWidth, height: theme.padding / 3, backgroundColor: theme.colors.gray_medium }} />
-        )
+        return <View style={styles.sectionSeparator} />
     }
 
     render() {
@@ -397,6 +405,11 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
         justifyContent: 'space-between',
         marginBottom: 5
+    },
+    sectionSeparator: {
+        width: constants.ScreenWidth,
+        height: theme.padding / 3,
+        backgroundColor: theme.colors.gray_medium
     }
 })
 
