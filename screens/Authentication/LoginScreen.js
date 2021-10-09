@@ -103,51 +103,54 @@ class LoginScreen extends Component {
 
           <Logo />
 
-          <TextInput
-            style={styles.credInput}
-            label="Email"
-            returnKeyType="next"
-            value={email.value}
-            onChangeText={text => updateField(this, email, text)}
-            error={!!email.error}
-            errorText={email.error}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoCompleteType="email"
-            textContentType="emailAddress"
-            keyboardType="email-address"
-            editable={!loading}
-          />
+          <View>
+            <TextInput
+              style={styles.credInput}
+              label="Email"
+              returnKeyType="next"
+              value={email.value}
+              onChangeText={text => updateField(this, email, text)}
+              error={!!email.error}
+              errorText={email.error}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoCompleteType="email"
+              textContentType="emailAddress"
+              keyboardType="email-address"
+              editable={!loading}
+            />
 
-          <TextInput
-            style={styles.credInput}
-            label="Mot de passe"
-            returnKeyType="done"
-            value={password.value}
-            onChangeText={text => updateField(this, password, text)}
-            error={!!password.error}
-            errorText={password.error}
-            secureTextEntry={!password.show}
-            autoCapitalize="none"
-            editable={!loading}
-            right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
-              password.show = !password.show
-              this.setState({ password })
-            }} />}
-          />
+            <TextInput
+              style={styles.credInput}
+              label="Mot de passe"
+              returnKeyType="done"
+              value={password.value}
+              onChangeText={text => updateField(this, password, text)}
+              error={!!password.error}
+              errorText={password.error}
+              secureTextEntry={!password.show}
+              autoCapitalize="none"
+              editable={!loading}
+              right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
+                password.show = !password.show
+                this.setState({ password })
+              }} />}
+            />
 
-          <View style={styles.forgotPassword}>
-            <TouchableOpacity onPress={this.forgotPassword}>
-              <Text style={[theme.customFontMSregular.body, styles.forgetPasswordLink]}>Mot de passe oublié ?</Text>
+            <View style={styles.forgotPassword}>
+              <TouchableOpacity onPress={this.forgotPassword}>
+                <Text style={[theme.customFontMSregular.caption, styles.forgetPasswordLink]}>Mot de passe oublié ?</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.loginButton} onPress={this.handleLogin}>
+              <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
+                {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
+                <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginRight: 10 }]}>Se connecter</Text>
+              </LinearGradient>
             </TouchableOpacity>
-          </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={this.handleLogin}>
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
-              {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
-              <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginRight: 10 }]}>SE CONNECTER</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          </View>
 
         </View>
 
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     width: "100%",
     alignItems: "flex-end",
-    marginTop: 20,
+    marginTop: theme.padding,
   },
   row: {
     flexDirection: "row",
@@ -203,8 +206,8 @@ const styles = StyleSheet.create({
     borderRadius: 5
   },
   forgetPasswordLink: {
-    color: theme.colors.secondary,
-    zIndex: 1
+    color: theme.colors.gray_dark,
+    zIndex: 1,
   },
   loginButton: {
     justifyContent: 'center',

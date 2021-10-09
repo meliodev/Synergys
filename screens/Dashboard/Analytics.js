@@ -17,6 +17,7 @@ import { fetchTurnoverData } from '../../api/firestore-api'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from './helpers'
 
 import { Picker, TurnoverGoal, Loading } from '../../components'
+import Tooltip from '../../components/Tooltip'
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 
@@ -39,6 +40,7 @@ class Analytics extends Component {
             chartDataSets: [[]],
             chartPeriod: 'lastSemester',
             monthlyGoals: [],
+            selectedPointChart: null,
             loading: true
         }
     }
@@ -195,8 +197,31 @@ class Analytics extends Component {
         )
     }
 
+    tooltipDecorators(state, data) {
+        if (state === null) {
+            return null;
+        }
+
+        const { index, value, x, y } = state;
+        const textX = data.labels[index];
+        const position = data.labels.length === index + 1 ? 'left' : 'right';
+
+        return (
+            <Tooltip
+                textX={String(textX)}
+                textY={String(value)}
+                x={x}
+                y={y}
+                stroke={theme.colors.primary}
+                pointStroke={theme.colors.secondary}
+                position={position}
+                dismiss={() => this.setState({ selectedPointChart: null })}
+            />
+        );
+    };
+
     renderChart() {
-        const { chartPeriod, monthlyGoals, chartDataSets, chartLabels } = this.state
+        const { chartPeriod, monthlyGoals, chartDataSets, chartLabels, selectedPointChart } = this.state
         const periods = [
             { label: 'Le mois courant', value: 'currentMonth' },
             { label: 'Les 6 derniers mois', value: 'lastSemester' },
@@ -209,6 +234,8 @@ class Analytics extends Component {
             const data = chartData
             datasets.push({ data })
         }
+
+        const data = { labels, datasets }
 
         return (
             <View style={{ marginTop: theme.padding * 1.5, borderTopWidth: 8, borderTopColor: theme.colors.gray_light, paddingHorizontal: theme.padding }}>
@@ -230,10 +257,7 @@ class Analytics extends Component {
                 </View>
 
                 <LineChart
-                    data={{
-                        labels,
-                        datasets
-                    }}
+                    data={data}
                     width={Dimensions.get("window").width - theme.padding * 2} // from react-native
                     height={220}
                     yAxisLabel="€"
@@ -260,7 +284,10 @@ class Analytics extends Component {
                             x: "52"
                         },
                     }}
-                    onDataPointClick={(data) => console.log(data)}
+                    decorator={() => this.tooltipDecorators(selectedPointChart, data)}
+                    onDataPointClick={(data) => {
+                        this.setState({ selectedPointChart: data })
+                    }}
                     bezier
                     style={{
                         marginTop: 0,
@@ -333,7 +360,7 @@ class Analytics extends Component {
     }
 
     render() {
-        const { chartLabels, loading } = this.state
+        const { chartLabels, loading, selectedPointChart } = this.state
         const { isConnected } = this.props.network
 
         return (
@@ -342,8 +369,8 @@ class Analytics extends Component {
                     <Loading />
                     :
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        {this.renderSummary()}
                         {chartLabels.length > 0 && this.renderChart()}
+                        {this.renderSummary()}
                         {this.renderGoals()}
                     </ScrollView>
                 }

@@ -3,7 +3,7 @@ import { Image, StyleSheet } from 'react-native';
 import { constants } from '../core/constants'
 
 const ratio = 332 / 925
-const width =  constants.ScreenWidth * 0.85
+const width =  constants.ScreenWidth * 0.65
 const height = width * ratio
 // const width = constants.ScreenWidth * 0.32
 
