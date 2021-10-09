@@ -106,7 +106,7 @@ class CreateClient extends Component {
             var navScreen = this.prevScreen === "CreateProject" ? this.prevScreen : "Profile"
             var navParams = this.prevScreen === "CreateProject" ? {} : { user: { id: this.ClientId, roleId: 'client' } }
             this.setState({ loadingDialog: false }, () => {
-                this.props.navigation.navigate(navScreen, navParams)
+                this.props.navigation.replace(navScreen, navParams)
             })
         }
     }
