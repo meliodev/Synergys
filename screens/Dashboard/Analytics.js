@@ -238,7 +238,7 @@ class Analytics extends Component {
         const data = { labels, datasets }
 
         return (
-            <View style={{ marginTop: theme.padding * 1.5, borderTopWidth: 8, borderTopColor: theme.colors.gray_light, paddingHorizontal: theme.padding }}>
+            <View style={{ marginTop: theme.padding * 1.5, borderTopWidth: 16, borderTopColor: theme.colors.gray_extraLight, paddingHorizontal: theme.padding }}>
                 <View style={styles.chartHeader}>
                     <View style={{ paddingBottom: 10 }}>
                         <Text style={[theme.customFontMSsemibold.body]}>Statistiques</Text>
@@ -342,7 +342,7 @@ class Analytics extends Component {
         const isCom = roleId === 'com'
 
         return (
-            <View style={{ borderTopWidth: 8, borderTopColor: theme.colors.gray_light, padding: theme.padding }}>
+            <View style={{ borderTopWidth: 16, borderTopColor: theme.colors.gray_extraLight, padding: theme.padding }}>
                 <Text style={[theme.customFontMSsemibold.body, { marginBottom: theme.padding }]}>Objectifs</Text>
                 <TurnoverGoalsContainer
                     monthlyGoals={monthlyGoals}
@@ -355,10 +355,6 @@ class Analytics extends Component {
         )
     }
 
-    renderSectionSeparator() {
-        return <View style={styles.sectionSeparator} />
-    }
-
     render() {
         const { chartLabels, loading, selectedPointChart } = this.state
         const { isConnected } = this.props.network
@@ -369,8 +365,8 @@ class Analytics extends Component {
                     <Loading />
                     :
                     <ScrollView showsVerticalScrollIndicator={false}>
-                        {chartLabels.length > 0 && this.renderChart()}
                         {this.renderSummary()}
+                        {chartLabels.length > 0 && this.renderChart()}
                         {this.renderGoals()}
                     </ScrollView>
                 }
@@ -433,10 +429,5 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginBottom: 5
     },
-    sectionSeparator: {
-        width: constants.ScreenWidth,
-        height: theme.padding / 3,
-        backgroundColor: theme.colors.gray_medium
-    }
 })
 
