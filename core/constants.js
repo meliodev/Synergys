@@ -12,7 +12,7 @@ export const constants = {
     ScreenHeight: height
 }
 
-export const appVersion = "1.3.0"
+export const appVersion = "1.3.1"
 export const latestProcessVersion = "version5"
 
 export const roles = [

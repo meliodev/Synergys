@@ -30,7 +30,7 @@ import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants, errorMessages, generableDocTypes, highRoles, imageSources, masculinsDocTypes } from "../../core/constants";
+import { constants, docsConfig, errorMessages, generableDocTypes, highRoles, imageSources, masculinsDocTypes } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -657,7 +657,6 @@ class UploadDocument extends Component {
     startGenPdf(index) {
 
         const { type, project } = this.state
-        this.toggleModal()
 
         let navParams = {
             autoGenPdf: true,
@@ -673,7 +672,8 @@ class UploadDocument extends Component {
         const { genNavigation } = config[type]
         navParams = { ...navParams, ...genNavigation }
         const navScreen = index === 0 ? navParams.listScreen : navParams.creationScreen
-        console.log(navScreen, navParams)
+
+        this.toggleModal()
         this.props.navigation.navigate(navScreen, navParams)
     }
 

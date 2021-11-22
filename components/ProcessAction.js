@@ -700,8 +700,8 @@ class ProcessAction extends Component {
         return (
             <View style={{ borderBottomRightRadius: 5, borderBottomLeftRadius: 5 }}>
                 <View style={{ padding: theme.padding }}>
-                    <Text style={[theme.customFontMSmedium.body, { marginBottom: 8 }]}>{phaseTitle}</Text>
-                    <Text style={theme.customFontMSregular.body}>{stepTitle}</Text>
+                    <Text style={[theme.customFontMSmedium.header, { marginBottom: 8 }]}>{phaseTitle}</Text>
+                    <Text style={[theme.customFontMSregular.body]}>{stepTitle}</Text>
                     {showProgress &&
                         <StepProgress
                             progress={progress}

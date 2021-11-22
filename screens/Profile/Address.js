@@ -122,8 +122,6 @@ class MarkerTypes extends React.Component {
     render() {
         let { address, showInput, loading } = this.state
 
-        console.log(address.description)
-
         return (
             <View style={{ flex: 1 }}>
 
