@@ -28,7 +28,23 @@ const properties = [
     "phaseType",
     "electricPanelPicture", //remove
     "eletricPanelSize",
-    "test"
+    "clientName",
+    //Ballon Solaire
+    "isPowerCable",
+    "tubeDiameterEF",
+    "tubeDiameterECS",
+    "tubeMaterials",
+    "PVCdrainingToDo",
+    "PVCdrainingDiameter",
+    "tubeDiameter",
+    "isDoubleTube",
+    "isSpaceEnough",
+    "linksPassage",
+
+    //PV
+    //PAA
+    //PAE
+    //Ballon Thermo
 ]
 
 let initialState = {
@@ -37,7 +53,18 @@ let initialState = {
     phaseType: "",
     electricPanelPicture: null,
     eletricPanelSize: "",
-    test: ""
+    clientName: "",
+    //BS
+    isPowerCable: "",
+    tubeDiameterEF: "",
+    tubeDiameterECS: "",
+    tubeMaterials: "",
+    PVCdrainingToDo: "",
+    PVCdrainingDiameter: "",
+    tubeDiameter: "",
+    isDoubleTube: "",
+    isSpaceEnough: "",
+    linksPassage: "",
 }
 
 class CreateFicheTech extends Component {
@@ -49,10 +76,14 @@ class CreateFicheTech extends Component {
 
         //Travaux du projet
         this.workTypes = this.project ? this.project.workTypes : []
+        this.clientName = this.project ? this.project.client.fullName : ""
+
         initialState.workTypes = this.workTypes
+        initialState.clientName = this.clientName
 
         this.state = {
-            model: []
+            model: [],
+            checklistBase64: []
         }
     }
 

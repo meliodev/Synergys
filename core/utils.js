@@ -666,7 +666,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
 
-        console.log("88888888888888888888888888888888888888888", field)
         const { id, isMultiOptions, isStepMultiOptions, pdfConfig, type, splitArobase } = field
         const isHandleField = isMultiOptions && formInputs[id].length > 0 || formInputs[id] !== ""
 

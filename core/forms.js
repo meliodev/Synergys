@@ -2289,6 +2289,21 @@ export const pvReceptionModel = (params) => {
 export const visiteTechModel = () => {
 
     const model = [
+        {//1
+            id: "clientName",
+            title: "",
+            fields: [
+                {
+                    id: "clientName",
+                    type: "textInput",
+                    maxLength: 15,
+                    label: "Client",
+                    errorId: "clientNameError",
+                    pdfConfig: { dx: -490, dy: - 339, pageIndex: 0 }, //add spaces
+                    mendatory: true
+                },
+            ]
+        },
         {//2
             id: "subPower",
             title: "",
@@ -2371,10 +2386,10 @@ export const checklistPAAModel = (pageIndex) => {
             id: "test1",
             title: "",
             fields: [{
-                id: "test1",
+                id: "test5",
                 type: "textInput",
                 isNumeric: true,
-                label: "Test PAA",
+                label: "Test PV",
                 errorId: "testError",
                 mendatory: true,
                 pdfConfig: { dx: -260, dy: - 187, pageIndex }
@@ -2424,18 +2439,235 @@ export const checklistBTModel = (pageIndex) => {
 }
 export const checklistBSModel = (pageIndex) => {
     const model = [
+        {//1
+            id: "isPowerCable",
+            title: "BALLON SOLAIRE -Partie Electrique",
+            fields: [
+                {
+                    id: "isPowerCable",
+                    label: "Câble d’alimentation présent ?",
+                    type: "options",
+                    items: [
+                        { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -190, dy: - 484, pageIndex } },
+                        { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { dx: -247, dy: - 484, pageIndex } },
+                    ],
+                    errorId: "isPowerCableError",
+                    mendatory: true
+                },
+            ]
+        },
         {//2
-            id: "test4",
-            title: "",
-            fields: [{
-                id: "test5",
-                type: "textInput",
-                isNumeric: true,
-                label: "Test BS",
-                errorId: "testError",
-                mendatory: true,
-                pdfConfig: { dx: -260, dy: - 187, pageIndex }
-            }]
+            id: "tubeDiameter",
+            title: "BALLON SOLAIRE - Partie Hydraulique",
+            fields: [
+                {
+                    id: "tubeDiameterEF",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Diamètre tube EF",
+                    errorId: "tubeDiameterEFError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+                {
+                    id: "tubeDiameterECS",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Diamètre tube ECS",
+                    errorId: "tubeDiameterECSError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//3
+            id: "tubeMaterials",
+            title: "BALLON SOLAIRE - Partie Hydraulique",
+            fields: [
+                {
+                    id: "tubeMaterials",
+                    label: "Matériaux des tubes",
+                    type: "options",
+                    items: [
+                        { label: "Acier", value: "Acier", pdfConfig: { dx: -450, dy: - 305, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", pdfConfig: { dx: -450, dy: - 305, pageIndex } },
+                        { label: "Plastique", value: "Plastique", pdfConfig: { dx: -450, dy: - 305, pageIndex } },
+                    ],
+                    label: "Matériaux des tubes",
+                    mendatory: true,
+                    errorId: "tubeMaterialsError",
+                    pdfConfig: { dx: -450, dy: - 305, pageIndex }
+                },
+            ]
+        },
+        {//4
+            id: "PVCdraining",
+            title: "BALLON SOLAIRE - Partie Hydraulique",
+            fields: [
+                {
+                    id: "PVCdrainingToDo",
+                    type: "options",
+                    items: [
+                        { label: "À faire", value: "À faire", pdfConfig: { dx: -450, dy: - 305, pageIndex } },
+                    ],
+                    label: "Evacuation PVC existante",
+                    errorId: "PVCdrainingToDoError",
+                },
+                {
+                    id: "PVCdrainingDiameter",
+                    type: "textInput",
+                    label: "Diamètre",
+                    isNumeric: true,
+                    errorId: "PVCdrainingDiameterError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//5
+            id: "isDoubleTube",
+            title: "BALLON SOLAIRE - Partie Hydraulique",
+            fields: [
+                {
+                    id: "isDoubleTube",
+                    label: "Tube en doublage",
+                    type: "options",
+                    items: [
+                        { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -190, dy: - 484, pageIndex } },
+                        { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { dx: -247, dy: - 484, pageIndex } },
+                    ],
+                    errorId: "isDoubleTubeError",
+                    mendatory: true
+                },
+            ]
+        },
+        {//6
+            id: "isSpaceEnough",
+            title: "BALLON SOLAIRE - Partie Emplacement",
+            fields: [
+                {
+                    id: "isSpaceEnough",
+                    type: "textInput",
+                    label: "Vérifier espace suffisant pour emplacement ballon",
+                    errorId: "isSpaceEnoughError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//7
+            id: "linksPassage",
+            title: "BALLON SOLAIRE - Partie Emplacement",
+            fields: [
+                {
+                    id: "linksPassage",
+                    type: "textInput",
+                    label: "Passage des liaisons, longueur",
+                    isNumeric: true,
+                    errorId: "linksPassageError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//8
+            id: "sensorsNumber",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "sensorsNumber",
+                    type: "textInput",
+                    label: "Nombre de capteur solaire",
+                    isNumeric: true,
+                    errorId: "sensorsNumberError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//9
+            id: "calpinage",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "calpinage",
+                    type: "textInput",
+                    label: "Calpinage",
+                    errorId: "calpinageError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//10
+            id: "sensorLocation",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "sensorLocation",
+                    type: "textInput",
+                    label: "Emplacement capteur",
+                    errorId: "sensorLocationError",
+                    mendatory: true,
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//11
+            id: "orientationCS",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "orientationCS",
+                    label: "Orientation",
+                    type: "options",
+                    items: [
+                        { label: 'Portrait', value: 'Portrait', pdfConfig: { dx: -190, dy: - 484, pageIndex } },
+                        { label: 'Paysage', value: 'Paysage', pdfConfig: { dx: -247, dy: - 484, pageIndex } },
+                    ],
+                    errorId: "orientationCSError",
+                    mendatory: true
+                },
+            ]
+        },
+        {//12
+            id: "solarMask",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "solarMask",
+                    type: "textInput",
+                    label: "Masque solaire",
+                    errorId: "solarMaskError",
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//13
+            id: "notice",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "notice",
+                    type: "textInput",
+                    label: "Remarque",
+                    errorId: "noticeError",
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
+        },
+        {//14
+            id: "materialProposition",
+            title: "BALLON SOLAIRE - Capteur(s) Solaire",
+            fields: [
+                {
+                    id: "materialProposition",
+                    type: "textInput",
+                    label: "Proposition matériel adéquat si refus VT",
+                    errorId: "materialPropositionError",
+                    pdfConfig: { dx: -260, dy: - 187, pageIndex }
+                },
+            ]
         },
     ]
 
