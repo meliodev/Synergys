@@ -69,7 +69,7 @@ import ListMandatsMPR from '../screens/Forms/MandatMaPrimeRenov/ListMandatsMPR'
 //Mandat Synergys
 import CreateMandatSynergys from '../screens/Forms/MandatSynergys/CreateMandatSynergys'
 import ListMandatsSynergys from '../screens/Forms/MandatSynergys/ListMandatsSynergys'
-//Fiche Technique
+//Visite technique
 import CreateFicheTech from '../screens/Forms/FicheTechnique/CreateFicheTech'
 
 //News

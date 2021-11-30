@@ -228,7 +228,7 @@ export const docsConfig = (index) => {
                 popCount: index === 0 ? 2 : 1,
             },
         },
-        "Fiche technique": {
+        "Visite technique": {
             genNavigation: {
                 titleText: "Choix du formulaire",
                 listScreen: "",

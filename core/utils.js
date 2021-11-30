@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, errorMessages, roles, constants } from './constants'
-import { ficheEEBModel, ficheTechModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
+import { ficheEEBModel, visiteTechModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -106,7 +106,6 @@ export const compareTimes = (time1, time2, operator) => {
 }
 
 export const checkOverlap = (timeSegments) => {
-  console.log(timeSegments)
   if (timeSegments.length === 1) return false;
 
   timeSegments.sort((timeSegment1, timeSegment2) =>
@@ -473,10 +472,6 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
-const getImageType = () => {
-
-}
-
 export const convertImageToPdf = async (attachment) => {
 
   let errorMessage = null
@@ -614,6 +609,21 @@ const lineBreaker = (dataArray, font, size, linesWidths, maxNumberOflLines) => {
   return dataArrayFormated
 }
 
+
+async function mergePDFDocuments(documents) {
+
+  const mergedPdf = await PDFDocument.create();
+
+  for (let document of documents) {
+    document = await PDFDocument.load(document);
+
+    const copiedPages = await mergedPdf.copyPages(document, document.getPageIndices());
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  return mergedPdf
+}
+
 export const generatePdfForm = async (formInputs, pdfType, params) => {
   try {
     if (pdfType === "PvReception") {
@@ -633,13 +643,12 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var { model: formPages, globalConfig } = mandatSynergysModel()
     }
 
-    else if (pdfType === "FichesTech") {
-
-      var originalPdfBase64 = ficheTechBase64
-      var { model: formPages } = ficheTechModel()
+    if (pdfType === "VisitesTech") {
+      var { model: formPages, checklistBase64 } = params
+      var pdfDoc = await mergePDFDocuments(checklistBase64)
     }
+    else var pdfDoc = await PDFDocument.load(originalPdfBase64)
 
-    let pdfDoc = await PDFDocument.load(originalPdfBase64)
 
     const pages = pdfDoc.getPages()
 
@@ -654,11 +663,10 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
     const caption = 10
 
-    console.log("Starting PDF GEN........................")
-
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
 
+        console.log("88888888888888888888888888888888888888888", field)
         const { id, isMultiOptions, isStepMultiOptions, pdfConfig, type, splitArobase } = field
         const isHandleField = isMultiOptions && formInputs[id].length > 0 || formInputs[id] !== ""
 
@@ -991,16 +999,16 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
 
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 import { highRoles } from './constants'
+
 import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
 import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
 import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
 import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
-import { ficheTechBase64 } from '../assets/files/ficheTechBase64';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
-  { label: 'Fiche technique', value: 'Fiche technique', icon: faUserHardHat },
+  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 
@@ -1020,7 +1028,7 @@ const allDocTypes = [
   { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
   { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
   { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
-  { label: 'Fiche technique', value: 'Fiche technique', icon: faUserHardHat },
+  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
 
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
@@ -1144,7 +1152,6 @@ export function refreshTechContact(user) {
 
 export function refreshAssignedTo(user) {
   const assignedTo = refreshUser(user)
-  console.log(assignedTo)
   this.setState({ assignedTo, assignedToError: "" })
 }
 
@@ -1152,7 +1159,6 @@ export const refreshUser = (user) => {
   const { isPro, id, denom, nom, prenom, role, email, phone } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
-  console.log('USER OBJECT', userObject)
   return userObject
 }
 

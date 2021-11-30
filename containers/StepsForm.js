@@ -10,7 +10,6 @@ import DatePicker from 'react-native-date-picker'
 import TextInputMask from 'react-native-text-input-mask';
 import RNFS from 'react-native-fs'
 
-
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
@@ -915,7 +914,6 @@ class StepsForm extends Component {
         return new Promise(async (resolve, reject) => {
 
             try {
-                console.log('Starting submit....................')
                 this.setState({ loading: true })
 
                 //Verify onPress Check icon
@@ -927,8 +925,6 @@ class StepsForm extends Component {
                     }
                 }
 
-                console.log('Fields verified.....................')
-
                 const { idPattern, collection } = this.props
 
                 //Set form
@@ -937,16 +933,12 @@ class StepsForm extends Component {
                 form.isSubmitted = form.isSubmitted || isSubmitted
                 const DocId = this.state.isEdit ? this.DocId : idPattern ? generateId(idPattern) : ""
 
-                console.log('Form formated.....................')
-
                 //Persist
                 if (collection) {
                     db.collection(collection).doc(DocId).set(form)
                 }
 
-                console.log('Ready to Generate form..............')
                 const pdfBase64 = await this.props.generatePdf(form, this.props.pdfType)
-                console.log('FORM GENERATED.................')
 
                 this.DocId = DocId
                 const update = {
@@ -959,9 +951,7 @@ class StepsForm extends Component {
                     loading: false,
                 }
 
-                console.log('Ready to update state.............................')
                 this.setState(update, () => {
-                    console.log('STATE UPDATED !')
                     resolve(true)
                 })
             }
@@ -1286,8 +1276,7 @@ class StepsForm extends Component {
 
     //##Helpers
     toggleModal() {
-        console.log("1....", moment().format())
-        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible }, () => console.log("2....", moment().format()))
+        this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible })
     }
 
     async savePdfBase64(pdfBase64, isProcess) {
@@ -1330,12 +1319,10 @@ class StepsForm extends Component {
 
     //##Overview
     renderOverview() {
-        console.log('Rendering overview......................')
         const { readOnly, isEdit } = this.state
         const { pages, collection } = this.props
         const form = this.unformatDocument()
         let redundantFields = []
-        console.log('Formated form........................')
 
         let showSummary = false
         if (collection === "Simulations") {
@@ -1349,8 +1336,6 @@ class StepsForm extends Component {
             ]
             showSummary = colorCat !== "" && products !== [] && estimation > 0
         }
-
-        console.log('Show summary..........', showSummary)
 
         return (
             <View style={{ flex: 1 }}>

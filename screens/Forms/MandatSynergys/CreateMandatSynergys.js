@@ -35,7 +35,7 @@ const properties = [
     "financingAids",
 ]
 
-const initialState = {
+let initialState = {
     serviceProvider: "",
     serviceType: "",
     productTypes: [],
@@ -74,9 +74,6 @@ class CreateMandatSynergys extends Component {
         initialState.addressClient = this.clientAddress.description
         initialState.mobilePhoneClient = this.clientPhone
         initialState.emailClient = this.clientEmail
-
-        this.state = {
-        }
     }
 
     render() {

@@ -2286,7 +2286,7 @@ export const pvReceptionModel = (params) => {
     return { model, globalConfig }
 }
 
-export const ficheTechModel = () => {
+export const visiteTechModel = () => {
 
     const model = [
         {//2
@@ -2330,35 +2330,131 @@ export const ficheTechModel = () => {
                 pdfConfig: { dx: -240, dy: - 339, pageIndex: 0 }
             }]
         },
-        //5 Checklist produits (autoGen)
-        //7 Montant accompte (autoGen)
-        { //1
-            id: "electricMeterPicture",
+        // //5 Checklist produits (autoGen)
+        // //7 Montant accompte (autoGen)
+        // { //1
+        //     id: "electricMeterPicture",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "electricMeterPicture",
+        //             label: "Photo du compteur électrique",
+        //             type: "image",
+        //             errorId: "electricMeterPictureError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -10, dy: - 10, pageIndex: 0 }
+        //         },
+        //     ]
+        // },
+        // { //4
+        //     id: "electricPanelPicture",
+        //     title: "",
+        //     fields: [
+        //         {
+        //             id: "electricPanelPicture",
+        //             label: "Photo du tableau électrique existant",
+        //             type: "image",
+        //             errorId: "electricPanelPictureError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -10, dy: - 10, pageIndex: 0 }
+        //         },
+        //     ]
+        // },
+    ]
+
+    return { model }
+}
+
+export const checklistPAAModel = (pageIndex) => {
+    const model = [
+        {//2
+            id: "test1",
             title: "",
-            fields: [
-                {
-                    id: "electricMeterPicture",
-                    label: "Photo du compteur électrique",
-                    type: "image",
-                    errorId: "electricMeterPictureError",
-                    mendatory: true,
-                    pdfConfig: { dx: -10, dy: - 10, pageIndex: 0 }
-                },
-            ]
+            fields: [{
+                id: "test1",
+                type: "textInput",
+                isNumeric: true,
+                label: "Test PAA",
+                errorId: "testError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 187, pageIndex }
+            }]
         },
-        { //4
-            id: "electricPanelPicture",
+    ]
+
+    return { model }
+}
+export const checklistPAEModel = (pageIndex) => {
+    const model = [
+        {//2
+            id: "test2",
             title: "",
-            fields: [
-                {
-                    id: "electricPanelPicture",
-                    label: "Photo du tableau électrique existant",
-                    type: "image",
-                    errorId: "electricPanelPictureError",
-                    mendatory: true,
-                    pdfConfig: { dx: -10, dy: - 10, pageIndex: 0 }
-                },
-            ]
+            fields: [{
+                id: "test2",
+                type: "textInput",
+                isNumeric: true,
+                label: "Test PAE",
+                errorId: "testError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 187, pageIndex }
+            }]
+        },
+    ]
+
+    return { model }
+}
+export const checklistBTModel = (pageIndex) => {
+    const model = [
+        {//2
+            id: "test3",
+            title: "",
+            fields: [{
+                id: "test3",
+                type: "textInput",
+                isNumeric: true,
+                label: "Test BT",
+                errorId: "testError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 187, pageIndex }
+            }]
+        },
+    ]
+
+    return { model }
+}
+export const checklistBSModel = (pageIndex) => {
+    const model = [
+        {//2
+            id: "test4",
+            title: "",
+            fields: [{
+                id: "test5",
+                type: "textInput",
+                isNumeric: true,
+                label: "Test BS",
+                errorId: "testError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 187, pageIndex }
+            }]
+        },
+    ]
+
+    return { model }
+}
+export const checklistPVModel = (pageIndex) => {
+    const model = [
+        {//2
+            id: "test5",
+            title: "",
+            fields: [{
+                id: "test5",
+                type: "textInput",
+                isNumeric: true,
+                label: "Test PV",
+                errorId: "testError",
+                mendatory: true,
+                pdfConfig: { dx: -260, dy: - 187, pageIndex }
+            }]
         },
     ]
 

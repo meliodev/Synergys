@@ -903,7 +903,7 @@ export const version5 = {
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
-                    //#task: add fiche technique (montant de l'accompte available) (dynamic: false, public: true)
+                    //#task: add Visite technique (montant de l'accompte available) (dynamic: false, public: true)
                     {
                         id: 'technicalVisitChoice',
                         title: "Voulez-vous cloturer la visite technique",
