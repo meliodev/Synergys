@@ -22,6 +22,7 @@ import { generatePdfForm, generatePvReception } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 
+//Fetch from DB
 const properties = [
     "electricMeterPicture", //remove
     "subPower",
@@ -39,9 +40,9 @@ const properties = [
     "tubeDiameter",
     "isDoubleTube",
     "isSpaceEnough",
-    "linksPassage",
-
+    "linksPassage", //#task: add the rest...
     //PV
+    "inverterTypes",
     //PAA
     //PAE
     //Ballon Thermo
@@ -65,7 +66,12 @@ let initialState = {
     isDoubleTube: "",
     isSpaceEnough: "",
     linksPassage: "",
+    test5: '000',
+
+    //PV
+    inverterTypes: [],
 }
+
 
 class CreateFicheTech extends Component {
     constructor(props) {
@@ -78,6 +84,7 @@ class CreateFicheTech extends Component {
         this.workTypes = this.project ? this.project.workTypes : []
         this.clientName = this.project ? this.project.client.fullName : ""
 
+        console.log("WT", this.workTypes)
         initialState.workTypes = this.workTypes
         initialState.clientName = this.clientName
 

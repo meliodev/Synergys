@@ -24,7 +24,7 @@ export const configureQuery = (collection, queryFilters, params) => {
             }
 
             else if (queryFilter.clause === 'orderBy') {
-                query = query.orderBy(field, sort)
+                query = query.orderBy(field, sort).limit(1)
             }
         })
     }
