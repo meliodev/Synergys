@@ -1,16 +1,25 @@
 
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, } from 'react-native'
-import { faVials } from '@fortawesome/pro-duotone-svg-icons';
+import { View, Text, StyleSheet } from 'react-native'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
+//Containers & Components
 import StepsForm from '../../../containers/StepsForm'
 import { CustomIcon, Button } from '../../../components/index'
 
-import { visiteTechModel, pvReceptionModel, checklistPAEModel, checklistPAAModel, checklistBTModel, checklistBSModel, checklistPVModel } from '../../../core/forms'
+//Forms Models
+import { visiteTechModel } from '../../../core/forms/visitTech/visiteTechModel'
+import { checklistPAEModel } from '../../../core/forms/visitTech/checklistPAEModel'
+import { checklistPAAModel } from '../../../core/forms/visitTech/checklistPAAModel'
+import { checklistBTModel } from '../../../core/forms/visitTech/checklistBTModel'
+import { checklistBSModel } from '../../../core/forms/visitTech/checklistBSModel'
+import { checklistPVModel } from '../../../core/forms/visitTech/checklistPVModel'
+import { vtAttachedFilesModel } from '../../../core/forms/visitTech/vtAttachedFilesModel'
+
+//PDFs
 import { visiteTechBase64 } from '../../../assets/files/visiteTechBase64'
 import { checklistPAABase64 } from '../../../assets/files/checklist/checklistPAABase64'
 import { checklistPAEBase64 } from '../../../assets/files/checklist/checklistPAEBase64'
@@ -18,59 +27,11 @@ import { checklistBSBase64 } from '../../../assets/files/checklist/checklistBSBa
 import { checklistBTBase64 } from '../../../assets/files/checklist/checklistBTBase64'
 import { checklistPVBase64 } from '../../../assets/files/checklist/checklistPVBase64'
 
+//Helpers
 import { generatePdfForm, generatePvReception } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
-
-//Fetch from DB
-const properties = [
-    "electricMeterPicture", //remove
-    "subPower",
-    "phaseType",
-    "electricPanelPicture", //remove
-    "eletricPanelSize",
-    "clientName",
-    //Ballon Solaire
-    "isPowerCable",
-    "tubeDiameterEF",
-    "tubeDiameterECS",
-    "tubeMaterials",
-    "PVCdrainingToDo",
-    "PVCdrainingDiameter",
-    "tubeDiameter",
-    "isDoubleTube",
-    "isSpaceEnough",
-    "linksPassage", //#task: add the rest...
-    //PV
-    "inverterTypes",
-    //PAA
-    //PAE
-    //Ballon Thermo
-]
-
-let initialState = {
-    electricMeterPicture: null,
-    subPower: "",
-    phaseType: "",
-    electricPanelPicture: null,
-    eletricPanelSize: "",
-    clientName: "",
-    //BS
-    isPowerCable: "",
-    tubeDiameterEF: "",
-    tubeDiameterECS: "",
-    tubeMaterials: "",
-    PVCdrainingToDo: "",
-    PVCdrainingDiameter: "",
-    tubeDiameter: "",
-    isDoubleTube: "",
-    isSpaceEnough: "",
-    linksPassage: "",
-    test5: '000',
-
-    //PV
-    inverterTypes: [],
-}
+import { getPropsFromModel } from '../helpers'
 
 
 class CreateFicheTech extends Component {
@@ -84,54 +45,64 @@ class CreateFicheTech extends Component {
         this.workTypes = this.project ? this.project.workTypes : []
         this.clientName = this.project ? this.project.client.fullName : ""
 
-        console.log("WT", this.workTypes)
-        initialState.workTypes = this.workTypes
-        initialState.clientName = this.clientName
+        //Init form model & pdf base64 
+        const { model, checklistBase64 } = this.mergeChecklists()
+        const { properties, initialState } = getPropsFromModel(model)
+
+        this.model = model
+        this.checklistBase64 = checklistBase64
+        this.initialState = initialState
+        this.initialState.workTypes = this.workTypes
+        this.initialState.clientName = this.clientName
+        this.initialState.vtDate = moment().format('DD/MM/YYYY')
+        this.properties = properties
 
         this.state = {
-            model: [],
-            checklistBase64: []
+            model,
+            checklistBase64,
         }
-    }
-
-    componentDidMount() {
-        const { model, checklistBase64 } = this.mergeChecklists()
-        this.setState({ model, checklistBase64 })
     }
 
     //Merge checklists models & documents (depending on the given workTypes)
     mergeChecklists() {
+        //Helper
+        const isInclude = (workType) => { return this.workTypes.includes(workType) }
+
         let { model } = visiteTechModel()
         let checklistBase64 = [visiteTechBase64]
-        const isInclude = (workType) => { return this.workTypes.includes(workType) }
-        let lastPageIndex = 0 //#task =3 when adding 2 pictures
+        let pageIndex = 0
+        var params = { pageIndex, clientName: this.clientName }
 
+        //CHECKLISTS
         if (isInclude("PAC AIR/EAU")) {
-            //lastPageIndex is used to set up pdfConfig
-            lastPageIndex += 1
-            model = model.concat(checklistPAEModel(lastPageIndex).model)
+            params.pageIndex += 1
+            model = model.concat(checklistPAEModel(params).model)
             checklistBase64.push(checklistPAEBase64)
         }
         if (isInclude("PAC AIR/AIR (climatisation)")) {
-            lastPageIndex += 1
-            model = model.concat(checklistPAAModel(lastPageIndex).model)
+            params.pageIndex += 1
+            model = model.concat(checklistPAAModel(params).model)
             checklistBase64.push(checklistPAABase64)
         }
         if (isInclude("BALLON THERMODYNAMIQUE")) {
-            lastPageIndex += 1
-            model = model.concat(checklistBTModel(lastPageIndex).model)
+            params.pageIndex += 1
+            model = model.concat(checklistBTModel(params).model)
             checklistBase64.push(checklistBTBase64)
         }
         if (isInclude("BALLON SOLAIRE THERMIQUE")) {
-            lastPageIndex += 1
-            model = model.concat(checklistBSModel(lastPageIndex).model)
+            params.pageIndex += 1
+            model = model.concat(checklistBSModel(params).model)
             checklistBase64.push(checklistBSBase64)
         }
         if (isInclude("PHOTOVOLTAÏQUE")) {
-            lastPageIndex += 1
-            model = model.concat(checklistPVModel(lastPageIndex).model)
+            console.log('44444444444')
+            params.pageIndex += 1
+            model = model.concat(checklistPVModel(params).model)
             checklistBase64.push(checklistPVBase64)
         }
+
+        //ATTACHED FILES
+        model = model.concat(vtAttachedFilesModel().model)
 
         return { model, checklistBase64 }
     }
@@ -144,17 +115,18 @@ class CreateFicheTech extends Component {
             <StepsForm
                 titleText="Visite technique"
                 navigation={this.props.navigation}
-                stateProperties={properties}
-                initialState={initialState}
+                stateProperties={this.properties}
+                initialState={this.initialState}
                 idPattern={"GS-VT-"}
                 DocId={this.VisiteTechId}
                 collection={"VisitesTech"}
                 pdfType={"VisitesTech"}
-                steps={["INFO GÉNÉRALES", "", "IMAGES", "", "CHECKLIST"]}
+                steps={["INFO GÉNÉRALES", "", "CHECKLIST", "", "PHOTOS"]}
                 pages={model}
-                generatePdf={(formInputs) => generatePdfForm(formInputs, "VisitesTech", { model, checklistBase64 })} //send checklistBase64 as param directly
+                generatePdf={(formInputs) => generatePdfForm(formInputs, "VisitesTech", { model, checklistBase64 })}
                 genButtonTitle="Générer une Visite technique"
                 fileName="Visite technique"
+                showPagination={true}
             />
         )
     }

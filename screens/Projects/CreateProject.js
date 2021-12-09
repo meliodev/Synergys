@@ -203,7 +203,7 @@ class CreateProject extends Component {
                 if (!doc.exists) return null
                 let project = doc.data()
                 project.id = doc.id
-                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address'])
+                this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address', 'workTypes'])
                 project = this.setProject(project)
                 if (!project) return
                 this.setImageCarousel(project.attachments)

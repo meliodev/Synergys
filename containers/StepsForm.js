@@ -209,10 +209,13 @@ class StepsForm extends Component {
 
     renderTitle(pages) {
         const { pageIndex } = this.state
+        const { showPagination } = this.props
         const { title } = pages[pageIndex]
+        const pagination = showPagination ? `${pageIndex + 1}/${pages.length}` : ""
+
         return (
             <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', marginTop: 16, color: theme.colors.gray_dark }]}>
-                {title}
+                {title} ({pagination})
             </Text>
         )
     }
@@ -643,7 +646,7 @@ class StepsForm extends Component {
 
         if (!this.state[id])
             return (
-                <View>
+                <View key={id}>
                     {this.renderLabel(label)}
                     <SquarePlus
                         style={{ marginTop: theme.padding }}
@@ -779,8 +782,9 @@ class StepsForm extends Component {
             update.isBack = false
 
             //Increment step
-            if (pages[pageIndex].isLast)
-                update.stepIndex = stepIndex + 1
+            if (pages[pageIndex].isLast || pages[pageIndex + 1].isFirst) {
+                update.stepIndex = stepIndex + 2
+            }
 
             //Show results (Simulation) or submit
             const isLastFormPage = pageIndex === pages.length - 2
@@ -832,8 +836,8 @@ class StepsForm extends Component {
         })
 
         //Decrement step
-        if (pages[pageIndex].isFirst)
-            this.setState({ stepIndex: stepIndex - 1 })
+        if (pages[pageIndex].isLast || pages[pageIndex + 1].isFirst)
+            this.setState({ stepIndex: stepIndex - 2 })
     }
 
     verifyFields(pages, pageIndex) {

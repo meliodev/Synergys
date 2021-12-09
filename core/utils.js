@@ -472,7 +472,7 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
-export const convertImageToPdf = async (attachment) => {
+export const convertImageToPdf = async (attachment, title) => {
 
   let errorMessage = null
 
@@ -490,6 +490,14 @@ export const convertImageToPdf = async (attachment) => {
     const image = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
     const page = pdfDoc.addPage(PageSizes.A4)
 
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+    const colors = {
+      primary: rgb(0.576, 0.768, 0.486),
+      black: rgb(0, 0, 0),
+      white: rgb(1, 1, 1),
+      gray: rgb(0.1333, 0.1333, 0.1333)
+    }
+
     const scaleToFit_x = page.getWidth()
     const scaleToFit_y = page.getHeight()
     const jpgDims = image.scaleToFit(scaleToFit_x, scaleToFit_y)
@@ -502,6 +510,15 @@ export const convertImageToPdf = async (attachment) => {
       width: jpgDims.width,
       height: jpgDims.height,
     })
+
+    if (title)
+      page.drawText(title, {
+        x: 25,
+        y: page.getHeight() * 0.95,
+        size: 16,
+        font: timesRomanFont,
+        color: colors.black,
+      })
 
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
@@ -642,7 +659,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var originalPdfBase64 = mandatSynergysBase64
       var { model: formPages, globalConfig } = mandatSynergysModel()
     }
-
     if (pdfType === "VisitesTech") {
       var { model: formPages, checklistBase64 } = params
       var pdfDoc = await mergePDFDocuments(checklistBase64)
@@ -679,6 +695,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
           else switch (type) {
             case "textInput":
+
               text = formInputs[id]
               let dataTextArray = [text]
 
@@ -715,14 +732,15 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
                       size: caption,
                       font: timesRomanFont,
                       color: colors.black,
-                    })
+                    }
+                  )
                 }
               })
 
               break;
 
             case "options":
-
+              console.log(id, field.items[0].pdfConfig.pageIndex)
               if (isMultiOptions || isStepMultiOptions) {
                 for (const item of field.items) {
                   if (!item.skip && formInputs[field.id].includes(item.value)) {
@@ -796,7 +814,9 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               break;
 
             case "autogen":
+
               text = field.value
+
               if (field.pdfConfig.spaces) {
                 const { afterEach, str } = field.pdfConfig.spaces
                 text = chunk(text, afterEach).join(str)
@@ -806,15 +826,17 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               if (condtionUnsatisfied)
                 console.log("Skip drawing text..")
 
-              else pages[field.pdfConfig.pageIndex].drawText(text,
-                {
-                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
-                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
-                  size: caption,
-                  font: timesRomanFont,
-                  color: colors.black,
-                }
-              )
+              else {
+                pages[pdfConfig.pageIndex].drawText(text,
+                  {
+                    x: pages[pdfConfig.pageIndex].getWidth() + pdfConfig.dx,
+                    y: pages[pdfConfig.pageIndex].getHeight() + pdfConfig.dy,
+                    size: caption,
+                    font: timesRomanFont,
+                    color: colors.black,
+                  }
+                )
+              }
               break;
 
             case "address":
@@ -832,7 +854,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
             case "image":
               const mergedPdf = await PDFDocument.create()
-              const imagePdfBase64 = await convertImageToPdf(formInputs[id])
+              const imagePdfBase64 = await convertImageToPdf(formInputs[id], field.label)
               const imagePdf = await PDFDocument.load(imagePdfBase64)
 
               const copiedPagesA = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())

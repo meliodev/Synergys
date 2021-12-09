@@ -99,6 +99,7 @@ class ProcessAction extends Component {
 
     async initializer(skipProcessHandler) {
         this.processModel = this.setProcessModel(this.props.process)
+        console.log('PROCESS:::::::::::::', this.processModel)
         await this.mainHandler(this.props.process, skipProcessHandler)
             .catch((e) => displayError({ message: e.message }))
     }

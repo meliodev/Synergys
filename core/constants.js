@@ -13,7 +13,7 @@ export const constants = {
 }
 
 export const appVersion = "1.3.1"
-export const latestProcessVersion = "version5"
+export const latestProcessVersion = "version6"
 
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },
