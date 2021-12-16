@@ -18,7 +18,7 @@ moment.locale('fr')
 
 import * as theme from './theme'
 import { downloadDir, errorMessages, roles, constants } from './constants'
-import { ficheEEBModel, ficheTechModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
+import { ficheEEBModel, visiteTechModel, mandatMPRModel, mandatSynergysModel, pvReceptionModel } from "./forms";
 
 //##VALIDATORS
 export const emailValidator = email => {
@@ -106,7 +106,6 @@ export const compareTimes = (time1, time2, operator) => {
 }
 
 export const checkOverlap = (timeSegments) => {
-  console.log(timeSegments)
   if (timeSegments.length === 1) return false;
 
   timeSegments.sort((timeSegment1, timeSegment2) =>
@@ -473,11 +472,7 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
-const getImageType = () => {
-
-}
-
-export const convertImageToPdf = async (attachment) => {
+export const convertImageToPdf = async (attachment, title) => {
 
   let errorMessage = null
 
@@ -495,6 +490,14 @@ export const convertImageToPdf = async (attachment) => {
     const image = isPng ? await pdfDoc.embedPng(imageBytes) : await pdfDoc.embedJpg(imageBytes)
     const page = pdfDoc.addPage(PageSizes.A4)
 
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+    const colors = {
+      primary: rgb(0.576, 0.768, 0.486),
+      black: rgb(0, 0, 0),
+      white: rgb(1, 1, 1),
+      gray: rgb(0.1333, 0.1333, 0.1333)
+    }
+
     const scaleToFit_x = page.getWidth()
     const scaleToFit_y = page.getHeight()
     const jpgDims = image.scaleToFit(scaleToFit_x, scaleToFit_y)
@@ -507,6 +510,15 @@ export const convertImageToPdf = async (attachment) => {
       width: jpgDims.width,
       height: jpgDims.height,
     })
+
+    if (title)
+      page.drawText(title, {
+        x: 25,
+        y: page.getHeight() * 0.95,
+        size: 16,
+        font: timesRomanFont,
+        color: colors.black,
+      })
 
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
@@ -614,6 +626,21 @@ const lineBreaker = (dataArray, font, size, linesWidths, maxNumberOflLines) => {
   return dataArrayFormated
 }
 
+
+async function mergePDFDocuments(documents) {
+
+  const mergedPdf = await PDFDocument.create();
+
+  for (let document of documents) {
+    document = await PDFDocument.load(document);
+
+    const copiedPages = await mergedPdf.copyPages(document, document.getPageIndices());
+    copiedPages.forEach((page) => mergedPdf.addPage(page));
+  }
+
+  return mergedPdf
+}
+
 export const generatePdfForm = async (formInputs, pdfType, params) => {
   try {
     if (pdfType === "PvReception") {
@@ -632,14 +659,12 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var originalPdfBase64 = mandatSynergysBase64
       var { model: formPages, globalConfig } = mandatSynergysModel()
     }
-
-    else if (pdfType === "FichesTech") {
-
-      var originalPdfBase64 = ficheTechBase64
-      var { model: formPages } = ficheTechModel()
+    if (pdfType === "VisitesTech") {
+      var { model: formPages, checklistBase64 } = params
+      var pdfDoc = await mergePDFDocuments(checklistBase64)
     }
+    else var pdfDoc = await PDFDocument.load(originalPdfBase64)
 
-    let pdfDoc = await PDFDocument.load(originalPdfBase64)
 
     const pages = pdfDoc.getPages()
 
@@ -653,8 +678,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       gray: rgb(0.1333, 0.1333, 0.1333)
     }
     const caption = 10
-
-    console.log("Starting PDF GEN........................")
 
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
@@ -672,6 +695,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
           else switch (type) {
             case "textInput":
+
               text = formInputs[id]
               let dataTextArray = [text]
 
@@ -708,14 +732,15 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
                       size: caption,
                       font: timesRomanFont,
                       color: colors.black,
-                    })
+                    }
+                  )
                 }
               })
 
               break;
 
             case "options":
-
+              console.log(id, field.items[0].pdfConfig.pageIndex)
               if (isMultiOptions || isStepMultiOptions) {
                 for (const item of field.items) {
                   if (!item.skip && formInputs[field.id].includes(item.value)) {
@@ -789,7 +814,9 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               break;
 
             case "autogen":
+
               text = field.value
+
               if (field.pdfConfig.spaces) {
                 const { afterEach, str } = field.pdfConfig.spaces
                 text = chunk(text, afterEach).join(str)
@@ -799,15 +826,17 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               if (condtionUnsatisfied)
                 console.log("Skip drawing text..")
 
-              else pages[field.pdfConfig.pageIndex].drawText(text,
-                {
-                  x: pages[field.pdfConfig.pageIndex].getWidth() + field.pdfConfig.dx,
-                  y: pages[field.pdfConfig.pageIndex].getHeight() + field.pdfConfig.dy,
-                  size: caption,
-                  font: timesRomanFont,
-                  color: colors.black,
-                }
-              )
+              else {
+                pages[pdfConfig.pageIndex].drawText(text,
+                  {
+                    x: pages[pdfConfig.pageIndex].getWidth() + pdfConfig.dx,
+                    y: pages[pdfConfig.pageIndex].getHeight() + pdfConfig.dy,
+                    size: caption,
+                    font: timesRomanFont,
+                    color: colors.black,
+                  }
+                )
+              }
               break;
 
             case "address":
@@ -825,7 +854,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
             case "image":
               const mergedPdf = await PDFDocument.create()
-              const imagePdfBase64 = await convertImageToPdf(formInputs[id])
+              const imagePdfBase64 = await convertImageToPdf(formInputs[id], field.label)
               const imagePdf = await PDFDocument.load(imagePdfBase64)
 
               const copiedPagesA = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())
@@ -991,16 +1020,16 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
 
 import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 import { highRoles } from './constants'
+
 import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
 import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
 import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
 import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
-import { ficheTechBase64 } from '../assets/files/ficheTechBase64';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
-  { label: 'Fiche technique', value: 'Fiche technique', icon: faUserHardHat },
+  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 
@@ -1020,7 +1049,7 @@ const allDocTypes = [
   { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
   { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
   { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
-  { label: 'Fiche technique', value: 'Fiche technique', icon: faUserHardHat },
+  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
 
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
@@ -1144,7 +1173,6 @@ export function refreshTechContact(user) {
 
 export function refreshAssignedTo(user) {
   const assignedTo = refreshUser(user)
-  console.log(assignedTo)
   this.setState({ assignedTo, assignedToError: "" })
 }
 
@@ -1152,7 +1180,6 @@ export const refreshUser = (user) => {
   const { isPro, id, denom, nom, prenom, role, email, phone } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
-  console.log('USER OBJECT', userObject)
   return userObject
 }
 

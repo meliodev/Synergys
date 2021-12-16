@@ -413,8 +413,7 @@ class UploadDocument extends Component {
 
         else { //this.isEdit || !this.isEdit && this.documentType 
             let modalContent = ''
-            const { type } = this.state
-            let isGenerable = generableDocTypes.includes(type)
+            const isGenerable = generableDocTypes.includes(this.state.type)
             if (isGenerable) modalContent = 'docSources'
             else modalContent = 'imageSources'
             this.setState({ modalContent, showModal: true })
@@ -437,7 +436,9 @@ class UploadDocument extends Component {
         if (!attachment) {
             return (
                 <View style={{ marginVertical: 10, marginTop: 15 }}>
-                    {!isProcess && <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>}
+                    {!isProcess && 
+                    <Text style={[theme.customFontMSregular.caption, { marginBottom: 5 }]}>Pièce jointe</Text>
+                    }
                     <SquarePlus
                         style={{ marginTop: 5 }}
                         onPress={() => this.onPressAttachment(canWrite)}
@@ -592,7 +593,7 @@ class UploadDocument extends Component {
                 this.setState({ modalContent: 'genFicheEEBSources' })
             if (type === 'PV réception' || type === 'Mandat Synergys')
                 this.setState({ modalContent: 'genFormSources' })
-            else if (type === 'Devis' || type === 'Mandat MaPrimeRénov' || type === "Fiche technique")
+            else if (type === 'Devis' || type === 'Mandat MaPrimeRénov' || type === "Visite technique")
                 this.startGenPdf(1)
         }
     }

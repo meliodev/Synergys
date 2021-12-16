@@ -1,6 +1,6 @@
 
 
-export const version5 = {
+export const version6 = {
     'init': {
         title: 'Prospect',
         instructions: 'Lorem ipsum dolor',
@@ -899,16 +899,42 @@ export const version5 = {
                 ]
             },
             'technicalVisitChoice2': {
-                title: 'Cloturation de la visite technique',
+                title: 'Remplissage de la visite technique',
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
                     //#task: add Visite technique (montant de l'accompte available) (dynamic: false, public: true)
                     {
+                        id: 'technicalVisitFileCreation',
+                        title: 'Remplir la visite technique',
+                        instructions: 'Lorem ipsum dolor',
+                        actionOrder: 1,
+                        collection: 'Documents',
+                        //Verification
+                        queryFilters: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
+                        ],
+                        //Navigation
+                        queryFiltersUpdateNav: [
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                        ],
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { project: null, documentType: { label: 'Visite technique', value: 'Visite technique', selected: false }, dynamicType: true },
+                        type: 'auto',
+                        verificationType: 'doc-creation',
+                        responsable: 'Poseur',
+                        status: 'pending',
+                    },
+                    {
                         id: 'technicalVisitChoice',
                         title: "Voulez-vous cloturer la visite technique",
                         instructions: 'Lorem ipsum dolor',
-                        actionOrder: 1,
+                        actionOrder: 2,
                         collection: 'Agenda',
                         documentId: '',
                         queryFilters: [
@@ -1764,27 +1790,6 @@ export const version5 = {
             },
         }
     },
-    'version': 5
+    'version': 6
 }
 
-
-
-
-
-          // {
-                    //     id: 'conversionClient',
-                    //     title: 'Convertir le prospect en client',
-                    //     instructions: 'Appuyez sur le bouton "Convertir en client"',
-                    //     actionOrder: 5,
-                    //     collection: 'Clients',
-                    //     documentId: '', // dynamic
-                    //     properties: ['isProspect'],
-                    //     screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-                    //     screenParams: { user: { id: '', roleId: 'client' }, project: null },
-                    //     screenPush: true,
-                    //     type: 'auto',
-                    //     responsable: 'Commercial',
-                    //     status: 'pending',
-                    //     verificationType: 'data-fill',
-                    //     verificationValue: true, //check if fieldValue !== verificationValue
-                    // },
