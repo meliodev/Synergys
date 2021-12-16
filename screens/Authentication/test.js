@@ -3,7 +3,6 @@ import { TouchableOpacity, StyleSheet, Text, View, Keyboard, ActivityIndicator, 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { TextInput as paperInput } from 'react-native-paper'
 import LinearGradient from 'react-native-linear-gradient'
-import { connect } from 'react-redux'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -20,7 +19,6 @@ import { emailValidator, passwordValidator, updateField, load } from "../../core
 import { constants } from '../../core/constants'
 import { loginUser } from "../../api/auth-api";
 import Toast from "../../components/Toast";
-import { setAppToast } from "../../core/redux";
 
 class LoginScreen extends Component {
   constructor(props) {
@@ -81,9 +79,7 @@ class LoginScreen extends Component {
     const response = await loginUser({ email: email.value, password: password.value })
 
     if (response.error) {
-      this.setState({ loading: false })
-      const toast = { message: response.error, type: "error" }
-      setAppToast(this, toast)
+      this.setState({ loading: false, error: response.error })
     }
 
     else console.log("Logged in at", moment().format('HH:mm:ss'))
@@ -101,66 +97,68 @@ class LoginScreen extends Component {
     const height = width * ratio
 
     return (
+      <SafeAreaView style={{ backgroundColor: 'yellow', flex: 1 }}>
 
-      <NewBackground>
+        <NewBackground>
 
-        <View style={styles.container}>
+          <View style={styles.container}>
 
-          <Logo />
+            <Logo />
 
-          <View>
-            <TextInput
-              style={styles.credInput}
-              label="Email"
-              returnKeyType="next"
-              value={email.value}
-              onChangeText={text => updateField(this, email, text)}
-              error={!!email.error}
-              errorText={email.error}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoCompleteType="email"
-              textContentType="emailAddress"
-              keyboardType="email-address"
-              editable={!loading}
-            />
+            <View>
+              <TextInput
+                style={styles.credInput}
+                label="Email"
+                returnKeyType="next"
+                value={email.value}
+                onChangeText={text => updateField(this, email, text)}
+                error={!!email.error}
+                errorText={email.error}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoCompleteType="email"
+                textContentType="emailAddress"
+                keyboardType="email-address"
+                editable={!loading}
+              />
 
-            <TextInput
-              style={styles.credInput}
-              label="Mot de passe"
-              returnKeyType="done"
-              value={password.value}
-              onChangeText={text => updateField(this, password, text)}
-              error={!!password.error}
-              errorText={password.error}
-              secureTextEntry={!password.show}
-              autoCapitalize="none"
-              editable={!loading}
-              right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
-                password.show = !password.show
-                this.setState({ password })
-              }} />}
-            />
+              <TextInput
+                style={styles.credInput}
+                label="Mot de passe"
+                returnKeyType="done"
+                value={password.value}
+                onChangeText={text => updateField(this, password, text)}
+                error={!!password.error}
+                errorText={password.error}
+                secureTextEntry={!password.show}
+                autoCapitalize="none"
+                editable={!loading}
+                right={<paperInput.Icon name={password.show ? 'eye-off' : 'eye'} color={theme.colors.secondary} onPress={() => {
+                  password.show = !password.show
+                  this.setState({ password })
+                }} />}
+              />
 
-          </View>
+            </View>
 
-          <View style={styles.forgotPassword}>
-            <TouchableOpacity onPress={this.forgotPassword}>
-              <Text style={[theme.customFontMSregular.caption, styles.forgetPasswordLink]}>Mot de passe oublié ?</Text>
+            <View style={styles.forgotPassword}>
+              <TouchableOpacity onPress={this.forgotPassword}>
+                <Text style={[theme.customFontMSregular.caption, styles.forgetPasswordLink]}>Mot de passe oublié ?</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity style={styles.loginButton} onPress={this.handleLogin}>
+              <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
+                {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
+                <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginRight: 10 }]}>Se connecter</Text>
+              </LinearGradient>
             </TouchableOpacity>
+
           </View>
 
-          <TouchableOpacity style={styles.loginButton} onPress={this.handleLogin}>
-            <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
-              {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
-              <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginRight: 10 }]}>Se connecter</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+        </NewBackground >
 
-        </View>
-
-      </NewBackground >
-
+      </SafeAreaView >
     )
 
   }
@@ -219,15 +217,4 @@ const styles = StyleSheet.create({
   }
 })
 
-
-const mapStateToProps = (state) => {
-
-  return {
-    role: state.roles.role,
-    network: state.network,
-    currentUser: state.currentUser
-    //fcmToken: state.fcmtoken
-  }
-}
-
-export default connect(mapStateToProps)(LoginScreen)
+export default LoginScreen

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { LogBox, Text } from 'react-native'
+import { LogBox, StyleSheet, Text } from 'react-native'
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import { persistStore } from 'redux-persist'
@@ -9,6 +9,7 @@ import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-n
 import { MenuProvider } from 'react-native-popup-menu';
 import SplashScreen from 'react-native-splash-screen'
 import codePush from 'react-native-code-push'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import AppToast from './components/global/AppToast'
 import PdfGen from './PdfGen'
@@ -40,8 +41,6 @@ class App extends Component {
   async componentDidMount() {
     SplashScreen.hide()
 
-  //  await this.initRemoteConfig()
-
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
@@ -52,20 +51,6 @@ class App extends Component {
     })
 
     this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
-  }
-
-  async initRemoteConfig() {
-    await remoteConfig.setDefaults({ minAppVersion: '1.2.10', latestAppDownloadLink: "" })
-    const fetchedRemotely = await remoteConfig.fetchAndActivate()
-    await remoteConfig.fetch(60)
-
-
-    if (fetchedRemotely) {
-      console.log('Configs were retrieved from the backend and activated.');
-    }
-    else {
-      console.log('No configs were fetched from the backend, and the local configs were already activated',)
-    }
   }
 
   //Forground: messages listener
@@ -87,8 +72,10 @@ class App extends Component {
           <PaperProvider theme={paperTheme}>
             <MenuProvider>
               <Wrapper>
-                <RootController />
-                <AppToast />
+                <SafeAreaView style={styles.safeviewArea}>
+                  <RootController />
+                  <AppToast />
+                </SafeAreaView>
               </Wrapper>
             </MenuProvider>
           </PaperProvider>
@@ -100,6 +87,12 @@ class App extends Component {
 
 LogBox.ignoreAllLogs(true)
 
+const styles = StyleSheet.create({
+  safeviewArea: {
+    flex: 1,
+    backgroundColor: theme.colors.background
+  }
+})
 
 const codePushOptions = {
   checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
