@@ -40,7 +40,7 @@
     "@react-native-firebase/storage": "^10.4.1",
     "@react-native-picker/picker": "^1.9.11",
     "base-64": "^1.0.0",
-    "compare-versions": "^3.6.0",
+    "compare-versions": "^4.1.2",
     "moment": "^2.27.0",
     "pdf-lib": "^1.12.0",
     "react": "^16.13.1",
