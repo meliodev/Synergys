@@ -2,8 +2,8 @@
  * @format
  */
 import SplashScreen from 'react-native-splash-screen'
-import { AppRegistry } from 'react-native';
-import App from './src/App';
+import { AppRegistry, Platform } from 'react-native';
+import App from './App';
 import { name as appName } from './app.json';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler'
 import notifee, { AndroidImportance } from '@notifee/react-native'
@@ -24,4 +24,4 @@ async function onBackgroundMessageReceived(message) {
 
 messaging().setBackgroundMessageHandler(onBackgroundMessageReceived)
 
-AppRegistry.registerComponent(appName, () => gestureHandlerRootHOC(App));
+AppRegistry.registerComponent(Platform.OS === "ios" ? 'AsanaWorld' : appName, () => gestureHandlerRootHOC(App));

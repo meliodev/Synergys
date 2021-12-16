@@ -7,18 +7,18 @@ import * as theme from "../core/theme";
 const Toast = ({ type = "error", duration = 1500, containerStyle, message, onDismiss }) => {
 
   const setBackgroundColor = () => {
-       if (type === 'error')
-       return theme.colors.error
+    if (type === 'error')
+      return theme.colors.error
 
-       else if (type === 'success')
-       return theme.colors.success
+    else if (type === 'success')
+      return theme.colors.success
 
-       else if(type === 'info')
-       return '#616161'
+    else if (type === 'info')
+      return '#616161'
   }
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View style={[containerStyle]}>
       <Snackbar
         visible={!!message}
         duration={duration}
@@ -34,15 +34,6 @@ const Toast = ({ type = "error", duration = 1500, containerStyle, message, onDis
 }
 
 const styles = StyleSheet.create({
-  container: {
-    position: "absolute",
-    top: 80 + getStatusBarHeight(),
-    width: "100%",
-    alignSelf: 'center'
-  },
-  content: {
-    fontWeight: "500"
-  }
-});
+})
 
 export default memo(Toast);
