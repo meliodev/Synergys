@@ -1,13 +1,20 @@
 import React, { memo } from "react";
-import { View, StyleSheet, Text, Platform } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Platform } from "react-native";
 import { Picker } from '@react-native-picker/picker'
+import Modal from "react-native-modal"
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 import CustomIcon from './CustomIcon'
-import { Caption } from './typography/Typography'
+import { Caption, Body } from './typography/Typography'
 import { faAngleDown } from "@fortawesome/pro-light-svg-icons";
 
 const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title, showTitle = true, errorText, enabled = true, ...props }) => {
+
+    const [isModalVisible, setIsModalVisible] = React.useState(false)
+
+    const toggleModal = () => {
+        setIsModalVisible(!isModalVisible)
+    }
 
     const picker = () => {
         return (
@@ -17,7 +24,9 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
                 dropdownIconColor={theme.colors.gray_dark}
                 {...props}
             >
-                {elements.map((item, index) => <Picker.Item key={index.toString()} label={item.label} value={item.value} />)}
+                {elements.map((item, index) =>
+                    <Picker.Item key={index.toString()} label={item.label} value={item.value} />
+                )}
             </Picker>
         )
     }
@@ -27,9 +36,23 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
             return picker()
 
         else return (
-            <View style={styles.iosPicker}>
-                <Caption text="Hello world"/>
-                <CustomIcon icon={faAngleDown} color={theme.colors.gray_dark} />
+            <View>
+                <TouchableOpacity style={styles.iosPicker} onPress={toggleModal}>
+                    <Caption text={props.selectedValue} />
+                    <CustomIcon icon={faAngleDown} color={theme.colors.gray_dark} />
+                </TouchableOpacity>
+
+                <Modal
+                    isVisible={isModalVisible}
+                    onBackdropPress={toggleModal}
+                    style={styles.modal}
+                    backdropOpacity={0.25}
+                >
+                    <View style={styles.modalContainer}>
+                        <Body text={title} style={{ textAlign: "center" }} />
+                        {picker()}
+                    </View>
+                </Modal>
             </View>
         )
     }
@@ -38,11 +61,15 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
         <View style={[styles.container, style]}>
 
             <View style={[styles.pickerContainer, pickerContainerStyle]}>
-                {showTitle && <Text style={theme.customFontMSregular.caption}>{title}</Text>}
+                {showTitle && <Caption text={title} />}
                 {renderPicker()}
             </View>
 
-            {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
+            {errorText ?
+                <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text>
+                :
+                null
+            }
 
         </View>
     )
@@ -68,11 +95,20 @@ const styles = StyleSheet.create({
         color: theme.colors.error
     },
     iosPicker: {
-        flexDirection: "row", 
-        alignItems:"center", 
-        justifyContent:"space-between", 
-        paddingVertical: 5, 
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 5,
         ...theme.style.inputBorderBottom
+    },
+    modal: {
+        marginTop: 600,
+    },
+    modalContainer: {
+        backgroundColor: "white",
+        borderTopRightRadius: 15,
+        borderTopLeftRadius: 15,
+        paddingVertical: 5
     }
 });
 

@@ -1,5 +1,9 @@
 import React from "react";
-import { Caption as CaptionPaper } from "react-native-paper";
+import { 
+    Caption as CaptionPaper,
+    Paragraph,
+    Headline, 
+} from "react-native-paper";
 import * as theme from "../../core/theme";
 
 const Caption = ({ fontFamily = theme.customFontMSregular, style, text }) => (
@@ -8,5 +12,11 @@ const Caption = ({ fontFamily = theme.customFontMSregular, style, text }) => (
     </CaptionPaper>
 )
 
+const Body = ({ style, text }) => (
+    <Paragraph style={[style]}>
+        {text}
+    </Paragraph>
+)
 
-export { Caption }
+
+export { Caption, Body }
