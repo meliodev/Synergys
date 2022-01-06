@@ -48,9 +48,7 @@ export default function PhaseComponent({ labels, status, currentPage, setCurrent
     const color = position === currentPosition ? theme.colors.primary : status[position] === 'grayed' ? theme.colors.gray_dark : theme.colors.secondary
 
     return (
-      <View style={{ flex: 1 }}>
         <Text style={[theme.customFontMSregular.extraSmall, { textAlign: 'center', color }]}>{label}</Text>
-      </View>
     )
   }
 

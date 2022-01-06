@@ -642,7 +642,7 @@ class CreateOrder extends Component {
                     :
                     <View style={{ flex: 1 }}>
 
-                        <ScrollView keyboardShouldPersistTaps="always" style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
+                        <ScrollView keyboardShouldPersistTaps="never" style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
 
                             <FormSection
                                 sectionTitle='Informations générales'

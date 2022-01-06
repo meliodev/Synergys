@@ -1,11 +1,16 @@
+IOS:
 
-Salut les amis et bienvenue sur ma chaîne youtube. Accrochez pour cette nouvelle serie où je vais partager avec vous 
-tous ce que j'ai appris durant mes 5 années d'experience en tant que Développeur FullStack React Native. A la fin de
-ce cours, chacun de vous sera capable de développer son idée et de la partager sur Google Play et Apple Store. Et par 
-conséquent devenir très riche ($$$$$$).
+1. CodePush Integration
+2. Notifications config & test
+3. Add libraries updates (React Navigation dynamic links...)
+3. Check out if any config is required for other installed libraries
+4. Change app name
 
-Avant de commencer, une petite introduction s'impose, histoire de se familiariser avec l'environement autour de 
-React Native.
+5. Add Splashscreen
+6. Add Favicon
+
+7. Generate ipa
+
 
 
 

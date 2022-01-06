@@ -50,7 +50,7 @@ const SearchBar = ({
                     style={{ backgroundColor: theme.colors.appBar, elevation: 0 }}
                     theme={{ colors: { placeholder: '#fff', text: '#fff' } }}
                     icon={() => null}
-                    autoFocus
+                   // autoFocus
                     selectionColor={theme.colors.gray_dark}
                 />
             }

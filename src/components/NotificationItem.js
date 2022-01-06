@@ -95,8 +95,8 @@ const styles = StyleSheet.create({
         width: 45,
         height: 45,
         borderRadius: 25,
-        elevation: 1,
-        marginTop: 3
+        marginTop: 3,
+        ...theme.style.shadow
     },
     content: {
         flex: 1,

@@ -63,7 +63,7 @@ class NewMessage extends Component {
             loading: false,
             error: "",
             toastType: '',
-            toastMessage: ''
+            toastMessage: '',
         }
     }
 
@@ -318,7 +318,7 @@ class NewMessage extends Component {
                     handleAttachement={this.pickDocs.bind(this)}
                     loading={loading}
                 />
-                <ScrollView keyboardShouldPersistTaps="always" style={styles.form}>
+                <ScrollView keyboardShouldPersistTaps="never" style={styles.form}>
 
                     <View style={{ flexDirection: 'row', marginBottom: constants.ScreenHeight * 0.01 }}>
                         <View style={{ flexDirection: 'row' }}>
@@ -327,7 +327,7 @@ class NewMessage extends Component {
                         </View>
                     </View>
 
-                    <View style={{ flexDirection: 'row' }}>
+                    <View style={{ flexDirection: 'row', alignItems: "flex-end", zIndex: 1 }}>
                         <Text style={{ marginTop: 13 }}>À           </Text>
 
                         <AutoCompleteUsers
@@ -335,7 +335,7 @@ class NewMessage extends Component {
                             tagsSelected={tagsSelected}
                             main={this}
                             placeholder="Ajouter un destinataire"
-                            // autoFocus={true}
+                            //autoFocus={true}
                             showInput={true}
                             suggestionsBellow={true}
                             editable={!loading}
@@ -360,7 +360,6 @@ class NewMessage extends Component {
                             ref={ref => { this.messageInputRef = ref }}
                             placeholder='Rédigez votre message...'
                             underlineColor="transparent"
-                            returnKeyType="done"
                             value={message.value}
                             onChangeText={text => updateField(this, message, text)}
                             error={!!message.error}
@@ -370,7 +369,7 @@ class NewMessage extends Component {
                             selectionColor='#333'
                             style={styles.messageInput}
                             editable={!loading}
-                        //autoFocus={this.isReply}
+                            //autoFocus={this.isReply}
                         />
 
                         <View style={{ paddingTop: 30 }}>

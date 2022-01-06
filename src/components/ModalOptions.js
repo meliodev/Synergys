@@ -9,6 +9,7 @@ import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview, model = 'Element1' }) => {
@@ -34,14 +35,16 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
 
         const elementStaticStyle = () => {
             return {
+                borderWidth: StyleSheet.hairlineWidth,
+                borderColor: theme.colors.gray_medium,
                 borderRadius: 5,
                 justifyContent: 'center',
                 alignItems: 'center',
                 margin: elementSize * 0.03,
                 width: elementSize,
                 height: elementSize,
-                elevation: 2,
                 backgroundColor: theme.colors.white,
+                ...theme.style.shadow
             }
         }
 
@@ -65,12 +68,12 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 style={[elementStaticStyle(), elementDynamicStyle(selected)]}
                 onPress={() => onPressElement(element, index)}
             >
-                <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
+                <View style={{ height: elementSize * 0.65, justifyContent: 'center' }}>
                     {icon && <CustomIcon icon={icon} size={elementSize * 0.3} color={iconColor} />}
                     {image && <Image style={[{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }, imageStyle]} source={image} />}
                 </View>
-                <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
-                    <Text style={[label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>
+                <View style={{ height: elementSize * 0.35, paddingHorizontal: elementSize * 0.1 }}>
+                    <Text style={[theme.customFontMSsemibold.caption, { textAlign: 'center', color: textColor }]}>
                         {label}
                     </Text>
                 </View>
@@ -86,14 +89,10 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
             marginBottom: elementSize * 0.12,
             width: elementSize,
             height: elementSize,
-            elevation: 5,
             backgroundColor: element.colors.primary,
+            ...theme.style.shadow
         }
 
-        const { primary, secondary } = element.colors
-        const textColor = primary
-        const iconColor = primary
-        const backgroundColor = theme.colors.white
         const iconSize = element.icon.iconName === "user-alt" ? elementSize * 0.13 : elementSize * 0.16
 
         const iconContainer = {
@@ -106,8 +105,8 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 <View style={{ position: "absolute", right: 0, top: 0, backgroundColor: element.colors.secondary, borderBottomRightRadius: iconContainer.borderRadius, borderBottomLeftRadius: iconContainer.borderRadius, borderTopLeftRadius: iconContainer.borderRadius, borderTopRightRadius: 20, width: iconContainer.size, height: iconContainer.size, justifyContent: "center", alignItems: "center" }}>
                     <CustomIcon icon={element.icon} size={iconSize} color="#fff" />
                 </View>
-                <View style={{ margin: elementSize * 0.1 }}>
-                    <Text style={[theme.customFontMSsemibold.h3, { color: theme.colors.white }]}>{element.label}</Text>
+                <View style={{ paddingHorizontal: elementSize * 0.15, marginBottom: elementSize * 0.13 }}>
+                    <Text style={[theme.customFontMSbold.h3, { color: theme.colors.white }]}>{element.label}</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -230,11 +229,11 @@ const ModalOptions = ({
                     <ActivityIndicator color={theme.colors.primary} size={50} />
                 </View>
                 :
-                <View style={styles.container}>
+                <SafeAreaView style={styles.container}>
                     <TouchableOpacity style={{ zIndex: 1, position: 'absolute', top: theme.padding, right: theme.padding, justifyContent: 'center', alignItems: 'center' }} onPress={() => console.log('hello')}>
                         <CustomIcon icon={faTimes} color={theme.colors.gray_dark} onPress={toggleModal} />
                     </TouchableOpacity>
-                    <Title style={[theme.customFontMSmedium.header, { marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>
+                    <Title style={[theme.customFontMSmedium.header, { color: theme.colors.gray_dark, marginBottom: 35, textAlign: 'center', paddingHorizontal: theme.padding * 3 }]}>
                         {title}
                     </Title>
 
@@ -252,7 +251,7 @@ const ModalOptions = ({
                             <Button mode="contained" onPress={handleConfirm}>Confirmer</Button>
                         </View>
                     }
-                </View>
+                </SafeAreaView>
             }
         </Modal>
     )

@@ -377,7 +377,7 @@ export const updateField = (main, field, text) => {
   main.setState({ field })
 }
 
-export const myAlert = function myAlert(title, message, handleConfirm, handleCancel, confirmText = 'Confirmer', cancelText = 'Annuler', extraButton) {
+export const myAlert = function myAlert(title, message, handleConfirm, handleCancel, confirmText = 'Confirmer', cancelText = 'Annuler', extraButton={}) {
   Alert.alert(
     title,
     message,
@@ -395,14 +395,16 @@ export const displayError = (error) => {
   if (showError) Alert.alert('', error.message)
 }
 
-export const downloadFile = async (fileName, url) => {
+//##FILE SYSTEM
+export const downloadFile = async (fileName, url, open = true, updateProgress) => {
 
   try {
     const path = await setDestPath(fileName)
     const fileExist = await RNFetchBlob.fs.exists(path)
+    let downloadProgress = 0
 
     //Open file...
-    if (fileExist) {
+    if (fileExist && open) {
       FileViewer.open(path, { showOpenWithDialog: true })
       return true
     }
@@ -410,7 +412,7 @@ export const downloadFile = async (fileName, url) => {
     //Download file...
     let options = {
       fileCache: true,
-      //path, //#ios
+      path,
       addAndroidDownloads: {
         useDownloadManager: true,
         notification: true,
@@ -422,13 +424,65 @@ export const downloadFile = async (fileName, url) => {
     return RNFetchBlob
       .config(options)
       .fetch('GET', url)
+      .progress((received, total) => {
+        if (updateProgress) {
+          downloadProgress = Math.round((received / total) * 100)
+          updateProgress(downloadProgress)
+        }
+      })
   }
 
   catch (error) {
-    throw new Error('Erreur lors du téléchargement du fichier.')
+    throw new Error('Erreur lors du téléchargement du document, veuillez réessayer plus tard."')
   }
 }
 
+export const readFile = (path) => {
+  return RNFS.readFile(path, "base64")
+    .then((pdfBase64) => {
+      const pdfArrayBuffer = base64ToArrayBuffer(pdfBase64)
+      return { pdfBase64, pdfArrayBuffer }
+    })
+    .catch((e) => {
+      throw new Error('Erreur lors du chargement du document, veuillez réessayer plus tard."')
+    })
+}
+
+export const deleteFile = (path) => {
+  return RNFS.exists(path)
+    .then((exist) => {
+      if (!exist) return true
+      return RNFS.unlink(path)
+    })
+}
+
+export const setDestPath = async (fileName) => {
+  try {
+    const destFolder = `${downloadDir}/Synergys/Documents`
+    await RNFS.mkdir(destFolder)
+    const destPath = `${destFolder}/${fileName}`
+    return destPath
+  }
+
+  catch (e) {
+    throw new Error('RNFS mkdir error has occured.')
+  }
+}
+
+export const saveFile = async (file, fileName, encoding) => {
+  try {
+    const destPath = await setDestPath(fileName)
+    await RNFS.writeFile(destPath, file, encoding)
+    return destPath
+  }
+  catch (e) {
+    const errorMessage = "Erreur lors de l'enregistrement du document"
+    throw new Error(errorMessage)
+  }
+}
+
+
+//##INFO UI
 export const setToast = (main, type, toastMessage) => {
   let toastType = ''
   if (type === 'e')
@@ -534,33 +588,8 @@ export const convertImageToPdf = async (attachment, title) => {
   }
 }
 
-//##File system
-export const setDestPath = async (fileName) => {
-  try {
-    const destFolder = `${downloadDir}/Synergys/Documents`
-    await RNFS.mkdir(destFolder)
-    const destPath = `${destFolder}/${fileName}`
-    return destPath
-  }
 
-  catch (e) {
-    throw new Error('RNFS mkdir error has occured.')
-  }
-}
-
-export const saveFile = async (file, fileName, encoding) => {
-  try {
-    const destPath = await setDestPath(fileName)
-    await RNFS.writeFile(destPath, file, encoding)
-    return destPath
-  }
-  catch (e) {
-    const errorMessage = "Erreur lors de l'enregistrement du document"
-    throw new Error(errorMessage)
-  }
-}
-
-
+//#PDF LIB
 export const chunk = (str, n) => {
   var ret = [];
   var i;
@@ -929,13 +958,14 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
     }
 
     else {
+      console.log("res", response)
       const image = {
         type: response.type,
-        name: response.fileName,
+        name: response.fileName || `Image ${moment().format("DD-MM-YYYY-HH-mm")}`,
         size: response.fileSize,
         local: true,
         progress: 0,
-        originalRotation: response.originalRotation
+        // originalRotation: response.originalRotation
       }
 
       let { path, uri } = response
@@ -944,7 +974,7 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
         path = pathSuffix + path
         image.path = path
       }
-      else image.uri = uri
+      else image.path = uri
 
       let attachments = previousAttachments
       attachments.push(image)
@@ -965,7 +995,7 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
     const results = await DocumentPicker.pickMultiple({ type })
     for (const res of results) {
       var i = 0
-      if (res.uri.startsWith('content://')) {
+     // if (res.uri.startsWith('content://')) {
         const destPath = await setDestPath(res.name)
         await RNFS.moveFile(res.uri, destPath)
 
@@ -979,7 +1009,7 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
         attachments.push(attachment)
       }
       i = i + 1
-    }
+   // }
     return attachments
   }
 
@@ -994,22 +1024,26 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
 export const pickDoc = async (genName = false, type = [DocumentPicker.types.allFiles]) => {
   try {
     const res = await DocumentPicker.pick({ type })
-    //Android only
-    if (res.uri.startsWith('content://')) {
-      const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
-      const destPath = await setDestPath(attachmentName)
-      await RNFS.moveFile(res.uri, destPath)
 
-      const attachment = {
-        path: destPath,
-        type: res.type,
-        name: attachmentName,
-        size: res.size,
-        progress: 0,
-        downloadURL: ''
-      }
-      return attachment
+    //Android only
+    //if (res.uri.startsWith('content://')) {
+    const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
+    const destPath = await setDestPath(attachmentName)
+    await RNFS.moveFile(res.uri, destPath)
+
+    const attachment = {
+      path: destPath,
+      type: res.type,
+      name: attachmentName,
+      size: res.size,
+      progress: 0,
+      downloadURL: ''
     }
+
+    return attachment
+
+    //  }
+
   }
 
   catch (error) {
@@ -1044,7 +1078,7 @@ const allDocTypes = [
   { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
   // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
   { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
-  { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
+  // { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
   { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
   { label: 'PV réception', value: 'PV réception', icon: faReceipt },

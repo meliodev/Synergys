@@ -71,7 +71,7 @@ export default class ViewTeam extends Component {
     renderTeam() {
         const { expanded, loading } = this.state
         return (
-            <Card style={{ margin: 5, elevation: 2, marginBottom: 80 }}>
+            <Card style={{ margin: 5, marginBottom: 80, ...theme.style.shadow }}>
                 <List.Accordion
                     id={this.teamId}
                     titleComponent={<Text style={theme.customFontMSbold.header}>Membres</Text>}
@@ -189,7 +189,7 @@ export default class ViewTeam extends Component {
                 <Appbar back title titleText={this.state.team.name} handleAction={this.addMembers} />
 
                 <ScrollView style={styles.container} >
-                    <Card style={{ margin: 5, elevation: 2 }} onPress={this.editDetails}>
+                    <Card style={{ margin: 5, ...theme.style.shadow }} onPress={this.editDetails}>
                         <Card.Content>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
                                 <Title style={theme.customFontMSbold.header}>Informations générales</Title>

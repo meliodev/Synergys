@@ -100,7 +100,7 @@ export default class AutoCompleteUsers extends React.Component {
                 renderSuggestion={this.customRenderSuggestion}
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
-                autoFocus={this.props.autoFocus}
+                //autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
                 editable={this.props.editable}
                 suggestionsBellow={this.props.suggestionsBellow}
@@ -150,7 +150,8 @@ const styles = StyleSheet.create({
     },
     containerStyle: {
         minWidth: 200,
-        maxWidth: constants.ScreenWidth - theme.padding
+        maxWidth: constants.ScreenWidth - theme.padding,
+        marginLeft:6
     },
     listContainerStyle: {
         backgroundColor: "white",

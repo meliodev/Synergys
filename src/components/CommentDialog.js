@@ -32,7 +32,7 @@ const CommentDialog = ({
                 returnKeyType="done"
                 value={comment}
                 onChangeText={comment => setComment(comment)}
-                autoFocus={isVisible}
+                //autoFocus={isVisible}
                 keyboardType={keyboardType} />
 
             <Dialog.Button

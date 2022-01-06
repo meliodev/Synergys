@@ -121,7 +121,7 @@ class CreateTeam extends Component {
                             onChangeText={text => updateField(this, name, text)}
                             error={!!name.error}
                             errorText={name.error}
-                            autoFocus={true}
+                            //autoFocus={true}
                         />
 
                         <MyInput

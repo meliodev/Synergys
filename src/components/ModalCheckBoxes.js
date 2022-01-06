@@ -54,14 +54,15 @@ export default class ModalCheckBoxes extends Component {
         let { isModalVisible } = this.state
         let { items } = this.props
         const header = (text) => <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{text}</Text>
-
+        const hitslop = { top: 5, bottom: 5, left: 5, right: 5 }
+        
         return (
             <Modal
                 isVisible={isModalVisible}
                 style={modalStyles.modal}
                 onBackdropPress={this.toggleModal}>
                 <View style={modalStyles.container}>
-                    <TouchableOpacity style={modalStyles.closeIcon}>
+                    <TouchableOpacity style={modalStyles.closeIcon} hitslop={hitslop}>
                         <CustomIcon
                             icon={faTimes}
                             color={theme.colors.gray_dark}
@@ -79,14 +80,13 @@ export default class ModalCheckBoxes extends Component {
                         />
                     </View>
 
-                    <View>
                         <Button
                             mode="contained"
                             onPress={() => this.handleConfirmModal(items)}
-                            containerStyle={{ alignSelf: "flex-end" }}>
+                            containerStyle={{ alignSelf: "flex-end" }}
+                            >
                             Confirmer
                         </Button>
-                    </View>
                 </View>
             </Modal >
         )
@@ -170,7 +170,7 @@ const modalStyles = StyleSheet.create({
     modal: {
         flex: 1,
         maxHeight: constants.ScreenHeight,
-        margin: 15,
+        paddingTop: constants.ScreenHeight*0.015,
     },
     container: {
         flex: 1,
@@ -192,11 +192,7 @@ const modalStyles = StyleSheet.create({
         borderRadius: 8,
         paddingTop: 15,
         paddingHorizontal: 10,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.32,
-        shadowRadius: 5.46,
-        elevation: 2,
+        ...theme.style.shadow
     },
     item: {
         flexDirection: 'row',

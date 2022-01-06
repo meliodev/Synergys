@@ -597,7 +597,7 @@ class ProcessAction extends Component {
                             icon={leftIcon}
                             size={18}
                             color={leftIconColor}
-                            style={{ marginTop: 3, marginRight: 10, }}
+                            style={{ marginRight: 10 }}
                         />
                     }
                     <Text style={[textFont, { flex: 1, color: mainColor }]}>
@@ -772,12 +772,12 @@ class ProcessAction extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        elevation: 10,
         borderRadius: 5,
         backgroundColor: theme.colors.white,
         marginHorizontal: 15,
         marginTop: theme.padding * 3,
-        marginBottom: theme.padding * 2
+        marginBottom: theme.padding * 2,
+        ...theme.style.shadow
     },
     headerBarContainer: {
         backgroundColor: theme.colors.section,
@@ -820,7 +820,8 @@ const styles = StyleSheet.create({
     actionTitleContainer: {
         flex: 0.8,
         flexDirection: 'row',
-        paddingLeft: theme.padding*1.9,
+        paddingLeft: theme.padding * 1.9,
+        alignItems: 'center',
         //backgroundColor: 'brown'
     },
     actionIconsContainer: {

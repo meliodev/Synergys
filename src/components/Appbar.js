@@ -1,13 +1,10 @@
 import * as React from 'react';
-import { TouchableOpacity, View } from 'react-native'
 import { Appbar as appbar } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 import { withNavigation } from 'react-navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faArrowLeft, faTimes, faBars, faRedo, faPaperclip, faEllipsisVv, faTrash, faPaperPlane, faPen, faSearch } from '@fortawesome/pro-light-svg-icons'
 import { faCheck } from '@fortawesome/pro-solid-svg-icons'
 
-import CustomIcon from "./CustomIcon"
 import Loading from './Loading'
 
 import * as theme from '../core/theme'

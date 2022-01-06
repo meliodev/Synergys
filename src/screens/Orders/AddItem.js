@@ -146,7 +146,7 @@ class AddItem extends Component {
                 <Card style={{ margin: 10, paddingVertical: 10, paddingHorizontal: 5 }}>
                     <Card.Content>
                         <Text style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Article</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'flex-start', zIndex: 2 }}>
 
                             <View style={{ flex: 0.9 }}>
                                 <AutoCompleteProducts
@@ -154,11 +154,12 @@ class AddItem extends Component {
                                     suggestions={suggestions}
                                     tagsSelected={tagsSelected}
                                     main={this}
-                                    autoFocus={false}
+                                    //autoFocus={false}
                                     showInput={noItemSelected}
                                     errorText=''
                                     suggestionsBellow={true}
                                     role={this.props.role.id}
+                                    showTextInput={tagsSelected.length === 0}
                                 />
                             </View>
 

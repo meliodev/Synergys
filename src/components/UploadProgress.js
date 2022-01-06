@@ -47,13 +47,13 @@ const UploadProgress = ({ attachment, onPress, showRightIcon = false, rightIcon,
 
 const styles = StyleSheet.create({
     container: {
-        elevation: 1,
         backgroundColor: theme.colors.attachment,
         width: '100%',
         height: 64,
         alignSelf: 'center',
         borderRadius: 8,
-        marginVertical: 8
+        marginVertical: 8,
+        ...theme.style.shadow
     },
 })
 

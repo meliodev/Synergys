@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Alert, ScrollView, Keyboard } from "react-native";
+import { View, StyleSheet, ScrollView, Keyboard, KeyboardAvoidingView } from "react-native";
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
@@ -197,142 +197,145 @@ class CreateUser extends Component {
           <Loading size='large' />
           :
           <ScrollView
-            keyboardShouldPersistTaps="always"
+            keyboardShouldPersistTaps="never"
             style={{ backgroundColor: theme.colors.white }}
             contentContainerStyle={{ backgroundColor: '#fff', padding: theme.padding }}
           >
-            <MyInput
-              label="Identifiant utilisateur"
-              value={this.userId}
-              editable={false}
-              disabled
-            />
+            <KeyboardAvoidingView behavior="position">
 
-            {roles &&
-              <Picker
-                label="Rôle *"
-                returnKeyType="next"
-                value={this.state.role}
-                error={!!role.error}
-                errorText={role.error}
-                selectedValue={this.state.role}
-                onValueChange={(role) => this.setState({ role })}
-                title="Type d'utilisateur *"
-                elements={roles}
-              />
-            }
-
-            {showUserTypeRadio &&
-              <RadioButton
-                checked={this.state.checked}
-                firstChoice={{ title: 'Particulier', value: 'Particulier' }}
-                secondChoice={{ title: 'Professionnel', value: 'Professionnel' }}
-                onPress1={() => this.setState({ checked: 'first', isPro: false })}
-                onPress2={() => this.setState({ checked: 'second', isPro: true })}
-                style={{ justifyContent: 'space-between', marginTop: 20 }}
-              />
-            }
-
-            {!isPro &&
               <MyInput
-                label="Prénom *"
-                returnKeyType="done"
-                value={prenom.value}
-                onChangeText={text => updateField(this, prenom, text)}
-                error={!!prenom.error}
-                errorText={prenom.error}
+                label="Identifiant utilisateur"
+                value={this.userId}
+                editable={false}
+                disabled
               />
-            }
 
-            <MyInput
-              label={isPro ? 'Dénomination sociale *' : 'Nom *'}
-              returnKeyType="next"
-              value={isPro ? denom.value : nom.value}
-              onChangeText={text => {
-                const name = isPro ? denom : nom
-                updateField(this, name, text)
-              }}
-              error={isPro ? !!denom.error : !!nom.error}
-              errorText={isPro ? denom.error : nom.error}
-            />
-
-            <AddressInput
-              label='Adresse postale'
-              offLine={!isConnected}
-              onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
-              address={address}
-              onChangeText={this.setAddress}
-              clearAddress={() => this.setAddress('')}
-              addressError={addressError}
-              isEdit={false}
-            />
-
-            {isPro &&
-              <MyInput
-                label='Numéro siret *'
-                returnKeyType="next"
-                value={siret.value}
-                onChangeText={text => updateField(this, siret, text)}
-                error={!!siret.error}
-                errorText={siret.error}
-                render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
-              />}
-
-            <MyInput
-              label="Téléphone *"
-              returnKeyType="done"
-              value={phone.value}
-              onChangeText={text => updateField(this, phone, text)}
-              error={!!phone.error}
-              errorText={phone.error}
-              textContentType='telephoneNumber'
-              keyboardType='phone-pad'
-              dataDetectorTypes='phoneNumber'
-              render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
-
-            <MyInput
-              label="Email *"
-              returnKeyType="next"
-              value={email.value}
-              onChangeText={text => updateField(this, email, text)}
-              error={!!email.error}
-              errorText={email.error}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoCompleteType="email"
-              textContentType="emailAddress"
-              keyboardType="email-address"
-            />
-
-            <MyInput
-              label="Mot de passe *"
-              returnKeyType="done"
-              value={password.value}
-              onChangeText={text => updateField(this, password, text)}
-              error={!!password.error}
-              errorText={password.error}
-              autoCapitalize="none"
-              // secureTextEntry={!password.show}
-              right={
-                <TextInput.Icon
-                  name={<CustomIcon icon={faMagic} color={theme.colors.inpuIcon} />}
-                  color={theme.colors.secondary}
-                  onPress={() => {
-                    const password = { value: generateId('', 6), error: "" }
-                    this.setState({ password })
-                  }}
+              {roles &&
+                <Picker
+                  label="Rôle *"
+                  returnKeyType="next"
+                  value={this.state.role}
+                  error={!!role.error}
+                  errorText={role.error}
+                  selectedValue={this.state.role}
+                  onValueChange={(role) => this.setState({ role })}
+                  title="Type d'utilisateur *"
+                  elements={roles}
                 />
               }
-              editable={false}
-            />
 
-            <Toast
-              message={toastMessage}
-              type={toastType}
-              onDismiss={() => this.setState({ toastMessage: '' })} />
+              {showUserTypeRadio &&
+                <RadioButton
+                  checked={this.state.checked}
+                  firstChoice={{ title: 'Particulier', value: 'Particulier' }}
+                  secondChoice={{ title: 'Professionnel', value: 'Professionnel' }}
+                  onPress1={() => this.setState({ checked: 'first', isPro: false })}
+                  onPress2={() => this.setState({ checked: 'second', isPro: true })}
+                  style={{ justifyContent: 'space-between', marginTop: 20 }}
+                />
+              }
 
-            <LoadDialog loading={loadingDialog} message="Création de l'utilisateur en cours..." />
+              {!isPro &&
+                <MyInput
+                  label="Prénom *"
+                  returnKeyType="done"
+                  value={prenom.value}
+                  onChangeText={text => updateField(this, prenom, text)}
+                  error={!!prenom.error}
+                  errorText={prenom.error}
+                />
+              }
 
+              <MyInput
+                label={isPro ? 'Dénomination sociale *' : 'Nom *'}
+                returnKeyType="next"
+                value={isPro ? denom.value : nom.value}
+                onChangeText={text => {
+                  const name = isPro ? denom : nom
+                  updateField(this, name, text)
+                }}
+                error={isPro ? !!denom.error : !!nom.error}
+                errorText={isPro ? denom.error : nom.error}
+              />
+
+              <AddressInput
+                label='Adresse postale'
+                offLine={!isConnected}
+                onPress={() => this.props.navigation.navigate('Address', { onGoBack: this.refreshAddress })}
+                address={address}
+                onChangeText={this.setAddress}
+                clearAddress={() => this.setAddress('')}
+                addressError={addressError}
+                isEdit={false}
+              />
+
+              {isPro &&
+                <MyInput
+                  label='Numéro siret *'
+                  returnKeyType="next"
+                  value={siret.value}
+                  onChangeText={text => updateField(this, siret, text)}
+                  error={!!siret.error}
+                  errorText={siret.error}
+                  render={props => <TextInputMask {...props} mask="[000] [000] [000] [00000]" />}
+                />}
+
+              <MyInput
+                label="Téléphone *"
+                returnKeyType="done"
+                value={phone.value}
+                onChangeText={text => updateField(this, phone, text)}
+                error={!!phone.error}
+                errorText={phone.error}
+                textContentType='telephoneNumber'
+                keyboardType='phone-pad'
+                dataDetectorTypes='phoneNumber'
+                render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
+
+              <MyInput
+                label="Email *"
+                returnKeyType="next"
+                value={email.value}
+                onChangeText={text => updateField(this, email, text)}
+                error={!!email.error}
+                errorText={email.error}
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoCompleteType="email"
+                textContentType="emailAddress"
+                keyboardType="email-address"
+              />
+
+              <MyInput
+                label="Mot de passe *"
+                returnKeyType="done"
+                value={password.value}
+                onChangeText={text => updateField(this, password, text)}
+                error={!!password.error}
+                errorText={password.error}
+                autoCapitalize="none"
+                // secureTextEntry={!password.show}
+                right={
+                  <TextInput.Icon
+                    name={<CustomIcon icon={faMagic} color={theme.colors.inpuIcon} />}
+                    color={theme.colors.secondary}
+                    onPress={() => {
+                      const password = { value: generateId('', 6), error: "" }
+                      this.setState({ password })
+                    }}
+                  />
+                }
+                editable={false}
+              />
+
+              <Toast
+                message={toastMessage}
+                type={toastType}
+                onDismiss={() => this.setState({ toastMessage: '' })} />
+
+              <LoadDialog loading={loadingDialog} message="Création de l'utilisateur en cours..." />
+
+            </KeyboardAvoidingView>
           </ScrollView >
         }
 

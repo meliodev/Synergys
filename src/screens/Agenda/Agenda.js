@@ -335,7 +335,7 @@ class Agenda2 extends Component {
                             agendaDayTextColor: theme.colors.agendaLight,
                             agendaDayNumColor: theme.colors.agendaLight,
                             agendaTodayColor: theme.colors.primary,
-                            textDayFontFamily: '-Regular',
+                            textDayFontFamily: 'Montserrat-Regular',
                             // backgroundColor: 'green',
                             'stylesheet.agenda.list': {
                                 container: {

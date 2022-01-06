@@ -82,7 +82,8 @@ class EditEmail extends Component {
                             value={password.value}
                             onChangeText={text => updateField(this, password, text)}
                             secureTextEntry
-                            autoFocus={showDialog} />
+                        // autoFocus={showDialog} 
+                        />
                         <Dialog.Button label="Annuler" onPress={() => this.setState({ showDialog: false })} />
                         <Dialog.Button label="Confirmer" onPress={async () => await this.changeEmail()} />
                     </Dialog.Container>

@@ -54,7 +54,7 @@ export default class AddressSearch extends Component {
                 {this.props.showInput &&
                     <GooglePlacesAutocomplete
                         placeholder='Recherchez une adresse'
-                        autoFocus
+                        //autoFocus
                         onPress={(data, details = null) => {
                             //'details' are provided when fetchDetails = true (it costs higher)
                             // console.log(data, details)

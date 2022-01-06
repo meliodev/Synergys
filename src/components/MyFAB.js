@@ -26,8 +26,8 @@ const styles = StyleSheet.create({
         width: constants.ScreenWidth * 0.15,
         height: constants.ScreenWidth * 0.15,
         borderRadius: constants.ScreenWidth * 0.15 / 2,
-        elevation: 5,
-        zIndex: 2
+        zIndex: 2,
+        ...theme.style.shadow
     }
 });
 
