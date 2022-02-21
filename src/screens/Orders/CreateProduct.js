@@ -4,7 +4,7 @@
 //Marque: {id, name, logo} : AutoCompleteTag (like articles)
 
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert, Image, ImageBackground, Platform, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, KeyboardAvoidingView, Keyboard, Image, ImageBackground, Platform, ActivityIndicator } from 'react-native';
 import { Card, Title, TextInput } from 'react-native-paper'
 import Ionicons from 'react-native-vector-icons/Ionicons'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -21,9 +21,7 @@ moment.locale('fr')
 import Appbar from '../../components/Appbar'
 import MyInput from '../../components/TextInput'
 import Picker from "../../components/Picker"
-import Button from "../../components/Button"
 import RadioButton from "../../components/RadioButton"
-import UploadProgress from "../../components/UploadProgress"
 import AutoCompleteBrands from "../../components/AutoCompleteBrands"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
@@ -35,7 +33,6 @@ import { uploadFile } from "../../api/storage-api";
 import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, positiveNumberValidator, arrayValidator, setToast, load, displayError } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";
-import { handleFirestoreError } from '../../core/exceptions';
 import SquarePlus from '../../components/SquarePlus';
 
 class CreateProduct extends Component {
@@ -276,6 +273,7 @@ class CreateProduct extends Component {
         let { newBrandLogo } = this.state
         const attachments = await pickImage([])
         newBrandLogo = attachments[0]
+        newBrandLogo.ref = "newBrandLogo"
         this.setState({ newBrandLogo })
     }
 
@@ -435,7 +433,7 @@ class CreateProduct extends Component {
         const { isConnected } = this.props.network
 
         return (
-            <View style={{ marginBottom: 5 }}>
+            <View style={{ marginBottom: 5, zIndex: 2 }}>
                 <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.placeholder, marginBottom: 5 }]} >Marque *</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
 
@@ -445,7 +443,7 @@ class CreateProduct extends Component {
                             suggestions={suggestions}
                             tagsSelected={tagsSelected}
                             main={this}
-                            autoFocus={false}
+                            //autoFocus={false}
                             showInput={noItemSelected}
                             errorText={brandError}
                             suggestionsBellow={false}
@@ -485,69 +483,70 @@ class CreateProduct extends Component {
 
                         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
 
-                            <Card style={{ margin: 5, paddingVertical: 10 }}>
-                                <Card.Content>
+                            <KeyboardAvoidingView style={{ flex: 1 }} behavior="position">
 
-                                    {this.renderTypeAndLogo()}
+                                <Card style={{ margin: 5, paddingVertical: 10 }}>
+                                    <Card.Content>
 
-                                    <MyInput
-                                        label="Numéro de l'article"
-                                        returnKeyType="done"
-                                        value={ProductId}
-                                        editable={false}
-                                        disabled
-                                    />
+                                        {this.renderTypeAndLogo()}
 
-                                    {this.renderCategory()}
-                                    {this.renderBrand()}
+                                        <MyInput
+                                            label="Numéro de l'article"
+                                            returnKeyType="done"
+                                            value={ProductId}
+                                            editable={false}
+                                            disabled
+                                        />
 
-                                    <MyInput
-                                        label="Désignation *"
-                                        returnKeyType="done"
-                                        value={name.value}
-                                        onChangeText={text => updateField(this, name, text)}
-                                        error={!!name.error}
-                                        errorText={name.error}
-                                        multiline={true} />
+                                        {this.renderCategory()}
+                                        {this.renderBrand()}
 
-                                    <MyInput
-                                        label="Description"
-                                        returnKeyType="done"
-                                        value={description.value}
-                                        onChangeText={text => updateField(this, description, text)}
-                                        error={!!description.error}
-                                        errorText={description.error}
-                                        multiline={true} />
+                                        <MyInput
+                                            label="Désignation *"
+                                            value={name.value}
+                                            onChangeText={text => updateField(this, name, text)}
+                                            error={!!name.error}
+                                            errorText={name.error}
+                                            multiline={true} />
 
-                                    <View style={{ flexDirection: 'row' }}>
-                                        <View style={{ flex: 0.5, paddingRight: 15 }}>
-                                            <MyInput
-                                                label="Prix de vente (€) *"
-                                                returnKeyType="done"
-                                                keyboardType='numeric'
-                                                value={price.value}
-                                                onChangeText={text => updateField(this, price, text)}
-                                                error={!!price.error}
-                                                errorText={price.error}
-                                            />
+                                        <MyInput
+                                            label="Description"
+                                            value={description.value}
+                                            onChangeText={text => updateField(this, description, text)}
+                                            error={!!description.error}
+                                            errorText={description.error}
+                                            multiline={true} />
+
+                                        <View style={{ flexDirection: 'row' }}>
+                                            <View style={{ flex: 0.5, paddingRight: 15 }}>
+                                                <MyInput
+                                                    label="Prix de vente (€) *"
+                                                    returnKeyType="done"
+                                                    keyboardType='numeric'
+                                                    value={price.value}
+                                                    onChangeText={text => updateField(this, price, text)}
+                                                    error={!!price.error}
+                                                    errorText={price.error}
+                                                />
+                                            </View>
+
+                                            <View style={{ flex: 0.5, paddingLeft: 15 }}>
+                                                <MyInput
+                                                    label="Taxe (%)"
+                                                    returnKeyType="done"
+                                                    keyboardType='numeric'
+                                                    value={taxe.value}
+                                                    onChangeText={text => updateField(this, taxe, text)}
+                                                    error={!!taxe.error}
+                                                    errorText={taxe.error}
+                                                />
+                                            </View>
                                         </View>
 
-                                        <View style={{ flex: 0.5, paddingLeft: 15 }}>
-                                            <MyInput
-                                                label="Taxe (%)"
-                                                returnKeyType="done"
-                                                keyboardType='numeric'
-                                                value={taxe.value}
-                                                onChangeText={text => updateField(this, taxe, text)}
-                                                error={!!taxe.error}
-                                                errorText={taxe.error}
-                                            />
-                                        </View>
-                                    </View>
+                                    </Card.Content>
+                                </Card>
 
-                                </Card.Content>
-                            </Card>
-
+                            </KeyboardAvoidingView>
                         </ScrollView>
 
                         {showDialog && this.renderDialog(dialogType)}
@@ -648,9 +647,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 5,
         width: 90,
-        height: 90
+        height: 90,
+        ...theme.style.shadow
     }
 })
 

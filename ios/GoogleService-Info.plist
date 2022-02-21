@@ -3,23 +3,23 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>423334078415-h9cvu66ra2b760uien1s7uah1rdu1pq6.apps.googleusercontent.com</string>
+	<string>226695008961-rhr55a47i7slvvvgv030984es2b6rd23.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.423334078415-h9cvu66ra2b760uien1s7uah1rdu1pq6</string>
+	<string>com.googleusercontent.apps.226695008961-rhr55a47i7slvvvgv030984es2b6rd23</string>
 	<key>ANDROID_CLIENT_ID</key>
-	<string>423334078415-7u7uh2bdub5hf37s4vgjlqlqhr2socjt.apps.googleusercontent.com</string>
+	<string>226695008961-t67vt0van6kc8380cc48d28k57ihg324.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyC3U1zG-ndLDVCK06z7hcdglZHNN-7a934</string>
+	<string>AIzaSyB9F72b-wXMfuRJX0Ch0K0EgMwnFJ-WJaE</string>
 	<key>GCM_SENDER_ID</key>
-	<string>423334078415</string>
+	<string>226695008961</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>org.reactjs.native.example.AsanaWorld</string>
 	<key>PROJECT_ID</key>
-	<string>projectmanagement-b9677</string>
+	<string>groupe-synergys-7e672</string>
 	<key>STORAGE_BUCKET</key>
-	<string>projectmanagement-b9677.appspot.com</string>
+	<string>groupe-synergys-7e672.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,8 +31,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:423334078415:ios:efca7bc6c40f35438954ba</string>
+	<string>1:226695008961:ios:943ea9413ae8761304fa40</string>
 	<key>DATABASE_URL</key>
-	<string>https://projectmanagement-b9677.firebaseio.com</string>
+	<string>https://groupe-synergys-7e672.firebaseio.com</string>
 </dict>
 </plist>

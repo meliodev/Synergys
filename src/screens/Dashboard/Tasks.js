@@ -99,7 +99,7 @@ class Tasks extends Component {
     tasksSummary() {
         const columnStyle = { flex: 1, justifyContent: 'center', alignItems: 'center' }
         return (
-            <View style={{ height: constants.ScreenHeight * 0.15, borderRadius: 25, elevation: 5, backgroundColor: theme.colors.white, flexDirection: 'row' }}>
+            <View style={{ height: constants.ScreenHeight * 0.15, borderRadius: 25, backgroundColor: theme.colors.white, flexDirection: 'row', ...theme.style.shadow }}>
                 <View style={columnStyle}>
                     <Text>30</Text>
                     <Text>En retard</Text>

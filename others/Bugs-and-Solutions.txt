@@ -1,0 +1,8 @@
+iOS:
+
+- Undefined symbols for architecture arm64
+-> Remove GoogleService-Info-2.plist (I forgot to delete a duplicate file of GoolgleService-Info)
+-> Delete Pods
+-> Delete Podfile.lock
+-> Comment use_frameworks! on Podfile
+-> run pod install

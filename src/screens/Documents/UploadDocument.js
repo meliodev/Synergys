@@ -61,7 +61,7 @@ const genFormSources = [
     { label: 'Un nouveau formulaire', value: 'newForm', icon: faFilePlus },
 ]
 
-const properties = ["project", "name", "type", "state", "attachment", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
+const properties = ["project", "name", "type", "state", "attachment", "attachmentSource", "orderData", "createdAt", "createdBy", "editedAt", "editedBy"]
 
 class UploadDocument extends Component {
 
@@ -101,6 +101,7 @@ class UploadDocument extends Component {
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         //Process params
+        this.isSignature = this.props.navigation.getParam('isSignature', false)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined) //Not editable
@@ -145,7 +146,7 @@ class UploadDocument extends Component {
             //Pdf generation
             showModal: false,
             modalContent: 'docTypes',
-            attachmentSource: '', //upload || generation || conversion
+            attachmentSource: '', //upload || generation || conversion || signature
             orderData: null,
 
             initialLoading: true,
@@ -180,12 +181,15 @@ class UploadDocument extends Component {
         if (this.isEdit) await this.initEditMode(this.DocumentId)
         //Auto refresh
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => {
-            this.setState({ initialLoading: faTrumpet })
+            this.setState({ initialLoading: true })
             await this.initEditMode(this.DocumentId)
             this.setState({ initialLoading: false })
         })
         this.initialState = _.cloneDeep(this.state)
         this.setState({ initialLoading: false })
+
+        if (this.isSignature)
+            this.navigateToSignature(true, this.props.network.isConnected)
     }
 
     componentWillUnmount() {
@@ -301,7 +305,9 @@ class UploadDocument extends Component {
             document = this.unformatDocument_conversion(document)
 
         await this.persistDocument(document, DocumentId)
+
         this.documentListener() //listener to await local writes
+
         this.refreshState(document, DocumentId, isConversion)
 
         //5. Upload
@@ -655,6 +661,7 @@ class UploadDocument extends Component {
         const isImage = attachment.type.includes('image/')
         if (!isImage) return attachment
         try {
+            this.setState({ modalLoading: true })
             const pdfBase64 = await convertImageToPdf(attachment)
             const fileName = `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf`
             const destPath = await saveFile(pdfBase64, fileName, 'base64')
@@ -664,6 +671,9 @@ class UploadDocument extends Component {
         }
         catch (e) {
             throw new Error(e)
+        }
+        finally {
+            this.setState({ modalLoading: false })
         }
     }
 
@@ -724,7 +734,7 @@ class UploadDocument extends Component {
             progress: 0,
         }
 
-        this.setState({ attachment, orderData }, () => {
+        this.setState({ attachment, orderData: orderData || null }, () => {
             if (!isConversion) return
             //Handle conversion
             this.handleSubmit(isConversion, DocumentId)
@@ -784,7 +794,7 @@ class UploadDocument extends Component {
     }
 
     onPressFooterButton(type, isConnected, DocumentId, enable) {
-        if (!enable) return
+        //if (!enable) return
 
         if (type === "upload") {
             this.handleSubmit(false, DocumentId)
@@ -895,7 +905,7 @@ class UploadDocument extends Component {
 
                 <ScrollView
                     style={{ flex: 0.8 }}
-                    keyboardShouldPersistTaps="always"
+                    keyboardShouldPersistTaps="never"
                     contentContainerStyle={{ backgroundColor: theme.colors.white, paddingBottom: theme.padding }}
                 >
                     <View>
@@ -984,7 +994,7 @@ class UploadDocument extends Component {
                                         title={title}
                                         columns={columns}
                                         isLoading={modalLoading}
-                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? 0 : constants.ScreenHeight * 0.5 }}
+                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? constants.ScreenHeight * 0.13 : constants.ScreenHeight * 0.5 }}
                                         isVisible={showModal}
                                         toggleModal={() => this.toggleModal()}
                                         elements={elements}
@@ -1028,7 +1038,7 @@ class UploadDocument extends Component {
             }
         }
 
-        const { project, type, attachment } = this.initialState
+        const { project, type, attachment, attachmentSource } = this.initialState
 
         const onGoBack = () => {
             if (this.onGoBack) this.onGoBack()
@@ -1037,18 +1047,19 @@ class UploadDocument extends Component {
 
         var params = {
             onGoBack,
-            ProjectId: this.state.project.id,
+            ProjectId: project.id,
             DocumentId: this.DocumentId,
             DocumentType: type,
             fileName: attachment.name,
             url: attachment.downloadURL,
             onSignaturePop: this.onSignaturePop,
+            attachmentSource
         }
 
         if (signMode)
             params.initMode = 'sign'
 
-        navigateToScreen(this, 'Signature', params)
+        this.props.navigation.navigate("Signature", params)
     }
 
     render() {

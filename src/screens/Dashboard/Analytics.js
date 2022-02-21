@@ -400,10 +400,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: theme.padding
     },
     summaryColumn: {
-        elevation: 4,
         height: constants.ScreenHeight * 0.1,
         width: constants.ScreenWidth * 0.275,
         borderRadius: 8,
+        ...theme.style.shadow
     },
     summaryLabelContainer: {
         flex: 0.45,

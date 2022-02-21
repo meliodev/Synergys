@@ -15,6 +15,7 @@ import { load } from '../../core/utils'
 import { ModalForm } from '../../components/ModalOptions'
 
 import { Appbar, CustomIcon, Section, EmptyList, NotificationItem, TaskItem, Loading } from '../../components'
+import crashlytics, { firebase } from '@react-native-firebase/crashlytics';
 
 const shortcutsModel = {
     createProspect: {

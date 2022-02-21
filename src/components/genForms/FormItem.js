@@ -62,9 +62,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         backgroundColor: theme.colors.background,
-        elevation: 3,
         borderRadius: 10,
-        marginVertical: 5
+        marginVertical: 5,
+        ...theme.style.shadow
     },
     header: {
         flexDirection: 'row',

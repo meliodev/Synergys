@@ -710,7 +710,7 @@ class CreateTask extends Component {
         const { showTasksConflicts, toastMessage, toastType } = this.state
         return (
             < ScrollView
-                keyboardShouldPersistTaps="always"
+                keyboardShouldPersistTaps="never"
                 style={styles.container}
                 contentContainerStyle={{ flex: 1, paddingHorizontal: theme.padding }
                 }
@@ -736,7 +736,7 @@ class CreateTask extends Component {
         const enableTypePicker = !this.isEdit && !this.taskType
 
         return (
-            <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
+            <ScrollView keyboardShouldPersistTaps="never" style={styles.container}>
 
                 <FormSection
                     sectionTitle='Créneau horaire'

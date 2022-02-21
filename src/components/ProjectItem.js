@@ -86,8 +86,8 @@ const styles = StyleSheet.create({
     container: {
         marginVertical: theme.padding / 2,
         borderRadius: 10,
-        elevation: 4,
-        zIndex: 100
+        zIndex: 100,
+        ...theme.style.shadow
     },
     linearGradient: {
         flex: 1,

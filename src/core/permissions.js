@@ -31,6 +31,9 @@ export const checkPermission = async () => {
 }
 
 export const requestWESPermission = async () => {
+
+    if (Platform.OS === "ios")
+        return
     try {
         const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -55,6 +58,8 @@ export const requestWESPermission = async () => {
 };
 
 export const requestRESPermission = async () => {
+    if (Platform.OS === "ios")
+        return
     try {
         const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,

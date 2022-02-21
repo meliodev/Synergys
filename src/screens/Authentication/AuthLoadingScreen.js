@@ -166,7 +166,7 @@ class AuthLoadingScreen extends Component {
             //0. Get idTokenResult
             const idTokenResult = await user.getIdTokenResult()
             if (!idTokenResult) {
-              throw new Error(errorMessages.appInit)
+              throw new Error("ID Token Invalide, veuillez contacter un admin.")
             }
 
             //1. Set role
@@ -176,6 +176,7 @@ class AuthLoadingScreen extends Component {
                 var roleValue = role.value
               }
             }
+            
 
             //2. Set currentUser
             const currentUser = {
@@ -187,10 +188,7 @@ class AuthLoadingScreen extends Component {
 
             //3. Set fcm token
             const enabled = await this.requestUserPermission() //iOS only
-            const res = await this.configureFcmToken()
-            if (!res) {
-              throw new Error(errorMessages.appInit)
-            }
+            await this.configureFcmToken()
 
             //4. Set role/permissions/currentUser on redux:
             const action1 = { type: "ROLE", value: role }
@@ -283,15 +281,13 @@ class AuthLoadingScreen extends Component {
         }
 
         catch (e) {
-          throw new Error('Error when handling tokens...')
+          throw new Error(e)
         }
       })
-
-      return true
     }
 
     catch (e) {
-      return false
+      throw new Error(e)
     }
   }
 

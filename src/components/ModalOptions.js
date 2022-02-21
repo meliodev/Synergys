@@ -44,7 +44,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 width: elementSize,
                 height: elementSize,
                 backgroundColor: theme.colors.white,
-                ...theme.shadow
+                ...theme.style.shadow
             }
         }
 
@@ -90,7 +90,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
             width: elementSize,
             height: elementSize,
             backgroundColor: element.colors.primary,
-            ...theme.shadow
+            ...theme.style.shadow
         }
 
         const iconSize = element.icon.iconName === "user-alt" ? elementSize * 0.13 : elementSize * 0.16

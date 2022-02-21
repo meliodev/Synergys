@@ -244,7 +244,7 @@ class AddGoal extends Component {
                 {loading ?
                     <Loading />
                     :
-                    <ScrollView keyboardShouldPersistTaps="always" style={styles.dataContainer}>
+                    <ScrollView keyboardShouldPersistTaps="never" style={styles.dataContainer}>
                         {this.isEdit && this.goalOverview()}
                         <FormSection
                             sectionTitle='Détails'
@@ -349,8 +349,8 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: theme.colors.white,
         borderRadius: 8,
-        elevation: 3,
-        marginTop: 12
+        marginTop: 12,
+        ...theme.style.shadow
     },
     incSourcesHeader: {
         flexDirection: 'row',

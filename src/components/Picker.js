@@ -1,28 +1,79 @@
 import React, { memo } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity, Platform } from "react-native";
 import { Picker } from '@react-native-picker/picker'
+import Modal from "react-native-modal"
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
+import CustomIcon from './CustomIcon'
+import { Caption, Body } from './typography/Typography'
+import { faAngleDown } from "@fortawesome/pro-light-svg-icons";
 
-const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title, showTitle = true, errorText, enabled = true, ...props }) => (
-    <View style={[styles.container, style]}>
+const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title, showTitle = true, errorText, enabled = true, ...props }) => {
 
-        <View style={[styles.pickerContainer, pickerContainerStyle]}>
-            {showTitle && <Text style={theme.customFontMSregular.caption}>{title}</Text>}
+    const [isModalVisible, setIsModalVisible] = React.useState(false)
+
+    const toggleModal = () => {
+        setIsModalVisible(!isModalVisible)
+    }
+
+    const picker = () => {
+        return (
             <Picker
-                style={[styles.input]}
+                //style={[styles.input]}
                 enabled={enabled}
                 dropdownIconColor={theme.colors.gray_dark}
                 {...props}
             >
-                {elements.map((item, index) => <Picker.Item key={index.toString()} label={item.label} value={item.value} />)}
+                {elements.map((item, index) =>
+                    <Picker.Item key={index.toString()} label={item.label} value={item.value} />
+                )}
             </Picker>
+        )
+    }
+
+    renderPicker = () => {
+        if (Platform.OS === "android")
+            return picker()
+
+        else return (
+            <View>
+                <TouchableOpacity style={styles.iosPicker} onPress={toggleModal}>
+                    <Caption text={props.selectedValue} />
+                    <CustomIcon icon={faAngleDown} color={theme.colors.gray_dark} />
+                </TouchableOpacity>
+
+                <Modal
+                    isVisible={isModalVisible}
+                    onBackdropPress={toggleModal}
+                    style={styles.modal}
+                    backdropOpacity={0.25}
+                >
+                    <View style={styles.modalContainer}>
+                        <Body text={title} style={{ textAlign: "center" }} />
+                        {picker()}
+                    </View>
+                </Modal>
+            </View>
+        )
+    }
+
+    return (
+        <View style={[styles.container, style]}>
+
+            <View style={[styles.pickerContainer, pickerContainerStyle]}>
+                {showTitle && <Caption text={title} />}
+                {renderPicker()}
+            </View>
+
+            {errorText ?
+                <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text>
+                :
+                null
+            }
+
         </View>
-
-        {errorText ? <Text style={[theme.customFontMSregular.caption, styles.error]}>{errorText}</Text> : null}
-
-    </View>
-)
+    )
+}
 
 const styles = StyleSheet.create({
     container: {
@@ -30,19 +81,34 @@ const styles = StyleSheet.create({
         paddingTop: 15,
     },
     pickerContainer: {
-        borderBottomWidth: StyleSheet.hairlineWidth * 3,
+        borderBottomWidth: Platform.OS === "android" ? StyleSheet.hairlineWidth * 3 : 0,
         borderBottomColor: theme.colors.gray_extraLight,
     },
     input: {
-        // marginLeft: -8,
         color: theme.colors.gray_dark,
-        height: 40,
-        alignItems: 'flex-start',
+        //height: 40,
+        //alignItems: 'flex-start',
     },
     error: {
         paddingHorizontal: 4,
         paddingVertical: 4,
         color: theme.colors.error
+    },
+    iosPicker: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 5,
+        ...theme.style.inputBorderBottom
+    },
+    modal: {
+        marginTop: 600,
+    },
+    modalContainer: {
+        backgroundColor: "white",
+        borderTopRightRadius: 15,
+        borderTopLeftRadius: 15,
+        paddingVertical: 5
     }
 });
 

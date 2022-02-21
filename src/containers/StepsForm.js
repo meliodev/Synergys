@@ -54,6 +54,7 @@ import * as theme from '../core/theme'
 import { setStatusBarColor } from '../core/redux';
 import { db } from '../firebase';
 import { fetchDocument } from '../api/firestore-api';
+import { ThemeContext } from 'react-navigation';
 
 const mascCollections = ["PvReception", "MandatsMPR", "MandatsSynergys"]
 
@@ -1846,15 +1847,15 @@ const styles = StyleSheet.create({
         paddingVertical: theme.padding / 2,
     },
     modal: {
-        justifyContent: 'flex-end',
-        margin: 0,
+        marginTop: 65,
+        width: constants.ScreenWidth*0.95
     },
     scrollableModal: {
         flex: 1,
-        height: constants.ScreenHeight * 0.93,
-        borderTopLeftRadius: constants.ScreenWidth * 0.03,
-        borderTopRightRadius: constants.ScreenWidth * 0.03,
-        paddingBottom: 70,
+       // height: constants.ScreenHeight * 0.9,
+         borderTopLeftRadius: constants.ScreenWidth * 0.03,
+         borderTopRightRadius: constants.ScreenWidth * 0.03,
+        // paddingBottom: 70,
         backgroundColor: '#fff'
     },
     scrollableModalContent1: {

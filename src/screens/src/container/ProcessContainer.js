@@ -25,8 +25,6 @@ class ProcessContainer extends Component {
     let { canUpdate } = this.props
     const { currentPage } = this.state
 
-    console.log("Phaselabels", phaseLabels)
-
     return (
       <View style={{ flex: 1 }}>
         {phaseLabels.length > 0 &&

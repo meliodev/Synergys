@@ -151,7 +151,8 @@ const styles = StyleSheet.create({
     },
     containerStyle: {
         minWidth: 200,
-        maxWidth: constants.ScreenWidth - theme.padding
+        maxWidth: constants.ScreenWidth - theme.padding,
+        marginLeft:6
     },
     listContainerStyle: {
         backgroundColor: "white",

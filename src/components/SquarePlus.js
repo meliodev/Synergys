@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
         borderRadius: 1
     },
     bigImageBox: {
-        elevation: 3,
         alignSelf: "center",
         justifyContent: 'center',
         alignItems: 'center',
@@ -68,7 +67,8 @@ const styles = StyleSheet.create({
         //  borderWidth: 1,
         //  borderStyle: 'dashed',
         // borderColor: theme.colors.gray_dark,
-        borderRadius: 5
+        borderRadius: 5,
+        ...theme.style.shadow
     },
     dashedBigImageBox: {
         alignSelf: "center",

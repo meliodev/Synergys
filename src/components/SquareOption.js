@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         justifyContent: 'center',
         alignItems: 'center',
-        elevation: 2,
         backgroundColor: theme.colors.white,
+        ...theme.style.shadow
     }
 })
 

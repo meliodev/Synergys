@@ -10,17 +10,20 @@ export async function uploadFile(attachment, storageRefPath, showProgress, metad
 
     const promise = new Promise((resolve, reject) => {
 
+        const { path, ref } = attachment
         const storageRef = firebase.storage().ref(storageRefPath)
-        this.uploadTask = storageRef.putFile(attachment.path, { customMetadata: metadata || {} })
+        this.uploadTask = storageRef.putFile(path, { customMetadata: metadata || {} })
+        let update = {}
 
         this.uploadTask
             .on('state_changed', async function (tasksnapshot) {
                 var progress = Math.round((tasksnapshot.bytesTransferred / tasksnapshot.totalBytes) * 100)
-                console.log('Upload attachment ' + progress + '% done')
+                //console.log('Upload attachment ' + progress + '% done')
 
                 if (showProgress) {
                     attachment.progress = progress / 100
-                    this.setState({ attachment })
+                    update[ref] = attachment
+                    this.setState(update)
                 }
 
             }.bind(this))
@@ -29,12 +32,15 @@ export async function uploadFile(attachment, storageRefPath, showProgress, metad
             .then(async (res) => {
                 attachment.downloadURL = await storageRef.getDownloadURL()
                 attachment.generation = 'upload'
-                delete attachment.progress
-                this.setState({ attachment }, () => resolve(attachment))
+                //delete attachment.progress
+                delete attachment.ref
+                update[ref] = attachment
+                this.setState(update, () => resolve(attachment))
             })
             .catch(err => {
                 attachment.progress = 0
-                this.setState({ attachment })
+                update[ref] = attachment
+                this.setState(update)
                 reject('failure')
             })
     })

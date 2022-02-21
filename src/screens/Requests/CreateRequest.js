@@ -459,7 +459,7 @@ class CreateRequest extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <ScrollView keyboardShouldPersistTaps="always" style={styles.container}>
+                    <ScrollView keyboardShouldPersistTaps="never" style={styles.container}>
                         <FormSection
                             sectionTitle='Informations générales'
                             sectionIcon={faInfoCircle}
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         borderRadius: 8,
         marginTop: 15,
-        elevation: 3,
+        ...theme.style.shadow    
     },
     productsListHeader: {
         flexDirection: 'row',
@@ -659,11 +659,7 @@ const modalStyles = StyleSheet.create({
         borderRadius: 8,
         paddingTop: 15,
         paddingHorizontal: 10,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.32,
-        shadowRadius: 5.46,
-        elevation: 2,
+        ...theme.style.shadow
     },
     item: {
         flexDirection: 'row',

@@ -1,6 +1,7 @@
-
+import { StyleSheet } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
 import { constants } from './constants'
+
 
 const baseColors = {
   gray1: "#F1F2F7"
@@ -300,7 +301,24 @@ const customFontMSregular = {
   },
 }
 
-export { colors, sizes, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold }
+const style = {
+  shadow: {
+    shadowColor: colors.secondary,
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+  },
+  inputBorderBottom: {
+    borderBottomWidth: StyleSheet.hairlineWidth * 2,
+    borderBottomColor: colors.gray_extraLight
+  }
+}
+
+export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold }
 
 
 

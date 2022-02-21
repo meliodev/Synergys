@@ -74,7 +74,7 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
                         <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >Par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]}>{request.editedBy.fullName}</Text></Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2, elevation: 2 }}>
+                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2, ...theme.style.shadow }}>
                             <Paragraph style={[theme.customFontMSmedium.caption, { textAlign: 'center' }]}>{request.state}</Paragraph>
                         </View>
                     </View>

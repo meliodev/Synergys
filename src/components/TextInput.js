@@ -47,6 +47,8 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.gray_extraLight,
     textAlign: 'center',
     paddingHorizontal: 0,
+    textAlign: 'auto'
+
     //    backgroundColor: 'pink'
   },
   error: {

@@ -64,7 +64,7 @@ const OrderItem = ({ order, onPress, navigation, ...props }) => {
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(order.editedAt).format('ll')}</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <View style={{ width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 50, backgroundColor: setStateColor(order.state), padding: 2, elevation: 2 }}>
+                    <View style={{ width: 100, justifyContent: 'center', alignItems: 'center', borderRadius: 50, backgroundColor: setStateColor(order.state), padding: 2, ...theme.style.shadow }}>
                         <Text style={theme.customFontMSregular.caption}>{order.state}</Text>
                     </View>
                 </View>
@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         backgroundColor: theme.colors.background,
-        elevation: 3,
         borderRadius: 10,
-        marginVertical: 5
+        marginVertical: 5,
+        ...theme.style.shadow
     },
     linearGradient: {
         flex: 1,
