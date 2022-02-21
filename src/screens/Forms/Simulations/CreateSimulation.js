@@ -160,8 +160,10 @@ class CreateSimulation extends Component {
         super(props)
         this.SimulationId = this.props.navigation.getParam('SimulationId', '')
 
-        this.state = {
-        }
+        this.project = this.props.navigation.getParam('project', null)
+        const nameSir = this.project ? this.project.client.fullName : ""
+        initialState.nameSir = nameSir //#task add sex to client collection -> To know if nameSir or nameMiss
+        initialState.isProprio = "Oui" //Select by default
     }
 
     //##Welcome 

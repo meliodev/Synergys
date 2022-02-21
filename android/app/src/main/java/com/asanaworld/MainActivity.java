@@ -10,6 +10,8 @@ import android.content.res.Configuration; // <--- import
 
 import org.devio.rn.splashscreen.SplashScreen;
 import android.os.Bundle;
+import android.util.Log;
+
 
 public class MainActivity extends ReactActivity {
 
@@ -27,6 +29,8 @@ public class MainActivity extends ReactActivity {
    */
   @Override
   protected String getMainComponentName() {
+    Log.d("TEST", "Hello world ! This is a log test.");
+
     return "Synergys";
   }
 

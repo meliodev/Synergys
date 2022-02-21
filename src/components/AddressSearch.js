@@ -54,7 +54,8 @@ export default class AddressSearch extends Component {
                 {this.props.showInput &&
                     <GooglePlacesAutocomplete
                         placeholder='Recherchez une adresse'
-                        autoFocus
+                        //autoFocus 
+                        autoFocus={false}
                         onPress={(data, details = null) => {
                             //'details' are provided when fetchDetails = true (it costs higher)
                             // console.log(data, details)
@@ -64,8 +65,6 @@ export default class AddressSearch extends Component {
                             Geocoder.from(address.description)
                                 .then(json => {
                                     let location = json.results[0].geometry.location
-                                    console.log('location::::::::::::::::::::::::')
-                                    console.log(json.results[0])
                                     // {"lat": 43.184277, "lng": 3.003078}
                                     let marker = { latitude: '', longitude: '' }
                                     let region = marker

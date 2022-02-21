@@ -13,6 +13,7 @@ export const checklistPAEModel = (params) => {
     const model = [
         {//0
             id: "metaDataPAE",
+
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
@@ -27,10 +28,13 @@ export const checklistPAEModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -287, dy: - 33, pageIndex },
                 },
-            ]
+            ],
+            isFirstSubStep: true,
         },
         {//1
             id: "isInstalledPAE",
+            subStep: { id: "pae", label: "PAC AIR/EAU" },
+            section: { id: "electric", label: "Partie Electrique" },
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
@@ -44,42 +48,53 @@ export const checklistPAEModel = (params) => {
                     errorId: "isInstalledPAEError",
                     mendatory: true,
                 },
-            ]
+            ],
         },
-        {//2
-            id: "phaseTypePAE",
-            title: "PAC AIR/EAU - Partie Electrique",
-            fields: [
-                {
-                    id: "phaseTypePAE",
-                    label: "Type de phase",
-                    type: "options",
-                    items: [
-                        { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -321, dy: - 101, pageIndex } },
-                        { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -176, dy: - 101, pageIndex } },
-                    ],
-                    errorId: "phaseTypePAEError",
-                    mendatory: true
-                },
-            ]
-        },
+        // {//2
+        //     id: "phaseTypePAE",
+        //    
+        //     title: "PAC AIR/EAU - Partie Electrique",
+        //     fields: [
+        //         {
+        //             id: "phaseTypePAE",
+        //             label: "Type de phase",
+        //             type: "options",
+        //             items: [
+        //                 { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -321, dy: - 101, pageIndex } },
+        //                 { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -176, dy: - 101, pageIndex } },
+        //             ],
+        //             errorId: "phaseTypePAEError",
+        //             mendatory: true
+        //         },
+        //     ]
+        // },
         {//3
             id: "counterSubPowerPAE",
+
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
                     id: "counterSubPowerPAE",
-                    type: "textInput",
-                    isNumeric: true,
+                    type: "picker",
+                    items: [
+                        { label: "Selectionner", value: "" },
+                        { label: "6", value: "6" },
+                        { label: "9", value: "9" },
+                        { label: "12", value: "12" },
+                        { label: "18", value: "18" },
+                    ],
                     label: "Puissance abonnement compteur",
-                    errorId: "counterSubPowerPAEError",
                     mendatory: true,
-                    pdfConfig: { dx: -200, dy: - 121, pageIndex }
+                    errorId: "counterSubPowerPAEError",
+                    pdfConfig: { dx: -200, dy: - 121, pageIndex },
+                    // style: { marginBottom: 32 },
+                    // rollBack: { fields: [{ id: "transmittersTypes", type: "array" }] }
                 },
             ]
         },
         {//4
             id: "powerCablePAE1",
+
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
@@ -93,18 +108,19 @@ export const checklistPAEModel = (params) => {
                     ],
                     mendatory: true,
                 },
-                {
-                    id: "powerCableSectionPAE",
-                    type: "textInput",
-                    label: "Section",
-                    errorId: "powerCableSectionPAEError",
-                    mendatory: true,
-                    pdfConfig: { dx: -110, dy: - 140, pageIndex }
-                },
+                // {
+                //     id: "powerCableSectionPAE",
+                //     type: "textInput",
+                //     label: "Section",
+                //     errorId: "powerCableSectionPAEError",
+                //     mendatory: true,
+                //     pdfConfig: { dx: -110, dy: - 140, pageIndex }
+                // },
             ]
         },
         {//5
             id: "powerCablePAE2",
+
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
@@ -112,7 +128,6 @@ export const checklistPAEModel = (params) => {
                     type: "textInput",
                     label: "Type câble d'alimentation",
                     errorId: "powerCableTypePAEError",
-                    mendatory: true,
                     pdfConfig: { dx: -370, dy: - 160, pageIndex }
                 },
                 {
@@ -128,6 +143,7 @@ export const checklistPAEModel = (params) => {
         },
         {//6
             id: "thermostatTypePAE",
+
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
@@ -145,6 +161,7 @@ export const checklistPAEModel = (params) => {
         },
         {//7
             id: "cableToPullLengthPAE",
+
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
@@ -158,30 +175,54 @@ export const checklistPAEModel = (params) => {
                 },
             ]
         },
-        {//8
-            id: "protectionPAE",
+        { //4
+            id: "internalUnityLocationPicturePAE",
             title: "PAC AIR/EAU - Partie Electrique",
             fields: [
                 {
-                    id: "interdiffProtectionPAE",
-                    type: "textInput",
-                    label: "Protection de l'interdifférentiel",
-                    errorId: "interdiffProtectionPAEError",
+                    id: "internalUnityLocationPicturePAE",
+                    label: "Photo emplacement unité intérieure",
+                    title: "Photo emplacement unité intérieure",
+                    type: "image",
+                    errorId: "internalUnityLocationPicturePAEError",
                     mendatory: true,
-                    pdfConfig: { dx: -257, dy: - 242, pageIndex }
                 },
                 {
-                    id: "disjoncteurProtectionPAE",
+                    id: "internalUnityLocationPictureNoticePAE",
+                    label: "Remarques",
+                    isImageNotice: true,
                     type: "textInput",
-                    label: "Protection de(s) disjoncteur(s)",
-                    errorId: "disjoncteurProtectionPAEError",
-                    mendatory: true,
-                    pdfConfig: { dx: -120, dy: - 242, pageIndex }
-                },
-            ]
+                    maxLength: 300,
+                    multiline: true,
+                }
+            ],
         },
+        // {//8
+        //     id: "protectionPAE",
+        //    
+        //     title: "PAC AIR/EAU - Partie Electrique",
+        //     fields: [
+        //         {
+        //             id: "interdiffProtectionPAE",
+        //             type: "textInput",
+        //             label: "Protection de l'interdifférentiel",
+        //             errorId: "interdiffProtectionPAEError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -257, dy: - 242, pageIndex }
+        //         },
+        //         {
+        //             id: "disjoncteurProtectionPAE",
+        //             type: "textInput",
+        //             label: "Protection de(s) disjoncteur(s)",
+        //             errorId: "disjoncteurProtectionPAEError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -120, dy: - 242, pageIndex }
+        //         },
+        //     ]
+        // },
         {//9
             id: "heatingPipeDiameterPAE",
+            section: { id: "hydraulic", label: "Partie Hydraulique" },
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -206,6 +247,7 @@ export const checklistPAEModel = (params) => {
         },
         {//10
             id: "pipeMaterialTypePAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -213,10 +255,12 @@ export const checklistPAEModel = (params) => {
                     label: "Types matériaux tuyaux",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -315, dy: -307, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -237, dy: - 307, pageIndex } },
-                        { label: "Fonte", value: "Fonte", icon: faQuestionCircle, pdfConfig: { dx: -170, dy: - 307, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -352, dy: -307, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -284, dy: - 307, pageIndex } },
+                        { label: "PER", value: "PER", icon: faQuestionCircle, pdfConfig: { dx: -218, dy: - 307, pageIndex } },
+                        { label: "Multicouches", value: "Multicouches", icon: faQuestionCircle, pdfConfig: { dx: -166, dy: - 307, pageIndex } },
                     ],
+                    isMultiOptions: true,
                     mendatory: true,
                     errorId: "pipeMaterialTypePAEError",
                     pdfConfig: { dx: -450, dy: - 305, pageIndex }
@@ -225,22 +269,32 @@ export const checklistPAEModel = (params) => {
         },
         {//11
             id: "heatingZonesCountPAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
                     id: "heatingZonesCountPAE",
-                    type: "textInput",
-                    isNumeric: true,
+                    type: "picker",
+                    items: [
+                        { label: "Selectionner un nombre", value: "" },
+                        { label: "1", value: "1" },
+                        { label: "2", value: "2" },
+                        { label: "3", value: "3" },
+                        { label: "4", value: "4" },
+                    ],
                     label: "Nombre zones de chauffage",
-                    errorId: "heatingZonesCountPAEError",
                     mendatory: true,
+                    errorId: "heatingZonesCountPAEError",
                     pdfConfig: { dx: -421, dy: - 327, pageIndex }
+                    // style: { marginBottom: 32 },
+                    // rollBack: { fields: [{ id: "transmittersTypes", type: "array" }] }
                 },
             ]
         },
         {//12
             id: "transmittersTypePAE",
-            title: "PAC AIR/EAU - Partie Electrique",
+
+            title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
                     id: "transmittersTypePAE",
@@ -248,8 +302,9 @@ export const checklistPAEModel = (params) => {
                     type: "options",
                     errorId: "transmittersTypePAEError",
                     items: [
-                        { label: 'Radiateur', value: 'Radiateur', icon: faQuestionCircle, pdfConfig: { dx: -325, dy: - 345, pageIndex } },
-                        { label: 'Plancher chauffant', value: 'Plancher chauffant', icon: faQuestionCircle, pdfConfig: { dx: -173, dy: - 345, pageIndex } },
+                        { label: 'Radiateur', value: 'Radiateur', icon: faQuestionCircle, pdfConfig: { dx: -358, dy: - 345, pageIndex } },
+                        { label: 'Plancher chauffant', value: 'Plancher chauffant', icon: faQuestionCircle, pdfConfig: { dx: -265, dy: - 345, pageIndex } },
+                        { label: 'Ventilo-convecteur  ', value: 'Ventilo-convecteur  ', icon: faQuestionCircle, pdfConfig: { dx: -139, dy: - 345, pageIndex } },
                     ],
                     mendatory: true,
                 },
@@ -257,6 +312,7 @@ export const checklistPAEModel = (params) => {
         },
         {//13
             id: "radiatorMaterialTypePAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -264,10 +320,9 @@ export const checklistPAEModel = (params) => {
                     label: "Types matériaux radiateurs",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -359, dy: -364, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -293, dy: - 364, pageIndex } },
-                        { label: "Fonte", value: "Fonte", icon: faQuestionCircle, pdfConfig: { dx: -210, dy: - 364, pageIndex } },
-                        { label: "Fonte Alu", value: "Fonte Alu", icon: faQuestionCircle, pdfConfig: { dx: -143, dy: - 364, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -330, dy: -364, pageIndex } },
+                        { label: "Fonte", value: "Fonte", icon: faQuestionCircle, pdfConfig: { dx: -238, dy: - 364, pageIndex } },
+                        { label: "Alu", value: "Alu", icon: faQuestionCircle, pdfConfig: { dx: -146, dy: - 364, pageIndex } },
                     ],
                     mendatory: true,
                     errorId: "radiatorMaterialTypePAEError",
@@ -276,6 +331,7 @@ export const checklistPAEModel = (params) => {
         },
         {//14
             id: "radiatorCountPAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -291,6 +347,7 @@ export const checklistPAEModel = (params) => {
         },
         {//15
             id: "isBallAndCircMergeRequiredPAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -319,6 +376,7 @@ export const checklistPAEModel = (params) => {
         },
         {//16
             id: "isExpansionTankRequiredPAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -336,7 +394,7 @@ export const checklistPAEModel = (params) => {
                     id: "expansionTankVolumePAE",
                     type: "textInput",
                     isNumeric: true,
-                    label: "6% volume d'eau (en L)",
+                    label: "6% du volume d'eau de chauffage (en L)",
                     errorId: "expansionTankVolumePAEError",
                     mendatory: true,
                     isConditional: true,
@@ -347,20 +405,23 @@ export const checklistPAEModel = (params) => {
         },
         {//17
             id: "hydraulicModuleLocationPAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
                     id: "hydraulicModuleLocationPAE",
                     type: "textInput",
-                    label: "Emplacement module hydraulique INT (sauf monobloc)",
+                    label: "Emplacement module hydraulique",
                     errorId: "hydraulicModuleLocationPAEError",
                     mendatory: true,
+                    instruction: { priority: "low", message: "Emplacement module hydraulique INT (sauf monobloc)" },
                     pdfConfig: { dx: -360, dy: - 440, pageIndex }
                 },
             ]
         },
         {//18
             id: "commentsElecPAE",
+
             title: "PAC AIR/EAU - Partie Hydraulique",
             fields: [
                 {
@@ -374,6 +435,7 @@ export const checklistPAEModel = (params) => {
         },
         {//19
             id: "tubeDiameterPAE",
+            section: { id: "ecs", label: "Partie EC Sanitaire" },
             title: "PAC AIR/EAU - Partie EC Sanitaire",
             fields: [
                 {
@@ -398,6 +460,7 @@ export const checklistPAEModel = (params) => {
         },
         {//20
             id: "tubeMaterialsPAE",
+
             title: "PAC AIR/EAU - Partie EC Sanitaire",
             fields: [
                 {
@@ -405,10 +468,12 @@ export const checklistPAEModel = (params) => {
                     label: "Type matériaux tuyaux",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -323, dy: -522, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -245, dy: - 522, pageIndex } },
-                        { label: "Plastique", value: "Plastique", icon: faQuestionCircle, pdfConfig: { dx: -177, dy: - 522, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -351, dy: -522, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -284, dy: - 522, pageIndex } },
+                        { label: "PER", value: "PER", icon: faQuestionCircle, pdfConfig: { dx: -217, dy: - 522, pageIndex } },
+                        { label: "Multicouches", value: "Multicouches", icon: faQuestionCircle, pdfConfig: { dx: -167, dy: - 522, pageIndex } },
                     ],
+                    isMultiOptions: true,
                     mendatory: true,
                     errorId: "tubeMaterialsPAEError",
                 },
@@ -420,7 +485,7 @@ export const checklistPAEModel = (params) => {
             fields: [
                 {
                     id: "PVCdrainingPAE",
-                    label: "Type d'émetteurs",
+                    label: "Evacuation PVC",
                     type: "options",
                     errorId: "PVCdrainingPAEError",
                     items: [
@@ -433,20 +498,22 @@ export const checklistPAEModel = (params) => {
         },
         {//22
             id: "PVCdrainingDiameterPAE",
-            title: "PAC AIR/EAU - Partie Hydraulique",
+            title: "PAC AIR/EAU - Partie EC Sanitaire",
             fields: [
                 {
                     id: "PVCdrainingDiameterPAE",
                     type: "textInput",
                     isNumeric: true,
-                    label: "Si évacuation PVC existante : diamètre (en mm)",
+                    label: "Si évacuation PVC existante: diamètre",
                     errorId: "PVCdrainingDiameterPAEError",
+                    instruction: { priority: "low", message: "Si évacuation PVC existante: diamètre en mm" },
                     pdfConfig: { dx: -253, dy: - 560, pageIndex }
                 },
             ]
         },
         {//23
             id: "GELocationPAE",
+            section: { id: "ext", label: "Partie Groupe Ext." },
             title: "PAC AIR/EAU - Partie Groupe Ext.",
             fields: [
                 {
@@ -462,7 +529,8 @@ export const checklistPAEModel = (params) => {
         },
         {//24
             id: "bracketTypePAE",
-            title: "PAC AIR/AIR - Partie Groupe Ext.",
+
+            title: "PAC AIR/EAU - Partie Groupe Ext.",
             fields: [
                 {
                     id: "bracketTypePAE",
@@ -480,12 +548,13 @@ export const checklistPAEModel = (params) => {
         },
         {//25
             id: "capacitorDrainingPAE",
+
             title: "PAC AIR/EAU - Partie Groupe Ext.",
             fields: [
                 {
                     id: "capacitorDrainingPAE",
                     type: "textInput",
-                    label: "Evacuation condensateur",
+                    label: "Evacuation condensat",
                     mendatory: true,
                     errorId: "capacitorDrainingPAEError",
                     pdfConfig: { dx: -421, dy: - 634, pageIndex }
@@ -494,6 +563,7 @@ export const checklistPAEModel = (params) => {
         },
         {//26
             id: "commentsExtGroupPAE",
+
             title: "PAC AIR/EAU - Partie Groupe Ext.",
             fields: [
                 {
@@ -505,23 +575,25 @@ export const checklistPAEModel = (params) => {
                 },
             ]
         },
-        {//27
-            id: "linksDiameterPAE",
-            title: "PAC AIR/EAU - Partie Frigorifique",
-            fields: [
-                {
-                    id: "linksDiameterPAE",
-                    type: "textInput",
-                    label: "Diamètre liaison",
-                    isNumeric: true,
-                    mendatory: true,
-                    errorId: "linksDiameterPAEError",
-                    pdfConfig: { dx: -421, dy: - 700, pageIndex }
-                },
-            ]
-        },
+        // {//27
+        //     id: "linksDiameterPAE",
+        //    
+        //     title: "PAC AIR/EAU - Partie Frigorifique",
+        //     fields: [
+        //         {
+        //             id: "linksDiameterPAE",
+        //             type: "textInput",
+        //             label: "Diamètre liaison",
+        //             isNumeric: true,
+        //             mendatory: true,
+        //             errorId: "linksDiameterPAEError",
+        //             pdfConfig: { dx: -421, dy: - 700, pageIndex }
+        //         },
+        //     ]
+        // },
         {//28
             id: "linksLengthPAE",
+            section: { id: "frigo", label: "Partie Frigorifique" },
             title: "PAC AIR/EAU - Partie Frigorifique",
             fields: [
                 {
@@ -537,6 +609,7 @@ export const checklistPAEModel = (params) => {
         },
         {//29
             id: "linksPassagePAE",
+
             title: "PAC AIR/EAU - Partie Frigorifique",
             fields: [
                 {
@@ -549,15 +622,38 @@ export const checklistPAEModel = (params) => {
                 },
             ]
         },
-        {//30
-            id: "linksTypePAE",
+        { //4
+            id: "linksPassagePicturePAE",
             title: "PAC AIR/EAU - Partie Frigorifique",
             fields: [
                 {
-                    id: "linksTypePAE",
-                    label: "Type de liaisons",
+                    id: "linksPassagePicturePAE",
+                    label: "Photo du passage des liaisons",
+                    title: "Photo du passage des liaisons",
+                    type: "image",
+                    errorId: "linksPassagePicturePAEError",
+                    mendatory: true,
+                },
+                {
+                    id: "linksPassagePictureNoticePAE",
+                    label: "Remarques",
+                    isImageNotice: true,
+                    type: "textInput",
+                    maxLength: 300,
+                    multiline: true,
+                }
+            ],
+        },
+        {//30
+            id: "gutterTypePAE",
+
+            title: "PAC AIR/EAU - Partie Frigorifique",
+            fields: [
+                {
+                    id: "gutterTypePAE",
+                    label: "Type de goulottes",
                     type: "options",
-                    errorId: "linksTypePAEError",
+                    errorId: "gutterTypePAEError",
                     items: [
                         { label: '80Ø', value: '80Ø', icon: faQuestionCircle, pdfConfig: { dx: -309, dy: - 757, pageIndex } },
                         { label: '120Ø', value: '120Ø', icon: faQuestionCircle, pdfConfig: { dx: -176, dy: - 757, pageIndex } },
@@ -566,8 +662,25 @@ export const checklistPAEModel = (params) => {
                 },
             ]
         },
+        {//30.1
+            id: "gutterLengthPAE",
+
+            title: "PAC AIR/EAU - Partie Frigorifique",
+            fields: [
+                {
+                    id: "gutterLengthPAE",
+                    type: "textInput",
+                    label: "Longueur des goulottes (en m)",
+                    isNumeric: true,
+                    mendatory: true,
+                    errorId: "gutterLengthPAEError",
+                    pdfConfig: { dx: -421, dy: - 777, pageIndex }
+                },
+            ]
+        },
         {//31
             id: "noticePAE",
+
             title: "PAC AIR/EAU - Remarques",
             fields: [
                 {
@@ -577,7 +690,8 @@ export const checklistPAEModel = (params) => {
                     errorId: "noticePAEError",
                     pdfConfig: { dx: -421, dy: - 819, pageIndex }
                 },
-            ]
+            ],
+            isLastSubStep: true
         },
     ]
 

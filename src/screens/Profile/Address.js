@@ -108,6 +108,8 @@ class MarkerTypes extends React.Component {
         Geocoder.from(lat, lng)
             .then(json => {
                 var addressComponent = json.results[0]
+                addressComponent.address_components.forEach((item) => console.log('ADDRESS', item))
+
                 const address = {
                     description: addressComponent.formatted_address,
                     place_id: addressComponent.place_id

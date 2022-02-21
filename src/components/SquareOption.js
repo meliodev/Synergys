@@ -45,7 +45,7 @@ const SquareOption = ({ element, index, elementSize, onPress }) => {
                 }
             </View>
             <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
-                <Text style={[element.label.length > 15 ? theme.customFontMSregular.small : theme.customFontMSregular.body, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
+                <Text style={[theme.customFontMSsemibold.caption, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
             </View>
         </TouchableOpacity>
     )

@@ -39,6 +39,57 @@ const { base, font, radius, padding, h1, h2, h3, header, body } = sizes
 const caption = 10
 const lineHeight = 12
 
+
+export const lineBreaker = (data, font, size, maxWidth) => {
+    const dataArray = [data]
+
+    let dataArrayFormated = []
+    const line_Height = font.heightAtSize(size)
+
+    for (var line of dataArray) {
+        const lineWidth = font.widthOfTextAtSize(line, size)
+
+        if (lineWidth > maxWidth) {
+
+            var lineLength = line.length
+            var lastCharIndex = maxWidth * lineLength / lineWidth
+
+            //Avoid spliting words
+            while (line.charAt(lastCharIndex) !== ' ') {
+                lastCharIndex = lastCharIndex - 1
+            }
+
+            var slicedLine = line.slice(0, lastCharIndex)
+            dataArrayFormated.push(slicedLine)
+
+            var restOfLine = line.slice(lastCharIndex)
+            var restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
+
+            while (restOfLineWidth > maxWidth) {
+                lineLength = restOfLine.length
+                lastCharIndex = maxWidth * lineLength / restOfLineWidth
+
+                //Avoid spliting words
+                while (restOfLine.charAt(lastCharIndex) !== ' ') {
+                    lastCharIndex = lastCharIndex - 1
+                }
+
+                slicedLine = restOfLine.slice(0, lastCharIndex)
+                dataArrayFormated.push(slicedLine)
+
+                restOfLine = restOfLine.slice(lastCharIndex)
+                restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
+            }
+
+            dataArrayFormated.push(restOfLine)
+        }
+
+        else dataArrayFormated.push(line)
+    }
+
+    return dataArrayFormated
+}
+
 export default class PdfGeneration extends Component {
 
     constructor(props) {
@@ -66,55 +117,6 @@ export default class PdfGeneration extends Component {
         if (purchasDocs.includes(this.docType)) {
             this.generatePurchaseDoc()
         }
-    }
-
-    lineBreaker(dataArray, font, size, maxWidth) {
-
-        let dataArrayFormated = []
-        const line_Height = font.heightAtSize(size)
-
-        for (var line of dataArray) {
-            const lineWidth = font.widthOfTextAtSize(line, size)
-
-            if (lineWidth > maxWidth) {
-
-                var lineLength = line.length
-                var lastCharIndex = maxWidth * lineLength / lineWidth
-
-                //Avoid spliting words
-                while (line.charAt(lastCharIndex) !== ' ') {
-                    lastCharIndex = lastCharIndex - 1
-                }
-
-                var slicedLine = line.slice(0, lastCharIndex)
-                dataArrayFormated.push(slicedLine)
-
-                var restOfLine = line.slice(lastCharIndex)
-                var restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
-
-                while (restOfLineWidth > maxWidth) {
-                    lineLength = restOfLine.length
-                    lastCharIndex = maxWidth * lineLength / restOfLineWidth
-
-                    //Avoid spliting words
-                    while (restOfLine.charAt(lastCharIndex) !== ' ') {
-                        lastCharIndex = lastCharIndex - 1
-                    }
-
-                    slicedLine = restOfLine.slice(0, lastCharIndex)
-                    dataArrayFormated.push(slicedLine)
-
-                    restOfLine = restOfLine.slice(lastCharIndex)
-                    restOfLineWidth = font.widthOfTextAtSize(restOfLine, size)
-                }
-
-                dataArrayFormated.push(restOfLine)
-            }
-
-            else dataArrayFormated.push(line)
-        }
-
-        return dataArrayFormated
     }
 
     sortOrderLines(orderLines) {
@@ -236,8 +238,7 @@ export default class PdfGeneration extends Component {
             var maxWidth = width * 0.5 - marginRight
 
             for (const clientContactLine of clientContactArray) {
-                var textArray = [clientContactLine]
-                var textArrayFormated = this.lineBreaker(textArray, timesRomanFont, caption, maxWidth)
+                var textArrayFormated = lineBreaker(clientContactLine, timesRomanFont, caption, maxWidth)
 
                 textArrayFormated.forEach((text) => {
                     pages[pageIndex].drawText(text,
@@ -312,8 +313,8 @@ export default class PdfGeneration extends Component {
             let clientSummaryBoxHeight = padding * 2 + clientNameHeight
 
             for (const clientAddressLine of clientAddressArray) {
-                textArray = [clientAddressLine]
-                textArrayFormated = this.lineBreaker(textArray, timesRomanFont, caption, maxWidth)
+
+                textArrayFormated = lineBreaker(clientAddressLine, timesRomanFont, caption, maxWidth)
 
                 textArrayFormated.forEach((text) => {
                     pages[pageIndex].drawText(text,
@@ -463,8 +464,7 @@ export default class PdfGeneration extends Component {
 
                     //Cat Name
                     category = orderLine.product.category
-                    textArray = [category]
-                    textArrayFormated = this.lineBreaker(textArray, timesRomanBoldFont, caption, maxWidth) //to upper case
+                    textArrayFormated = lineBreaker(category, timesRomanBoldFont, caption, maxWidth) //to upper case
                     textArrayFormated.forEach((text) => {
                         pages[pageIndex].drawText(text,
                             {
@@ -499,8 +499,7 @@ export default class PdfGeneration extends Component {
                         })
                 })
 
-                textArray = [orderLine.product.name]
-                textArrayFormated = this.lineBreaker(textArray, timesRomanFont, caption, maxWidth)
+                textArrayFormated = lineBreaker(orderLine.product.name, timesRomanFont, caption, maxWidth)
 
                 textArrayFormated.forEach((productName) => {
                     pages[pageIndex].drawText(productName,

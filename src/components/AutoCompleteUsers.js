@@ -100,7 +100,8 @@ export default class AutoCompleteUsers extends React.Component {
                 renderSuggestion={this.customRenderSuggestion}
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
-                autoFocus={this.props.autoFocus}
+               // autoFocus={this.props.autoFocus}
+                autoFocus={false}
                 showInput={this.props.showInput}
                 editable={this.props.editable}
                 suggestionsBellow={this.props.suggestionsBellow}

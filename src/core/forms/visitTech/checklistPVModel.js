@@ -27,10 +27,12 @@ export const checklistPVModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -265, dy: - 60, pageIndex },
                 },
-            ]
+            ],
+            isFirstSubStep: true
         },
         {//1
             id: "panelTotalPowerPV",
+            subStep: { id: "pv", label: "Photovoltaïque" },
             title: "PV - Partie Electrique",
             fields: [
                 {
@@ -267,7 +269,8 @@ export const checklistPVModel = (params) => {
                     errorId: "noticePVError",
                     pdfConfig: { dx: -421, dy: - 791, pageIndex }
                 },
-            ]
+            ],
+            isLastSubStep: true
         },
     ]
 

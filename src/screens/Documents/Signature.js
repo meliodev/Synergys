@@ -235,7 +235,7 @@ class Signature extends Component {
             Alert.alert('', 'Erreur inattendue lors de la vérification du code', [{ text: 'OK', style: 'cancel' }], { cancelable: false })
             return
         }
- 
+
         //UX security
         else if (resp.data.status === 'approved') {
             setTimeout(() => this.setState({ codeApproved: true, approvalMessage: 'Code approuvé...' }), 0)
@@ -285,7 +285,9 @@ class Signature extends Component {
                         returnKeyType="done"
                         value={this.state.code}
                         onChangeText={code => this.setState({ code: Number(code) })}
-                        autoFocus={showDialog} />
+                       // autoFocus={showDialog}
+                        autoFocus={false}
+                    />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 15, paddingHorizontal: constants.ScreenWidth * 0.03 }}>
                         <TouchableOpacity disabled={disableResend} onPress={this.verifyUser}>
                             <Text style={[theme.customFontMSmedium.body, { color: disableResend ? theme.colors.placeholder : theme.colors.primary }]}>Renvoyer le code</Text>

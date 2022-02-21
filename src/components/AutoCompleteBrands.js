@@ -128,7 +128,8 @@ class AutoCompleteBrands extends React.Component {
                     //handleEmptyDate= {() => console.log('Empty data..')}
                     createTagOnSpace
                     style={styles.autotags}
-                    autoFocus={this.props.autoFocus}
+                   // autoFocus={this.props.autoFocus}
+                    autoFocus={false}
                     showInput={this.props.showInput}
                     suggestionsBellow={this.props.suggestionsBellow}
                     editable={this.props.editable}

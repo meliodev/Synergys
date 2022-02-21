@@ -6,7 +6,7 @@ export const version6 = {
         instructions: 'Lorem ipsum dolor',
         phaseOrder: 1,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
-        steps: { 
+        steps: {
             'prospectCreation': {
                 title: 'Création prospect',
                 instructions: 'Lorem ipsum dolor',
@@ -730,29 +730,29 @@ export const version6 = {
                         comment: '',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker' },
-                            { label: 'Financement', id: 'financing', onSelectType: 'commentPicker' },
+                            { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker', nextStep: 'technicalVisitCreation' },
+                            { label: 'Financement', id: 'financing', onSelectType: 'commentPicker', nextStep: 'technicalVisitCreation' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
                     },
                     //Montant de l'acompte? (zone de saisie) //operation: add it to bill sub attributes
                     //Reste à payer: (zone de saisie)
-                    {
-                        id: 'quoteValidation',
-                        title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
-                        instructions: "",
-                        actionOrder: 2,
-                        type: 'manual',
-                        comment: '',
-                        responsable: 'ADV',
-                        status: 'pending',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                            { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
-                        ],
-                    },
+                    // {
+                    //     id: 'quoteValidation',
+                    //     title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+                    //     instructions: "",
+                    //     actionOrder: 2,
+                    //     type: 'manual',
+                    //     comment: '',
+                    //     responsable: 'ADV',
+                    //     status: 'pending',
+                    //     verificationType: 'multiple-choices',
+                    //     choices: [
+                    //         { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+                    //         { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
+                    //     ],
+                    // },
                 ]
             },
             'technicalVisitCreation': {

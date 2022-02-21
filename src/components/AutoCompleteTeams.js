@@ -91,7 +91,8 @@ export default class AutoCompleteInput extends React.Component {
                 onCustomTagCreated={this.onCustomTagCreated}
                 createTagOnSpace
                 style={{ backgroundColor: '#fff', marginLeft: -constants.ScreenWidth * 0.025, paddingBottom: 15, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: theme.colors.gray }}
-                autoFocus={this.props.autoFocus}
+               // autoFocus={this.props.autoFocus}
+                autoFocus={false}
                 showInput={this.props.showInput}
                 createTagOnSpace={false}
             // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}

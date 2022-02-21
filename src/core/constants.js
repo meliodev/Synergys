@@ -12,7 +12,7 @@ export const constants = {
     ScreenHeight: height
 }
 
-export const appVersion = "1.3.2"
+export const appVersion = "1.4.0"
 
 export const latestProcessVersion = "version6"
 

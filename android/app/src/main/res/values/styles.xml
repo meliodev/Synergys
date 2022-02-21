@@ -6,6 +6,7 @@
         <!-- Customize your theme here. -->
         <item name="android:textColor">#1B2331</item> 
         <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
+        <item name="android:editTextBackground">@drawable/edit_text</item>
         <!-- <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem</item> -->
     </style>
 

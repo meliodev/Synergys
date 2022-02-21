@@ -5,8 +5,51 @@ import * as theme from '../../theme'
 export const visiteTechModel = () => {
 
     const model = [
-        
-        {//1
+        { //1
+            id: "houseFacadePicture",
+            title: "Informations générales",
+            fields: [
+                {
+                    id: "houseFacadePicture",
+                    label: "Ajouter photo de la façade de la maison",
+                    title: "Photo de la façade de la maison",
+                    type: "image",
+                    errorId: "houseFacadePictureError",
+                    mendatory: true,
+                },
+                {
+                    id: "houseFacadePictureNotice",
+                    label: "Remarques",
+                    isImageNotice: true,
+                    type: "textInput",
+                    maxLength: 300,
+                    multiline: true,
+                }
+            ],
+        },
+        { //2
+            id: "houseAccessPicture",
+            title: "Informations générales",
+            fields: [
+                {
+                    id: "houseAccessPicture",
+                    label: "Ajouter photo de l'accès",
+                    title: "Photo de l'accès",
+                    type: "image",
+                    errorId: "houseAccessPictureError",
+                    mendatory: true,
+                },
+                {
+                    id: "houseAccessPictureNotice",
+                    label: "Remarques",
+                    isImageNotice: true,
+                    type: "textInput",
+                    maxLength: 300,
+                    multiline: true,
+                }
+            ],
+        },
+        {//3
             id: "subPower",
             title: "Informations générales",
             fields: [{
@@ -19,7 +62,29 @@ export const visiteTechModel = () => {
                 pdfConfig: { dx: -260, dy: - 187, pageIndex: 0 }
             }],
         },
-        {//2
+        { //4
+            id: "electricMeterPicture",
+            title: "Informations générales",
+            fields: [
+                {
+                    id: "electricMeterPicture",
+                    label: "Ajouter photo du compteur",
+                    title: "Photo du compteur",
+                    type: "image",
+                    errorId: "electricMeterPictureError",
+                    mendatory: true,
+                },
+                {
+                    id: "electricMeterPictureNotice",
+                    label: "Remarques",
+                    isImageNotice: true,
+                    type: "textInput",
+                    maxLength: 300,
+                    multiline: true,
+                }
+            ],
+        },
+        {//5
             id: "phaseType",
             title: "Informations générales",
             fields: [{
@@ -33,16 +98,37 @@ export const visiteTechModel = () => {
                 mendatory: true,
             }]
         },
-        {//3
-            id: "eletricPanelSize",
+        { //6
+            id: "electricPanelPicture",
+            title: "Informations générales",
+            fields: [
+                {
+                    id: "electricPanelPicture",
+                    label: "Photo du tableau électrique existant",
+                    title: "Photo du tableau électrique existant",
+                    type: "image",
+                    errorId: "electricPanelPictureError",
+                    mendatory: true,
+                },
+                {
+                    id: "electricPanelPictureNotice",
+                    label: "Remarques",
+                    isImageNotice: true,
+                    type: "textInput",
+                    maxLength: 300,
+                    multiline: true,
+                }
+            ],
+        },
+        {//7
+            id: "electricPanelLocation",
             title: "Informations générales",
             fields: [{
-                id: "eletricPanelSize",
+                id: "electricPanelLocation",
                 type: "textInput",
-                isNumeric: true,
-                label: "Taille du tableau électrique à installer",
-                instruction: { priority: "low", message: "Renseigner le nombre de modules" },
-                errorId: "eletricPanelSizeError",
+                label: "Emplacement du tableau",
+                instruction: { priority: "low", message: "Indiquez l'emplacement du tableau" },
+                errorId: "electricPanelLocationError",
                 mendatory: true,
                 pdfConfig: { dx: -240, dy: - 402, pageIndex: 0 }
             }],

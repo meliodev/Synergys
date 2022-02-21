@@ -83,6 +83,7 @@ class StepsForm extends Component {
             pagesDone: [],
             pageIndex: 0,
             stepIndex: 0,
+            subStepIndex: -1,
             progress: 0,
             isPdfModalVisible: false,
             pdfBase64: "",
@@ -106,25 +107,51 @@ class StepsForm extends Component {
     //##Initialization
     async componentDidMount() {
         try {
-            setStatusBarColor(this, { backgroundColor: "#003250", barStyle: "light-content" })
-            if (this.state.isEdit) await this.initEditMode()
-            else if (this.props.autoGen) {
+            const statusBarStyle = { backgroundColor: "#003250", barStyle: "light-content" }
+            setStatusBarColor(this, statusBarStyle)
+            if (this.state.isEdit)
+                await this.initEditMode()
+            else if (this.props.autoGen)
                 await this.handleSubmit(true, false)
-            }
             this.initialState = _.cloneDeep(this.state)
-            this.setState({ initialLoading: false })
         }
         catch (e) {
             displayError({ message: e.message })
         }
+        finally {
+            this.setState({ initialLoading: false })
+        }
+    }
+
+    async componentDidUpdate(prevProps, prevState, snapshot) {
+        //For some forms parent initialState can change --> We have to update the generated PDF.
+        if (prevProps.initialState !== this.props.initialState) {
+            this.setState({ loading: true })
+            await this.onInitialStateChange()
+            this.setState({ loading: false })
+        }
+    }
+
+    onInitialStateChange() {
+        return new Promise((resolve, reject) => {
+            this.setState(this.props.initialState, async () => {
+                const pdfBase64 = await this.props.generatePdf(this.state, this.props.collection)
+                this.setState({ pdfBase64 }, () => resolve(true))
+            })
+        })
     }
 
     async initEditMode() {
         try {
-            let document = await fetchDocument(this.props.collection, this.DocId)
-            document = this.setDocument(document)
-            if (!document) return
-            const pdfBase64 = await this.props.generatePdf(document, this.props.collection)
+            const { collection } = this.props
+            let document = await fetchDocument(collection, this.DocId)
+            //document = this.setDocument(document)
+            if (!document) {
+                this.setState({ docNotFound: true })
+                return
+            }
+            this.setState(document)
+            const pdfBase64 = await this.props.generatePdf(document, collection)
             this.setState({ pdfBase64 })
         }
         catch (e) {
@@ -132,23 +159,24 @@ class StepsForm extends Component {
         }
     }
 
-    setDocument(document) {
-        if (!document)
-            this.setState({ docNotFound: true })
-        else {
-            const defaultProps = ["project", "createdAt", "createdBy", "editedAt", "editedBy", "deleted", "isSubmitted"]
-            let properties = [...this.props.stateProperties, ...defaultProps]
-            document = formatDocument(document, properties)
-            this.setState(document)
-        }
-        return document
-    }
+    // setDocument(document) {
+    //     if (!document) 
+    //         this.setState({ docNotFound: true })
+    //     else {
+    //         const defaultProps = ["project", "createdAt", "createdBy", "editedAt", "editedBy", "deleted", "isSubmitted"]
+    //         let properties = [...this.props.stateProperties, ...defaultProps]
+    //         document = formatDocument(document, properties)
+    //         this.setState(document)
+    //     }
+    //     return document
+    // }
 
     //##Progression
     renderProgression(pages) {
-        const { pagesDone } = this.state
+        // const { pagesDone } = this.state
         const pagesCount = pages.length - 1
-        const progress = Math.round((pagesDone.length / pagesCount) * 100)
+        // const progress = Math.round((pagesDone.length / pagesCount) * 100)
+        const progress = Math.round((this.state.pageIndex / pagesCount) * 100)
 
         return (
             <View style={{ marginTop: 16, backgroundColor: '#003250' }}>
@@ -169,7 +197,6 @@ class StepsForm extends Component {
         const isSelected = stepIndex === index
         const { primary, white, gray_medium } = theme.colors
         const backgroundColor = isSelected ? primary : white
-        const borderColor = isSelected ? white : gray_medium
         const color = isSelected ? white : gray_medium
 
         return (
@@ -181,6 +208,7 @@ class StepsForm extends Component {
 
     //##Form
     renderSteps(pages, steps) {
+
         return (
             <View style={styles.stepsContainer}>
                 {steps.map((step, index) => {
@@ -192,14 +220,12 @@ class StepsForm extends Component {
                             />
                         )
 
-                    else return (
-                        <View
-                            key={index.toString()}
-                            style={{ flexDirection: "row", alignItems: "center" }}
-                        >
-                            {this.renderStep(step, index)}
-                        </View>
-                    )
+                    else {
+                        const isStepObject = typeof (step) === "object"
+                        const stepLabel = isStepObject ? step.label : step
+                        const flex = (1 / step.subStepsCount) - 0.02
+                        return this.renderStep(stepLabel, index)
+                    }
                 })
                 }
             </View >
@@ -211,11 +237,19 @@ class StepsForm extends Component {
         const { showPagination } = this.props
         const { title } = pages[pageIndex]
         const pagination = showPagination ? `(${pageIndex + 1}/${pages.length})` : ""
-        
+        // const titles = title.split(' -')
+        // const title1 = titles[0]
+        // const title2 = titles[1]
+
         return (
-            <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', marginTop: 16, color: theme.colors.gray_dark }]}>
-                {title} {pagination}
-            </Text>
+            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: theme.padding / 2, paddingHorizontal: theme.padding }}>
+                <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.gray_dark }]}>
+                    {title}
+                </Text>
+                {/* <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: theme.colors.gray_dark, marginTop: 2 }]}>
+                    {title2}
+                </Text> */}
+            </View>
         )
     }
 
@@ -228,9 +262,10 @@ class StepsForm extends Component {
     }
 
     renderForm(pages) {
-        const { pageIndex } = this.state
+        const { pageIndex, showSuccessMessage } = this.state
 
-        if (pages[pageIndex].id === "submit") //Only for Simulations
+        // if (pages[pageIndex].id === "submit") //Only for Simulations
+        if (showSuccessMessage)
             return this.successMessage()
 
         else return (
@@ -286,6 +321,7 @@ class StepsForm extends Component {
                                 returnKeyType="done"
                                 keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
                                 value={value}
+                                multiline={field.multiline}
                                 onChangeText={value => {
                                     this.removeErrors(errorId)
                                     let update = {}
@@ -320,6 +356,7 @@ class StepsForm extends Component {
                             label={label}
                             returnKeyType="done"
                             keyboardType={isNumeric ? 'numeric' : isEmail ? "email-address" : "default"}
+                            multiline={field.multiline}
                             value={value}
                             onChangeText={value => {
                                 this.removeErrors(errorId)
@@ -759,7 +796,7 @@ class StepsForm extends Component {
     async goNext() {
 
         return new Promise((resolve, reject) => {
-            const { pageIndex, pagesDone, stepIndex } = this.state
+            const { pageIndex, pagesDone, stepIndex, subStepIndex, showSuccessMessage } = this.state
             const { pages, collection } = this.props
             let update = {}
 
@@ -780,43 +817,52 @@ class StepsForm extends Component {
             update.pagesDone = pagesDone
             update.isBack = false
 
-            //Increment step
-            if (pages[pageIndex].isLast || pages[pageIndex + 1] && pages[pageIndex + 1].isFirst) {
-                update.stepIndex = stepIndex + 2
-            }
-
-            //Show results (Simulation) or submit
-            const isLastFormPage = pageIndex === pages.length - 2
+            //Show results (Simulation) or Submit
             const isLastPage = pageIndex === pages.length - 1
 
             //Set & Show simulation results
-            if (collection === "Simulations" && isLastFormPage) {
-                const { products, colorCat, estimation } = this.setResults()
-                update.products = products
-                update.colorCat = colorCat
-                update.estimation = estimation
-                update.showSuccessMessage = true
-                update.loading = false
+            if (isLastPage) {
+                if (collection === "Simulations" && !showSuccessMessage) {
+                    const { products, colorCat, estimation } = this.setResults()
+                    update.products = products
+                    update.colorCat = colorCat
+                    update.estimation = estimation
+                    update.showSuccessMessage = true
+                    update.loading = false
+                }
             }
 
-            //Increment page
-            if (!isLastPage)
+            else {
+                //Increment page
                 update.pageIndex = pageIndex + 1
+
+                //Increment step
+                if (pages[pageIndex].isLast || pages[pageIndex + 1] && pages[pageIndex + 1].isFirst) {
+                    update.stepIndex = stepIndex + 2
+                }
+
+                //Increment subStep
+                if (pages[pageIndex].isLastSubStep || pages[pageIndex + 1] && pages[pageIndex + 1].isFirstSubStep) {
+                    update.subStepIndex = subStepIndex + 1
+                }
+            }
 
             //Update
             this.setState(update, async () => {
-                if (isLastPage)
-                    await this.handleSubmit(true, true)
-
-                resolve(true)
+                if (isLastPage) {
+                    const runSubmit = collection === "Simulations" && showSuccessMessage || collection !== "Simulations"
+                    if (runSubmit) {
+                        await this.handleSubmit(true, true)
+                    }
+                    resolve(true)
+                }
             })
 
         })
-
     }
 
     goBack() {
-        let { pageIndex, pagesDone, stepIndex } = this.state
+        let { pageIndex, pagesDone, stepIndex, subStepIndex } = this.state
         const { pages } = this.props
 
         //Set direction (useful for handling pageIndex/pagesDone update)
@@ -837,6 +883,10 @@ class StepsForm extends Component {
         //Decrement step
         if (pages[pageIndex].isLast || pages[pageIndex + 1] && pages[pageIndex + 1].isFirst)
             this.setState({ stepIndex: stepIndex - 2 })
+
+        //Decrement subStep
+        if (pages[pageIndex].isLastSubStep || pages[pageIndex + 1] && pages[pageIndex + 1].isFirstSubStep)
+            this.setState({ subStepIndex: subStepIndex - 1 })
     }
 
     verifyFields(pages, pageIndex) {
@@ -899,7 +949,7 @@ class StepsForm extends Component {
 
     removeErrors(errorId) {
 
-        const { pageIndex, pagesDone, stepIndex } = this.state
+        const { pageIndex, pagesDone } = this.state
         let errorUpdate = {}
 
         for (const field of this.props.pages[pageIndex].fields) {
@@ -917,11 +967,9 @@ class StepsForm extends Component {
         return new Promise(async (resolve, reject) => {
 
             try {
-                console.log('111111111111111')
-
                 this.setState({ loading: true })
 
-                //Verify onPress Check icon
+                //Inputs Verification
                 if (!ignoreVerification) {
                     const isValid = this.verifyFields(this.props.pages, this.state.pageIndex)
                     if (!isValid) {
@@ -938,7 +986,6 @@ class StepsForm extends Component {
                 form.isSubmitted = form.isSubmitted || isSubmitted
                 const DocId = this.state.isEdit ? this.DocId : idPattern ? generateId(idPattern) : ""
 
-                console.log('2')
                 //Persist
                 if (collection) {
                     db.collection(collection).doc(DocId).set(form)
@@ -955,6 +1002,7 @@ class StepsForm extends Component {
                     readOnly: true,
                     isEdit: true,
                     loading: false,
+                    showSuccessMessage: false,
                 }
 
                 this.setState(update, () => {
@@ -964,7 +1012,12 @@ class StepsForm extends Component {
 
             catch (e) {
                 console.log("ERROR SUBMIT....................", e.message)
+                displayError({ message: e.message })
                 reject(e)
+            }
+
+            finally {
+                this.setState({ loading: false })
             }
         })
 
@@ -982,6 +1035,7 @@ class StepsForm extends Component {
         delete state.pagesDone
         delete state.pageIndex
         delete state.stepIndex
+        delete state.subStepIndex
         delete state.progress
         delete state.isPdfModalVisible
         delete state.pdfBase64
@@ -1323,6 +1377,27 @@ class StepsForm extends Component {
         )
     }
 
+    calculateStepIndex(selectedPageIndex) {
+        let stepIndex = 0
+        let subStepIndex = 0
+        const { pages } = this.props
+
+        let i = 0
+        let pagesIterator = pages[i]
+        while (i <= selectedPageIndex) {
+            if (pagesIterator.isLast) {
+                stepIndex += 2
+            }
+            if (pagesIterator.isLastSubStep) {
+                subStepIndex += 1
+            }
+            i += 1
+            pagesIterator = pages[i]
+        }
+
+        return { stepIndex, subStepIndex }
+    }
+
     //##Overview
     renderOverview() {
         const { readOnly, isEdit } = this.state
@@ -1421,16 +1496,40 @@ class StepsForm extends Component {
                                             else {
                                                 const emptyAndConditional = !values && field.isConditional
                                                 return (
-                                                    <TouchableOpacity
-                                                        key={field.id.toString()}
-                                                        onPress={() => {
-                                                            if (emptyAndConditional) return
-                                                            this.setState({ pageIndex, readOnly: false, submitted: false })
-                                                        }}
-                                                        style={styles.overviewRow}>
-                                                        <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_dark }]}>{field.label}</Text>
-                                                        <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{values || "-"}</Text>
-                                                    </TouchableOpacity>
+                                                    <View>
+                                                        {page.subStep &&
+                                                            <View style={{ backgroundColor: "#003250", paddingHorizontal: theme.padding, paddingVertical: theme.padding / 2 }}>
+                                                                <Text style={[theme.customFontMSmedium.header, { color: theme.colors.white }]}>
+                                                                    {page.subStep.label}
+                                                                </Text>
+                                                            </View>
+                                                        }
+                                                        {page.section && key === 0 &&
+                                                            <View style={{ backgroundColor: theme.colors.gray_light, paddingHorizontal: theme.padding, paddingVertical: theme.padding / 2 }}>
+                                                                <Text style={[theme.customFontMSmedium.body, { color: "#003250" }]}>
+                                                                    {page.section.label}
+                                                                </Text>
+                                                            </View>
+                                                        }
+                                                        <TouchableOpacity
+                                                            key={field.id.toString()}
+                                                            onPress={() => {
+                                                                if (emptyAndConditional) return
+                                                                const { stepIndex, subStepIndex } = this.calculateStepIndex(pageIndex)
+                                                                this.setState({
+                                                                    pageIndex,
+                                                                    stepIndex,
+                                                                    subStepIndex,
+                                                                    showSuccessMessage: false,
+                                                                    readOnly: false,
+                                                                    submitted: false,
+                                                                })
+                                                            }}
+                                                            style={styles.overviewRow}>
+                                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_dark }]}>{field.label}</Text>
+                                                            <Text style={[theme.customFontMSregular.caption, styles.overviewText, { color: emptyAndConditional ? theme.colors.gray_medium : theme.colors.gray_googleAgenda }]}>{values || "-"}</Text>
+                                                        </TouchableOpacity>
+                                                    </View>
                                                 )
                                             }
                                         })
@@ -1449,6 +1548,36 @@ class StepsForm extends Component {
 
             </View>
         )
+    }
+
+    renderSubSteps() {
+        const { stepIndex } = this.state
+        const { subSteps, subStepsCount } = this.props.steps[stepIndex]
+
+        if (!subSteps) return null
+
+        const flex = (1 / subStepsCount) - 0.02
+
+        return (
+            <View style={styles.subStepsContainer}>
+                {
+                    subSteps.map((subStep, i) => {
+                        const isSubStepSelected = this.state.subStepIndex === i
+                        const { primary, white } = theme.colors
+                        const backgroundColor = isSubStepSelected ? primary : white
+                        return (
+                            <View style={[styles.subStepContainer, { flex, backgroundColor, borderWidth: isSubStepSelected ? 0 : StyleSheet.hairlineWidth }]}>
+                                <Text style={[theme.customFontMSmedium.body, { textAlign: "center", color: isSubStepSelected ? theme.colors.white : theme.colors.gray_dark }]}>
+                                    {subStep.id}
+                                </Text>
+                            </View>
+                        )
+                    }
+                    )
+                }
+            </View >
+        )
+
     }
 
     renderContent() {
@@ -1476,6 +1605,7 @@ class StepsForm extends Component {
                 }
 
                 <View style={styles.body}>
+                    {this.renderSubSteps()}
                     {!showSuccessMessage && this.renderTitle(pages)}
                     {this.renderForm(pages)}
                 </View>
@@ -1494,7 +1624,7 @@ class StepsForm extends Component {
             this.setState({ products, colorCat, estimation })
         }
 
-        const isLastPage = this.state.pageIndex === pages.length - 1
+        const isLastPage = pageIndex === pages.length - 1
         const isSubmitted = isLastPage
         await this.handleSubmit(isSubmitted, false)
     }
@@ -1620,9 +1750,22 @@ const styles = StyleSheet.create({
     formContainer: {
         flexGrow: 1,
         // justifyContent: 'center',
-        paddingTop: constants.ScreenHeight * 0.1,
+        paddingTop: constants.ScreenHeight * 0.05,
         paddingBottom: 24,
         paddingHorizontal: theme.padding
+    },
+    subStepsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: theme.padding / 2,
+        marginHorizontal: theme.padding
+    },
+    subStepContainer: {
+        height: 25,
+        justifyContent: 'center',
+        alignItems: "center",
+        borderRadius: 2,
+        borderColor: theme.colors.gray_medium
     },
     header: {
         backgroundColor: "#003250",
@@ -1637,6 +1780,7 @@ const styles = StyleSheet.create({
     },
     stepsSeparator: {
         flex: 1,
+        alignSelf: "center",
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: theme.colors.white,
     },
@@ -1647,7 +1791,7 @@ const styles = StyleSheet.create({
     },
     stepsContainer: {
         flexDirection: "row",
-        alignItems: 'center',
+        //  alignItems: 'center',
         justifyContent: "space-between",
         backgroundColor: "#003250"
     },
