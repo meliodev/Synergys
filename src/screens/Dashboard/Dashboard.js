@@ -5,6 +5,8 @@ import { Appbar } from '../../components'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 
+import { crashlytics } from '../../firebase';
+
 import * as theme from '../../core/theme'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
 
@@ -18,7 +20,7 @@ class Dashboard extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <Appbar menu title titleText="Accueil"/>
+                <Appbar menu title titleText="Accueil" />
                 <DashboardMenu navigation={this.props.navigation} />
             </View>
         )

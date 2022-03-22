@@ -9,7 +9,6 @@ import { CustomIcon, Button } from '../../../components/index'
 import { ficheEEBBase64 } from '../../../assets/files/ficheEEBBase64'
 
 import { ficheEEBModel } from '../../../core/forms/ficheEEB/ficheEEBModel'
-import { generatePdfForm } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 
@@ -237,7 +236,6 @@ class CreateSimulation extends Component {
                 welcomeMessage={this.welcomeMessage}
                 steps={["Votre Foyer", "", "Votre Habitation", "", "Votre Bilan"]}
                 pages={ficheEEBModel}
-                generatePdf={(formInputs) => generatePdfForm(formInputs, "Simulations")}
                 genButtonTitle="Générer une fiche EEB"
                 fileName="Fiche EEB"
             />

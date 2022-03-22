@@ -380,6 +380,23 @@ export const ficheEEBModel = [
             },
         ]
     },
+    { //20
+        id: "isParkingMinFourMetersSqr",
+        title: "HABITATION",
+        fields: [
+            {
+                id: "isParkingMinFourMetersSqr",
+                label: "Garage ou dépendance avec disponibilité de plus de 4m2 ?",
+                type: "options",
+                items: [
+                    { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -318, dy: - 154, pageIndex: 0 } },
+                    { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { dx: -396, dy: - 154, pageIndex: 0 } },
+                ],
+                errorId: "isParkingMinFourMetersSqrError",
+                mendatory: true
+            }
+        ],
+    },
     { //17
         id: "basementType",
         title: "HABITATION",

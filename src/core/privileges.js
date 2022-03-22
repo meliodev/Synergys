@@ -20,7 +20,7 @@ export const configureQuery = (collection, queryFilters, params) => {
             const { clause, filter, operation, value, field, sort } = queryFilter
 
             if (queryFilter.clause === 'where') {
-                query = query.where(filter, operation, value).limit(3)
+                query = query.where(filter, operation, value)
             }
 
             else if (queryFilter.clause === 'orderBy') {

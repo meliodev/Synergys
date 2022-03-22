@@ -44,7 +44,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 width: elementSize,
                 height: elementSize,
                 backgroundColor: theme.colors.white,
-                ...theme.style.shadow
+               // ...theme.style.shadow
             }
         }
 
@@ -261,7 +261,7 @@ const ModalOptions = ({
 const styles = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
-        marginTop: constants.ScreenHeight * 0.58,
+        marginTop: constants.ScreenHeight*0.58,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,

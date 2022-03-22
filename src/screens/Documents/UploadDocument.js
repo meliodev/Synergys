@@ -994,7 +994,7 @@ class UploadDocument extends Component {
                                         title={title}
                                         columns={columns}
                                         isLoading={modalLoading}
-                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? constants.ScreenHeight * 0.13 : constants.ScreenHeight * 0.5 }}
+                                        modalStyle={{ marginTop: modalContent === 'docTypes' ? constants.ScreenHeight * 0.05 : constants.ScreenHeight * 0.5 }}
                                         isVisible={showModal}
                                         toggleModal={() => this.toggleModal()}
                                         elements={elements}

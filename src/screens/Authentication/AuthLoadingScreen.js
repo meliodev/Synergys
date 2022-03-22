@@ -303,6 +303,7 @@ class AuthLoadingScreen extends Component {
       await fcmTokensRef.doc(uid).set({ tokens }, { merge: true })
     }
     catch (e) {
+      console.log('Error', e)
       throw new Error("Error while adding token to current user...")
     }
   }

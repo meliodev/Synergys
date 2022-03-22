@@ -12,9 +12,10 @@ export const constants = {
     ScreenHeight: height
 }
 
-export const appVersion = "1.4.0"
+export const appVersion = "1.4.4"
+//export const appVersionDescription = "Lorem ipsum dolor"
 
-export const latestProcessVersion = "version6"
+export const latestProcessVersion = "version7"
 
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },
