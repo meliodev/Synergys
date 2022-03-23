@@ -1,12 +1,13 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '11.0'
+platform :ios, '15.0'
 
 target 'AsanaWorld' do
   config = use_native_modules!
 
   use_react_native!(:path => config["reactNativePath"])
+
 
   pod 'rn-fetch-blob', :path => '../node_modules/rn-fetch-blob'
   pod 'RNSVG', :path => '../node_modules/react-native-svg'
@@ -14,16 +15,35 @@ target 'AsanaWorld' do
   #use_frameworks!
   pod 'RNInputMask', :path => '../node_modules/react-native-text-input-mask/ios/InputMask'
 
+  pod 'GoogleMaps'  # Remove this line if you don't want to support GoogleMaps on iOS
+  pod 'react-native-maps', path: '../node_modules/react-native-maps'
+  pod 'react-native-google-maps', path: '../node_modules/react-native-maps'  # If you need GoogleMaps support on iOS
+
   target 'AsanaWorldTests' do
     inherit! :complete
     # Pods for testing
   end
 
+
+  # post_install do |installer|
+  #   installer.pods_project.targets.each do |target|
+  #     target.build_configurations.each do |config|
+  #       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '11'
+  #     end
+  #   end
+  # end
+
   post_install do |installer|
     installer.pods_project.targets.each do |target|
-      target.build_configurations.each do |config|
-        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '11'
-      end
+        if target.name == 'react-native-google-maps'
+            target.build_configurations.each do |config|
+                config.build_settings['CLANG_ENABLE_MODULES'] = 'No'
+            end
+        end
+        
+        if target.name == "React"
+            target.remove_from_project
+        end
     end
   end
 

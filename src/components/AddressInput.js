@@ -111,6 +111,7 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
                         {renderAddressInput(false)}
                     </TouchableOpacity>
                 }
+                
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
                     <Checkbox
                         status={checked ? 'checked' : 'unchecked'}

@@ -100,7 +100,8 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     <TextInput
                         label={option.title}
                         value={option.value}
-                        editable={false} />
+                        editable={false}
+                    />
                 </TouchableOpacity>
             )
         }
