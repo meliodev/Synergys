@@ -286,7 +286,8 @@ class Signature extends Component {
                         returnKeyType="done"
                         value={this.state.code}
                         onChangeText={code => this.setState({ code: Number(code) })}
-                        //autoFocus={showDialog}
+                       // autoFocus={showDialog}
+                        autoFocus={false}
                     />
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 15, paddingHorizontal: constants.ScreenWidth * 0.03 }}>
                         <TouchableOpacity disabled={disableResend} onPress={this.verifyUser}>

@@ -15,7 +15,7 @@ import AppToast from './components/global/AppToast'
 import Wrapper from './Wrapper'
 import RootController from './Navigation/DrawerNavigator'
 
-import firebase, { remoteConfig } from './firebase'
+import firebase, { crashlytics, remoteConfig } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from '../fontConfig'
 import * as theme from './core/theme'

@@ -1,6 +1,6 @@
 
 
-export const version6 = {
+export const version7 = {
     'init': {
         title: 'Prospect',
         instructions: 'Lorem ipsum dolor',
@@ -209,88 +209,8 @@ export const version6 = {
                         status: 'pending',
                         nextStep: 'rd2Creation',
                     },
-                    // {
-                    //     id: 'eebFileChoice',
-                    //     title: 'Le client est-il eligible au dossier action logement ?',
-                    //     instructions: 'Lorem ipsum dolor',
-                    //     actionOrder: 2,
-                    //     type: 'manual',
-                    //     verificationType: 'multiple-choices',
-                    //     comment: '', //motif
-                    //     choices: [
-                    //         { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                    //         { label: 'OUI', id: 'confirm', nextPhase: 'technicalVisitManagement', onSelectType: 'transition', operation: null },
-                    //     ],
-                    //     responsable: 'Commercial',
-                    //     status: 'pending',
-                    // },
                 ]
             },
-            // 'primeCEECreation': {
-            //     title: "Création d'une prime CEE",
-            //     instructions: 'Lorem ipsum dolor',
-            //     stepOrder: 3,
-            //     actions: [
-            //         {
-            //             id: 'primeCEEChoice',
-            //             title: 'Ce projet est il éligible à la prime cee ?',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 1,
-            //             type: 'manual',
-            //             verificationType: 'multiple-choices',
-            //             comment: '', //motif
-            //             choices: [
-            //                 { label: 'NON', id: 'cancel', nextStep: 'rd2Creation', onSelectType: 'transition', commentRequired: true },
-            //                 //{ label: 'OUI', id: 'confirm', nextStep: 'primeCEECreation', onSelectType: 'transition' },
-            //                 { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
-            //             ],
-            //             responsable: 'Commercial',
-            //             status: 'pending',
-            //         },
-            //         {
-            //             id: 'primeCEECreation',
-            //             title: 'Créer une prime CEE',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 2,
-            //             collection: 'Documents',
-            //             //Verification
-            //             queryFilters: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Dossier CEE' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //                 { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-            //             ],
-            //             //Navigation
-            //             queryFiltersUpdateNav: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Dossier CEE' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //             ],
-            //             screenName: 'UploadDocument', //creation
-            //             screenParams: { project: null, documentType: { label: 'Dossier CEE', value: 'Dossier CEE', selected: false }, dynamicType: true },
-            //             type: 'auto',
-            //             verificationType: 'doc-creation',
-            //             responsable: 'Commercial',
-            //             status: 'pending',
-            //             nextStep: 'rd2Creation'
-            //         },
-            //         // {
-            //         //     id: 'quoteCreationChoice',
-            //         //     title: 'Souhaitez-vous toujours être acteur de la transition énergétique ?',
-            //         //     instructions: 'Lorem ipsum dolor',
-            //         //     actionOrder: 3,
-            //         //     type: 'manual',
-            //         //     verificationType: 'multiple-choices',
-            //         //     comment: '', //motif
-            //         //     choices: [
-            //         //         { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-            //         //         { label: 'Poursuivre', id: 'confirm', nextStep: 'rd2Creation', onSelectType: 'transition' },
-            //         //     ],
-            //         //     responsable: 'Commercial',
-            //         //     status: 'pending',
-            //         // },
-            //     ]
-            // },
             'rd2Creation': {
                 title: 'Initiation rendez-vous 2',
                 instructions: 'Lorem ipsum dolor',
@@ -387,61 +307,6 @@ export const version6 = {
                     }
                 ]
             },
-            // 'rdnChoice': {
-            //     title: "Modifier l'état du rendez-vous",
-            //     instructions: 'Lorem ipsum dolor',
-            //     stepOrder: 2,
-            //     actions: [
-            //         {
-            //             id: 'rdnChoice',
-            //             title: 'Modifier le statut du rendez-vous',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 1,
-            //             collection: 'Agenda',
-            //             documentId: '', //#task: should be array in case of RDN lasting for many days (multiple tasks)
-            //             queryFilters: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Présentation étude' },
-            //                 { filter: 'status', operation: '!=', value: 'Annulé' } //Get id of active RDN (all old/canceled RDN are inactive)
-            //             ],
-            //             type: 'manual',
-            //             verificationType: 'multiple-choices',
-            //             choices: [
-            //                 { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
-            //                 { label: 'Reporter', id: 'postpone', nextStep: 'rdnCreation', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
-            //                 { label: 'Confirmer', id: 'confirm', nextStep: 'signature', onSelectType: 'transition', operation: { type: 'update', field: 'status', value: 'Terminé' } },
-            //             ],
-            //             responsable: 'Commercial',
-            //             status: 'pending',
-            //         }
-            //     ]
-            // },
-            // 'rdnCreation': { //rdn postpone
-            //     title: "Création d'un rendez-vous 2 (Report)",
-            //     instructions: 'Lorem ipsum dolor',
-            //     stepOrder: 3,
-            //     actions: [
-            //         {
-            //             id: 'rd2Creation', //1. verify if RD2 exists
-            //             title: 'Créer un rendez-vous 2 (Report)',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 1,
-            //             collection: 'Agenda',
-            //             queryFilters: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Présentation étude' },
-            //                 { filter: 'status', operation: '!=', value: 'Annulé' }
-            //             ],
-            //             screenName: 'CreateTask', //creation
-            //             screenParams: { project: null, taskType: { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, dynamicType: true },
-            //             type: 'auto',
-            //             verificationType: 'doc-creation',
-            //             status: 'pending',
-            //             nextStep: 'rdnChoice',
-            //         }
-            //     ]
-            // },
-            //
             'signature': {
                 title: 'Signature des documents',
                 instructions: 'Lorem ipsum dolor',
@@ -625,99 +490,12 @@ export const version6 = {
                         responsable: 'Client',
                         status: 'pending',
                         verificationType: 'doc-creation',
-                    },
-                    //#removed
-                    // {
-                    //     id: 'mandatSynergysCreation',
-                    //     title: 'Créer un mandat Synergys',
-                    //     instructions: 'Lorem ipsum dolor',
-                    //     actionOrder: 9,
-                    //     collection: 'Documents',
-                    //     //Verification
-                    //     queryFilters: [
-                    //         { filter: 'project.id', operation: '==', value: '' },
-                    //         { filter: 'type', operation: '==', value: 'Mandat Synergys' },
-                    //         { filter: 'deleted', operation: '==', value: false },
-                    //         { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-                    //     ],
-                    //     //Navigation
-                    //     queryFiltersUpdateNav: [
-                    //         { filter: 'project.id', operation: '==', value: '' },
-                    //         { filter: 'type', operation: '==', value: 'Mandat Synergys' },
-                    //         { filter: 'deleted', operation: '==', value: false },
-                    //     ],
-                    //     screenName: 'UploadDocument', //creation
-                    //     screenParams: { project: null, documentType: { label: 'Mandat Synergys', value: 'Mandat Synergys', selected: false }, dynamicType: true },
-                    //     type: 'auto',
-                    //     verificationType: 'doc-creation',
-                    //     responsable: 'Commercial',
-                    //     status: 'pending',
-                    // },
-                    //#removed
-                    // {
-                    //     id: 'signedMandatMPRCreation', //#task: check if devis is still existing..
-                    //     title: 'Signer le mandat Synergys',
-                    //     instructions: 'Lorem ipsum dolor',
-                    //     actionOrder: 10,
-                    //     collection: 'Documents',
-                    //     queryFilters: [ //VERIFICATION: verify if signed quote exists
-                    //         { filter: 'project.id', operation: '==', value: '' },
-                    //         { filter: 'type', operation: '==', value: 'Mandat Synergys' },
-                    //         { filter: 'deleted', operation: '==', value: false },
-                    //         { filter: 'attachmentSource', operation: '==', value: 'signature' }
-                    //     ],
-                    //     queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
-                    //         { filter: 'project.id', operation: '==', value: '' },
-                    //         { filter: 'type', operation: '==', value: 'Mandat Synergys' },
-                    //         { filter: 'deleted', operation: '==', value: false },
-                    //     ],
-                    //     screenName: 'UploadDocument',
-                    //     screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat Synergys', value: 'Mandat Synergys', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
-                    //     type: 'auto',
-                    //     choices: [
-                    //         { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                    //         { label: 'Signer le mandat Synergys', id: 'sign', onSelectType: 'navigation' },
-                    //     ],
-                    //     responsable: 'Client',
-                    //     status: 'pending',
-                    //     verificationType: 'doc-creation',
-                    // },
-                    //info: Removed because currently user can't go back on process (for example after a mistake)
-                    // {
-                    //     id: 'isQuoteFinanced',
-                    //     title: "Le devis est-il accompagné d'un financement ?",
-                    //     instructions: 'Lorem ipsum dolor',
-                    //     actionOrder: 11,
-                    //     type: 'manual',
-                    //     verificationType: 'multiple-choices',
-                    //     comment: '', //#task: comments are joined (separated by ;)
-                    //     choices: [
-                    //         { label: 'NON', id: 'comment', nextStep: 'technicalVisitCreation', onSelectType: 'transition', commentRequired: true }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                    //         { label: 'OUI', id: 'confirm', onSelectType: 'validation' },
-                    //     ],
-                    //     responsable: 'Commercial',
-                    //     status: 'pending',
-                    // },
-                    {
-                        id: 'financingWebsite',
-                        title: 'Propositions de financement',
-                        instructions: "Lorem ipsum dolor",
-                        actionOrder: 9,
-                        type: 'manual',
-                        comment: '',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            { label: 'Adhefi.com', id: 'cashPayment', image: "sofincoLogo", onSelectType: 'openLink', link: 'https://www.adhefi.com' },
-                            { label: 'Moncofidispro.fr', id: 'financing', image: "cofidisLogo", onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
-                            { label: 'Continuer', id: 'confirm', nextStep: 'payModeValidation', onSelectType: 'transition' },
-                        ],
-                        responsable: 'Commercial',
-                        status: 'pending',
+                        nextStep: 'payModeValidation'
                     },
                 ]
             },
             'payModeValidation': {
-                title: "Validation modalité paiement",
+                title: "Modalité de paiement",
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 3,
                 actions: [
@@ -730,29 +508,29 @@ export const version6 = {
                         comment: '',
                         verificationType: 'multiple-choices',
                         choices: [
-                            { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker', nextStep: 'technicalVisitCreation' },
-                            { label: 'Financement', id: 'financing', onSelectType: 'commentPicker', nextStep: 'technicalVisitCreation' },
+                            { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker' },
+                            { label: 'Financement', id: 'financing', onSelectType: 'commentPicker' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'financingWebsite',
+                        title: 'Propositions de financement',
+                        instructions: "Lorem ipsum dolor",
+                        actionOrder: 2,
+                        type: 'manual',
+                        comment: '',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            { label: 'Adhefi.com', id: 'cashPayment', image: "sofincoLogo", onSelectType: 'openLink', link: 'https://www.adhefi.com' },
+                            { label: 'Moncofidispro.fr', id: 'financing', image: "cofidisLogo", onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
+                            { label: 'Continuer', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
                     },
                     //Montant de l'acompte? (zone de saisie) //operation: add it to bill sub attributes
-                    //Reste à payer: (zone de saisie)
-                    // {
-                    //     id: 'quoteValidation',
-                    //     title: "Validation du devis par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
-                    //     instructions: "",
-                    //     actionOrder: 2,
-                    //     type: 'manual',
-                    //     comment: '',
-                    //     responsable: 'ADV',
-                    //     status: 'pending',
-                    //     verificationType: 'multiple-choices',
-                    //     choices: [
-                    //         { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                    //         { label: 'Valider', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
-                    //     ],
-                    // },
                 ]
             },
             'technicalVisitCreation': {
@@ -760,35 +538,6 @@ export const version6 = {
                 instructions: 'Lorem ipsum dolor',
                 stepOrder: 4,
                 actions: [
-                    // {
-                    //     //General
-                    //     id: 'checkTechContact',
-                    //     title: 'Renseigner un contact technique pour le projet', //#add refresh before scrollto
-                    //     instructions: 'Renseigner un contact technique pour le projet',
-                    //     actionOrder: 1,
-                    //     //Verification
-                    //     collection: 'Projects',
-                    //     documentId: '', //#dynamic
-                    //     properties: ['techContact', 'id'],
-                    //     //Navigation
-                    //     screenName: 'ListEmployees',
-                    //     screenParams: {
-                    //         project: null,
-                    //         prevScreen: 'CreateProject',
-                    //         isRoot: false,
-                    //         titleText: 'Choisir un technicien',
-                    //         //Filter List (new param type)
-                    //         queryFilters: [ //Filter list
-                    //             { filter: 'role', operation: '==', value: 'Poseur' },
-                    //             { filter: 'deleted', operation: '==', value: false }
-                    //         ]
-                    //     },
-                    //     type: 'auto',
-                    //     verificationType: 'data-fill',
-                    //     verificationValue: '',
-                    //     responsable: 'Commercial',
-                    //     status: 'pending',
-                    // },
                     {
                         id: 'technicalVisitCreation', //1. verify if RD2 exists
                         title: 'Créer une visite technique',
@@ -1785,6 +1534,6 @@ export const version6 = {
             },
         }
     },
-    'version': 6
+    'version': 7
 }
 

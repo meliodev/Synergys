@@ -51,6 +51,7 @@ const SearchBar = ({
                     theme={{ colors: { placeholder: '#fff', text: '#fff' } }}
                     icon={() => null}
                    // autoFocus
+                    autoFocus={false}
                     selectionColor={theme.colors.gray_dark}
                 />
             }

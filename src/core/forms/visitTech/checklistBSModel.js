@@ -27,10 +27,12 @@ export const checklistBSModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -265, dy: - 48, pageIndex },
                 },
-            ]
+            ],
+            isFirstSubStep: true
         },
         {//1
             id: "isPowerCableBS",
+            subStep: { id: "bs", label: "Ballon solaire" },
             title: "BALLON SOLAIRE - Partie Electrique",
             fields: [
                 {
@@ -256,7 +258,8 @@ export const checklistBSModel = (params) => {
                     errorId: "materialPropositionBSError",
                     pdfConfig: { dx: -421, dy: - 807, pageIndex }
                 },
-            ]
+            ],
+            isLastSubStep: true
         },
     ]
 

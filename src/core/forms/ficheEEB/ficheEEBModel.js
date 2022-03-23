@@ -380,6 +380,23 @@ export const ficheEEBModel = [
             },
         ]
     },
+    { //20
+        id: "isParkingMinFourMetersSqr",
+        title: "HABITATION",
+        fields: [
+            {
+                id: "isParkingMinFourMetersSqr",
+                label: "Garage ou dépendance avec disponibilité de plus de 4m2 ?",
+                type: "options",
+                items: [
+                    { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -318, dy: - 154, pageIndex: 0 } },
+                    { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { dx: -396, dy: - 154, pageIndex: 0 } },
+                ],
+                errorId: "isParkingMinFourMetersSqrError",
+                mendatory: true
+            }
+        ],
+    },
     { //17
         id: "basementType",
         title: "HABITATION",
@@ -892,86 +909,8 @@ export const ficheEEBModel = [
         ],
         isLast: true
     },
-    // {//35
-    //     id: "generalData",
-    //     title: "ADRESSE",
-    //     fields: [
-    //         {
-    //             id: "addressNum",
-    //             type: "textInput",
-    //             label: "Numéro",
-    //             isNumeric: true,
-    //             errorId: "addressNumError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -556, dy: - 194, pageIndex: 1 }
-    //         },
-    //         {
-    //             id: "addressStreet",
-    //             type: "textInput",
-    //             label: "Rue",
-    //             errorId: "addressStreetError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -468, dy: - 194, pageIndex: 1 }
-    //         },
-    //         {
-    //             id: "addressCode",
-    //             type: "textInput",
-    //             mask: "[0][0][0][0][0]",
-    //             label: "Code Postal",
-    //             isNumeric: true,
-    //             errorId: "addressCodeError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -518, dy: - 218, pageIndex: 1, spaces: { afterEach: 1, str: '      ' } }
-    //         },
-    //         {
-    //             id: "addressCity",
-    //             type: "textInput",
-    //             label: "Ville",
-    //             errorId: "addressCityError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -349, dy: - 218, pageIndex: 1 }
-    //         },
-    //     ]
-    // },
-    // {//36
-    //     id: "generalData",
-    //     title: "RENSEIGNEMENTS GENERAUX",
-    //     fields: [
-    //         {
-    //             id: "phone",
-    //             type: "textInput",
-    //             mask: "[00][00][00][00][00]",
-    //             isNumeric: true,
-    //             label: "Téléphone",
-    //             errorId: "phoneError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -521, dy: - 243, pageIndex: 1, spaces: { afterEach: 2, str: '          ' } }
-    //         },
-    //         // {
-    //         //     id: "disablePhoneContact",
-    //         //     label: "J'accepte d'être rappelé à ce numéro",
-    //         //     type: "checkbox",
-    //         // },
-    //     ]
-    // },
-    // {//37
-    //     id: "generalData",
-    //     title: "RENSEIGNEMENTS GENERAUX",
-    //     fields: [
-    //         {
-    //             id: "email",
-    //             type: "textInput",
-    //             isEmail: true,
-    //             label: "Adresse email",
-    //             errorId: "emailError",
-    //             mendatory: true,
-    //             pdfConfig: { dx: -380, dy: - 267, pageIndex: 1, splitArobase: true }
-    //         },
-    //     ],
-    //     isLast: true
-    // },
-    {
-        id: "submit",
-        fields: []
-    }
+    // {
+    //     id: "submit",
+    //     fields: []
+    // }
 ]

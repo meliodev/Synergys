@@ -4,6 +4,7 @@ import { rgb } from 'pdf-lib'
 
 import moment from "moment";
 import * as theme from '../../theme'
+import { getAddressDetails } from "../../utils";
 
 
 export const mandatMPRModel = [
@@ -60,6 +61,36 @@ export const mandatMPRModel = [
                 errorId: "addressError",
                 maxLength: 100,
                 pdfConfig: { dx: -520, dy: - 440, pageIndex: 0 }, //add spaces
+                mendatory: true,
+            },
+        ],
+    },
+    {
+        id: "property",
+        title: "PROPRIÉTÉ DU MANDANT",
+        fields: [
+            {
+                id: "zipCode",
+                type: "textInput",
+                label: "Code postal",
+                errorId: "zipCodeError",
+                maxLength: 10,
+                pdfConfig: { dx: -480, dy: - 456, pageIndex: 0 },
+                mendatory: true,
+            },
+        ],
+    },
+    {
+        id: "property",
+        title: "PROPRIÉTÉ DU MANDANT",
+        fields: [
+            {
+                id: "city",
+                type: "textInput",
+                label: "Commune",
+                errorId: "cityError",
+                maxLength: 50,
+                pdfConfig: { dx: -386, dy: - 456, pageIndex: 0 },
                 mendatory: true,
             },
         ],
@@ -161,6 +192,17 @@ export const mandatMPRModel = [
                     dx: -372, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
                     mendatory: true,
                 }
+            },
+            {
+                id: "isProprio",
+                type: "autogen",
+                items: [
+                    {
+                        label: 'Oui',
+                        value: 'Oui',
+                        pdfConfig: { dx: -523, dy: - 432, pageIndex: 0 }
+                    },
+                ],
             },
         ]
     },

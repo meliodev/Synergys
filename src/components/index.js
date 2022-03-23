@@ -15,6 +15,7 @@ export { default as Button } from './Button';
 export { default as ColorPicker } from './ColorPicker';
 export { default as CustomIcon } from './CustomIcon';
 export { default as DocumentItem } from './DocumentItem';
+export { default as EEBPack } from './EEBPack';
 export { default as EmptyList } from './EmptyList';
 export { default as Filter } from './Filter';
 export { default as FormSection } from './FormSection';

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Synergys</string>
-    <string moduleConfig="true" name="CodePushDeploymentKey">nvGVPS2uE477OzpOwbwooLCi7G3Hzu42Wxpix</string> <!--Staging-->
-    <!-- <string moduleConfig="true" name="CodePushDeploymentKey">T4WOdkplIip2tspy8l1W4b4iBwCFPtnwFQ0Xu</string> Production -->
+    <!-- <string moduleConfig="true" name="CodePushDeploymentKey">nvGVPS2uE477OzpOwbwooLCi7G3Hzu42Wxpix</string> Staging -->
+    <string moduleConfig="true" name="CodePushDeploymentKey">T4WOdkplIip2tspy8l1W4b4iBwCFPtnwFQ0Xu</string>
 
     <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:background">@drawable/background_splash</item>

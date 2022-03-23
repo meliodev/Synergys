@@ -11,6 +11,7 @@ import UUIDGenerator from 'react-native-uuid-generator'
 import { PDFDocument, degrees, PageSizes, StandardFonts, rgb } from 'pdf-lib'
 import _ from 'lodash'
 import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave, faUserHardHat } from '@fortawesome/pro-light-svg-icons'
+import Geocoder from 'react-native-geocoding';
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -132,6 +133,38 @@ export const navigateToScreen = (main, screen, params) => {
 }
 
 //##HELPERS
+
+//Get zip code + city
+export const getAddressDetails = async (lat, lng) => {
+
+  var addressDetails = {
+    zipCode: "",
+    city: ""
+  }
+
+  if (lat === "" || lng === "" || lat === null || lng === null)
+    return addressDetails
+
+  addressDetails = await Geocoder.from(lat, lng)
+    .then(json => {
+      const addressComponent = json.results[0]
+      const { address_components } = addressComponent
+
+      for (const component of address_components) {
+        const isPostalCode = component.types.includes('postal_code')
+        const isCity = component.types.includes('locality')
+        if (isPostalCode)
+          addressDetails.zipCode = component.long_name
+        else if (isCity)
+          addressDetails.city = component.long_name
+      }
+
+      return addressDetails
+    })
+    .catch(e => { throw new Error(e) })
+
+  return addressDetails
+}
 
 //We suppose that firstName can be composed of many strings. And lastName only one string.
 export const retrieveFirstAndLastNameFromFullName = (fullName) => {
@@ -528,7 +561,7 @@ export const uint8ToBase64 = (u8Arr) => {
   return btoa(result);
 }
 
-export const convertImageToPdf = async (attachment, title) => {
+export const convertImageToPdf = async (attachment, title, notice) => {
 
   let errorMessage = null
 
@@ -547,6 +580,7 @@ export const convertImageToPdf = async (attachment, title) => {
     const page = pdfDoc.addPage(PageSizes.A4)
 
     const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+    const TimesRomanBold = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
     const colors = {
       primary: rgb(0.576, 0.768, 0.486),
       black: rgb(0, 0, 0),
@@ -554,27 +588,48 @@ export const convertImageToPdf = async (attachment, title) => {
       gray: rgb(0.1333, 0.1333, 0.1333)
     }
 
+    const maxHeightRatio = notice ? 0.8 : 0.83
     const scaleToFit_x = page.getWidth()
-    const scaleToFit_y = page.getHeight()
+    const scaleToFit_y = page.getHeight() * maxHeightRatio
     const jpgDims = image.scaleToFit(scaleToFit_x, scaleToFit_y)
     const image_dx = - jpgDims.width / 2
     const image_dy = - jpgDims.height / 2
 
     page.drawImage(image, {
       x: page.getWidth() / 2 + image_dx,
-      y: page.getHeight() / 2 + image_dy,
+      y: notice ? 5 : page.getHeight() / 2 + image_dy,
       width: jpgDims.width,
       height: jpgDims.height,
     })
 
     if (title)
       page.drawText(title, {
-        x: 25,
+        x: page.getWidth() / 2 - TimesRomanBold.widthOfTextAtSize(title, 18) / 2,
         y: page.getHeight() * 0.95,
-        size: 16,
-        font: timesRomanFont,
+        size: 18,
+        font: TimesRomanBold,
         color: colors.black,
       })
+
+
+    if (notice) {
+      notice = notice.split("\n").join(" ");
+      const noticeArray = lineBreaker(notice, timesRomanFont, 16, page.getWidth() * 0.9)
+      let marginTop = 0
+
+      noticeArray.forEach((line) => {
+        page.drawText(line,
+          {
+            x: page.getWidth() * 0.05,
+            y: page.getHeight() * 0.9 - marginTop,
+            size: 16,
+            font: timesRomanFont,
+            color: colors.black,
+          })
+
+        marginTop += timesRomanFont.sizeAtHeight(16)
+      })
+    }
 
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)
@@ -582,6 +637,7 @@ export const convertImageToPdf = async (attachment, title) => {
   }
 
   catch (e) {
+    console.log('error', e)
     if (e === "The input is not a PNG file!")
       errorMessage = "Fichier corrompu ou incompatible."
     throw new Error(errorMessage || "Erreur lors de la conversion de l'image en pdf.")
@@ -603,7 +659,7 @@ export const chunk = (str, n) => {
 }
 
 
-const lineBreaker = (dataArray, font, size, linesWidths, maxNumberOflLines) => {
+const lineBreaker2 = (dataArray, font, size, linesWidths, maxNumberOflLines) => {
 
   let dataArrayFormated = []
   const line_Height = font.heightAtSize(size)
@@ -710,11 +766,12 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
     const caption = 10
 
+    //1. ADD INPUTS
     for (const formPage of formPages) {
       for (const field of formPage.fields) {
-
         const { id, isMultiOptions, isStepMultiOptions, pdfConfig, type, splitArobase } = field
-        const isHandleField = isMultiOptions && formInputs[id].length > 0 || formInputs[id] !== ""
+
+        const isHandleField = isMultiOptions && formInputs[id].length > 0 || formInputs[id]
 
         if (isHandleField) {
 
@@ -727,51 +784,53 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
           else switch (type) {
             case "textInput":
 
-              text = formInputs[id]
-              let dataTextArray = [text]
+              if (pdfConfig) {
+                text = formInputs[id]
+                let dataTextArray = [text]
 
-              //Specific cases (spaces, email spli)
-              if (typeof (text) !== "undefined") {
-                if (pdfConfig.spaces) {
-                  const { afterEach, str } = pdfConfig.spaces
-                  text = chunk(text, afterEach).join(str)
+                //Specific cases (spaces, email spli)
+                if (typeof (text) !== "undefined") {
+                  if (pdfConfig.spaces) {
+                    const { afterEach, str } = pdfConfig.spaces
+                    text = chunk(text, afterEach).join(str)
+                  }
+
+                  if (id === "email" && splitArobase) {
+                    text = text.split('@')
+                    text = text.join('                                                               ')
+                  }
+                }
+                else text = ""
+
+                //Break line if longer than field space
+                if (pdfConfig.breakLines) {
+                  const lineWidth = timesRomanFont.widthOfTextAtSize(text, caption)
+                  dataTextArray = lineBreaker2(dataTextArray, timesRomanFont, caption, pdfConfig.breakLines.linesWidths, 4)
                 }
 
-                if (id === "email" && splitArobase) {
-                  text = text.split('@')
-                  text = text.join('                                                               ')
-                }
+                dataTextArray.forEach((text, key) => {
+                  const isDrawText = !pdfConfig.breakLines || (pdfConfig.breakLines && key < pdfConfig.breakLines.linesStarts.length)
+                  if (isDrawText) {
+                    const dx = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dx : pdfConfig.dx
+                    const dy = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dy : pdfConfig.dy
+
+                    pages[pdfConfig.pageIndex].drawText(text,
+                      {
+                        x: pages[pdfConfig.pageIndex].getWidth() + dx,
+                        y: pages[pdfConfig.pageIndex].getHeight() + dy,
+                        size: caption,
+                        font: timesRomanFont,
+                        color: colors.black,
+                      }
+                    )
+                  }
+                })
               }
-              else text = ""
-
-              //Break line if longer than field space
-              if (pdfConfig.breakLines) {
-                const lineWidth = timesRomanFont.widthOfTextAtSize(text, caption)
-                dataTextArray = lineBreaker(dataTextArray, timesRomanFont, caption, pdfConfig.breakLines.linesWidths, 4)
-              }
-
-              dataTextArray.forEach((text, key) => {
-                const isDrawText = !pdfConfig.breakLines || (pdfConfig.breakLines && key < pdfConfig.breakLines.linesStarts.length)
-                if (isDrawText) {
-                  const dx = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dx : pdfConfig.dx
-                  const dy = pdfConfig.breakLines ? pdfConfig.breakLines.linesStarts[key].dy : pdfConfig.dy
-
-                  pages[pdfConfig.pageIndex].drawText(text,
-                    {
-                      x: pages[pdfConfig.pageIndex].getWidth() + dx,
-                      y: pages[pdfConfig.pageIndex].getHeight() + dy,
-                      size: caption,
-                      font: timesRomanFont,
-                      color: colors.black,
-                    }
-                  )
-                }
-              })
 
               break;
 
             case "options":
-              console.log(id, field.items[0].pdfConfig.pageIndex)
+              
               if (isMultiOptions || isStepMultiOptions) {
                 for (const item of field.items) {
                   if (!item.skip && formInputs[field.id].includes(item.value)) {
@@ -846,27 +905,38 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
             case "autogen":
 
-              text = field.value
-
-              if (field.pdfConfig.spaces) {
-                const { afterEach, str } = field.pdfConfig.spaces
-                text = chunk(text, afterEach).join(str)
-              }
-
               const condtionUnsatisfied = field.isConditional && !field.condition.values.includes(formInputs[field.condition.with])
               if (condtionUnsatisfied)
                 console.log("Skip drawing text..")
 
               else {
-                pages[pdfConfig.pageIndex].drawText(text,
-                  {
-                    x: pages[pdfConfig.pageIndex].getWidth() + pdfConfig.dx,
-                    y: pages[pdfConfig.pageIndex].getHeight() + pdfConfig.dy,
-                    size: caption,
-                    font: timesRomanFont,
-                    color: colors.black,
+
+                if (field.value) {
+                  text = field.value
+                  if (field.pdfConfig.spaces) {
+                    const { afterEach, str } = field.pdfConfig.spaces
+                    text = chunk(text, afterEach).join(str)
                   }
-                )
+                  pages[pdfConfig.pageIndex].drawText(text,
+                    {
+                      x: pages[pdfConfig.pageIndex].getWidth() + pdfConfig.dx,
+                      y: pages[pdfConfig.pageIndex].getHeight() + pdfConfig.dy,
+                      size: caption,
+                      font: timesRomanFont,
+                      color: colors.black,
+                    }
+                  )
+                }
+
+                else if (field.items) {
+                  const { dx, dy } = field.items[0].pdfConfig
+                  pages[field.items[0].pdfConfig.pageIndex].drawSquare({
+                    x: pages[field.items[0].pdfConfig.pageIndex].getWidth() + dx,
+                    y: pages[field.items[0].pdfConfig.pageIndex].getHeight() + dy,
+                    size: field.items[0].pdfConfig.squareSize || 7,
+                    color: rgb(0, 0, 0),
+                  })
+                }
               }
               break;
 
@@ -883,22 +953,31 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               )
               break;
 
-            case "image":
-              const mergedPdf = await PDFDocument.create()
-              const imagePdfBase64 = await convertImageToPdf(formInputs[id], field.label)
-              const imagePdf = await PDFDocument.load(imagePdfBase64)
-
-              const copiedPagesA = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())
-              const copiedPagesB = await mergedPdf.copyPages(imagePdf, imagePdf.getPageIndices())
-              copiedPagesA.forEach((p) => mergedPdf.addPage(p))
-              copiedPagesB.forEach((p) => mergedPdf.addPage(p))
-
-              pdfDoc = mergedPdf
-              break;
-
             default: break;
           }
 
+        }
+      }
+    }
+
+    //2. ADD PICTURES
+    for (const formPage of formPages) {
+      for (const field of formPage.fields) {
+        if (field.type === "image" && formInputs[field.id]) {
+          //Find Image notice (Remarques)
+          const imageNoticeField = formPage.fields.filter((field) => field.isImageNotice)[0]
+          const imageNotice = formInputs[imageNoticeField.id]
+
+          const mergedPdf = await PDFDocument.create()
+          const imagePdfBase64 = await convertImageToPdf(formInputs[field.id], field.title, imageNotice)
+          const imagePdf = await PDFDocument.load(imagePdfBase64)
+
+          const copiedPagesA = await mergedPdf.copyPages(pdfDoc, pdfDoc.getPageIndices())
+          const copiedPagesB = await mergedPdf.copyPages(imagePdf, imagePdf.getPageIndices())
+          copiedPagesA.forEach((p) => mergedPdf.addPage(p))
+          copiedPagesB.forEach((p) => mergedPdf.addPage(p))
+
+          pdfDoc = mergedPdf
         }
       }
     }
@@ -928,7 +1007,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
   catch (e) {
     console.log(e)
-    throw new Error(errorMessages.pdfGen)
+    throw new Error(e)
   }
 }
 
@@ -1061,6 +1140,8 @@ import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
 import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
 import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
 import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
+import { lineBreaker } from '../screens/Documents/PdfGeneration';
+import { not } from 'react-native-reanimated';
 
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },

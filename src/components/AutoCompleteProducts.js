@@ -127,6 +127,7 @@ class AutoCompleteProducts extends React.Component {
                 createTagOnSpace
                 style={styles.autotags}
                 listStyle={theme.style.shadow}
+                autoFocus={false}
                 //autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
                 suggestionsBellow={this.props.suggestionsBellow}

@@ -27,10 +27,12 @@ export const checklistPAAModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -287, dy: - 33, pageIndex },
                 },
-            ]
+            ],
+            isFirstSubStep: true
         },
         {//1
             id: "counterPowerPAA",
+            subStep: { id: "paa", label: "PAC AIR/AIR" },
             title: "PAC AIR/AIR - Partie Electrique",
             fields: [{
                 id: "counterPowerPAA",
@@ -128,6 +130,7 @@ export const checklistPAAModel = (params) => {
         },
         {//6
             id: "sumpPumpsCountPAA",
+
             title: "PAC AIR/AIR - Partie Emplacement",
             fields: [
                 {
@@ -143,6 +146,7 @@ export const checklistPAAModel = (params) => {
         },
         {//7
             id: "bracketTypePAA",
+
             title: "PAC AIR/AIR - Partie Groupe Ext.",
             fields: [
                 {
@@ -162,6 +166,7 @@ export const checklistPAAModel = (params) => {
         },
         {//8
             id: "GELocationPAA",
+
             title: "PAC AIR/AIR - Partie Emplacement",
             fields: [
                 {
@@ -176,6 +181,7 @@ export const checklistPAAModel = (params) => {
         },
         {//8.1
             id: "capacitorDrainingPAA",
+
             title: "PAC AIR/AIR - Partie Groupe Ext.",
             fields: [
                 {
@@ -190,6 +196,7 @@ export const checklistPAAModel = (params) => {
         },
         {//9
             id: "linksPassagePAA",
+
             title: "PAC AIR/AIR - Partie Frigorifique",
             fields: [
                 {
@@ -204,12 +211,13 @@ export const checklistPAAModel = (params) => {
         },
         {//10
             id: "linksLengthPAA",
+
             title: "PAC AIR/AIR - Partie Frigorifique",
             fields: [
                 {
                     id: "linksLengthPAA",
                     type: "textInput",
-                    label: "Passage des liaisons",
+                    label: "Longueur des liaisons",
                     errorId: "linksLengthPAAError",
                     mendatory: true,
                     pdfConfig: { dx: -420, dy: - 639, pageIndex }
@@ -218,6 +226,7 @@ export const checklistPAAModel = (params) => {
         },
         {//11
             id: "chuteTypePAA",
+
             title: "PAC AIR/AIR - Partie Frigorifique",
             fields: [
                 {
@@ -232,6 +241,7 @@ export const checklistPAAModel = (params) => {
         },
         {//12
             id: "chuteLengthPAA",
+
             title: "PAC AIR/AIR - Partie Frigorifique",
             fields: [
                 {
@@ -247,6 +257,7 @@ export const checklistPAAModel = (params) => {
         },
         {//13
             id: "noticePAA",
+
             title: "PAC AIR/AIR - Remarques",
             fields: [
                 {
@@ -260,6 +271,7 @@ export const checklistPAAModel = (params) => {
         },
         {//14
             id: "materialPropositionPAA",
+
             title: "PAC AIR/AIR - Remarques",
             fields: [
                 {
@@ -269,7 +281,8 @@ export const checklistPAAModel = (params) => {
                     errorId: "materialPropositionPAAError",
                     pdfConfig: { dx: -421, dy: - 812, pageIndex }
                 },
-            ]
+            ],
+            isLastSubStep: true
         },
     ]
 

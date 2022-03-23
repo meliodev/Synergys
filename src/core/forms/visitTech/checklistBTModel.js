@@ -27,10 +27,13 @@ export const checklistBTModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -287, dy: - 47, pageIndex },
                 },
-            ]
+            ],
+            isFirstSubStep: true,
         },
         {//1
             id: "blocTypeBT",
+            subStep: { id: "bt", label: "Chauffe-eau thermodynamique" },
+            section: { id: "electricBT", label: "Partie Electrique" },
             title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Electrique",
             fields: [
                 {
@@ -38,8 +41,29 @@ export const checklistBTModel = (params) => {
                     label: "Type de bloc",
                     type: "options",
                     items: [
-                        { label: 'Monobloc', value: 'Monobloc', icon: faQuestionCircle, pdfConfig: { dx: -374, dy: - 107, pageIndex } },
-                        { label: 'Bi-Bloc', value: 'Bi-Bloc', icon: faQuestionCircle, pdfConfig: { dx: -260, dy: - 107, pageIndex } },
+                        {
+                            label: 'Monobloc',
+                            value: 'Monobloc',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -374, dy: - 107, pageIndex },
+                            rollBack: {
+                                fields: [
+                                    { id: "supportTypeBT", type: "string" },
+                                ]
+                            }
+                        },
+                        {
+                            label: 'Bi-Bloc',
+                            value: 'Bi-Bloc',
+                            icon: faQuestionCircle,
+                            pdfConfig: { dx: -260, dy: - 107, pageIndex },
+                            rollBack: {
+                                fields: [
+                                    { id: "extractionTypeBT", type: "string" },
+                                    { id: "aspirationTypeBT", type: "string" },
+                                ]
+                            }
+                        },
                     ],
                     errorId: "blocTypeBTError",
                     mendatory: true
@@ -55,11 +79,46 @@ export const checklistBTModel = (params) => {
                     label: "Câble d’alimentation présent ?",
                     type: "options",
                     items: [
-                        { label: 'Non', value: 'Non', icon: faTimes, iconColor: theme.colors.error, pdfConfig: { dx: -201, dy: - 135, pageIndex } },
-                        { label: 'Oui', value: 'Oui', icon: faCheck, iconColor: "green", pdfConfig: { dx: -298, dy: - 135, pageIndex } },
+                        {
+                            label: 'Non',
+                            value: 'Non',
+                            icon: faTimes,
+                            iconColor: theme.colors.error,
+                            pdfConfig: { dx: -201, dy: - 135, pageIndex },
+                        },
+                        {
+                            label: 'Oui',
+                            value: 'Oui',
+                            icon: faCheck,
+                            iconColor: "green",
+                            pdfConfig: { dx: -298, dy: - 135, pageIndex },
+                            rollBack: {
+                                fields: [
+                                    { id: "electricLinkLenghtBT", type: "string" },
+                                ]
+                            }
+                        },
                     ],
                     errorId: "isPowerCableBTError",
                     mendatory: true
+                },
+            ]
+        },
+        {//3
+            id: "tubeDiameterBT",
+            section: { id: "hydraulicBT", label: "Partie Hydraulique" },
+            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Hydraulique",
+            fields: [
+                {
+                    id: "electricLinkLenghtBT",
+                    type: "textInput",
+                    isNumeric: true,
+                    label: "Longueur de la liaison électrique",
+                    errorId: "electricLinkLenghtBTError",
+                    mendatory: true,
+                    isConditional: true,
+                    condition: { with: "isPowerCableBT", values: ["Non"] },
+                    pdfConfig: { dx: -256, dy: - 342, pageIndex }
                 },
             ]
         },
@@ -96,43 +155,47 @@ export const checklistBTModel = (params) => {
                     label: "Type matériaux radiateur",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -391, dy: -239, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -247, dy: - 239, pageIndex } },
-                        { label: "Plastique", value: "Plastique", icon: faQuestionCircle, pdfConfig: { dx: -126, dy: - 239, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -365, dy: -239, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -292, dy: - 239, pageIndex } },
+                        { label: "PER", value: "PER", icon: faQuestionCircle, pdfConfig: { dx: -220, dy: - 239, pageIndex } },
+                        { label: "Multicouches", value: "Multicouches", icon: faQuestionCircle, pdfConfig: { dx: -167, dy: - 239, pageIndex } },
                     ],
                     mendatory: true,
+                    isMultiOptions: true,
                     errorId: "radiatorMaterialsBTError",
                 },
             ]
         },
         {//5
             id: "isSpaceEnoughBT",
+            section: { id: "frigoBT", label: "Partie Frigorifique" },
             title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Frigorifique",
             fields: [
                 {
                     id: "isSpaceEnoughBT",
                     type: "textInput",
-                    label: "Vérifier espace suffisant pour emplacement ballon",
+                    label: "Emplacement du ballon",
                     errorId: "isSpaceEnoughBTError",
                     mendatory: true,
+                    instruction: { priority: "low", message: "Emplacement du ballon + Vérifier si l'emplacement est suffisant pour le ballon" },
                     pdfConfig: { dx: -420, dy: - 282, pageIndex }
                 },
             ]
         },
-        {//6
-            id: "linksDiameterBT",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Frigorifique",
-            fields: [
-                {
-                    id: "linksDiameterBT",
-                    type: "textInput",
-                    label: "Diamètre liaison",
-                    isNumeric: true,
-                    errorId: "linksDiameterBTError",
-                    pdfConfig: { dx: -421, dy: - 315, pageIndex }
-                },
-            ]
-        },
+        // {//6
+        //     id: "linksDiameterBT",
+        //     title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Frigorifique",
+        //     fields: [
+        //         {
+        //             id: "linksDiameterBT",
+        //             type: "textInput",
+        //             label: "Diamètre liaison",
+        //             isNumeric: true,
+        //             errorId: "linksDiameterBTError",
+        //             pdfConfig: { dx: -421, dy: - 315, pageIndex }
+        //         },
+        //     ]
+        // },
         {//7
             id: "linksLengthBT",
             title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Frigorifique",
@@ -140,7 +203,7 @@ export const checklistBTModel = (params) => {
                 {
                     id: "linksLengthBT",
                     type: "textInput",
-                    label: "Longueur des liaisons (en mm)",
+                    label: "Longueur des liaisons (en m)",
                     isNumeric: true,
                     errorId: "linksLengthBTError",
                     pdfConfig: { dx: -257, dy: - 343, pageIndex }
@@ -149,6 +212,7 @@ export const checklistBTModel = (params) => {
         },
         {//8
             id: "linksPassageBT",
+            section: { id: "locationBT", label: "Partie Emplacement" },
             title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Emplacement",
             fields: [
                 {
@@ -162,11 +226,12 @@ export const checklistBTModel = (params) => {
             ]
         },
         {//9
-            id: "GELocationBT",
+            id: "supportTypeBT",
+            section: { id: "extBT", label: "Partie Exterieure" },
             title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Exterieure",
             fields: [
                 {
-                    id: "GELocationBT",
+                    id: "supportTypeBT",
                     label: "Type de support",
                     type: "options",
                     items: [
@@ -175,14 +240,17 @@ export const checklistBTModel = (params) => {
                         { label: "Support Mupro", value: "Support Mupro", icon: faQuestionCircle, pdfConfig: { dx: -156, dy: - 418, pageIndex } },
                     ],
                     mendatory: true,
-                    errorId: "GELocationBTError",
-                    pdfConfig: { dx: -450, dy: - 305, pageIndex }
+                    errorId: "supportTypeBTError",
+                    isConditional: true,
+                    condition: { with: "blocTypeBT", values: ["Bi-Bloc"] },
+                    pdfConfig: { dx: -450, dy: - 305, pageIndex },
                 },
             ]
         },
         {//10
             id: "PVCdrainingBT",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Intérieur",
+            section: { id: "intBT", label: "Partie Intérieure" },
+            title: "CHAUFFE-EAU THERMODYNAMIQUE - partie Intérieure",
             fields: [
                 {
                     id: "PVCdrainingToDoBT",
@@ -204,44 +272,79 @@ export const checklistBTModel = (params) => {
                 },
                 {
                     id: "PVCDoubleBT",
-                    type: "textInput",
+                    type: "picker",
+                    items: [
+                        { label: "Selectionner", value: "" },
+                        { label: "Oui", value: "Oui" },
+                        { label: "Non", value: "Non", pdfConfig: { dx: -421, dy: - 494, pageIndex } },
+                    ],
                     label: "En doublage",
+                    mendatory: true,
                     errorId: "PVCDoubleBTError",
-                    mendatory: true,
                     pdfConfig: { dx: -421, dy: - 494, pageIndex }
+                    // style: { marginBottom: 32 },
+                    // rollBack: { fields: [{ id: "transmittersTypes", type: "array" }] }
                 },
             ]
         },
-        {//11
-            id: "ifMonoblocBT",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Intérieur",
-            fields: [
-                {
-                    id: "ifMonoblocBT",
-                    type: "textInput",
-                    label: "Si B.T monobloc",
-                    errorId: "ifMonoblocBTError",
-                    pdfConfig: { dx: -420, dy: - 541, pageIndex }
-                },
-            ]
-        },
+        // {//11
+        //     id: "ifMonoblocBT",
+        //     title: "CHAUFFE-EAU THERMODYNAMIQUE - partie Intérieure",
+        //     fields: [
+        //         {
+        //             id: "ifMonoblocBT",
+        //             type: "textInput",
+        //             label: "Si B.T monobloc",
+        //             errorId: "ifMonoblocBTError",
+        //             pdfConfig: { dx: -420, dy: - 541, pageIndex }
+        //         },
+        //     ]
+        // },
         {//12
-            id: "repressionDrainTypeBT",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Intérieur",
+            id: "extractionTypeBT",
+            title: "CHAUFFE-EAU THERMODYNAMIQUE - partie Intérieure",
             fields: [
                 {
-                    id: "repressionDrainTypeBT",
-                    type: "textInput",
-                    label: "Type d'évacuation pour refoulement",
+                    id: "extractionTypeBT",
+                    type: "picker",
+                    items: [
+                        { label: "Selectionner", value: "" },
+                        { label: "Pièce ambiante", value: "Pièce ambiante" },
+                        { label: "Toiture", value: "Toiture" },
+                        { label: "Murale", value: "Murale" },
+                    ],
+                    label: "Type d'extraction",
                     mendatory: true,
-                    errorId: "repressionDrainTypeBTError",
-                    pdfConfig: { dx: -420, dy: - 568, pageIndex }
+                    errorId: "extractionTypeBTError",
+                    isConditional: true,
+                    condition: { with: "blocTypeBT", values: ["Monobloc"] },
+                    pdfConfig: { dx: -375, dy: - 568, pageIndex }
+                    // style: { marginBottom: 32 },
+                    // rollBack: { fields: [{ id: "transmittersTypes", type: "array" }] }
+                },
+                {
+                    id: "aspirationTypeBT",
+                    type: "picker",
+                    items: [
+                        { label: "Selectionner", value: "" },
+                        { label: "Pièce ambiante", value: "Pièce ambiante" },
+                        { label: "Toiture", value: "Toiture", },
+                        { label: "Murale", value: "Murale" },
+                    ],
+                    label: "Type d'aspiration",
+                    mendatory: true,
+                    errorId: "aspirationTypeBTError",
+                    isConditional: true,
+                    condition: { with: "blocTypeBT", values: ["Monobloc"] },
+                    pdfConfig: { dx: -156, dy: - 568, pageIndex }
+                    // style: { marginBottom: 32 },
+                    // rollBack: { fields: [{ id: "transmittersTypes", type: "array" }] }
                 },
             ]
         },
         {//13
             id: "commentsInternPartBT",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Intérieur",
+            title: "CHAUFFE-EAU THERMODYNAMIQUE - partie Intérieure",
             fields: [
                 {
                     id: "commentsInternPartBT",
@@ -254,7 +357,7 @@ export const checklistBTModel = (params) => {
         },
         {//14
             id: "extBT1",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Intérieur",
+            title: "CHAUFFE-EAU THERMODYNAMIQUE - partie Intérieure",
             fields: [
                 {
                     id: "extLenghtCountBT",
@@ -264,19 +367,19 @@ export const checklistBTModel = (params) => {
                     errorId: "extLenghtCountBTError",
                     pdfConfig: { dx: -360, dy: - 623, pageIndex }
                 },
-                {
-                    id: "extFittingSleeveCountBT",
-                    type: "textInput",
-                    isNumeric: true,
-                    label: "Nombre manchon raccord",
-                    errorId: "extFittingSleeveCountBTError",
-                    pdfConfig: { dx: -343, dy: - 698, pageIndex }
-                },
+                // {
+                //     id: "extFittingSleeveCountBT",
+                //     type: "textInput",
+                //     isNumeric: true,
+                //     label: "Nombre manchon raccord",
+                //     errorId: "extFittingSleeveCountBTError",
+                //     pdfConfig: { dx: -343, dy: - 698, pageIndex }
+                // },
             ]
         },
         {//15
             id: "extBT2",
-            title: "CHAUFFE-EAU THERMODYNAMIQUE - Partie Intérieur",
+            title: "CHAUFFE-EAU THERMODYNAMIQUE - partie Intérieure",
             fields: [
                 {
                     id: "extNinetyElbowCountBT",
@@ -298,6 +401,7 @@ export const checklistBTModel = (params) => {
         },
         {//16
             id: "noticeBT",
+            section: { id: "noticeBT", label: "Remarques" },
             title: "CHAUFFE-EAU THERMODYNAMIQUE - Remarques",
             fields: [
                 {
@@ -320,7 +424,8 @@ export const checklistBTModel = (params) => {
                     errorId: "materialPropositionBTError",
                     pdfConfig: { dx: -421, dy: - 791, pageIndex }
                 },
-            ]
+            ],
+            isLastSubStep: true
         },
     ]
 

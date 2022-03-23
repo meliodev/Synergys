@@ -328,7 +328,8 @@ class CreateProduct extends Component {
                                 this.setState({ newBrandName })
                             }
                         }}
-                        //autoFocus={showDialog}
+                       // autoFocus={showDialog}
+                        autoFocus={false}
                         style={{ borderBottomColor: theme.colors.graySilver, borderBottomWidth: StyleSheet.hairlineWidth }}
                     />
                     <Dialog.Button label="Annuler" onPress={() => this.toggleDialog('')} style={{ color: theme.colors.placeholder }} />

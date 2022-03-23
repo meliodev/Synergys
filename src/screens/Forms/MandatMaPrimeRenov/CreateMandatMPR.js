@@ -9,7 +9,7 @@ import { CustomIcon, Button } from '../../../components/index'
 import { mandatMPRModel } from '../../../core/forms/mandatMPR/mandatMPRModel'
 import { mandatMPRBase64 } from '../../../assets/files/mandatMPRBase64'
 
-import { generatePdfForm, retrieveFirstAndLastNameFromFullName } from '../../../core/utils'
+import { generatePdfForm, getAddressDetails, retrieveFirstAndLastNameFromFullName } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 import { db } from '../../../firebase';
@@ -19,8 +19,8 @@ const properties = [
     "applicantFirstName",
     "applicantLastName",
     "address",
-    "addressCode",
-    "commune",
+    "zipCode",
+    "city",
     "email",
     "phone",
     "createdIn",
@@ -31,8 +31,8 @@ let initialState = {
     applicantFirstName: "",//Auto
     applicantLastName: "",//Auto
     address: "",//Auto
-    addressCode: "",//Old
-    commune: "",//Old
+    zipCode: "",//Old
+    city: "",//Old
     email: "",//Auto
     phone: "", //Auto
     createdIn: "",//Auto
@@ -45,33 +45,49 @@ class CreateMandatMPR extends Component {
         this.MandatMPRId = this.props.navigation.getParam('MandatMPRId', '')
 
         this.project = this.props.navigation.getParam('project', null)
-        this.clientFullName = this.project ? this.project.client.fullName : ""
-        this.clientPhone = this.project ? this.project.client.phone : ""
-        this.clientAddress = this.project ? this.project.address : ""
-        this.clientPhone = this.project ? this.project.client.phone : ""
-        this.clientEmail = this.project ? this.project.client.email : ""
+        const clientFullName = this.project ? this.project.client.fullName : ""
+        const clientAddress = this.project ? this.project.address : ""
+        const clientPhone = this.project ? this.project.client.phone : ""
+        const clientEmail = this.project ? this.project.client.email : ""
 
-        const { firstName: clientFirstName, lastName: clientLastName } = retrieveFirstAndLastNameFromFullName(this.clientFullName)
-        initialState.sexe = "Monsieur"
-        initialState.applicantFirstName = clientFirstName
-        initialState.applicantLastName = clientLastName
-        initialState.address = this.clientAddress.description
-        initialState.phone = this.clientPhone
-        initialState.email = this.clientEmail
-        initialState.createdIn = this.clientAddress.description
+        const {
+            firstName: clientFirstName,
+            lastName: clientLastName
+        } = retrieveFirstAndLastNameFromFullName(clientFullName)
 
         this.state = {
+            zipCode: "",
+            city: "",
+            sexe: "Monsieur",
+            applicantFirstName: clientFirstName,
+            applicantLastName: clientLastName,
+            address: clientAddress.description,
+            phone: clientPhone,
+            email: clientEmail,
+            createdIn: clientAddress.description,
+            version: 1
         }
+
+        console.log("-------------------", this.project)
+
+    }
+
+    async componentDidMount() {
+        const { latitude, longitude } = this.project.address.marker
+        const addressDetails = await getAddressDetails(latitude, longitude)
+        const { zipCode, city } = addressDetails
+        this.setState({ zipCode, city })
     }
 
     render() {
+
         return (
             <StepsForm
                 autoGen={true}
                 titleText="Créer un mandat Maprimerénov"
                 navigation={this.props.navigation}
                 stateProperties={properties}
-                initialState={initialState}
+                initialState={this.state}
                 idPattern={"GS-MMPR-"}
                 DocId={this.MandatMPRId}
                 collection={"MandatsMPR"}
