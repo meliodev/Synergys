@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { Children } from 'react'
 import { StyleSheet, View, Alert } from 'react-native'
 import NetInfo from "@react-native-community/netinfo"
 import { connect } from 'react-redux'

@@ -10,6 +10,7 @@ import EmptyList from '../../components/EmptyList'
 import { constants, errorMessages } from '../../core/constants'
 import { displayError, load } from '../../core/utils'
 import { Alert } from 'react-native';
+import { firebase } from '@react-native-firebase/crashlytics';
 
 class ListNews extends Component {
     constructor(props) {
@@ -25,7 +26,6 @@ class ListNews extends Component {
     componentDidMount() {
         const { isConnected } = this.props.network
         if (!isConnected) return
-
         load(this, true)
         this.fetchWordpressPosts()
     }
@@ -66,15 +66,14 @@ class ListNews extends Component {
     }
 
     render() {
-        const regex = "/(<([^>]+)>)/ig"
+      //  const regex = "/(<([^>]+)>)/ig"
         const { news, loading } = this.state
-        const { isConnected } = this.props.network
         const newsCount = news.length
 
         return (
 
             <SafeAreaView style={styles.container}>
-                <Appbar menu title titleText='Actualités' />
+                <Appbar menu={firebase.auth().currentUser} title titleText='Actualités' />
 
                 {loading ?
                     <View style={styles.container}>

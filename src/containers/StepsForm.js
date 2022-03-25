@@ -1,6 +1,6 @@
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert, Dimensions } from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { ProgressBar, Checkbox, TextInput as Input } from "react-native-paper";
 import { connect } from 'react-redux'
 import _ from 'lodash'
@@ -8,7 +8,6 @@ import Modal from 'react-native-modal'
 import Pdf from "react-native-pdf"
 import DatePicker from 'react-native-date-picker'
 import TextInputMask from 'react-native-text-input-mask';
-import RNFS from 'react-native-fs'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -33,31 +32,26 @@ import {
     SquarePlus,
     EEBPack
 } from '../components';
+import { setEstimation } from '../components/EEBPack';
 
 import {
     nameValidator,
     positiveNumberValidator,
     emailValidator,
     generateId,
-    chunk,
-    formatDocument,
     myAlert,
     saveFile,
-    setAddress,
-    refreshAddress,
     displayError,
     arrayIntersection,
     articles_fr,
-    setToast,
     pickImage,
 } from '../core/utils';
 
-import { constants } from '../core/constants';
+import { constants, contactForm } from '../core/constants';
 import * as theme from '../core/theme'
 import { setStatusBarColor } from '../core/redux';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 import { fetchDocument } from '../api/firestore-api';
-import { ThemeContext } from 'react-navigation';
 
 const mascCollections = ["PvReception", "MandatsMPR", "MandatsSynergys"]
 
@@ -71,6 +65,7 @@ class StepsForm extends Component {
         this.handleSave = this.handleSave.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+        this.submitContactForm = this.submitContactForm.bind(this);
         this.myAlert = myAlert.bind(this)
         BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
 
@@ -81,9 +76,13 @@ class StepsForm extends Component {
         this.DocumentId = this.props.navigation.getParam('DocumentId', '')
         this.popCount = this.props.navigation.getParam('popCount', 1)
 
-        this.state = {
+        this.isGuest = !auth.currentUser
+
+        this.initialState = {
             showWelcomeMessage: this.props.collection === "Simulations" && !this.isEdit,
             showSuccessMessage: false,
+            showContactModal: true,
+            acceptPhoneCall: true,
             pagesDone: [],
             pageIndex: 0,
             stepIndex: 0,
@@ -106,13 +105,26 @@ class StepsForm extends Component {
             isBack: false,
             ...this.props.initialState
         }
+
+        this.state = this.initialState
     }
 
     //##Initialization
+    addNavigationListeners() {
+        this.willFocusSubscription = this.props.navigation.addListener('willFocus', () => {
+            const darkStatusBarStyle = { backgroundColor: "#003250", barStyle: "light-content" }
+            setStatusBarColor(this, darkStatusBarStyle)
+        })
+        this.willBlurSubscription = this.props.navigation.addListener('willBlur', () => {
+            const lightStatusBarStyle = { backgroundColor: "#fff", barStyle: "dark-content" }
+            setStatusBarColor(this, lightStatusBarStyle)
+        })
+    }
+
     async componentDidMount() {
         try {
-            const statusBarStyle = { backgroundColor: "#003250", barStyle: "light-content" }
-            setStatusBarColor(this, statusBarStyle)
+            this.addNavigationListeners()
+
             if (this.state.isEdit)
                 await this.initEditMode()
             else if (this.props.autoGen)
@@ -133,6 +145,13 @@ class StepsForm extends Component {
             await this.onInitialStateChange()
             this.setState({ loading: false })
         }
+    }
+
+    componentWillUnmount() {
+        if (this.willFocusSubscription)
+            this.willFocusSubscription.remove()
+        if (this.willBlurSubscription)
+            this.willBlurSubscription.remove()
     }
 
     onInitialStateChange() {
@@ -176,9 +195,7 @@ class StepsForm extends Component {
 
     //##Progression
     renderProgression(pages) {
-        // const { pagesDone } = this.state
         const pagesCount = pages.length - 1
-        // const progress = Math.round((pagesDone.length / pagesCount) * 100)
         const progress = Math.round((this.state.pageIndex / pagesCount) * 100)
 
         return (
@@ -240,12 +257,9 @@ class StepsForm extends Component {
         const { showPagination } = this.props
         const { title } = pages[pageIndex]
         const pagination = showPagination ? `(${pageIndex + 1}/${pages.length})` : ""
-        // const titles = title.split(' -')
-        // const title1 = titles[0]
-        // const title2 = titles[1]
 
         return (
-            <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: theme.padding / 2, paddingHorizontal: theme.padding }}>
+            <View style={styles.titleContainer}>
                 <Text style={[theme.customFontMSmedium.body, { textAlign: 'center', color: theme.colors.gray_dark }]}>
                     {title}
                 </Text>
@@ -624,15 +638,15 @@ class StepsForm extends Component {
                     break;
 
                 case "checkbox":
-                    const onPressCheckBox = () => this.setState({ disablePhoneContact: !this.state.disablePhoneContact })
+                    const onPressCheckBox = () => this.setState({ acceptPhoneCall: !this.state.acceptPhoneCall })
                     return (
-                        <View key={field.id.toString()} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
+                        <View key={field.id.toString()} style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 25 }}>
                             <Checkbox
-                                status={this.state.disablePhoneContact ? 'unchecked' : 'checked'}
+                                status={this.state.acceptPhoneCall ? 'checked' : 'unchecked'}
                                 onPress={onPressCheckBox}
                                 color={theme.colors.primary}
                             />
-                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]} onPress={onPressCheckBox}>
+                            <Text style={[theme.customFontMSregular.body]} onPress={onPressCheckBox}>
                                 {label}
                             </Text>
                         </View>
@@ -766,11 +780,12 @@ class StepsForm extends Component {
     }
 
     renderButtons(pages) {
-        const { pageIndex } = this.state
-        const isSubmit = pages[pageIndex].id === 'submit'
+        const { pageIndex, showSuccessMessage } = this.state
+        const { collection } = this.props
         const isLastPage = pageIndex === pages.length - 1
-        // const isLastFormPage = pageIndex === pages.length - 2
-        const title = isSubmit ? "SOUMETTRE" : isLastPage ? "TERMINER" : "CONTINUER"
+        const showContactUs = collection === "Simulations" && showSuccessMessage && isLastPage && this.isGuest
+        let title = isLastPage ? "TERMINER" : "CONTINUER"
+        title = showContactUs ? "NOUS CONTACTER" : title
 
         return (
             <View style={styles.buttonsContainer}>
@@ -824,7 +839,10 @@ class StepsForm extends Component {
         if (isLastPage) {
 
             if (collection === "Simulations" && showSuccessMessage || collection !== "Simulations") {
-                await this.handleSubmit(true, true, update)
+                if (this.isGuest)
+                    this.setState({ showContactModal: true })
+
+                else await this.handleSubmit(true, true, update)
             }
 
             else if (collection === "Simulations" && !showSuccessMessage) {
@@ -1031,6 +1049,8 @@ class StepsForm extends Component {
     extractForm(state) {
         delete state.showWelcomeMessage
         delete state.showSuccessMessage
+        delete state.showContactModal
+        delete state.acceptPhoneCall
         delete state.pagesDone
         delete state.pageIndex
         delete state.stepIndex
@@ -1080,7 +1100,7 @@ class StepsForm extends Component {
         const form = this.unformatDocument()
         const products = this.setProducts(form)
         const colorCat = this.setColorCat(form)
-        const estimation = this.setEstimation(products, colorCat)
+        const estimation = setEstimation(products, colorCat)
         return { products, colorCat, estimation }
     }
 
@@ -1209,48 +1229,6 @@ class StepsForm extends Component {
         }
 
         return couleurChoisie
-    }
-
-    setEstimation(products, colorCat) {
-
-        let totalAide = 0
-
-        const isProductProposed = (productName) => {
-            const isIncluded = products.includes(productName) ? 1 : 0
-            return isIncluded
-        }
-
-        const isPacAirAir = isProductProposed("Pac air air (climatisation)")
-        const isPacAirEau = isProductProposed("PAC AIR EAU")
-        const isIsolationComble = isProductProposed("Isolation des combles")
-        const isPhotovoltaique = isProductProposed("Photovoltaïque")
-        const isBallonThermo = isProductProposed("Ballon thermodynamique")
-
-        //New proucts (2022)
-        const isCag = isProductProposed("Chaudière à granulé")
-        const isCesi = isProductProposed("Chauffe-eau solaire individuel")
-        const isSsc = isProductProposed("Chauffage solaire combiné")
-
-        let { lostAticsSurface } = this.state
-        lostAticsSurface = Number(lostAticsSurface)
-
-        if (colorCat == 'blue') {
-            totalAide = (4000 * isPacAirEau) + (0 * isPacAirAir) + (1200 * isBallonThermo) + (0 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique) + (10000 * isCag) + (4000 * isCesi) + (10000 * isSsc)
-        }
-
-        else if (colorCat == 'yellow') {
-            totalAide = (3000 * isPacAirEau) + (0 * isPacAirAir) + (800 * isBallonThermo) + (0 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique) + (8000 * isCag) + (3000 * isCesi) + (8000 * isSsc)
-        }
-
-        else if (colorCat == 'purple') {
-            totalAide = (2000 * isPacAirEau) + (0 * isPacAirAir) + (400 * isBallonThermo) + (0 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique) + (4000 * isCag) + (2000 * isCesi) + (4000 * isSsc)
-        }
-
-        else if (colorCat == 'pink') {
-            totalAide = (0 * isPacAirEau) + (0 * isPacAirAir) + (0 * isBallonThermo) + (0 * lostAticsSurface * isIsolationComble) + (0 * isPhotovoltaique) + (0 * isCag) + (0 * isCesi) + (0 * isSsc)
-        }
-
-        return totalAide
     }
 
     //##Success
@@ -1410,14 +1388,21 @@ class StepsForm extends Component {
         if (!isEdit && !showWelcomeMessage && !submitted) {
             const title = "Abandonner"
             const message = 'Les données saisies seront perdues. Êtes-vous sûr de vouloir annuler ?'
-            const handleConfirm = () => this.props.navigation.goBack(null);
+            const handleConfirm = () => {
+                this.initialState.initialLoading = false
+                this.setState(this.initialState, () => this.props.navigation.goBack(null))
+                this.props.navigation.goBack(null);
+            }
             this.myAlert(title, message, handleConfirm)
         }
 
         else {
             if (!readOnly)
                 this.setState({ readOnly: true })
-            else this.props.navigation.goBack(null);
+            else {
+                this.initialState.initialLoading = false
+                this.setState(this.initialState, () => this.props.navigation.goBack(null))
+            }
         }
         return true;
     }
@@ -1644,8 +1629,6 @@ class StepsForm extends Component {
         if (this.props.steps[stepIndex])
             var { subSteps, subStepsCount } = this.props.steps[stepIndex]
 
-        console.log(stepIndex, '000000000000')
-
         if (!subSteps) return null
 
         const flex = (1 / subStepsCount) - 0.02
@@ -1721,18 +1704,81 @@ class StepsForm extends Component {
         await this.handleSubmit(isSubmitted, false)
     }
 
+
+    toggleContactModal() {
+        this.setState({ showContactModal: !this.state.showContactModal })
+    }
+
+    submitContactForm() {
+        //1. Hide contact form
+        this.setState({ showContactModal: false })
+
+        //2. Show loading dialog
+        setTimeout(() => {
+            this.setState({ loading: true })
+        }, 500)
+        
+        //3. Generate Fiche EEB PDF (page 1) + Products & Packages (page 2) + Contact info (page 3)
+        //4. Send email (using nodemailer)
+        //5. Hide loading dialog
+        //6. Show Thanks message
+    }
+
+    renderGuestContactModal() {
+        const { showContactModal } = this.state
+
+        return (
+            <Modal
+                isVisible={showContactModal}
+                onSwipeComplete={this.toggleContactModal}
+                onBackButtonPress={this.toggleContactModal}
+                onBackdropPress={this.toggleContactModal}
+                style={styles.contactModal}
+                propagateSwipe={true}
+            >
+                <View style={styles.scrollableModal}>
+                    <ModalHeader
+                        title="Coordonnées"
+                        toggleModal={this.toggleModal}
+                    />
+
+                    <KeyboardAvoidingView
+                        keyboardVerticalOffset={150}
+                        style={{ flex: 1 }}
+                        behavior="padding">
+
+                        <ScrollView
+                            style={{ flex: 0.9, paddingHorizontal: theme.padding }}
+                            contentContainerStyle={{ paddingBottom: 200 }}
+                        >
+                            {this.renderFields(contactForm, 0)}
+                        </ScrollView>
+
+                    </KeyboardAvoidingView>
+
+                    <View style={{ flex: 0.1, paddingRight: theme.padding }}>
+                        <Button
+                            mode="contained"
+                            containerStyle={{ alignSelf: "flex-end" }}
+                            onPress={this.submitContactForm}>
+                            <Text style={[theme.customFontMSmedium.caption]}>
+                                Soumettre
+                            </Text>
+                        </Button>
+                    </View>
+                </View>
+            </Modal >
+        )
+    }
+
     render() {
         const {
             showWelcomeMessage,
-            showSuccessMessage,
             isPdfModalVisible,
-            pageIndex,
             pdfBase64,
-            submitted,
             isEdit,
             readOnly,
             loading,
-            initialLoading,
             docNotFound,
             toastMessageModal,
             toastTypeModal,
@@ -1765,7 +1811,7 @@ class StepsForm extends Component {
                     iconsColor={theme.colors.white}
                     close
                     title
-                    check={!showWelcomeMessage && !readOnly}
+                    check={!showWelcomeMessage && !readOnly && auth.currentUser}
                     handleSubmit={this.handleSave}
                     edit={isEdit && readOnly}
                     handleEdit={() => this.setState({ submitted: false, readOnly: false })}
@@ -1774,6 +1820,8 @@ class StepsForm extends Component {
                 />
 
                 {this.renderContent()}
+
+                {this.isGuest && this.renderGuestContactModal()}
 
                 <Modal
                     isVisible={isPdfModalVisible}
@@ -1811,7 +1859,7 @@ class StepsForm extends Component {
                 </Modal>
 
                 <LoadDialog
-                    message={"Traitement en cours"}
+                    message={"Traitement en cours..."}
                     loading={loading}
                 />
 
@@ -1875,6 +1923,12 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         borderWidth: StyleSheet.hairlineWidth,
         borderColor: theme.colors.white,
+    },
+    titleContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: theme.padding,
+        paddingHorizontal: theme.padding,
     },
     body: {
         flex: 1,
@@ -1945,13 +1999,17 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
         borderTopRightRadius: constants.ScreenWidth * 0.03,
     },
+    contactModal: {
+        width: constants.ScreenWidth * 0.7,
+        marginVertical: constants.ScreenHeight * 0.1,
+        alignSelf: "center",
+        borderRadius: constants.ScreenWidth * 0.05,
+    },
     scrollableModal: {
         flex: 1,
-        // height: constants.ScreenHeight * 0.9,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,
         borderTopRightRadius: constants.ScreenWidth * 0.03,
-        // paddingBottom: 70,
-        backgroundColor: '#fff'
+        backgroundColor: '#fff',
     },
     scrollableModalContent1: {
         height: 200,

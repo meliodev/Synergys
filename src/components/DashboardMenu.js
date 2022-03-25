@@ -32,13 +32,14 @@ const DashboardMenu = ({ ...props }) => {
 
   return (
     // <Provider>
-      <BottomNavigation
-        navigationState={{ index, routes }}
-        onIndexChange={setIndex}
-        renderScene={renderScene}
-        barStyle={{ backgroundColor: '#fff' }}
-        activeColor= {"#061357"}
-      />
+    <BottomNavigation
+      navigationState={{ index, routes }}
+      onIndexChange={setIndex}
+      renderScene={renderScene}
+      barStyle={{ backgroundColor: '#fff', height: 55 }}
+      activeColor={"#061357"}
+      safeAreaInset={{ bottom: 0 }}
+    />
     // </Provider>
   )
 }

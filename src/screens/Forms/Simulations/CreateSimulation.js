@@ -1,6 +1,6 @@
 
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView, StatusBar, } from 'react-native'
 import { faVials } from '@fortawesome/pro-duotone-svg-icons';
 
 import StepsForm from '../../../containers/StepsForm'
@@ -168,9 +168,9 @@ class CreateSimulation extends Component {
     //##Welcome 
     welcomeMessage(callBack) {
         const title = "SIMULATION EN LIGNE"
-        const message = "Bienvenue sur l’outil de simulation en ligne et de dépôt de dossier d’aide. Les informations que vous renseignez seront utilisées uniquement pour calculer vos montants d’aides et les équipements préconisés. En fin de formulaire, vous aurez la possibilité de transformer votre simulation en dépôt de dossier en ligne. À tout moment vous pouvez être rappelé par un conseiller pour être accompagné dans votre démarche."
+        const message = "Bienvenue sur l’outil de simulation en ligne et de dépôt de dossier d’aide. Les informations que vous renseignez seront utilisées uniquement pour calculer vos montants d’aides et les équipements préconisés. En fin de formulaire, vous aurez la possibilité de nous communiquer vos coordonnées. À tout moment vous pouvez être contacté par un conseiller pour être accompagné dans votre démarche."
         const instructions = [
-            "Renseigner vos informations et découvrez votre montant d’aides et les produits que nous vous recommandons",
+            "Renseigner vos informations et découvrez votre montant d’aides et les produits/packs que nous vous recommandons",
             "Déposer votre dossier d’aide directement en ligne !",
             "Suivez l’avancement de vos demandes"
         ]
@@ -201,7 +201,7 @@ class CreateSimulation extends Component {
                             return (
                                 <View key={index.toString()} style={{ flexDirection: 'row' }}>
                                     <Text style={{ color: theme.colors.primary }}>{count}. </Text>
-                                    <Text style={[theme.customFontMSregular.caption, { marginBottom: 12 }]}>
+                                    <Text style={[theme.customFontMSregular.body, { marginBottom: 12 }]}>
                                         {instruction}
                                     </Text>
                                 </View>
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     welcomeInstructionsContainer: {
         flex: 1,
         paddingHorizontal: theme.padding,
-        paddingVertical: theme.padding * 3
+        paddingVertical: theme.padding * 2
     },
     welcomeSeparator: {
         borderColor: theme.colors.gray_light,

@@ -1,5 +1,10 @@
+import * as React from 'react';
+
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
+import * as theme from '../core/theme'
+import { Text } from 'react-native'
+import { faArrowToRight, faInfo, faNewspaper, faVials } from '@fortawesome/pro-light-svg-icons'
 
 //Import screens
 //Auth
@@ -86,6 +91,9 @@ import VideoPlayer from '../screens/Helpers/VideoPlayer'
 
 import { constants } from '../core/constants'
 import { Menu, MenuOptions, MenuOption, MenuTrigger, } from 'react-native-popup-menu'
+import { createBottomTabNavigator } from 'react-navigation-tabs';
+import { CustomIcon } from '../components';
+import AboutUs from '../screens/AboutUs';
 
 //Icons: No Icon
 const hideHeader = () => ({
@@ -332,6 +340,7 @@ const authScreens = {
     },
 }
 
+
 const DashboardStack = createStackNavigator(appScreens, { initialRouteName: "Dashboard" })
 const ProfileStack = createStackNavigator(appScreens, { initialRouteName: "Profile" })
 const UsersManagementStack = createStackNavigator(appScreens, { initialRouteName: "UsersManagement" })
@@ -346,6 +355,36 @@ const SimulatorStack = createStackNavigator(appScreens, { initialRouteName: "Lis
 const MandatMPRStack = createStackNavigator(appScreens, { initialRouteName: "ListMandatsMPR" })
 const MandatSynergysStack = createStackNavigator(appScreens, { initialRouteName: "ListMandatsSynergys" })
 const NewsStack = createStackNavigator(appScreens, { initialRouteName: "ListNews" })
+const AuthStack = createStackNavigator(authScreens, { initialRouteName: "LoginScreen" })
+
+const guestScreens = {
+    Simulation: {
+        screen: CreateSimulation,
+        navigationOptions: {
+            title: "Simulation",
+            unmountOnBlur: true,
+        }
+    },
+    News: {
+        screen: NewsStack,
+        navigationOptions: {
+            title: "Actualité",
+            unmountOnBlur: true,
+        }
+    },
+    AboutUs: {
+        screen: AboutUs,
+        navigationOptions: {
+            title: "A propos"
+        }
+    },
+    Auth: {
+        screen: AuthStack,
+        navigationOptions: {
+            title: "Se connecter"
+        }
+    },
+}
 
 const stacks = {
     DashboardStack: {
@@ -408,7 +447,46 @@ const stacks = {
     },
 }
 
-export const AuthStack = createStackNavigator(authScreens, { initialRouteName: "LoginScreen" })
+//export const AuthStack = createStackNavigator(authScreens, { initialRouteName: "LoginScreen" })
+export const GuestTab = createBottomTabNavigator(
+    guestScreens,
+    {
+        defaultNavigationOptions: ({ navigation }) => ({
+            tabBarIcon: ({ focused, horizontal, tintColor }) => {
+                const { routeName } = navigation.state;
+                let IconComponent = CustomIcon;
+                let icon;
+                if (routeName === 'Auth') {
+                    icon = faArrowToRight
+                }
+                else if (routeName === 'Simulation') {
+                    icon = faVials
+                }
+                else if (routeName === 'AboutUs') {
+                    icon = faInfo
+                }
+                else if (routeName === 'News') {
+                    icon = faNewspaper
+                }
+
+                return <IconComponent icon={icon} size={25} color={tintColor} />;
+            },
+        }),
+        resetOnBlur: true,
+        tabBarOptions: {
+            activeTintColor: theme.colors.primary,
+            inactiveTintColor: theme.colors.gray_dark,
+            safeAreaInset: {
+                bottom: 0,
+            },
+        },
+        initialRouteName: "Auth",
+    }
+)
+
+
+
+//const AuthStack = createBottomTabNavigator(authScreens)
 export const AppStack = createSwitchNavigator(stacks)
 
 

@@ -114,6 +114,75 @@ export const workTypes = [
     { label: 'RADIATEUR INERTIE ', value: 'RADIATEUR INERTIE ', selected: false },
 ]
 
+export const contactForm = [
+    {//33
+        id: "coordinates",
+        title: "COORDONNEES",
+        fields: [
+            {
+                id: "addressNumber",
+                type: "textInput",
+                label: "N°",
+                isNumeric: true,
+                errorId: "addressNumberError",
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+            {
+                id: "addressStreet",
+                type: "textInput",
+                label: "Rue",
+                errorId: "addressStreetError",
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+            {
+                id: "addressPostalCode",
+                type: "textInput",
+                label: "Code postal",
+                errorId: "addressPostalCodeError",
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+            {
+                id: "addressCity",
+                type: "textInput",
+                label: "Ville",
+                errorId: "addressCityError",
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+            {
+                id: "email",
+                type: "textInput",
+                label: "Email",
+                errorId: "emailError",
+                isEmail: true,
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+            {
+                id: "phone",
+                type: "textInput",
+                label: "Téléphone",
+                errorId: "phoneError",
+                isNumeric: true,
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+            {
+                id: "acceptPhoneCall",
+                type: "checkbox",
+                label: "Être rappelé",
+                errorId: "acceptPhoneCallError",
+                isNumeric: true,
+                mendatory: true,
+                pdfConfig: { dx: -53, dy: - 650, pageIndex: 2 }
+            },
+        ],
+    },
+]
+
 //Auto-Sign docs
 export const autoSignDocs = ["Mandat MaPrimeRénov"]
 export const docsConfig = (index) => {

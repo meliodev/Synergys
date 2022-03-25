@@ -1,11 +1,12 @@
 import React, { Component } from 'react'
-import { Text } from 'react-native'
+import { Text, View } from 'react-native'
 
 import { createAppContainer, createSwitchNavigator, NavigationActions } from 'react-navigation';
 import { createDrawerNavigator } from 'react-navigation-drawer';
 import { createStackNavigator } from 'react-navigation-stack';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
 
-import { AuthStack, AppStack } from './StackNavigators'
+import { GuestTab, AppStack } from './StackNavigators'
 import AuthLoadingScreen from '../screens/Authentication/AuthLoadingScreen'
 
 import { constants } from '../core/constants'
@@ -29,12 +30,11 @@ const AppDrawer = createDrawerNavigator({
     },
   })
 
-
 const MyApp = createSwitchNavigator(
   {
     Starter: AuthLoadingScreen,
     App: AppDrawer,
-    Auth: AuthStack,
+    Guest: GuestTab,
   },
 )
 

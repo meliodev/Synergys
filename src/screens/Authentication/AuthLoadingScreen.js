@@ -143,7 +143,7 @@ class AuthLoadingScreen extends Component {
         case EventType.PRESS:
           if (currentUser)
             this.props.navigation.navigate(screen, params)
-          else this.props.navigation.navigate("LoginScreen")
+          else this.props.navigation.navigate("Guest")
           await notifee.cancelNotification(notification.id)
           break
       }
@@ -224,7 +224,7 @@ class AuthLoadingScreen extends Component {
           resetState(this)
           const network = { type, isConnected }
           setNetwork(this, network)
-          var routeName = "LoginScreen"
+          var routeName = "Guest"
           var routeParams = {}
         }
 

@@ -30,7 +30,9 @@ class Analytics extends Component {
 
         const role = this.props.role
         const roleId = role.id
-        this.queries = analyticsQueriesBasedOnRole(roleId, auth.currentUser.uid)
+
+        if (auth.currentUser)
+            this.queries = analyticsQueriesBasedOnRole(roleId, auth.currentUser.uid)
 
         this.state = {
             totalIncome: 0,
@@ -46,7 +48,8 @@ class Analytics extends Component {
     }
 
     async componentDidMount() {
-        await this.fetchData()
+        if (this.queries)
+            await this.fetchData()
         load(this, false)
     }
 

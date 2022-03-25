@@ -8,49 +8,50 @@ import NumberFormat from 'react-number-format';
 import * as theme from "../core/theme";
 import CustomIcon from "./CustomIcon";
 
-const EEBPack = ({ packs, isPV, colorCat, ...props }) => {
 
-    const setEstimation = (products) => {
+export const setEstimation = (products, colorCat) => {
 
-        let totalAide = 0
+    let totalAide = 0
 
-        const isProductProposed = (productName) => {
-            const isIncluded = products.includes(productName) ? 1 : 0
-            return isIncluded
-        }
-
-        const isPacAirAir = isProductProposed("Pac air air (climatisation)")
-        const isPacAirEau = isProductProposed("PAC AIR EAU")
-        const isIsolationComble = isProductProposed("Isolation des combles")
-        const isPhotovoltaique = isProductProposed("Photovoltaïque")
-        const isBallonThermo = isProductProposed("Ballon thermodynamique")
-
-        //New proucts (2022)
-        const isCag = isProductProposed("Chaudière à granulé")
-        const isCesi = isProductProposed("Chauffe-eau solaire individuel")
-        const isSsc = isProductProposed("Chauffage solaire combiné")
-
-        // let { lostAticsSurface } = this.state
-        // lostAticsSurface = Number(lostAticsSurface)
-
-        if (colorCat == 'blue') {
-            totalAide = (4000 * isPacAirEau) + (0 * isPacAirAir) + (1200 * isBallonThermo) + (0 * isPhotovoltaique) + (10000 * isCag) + (4000 * isCesi) + (10000 * isSsc)
-        }
-
-        else if (colorCat == 'yellow') {
-            totalAide = (3000 * isPacAirEau) + (0 * isPacAirAir) + (800 * isBallonThermo) + (0 * isPhotovoltaique) + (8000 * isCag) + (3000 * isCesi) + (8000 * isSsc)
-        }
-
-        else if (colorCat == 'purple') {
-            totalAide = (2000 * isPacAirEau) + (0 * isPacAirAir) + (400 * isBallonThermo) + (0 * isPhotovoltaique) + (4000 * isCag) + (2000 * isCesi) + (4000 * isSsc)
-        }
-
-        else if (colorCat == 'pink') {
-            totalAide = (0 * isPacAirEau) + (0 * isPacAirAir) + (0 * isBallonThermo) + (0 * isPhotovoltaique) + (0 * isCag) + (0 * isCesi) + (0 * isSsc)
-        }
-
-        return totalAide
+    const isProductProposed = (productName) => {
+        const isIncluded = products.includes(productName) ? 1 : 0
+        return isIncluded
     }
+
+    const isPacAirAir = isProductProposed("Pac air air (climatisation)")
+    const isPacAirEau = isProductProposed("PAC AIR EAU")
+    const isIsolationComble = isProductProposed("Isolation des combles")
+    const isPhotovoltaique = isProductProposed("Photovoltaïque")
+    const isBallonThermo = isProductProposed("Ballon thermodynamique")
+
+    //New proucts (2022)
+    const isCag = isProductProposed("Chaudière à granulé")
+    const isCesi = isProductProposed("Chauffe-eau solaire individuel")
+    const isSsc = isProductProposed("Chauffage solaire combiné")
+
+    // let { lostAticsSurface } = this.state
+    // lostAticsSurface = Number(lostAticsSurface)
+
+    if (colorCat == 'blue') {
+        totalAide = (4000 * isPacAirEau) + (0 * isPacAirAir) + (1200 * isBallonThermo) + (0 * isPhotovoltaique) + (10000 * isCag) + (4000 * isCesi) + (10000 * isSsc)
+    }
+
+    else if (colorCat == 'yellow') {
+        totalAide = (3000 * isPacAirEau) + (0 * isPacAirAir) + (800 * isBallonThermo) + (0 * isPhotovoltaique) + (8000 * isCag) + (3000 * isCesi) + (8000 * isSsc)
+    }
+
+    else if (colorCat == 'purple') {
+        totalAide = (2000 * isPacAirEau) + (0 * isPacAirAir) + (400 * isBallonThermo) + (0 * isPhotovoltaique) + (4000 * isCag) + (2000 * isCesi) + (4000 * isSsc)
+    }
+
+    else if (colorCat == 'pink') {
+        totalAide = (0 * isPacAirEau) + (0 * isPacAirAir) + (0 * isBallonThermo) + (0 * isPhotovoltaique) + (0 * isCag) + (0 * isCesi) + (0 * isSsc)
+    }
+
+    return totalAide
+}
+
+const EEBPack = ({ packs, isPV, colorCat, ...props }) => {
 
     const isPVEligible = () => {
         return (
@@ -86,7 +87,7 @@ const EEBPack = ({ packs, isPV, colorCat, ...props }) => {
 
             {packs.map((products, i) => {
 
-                const amount = setEstimation(products, "blue")
+                const amount = setEstimation(products, colorCat)
                 const packLabel = products.join(" + ")
 
                 return (

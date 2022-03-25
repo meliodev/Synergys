@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { LogBox, StyleSheet, Text } from 'react-native'
+import { LogBox, StatusBar, StyleSheet, Text } from 'react-native'
 import notifee, { AndroidImportance } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import { persistStore } from 'redux-persist'
@@ -19,6 +19,7 @@ import firebase, { crashlytics, remoteConfig } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from '../fontConfig'
 import * as theme from './core/theme'
+import MyStatusBar from './components/MyStatusBar'
 
 const paperTheme = {
   ...DefaultTheme,
@@ -71,10 +72,10 @@ class App extends Component {
           <PaperProvider theme={paperTheme}>
             <MenuProvider>
               <Wrapper>
-                <SafeAreaView style={styles.safeviewArea}>
+                <MyStatusBar>
                   <RootController />
                   <AppToast />
-                </SafeAreaView>
+                </MyStatusBar>
               </Wrapper>
             </MenuProvider>
           </PaperProvider>
@@ -88,8 +89,7 @@ LogBox.ignoreAllLogs(true)
 
 const styles = StyleSheet.create({
   safeviewArea: {
-    flex: 1,
-    backgroundColor: theme.colors.background
+    flex: 1
   }
 })
 
@@ -98,5 +98,7 @@ const codePushOptions = {
   installMode: codePush.InstallMode.IMMEDIATE,
 }
 
+
 export default codePush(codePushOptions)(App)
 //export default App
+
