@@ -65,6 +65,7 @@ import CreateOrder from '../screens/Orders/CreateOrder'
 //Simulation
 import CreateSimulation from '../screens/Forms/Simulations/CreateSimulation'
 import ListSimulations from '../screens/Forms/Simulations/ListSimulations'
+import GuestContactSuccess from '../screens/Forms/Simulations/GuestContactSuccess';
 //PV réception
 import CreatePvReception from '../screens/Forms/PvReception/CreatePvReception'
 import ListPvReceptions from '../screens/Forms/PvReception/ListPvReceptions'
@@ -262,6 +263,10 @@ const appScreens = {
         screen: ListSimulations,
         navigationOptions: hideHeader
     },
+    GuestContactSuccess: {
+        screen: GuestContactSuccess,
+        navigationOptions: hideHeader
+    },
     CreatePvReception: {
         screen: CreatePvReception,
         navigationOptions: hideHeader
@@ -357,16 +362,46 @@ const MandatSynergysStack = createStackNavigator(appScreens, { initialRouteName:
 const NewsStack = createStackNavigator(appScreens, { initialRouteName: "ListNews" })
 const AuthStack = createStackNavigator(authScreens, { initialRouteName: "LoginScreen" })
 
+
+//GUEST APP
+const SimulatorStackGuest = createStackNavigator(
+    {
+        CreateSimulation: {
+            screen: CreateSimulation,
+            navigationOptions: hideHeader
+        },
+        GuestContactSuccess: {
+            screen: GuestContactSuccess,
+            navigationOptions: hideHeader
+        },
+    },
+    { initialRouteName: "CreateSimulation" }
+)
+
+const NewsStackGuest = createStackNavigator(
+    {
+        ListNews: {
+            screen: ListNews,
+            navigationOptions: hideHeader
+        },
+        ViewNews: {
+            screen: ViewNews,
+            navigationOptions: hideHeader
+        },
+    },
+    { initialRouteName: "ListNews" }
+)
+
 const guestScreens = {
     Simulation: {
-        screen: CreateSimulation,
+        screen: SimulatorStackGuest,
         navigationOptions: {
             title: "Simulation",
             unmountOnBlur: true,
         }
     },
     News: {
-        screen: NewsStack,
+        screen: NewsStackGuest,
         navigationOptions: {
             title: "Actualité",
             unmountOnBlur: true,
@@ -386,6 +421,7 @@ const guestScreens = {
     },
 }
 
+//All stacks
 const stacks = {
     DashboardStack: {
         screen: DashboardStack,

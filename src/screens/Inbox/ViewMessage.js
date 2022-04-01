@@ -8,8 +8,8 @@ import Entypo from 'react-native-vector-icons/Entypo'
 
 import firebase, { db, functions } from '../../firebase'
 import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
-import { downloadFile, setToast, load, countDown } from '../../core/utils'
+import { constants, errorMessages } from '../../core/constants'
+import { downloadFile, setToast, load, countDown, displayError } from '../../core/utils'
 import { fetchDocuments } from '../../api/firestore-api'
 
 import moment from 'moment'
@@ -158,9 +158,15 @@ export default class ViewMessage extends Component {
                 showRightIcon
                 showProgress={false}
                 rightIcon={
-                    <TouchableOpacity style={rightIconStyle} onPress={() => {
-                        setToast(this, 'i', 'Début du téléchargement...')
-                        downloadFile(document.name, document.downloadURL)
+                    <TouchableOpacity style={rightIconStyle} onPress={async () => {
+                        try {
+                            setToast(this, 'i', 'Début du téléchargement...')
+                            await downloadFile(document.name, document.downloadURL)
+                            setToast(this, 'i', 'Le fichier a été téléchargé avec succès !')
+                        }
+                        catch (e) {
+                            displayError({ message: e.message })
+                        }
                     }}>
                         <CustomIcon icon={faArrowAltToBottom} color={theme.colors.gray_dark} size={20} />
                     </TouchableOpacity>

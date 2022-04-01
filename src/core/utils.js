@@ -410,7 +410,7 @@ export const updateField = (main, field, text) => {
   main.setState({ field })
 }
 
-export const myAlert = function myAlert(title, message, handleConfirm, handleCancel, confirmText = 'Confirmer', cancelText = 'Annuler', extraButton={}) {
+export const myAlert = function myAlert(title, message, handleConfirm, handleCancel, confirmText = 'Confirmer', cancelText = 'Annuler', extraButton = {}) {
   Alert.alert(
     title,
     message,
@@ -463,10 +463,12 @@ export const downloadFile = async (fileName, url, open = true, updateProgress) =
           updateProgress(downloadProgress)
         }
       })
+      .then(() => { FileViewer.open(path, { showOpenWithDialog: true }) })
+      .catch((e) => { throw new Error(e) })
   }
 
   catch (error) {
-    throw new Error('Erreur lors du téléchargement du document, veuillez réessayer plus tard."')
+    throw new Error(errorMessages.documents.download)
   }
 }
 
@@ -830,7 +832,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
               break;
 
             case "options":
-              
+
               if (isMultiOptions || isStepMultiOptions) {
                 for (const item of field.items) {
                   if (!item.skip && formInputs[field.id].includes(item.value)) {
@@ -1074,25 +1076,26 @@ export const pickDocs = async (attachments, type = [DocumentPicker.types.allFile
     const results = await DocumentPicker.pickMultiple({ type })
     for (const res of results) {
       var i = 0
-     // if (res.uri.startsWith('content://')) {
-        const destPath = await setDestPath(res.name)
-        await RNFS.moveFile(res.uri, destPath)
+      // if (res.uri.startsWith('content://')) {
+      const destPath = await setDestPath(res.name)
+      await RNFS.moveFile(decodeURI(res.uri), destPath)
 
-        const attachment = {
-          path: destPath,
-          type: res.type,
-          name: res.name,
-          size: res.size,
-          progress: 0
-        }
-        attachments.push(attachment)
+      const attachment = {
+        path: destPath,
+        type: res.type,
+        name: res.name,
+        size: res.size,
+        progress: 0
       }
-      i = i + 1
-   // }
+      attachments.push(attachment)
+    }
+    i = i + 1
+    // }
     return attachments
   }
 
   catch (error) {
+    console.log(error)
     let errorMessage = 'Erreur lors de la sélection du fichier. Veuillez réessayer.'
     if (DocumentPicker.isCancel(error))
       return attachments
@@ -1108,7 +1111,7 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
     //if (res.uri.startsWith('content://')) {
     const attachmentName = genName ? `Scan-${moment().format('DD-MM-YYYY-HHmmss')}.pdf` : res.name
     const destPath = await setDestPath(attachmentName)
-    await RNFS.moveFile(res.uri, destPath)
+    await RNFS.moveFile(decodeURI(res.uri), destPath)
 
     const attachment = {
       path: destPath,

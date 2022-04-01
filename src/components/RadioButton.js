@@ -14,7 +14,7 @@ const RadioButton = ({ firstChoice, secondChoice, checked, onPress1, onPress2, t
         <View style={[isRow ? styles.container : {}, style]}>
             <View style={[styles.row, isRow ? { marginRight: constants.ScreenWidth * 0.025 } : {}]}>
                 {!textRight && firstTitle()}
-                <MyRadioButton
+                <MyRadioButton.Android
                     value={firstChoice.value}
                     status={checked === 'first' ? 'checked' : 'unchecked'}
                     onPress={onPress1}
@@ -24,7 +24,7 @@ const RadioButton = ({ firstChoice, secondChoice, checked, onPress1, onPress2, t
 
             <View style={[styles.row, isRow ? { justifyContent: 'flex-end' } : {}]}>
                 {!textRight && secondTitle()}
-                <MyRadioButton
+                <MyRadioButton.Android
                     value={secondChoice.title}
                     status={checked === 'second' ? 'checked' : 'unchecked'}
                     onPress={onPress2}

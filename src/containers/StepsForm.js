@@ -1,7 +1,8 @@
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
-import { KeyboardAvoidingView, StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
 import { ProgressBar, Checkbox, TextInput as Input } from "react-native-paper";
+import FileViewer from 'react-native-file-viewer'
 import { connect } from 'react-redux'
 import _ from 'lodash'
 import Modal from 'react-native-modal'
@@ -47,10 +48,10 @@ import {
     pickImage,
 } from '../core/utils';
 
-import { constants, contactForm } from '../core/constants';
+import { constants, contactForm, errorMessages, pack1, pack2 } from '../core/constants';
 import * as theme from '../core/theme'
 import { setStatusBarColor } from '../core/redux';
-import { db, auth } from '../firebase';
+import { db, auth, functions } from '../firebase';
 import { fetchDocument } from '../api/firestore-api';
 
 const mascCollections = ["PvReception", "MandatsMPR", "MandatsSynergys"]
@@ -64,6 +65,7 @@ class StepsForm extends Component {
         this.handleSubmit = this.handleSubmit.bind(this)
         this.handleSave = this.handleSave.bind(this)
         this.toggleModal = this.toggleModal.bind(this)
+        this.toggleContactModal = this.toggleContactModal.bind(this)
         this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
         this.submitContactForm = this.submitContactForm.bind(this);
         this.myAlert = myAlert.bind(this)
@@ -81,7 +83,7 @@ class StepsForm extends Component {
         this.initialState = {
             showWelcomeMessage: this.props.collection === "Simulations" && !this.isEdit,
             showSuccessMessage: false,
-            showContactModal: true,
+            showContactModal: false,
             acceptPhoneCall: true,
             pagesDone: [],
             pageIndex: 0,
@@ -157,7 +159,7 @@ class StepsForm extends Component {
     onInitialStateChange() {
         return new Promise((resolve, reject) => {
             this.setState(this.props.initialState, async () => {
-                const pdfBase64 = await generatePdfForm(this.state, this.props.collection)
+                const pdfBase64 = await generatePdfForm(this.state, this.props.collection, this.props.pdfParams)
                 this.setState({ pdfBase64 }, () => resolve(true))
             })
         })
@@ -165,7 +167,7 @@ class StepsForm extends Component {
 
     async initEditMode() {
         try {
-            const { collection } = this.props
+            const { collection, pdfParams } = this.props
             let document = await fetchDocument(collection, this.DocId)
             //document = this.setDocument(document)
             if (!document) {
@@ -173,7 +175,7 @@ class StepsForm extends Component {
                 return
             }
             this.setState(document)
-            const pdfBase64 = await generatePdfForm(document, collection)
+            const pdfBase64 = await generatePdfForm(document, collection, pdfParams)
             this.setState({ pdfBase64 })
         }
         catch (e) {
@@ -992,7 +994,7 @@ class StepsForm extends Component {
                     }
                 }
 
-                const { idPattern, collection } = this.props
+                const { idPattern, collection, pdfParams } = this.props
 
                 //Set form
                 let form = this.unformatDocument()
@@ -1005,7 +1007,7 @@ class StepsForm extends Component {
                     db.collection(collection).doc(DocId).set(form)
                 }
 
-                const pdfBase64 = await generatePdfForm(form, this.props.pdfType)
+                const pdfBase64 = await generatePdfForm(form, this.props.pdfType, pdfParams)
 
                 this.DocId = DocId
                 let update = {
@@ -1232,26 +1234,8 @@ class StepsForm extends Component {
     }
 
     //##Success
-    successMessage() {
-        const title = "Estimation de votre prime: "
-        const { products, colorCat, estimation, submitted } = this.state
-        const message1 = "Ce que nous vous recommandons"
-        const message2 = "PACKS proposés"
-        // const message3 = "Et Maintenant ?"
-        const instructions = [
-            "Renseigner vos informations et découvrez votre montant d’aides et les produits que nous vous recommandons",
-            "Déposer votre dossier d’aide directement en ligne!",
-            "Suivez l’avancement de vos demandes"
-        ]
 
-        const labels = [
-            "OK",
-            "Un conseiller vous contacte par téléphone et valide votre dossier.",
-            "Synergys vous remet votre étude et votre devis.",
-            "Le devis accepté, nous entamons les travaux.",
-            "Pour les aides ? Vous n'avez pas à les avancer, Synergys est mandataire administratif et financier de maprimerénov'!"
-        ]
-
+    setPacks(products) {
         const isSSC = products.includes("Chauffage solaire combiné")
         const isPAE = products.includes("PAC AIR EAU")
         const isBT = products.includes("Ballon thermodynamique")
@@ -1264,26 +1248,32 @@ class StepsForm extends Component {
         let isPVElligible = false
 
         if (isFirstPacks) {
-            const choice1 = ["PAC AIR EAU", "Chauffage solaire combiné"]
-            const choice2 = ["Chaudière à granulé", "Chauffage solaire combiné"]
-            packs = [choice1, choice2]
+            packs = pack1
             isPVElligible = true
         }
 
         else if (isSecondPacks) {
-            const choice1 = ["PAC AIR EAU", "Chauffe-eau solaire individuel"]
-            const choice2 = ["PAC AIR EAU", "Ballon thermodynamique"]
-            const choice3 = ["Chaudière à granulé", "Chauffe-eau solaire individuel"]
-            const choice4 = ["Chaudière à granulé", "Ballon thermodynamique"]
-            packs = [choice1, choice2, choice3, choice4]
+            packs = pack2
             isPVElligible = true
         }
 
+        return { packs, isPVElligible }
+    }
+
+    successMessage() {
+        const title = "Estimation de votre prime: "
+        const { products, colorCat, estimation, submitted } = this.state
+        const message1 = "Ce que nous vous recommandons"
+
+        const { packs, isPVElligible } = this.setPacks(products)
         const showPacks = packs.length > 0
 
         return (
             <View style={{ flex: 1 }}>
-                <ScrollView style={{ backgroundColor: theme.colors.white }} contentContainerStyle={{ paddingBottom: 8 }}>
+                <ScrollView
+                    style={{ backgroundColor: theme.colors.white }}
+                    contentContainerStyle={{ paddingBottom: 8 }}
+                >
 
                     <View style={styles.sucessMessageContent}>
                         <View style={[styles.colorCatCircle, { backgroundColor: colorCat }]} />
@@ -1431,6 +1421,8 @@ class StepsForm extends Component {
                     })
                     this.props.navigation.pop(this.popCount)
                 }
+
+                else FileViewer.open(destPath, { showOpenWithDialog: true })
             })
             .catch((e) => {
                 Alert.alert('', e.message)
@@ -1709,19 +1701,108 @@ class StepsForm extends Component {
         this.setState({ showContactModal: !this.state.showContactModal })
     }
 
-    submitContactForm() {
-        //1. Hide contact form
-        this.setState({ showContactModal: false })
+    async submitContactForm() {
 
-        //2. Show loading dialog
-        setTimeout(() => {
-            this.setState({ loading: true })
-        }, 500)
-        
-        //3. Generate Fiche EEB PDF (page 1) + Products & Packages (page 2) + Contact info (page 3)
-        //4. Send email (using nodemailer)
-        //5. Hide loading dialog
-        //6. Show Thanks message
+        try {
+
+            //0. Verify input
+            const isValid = this.verifyFields(contactForm, 0)
+            if (!isValid) return
+
+            //1. Hide contact form
+            this.setState({ showContactModal: false })
+
+            //2. Show loading dialog
+            setTimeout(() => {
+                this.setState({ loading: true })
+            }, 500)
+
+            // 4. Generate Fiche EEB PDF (page 1) + Products & Packages (page 2) + Contact info (page 3)
+            const pdfBase64 = await generatePdfForm(this.state, this.props.collection, this.props.pdfParams)
+
+            //5. Send email (using nodemailer)
+            const {
+                nameSir,
+                nameMiss,
+                acceptPhoneCall,
+                addressCity,
+                addressNumber,
+                addressStreet,
+                addressPostalCode,
+                email,
+                phone,
+                products,
+                colorCat
+            } = this.state
+            const clientName = nameSir || nameMiss || "eeb"
+            const isAcceptPhoneCall = acceptPhoneCall ? "Oui" : "Non"
+
+            const subject = "Contact client"
+            const receivers = [
+                "contact@eqx-software.com",
+                "salimlyoussi1@gmail.com"
+            ]
+            const attachments = [
+                {
+                    filename: `Simulation-${clientName}.pdf`,
+                    content: pdfBase64,
+                    encoding: 'base64'
+                },
+            ]
+
+            const { packs, isPVElligible } = this.setPacks(products)
+
+            const packsList = packs.map((choice, i) => {
+                let myHtml = `<p>Pack ${i + 1}:</p><ul>`
+                for (const product of choice) {
+                    const str = `<li>${product}</li>`
+                    myHtml = myHtml.concat(str)
+                }
+                const PVElligibleStr = isPVElligible ? "<li>Éligible à l'option photovoltaïque</li>" : ""
+                myHtml = myHtml.concat(PVElligibleStr)
+
+                const estimation = setEstimation(choice, colorCat)
+                const amount = `</ul><p>Estimation des aides: €${estimation}</p>`
+                myHtml = myHtml.concat(amount)
+                myHtml = `${myHtml}`
+                return myHtml
+            })
+            const packsHtmlList = packsList.join("")
+
+            const html = `
+                    <!DOCTYPE html>
+                        <html>
+                        <body>
+                           <h2>Coordonnées du client</h2>
+                           <p>Nom: ${clientName}</p>
+                           <p>Ville: ${addressCity}</p>
+                           <p>N°: ${addressNumber}</p>
+                           <p>Rue: ${addressStreet}</p>
+                           <p>Code postal: ${addressPostalCode}</p>
+                           <p>Email: ${email}</p>
+                           <p>Téléphone: ${phone}</p>
+                           <p>Être rappelé: ${isAcceptPhoneCall}</p>    
+                           <h2>Packs proposés</h2>
+                               ${packsHtmlList}
+                        </body>
+                        </html>
+                    `
+
+            const sendEmail = functions.httpsCallable('sendEmail')
+            const isSent = await sendEmail({ receivers, subject, html, attachments })
+            console.log("Has email been sent ?", isSent)
+
+            //6. Reset state & Go to success screen
+            this.initialState.loading = false
+            this.setState(this.initialState, () => {
+                this.props.navigation.navigate("GuestContactSuccess")
+            })
+        }
+
+        catch (e) {
+            console.log("Error::::::", e)
+            displayError({ message: e.message })
+        }
     }
 
     renderGuestContactModal() {
@@ -1739,7 +1820,7 @@ class StepsForm extends Component {
                 <View style={styles.scrollableModal}>
                     <ModalHeader
                         title="Coordonnées"
-                        toggleModal={this.toggleModal}
+                        toggleModal={this.toggleContactModal}
                     />
 
                     <KeyboardAvoidingView
@@ -1809,9 +1890,9 @@ class StepsForm extends Component {
                 <Appbar
                     appBarColor={"#003250"}
                     iconsColor={theme.colors.white}
-                    close
+                    close={!this.isGuest}
                     title
-                    check={!showWelcomeMessage && !readOnly && auth.currentUser}
+                    check={!showWelcomeMessage && !readOnly && !this.isGuest}
                     handleSubmit={this.handleSave}
                     edit={isEdit && readOnly}
                     handleEdit={() => this.setState({ submitted: false, readOnly: false })}
@@ -1820,7 +1901,6 @@ class StepsForm extends Component {
                 />
 
                 {this.renderContent()}
-
                 {this.isGuest && this.renderGuestContactModal()}
 
                 <Modal
@@ -1862,7 +1942,6 @@ class StepsForm extends Component {
                     message={"Traitement en cours..."}
                     loading={loading}
                 />
-
             </View>
         )
     }
@@ -1888,10 +1967,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     formContainer: {
-        flexGrow: 1,
+        flex: 1,
+        // flexGrow: 1,
         // justifyContent: 'center',
         paddingTop: constants.ScreenHeight * 0.05,
-        paddingBottom: 24,
+        //paddingBottom: 300,
         paddingHorizontal: theme.padding
     },
     subStepsContainer: {

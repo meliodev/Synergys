@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, Text, StyleSheet, Alert, ScrollView, Keyboard, KeyboardAvoidingView } from "react-native";
+import { View, Text, StyleSheet, Alert, ScrollView, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
@@ -134,12 +134,15 @@ class CreateClient extends Component {
                 {loading ?
                     <Loading size='large' />
                     :
-                    <ScrollView
-                        keyboardShouldPersistTaps="never"
-                        style={styles.container}
-                        contentContainerStyle={styles.scrollview}
+                    <KeyboardAvoidingView
+                        behavior={Platform.OS === "ios" ? "padding" : "height"}
+                        style={{ flex: 1 }}
                     >
-                        <KeyboardAvoidingView behavior="position">
+                        <ScrollView
+                            keyboardShouldPersistTaps="never"
+                            style={styles.container}
+                            contentContainerStyle={styles.scrollview}
+                        >
                             <MyInput
                                 label="Identifiant client"
                                 value={this.ClientId}
@@ -263,8 +266,9 @@ class CreateClient extends Component {
                             <Toast message={error} onDismiss={() => this.setState({ error: '' })} />
                             <LoadDialog loading={loadingDialog} message={loadingMessage} />
 
-                        </KeyboardAvoidingView>
-                    </ScrollView >
+                        </ScrollView >
+                    </KeyboardAvoidingView>
+
                 }
 
                 <Button
@@ -274,7 +278,7 @@ class CreateClient extends Component {
                     containerStyle={styles.confirmButton}>
                     Valider
                 </Button>
-            </View>
+            </View >
         )
     }
 }

@@ -55,7 +55,10 @@ export const errorMessages = {
         roleUpdate: "Erreur lors de la modification du role. Veuillez réessayer.",
         passwordUpdate: "Erreur lors de la modification du mot de passe. Veuillez réessayer."
     },
-    documents: { upload: "Erreur lors de l'importation de la pièce jointe, veuillez réessayer." },
+    documents: { 
+        upload: "Erreur lors de l'importation de la pièce jointe, veuillez réessayer." ,
+        download: "Erreur lors du téléchargement du document, veuillez réessayer plus tard."
+    },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer.",
     invalidFields: "Erreur de saisie, veuillez verifier les champs.",
     network: {
@@ -182,6 +185,17 @@ export const contactForm = [
         ],
     },
 ]
+
+const choice1 = ["PAC AIR EAU", "Chauffage solaire combiné"]
+const choice2 = ["Chaudière à granulé", "Chauffage solaire combiné"]
+export const pack1 = [choice1, choice2]
+
+const choice3 = ["PAC AIR EAU", "Chauffe-eau solaire individuel"]
+const choice4 = ["PAC AIR EAU", "Ballon thermodynamique"]
+const choice5 = ["Chaudière à granulé", "Chauffe-eau solaire individuel"]
+const choice6 = ["Chaudière à granulé", "Ballon thermodynamique"]
+export const pack2 = [choice3, choice4, choice5, choice6]
+
 
 //Auto-Sign docs
 export const autoSignDocs = ["Mandat MaPrimeRénov"]

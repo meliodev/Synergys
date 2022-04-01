@@ -15,6 +15,7 @@ import { SystemMessage } from 'react-native-gifted-chat';
 import * as theme from '../core/theme';
 import { constants } from '../core/constants';
 import { refreshClient, refreshProject, refreshUser } from '../core/utils';
+import ItemPicker from './ItemPicker';
 
 const { SlideInMenu } = renderers
 
@@ -96,13 +97,13 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
         else if (option.type === 'screen') {
             return (
-                <TouchableOpacity key={index.toString()} onPress={() => onPressScreenPicker(option)}>
-                    <TextInput
-                        label={option.title}
-                        value={option.value}
-                        editable={false}
-                    />
-                </TouchableOpacity>
+                <ItemPicker
+                    key={index.toString()}
+                    onPress={() => onPressScreenPicker(option)}
+                    label={option.title}
+                    value={option.value}
+                    editable={true}
+                />
             )
         }
     }

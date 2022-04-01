@@ -39,12 +39,14 @@ const paperTheme = {
 class App extends Component {
 
   async componentDidMount() {
+    console.log("Mounting app.js...")
     SplashScreen.hide()
+    console.log("splash screen hidden...")
 
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
-      name: 'projects',
+      name: 'projects', 
       lights: false,
       vibration: true,
       importance: AndroidImportance.HIGH,

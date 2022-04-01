@@ -13,6 +13,7 @@ import { TextInput } from 'react-native-paper'
 import * as theme from "../core/theme";
 import { notAvailableOffline } from '../core/exceptions';
 import { constants } from "../core/constants";
+import ItemPicker from "./ItemPicker";
 
 const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clearAddress, addressError, label, editable = true, isEdit, ...props }) => {
 
@@ -58,10 +59,7 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
         await Linking.openURL(url)
     }
 
-    const renderAddressInput = (isTextInput) => {
-
-        const isEditable = isTextInput && editable
-
+    const renderAddressInput = () => {
         return (
             <MyInput
                 label={label || "Adresse"}
@@ -69,14 +67,20 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
                 onChangeText={onChangeText}
                 error={!!addressError}
                 errorText={addressError}
-                editable={isEditable}
+                editable={editable}
                 //multiline={true}
-                right={!isTextInput &&
-                    <TextInput.Icon
-                        name={<CustomIcon icon={isAddressMarked ? faEye : faMapMarkerAlt} color={theme.colors.inpuIcon} />}
-                        onPress={onPressRightIcon}
-                    />
-                }
+            />
+        )
+    }
+
+    const renderItemPicker = () => {
+        return (
+            <ItemPicker
+                onPress={openMap}
+                label='Adresse'
+                editable={editable}
+                icon={faMapMarkerAlt}
+                value={address.description}
             />
         )
     }
@@ -105,18 +109,17 @@ const AddressInput = ({ offLine, onPress, rightIcon, address, onChangeText, clea
         return (
             <View>
                 {checked ?
-                    renderAddressInput(true)
+                    renderAddressInput()
                     :
-                    <TouchableOpacity onPress={openMap}>
-                        {renderAddressInput(false)}
-                    </TouchableOpacity>
+                    renderItemPicker()
                 }
-                
+
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10, marginTop: 10 }}>
-                    <Checkbox
+                    <Checkbox.Android
                         status={checked ? 'checked' : 'unchecked'}
                         onPress={onPressCheck}
                         color={theme.colors.primary}
+                        style={{ backgroundColor: "green", borderWidth: 3, borderColor: "green" }}
                     />
                     <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]} onPress={onPressCheck}>
                         Saisir l'adresse manuellement

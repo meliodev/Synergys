@@ -7,7 +7,17 @@ import CustomIcon from './CustomIcon'
 import * as theme from "../core/theme";
 import { constants } from "../core/constants";
 
-const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, icon = faPlusCircle, editable, style, ...props }) => {
+const ItemPicker = ({
+
+    label,
+    value,
+    errorText,
+    onPress,
+    showAvatarText = true,
+    icon = faPlusCircle,
+    editable,
+    style,
+    ...props }) => {
 
     const noError = errorText === '' || typeof (errorText) === 'undefined' || !errorText
     const noValue = value === '' || typeof (value) === 'undefined' || !value
@@ -54,7 +64,7 @@ const ItemPicker = ({ label, value, errorText, onPress, showAvatarText = true, i
                         <View style={{ flexDirection: 'row', paddingTop: 10 }}>
 
                             <View style={{ flex: 1, flexDirection: 'row', paddingRight: theme.padding }}>
-                                {showAvatarText && <AvatarText text={avatarText} style={{ marginRight: theme.padding/2 }} />}
+                                {showAvatarText && <AvatarText text={avatarText} style={{ marginRight: theme.padding / 2 }} />}
                                 <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{value}</Text>
                             </View>
 

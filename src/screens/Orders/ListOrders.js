@@ -120,6 +120,7 @@ class ListOrders extends Component {
     renderSearchBar() {
         let { state, project, client, filterOpened } = this.state
         let { searchInput, showInput } = this.state
+
         return (
             <SearchBar
                 menu={this.isRoot}
@@ -142,7 +143,7 @@ class ListOrders extends Component {
                         options={[
                             { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
                             // { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
-                            { id: 2, type: 'screen', title: "Projet", value: project.name.value, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet', disabled: this.project },
+                            { id: 2, type: 'screen', title: "Projet", value: project.name, field: 'project', screen: 'ListProjects', titleText: 'Filtre par projet', disabled: this.project },
                         ]}
                     />
                 }

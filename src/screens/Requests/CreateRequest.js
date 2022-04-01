@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, FlatList, TextInput } from 'react-native'
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, FlatList, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
 import { Card, Title, Checkbox } from 'react-native-paper'
 import { faCommentDots, faInfoCircle, faLightbulbSlash, faPen, faRetweet, faTimes } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
@@ -374,7 +374,10 @@ class CreateRequest extends Component {
                 isVisible={isModalVisible}
                 style={modalStyles.modal}
                 onBackdropPress={this.toggleModal}>
-                <View style={modalStyles.container}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={modalStyles.container}
+                >
                     <TouchableOpacity style={modalStyles.closeIcon}>
                         <CustomIcon
                             icon={faTimes}
@@ -425,7 +428,7 @@ class CreateRequest extends Component {
                             Confirmer
                         </Button>
                     </View>
-                </View>
+                </KeyboardAvoidingView>
             </Modal >
         )
     }
@@ -614,7 +617,7 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.white,
         borderRadius: 8,
         marginTop: 15,
-        ...theme.style.shadow    
+        ...theme.style.shadow
     },
     productsListHeader: {
         flexDirection: 'row',

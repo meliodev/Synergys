@@ -1,6 +1,6 @@
 
 
-import { faCheck } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faVrCardboard } from "@fortawesome/pro-light-svg-icons";
 import React from "react"
 import { View, StyleSheet, Text, Alert, TextInput as NativeTextInput } from "react-native";
 import NumberFormat from 'react-number-format';
@@ -33,20 +33,26 @@ export const setEstimation = (products, colorCat) => {
     // lostAticsSurface = Number(lostAticsSurface)
 
     if (colorCat == 'blue') {
-        totalAide = (4000 * isPacAirEau) + (0 * isPacAirAir) + (1200 * isBallonThermo) + (0 * isPhotovoltaique) + (10000 * isCag) + (4000 * isCesi) + (10000 * isSsc)
+        var totalCEE = (4000 * isPacAirEau) + (0 * isPacAirAir) + (98 * isBallonThermo) + (0 * isPhotovoltaique) + (4000 * isCag) + (173 * isCesi) + (0 * isSsc)
+        var totalMPR = (4000 * isPacAirEau) + (0 * isPacAirAir) + (1200 * isBallonThermo) + (0 * isPhotovoltaique) + (10000 * isCag) + (4000 * isCesi) + (10000 * isSsc)
     }
 
     else if (colorCat == 'yellow') {
-        totalAide = (3000 * isPacAirEau) + (0 * isPacAirAir) + (800 * isBallonThermo) + (0 * isPhotovoltaique) + (8000 * isCag) + (3000 * isCesi) + (8000 * isSsc)
+        var totalCEE = (4000 * isPacAirEau) + (0 * isPacAirAir) + (98 * isBallonThermo) + (0 * isPhotovoltaique) + (4000 * isCag) + (173 * isCesi) + (0 * isSsc)
+        var totalMPR = (3000 * isPacAirEau) + (0 * isPacAirAir) + (800 * isBallonThermo) + (0 * isPhotovoltaique) + (8000 * isCag) + (3000 * isCesi) + (8000 * isSsc)
     }
 
     else if (colorCat == 'purple') {
-        totalAide = (2000 * isPacAirEau) + (0 * isPacAirAir) + (400 * isBallonThermo) + (0 * isPhotovoltaique) + (4000 * isCag) + (2000 * isCesi) + (4000 * isSsc)
+        var totalCEE = (2500 * isPacAirEau) + (0 * isPacAirAir) + (98 * isBallonThermo) + (0 * isPhotovoltaique) + (2500 * isCag) + (173 * isCesi) + (0 * isSsc)
+        var totalMPR = (2000 * isPacAirEau) + (0 * isPacAirAir) + (400 * isBallonThermo) + (0 * isPhotovoltaique) + (4000 * isCag) + (2000 * isCesi) + (4000 * isSsc)
     }
 
     else if (colorCat == 'pink') {
-        totalAide = (0 * isPacAirEau) + (0 * isPacAirAir) + (0 * isBallonThermo) + (0 * isPhotovoltaique) + (0 * isCag) + (0 * isCesi) + (0 * isSsc)
+        var totalCEE = (2500 * isPacAirEau) + (0 * isPacAirAir) + (98 * isBallonThermo) + (0 * isPhotovoltaique) + (2500 * isCag) + (173 * isCesi) + (0 * isSsc)
+        var totalMPR = (0 * isPacAirEau) + (0 * isPacAirAir) + (0 * isBallonThermo) + (0 * isPhotovoltaique) + (0 * isCag) + (0 * isCesi) + (0 * isSsc)
     }
+
+    totalAide = totalCEE + totalMPR
 
     return totalAide
 }

@@ -102,6 +102,7 @@ class CreatePvReception extends Component {
     render() {
 
         const { clientFullName, billingDate } = this
+        const pdfParams = { clientFullName, billingDate }
         const { model } = pvReceptionModel({ clientFullName, billingDate })
 
         return (
@@ -114,6 +115,7 @@ class CreatePvReception extends Component {
                 DocId={this.PvReceptionId}
                 collection={"PvReception"}
                 pdfType={"PvReception"}
+                pdfParams={pdfParams}
                 //welcomeMessage={this.welcomeMessage}
                 steps={["RÉSERVES", "", "CHANTIER", "", "INSTALLATIONS"]}
                 pages={model}

@@ -52,7 +52,7 @@ class CreateFicheTech extends Component {
         this.workTypes = this.project ? this.project.workTypes : []
         this.clientName = this.project ? this.project.client.fullName : ""
 
-        this.subSteps = workTypes.filter((w) => 
+        this.subSteps = workTypes.filter((w) =>
             this.workTypes.includes(w.label)
         )
 
@@ -118,6 +118,7 @@ class CreateFicheTech extends Component {
     render() {
 
         const { model, checklistBase64 } = this.state
+        const pdfParams = { model, checklistBase64 }
 
         return (
             <StepsForm
@@ -129,6 +130,7 @@ class CreateFicheTech extends Component {
                 DocId={this.VisiteTechId}
                 collection={"VisitesTech"}
                 pdfType={"VisitesTech"}
+                pdfParams={pdfParams}
                 steps={[
                     "INFO GÉNÉRALES",
                     "",

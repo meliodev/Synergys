@@ -986,7 +986,7 @@ class UploadDocument extends Component {
                                         onChangeText={name => this.setState({ name, nameError })}
                                         error={!!nameError}
                                         errorText={nameError}
-                                        multiline={true}
+                                        //multiline={true}
                                         editable={canWrite}
                                     />
 
