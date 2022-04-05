@@ -1,0 +1,24 @@
+ 
+ REACT-NATIVE-PAPER
+1.Add support of FontAwesome on appBar icons
+Path: D:\Github\Groupe-Synergys\node_modules\react-native-paper\src\components\Icon.tsx
+ Update:
+ else if (typeof s === "object") {
+    return s
+  }
+
+REACT-NATIVE-TAGS-AUTOCOMPLETE
+1. Make backgroundcolor = white
+Path: D:\Github\Groupe-Synergys\node_modules\react-native-tag-autocomplete\index.js
+update: 
+ style={{ backgroundColor: "#fff" }}
+
+REACT NAVIGATION: 
+1. Deep link handle gmail links
+Path: D:\React Native\Synergys-Backups\Version Beta\Synergys-04-02-2021\@react-navigation\native\lib\module\createAppContainer.js
+update: (in getStartupParams & constructor)
+  if (url.includes('link=')) {
+          url = url.split('link=')[1]
+          url = url.replace(/%3A/g, ':')
+          url = url.replace(/%2F/g, '/')
+  }
