@@ -7,6 +7,7 @@ const dispatchAction = (main, type, value) => {
 
 //App Toast
 export const setAppToast = (main, value) => {
+    console.log('MAIN', main.props)
     dispatchAction(main, "TOAST", value)
 }
 

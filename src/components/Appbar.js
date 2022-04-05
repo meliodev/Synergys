@@ -37,11 +37,11 @@ const Appbar = ({
 
     else return (
         <appbar.Header style={[{ backgroundColor: appBarColor || theme.colors.appBar, elevation: 0 }, style]}>
-            {back && <AppBarIcon icon={faArrowLeft} onPress={customBackHandler || navBack} iconColor={iconsColor || theme.colors.secondary}/>}
+            {back && <AppBarIcon icon={faArrowLeft} onPress={customBackHandler || navBack} iconColor={iconsColor || theme.colors.secondary} />}
             {close && <AppBarIcon icon={faTimes} onPress={customBackHandler || navBack} iconColor={iconsColor || theme.colors.secondary} />}
             {menu && <AppBarIcon icon={faBars} onPress={showMenu} />}
             {searchBar}
-            {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]} />}
+            {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: back || close || menu ? 0 : theme.padding, letterSpacing: 1 }]} />}
             {refresh && <AppBarIcon icon={faRedo} onPress={handleRefresh} />}
             {search && <AppBarIcon icon={faSearch} onPress={handleSearch} />}
             {attach && <AppBarIcon icon={faPaperclip} onPress={handleAttachement} />}

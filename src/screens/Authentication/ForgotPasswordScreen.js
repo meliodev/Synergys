@@ -1,6 +1,7 @@
 import React, { memo, Component } from "react";
 import { Text, StyleSheet, View, TouchableOpacity, ActivityIndicator } from "react-native";
 import LinearGradient from 'react-native-linear-gradient'
+import { connect } from 'react-redux'
 
 import NewBackground from "../../components/NewBackground";
 import Appbar from "../../components/Appbar";
@@ -13,6 +14,7 @@ import { sendEmailWithPassword } from "../../api/auth-api"
 import { updateField, emailValidator, load, setToast } from "../../core/utils"
 import * as theme from "../../core/theme"
 import { constants } from "../../core/constants"
+import { setAppToast } from "../../core/redux";
 
 class ForgotPasswordScreen extends Component {
 
@@ -39,8 +41,8 @@ class ForgotPasswordScreen extends Component {
     return true
   }
 
-  handleSendEmail = async () => {
-    let { loading, email, toast } = this.state
+  async handleSendEmail() {
+    let { loading, email } = this.state
 
     if (loading) return
     load(this, true)
@@ -54,11 +56,15 @@ class ForgotPasswordScreen extends Component {
 
     const response = await sendEmailWithPassword(email.value);
 
-    if (response.error)
-      setToast(this, 'e', response.error)
+    if (response.error) {
+      const toast = { message: response.error, type: "error" }
+      setAppToast(this, toast)
+    }
 
-    else
-      setToast(this, 'i', 'Un email pour modifier le mot de passe a été envoyé.')
+    else {
+      const toast = { message: "Un email pour modifier le mot de passe a été envoyé.", type: "info" }
+      setAppToast(this, toast)
+    }
 
     load(this, false)
   }
@@ -87,19 +93,12 @@ class ForgotPasswordScreen extends Component {
             keyboardType="email-address"
           />
 
-          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 30, zIndex: 1 }} onPress={this.handleSendEmail}>
+          <TouchableOpacity style={{ justifyContent: 'center', alignItems: 'center', marginTop: 30, zIndex: 500 }} onPress={this.handleSendEmail}>
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={['#33a979', '#58cb7e', '#6edd81']} style={styles.linearGradient}>
               {loading && <ActivityIndicator size='small' color={theme.colors.white} style={{ marginRight: 10 }} />}
               <Text style={[theme.customFontMSmedium.header, { color: '#fff', letterSpacing: 1, marginLeft: 10 }]}>Envoyer un email</Text>
             </LinearGradient>
           </TouchableOpacity>
-
-          <Toast
-            type={toastType}
-            message={toastMessage}
-            onDismiss={() => this.setState({ toastType: '', toastMessage: '' })}
-            containerStyle={{ bottom: constants.ScreenHeight*0.35 }}
-          />
 
         </View>
 
@@ -113,8 +112,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: constants.ScreenWidth * 0.1,
-    zIndex: 2,
-
+  //  zIndex: 20,
   },
   button: {
     marginTop: 12
@@ -129,4 +127,16 @@ const styles = StyleSheet.create({
   },
 })
 
-export default memo(ForgotPasswordScreen);
+
+const mapStateToProps = (state) => {
+
+  return {
+    toast: state.toast,
+    // role: state.roles.role,
+    // network: state.network,
+    // currentUser: state.currentUser
+    //fcmToken: state.fcmtoken
+  }
+}
+
+export default connect(mapStateToProps)(ForgotPasswordScreen)
