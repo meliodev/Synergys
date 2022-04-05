@@ -33,7 +33,7 @@ export default class ModalCheckBoxes extends Component {
 
         return (
             <View style={modalStyles.item}>
-                <Checkbox
+                <Checkbox.Android
                     status={items[key].selected ? 'checked' : 'unchecked'}
                     color={theme.colors.primary}
                     onPress={onPressItem}

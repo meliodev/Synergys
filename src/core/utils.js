@@ -740,7 +740,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var originalPdfBase64 = ficheEEBBase64
       var formPages = ficheEEBModel
     }
-    else if (pdfType === "MandatsMPR") {
+    else if (pdfType === "MandatsMPR") { 
       var originalPdfBase64 = mandatMPRBase64
       var formPages = mandatMPRModel
     }

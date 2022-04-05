@@ -1,17 +1,12 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import { connect } from 'react-redux'
-import { LineChart } from 'react-native-chart-kit'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import { db, auth } from '../firebase'
 import * as theme from '../core/theme'
-import { constants, highRoles } from '../core/constants'
-import { load, sortMonths } from '../core/utils'
-import { setTurnoverArr, setMonthlyGoals } from '../screens/Dashboard/helpers'
+import { constants } from '../core/constants'
 
 import { TurnoverGoal } from '../components'
 

@@ -16,10 +16,10 @@ import { displayError, load, sortMonths } from '../../core/utils'
 import { fetchTurnoverData } from '../../api/firestore-api'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from './helpers'
 
-import { Picker, TurnoverGoal, Loading } from '../../components'
+import { Picker, TurnoverGoal, Loading, CustomIcon } from '../../components'
 import Tooltip from '../../components/Tooltip'
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
-import { TouchableOpacity } from 'react-native-gesture-handler'
+import { faChevronDown } from '@fortawesome/pro-light-svg-icons';
 
 class Analytics extends Component {
     constructor(props) {
@@ -55,16 +55,20 @@ class Analytics extends Component {
 
     async fetchData() {
         try {
+            const { turnover, projects } = this.queries
+            const { uid } = auth.currentUser
             //Summary
-            const totalIncome = await this.fetchTotalIncome(this.queries.turnover)
-            const { totalProjects, totalClients } = await this.fetchTotals(this.queries.projects)
+            const totalIncome = await this.fetchTotalIncome(turnover)
+            const { totalProjects, totalClients } = await this.fetchTotals(projects)
             //Stats data format
             let turnoverObjects = initTurnoverObjects()
-            turnoverObjects = await fetchTurnoverData(this.queries.turnover, turnoverObjects, auth.currentUser.uid)
+            turnoverObjects = await fetchTurnoverData(turnover, turnoverObjects, uid)
             let turnoverArr = setTurnoverArr(turnoverObjects)
             turnoverArr = sortMonths(turnoverArr)
+
             //Goals
             const monthlyGoals = setMonthlyGoals(turnoverArr)
+
             //Chart
             const { chartLabels, chartDataSets } = this.setChart(turnoverArr)
             this.setState({ totalIncome, totalProjects, totalClients, chartDataSets, chartLabels, monthlyGoals })
@@ -243,20 +247,13 @@ class Analytics extends Component {
         return (
             <View style={{ marginTop: theme.padding * 1.5, borderTopWidth: 16, borderTopColor: theme.colors.gray_extraLight, paddingHorizontal: theme.padding }}>
                 <View style={styles.chartHeader}>
-                    <View style={{ paddingBottom: 10 }}>
+                    <View>
                         <Text style={[theme.customFontMSsemibold.body]}>Statistiques</Text>
                     </View>
-                    <Picker
-                        showTitle={false}
-                        returnKeyType="next"
-                        value={chartPeriod}
-                        selectedValue={chartPeriod}
-                        onValueChange={(chartPeriod) => this.setState({ chartPeriod })}
-                        elements={periods}
-                        enabled={false}
-                        style={{ width: '50%', marginRight: -15 }}
-                        pickerContainerStyle={{ borderBottomWidth: 0 }}
-                    />
+                    <View style={{ flexDirection: "row", alignItems: 'center' }}>
+                        <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark, marginRight: 5 }]}>Les 6 derniers mois</Text>
+                        <CustomIcon icon={faChevronDown} color={theme.colors.gray_dark} size={12} />
+                    </View>
                 </View>
 
                 <LineChart
@@ -430,7 +427,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-end',
         justifyContent: 'space-between',
-        marginBottom: 5
+        marginVertical: theme.padding,
     },
 })
 

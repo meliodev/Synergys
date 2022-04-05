@@ -10,7 +10,7 @@ import NumberFormat from 'react-number-format';
 
 const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) => {
 
-    let { current, target, month } = goal
+    let { current, target, month, year } = goal
 
     const progress = (current / target) * 100
     const targetReached = progress >= 100
@@ -46,7 +46,7 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) 
                                 value={target}
                                 displayType={'text'}
                                 thousandSeparator={true}
-                               // suffix={'€'}
+                                //suffix={'€'}
                                 renderText={value => <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: theme.colors.gray_dark }]}>sur {value}</Text>}
                             />
 
@@ -57,7 +57,7 @@ const TurnoverGoal = ({ goal, index, onPress, isList = true, style, ...props }) 
                 )}
             </AnimatedCircularProgress>
 
-            <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{month}</Text>
+            <Text style={[theme.customFontMSmedium.caption, { textAlign: 'center', color: textColor }]}>{month} {year}</Text>
 
         </TouchableOpacity>
     )

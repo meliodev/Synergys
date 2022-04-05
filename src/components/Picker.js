@@ -20,13 +20,16 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
         return (
             <Picker
                 //style={[styles.input]}
-                enabled={enabled}
+                enabled={false}
                 dropdownIconColor={theme.colors.gray_dark}
                 {...props}
             >
-                {elements.map((item, index) =>
-                    <Picker.Item key={index.toString()} label={item.label} value={item.value} />
-                )}
+                {
+                    elements ?
+                        elements.map((item, index) =>
+                            <Picker.Item key={index.toString()} label={item.label} value={item.value} />)
+                        : null
+                }
             </Picker>
         )
     }

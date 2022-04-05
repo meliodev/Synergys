@@ -1,6 +1,6 @@
 import { faTimes } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
-import { KeyboardAvoidingView, StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, Text, View, Image, BackHandler, TouchableOpacity, ScrollView, Alert, Platform, Keyboard } from 'react-native';
 import { ProgressBar, Checkbox, TextInput as Input } from "react-native-paper";
 import FileViewer from 'react-native-file-viewer'
 import { connect } from 'react-redux'
@@ -1671,11 +1671,13 @@ class StepsForm extends Component {
                     </View>
                 }
 
-                <View style={styles.body}>
-                    {this.renderSubSteps()}
-                    {!showSuccessMessage && this.renderTitle(pages)}
-                    {this.renderForm(pages)}
-                </View>
+                <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' keyboardVerticalOffset={100} >
+                    <View style={styles.body}>
+                        {this.renderSubSteps()}
+                        {!showSuccessMessage && this.renderTitle(pages)}
+                        {this.renderForm(pages)}
+                    </View>
+                </KeyboardAvoidingView>
 
                 {!submitted && this.renderButtons(pages)}
             </View>
@@ -1903,6 +1905,8 @@ class StepsForm extends Component {
                 {this.renderContent()}
                 {this.isGuest && this.renderGuestContactModal()}
 
+                {/* 
+
                 <Modal
                     isVisible={isPdfModalVisible}
                     onSwipeComplete={this.toggleModal}
@@ -1936,13 +1940,13 @@ class StepsForm extends Component {
                             this.renderBottomRightButton("Télécharger", () => this.savePdfBase64(pdfBase64, isProcess))
                         }
                     </View>
-                </Modal>
+                </Modal> */}
 
                 <LoadDialog
                     message={"Traitement en cours..."}
                     loading={loading}
                 />
-            </View>
+            </View >
         )
     }
 }
@@ -1967,7 +1971,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     formContainer: {
-        flex: 1,
+        // flex: 1,
         // flexGrow: 1,
         // justifyContent: 'center',
         paddingTop: constants.ScreenHeight * 0.05,

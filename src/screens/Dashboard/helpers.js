@@ -57,15 +57,15 @@ export const initTurnoverObjects = () => {
 
     while (moment(monthIterator).isSameOrBefore(currentMonth)) {
         const year = moment(monthIterator, 'YYYY-MM').format('YYYY')
-        const monthNameLowerCase = moment(monthIterator, 'YYYY-MM').format('MMM')
-        const monthNameUpperCase = monthNameLowerCase.charAt(0).toUpperCase() + monthNameLowerCase.slice(1)
-        const formatedMonth = moment(monthIterator, 'YYYY-MM').format('MM-YYYY')
-        turnoverObjects[formatedMonth] = {
+        const month = moment(monthIterator, 'YYYY-MM').format('MMM')
+        const monthYear = moment(monthIterator, 'YYYY-MM').format('MM-YYYY')
+        const turnoverObject = {
             year,
-            month: monthNameUpperCase,
+            month,
+            monthYear,
             current: 0,
-            monthYear: formatedMonth
         }
+        turnoverObjects[monthYear] = turnoverObject
         monthIterator = moment(monthIterator).add(1, 'month').format('YYYY-MM')
     }
 
@@ -107,6 +107,7 @@ export const setTurnoverArr = (turnoverObjects) => {
 export const setMonthlyGoals = (turnoverArr) => {
     let monthlyGoals = []
 
+    console.log("////", turnoverArr)
     for (const turnover of turnoverArr) {
         if (turnover.target) {
             monthlyGoals.push(turnover)

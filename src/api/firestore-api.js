@@ -227,20 +227,17 @@ export const createUser = async function createUser(user, isConnected) {
 //#DASHBOARD
 export const fetchTurnoverData = async function fetchTurnoverData(query, turnoverObjects, userId) {
   try {
-    let turnoverdata = []
-    let chartDataObjects = []
-    let chartDataSets = []
-    const currentMonth = moment().format('MM-YYYY')
 
     const querySnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
     for (const doc of querySnapshot.docs) {
+
       const monthsTurnovers = doc.data()
       delete monthsTurnovers.target
       delete monthsTurnovers.current
 
       for (const month in monthsTurnovers) {
         //Update user income for "month"
-        let currentIncome = turnoverObjects[month] && turnoverObjects[month].current || 0
+        let currentIncome = turnoverObjects[month] ? turnoverObjects[month].current : 0
         const projectsIncome = monthsTurnovers[month].projectsIncome || {}
         for (var projectId in projectsIncome) {
           currentIncome += Number(projectsIncome[projectId].amount)
@@ -283,7 +280,7 @@ export const fetchTurnoverData = async function fetchTurnoverData(query, turnove
       .get()
       .catch((e) => { throw new Error(errorMessages.firestore.get) })
 
-    for (const doc of querySnapshot.docs) {
+    for (const doc of querySnapshotUsers.docs) {
       const monthsTurnovers = doc.data()
       delete monthsTurnovers.target
       delete monthsTurnovers.current
