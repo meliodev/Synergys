@@ -1241,21 +1241,37 @@ class StepsForm extends Component {
         const isBT = products.includes("Ballon thermodynamique")
         const isPV = products.includes("Photovoltaïque")
 
-        const isFirstPacks = isSSC && isPAE
-        const isSecondPacks = !isSSC && isPAE && isBT
+        // const isFirstPacks = isSSC && isPAE
+        // const isSecondPacks = !isSSC && isPAE && isBT
 
         let packs = []
         let isPVElligible = false
 
-        if (isFirstPacks) {
-            packs = pack1
-            isPVElligible = true
+        if (isPAE) {
+            if (isSSC) {
+                packs = packs.concat(pack1)
+            }
+            if (isBT) {
+                packs = packs.concat(pack2)
+            }
+            if (isSSC || isBT) {
+                isPVElligible = true
+            }
         }
 
-        else if (isSecondPacks) {
-            packs = pack2
-            isPVElligible = true
-        }
+        // if (isFirstPacks) {
+        //     packs = pack1
+        //     isPVElligible = true
+
+        //     //FirstPack -> 4m2 garage dispo -> Include other packs
+        //     if (isBT)
+        //         packs = packs.concat(packs2)
+        // }
+
+        // else if (isSecondPacks) {
+        //     packs = pack2
+        //     isPVElligible = true
+        // }
 
         return { packs, isPVElligible }
     }
@@ -1276,14 +1292,11 @@ class StepsForm extends Component {
                 >
 
                     <View style={styles.sucessMessageContent}>
+                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>Vous êtes dans le barème:   </Text>
                         <View style={[styles.colorCatCircle, { backgroundColor: colorCat }]} />
-                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>
-                            {title}
-                            <Text style={[theme.customFontMSmedium.h2, { color: theme.colors.primary }]}>{estimation}€</Text>
-                        </Text>
                     </View>
 
-                    <View style={{ padding: theme.padding }}>
+                    {/* <View style={{ padding: theme.padding }}>
                         <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message1}</Text>
                         {products.map((product, key) => {
                             return (
@@ -1294,7 +1307,7 @@ class StepsForm extends Component {
                             )
                         }
                         )}
-                    </View>
+                    </View> */}
 
                     <View style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth }} />
 
@@ -1477,8 +1490,8 @@ class StepsForm extends Component {
 
             var summary = [
                 { title: "Couleur", value: colorCat, isColor: true },
-                { title: "Produits recommandés", value: products },
-                { title: "Estimation", value: `${estimation} €` },
+                // { title: "Produits recommandés", value: products },
+                // { title: "Estimation", value: `${estimation} €` },
             ]
             showSummary = colorCat !== "" && products !== [] && estimation > 0
         }
@@ -1975,7 +1988,7 @@ const styles = StyleSheet.create({
         // flexGrow: 1,
         // justifyContent: 'center',
         paddingTop: constants.ScreenHeight * 0.05,
-        //paddingBottom: 300,
+        paddingBottom: 24,
         paddingHorizontal: theme.padding
     },
     subStepsContainer: {
@@ -2048,8 +2061,6 @@ const styles = StyleSheet.create({
         height: 18,
         width: 18,
         borderRadius: 9,
-        backgroundColor: 'green',
-        marginTop: 6
     },
     successMessageTitle: {
         color: theme.colors.white,

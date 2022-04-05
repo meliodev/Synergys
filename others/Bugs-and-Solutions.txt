@@ -6,3 +6,6 @@ iOS:
 -> Delete Podfile.lock
 -> Comment use_frameworks! on Podfile
 -> run pod install
+
+General:
+ENOENT & permission related issues: use command in powershell: "Set-ExecutionPolicy Unrestricted"
