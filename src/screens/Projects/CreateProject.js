@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, TextInput, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { List } from 'react-native-paper'
 import _ from 'lodash'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -754,8 +754,9 @@ class CreateProject extends Component {
         return (
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={'padding'}
-                keyboardVerticalOffset={65}>
+                behavior={Platform.OS === "ios" ? 'padding' : null}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+            >
                 <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="never">
 
                     {showProcessAction &&

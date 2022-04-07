@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.4.8"
+export const appVersion = "1.5.0"
 
 export const constants = {
     ScreenWidth: width,
@@ -64,7 +64,9 @@ export const errorMessages = {
     invalidFields: "Erreur de saisie, veuillez verifier les champs.",
     network: {
         newUser: "La création d'un nouvel utilisateur nécessite une connection réseau."
-    }
+    },
+    chat: "Erreur lors de l'envoi du message, veuillez réessayer",
+    map: "Erreur lors de la communication avec le serveur Google Maps. Veuillez réessayer..."
 }
 
 export const imageSources = [

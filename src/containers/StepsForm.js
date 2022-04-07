@@ -821,7 +821,7 @@ class StepsForm extends Component {
         //Verify fields
         const isValid = this.verifyFields(pages, pageIndex)
         if (!isValid) {
-            return resolve(true)
+            return
         }
 
         //Remove errors
@@ -1684,7 +1684,11 @@ class StepsForm extends Component {
                     </View>
                 }
 
-                <KeyboardAvoidingView style={{ flex: 1 }} behavior='padding' keyboardVerticalOffset={100} >
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === "ios" ? 'padding' : null}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+                >
                     <View style={styles.body}>
                         {this.renderSubSteps()}
                         {!showSuccessMessage && this.renderTitle(pages)}
@@ -1839,10 +1843,10 @@ class StepsForm extends Component {
                     />
 
                     <KeyboardAvoidingView
-                        keyboardVerticalOffset={150}
                         style={{ flex: 1 }}
-                        behavior="padding">
-
+                        behavior={Platform.OS === "ios" ? 'padding' : null}
+                        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+                    >
                         <ScrollView
                             style={{ flex: 0.9, paddingHorizontal: theme.padding }}
                             contentContainerStyle={{ paddingBottom: 200 }}
@@ -1918,8 +1922,6 @@ class StepsForm extends Component {
                 {this.renderContent()}
                 {this.isGuest && this.renderGuestContactModal()}
 
-                {/* 
-
                 <Modal
                     isVisible={isPdfModalVisible}
                     onSwipeComplete={this.toggleModal}
@@ -1953,7 +1955,7 @@ class StepsForm extends Component {
                             this.renderBottomRightButton("Télécharger", () => this.savePdfBase64(pdfBase64, isProcess))
                         }
                     </View>
-                </Modal> */}
+                </Modal>
 
                 <LoadDialog
                     message={"Traitement en cours..."}

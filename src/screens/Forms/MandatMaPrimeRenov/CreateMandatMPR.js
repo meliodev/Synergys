@@ -67,15 +67,12 @@ class CreateMandatMPR extends Component {
             createdIn: clientAddress.description,
             version: 1
         }
-
-        console.log("-------------------", this.project)
-
     }
 
     async componentDidMount() {
         const { latitude, longitude } = this.project.address.marker
         const addressDetails = await getAddressDetails(latitude, longitude)
-        const { zipCode, city } = addressDetails
+        const { zipCode, city } = addressDetails 
         this.setState({ zipCode, city })
     }
 

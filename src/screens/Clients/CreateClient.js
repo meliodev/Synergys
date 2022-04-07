@@ -135,8 +135,9 @@ class CreateClient extends Component {
                     <Loading size='large' />
                     :
                     <KeyboardAvoidingView
-                        behavior={Platform.OS === "ios" ? "padding" : "height"}
                         style={{ flex: 1 }}
+                        behavior={Platform.OS === "ios" ? 'padding' : null}
+                        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
                     >
                         <ScrollView
                             keyboardShouldPersistTaps="never"

@@ -98,7 +98,7 @@ const EEBPack = ({ packs, isPV, colorCat, ...props }) => {
 
                 return (
 
-                    <View style={[styles.container, theme.style.shadow]}>
+                    <View key={i.toString()} style={[styles.container, theme.style.shadow]}>
                         <View style={styles.headerContainer}>
                             <Text style={[styles.header, theme.customFontMSmedium.header]}>Pack {i + 1}</Text>
                         </View>

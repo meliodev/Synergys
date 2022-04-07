@@ -415,6 +415,7 @@ class CreateTask extends Component {
             //7. Persist task(s)
             await this.persistTasks(tasks)
 
+
             //8. Verify if contact technique/commercial changed
             this.checkAndUpdateProjectContacts()
 
@@ -487,6 +488,7 @@ class CreateTask extends Component {
 
     createTasks(tasks) {
         for (const task of tasks) {
+            console.log("...", task.id)
             db.collection('Agenda').doc(task.id).set(task)
         }
     }

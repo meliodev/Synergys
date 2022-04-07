@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { View, StyleSheet, ScrollView, Keyboard, KeyboardAvoidingView } from "react-native";
+import { View, StyleSheet, ScrollView, Keyboard, KeyboardAvoidingView, Platform } from "react-native";
 import { TextInput } from 'react-native-paper'
 import TextInputMask from 'react-native-text-input-mask';
 import { connect } from 'react-redux'
@@ -201,7 +201,11 @@ class CreateUser extends Component {
             style={{ backgroundColor: theme.colors.white }}
             contentContainerStyle={{ backgroundColor: '#fff', padding: theme.padding }}
           >
-            <KeyboardAvoidingView behavior="position">
+            <KeyboardAvoidingView
+              style={{ flex: 1 }}
+              behavior={Platform.OS === "ios" ? 'padding' : null}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+            >
 
               <MyInput
                 label="Identifiant utilisateur"

@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, ImageBackground, StyleSheet, KeyboardAvoidingView } from "react-native";
+import { View, ImageBackground, StyleSheet, KeyboardAvoidingView, Platform } from "react-native";
 import { SvgXml } from 'react-native-svg';
 
 import { constants } from '../core/constants'
@@ -22,7 +22,11 @@ const NewBackground = ({ children, style, motifStyle, showMotif = true }) => {
 
     return (
         <View style={[styles.background]}>
-            <KeyboardAvoidingView style={styles.container} behavior="padding">
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? 'padding' : null}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+            >
                 {children}
                 {showMotif && <SvgXml xml={motif} style={[styles.motifStyle, motifStyle]} />}
             </KeyboardAvoidingView>

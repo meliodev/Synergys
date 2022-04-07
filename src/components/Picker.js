@@ -20,7 +20,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
         return (
             <Picker
                 //style={[styles.input]}
-                enabled={false}
+                enabled={enabled}
                 dropdownIconColor={theme.colors.gray_dark}
                 {...props}
             >

@@ -374,9 +374,11 @@ class CreateRequest extends Component {
                 isVisible={isModalVisible}
                 style={modalStyles.modal}
                 onBackdropPress={this.toggleModal}>
+
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={modalStyles.container}
+                    behavior={Platform.OS === "ios" ? 'padding' : null}
+                    keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
                 >
                     <TouchableOpacity style={modalStyles.closeIcon}>
                         <CustomIcon

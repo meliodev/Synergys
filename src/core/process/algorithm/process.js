@@ -98,10 +98,12 @@ const handleSendBillEmail = async (action, projectName) => {
         const { subject, dest, projectId, attachments } = action.cloudFunction.params
         const html = `<b>${subject} du projet ${projectName}</b>`
         const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
-        if (isSent.data)
+        console.log("isSent", dest, subject, html, attachments )
+
+      //  if (isSent.data)
             await db.collection(action.collection).doc(projectId).update({ finalBillSentViaEmail: true })
 
-        else throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
+       // else throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
     }
     catch (e) {
         throw new Error(e)
@@ -396,7 +398,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
     try {
         const collection = actionsSameDoc[0]['collection']
         const documentId = actionsSameDoc[0]['documentId']
-        console.log('********', actionsSameDoc[0].id, actionsSameDoc[0]['documentId'])
         let allActionsSameDocValid = true
         let nextStep = ''
         let nextPhase = ''
@@ -407,7 +408,6 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
         for (let action of actionsSameDoc) {
 
             if (!doc.exists) {
-                console.log('123456', documentId)
                 action.status = 'pending'
                 allActionsSameDocValid = false
             }

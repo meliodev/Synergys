@@ -9,3 +9,7 @@ iOS:
 
 General:
 ENOENT & permission related issues: use command in powershell: "Set-ExecutionPolicy Unrestricted"
+
+CHANGE node version
+> nvm install 8.12.0 // to install the version I wanted
+> nvm use 8.12.0  // use the installed version

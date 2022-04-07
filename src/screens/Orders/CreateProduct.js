@@ -328,7 +328,7 @@ class CreateProduct extends Component {
                                 this.setState({ newBrandName })
                             }
                         }}
-                       // autoFocus={showDialog}
+                        // autoFocus={showDialog}
                         autoFocus={false}
                         style={{ borderBottomColor: theme.colors.graySilver, borderBottomWidth: StyleSheet.hairlineWidth }}
                     />
@@ -483,7 +483,11 @@ class CreateProduct extends Component {
 
                         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
 
-                            <KeyboardAvoidingView style={{ flex: 1 }} behavior="position">
+                            <KeyboardAvoidingView
+                                style={{ flex: 1 }}
+                                behavior={Platform.OS === "ios" ? 'padding' : null}
+                                keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+                            >
 
                                 <Card style={{ margin: 5, paddingVertical: 10 }}>
                                     <Card.Content>

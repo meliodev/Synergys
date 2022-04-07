@@ -10,6 +10,7 @@ import Video from 'react-native-video'
 import VideoPlayer from 'react-native-video-controls';
 import { Thumbnail } from 'react-native-thumbnail-video'
 import ImageView from 'react-native-image-view'
+import _ from 'lodash'
 
 import moment from 'moment'
 import 'moment/locale/fr'
@@ -78,7 +79,6 @@ class Chat extends Component {
     }
 
     async componentDidMount() {
-        console.log(this.chatId, '5555555555')
         this.fetchMessages()
     }
 
@@ -136,6 +136,7 @@ class Chat extends Component {
 
                     const messageId = await uuidGenerator()
                     document.messageId = messageId
+
                     await this.handleSend([{ text: '' }], messageId) //#task: get text using chat ref //#task2: add intermediary screen to crop/and adjust images
                     attachments.push(document)
                 }
@@ -185,60 +186,66 @@ class Chat extends Component {
 
     async handleSend(messages, messageId) {
 
-        const text = messages[0].text
+        try {
+            const text = messages[0].text
 
-        const { imageSource, videoSource, file } = this.state
+            const { imageSource, videoSource, file } = this.state
 
-        if (!messageId)
-            var messageId = await uuidGenerator()
+            if (!messageId)
+                var messageId = await uuidGenerator()
 
-        const msg = {
-            _id: messageId,
-            text,
-            createdAt: new Date().getTime(),
-            user: {
-                id: this.currentUser.uid,
-                email: this.currentUser.email,
-                fullName: this.currentUser.displayName
-            },
-            sent: true,
-            received: true,
-            pending: false,
+            const msg = {
+                _id: messageId,
+                text,
+                createdAt: new Date().getTime(),
+                user: {
+                    id: this.currentUser.uid,
+                    email: this.currentUser.email,
+                    fullName: this.currentUser.displayName
+                },
+                sent: true,
+                received: true,
+                pending: false,
+            }
+
+            // Handle attachments
+            if (imageSource || videoSource || file && file.source) {
+                console.log('imageSource', imageSource)
+
+                msg.sent = false
+                msg.received = false
+                msg.pending = true //Only local user can see this file
+
+                if (imageSource) {
+                    msg.image = imageSource
+                    msg.messageType = 'image/jpeg'
+                }
+
+                else if (videoSource) {
+                    msg.video = videoSource
+                    msg.messageType = 'video/mp4'
+                }
+
+                if (!_.isEmpty(file)) {
+                    const { source, name, size, type } = file
+                    msg.file = { source, name, size, type }
+                }
+            }
+
+            const batch = db.batch()
+            const chatsRef = db.collection('Chats').doc(this.chatId)
+            const messagesRef = db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId)
+
+            batch.set(chatsRef, msg)
+            batch.set(messagesRef, msg)
+            batch.commit()
+
+            this.setState({ imageSource: '', videoSource: '', file: {} })
+        }
+        catch (e) {
+            displayError({ message: errorMessages.chat })
         }
 
-        // Handle attachments
-        if (imageSource || videoSource || file && file.source) {
-            console.log('file', file)
-
-            msg.sent = false
-            msg.received = false
-            msg.pending = true //Only local user can see this file
-
-            if (imageSource) {
-                msg.image = imageSource
-                msg.messageType = 'image/jpeg'
-            }
-
-            else if (videoSource) {
-                msg.video = videoSource
-                msg.messageType = 'video/mp4'
-            }
-
-            if (file) {
-                const { source, name, size, type } = file
-                msg.file = { source, name, size, type }
-            }
-        }
-
-        const batch = db.batch()
-        const chatsRef = db.collection('Chats').doc(this.chatId)
-        const messagesRef = db.collection('Chats').doc(this.chatId).collection('ChatMessages').doc(messageId)
-
-        batch.set(chatsRef, msg)
-        batch.set(messagesRef, msg)
-        batch.commit()
-
-        this.setState({ imageSource: '', videoSource: '', file: {} })
     }
 
 

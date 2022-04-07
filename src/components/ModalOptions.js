@@ -68,11 +68,11 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 style={[elementStaticStyle(), elementDynamicStyle(selected)]}
                 onPress={() => onPressElement(element, index)}
             >
-                <View style={{ height: elementSize * 0.65, justifyContent: 'center' }}>
+                <View style={{ height: elementSize * 0.57, justifyContent: 'center' }}>
                     {icon && <CustomIcon icon={icon} size={elementSize * 0.3} color={iconColor} />}
                     {image && <Image style={[{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }, imageStyle]} source={image} />}
                 </View>
-                <View style={{ height: elementSize * 0.35, paddingHorizontal: elementSize * 0.1 }}>
+                <View style={{ height: elementSize * 0.43, paddingHorizontal: elementSize * 0.1 }}>
                     <Text style={[theme.customFontMSsemibold.caption, { textAlign: 'center', color: textColor }]}>
                         {label}
                     </Text>
