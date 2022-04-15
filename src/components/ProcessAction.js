@@ -82,24 +82,44 @@ class ProcessAction extends Component {
         await this.initializer(true)
     }
 
+    // async componentDidUpdate(prevProps, prevState, snapshot) {
+
+    //     console.log("is not equal", !_.isEqual(prevProps.process, this.props.process))
+    //     console.log("is not ==", prevProps.process !== this.props.process)
+    //    // if (!_.isEqual(prevProps.process, this.props.process)) {
+    //         // console.log("PROCESS needs update...")
+
+    //         if (prevProps.process !== this.props.process) {
+
+    //         //DON'T SKIP (Syncing updates comming from server; example: Another user just updated the process)
+    //         if (!this.state.skipProcessHandler) {
+    //             console.log('skipProcessHandler:', skipProcessHandler)
+    //             await this.initializer(true)
+    //         }
+
+    //         //SKIP (Skip to avoid unfinite loop due to triggering the listener)
+    //         else {
+    //             console.log('skipProcessHandler:', skipProcessHandler)
+    //             this.setState({ skipProcessHandler: false })
+    //         }
+    //     }
+
+    //     else {
+    //         console.log("PROCESS IS UP TO DATE !")
+    //     }
+    // }
+
     async componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.process !== this.props.process) {
-
-            //DON'T SKIP (Syncing updates comming from server; example: Another user just updated the process)
-            if (!this.state.skipProcessHandler) {
-                await this.initializer(true)
-            }
-
-            //SKIP (Skip to avoid unfinite loop due to triggering the listener)
-            else {
-                this.setState({ skipProcessHandler: false })
-            }
+        //Process was updated on backend (by some user...)
+        if (!_.isEqual(prevProps.process, this.props.process)) {
+            console.log("PROCESS WAS UPDATED !!!")
+            await this.refreshProcessOnstate(this.props.process)
         }
+        else console.log("PROCESS IS SAME....")
     }
 
     async initializer(skipProcessHandler) {
         this.processModel = this.setProcessModel(this.props.process)
-        console.log('PROCESS:::::::::::::', this.processModel)
         await this.mainHandler(this.props.process, skipProcessHandler)
             .catch((e) => displayError({ message: e.message }))
     }
@@ -107,15 +127,11 @@ class ProcessAction extends Component {
     async mainHandler(process, skipProcessHandler) {
         return new Promise(async (resolve, reject) => {
             load(this, true)
-            const { isAllProcess } = this.props
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
 
             this.setState({ skipProcessHandler }, async () => {
                 await this.updateProcess(updatedProcess)
-                await this.refreshProcess(updatedProcess)
-                if (isAllProcess) {
-                    this.refreshProcessHistory(updatedProcess)
-                }
+                await this.refreshProcessOnstate(updatedProcess)
                 resolve(true)
             })
         })
@@ -139,6 +155,14 @@ class ProcessAction extends Component {
                 editedBy: this.props.currentUser
             })
             .catch((e) => { throw new Error(errorMessages.firestore.update) })
+    }
+
+    async refreshProcessOnstate(process) {
+        const { isAllProcess } = this.props
+        await this.refreshProcess(process) //Triggers componentdidupdate
+        if (isAllProcess) {
+            this.refreshProcessHistory(process)
+        }
     }
 
     //3. Refresh latest process locally

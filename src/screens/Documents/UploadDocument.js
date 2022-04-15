@@ -30,7 +30,7 @@ import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
 import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants, docsConfig, errorMessages, generableDocTypes, onlyImportableDocTypes, highRoles, imageSources, masculinsDocTypes } from "../../core/constants";
+import { constants, docsConfig, errorMessages, generableDocTypes, onlyImportableDocTypes, highRoles, imageSources, masculinsDocTypes, staffRoles } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
@@ -552,7 +552,8 @@ class UploadDocument extends Component {
     }
 
     toggleModal(reset) {
-        this.setState({ showModal: !this.state.showModal, modalContent: 'docTypes' })
+        const modalContent = staffRoles.includes(this.props.role.id) ? "docTypes" : 'imageSources'
+        this.setState({ showModal: !this.state.showModal, modalContent })
         if (reset) this.resetModalOptions()
     }
 

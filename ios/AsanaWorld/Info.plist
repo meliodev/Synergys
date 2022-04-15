@@ -21,15 +21,15 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>UIFileSharingEnabled</key>
-	<string>YES</string>
-	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<string>YES</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CodePushDeploymentKey</key>
 	<string>NFdlqNTwylZ1QnSxS5ji284g0h_nX_RATgik5</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<string>YES</string>
+	<key>ITSAppUsesNonExemptEncryption</key>  
+    <false/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -44,13 +44,11 @@
 		</dict>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string></string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string>Cette application nécessite l'accès à la caméra.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string></string>
+	<string>Cette application ne nécessite pas d'accès au microphone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string></string>
+	<string>Cette application nécessite l'accès à la gallerie de photos.</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
@@ -113,6 +111,8 @@
 		<string>Roboto-Thin.ttf</string>
 		<string>Roboto-ThinItalic.ttf</string>
 	</array>
+	<key>UIFileSharingEnabled</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

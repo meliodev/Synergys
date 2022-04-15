@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.0"
+export const appVersion = "1.5.1"
 
 export const constants = {
     ScreenWidth: width,
@@ -30,6 +30,7 @@ export const roles = [
 
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
 export const lowRoles = ["poseur", "com"]
+export const staffRoles = [...highRoles, ...lowRoles]
 export const highRolesValues = ['Admin', 'Back office', 'Directeur commercial', 'Responsable technique']
 
 
@@ -56,8 +57,8 @@ export const errorMessages = {
         roleUpdate: "Erreur lors de la modification du role. Veuillez réessayer.",
         passwordUpdate: "Erreur lors de la modification du mot de passe. Veuillez réessayer."
     },
-    documents: { 
-        upload: "Erreur lors de l'importation de la pièce jointe, veuillez réessayer." ,
+    documents: {
+        upload: "Erreur lors de l'importation de la pièce jointe, veuillez réessayer.",
         download: "Erreur lors du téléchargement du document, veuillez réessayer plus tard."
     },
     pdfGen: "Erreur lors de la génération du document. Veuillez réessayer.",

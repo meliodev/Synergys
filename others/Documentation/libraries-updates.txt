@@ -6,7 +6,7 @@ Path: D:\Github\Groupe-Synergys\node_modules\react-native-paper\src\components\I
  else if (typeof s === "object") {
     return s
   }
-
+ 
 REACT-NATIVE-TAGS-AUTOCOMPLETE
 1. Make backgroundcolor = white
 Path: D:\Github\Groupe-Synergys\node_modules\react-native-tag-autocomplete\index.js

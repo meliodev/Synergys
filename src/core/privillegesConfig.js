@@ -210,8 +210,15 @@ export const privilleges = {
                     "filter": "project.techContact.id"
                 },
                 {
-                    "sort": "desc",
+                    "operation": "==",
+                    "value": false,
                     "filterOrder": 2,
+                    "clause": "where",
+                    "filter": "deleted"
+                },
+                {
+                    "sort": "desc",
+                    "filterOrder": 3,
                     "field": "createdAt",
                     "clause": "orderBy"
                 }
@@ -589,7 +596,8 @@ export const privilleges = {
         "requests": {
             "queryFilters": [
                 {
-                    "operation": "==", "filterOrder": 1,
+                    "operation": "==",
+                    "filterOrder": 1,
                     "valueSource": "currentUser",
                     "filter": "client.id",
                     "value": "",
@@ -654,8 +662,15 @@ export const privilleges = {
                     "filter": "project.client.id"
                 },
                 {
-                    "sort": "desc",
+                    "operation": "==",
+                    "value": false,
                     "filterOrder": 2,
+                    "clause": "where",
+                    "filter": "deleted"
+                },
+                {
+                    "sort": "desc",
+                    "filterOrder": 3,
                     "field": "createdAt",
                     "clause": "orderBy"
                 }

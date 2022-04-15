@@ -196,6 +196,7 @@ class CreateProject extends Component {
         let query = db.collection("Projects").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
             this.projectListener = query.onSnapshot(async (doc) => {
+                console.log("Project was updated...")
                 if (!doc.exists) return null
                 let project = doc.data()
                 project.id = doc.id
@@ -762,7 +763,7 @@ class CreateProject extends Component {
                     {showProcessAction &&
                         <ProcessAction
                             process={this.state.process}
-                            project={this.project}
+                            project={this.project} 
                             clientId={client.id}
                             step={step}
                             canUpdate={canWrite}

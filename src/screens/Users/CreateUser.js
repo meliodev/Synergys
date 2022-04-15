@@ -72,7 +72,7 @@ class CreateUser extends Component {
       email2: { value: "", error: "" },
       //"poseur123456@eqx-software.com"
       phone: { value: "", error: '' },
-      password: { value: '', error: '', show: false },
+      password: { value: 'Synergys@123', error: '', show: false },
 
       userType: "utilisateur",
 

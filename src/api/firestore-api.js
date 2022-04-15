@@ -53,7 +53,7 @@ export function fetchDocuments(query) {
       return documents
     })
     .catch((e) => { throw new Error(e) })
-}
+} 
 
 export function fetchDocument(collection, id, subCollection, subId) {
   let query = db.collection(collection).doc(id)

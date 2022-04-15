@@ -25,7 +25,7 @@ import EmptyList from "../../components/EmptyList"
 
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
-import { constants, highRoles } from '../../core/constants'
+import { constants, highRoles, lowRoles, staffRoles } from '../../core/constants'
 import { fetchDocs, fetchTurnoverData, fetchDocument, fetchDocuments } from '../../api/firestore-api'
 import { sortMonths, navigateToScreen, nameValidator, emailValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError, countDown } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
@@ -54,7 +54,9 @@ class Profile extends Component {
         this.roleId = this.props.role.id
         this.userParam = this.props.navigation.getParam('user', { id: firebase.auth().currentUser.uid, roleId: this.roleId }) //default: current user
         this.isProfileOwner = this.userParam.id === firebase.auth().currentUser.uid
-        this.isClient = this.props.navigation.getParam('isClient', false)
+        this.isClient = this.userParam.roleId === 'client'
+
+        console.log("is client", this.isClient)
 
         this.isEdit = this.props.navigation.getParam("isEdit", false) || this.isProfileOwner
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
@@ -148,6 +150,7 @@ class Profile extends Component {
             await countDown(count)
         }
         let user = await fetchDocument(this.dataCollection, this.userParam.id)
+        console.log("user", user)
         user = this.setUser(user)
         this.setState({ refreshing: false })
         if (!user) return
@@ -463,12 +466,18 @@ class Profile extends Component {
 
     renderProject(project, index) {
 
+        const { role } = this.props
+        const isCurrentUserStaff = staffRoles.includes(role.id)
+
         if (project.empty)
             return <View style={styles.invisibleItem} />
 
         else {
-            if (index === 0)
-                return this.addProjectComponent()
+            if (index === 0) {
+                if (isCurrentUserStaff)
+                    return this.addProjectComponent()
+                else return null
+            }
 
             else return (
                 <ProjectItem2
