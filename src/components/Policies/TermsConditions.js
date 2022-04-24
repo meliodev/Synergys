@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, ScrollView, Dimensions, TouchableOpacity, StyleSheet } from 'react-native';
-import Modal from 'react-native-modal'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { View, Text, ScrollView, Dimensions, StyleSheet } from 'react-native';
 
-import * as  theme from '../core/theme'
-import { constants } from '../core/constants'
+import * as  theme from '../../core/theme'
+import { constants } from '../../core/constants'
 
 const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
     const paddingToBottom = 20;
@@ -19,48 +17,6 @@ export default class TermsConditions extends Component {
         this.state = {
             accepted: false
         }
-    }
-
-    renderHeader() {
-
-        const hitslop = { top: 5, bottom: 5, left: 5, right: 5 }
-
-        return (
-            <View style={styles.headerContainer}>
-                <TouchableOpacity
-                    style={styles.downloadButton}
-                    onPress={this.props.downloadPdf}
-                >
-                    <MaterialCommunityIcons
-                        name='download'
-                        size={24}
-                        color={theme.colors.primary}
-                        style={{ padding: 15 }}
-                    />
-                    <Text style={[theme.customFontMSsemibold.body, { color: theme.colors.primary }]}>Télécharger</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={this.props.toggleTerms}
-                    hitSlop={hitslop}
-                >
-                    <MaterialCommunityIcons
-                        name='close'
-                        size={21}
-                        style={{ padding: 15 }}
-                    />
-                </TouchableOpacity>
-
-            </View>
-        )
-    }
-
-    renderTitle() {
-        return (
-            <View style={{ marginVertical: 15, paddingHorizontal: 30 }}>
-                <Text style={[theme.customFontMSsemibold.header, { alignSelf: 'center' }]}>CONDITIONS GÉNÉRALES DE</Text>
-                <Text style={[theme.customFontMSsemibold.header, { alignSelf: 'center' }]}>VENTE ET DE TRAVAUX (CGV)</Text>
-            </View>
-        )
     }
 
     renderTerms() {
@@ -135,11 +91,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -152,15 +108,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -175,15 +131,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -242,11 +198,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -259,15 +215,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -282,15 +238,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -349,11 +305,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -366,15 +322,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -389,15 +345,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -456,11 +412,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -473,15 +429,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -496,15 +452,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -563,11 +519,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -580,15 +536,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -603,15 +559,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -670,11 +626,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -687,15 +643,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -710,15 +666,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -777,11 +733,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -794,15 +750,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -817,15 +773,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -884,11 +840,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -901,15 +857,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -924,15 +880,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -991,11 +947,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1008,15 +964,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1031,15 +987,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -1098,11 +1054,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1115,15 +1071,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1138,15 +1094,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -1205,11 +1161,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1222,15 +1178,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1245,15 +1201,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -1312,11 +1268,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1329,15 +1285,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1352,15 +1308,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -1419,11 +1375,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1436,15 +1392,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1459,15 +1415,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -1526,11 +1482,11 @@ export default class TermsConditions extends Component {
                     restituées au plus tard dans les quatorze (14) jours qui suivent la date de dénonciation du contrat, à l’exclusion de toute indemnisation ou retenue. Le client doit permettre le libre accès des lieux où doit être livré le bien. Lors de la livraison, l’acheteur ou son représentant
                     (conjoint préposé, mandataire…) doit être présent.
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1543,15 +1499,15 @@ export default class TermsConditions extends Component {
                     transporteur.
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1566,15 +1522,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     14.1 La responsabilité de la société SYNERGYS est strictement limitée aux obligations définies aux présentes CGV et, le cas échéant, aux conditions particulières résultant d’un écrit signé par SYNERGYS et le client.
@@ -1636,11 +1592,11 @@ export default class TermsConditions extends Component {
                     (conjoint préposé, mandataire…) doit être présent.
                     Article 9 : Installation
                     L’installation et la mise en service des produits sont effectuées exclusivement par SYNERGYS ou par l’intermédiaire d’un sous-traitant. A cette fin le client s’engage :
-                     A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
-                     A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
-                     A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
-                     Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
-                     A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
+                    {"\n"}• A laisser aux salariés de la société SYNERGYS ou de son sous-traitant le libre accès du chantier.
+                    {"\n"}• A mettre à disposition de la société SYNERGYS ou de son sous-traitant la surface du toit ou de façade ainsi que les portes intérieures et/ou extérieures bâtiments où doit être réalisée l’installation.
+                    {"\n"}• A fournir l’eau et l’électricité nécessaire à l’installation et à la mise en service du matériel.
+                    {"\n"}• Dans le cas de travaux nécessitant de pénétrer sur des fonds contigus, à faire son affaire personnelle des demandes d’autorisation auprès des propriétaires concernés avant toute intervention de SYNERGYS ou de son sous-traitant.
+                    {"\n"}• A fournir toute justification sur le passage des canalisations d’eau, de gaz et d’électricité susceptibles de se trouver aux endroits de perçage des murs.
                     Le client déclare expressément que ses installations ou son bâtiment répond aux normes de construction en vigueur au jour de l’installation. En conséquence, le client fera son affaire personnelle de tout renforcement éventuellement nécessaire des structures existantes pour
                     supporter le matériel et l’évolution des personnes de la société SYNERGYS ou de son sous-traitant. Le client autorise expressément SYNERGYS ou son sous-traitant à apporter à ses structures ou bâtiments toute modification nécessitée par l’installation des produits sans pouvoir
                     réclamer aucune somme au vendeur. Le client garantit la conformité de son installation électrique aux normes en vigueur au jour de l’installation.
@@ -1656,15 +1612,15 @@ export default class TermsConditions extends Component {
                     Article 12 : Droit de rétraction
                     12.1 Droit de rétractation pour les contrats à distance ou en dehors d’un établissement commercial :
                     Vous avez le droit de vous rétracter du présent contrat sans donner de motif dans un délai de quatorze jours. Le point de départ du délai de rétractation court à compter du jour :
-                     De la conclusion du contrat, pour les contrats de prestation de services,
-                     De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
+                    {"\n"}• De la conclusion du contrat, pour les contrats de prestation de services,
+                    {"\n"}• De la réception du bien par le consommateur ou un tiers désigné par lui, pour les contrats de vente de biens et les contrats de prestations de services incluant la livraison de bien.
                     Pour exercer le droit de rétractation, vous devez nous notifier (SYNERGYS 6 rue Henri Becquerel 11200 LEZIGNAN-CORBIERES) votre décision de rétractation du présent contrat au moyen d’une déclaration dénuée d’ambiguïté (par exemple, lettre envoyée par la poste). Vous
                     pouvez utiliser le modèle de formulaire de rétractation mais ce n’est pas obligatoire. Pour que le délai de rétraction soit respecté, il suffit que vous transmettiez votre communication relative à l’exercice du droit de rétractation avant l’expiration du délai de rétractation. En cas
                     de rétractation de votre part du présent contrat, nous vous rembourserons tous les paiements reçus de vous, y compris les frais de livraison au plus tard quatorze jours à compter du jour où nous sommes informés de votre décision de rétractation du présent contrat. Ce
                     remboursement n’occasionnera aucun frais pour vous. Nous récupérons le bien à nos propres frais. Votre responsabilité est engagée qu’à l’égard de la dépréciation du bien résultant de manipulations autres que celles nécessaires pour établir la nature, les caractéristiques et
                     le bon fonctionnement de ce bien. Exception au droit de rétractation Conformément à l’article L221-28 du code la consommation, le client ne peut plus exercer son droit de rétractation pour :
-                     Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
-                     Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
+                    {"\n"}• Une prestation de services commencée avec son accord avant la fin du délai de rétractation et qu’il y a renoncé expressément (L221-28 1er du code de la consommation)
+                    {"\n"}• Une fourniture de biens confectionnés selon les spécifications du consommateur ou nettement personnalisés (L221-28 3e du code de la consommation)
                     12.2 Rétractation hors délais
                     Lorsque le client demande par lettre recommandé avec AR d’annuler sa commande alors qu’aux termes de la loi, elle est réputée ferme et définitive, le client devra régler à la société une indemnité d’annulation de 3000,00 euros. Les acomptes déjà versés seront ainsi retenus
                     à due concurrence et éventuellement complétés. En cas d’annulation par la société, elle s’engage, sauf cas de force majeure, à restituer les acomptes et à indemniser le client par une indemnité égale à 3000,00 euros
@@ -1680,15 +1636,15 @@ export default class TermsConditions extends Component {
                     Il est rappelé que le consommateur peut décider de mettre en œuvre la garantie contre les défauts cachés de la chose vendue au sens de l’article 1641 du code civil et que dans cette hypothèse il peut choisir entre la résolution de la vente ou une réduction du prix de
                     vente conformément à l’article 1644 du code civil.
                     13.2 Sont exclus de toute garantie, les défectuosités qui résulteraient des cas suivants :
-                     Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
-                     En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
+                    {"\n"}• Non-respect de la législation du pays dans lequel le produit est livré qu’il appartient au client de vérifier
+                    {"\n"}• En cas de mauvaise utilisation du produit, d’utilisation anormale ou d’utilisation non conforme aux prescriptions du fabricant, d’utilisation à des fins professionnelles lorsque le client est un non-professionnel, négligence ou défaut d’entretien de la part du
                     client, comme en cas d’usure normale du produit.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
-                     Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
-                     Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
-                     Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
-                     Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
-                     Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un acte de vandalisme.
+                    {"\n"}• Dégradation, désordre, défaut ou vice du produit et leurs conséquences provenant d’un cas de force majeure ou d’un cas fortuit habituellement reconnu par la jurisprudence ou d’un fait insurmontable et imprévisible d’un tiers.
+                    {"\n"}• Les pannes ou désordres liés aux accessoires (câble d’alimentation…)
+                    {"\n"}• Les détériorations, mauvais fonctionnement, défaut ou vice du produit et leurs conséquences provenant directement ou indirectement d’un choc, d’une surtension ou d’une variation du courant électrique, d’un phénomène magnétique.
+                    {"\n"}• Les défauts, désordre ou vice et leurs conséquences dus à des réparations transformation aux modifications réalisées sur le produit sans l’accord écrit de la société SYNERGYS.
+                    {"\n"}• Les détériorations, défauts ou vices consécutifs à des phénomènes naturels (chute de grêle, inondation, foudre, tempêtes ou autres aléas atmosphériques) qu’ainsi à des retombées chimiques, animales ou végétales, sable, sel, projection de gravillons et autres
                     facteurs extérieurs.
                     La garantie du vendeur est en tout état de cause limitée au remplacement ou en remboursement des produits non conforme ou affectés d’un vice.
                     Article 14 – Responsabilité du Vendeur-Force majeure-Défaut de sécurité du produit
@@ -1740,27 +1696,8 @@ export default class TermsConditions extends Component {
         )
     }
 
-    renderConfirmButton() {
-        return (
-            <TouchableOpacity
-                //disabled={!this.state.accepted}
-                onPress={this.props.acceptTerms}
-                //style={this.state.accepted ? styles.button : styles.buttonDisabled}>
-                style={styles.button}>
-                <Text style={styles.buttonLabel}>J'ai lu et accepté</Text>
-            </TouchableOpacity>
-        )
-    }
-
     render() {
-        return (
-            <Modal isVisible={this.props.showTerms} style={styles.modal}>
-                {this.renderHeader()}
-                {this.renderTitle()}
-                {this.renderTerms()}
-                {this.renderConfirmButton()}
-            </Modal >
-        )
+        return this.renderTerms()
     }
 
 }
@@ -1768,66 +1705,10 @@ export default class TermsConditions extends Component {
 const { height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
-    modal: {
-        maxHeight: constants.ScreenHeight * 0.8,
-        marginTop: constants.ScreenHeight * 0.1,
-        backgroundColor: '#fff'
-    },
-    headerContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between'
-    },
-    downloadButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center'
-    },
-    container: {
-        marginTop: 20,
-        marginLeft: 10,
-        marginRight: 10
-    },
-    title: {
-        fontSize: 22,
-        alignSelf: 'center'
-    },
-    tcP: {
-        marginTop: 10,
-        marginBottom: 10,
-        fontSize: 12
-    },
-    tcP: {
-        marginTop: 10,
-        fontSize: 12
-    },
-    tcL: {
-        marginLeft: 10,
-        marginTop: 10,
-        marginBottom: 10,
-        fontSize: 12
-    },
     tcContainer: {
         marginTop: 15,
         marginBottom: 15,
         height: height * .7
-    },
-
-    button: {
-        backgroundColor: theme.colors.primary,
-        // borderRadius: 5,
-        padding: 10
-    },
-
-    buttonDisabled: {
-        backgroundColor: '#999',
-        //borderRadius: 5,
-        padding: 10
-    },
-
-    buttonLabel: {
-        fontSize: 14,
-        color: '#FFF',
-        alignSelf: 'center'
     },
     article: {
         marginBottom: 15
@@ -1835,5 +1716,4 @@ const styles = StyleSheet.create({
     header: {
         marginBottom: 5
     }
-
 })

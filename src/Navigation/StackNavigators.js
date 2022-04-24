@@ -91,10 +91,13 @@ import Address from '../screens/Profile/Address'
 import VideoPlayer from '../screens/Helpers/VideoPlayer'
 
 import { constants } from '../core/constants'
-import { Menu, MenuOptions, MenuOption, MenuTrigger, } from 'react-native-popup-menu'
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { CustomIcon } from '../components';
-import AboutUs from '../screens/AboutUs';
+import AboutUs from '../screens/Settings/AboutUs';
+import Settings from '../screens/Settings/Settings';
+import SalesTermsAndConditions from '../screens/Settings/SalesTermsAndConditions';
+import PrivacyPolicy from '../screens/Settings/PrivacyPolicy';
+import Support from '../screens/Settings/Support';
 
 //Icons: No Icon
 const hideHeader = () => ({
@@ -332,6 +335,26 @@ const appScreens = {
         screen: VideoPlayer,
         navigationOptions: hideHeader
     },
+    Settings: {
+        screen: Settings,
+        navigationOptions: hideHeader
+    },
+    AboutUs: {
+        screen: AboutUs,
+        navigationOptions: hideHeader
+    },
+    SalesTermsAndConditions: {
+        screen: SalesTermsAndConditions,
+        navigationOptions: hideHeader
+    },
+    PrivacyPolicy: {
+        screen: PrivacyPolicy,
+        navigationOptions: hideHeader
+    },
+    Support: {
+        screen: Support,
+        navigationOptions: hideHeader
+    },
 }
 
 const authScreens = {
@@ -360,6 +383,7 @@ const SimulatorStack = createStackNavigator(appScreens, { initialRouteName: "Lis
 const MandatMPRStack = createStackNavigator(appScreens, { initialRouteName: "ListMandatsMPR" })
 const MandatSynergysStack = createStackNavigator(appScreens, { initialRouteName: "ListMandatsSynergys" })
 const NewsStack = createStackNavigator(appScreens, { initialRouteName: "ListNews" })
+const SettingsStack = createStackNavigator(appScreens, { initialRouteName: "Settings" })
 const AuthStack = createStackNavigator(authScreens, { initialRouteName: "LoginScreen" })
 
 
@@ -479,6 +503,10 @@ const stacks = {
     },
     NewsStack: {
         screen: NewsStack,
+        navigationOptions: hideHeader
+    },
+    SettingsStack: {
+        screen: SettingsStack,
         navigationOptions: hideHeader
     },
 }

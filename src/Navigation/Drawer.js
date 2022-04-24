@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faScroll, faVials, faHandHoldingUsd } from '@fortawesome/pro-light-svg-icons'
+import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faScroll, faVials, faHandHoldingUsd, faCogs } from '@fortawesome/pro-light-svg-icons'
 import { faCommentDots, faCog } from "@fortawesome/free-solid-svg-icons"
 
 import firebase, { db } from '../firebase'
@@ -18,13 +18,13 @@ import { resetState, setNetwork, setStatusBarColor } from '../core/redux'
 import AppVersion from '../components/AppVersion';
 
 const menuPrivilleges = {
-    backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
-    admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', 'logout'],
-    dircom: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'simulator', 'news', 'logout'],
-    com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'simulator', 'news', 'logout'],
-    tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'simulator', 'news', 'logout'],
-    poseur: ['projects', 'inbox', 'planning', 'requests', 'news', 'logout'],
-    client: ['projects', 'inbox', 'requests', 'documents', 'news', 'logout']
+    backoffice: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', "settings", 'logout'],
+    admin: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'simulator', 'documents', 'news', "settings", 'logout'],
+    dircom: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'documents', 'simulator', 'news', "settings", 'logout'],
+    com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'simulator', 'news', "settings", 'logout'],
+    tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'simulator', 'news', "settings", 'logout'],
+    poseur: ['projects', 'inbox', 'planning', 'requests', 'news', "settings", 'logout'],
+    client: ['projects', 'inbox', 'requests', 'documents', 'news', "settings", 'logout']
 }
 
 const menuItems = [
@@ -39,6 +39,7 @@ const menuItems = [
     { id: 'documents', name: 'Documents', icon: faFolder, color: theme.colors.miDocuments, navScreen: 'DocumentsStack' },
     { id: 'simulator', name: 'Simulateur', icon: faVials, color: theme.colors.miSimulator, navScreen: 'SimulatorStack' },
     { id: 'news', name: 'Actualités', icon: faNewspaper, color: theme.colors.miNews, navScreen: 'NewsStack' },
+    { id: 'settings', name: 'Paramètres', icon: faCogs, color: theme.colors.miSettings, navScreen: 'SettingsStack' },
     { id: 'logout', name: 'Se déconnecter', icon: faSignOutAlt, color: theme.colors.miLogout, navScreen: 'LoginScreen' },
 ]
 

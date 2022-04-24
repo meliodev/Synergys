@@ -551,9 +551,16 @@ class UploadDocument extends Component {
         }
     }
 
-    toggleModal(reset) {
-        const modalContent = staffRoles.includes(this.props.role.id) ? "docTypes" : 'imageSources'
-        this.setState({ showModal: !this.state.showModal, modalContent })
+    async toggleModal(reset) {
+        await new Promise((resolve, reject) => {
+            const modalContent = staffRoles.includes(this.props.role.id) ? "docTypes" : 'imageSources'
+            this.setState({ showModal: !this.state.showModal, modalContent }, () => {
+                setTimeout(() => {
+                    resolve(true)
+                }, 500)
+            })
+        })
+
         if (reset) this.resetModalOptions()
     }
 
@@ -679,7 +686,7 @@ class UploadDocument extends Component {
     }
 
     //3.2 Generation
-    startGenPdf(index) {
+    async startGenPdf(index) {
 
         const { type, project } = this.state
 
@@ -698,7 +705,7 @@ class UploadDocument extends Component {
         navParams = { ...navParams, ...genNavigation }
         const navScreen = index === 0 ? navParams.listScreen : navParams.creationScreen
 
-        this.toggleModal()
+        await this.toggleModal()
         this.props.navigation.navigate(navScreen, navParams)
     }
 

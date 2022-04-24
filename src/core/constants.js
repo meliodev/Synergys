@@ -70,6 +70,14 @@ export const errorMessages = {
     map: "Erreur lors de la communication avec le serveur Google Maps. Veuillez réessayer..."
 }
 
+export const issuesSubjects = [
+    { label: 'Bug', value: 'Bug' },
+    { label: 'Suggestion', value: 'Suggestion' },
+    { label: "Problème d'affichage/design", value: "Problème d'affichage/design" },
+    { label: "Plantage (Crash)", value: "Plantage (Crash)" },
+    { label: "Autre", value: "Autre" },
+]
+
 export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }

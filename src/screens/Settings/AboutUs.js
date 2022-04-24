@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { StyleSheet, SafeAreaView, View, Image, ScrollView } from 'react-native'
 import { Headline, Paragraph } from 'react-native-paper';
 
-import Appbar from '../components/Appbar'
-import { constants } from '../core/constants';
-import * as theme from "../core/theme"
+import Appbar from '../../components/Appbar'
+import { constants } from '../../core/constants';
+import * as theme from "../../core/theme"
 
 
 const Separator = ({ style }) => {
@@ -26,13 +26,23 @@ const MyHeadline = ({ style, showSeparator = true, ...props }) => {
 
 class AboutUs extends Component {
 
+    constructor(props) {
+        super(props)
+
+        this.isRoot = this.props.navigation.getParam('isRoot', true) //#task: set it to true
+
+        this.state = {
+            a: ''
+        }
+    }
+
     render() {
         return (
             <SafeAreaView style={styles.container}>
-                <Appbar title titleText='A propos' />
+                <Appbar back={!this.isRoot} title titleText='A propos' />
 
                 <ScrollView style={styles.container}>
-                    <Image resizeMode='contain' source={require('../assets/images/about-us-team.jpg')} style={{ height: constants.ScreenHeight / 5, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center" }} />
+                    <Image resizeMode='contain' source={require('../../assets/images/about-us-team.jpg')} style={{ height: constants.ScreenHeight / 5, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center" }} />
                     <MyHeadline>Présentation</MyHeadline>
                     <Paragraph>
                         Synergys est une entreprise à taille humaine. Une aventure où chacun à une réelle conscience écologique et l’envie de contribuer à la transition énergétique. L’écoute, la bonne humeur et l’entraide sont des valeurs qui habite nos locaux situés à Narbonne (Montredon-des-Corbières).
@@ -48,7 +58,7 @@ class AboutUs extends Component {
                         Nous ne faisons aucune sous-traitance!
                         Nos trois équipes d’intervention interviennent dans toute l’Occitanie. Souriants, compétents, motivés et bien équipés, ils sont le trésor de notre entreprise.
                     </Paragraph>
-                    <Image resizeMode='cover' source={require('../assets/images/about-us-technicien.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
+                    <Image resizeMode='cover' source={require('../../assets/images/about-us-technicien.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
                     <Paragraph>
                         Depuis 2005, la loi POPE (Programmation fixant les Orientations de la Politique Énergétique) permet aux foyers à revenus modestes de bénéficier par exemple une prise en charge de votre changement de système de chauffage. Le but ? Lutter contre la déperdition d’énergie, qui a souvent pour conséquence une surconsommation de chauffage ou de climatisation. Ces travaux sont financés en partie par l’Europe, des caisses privés et entreprises classées « grands pollueurs », qui sont dispensés en retour du paiement de la taxe carbone.
                         Contrairement aux idées reçues, tout le monde est éligible à ces aides. Seul le montant de la subvention varie selon certains critères relatifs aux revenus, au logement, au foyer… Les travaux doivent concerner le logement principal (construit depuis plus de 15 ans) et être réalisés par un prestataire RGE tel que Synergys.
@@ -89,13 +99,13 @@ class AboutUs extends Component {
                         Synergys, spécialiste en transition énergétique des bâtiments à Narbonne et dans tout le Languedoc-Roussillon est à votre écoute. Nous réalisons tous vos projets, l’installation de panneaux photovoltaïques, chauffe-eau solaire, vmc double flux, etc. Réalisation des dossiers, accompagnement et réalisation de votre projet. Nous mettons notre savoir-faire et notre expérience à votre service.
                     </Paragraph>
 
-                    <Image resizeMode='cover' source={require('../assets/images/hitachi-climatisation-reversible.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
+                    <Image resizeMode='cover' source={require('../../assets/images/hitachi-climatisation-reversible.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
                     <MyHeadline showSeparator={false} style={{ marginTop: 0 }}>Chauffage</MyHeadline>
-                    <Image resizeMode='cover' source={require('../assets/images/chauffe-eau-thermodynamique-hitachi.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
+                    <Image resizeMode='cover' source={require('../../assets/images/chauffe-eau-thermodynamique-hitachi.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
                     <MyHeadline showSeparator={false} style={{ marginTop: 0 }}>Eau chaude sanitaire</MyHeadline>
-                    <Image resizeMode='cover' source={require('../assets/images/installation-panneau-solaire-domotique-photovoltaique-800x512.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
+                    <Image resizeMode='cover' source={require('../../assets/images/installation-panneau-solaire-domotique-photovoltaique-800x512.jpg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
                     <MyHeadline showSeparator={false} style={{ marginTop: 0 }}>Photovoltaïque</MyHeadline>
-                    <Image resizeMode='cover' source={require('../assets/images/poele-a-granule.jpeg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
+                    <Image resizeMode='cover' source={require('../../assets/images/poele-a-granule.jpeg')} style={{ height: constants.ScreenHeight / 4, width: constants.ScreenWidth - theme.padding * 2, alignSelf: "center", marginVertical: theme.padding }} />
                     <MyHeadline showSeparator={false} style={{ marginTop: 0 }}>Poêles à granulés</MyHeadline>
                 </ScrollView>
 

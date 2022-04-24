@@ -20,6 +20,7 @@ import Store from './Store/configureStore'
 import { fontsConfig } from '../fontConfig'
 import * as theme from './core/theme'
 import MyStatusBar from './components/MyStatusBar'
+import Settings from './screens/Settings/Settings'
 
 const paperTheme = {
   ...DefaultTheme,
@@ -46,7 +47,7 @@ class App extends Component {
     //Notification channels
     const channelId = await notifee.createChannel({
       id: 'projects',
-      name: 'projects', 
+      name: 'projects',
       lights: false,
       vibration: true,
       importance: AndroidImportance.HIGH,

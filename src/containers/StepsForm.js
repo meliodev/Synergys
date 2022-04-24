@@ -1814,7 +1814,9 @@ class StepsForm extends Component {
             //6. Reset state & Go to success screen
             this.initialState.loading = false
             this.setState(this.initialState, () => {
-                this.props.navigation.navigate("GuestContactSuccess")
+                const title = "Votre dossier d'aide a été délivré avec succès!"
+                const subHeading = "Un conseiller vous contactera bientôt pour vous communiquer la démarche à suivre. Merci de patienter."
+                this.props.navigation.navigate("GuestContactSuccess", { title, subHeading })
             })
         }
 

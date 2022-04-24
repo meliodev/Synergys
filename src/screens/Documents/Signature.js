@@ -28,7 +28,8 @@ import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
 import Appbar from '../../components/Appbar'
 import LoadDialog from '../../components/LoadDialog'
 import Toast from '../../components/Toast'
-import TermsConditions from "../../components/TermsConditions";
+import TermsConditions from "../../components/Policies/TermsConditions";
+import TermsConditionsModal from "../../components/Policies/TermsConditionsModal";
 
 class Signature extends Component {
 
@@ -673,7 +674,7 @@ class Signature extends Component {
                     </View>
                 }
                 {showTerms &&
-                    <TermsConditions
+                    <TermsConditionsModal
                         showTerms={showTerms}
                         toggleTerms={this.toggleTerms}
                         //acceptTerms={this.verifyUser}

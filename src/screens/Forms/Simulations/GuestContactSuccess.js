@@ -12,6 +12,12 @@ import * as theme from '../../../core/theme'
 
 class GuestContactSuccess extends Component {
 
+    constructor(props) {
+        super(props)
+        this.title = this.props.navigation.getParam("title", "")
+        this.subHeading = this.props.navigation.getParam("subHeading", "")
+    }
+
     render() {
         return (
             <View style={styles.mainContainer}>
@@ -22,23 +28,10 @@ class GuestContactSuccess extends Component {
                     title
                     titleText="Message envoyé !"
                 />
-                <View style={{ padding: theme.padding }}>
-
-                    <View style={{ marginTop: theme.padding, alignItems: "center" }}>
-                        <Title style={{ textAlign: "center", marginBottom: theme.padding, color: "green", fontWeight: 'bold' }}>
-                            Votre dossier d'aide a été délivré avec succès!
-                        </Title>
-                        <Paragraph style={{ textAlign: "center", marginTop: 16 }}>
-                            Un conseiller vous contactera bientôt pour vous communiquer la démarche à suivre. Merci de patienter.
-                        </Paragraph>
-                        <CustomIcon
-                            icon={faCheckCircle}
-                            color={theme.colors.primary}
-                            size={constants.ScreenWidth * 0.42}
-                            style={{ alignSelf: "center", marginTop: constants.ScreenHeight * 0.12 }}
-                        />
-                    </View>
-                </View>
+                <SuccessMessage
+                    title={this.title}
+                    subHeading={this.subHeading}
+                />
             </View>
         )
     }

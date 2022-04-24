@@ -55,7 +55,7 @@ export { default as TabView } from './TabView';
 export { default as TaskItem } from './TaskItem';
 export { default as PlanningTabs } from './PlanningTabs';
 export { default as TeamItem } from './TeamItem';
-export { default as TermsConditions } from './TermsConditions';
+export { default as TermsConditions } from './Policies/TermsConditions';
 export { default as TextInput } from './TextInput';
 export { default as Toast } from './Toast';
 export { default as TurnoverGoal } from './TurnoverGoal';

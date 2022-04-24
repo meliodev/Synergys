@@ -171,7 +171,7 @@ class CreateRequest extends Component {
     }
 
     //POST
-    async AddRequestAndChatRoom(request) {
+    async AddRequestAndChatRoom(request) { 
         if (this.isEdit) {
             db.collection('Requests').doc(this.RequestId).set(request, { merge: true })
             return
