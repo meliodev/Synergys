@@ -1,10 +1,8 @@
 
 import React, { Component } from 'react';
 import { View, StyleSheet } from 'react-native'
-import { Paragraph, Title } from 'react-native-paper';
-import { faCheckCircle } from '@fortawesome/pro-light-svg-icons';
 
-import { Appbar, CustomIcon } from "../../../components"
+import { Appbar, SuccessMessage } from "../../../components"
 
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'

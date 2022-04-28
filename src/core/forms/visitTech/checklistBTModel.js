@@ -1,5 +1,5 @@
 
-import { faCheck, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faTimes, faCheckCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from '../../theme'
 
 import moment from 'moment';
@@ -44,7 +44,7 @@ export const checklistBTModel = (params) => {
                         {
                             label: 'Monobloc',
                             value: 'Monobloc',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -374, dy: - 107, pageIndex },
                             rollBack: {
                                 fields: [
@@ -55,7 +55,7 @@ export const checklistBTModel = (params) => {
                         {
                             label: 'Bi-Bloc',
                             value: 'Bi-Bloc',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -260, dy: - 107, pageIndex },
                             rollBack: {
                                 fields: [
@@ -155,10 +155,10 @@ export const checklistBTModel = (params) => {
                     label: "Type matériaux radiateur",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -365, dy: -239, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -292, dy: - 239, pageIndex } },
-                        { label: "PER", value: "PER", icon: faQuestionCircle, pdfConfig: { dx: -220, dy: - 239, pageIndex } },
-                        { label: "Multicouches", value: "Multicouches", icon: faQuestionCircle, pdfConfig: { dx: -167, dy: - 239, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faCheckCircle, pdfConfig: { dx: -365, dy: -239, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faCheckCircle, pdfConfig: { dx: -292, dy: - 239, pageIndex } },
+                        { label: "PER", value: "PER", icon: faCheckCircle, pdfConfig: { dx: -220, dy: - 239, pageIndex } },
+                        { label: "Multicouches", value: "Multicouches", icon: faCheckCircle, pdfConfig: { dx: -167, dy: - 239, pageIndex } },
                     ],
                     mendatory: true,
                     isMultiOptions: true,
@@ -235,9 +235,9 @@ export const checklistBTModel = (params) => {
                     label: "Type de support",
                     type: "options",
                     items: [
-                        { label: "Au sol", value: "Au sol", icon: faQuestionCircle, pdfConfig: { dx: -384, dy: -418, pageIndex } },
-                        { label: "Support classique", value: "Support classique", icon: faQuestionCircle, pdfConfig: { dx: -274, dy: - 418, pageIndex } },
-                        { label: "Support Mupro", value: "Support Mupro", icon: faQuestionCircle, pdfConfig: { dx: -156, dy: - 418, pageIndex } },
+                        { label: "Au sol", value: "Au sol", icon: faCheckCircle, pdfConfig: { dx: -384, dy: -418, pageIndex } },
+                        { label: "Support classique", value: "Support classique", icon: faCheckCircle, pdfConfig: { dx: -274, dy: - 418, pageIndex } },
+                        { label: "Support Mupro", value: "Support Mupro", icon: faCheckCircle, pdfConfig: { dx: -156, dy: - 418, pageIndex } },
                     ],
                     mendatory: true,
                     errorId: "supportTypeBTError",
@@ -256,7 +256,7 @@ export const checklistBTModel = (params) => {
                     id: "PVCdrainingToDoBT",
                     type: "options",
                     items: [
-                        { label: "À faire", value: "À faire", icon: faQuestionCircle, pdfConfig: { dx: -295, dy: - 466, pageIndex } },
+                        { label: "À faire", value: "À faire", icon: faCheckCircle, pdfConfig: { dx: -295, dy: - 466, pageIndex } },
                     ],
                     label: "Evacuation PVC existante",
                     errorId: "PVCdrainingToDoBTError",

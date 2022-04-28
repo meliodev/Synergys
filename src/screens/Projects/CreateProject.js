@@ -863,6 +863,7 @@ class CreateProject extends Component {
                                             itemsFetched={true}
                                             updateItems={(workTypes) => this.setState({ workTypes })}
                                             onPressItem={(item) => console.log(item)}
+                                            editable={canWrite && !this.isClient}
                                         />
 
                                         {/* <ColorPicker

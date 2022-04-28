@@ -398,6 +398,11 @@ const SimulatorStackGuest = createStackNavigator(
             screen: GuestContactSuccess,
             navigationOptions: hideHeader
         },
+        PrivacyPolicy: {
+            screen: PrivacyPolicy,
+            navigationOptions: hideHeader
+        },
+        
     },
     { initialRouteName: "CreateSimulation" }
 )

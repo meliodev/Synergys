@@ -1,5 +1,5 @@
 
-import { faCheck, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faTimes, faCheckCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from '../../theme'
 
 import moment from 'moment';
@@ -40,8 +40,8 @@ export const checklistPAAModel = (params) => {
                 type: "options",
                 errorId: "counterPowerPAAError",
                 items: [
-                    { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -312, dy: - 96, pageIndex } },
-                    { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -197, dy: - 96, pageIndex } },
+                    { label: 'Monophasé', value: 'Monophasé', icon: faCheckCircle, pdfConfig: { dx: -312, dy: - 96, pageIndex } },
+                    { label: 'Triphasé', value: 'Triphasé', icon: faCheckCircle, pdfConfig: { dx: -197, dy: - 96, pageIndex } },
                 ],
                 mendatory: true,
             }]
@@ -79,8 +79,8 @@ export const checklistPAAModel = (params) => {
                     type: "options",
                     errorId: "powerCableSourcePAAError",
                     items: [
-                        { label: 'Existant', value: 'Existant', icon: faQuestionCircle, pdfConfig: { dx: -392, dy: - 196, pageIndex } },
-                        { label: 'A tirer', value: 'A tirer', icon: faQuestionCircle, pdfConfig: { dx: -306, dy: - 196, pageIndex } },
+                        { label: 'Existant', value: 'Existant', icon: faCheckCircle, pdfConfig: { dx: -392, dy: - 196, pageIndex } },
+                        { label: 'A tirer', value: 'A tirer', icon: faCheckCircle, pdfConfig: { dx: -306, dy: - 196, pageIndex } },
                     ],
                     mendatory: true,
                 },
@@ -154,9 +154,9 @@ export const checklistPAAModel = (params) => {
                     label: "Type de support",
                     type: "options",
                     items: [
-                        { label: "Au sol", value: "Au sol", icon: faQuestionCircle, pdfConfig: { dx: -484, dy: -450, pageIndex } },
-                        { label: "Support mural classique", value: "Support mural classique", icon: faQuestionCircle, pdfConfig: { dx: -370, dy: - 450, pageIndex } },
-                        { label: "Support mural mupro", value: "Support mural mupro", icon: faQuestionCircle, pdfConfig: { dx: -200, dy: - 450, pageIndex } },
+                        { label: "Au sol", value: "Au sol", icon: faCheckCircle, pdfConfig: { dx: -484, dy: -450, pageIndex } },
+                        { label: "Support mural classique", value: "Support mural classique", icon: faCheckCircle, pdfConfig: { dx: -370, dy: - 450, pageIndex } },
+                        { label: "Support mural mupro", value: "Support mural mupro", icon: faCheckCircle, pdfConfig: { dx: -200, dy: - 450, pageIndex } },
                     ],
                     mendatory: true,
                     errorId: "bracketTypePAAError",

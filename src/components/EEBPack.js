@@ -87,7 +87,13 @@ const EEBPack = ({ packs, isPV, colorCat, ...props }) => {
         )
     }
 
-    return (
+    if (packs.length === 0) {
+        return (
+            <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, margin: theme.padding }]}>Aucun pack proposé</Text>
+        )
+    }
+
+    else return (
         <View>
             <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, margin: theme.padding }]}>Packs proposés:</Text>
 

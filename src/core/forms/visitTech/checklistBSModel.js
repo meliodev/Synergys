@@ -1,5 +1,5 @@
 
-import { faCheck, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faTimes, faCheckCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from '../../theme'
 
 import moment from 'moment';
@@ -81,9 +81,9 @@ export const checklistBSModel = (params) => {
                     label: "Matériaux des tubes",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -419, dy: -261, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -314, dy: - 261, pageIndex } },
-                        { label: "Plastique", value: "Plastique", icon: faQuestionCircle, pdfConfig: { dx: -218, dy: - 261, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faCheckCircle, pdfConfig: { dx: -419, dy: -261, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faCheckCircle, pdfConfig: { dx: -314, dy: - 261, pageIndex } },
+                        { label: "Plastique", value: "Plastique", icon: faCheckCircle, pdfConfig: { dx: -218, dy: - 261, pageIndex } },
                     ],
                     mendatory: true,
                     errorId: "tubeMaterialsBSError",
@@ -99,7 +99,7 @@ export const checklistBSModel = (params) => {
                     id: "PVCdrainingToDoBS",
                     type: "options",
                     items: [
-                        { label: "À faire", value: "À faire", icon: faQuestionCircle, pdfConfig: { dx: -309, dy: - 301, pageIndex } },
+                        { label: "À faire", value: "À faire", icon: faCheckCircle, pdfConfig: { dx: -309, dy: - 301, pageIndex } },
                     ],
                     label: "Evacuation PVC existante",
                     errorId: "PVCdrainingToDoBSError",
@@ -212,8 +212,8 @@ export const checklistBSModel = (params) => {
                     label: "Orientation",
                     type: "options",
                     items: [
-                        { label: 'Portrait', value: 'Portrait', icon: faQuestionCircle, pdfConfig: { dx: -311, dy: - 631, pageIndex } },
-                        { label: 'Paysage', value: 'Paysage', icon: faQuestionCircle, pdfConfig: { dx: -168, dy: - 631, pageIndex } },
+                        { label: 'Portrait', value: 'Portrait', icon: faCheckCircle, pdfConfig: { dx: -311, dy: - 631, pageIndex } },
+                        { label: 'Paysage', value: 'Paysage', icon: faCheckCircle, pdfConfig: { dx: -168, dy: - 631, pageIndex } },
                     ],
                     errorId: "orientationCSBSError",
                     mendatory: true

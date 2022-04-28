@@ -173,8 +173,7 @@ class DrawerMenu extends React.Component {
         const { currentUser } = firebase.auth()
 
         return (
-            <SafeAreaView style={styles.container}>
-                <StatusBar backgroundColor={statusBar.backgroundColor} barStyle={statusBar.barStyle} />
+            <View style={styles.container}>
 
                 {currentUser && this.renderHeader()}
 
@@ -185,7 +184,7 @@ class DrawerMenu extends React.Component {
                 <View style={[styles.footerContainer, { bottom: 5 }]}>
                     <AppVersion />
                 </View>
-            </SafeAreaView>
+            </View>
         )
     }
 }

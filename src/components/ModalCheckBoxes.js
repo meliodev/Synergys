@@ -46,6 +46,7 @@ export default class ModalCheckBoxes extends Component {
     }
 
     toggleModal() {
+        if (!this.props.editable) return
         const { isModalVisible } = this.state
         this.setState({ isModalVisible: !isModalVisible })
     }
@@ -55,7 +56,7 @@ export default class ModalCheckBoxes extends Component {
         let { items } = this.props
         const header = (text) => <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{text}</Text>
         const hitslop = { top: 5, bottom: 5, left: 5, right: 5 }
-        
+
         return (
             <Modal
                 isVisible={isModalVisible}
@@ -80,13 +81,13 @@ export default class ModalCheckBoxes extends Component {
                         />
                     </View>
 
-                        <Button
-                            mode="contained"
-                            onPress={() => this.handleConfirmModal(items)}
-                            containerStyle={{ alignSelf: "flex-end" }}
-                            >
-                            Confirmer
-                        </Button>
+                    <Button
+                        mode="contained"
+                        onPress={() => this.handleConfirmModal(items)}
+                        containerStyle={{ alignSelf: "flex-end" }}
+                    >
+                        Confirmer
+                    </Button>
                 </View>
             </Modal >
         )
@@ -170,7 +171,7 @@ const modalStyles = StyleSheet.create({
     modal: {
         flex: 1,
         maxHeight: constants.ScreenHeight,
-        paddingTop: constants.ScreenHeight*0.015,
+        paddingTop: constants.ScreenHeight * 0.015,
     },
     container: {
         flex: 1,

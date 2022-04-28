@@ -1,5 +1,5 @@
 
-import { faCheck, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faTimes, faCheckCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from '../../theme'
 
 import moment from 'moment';
@@ -69,8 +69,8 @@ export const checklistPVModel = (params) => {
                     label: "Type de phase",
                     type: "options",
                     items: [
-                        { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -321, dy: - 205, pageIndex } },
-                        { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -169, dy: - 205, pageIndex } },
+                        { label: 'Monophasé', value: 'Monophasé', icon: faCheckCircle, pdfConfig: { dx: -321, dy: - 205, pageIndex } },
+                        { label: 'Triphasé', value: 'Triphasé', icon: faCheckCircle, pdfConfig: { dx: -169, dy: - 205, pageIndex } },
                     ],
                     errorId: "phaseTypePVError",
                     mendatory: true
@@ -117,9 +117,9 @@ export const checklistPVModel = (params) => {
                     type: "options",
                     isMultiOptions: true,
                     items: [
-                        { label: 'Central', value: 'Central', icon: faQuestionCircle, pdfConfig: { dx: -334, dy: - 342, pageIndex } },
-                        { label: 'Micro onduleur', value: 'Micro onduleur', icon: faQuestionCircle, pdfConfig: { dx: -264, dy: - 342, pageIndex } },
-                        { label: 'Solaredge', value: 'Solaredge', icon: faQuestionCircle, pdfConfig: { dx: -163, dy: - 342, pageIndex } },
+                        { label: 'Central', value: 'Central', icon: faCheckCircle, pdfConfig: { dx: -334, dy: - 342, pageIndex } },
+                        { label: 'Micro onduleur', value: 'Micro onduleur', icon: faCheckCircle, pdfConfig: { dx: -264, dy: - 342, pageIndex } },
+                        { label: 'Solaredge', value: 'Solaredge', icon: faCheckCircle, pdfConfig: { dx: -163, dy: - 342, pageIndex } },
                     ],
                     errorId: "inverterTypesPVError",
                     mendatory: true
@@ -165,8 +165,8 @@ export const checklistPVModel = (params) => {
                     label: "Orientation du champ photovoltaîque",
                     type: "options",
                     items: [
-                        { label: 'Portrait', value: 'Portrait', icon: faQuestionCircle, pdfConfig: { dx: -323, dy: - 479, pageIndex } },
-                        { label: 'Paysage', value: 'Paysage', icon: faQuestionCircle, pdfConfig: { dx: -165, dy: - 479, pageIndex } },
+                        { label: 'Portrait', value: 'Portrait', icon: faCheckCircle, pdfConfig: { dx: -323, dy: - 479, pageIndex } },
+                        { label: 'Paysage', value: 'Paysage', icon: faCheckCircle, pdfConfig: { dx: -165, dy: - 479, pageIndex } },
                     ],
                     errorId: "orientationPVError",
                     mendatory: true

@@ -1,5 +1,5 @@
 
-import { faBuilding, faCheck, faHouse, faTimes, faQuestionCircle, faMars, faVenus } from "@fortawesome/pro-light-svg-icons";
+import { faBuilding, faCheck, faHouse, faTimes, faCheckCircle, faMars, faVenus } from "@fortawesome/pro-light-svg-icons";
 import { rgb } from 'pdf-lib'
 
 import moment from "moment";
@@ -31,7 +31,7 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Accepter la réception des travaux sans réserves',
                             value: 'Sans réserves',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -492, dy: - 226, pageIndex: 0 },
                             rollBack: {
                                 fields: [
@@ -42,7 +42,7 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Accepter la réception assortie de réserves',
                             value: 'Avec réserves',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -492, dy: - 250, pageIndex: 0 },
                             rollBack: {
                                 fields: [
@@ -272,14 +272,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Chauffe‐eau solaire individuel',
                             value: 'Chauffe‐eau solaire individuel',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 382, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -316,14 +316,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Système solaire combiné',
                             value: 'Système solaire combiné',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 405, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -360,14 +360,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Solaire thermique collectif (ECS)',
                             value: 'Solaire thermique collectif (ECS)',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 428, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields:
@@ -405,14 +405,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Chauffage au bois',
                             value: 'Chauffage au bois',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 449, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -467,14 +467,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Générateur photovoltaïque raccordé au réseau',
                             value: 'Générateur photovoltaïque raccordé au réseau',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 495, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -526,14 +526,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Pompe à chaleur',
                             value: 'Pompe à chaleur',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 541, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -590,14 +590,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Forage géothermique',
                             value: 'Forage géothermique',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 588, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -649,14 +649,14 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Chaudière à condensation',
                             value: 'Chaudière à condensation',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -544, dy: - 634, pageIndex: 1, squareSize: 8 },
                         },
                         {
                             label: 'Non installé, passer.',
                             value: '',
                             skip: true,
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { skip: true },
                             rollBack: {
                                 fields: [
@@ -707,25 +707,25 @@ export const pvReceptionModel = (params) => {
                         {
                             label: 'Très satisfaisante',
                             value: 'Très satisfaisante',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -340, dy: - 723, pageIndex: 1, squareSize: 10 },
                         },
                         {
                             label: 'Satisfaisante',
                             value: 'Satisfaisante',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -257, dy: - 723, pageIndex: 1, squareSize: 12 },
                         },
                         {
                             label: 'Peu satisfaisante',
                             value: 'Peu satisfaisante',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -176, dy: - 723, pageIndex: 1, squareSize: 12 },
                         },
                         {
                             label: 'Insatisfaisante',
                             value: 'Insatisfaisante',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -94, dy: - 723, pageIndex: 1, squareSize: 12 },
                         },
                     ],
@@ -792,8 +792,8 @@ export const mandatSynergysModel = () => {
                     label: "Synergys ou Sous-Traitance",
                     type: "options",
                     items: [
-                        { label: 'Synergys', value: 'Synergys', icon: faQuestionCircle, pdfConfig: { dx: -471, dy: - 174, squareSize: 12, pageIndex: 0 } },
-                        { label: 'Sous-Traitance', value: 'Sous-Traitance', icon: faQuestionCircle, pdfConfig: { dx: -278, dy: - 174, squareSize: 12, pageIndex: 0 } },
+                        { label: 'Synergys', value: 'Synergys', icon: faCheckCircle, pdfConfig: { dx: -471, dy: - 174, squareSize: 12, pageIndex: 0 } },
+                        { label: 'Sous-Traitance', value: 'Sous-Traitance', icon: faCheckCircle, pdfConfig: { dx: -278, dy: - 174, squareSize: 12, pageIndex: 0 } },
                     ],
                     errorId: "serviceProviderError",
                     mendatory: true,
@@ -814,7 +814,7 @@ export const mandatSynergysModel = () => {
                         {
                             label: 'Installation',
                             value: 'Installation (Synergys)',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -444, dy: - 197, squareSize: 8, pageIndex: 0 },
                             isConditional: true,
                             condition: { with: "serviceProvider", values: ["Synergys"] },
@@ -822,7 +822,7 @@ export const mandatSynergysModel = () => {
                         {
                             label: 'SAV',
                             value: 'SAV (Synergys)',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -362, dy: - 197, squareSize: 8, pageIndex: 0 },
                             isConditional: true,
                             condition: { with: "serviceProvider", values: ["Synergys"] },
@@ -830,7 +830,7 @@ export const mandatSynergysModel = () => {
                         {
                             label: 'Installation',
                             value: 'Installation (Sous-Traitance)',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -252, dy: - 197, squareSize: 8, pageIndex: 0 },
                             isConditional: true,
                             condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
@@ -838,7 +838,7 @@ export const mandatSynergysModel = () => {
                         {
                             label: 'SAV',
                             value: 'SAV (Sous-Traitance)',
-                            icon: faQuestionCircle,
+                            icon: faCheckCircle,
                             pdfConfig: { dx: -169, dy: - 197, squareSize: 8, pageIndex: 0 },
                             isConditional: true,
                             condition: { with: "serviceProvider", values: ["Sous-Traitance"] },
@@ -861,12 +861,12 @@ export const mandatSynergysModel = () => {
                     type: "options",
                     isMultiOptions: true,
                     items: [
-                        { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 253, squareSize: 8, pageIndex: 0 } },
-                        { label: 'PAC AIR/AIR', value: 'PAC AIR/AIR', icon: faQuestionCircle, pdfConfig: { dx: -430, dy: - 253, squareSize: 8, pageIndex: 0 } },
-                        { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 253, squareSize: 8, pageIndex: 0 } },
-                        { label: 'ISOLATION', value: 'ISOLATION', icon: faQuestionCircle, pdfConfig: { dx: -183, dy: - 252, squareSize: 8, pageIndex: 0 } },
-                        { label: 'CHAUFFE-EAU THERMODYNAMIQUE', value: 'CHAUFFE-EAU THERMODYNAMIQUE', icon: faQuestionCircle, pdfConfig: { dx: -533, dy: - 271, squareSize: 8, pageIndex: 0 } },
-                        { label: 'VMC', value: 'VMC', icon: faQuestionCircle, pdfConfig: { dx: -320, dy: - 271, squareSize: 8, pageIndex: 0 } },
+                        { label: 'PAC AIR/EAU', value: 'PAC AIR/EAU', icon: faCheckCircle, pdfConfig: { dx: -533, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                        { label: 'PAC AIR/AIR', value: 'PAC AIR/AIR', icon: faCheckCircle, pdfConfig: { dx: -430, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                        { label: 'PHOTOVOLTAÏQUE', value: 'PHOTOVOLTAÏQUE', icon: faCheckCircle, pdfConfig: { dx: -320, dy: - 253, squareSize: 8, pageIndex: 0 } },
+                        { label: 'ISOLATION', value: 'ISOLATION', icon: faCheckCircle, pdfConfig: { dx: -183, dy: - 252, squareSize: 8, pageIndex: 0 } },
+                        { label: 'CHAUFFE-EAU THERMODYNAMIQUE', value: 'CHAUFFE-EAU THERMODYNAMIQUE', icon: faCheckCircle, pdfConfig: { dx: -533, dy: - 271, squareSize: 8, pageIndex: 0 } },
+                        { label: 'VMC', value: 'VMC', icon: faCheckCircle, pdfConfig: { dx: -320, dy: - 271, squareSize: 8, pageIndex: 0 } },
                     ],
                     errorId: "productTypesError",
                     mendatory: true,
@@ -1119,11 +1119,11 @@ export const mandatSynergysModel = () => {
                     type: "options",
                     isMultiOptions: true,
                     items: [
-                        { label: 'ACTION LOGEMENT', value: 'ACTION LOGEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 615, pageIndex: 0 } },
-                        { label: 'CHEQUE REGION', value: 'CHEQUE REGION', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 648, pageIndex: 0 } },
-                        { label: 'MA PRIME RENOV', value: 'MA PRIME RENOV', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 684, pageIndex: 0 } }, //#task scroll to error offset_y
-                        { label: 'CEE', value: 'CEE', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 719, pageIndex: 0 } }, //#task scroll to error offset_y
-                        { label: 'FINANCEMENT', value: 'FINANCEMENT', icon: faQuestionCircle, pdfConfig: { dx: -267, dy: - 754, pageIndex: 0 } }, //#task scroll to error offset_y
+                        { label: 'ACTION LOGEMENT', value: 'ACTION LOGEMENT', icon: faCheckCircle, pdfConfig: { dx: -267, dy: - 615, pageIndex: 0 } },
+                        { label: 'CHEQUE REGION', value: 'CHEQUE REGION', icon: faCheckCircle, pdfConfig: { dx: -267, dy: - 648, pageIndex: 0 } },
+                        { label: 'MA PRIME RENOV', value: 'MA PRIME RENOV', icon: faCheckCircle, pdfConfig: { dx: -267, dy: - 684, pageIndex: 0 } }, //#task scroll to error offset_y
+                        { label: 'CEE', value: 'CEE', icon: faCheckCircle, pdfConfig: { dx: -267, dy: - 719, pageIndex: 0 } }, //#task scroll to error offset_y
+                        { label: 'FINANCEMENT', value: 'FINANCEMENT', icon: faCheckCircle, pdfConfig: { dx: -267, dy: - 754, pageIndex: 0 } }, //#task scroll to error offset_y
                     ],
                     style: { marginTop: 100 },
                     // isConditional: true,

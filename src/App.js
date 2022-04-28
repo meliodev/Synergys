@@ -9,10 +9,9 @@ import { Provider as PaperProvider, DefaultTheme, configureFonts } from 'react-n
 import { MenuProvider } from 'react-native-popup-menu';
 import SplashScreen from 'react-native-splash-screen'
 import codePush from 'react-native-code-push'
-import { SafeAreaView } from 'react-native-safe-area-context'
 
 import AppToast from './components/global/AppToast'
-import Wrapper from './Wrapper'
+import NetworkStatus from './NetworkStatus'
 import RootController from './Navigation/DrawerNavigator'
 
 import firebase, { crashlytics, remoteConfig } from './firebase'
@@ -74,12 +73,12 @@ class App extends Component {
         <PersistGate persistor={persistor}>
           <PaperProvider theme={paperTheme}>
             <MenuProvider>
-              <Wrapper>
-                <MyStatusBar>
+              <MyStatusBar>
+                <NetworkStatus>
                   <RootController />
                   <AppToast />
-                </MyStatusBar>
-              </Wrapper>
+                </NetworkStatus>
+              </MyStatusBar>
             </MenuProvider>
           </PaperProvider>
         </PersistGate>

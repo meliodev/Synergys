@@ -1,5 +1,5 @@
 
-import { faCheck, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faTimes, faCheckCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from '../../theme'
 
 import moment from 'moment';
@@ -60,8 +60,8 @@ export const checklistPAEModel = (params) => {
         //             label: "Type de phase",
         //             type: "options",
         //             items: [
-        //                 { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -321, dy: - 101, pageIndex } },
-        //                 { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -176, dy: - 101, pageIndex } },
+        //                 { label: 'Monophasé', value: 'Monophasé', icon: faCheckCircle, pdfConfig: { dx: -321, dy: - 101, pageIndex } },
+        //                 { label: 'Triphasé', value: 'Triphasé', icon: faCheckCircle, pdfConfig: { dx: -176, dy: - 101, pageIndex } },
         //             ],
         //             errorId: "phaseTypePAEError",
         //             mendatory: true
@@ -103,8 +103,8 @@ export const checklistPAEModel = (params) => {
                     type: "options",
                     errorId: "powerCableSourcePAEError",
                     items: [
-                        { label: 'Existant', value: 'Existant', icon: faQuestionCircle, pdfConfig: { dx: -330, dy: - 140, pageIndex } },
-                        { label: 'A tirer', value: 'A tirer', icon: faQuestionCircle, pdfConfig: { dx: -238, dy: - 140, pageIndex } },
+                        { label: 'Existant', value: 'Existant', icon: faCheckCircle, pdfConfig: { dx: -330, dy: - 140, pageIndex } },
+                        { label: 'A tirer', value: 'A tirer', icon: faCheckCircle, pdfConfig: { dx: -238, dy: - 140, pageIndex } },
                     ],
                     mendatory: true,
                 },
@@ -152,8 +152,8 @@ export const checklistPAEModel = (params) => {
                     type: "options",
                     errorId: "thermostatTypePAEError",
                     items: [
-                        { label: 'Filaire', value: 'Filaire', icon: faQuestionCircle, pdfConfig: { dx: -285, dy: - 198, pageIndex } },
-                        { label: 'Radio', value: 'Radio', icon: faQuestionCircle, pdfConfig: { dx: -201, dy: - 198, pageIndex } },
+                        { label: 'Filaire', value: 'Filaire', icon: faCheckCircle, pdfConfig: { dx: -285, dy: - 198, pageIndex } },
+                        { label: 'Radio', value: 'Radio', icon: faCheckCircle, pdfConfig: { dx: -201, dy: - 198, pageIndex } },
                     ],
                     mendatory: true,
                 },
@@ -255,10 +255,10 @@ export const checklistPAEModel = (params) => {
                     label: "Types matériaux tuyaux",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -352, dy: -307, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -284, dy: - 307, pageIndex } },
-                        { label: "PER", value: "PER", icon: faQuestionCircle, pdfConfig: { dx: -218, dy: - 307, pageIndex } },
-                        { label: "Multicouches", value: "Multicouches", icon: faQuestionCircle, pdfConfig: { dx: -166, dy: - 307, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faCheckCircle, pdfConfig: { dx: -352, dy: -307, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faCheckCircle, pdfConfig: { dx: -284, dy: - 307, pageIndex } },
+                        { label: "PER", value: "PER", icon: faCheckCircle, pdfConfig: { dx: -218, dy: - 307, pageIndex } },
+                        { label: "Multicouches", value: "Multicouches", icon: faCheckCircle, pdfConfig: { dx: -166, dy: - 307, pageIndex } },
                     ],
                     isMultiOptions: true,
                     mendatory: true,
@@ -302,9 +302,9 @@ export const checklistPAEModel = (params) => {
                     type: "options",
                     errorId: "transmittersTypePAEError",
                     items: [
-                        { label: 'Radiateur', value: 'Radiateur', icon: faQuestionCircle, pdfConfig: { dx: -358, dy: - 345, pageIndex } },
-                        { label: 'Plancher chauffant', value: 'Plancher chauffant', icon: faQuestionCircle, pdfConfig: { dx: -265, dy: - 345, pageIndex } },
-                        { label: 'Ventilo-convecteur  ', value: 'Ventilo-convecteur  ', icon: faQuestionCircle, pdfConfig: { dx: -139, dy: - 345, pageIndex } },
+                        { label: 'Radiateur', value: 'Radiateur', icon: faCheckCircle, pdfConfig: { dx: -358, dy: - 345, pageIndex } },
+                        { label: 'Plancher chauffant', value: 'Plancher chauffant', icon: faCheckCircle, pdfConfig: { dx: -265, dy: - 345, pageIndex } },
+                        { label: 'Ventilo-convecteur  ', value: 'Ventilo-convecteur  ', icon: faCheckCircle, pdfConfig: { dx: -139, dy: - 345, pageIndex } },
                     ],
                     mendatory: true,
                 },
@@ -320,9 +320,9 @@ export const checklistPAEModel = (params) => {
                     label: "Types matériaux radiateurs",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -330, dy: -364, pageIndex } },
-                        { label: "Fonte", value: "Fonte", icon: faQuestionCircle, pdfConfig: { dx: -238, dy: - 364, pageIndex } },
-                        { label: "Alu", value: "Alu", icon: faQuestionCircle, pdfConfig: { dx: -146, dy: - 364, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faCheckCircle, pdfConfig: { dx: -330, dy: -364, pageIndex } },
+                        { label: "Fonte", value: "Fonte", icon: faCheckCircle, pdfConfig: { dx: -238, dy: - 364, pageIndex } },
+                        { label: "Alu", value: "Alu", icon: faCheckCircle, pdfConfig: { dx: -146, dy: - 364, pageIndex } },
                     ],
                     mendatory: true,
                     errorId: "radiatorMaterialTypePAEError",
@@ -468,10 +468,10 @@ export const checklistPAEModel = (params) => {
                     label: "Type matériaux tuyaux",
                     type: "options",
                     items: [
-                        { label: "Acier", value: "Acier", icon: faQuestionCircle, pdfConfig: { dx: -351, dy: -522, pageIndex } },
-                        { label: "Cuivre", value: "Cuivre", icon: faQuestionCircle, pdfConfig: { dx: -284, dy: - 522, pageIndex } },
-                        { label: "PER", value: "PER", icon: faQuestionCircle, pdfConfig: { dx: -217, dy: - 522, pageIndex } },
-                        { label: "Multicouches", value: "Multicouches", icon: faQuestionCircle, pdfConfig: { dx: -167, dy: - 522, pageIndex } },
+                        { label: "Acier", value: "Acier", icon: faCheckCircle, pdfConfig: { dx: -351, dy: -522, pageIndex } },
+                        { label: "Cuivre", value: "Cuivre", icon: faCheckCircle, pdfConfig: { dx: -284, dy: - 522, pageIndex } },
+                        { label: "PER", value: "PER", icon: faCheckCircle, pdfConfig: { dx: -217, dy: - 522, pageIndex } },
+                        { label: "Multicouches", value: "Multicouches", icon: faCheckCircle, pdfConfig: { dx: -167, dy: - 522, pageIndex } },
                     ],
                     isMultiOptions: true,
                     mendatory: true,
@@ -489,8 +489,8 @@ export const checklistPAEModel = (params) => {
                     type: "options",
                     errorId: "PVCdrainingPAEError",
                     items: [
-                        { label: 'Existante', value: 'Existante', icon: faQuestionCircle, pdfConfig: { dx: -321, dy: - 541, pageIndex } },
-                        { label: 'Non existante', value: 'Non existante', icon: faQuestionCircle, pdfConfig: { dx: -199, dy: - 541, pageIndex } },
+                        { label: 'Existante', value: 'Existante', icon: faCheckCircle, pdfConfig: { dx: -321, dy: - 541, pageIndex } },
+                        { label: 'Non existante', value: 'Non existante', icon: faCheckCircle, pdfConfig: { dx: -199, dy: - 541, pageIndex } },
                     ],
                     mendatory: true,
                 },
@@ -537,9 +537,9 @@ export const checklistPAEModel = (params) => {
                     label: "Type de support",
                     type: "options",
                     items: [
-                        { label: "Au sol sur rubber foot", value: "Au sol sur rubber foo", icon: faQuestionCircle, pdfConfig: { dx: -401, dy: -615, pageIndex } },
-                        { label: "Support mural classique", value: "Support mural classique", icon: faQuestionCircle, pdfConfig: { dx: -279, dy: - 615, pageIndex } },
-                        { label: "Support mural mupro", value: "Support mural mupro", icon: faQuestionCircle, pdfConfig: { dx: -152, dy: - 615, pageIndex } },
+                        { label: "Au sol sur rubber foot", value: "Au sol sur rubber foo", icon: faCheckCircle, pdfConfig: { dx: -401, dy: -615, pageIndex } },
+                        { label: "Support mural classique", value: "Support mural classique", icon: faCheckCircle, pdfConfig: { dx: -279, dy: - 615, pageIndex } },
+                        { label: "Support mural mupro", value: "Support mural mupro", icon: faCheckCircle, pdfConfig: { dx: -152, dy: - 615, pageIndex } },
                     ],
                     mendatory: true,
                     errorId: "bracketTypePAEError",
@@ -655,8 +655,8 @@ export const checklistPAEModel = (params) => {
                     type: "options",
                     errorId: "gutterTypePAEError",
                     items: [
-                        { label: '80Ø', value: '80Ø', icon: faQuestionCircle, pdfConfig: { dx: -309, dy: - 757, pageIndex } },
-                        { label: '120Ø', value: '120Ø', icon: faQuestionCircle, pdfConfig: { dx: -176, dy: - 757, pageIndex } },
+                        { label: '80Ø', value: '80Ø', icon: faCheckCircle, pdfConfig: { dx: -309, dy: - 757, pageIndex } },
+                        { label: '120Ø', value: '120Ø', icon: faCheckCircle, pdfConfig: { dx: -176, dy: - 757, pageIndex } },
                     ],
                     mendatory: true,
                 },

@@ -1137,7 +1137,7 @@ class StepsForm extends Component {
         const slopeOrientationValues = ["Sud-Est/Sud-Ouest", "Sud"]
         const roofSurface = Number(roofWidth) * Number(roofLength)
         const yearlyCost_PerSquareMeter = yearlyElecCost / livingSurface
-
+ 
         const paeCondition = energySourceValues.includes(energySource)
         const paaCondition = transmittersTypes.includes("Radiateurs électriques")
         const isoComblesCondition = lostAticsIsolation == "Oui" && lostAticsIsolationAge > 6 && heatedSurface > 24
@@ -1234,15 +1234,11 @@ class StepsForm extends Component {
     }
 
     //##Success
-
     setPacks(products) {
         const isSSC = products.includes("Chauffage solaire combiné")
         const isPAE = products.includes("PAC AIR EAU")
         const isBT = products.includes("Ballon thermodynamique")
         const isPV = products.includes("Photovoltaïque")
-
-        // const isFirstPacks = isSSC && isPAE
-        // const isSecondPacks = !isSSC && isPAE && isBT
 
         let packs = []
         let isPVElligible = false
@@ -1259,20 +1255,6 @@ class StepsForm extends Component {
             }
         }
 
-        // if (isFirstPacks) {
-        //     packs = pack1
-        //     isPVElligible = true
-
-        //     //FirstPack -> 4m2 garage dispo -> Include other packs
-        //     if (isBT)
-        //         packs = packs.concat(packs2)
-        // }
-
-        // else if (isSecondPacks) {
-        //     packs = pack2
-        //     isPVElligible = true
-        // }
-
         return { packs, isPVElligible }
     }
 
@@ -1282,7 +1264,6 @@ class StepsForm extends Component {
         const message1 = "Ce que nous vous recommandons"
 
         const { packs, isPVElligible } = this.setPacks(products)
-        const showPacks = packs.length > 0
 
         return (
             <View style={{ flex: 1 }}>
@@ -1311,13 +1292,11 @@ class StepsForm extends Component {
 
                     <View style={{ width: constants.ScreenWidth - theme.padding * 2, alignSelf: 'center', borderColor: theme.colors.gray_light, borderWidth: StyleSheet.hairlineWidth }} />
 
-                    {showPacks &&
-                        <EEBPack
-                            packs={packs}
-                            isPV={isPVElligible}
-                            colorCat={colorCat}
-                        />
-                    }
+                    <EEBPack
+                        packs={packs}
+                        isPV={isPVElligible}
+                        colorCat={colorCat}
+                    />
 
                     <View style={{ flex: 1, padding: theme.padding }}>
                         {/* <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message3}</Text>

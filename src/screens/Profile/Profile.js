@@ -55,8 +55,7 @@ class Profile extends Component {
         this.userParam = this.props.navigation.getParam('user', { id: firebase.auth().currentUser.uid, roleId: this.roleId }) //default: current user
         this.isProfileOwner = this.userParam.id === firebase.auth().currentUser.uid
         this.isClient = this.userParam.roleId === 'client'
-
-        console.log("is client", this.isClient)
+        this.isCurrentUserStaff = staffRoles.includes(this.props.role.id)
 
         this.isEdit = this.props.navigation.getParam("isEdit", false) || this.isProfileOwner
         this.dataCollection = this.isClient ? 'Clients' : 'Users'
@@ -201,7 +200,11 @@ class Profile extends Component {
             .orderBy('createdAt', 'DESC')
 
 
-        const clientProjectsList = [...[{ id: "addNewProject" }], ...await fetchDocuments(query)]
+        let clientProjectsList = await fetchDocuments(query)
+        if(this.isCurrentUserStaff) {
+            clientProjectsList = [...[{ id: "addNewProject" }], ...clientProjectsList]
+        }
+
         this.setState({
             clientProjectsList,
             clientProjectsCount: clientProjectsList.length,
@@ -466,17 +469,12 @@ class Profile extends Component {
 
     renderProject(project, index) {
 
-        const { role } = this.props
-        const isCurrentUserStaff = staffRoles.includes(role.id)
-
         if (project.empty)
             return <View style={styles.invisibleItem} />
 
         else {
-            if (index === 0) {
-                if (isCurrentUserStaff)
-                    return this.addProjectComponent()
-                else return null
+            if (index === 0 && this.isCurrentUserStaff) {
+                return this.addProjectComponent()
             }
 
             else return (
@@ -529,7 +527,8 @@ class Profile extends Component {
                                 renderItem={({ item, index }) => this.renderProject(item, index)}
                                 style={{ zIndex: 1 }}
                                 numColumns={3}
-                                columnWrapperStyle={{ justifyContent: 'space-between' }} />
+                                columnWrapperStyle={{ justifyContent: 'space-between' }}
+                            />
                     }
                 />
 

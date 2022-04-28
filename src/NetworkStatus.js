@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { StyleSheet, View, Alert } from 'react-native'
+import { StyleSheet, View, Alert, StatusBar } from 'react-native'
 import NetInfo from "@react-native-community/netinfo"
 import { connect } from 'react-redux'
 import _ from 'lodash'
@@ -12,7 +12,7 @@ import OfflineBar from './components/OffLineBar'
 
 import { setNetwork } from './core/redux'
 
-class Wrapper extends Component {
+class NetworkStatus extends Component {
     constructor(props) {
         super(props)
         this.alertDisplayed = false
@@ -38,7 +38,8 @@ class Wrapper extends Component {
     }
 
     render() {
-        const { isConnected } = this.props.network
+        const { network } = this.props
+        const { isConnected } = network
 
         return (
             <View style={styles.container}>
@@ -57,7 +58,7 @@ const mapStateToProps = (state) => {
     }
 }
 
-export default connect(mapStateToProps)(Wrapper)
+export default connect(mapStateToProps)(NetworkStatus)
 
 const styles = StyleSheet.create({
     container: {

@@ -336,7 +336,7 @@ class MarkerTypes extends React.Component {
                             }}
                             region={this.state.region}
                             onRegionChange={(region) => console.log(region)}
-                            onRegionChangeComplete={(region) => this.setState({ region })}
+                            //onRegionChangeComplete={(region) => this.setState({ region })}
                             ref={ref => this.map = ref}
                             onPress={e => this.onChangePosition(e)} //update marker
                         >
@@ -344,8 +344,7 @@ class MarkerTypes extends React.Component {
                                 coordinate={this.state.marker}
                                 onDragEnd={(e) => this.onChangePosition(e)}
                                 draggable
-                            >
-                            </Marker>
+                            />
                         </MapView>
                     </View>
 

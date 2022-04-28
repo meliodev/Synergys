@@ -50,6 +50,7 @@ export { default as RequestState } from './RequestState';
 export { default as SearchBar } from './SearchBar';
 export { default as Section } from './Section';
 export { default as SquareOption } from './SquareOption';
+export { default as SuccessMessage } from './SuccessMessage';
 export { default as Switch } from './Switch';
 export { default as TabView } from './TabView';
 export { default as TaskItem } from './TaskItem';

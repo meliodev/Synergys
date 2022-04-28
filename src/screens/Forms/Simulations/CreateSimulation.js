@@ -1,7 +1,8 @@
 
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, StatusBar, } from 'react-native'
+import { View, Text, StyleSheet, SafeAreaView, StatusBar, Linking, } from 'react-native'
 import { faVials } from '@fortawesome/pro-duotone-svg-icons';
+import { connect } from 'react-redux';
 
 import StepsForm from '../../../containers/StepsForm'
 import { CustomIcon, Button } from '../../../components/index'
@@ -11,6 +12,9 @@ import { ficheEEBBase64 } from '../../../assets/files/ficheEEBBase64'
 import { ficheEEBModel } from '../../../core/forms/ficheEEB/ficheEEBModel'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
+import { Checkbox } from 'react-native-paper';
+import { auth } from '../../../firebase';
+import { setAppToast } from '../../../core/redux';
 
 const properties = [
     "estimation",
@@ -160,9 +164,17 @@ class CreateSimulation extends Component {
         this.SimulationId = this.props.navigation.getParam('SimulationId', '')
 
         this.project = this.props.navigation.getParam('project', null)
+        this.isGuest = !auth.currentUser
+
         const nameSir = this.project ? this.project.client.fullName : ""
         initialState.nameSir = nameSir //#task add sex to client collection -> To know if nameSir or nameMiss
         initialState.isProprio = "Oui" //Select by default
+
+        this.welcomeMessage = this.welcomeMessage.bind(this)
+
+        this.state = {
+            privacyPolicyAccepted: !this.isGuest,
+        }
     }
 
     //##Welcome 
@@ -174,6 +186,8 @@ class CreateSimulation extends Component {
             "Déposer votre dossier d’aide directement en ligne !",
             "Suivez l’avancement de vos demandes"
         ]
+        const { privacyPolicyAccepted } = this.state
+
         return (
             <View style={styles.welcomeContainer}>
 
@@ -181,7 +195,7 @@ class CreateSimulation extends Component {
                     <CustomIcon
                         icon={faVials}
                         style={{ alignSelf: "center" }}
-                        size={65}
+                        size={60}
                         color={theme.colors.white}
                         secondaryColor={theme.colors.primary}
                     />
@@ -208,15 +222,41 @@ class CreateSimulation extends Component {
                             )
                         })
                     }
+
+                    <View style={styles.bottomContainer}>
+                        <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginLeft: -10 }}>
+                            <Checkbox.Android
+                                status={privacyPolicyAccepted ? 'checked' : 'unchecked'}
+                                onPress={() => this.setState({ privacyPolicyAccepted: !privacyPolicyAccepted })}
+                                color={theme.colors.primary}
+                                style={{ backgroundColor: "green", borderWidth: 3, borderColor: "green" }}
+                            />
+                            <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark, flex: 1, flexWrap: 'wrap' }]} onPress={() => this.setState({ privacyPolicyAccepted: !privacyPolicyAccepted })}>
+                                Accepter la conditions de la <Text onPress={() => this.props.navigation.navigate("PrivacyPolicy")} style={[theme.customFontMSregular.body, { color: "blue", textDecorationLine: "underline" }]}>politique de confidentialité des données</Text>
+                            </Text>
+                        </View>
+
+                        <Button
+                            mode="contained"
+                            style={{
+                                width: constants.ScreenWidth - theme.padding * 2,
+                            }}
+                            backgroundColor={privacyPolicyAccepted ? theme.colors.primary : theme.colors.gray_medium}
+                            onPress={() => {
+                                if (!privacyPolicyAccepted) {
+                                    const toast = { message: "Veuillez accepter les conditions de confidentialité", type: "error" }
+                                    setAppToast(this, toast)
+                                    return
+                                }
+                                callBack()
+                            }}>
+                            Commencer
+                        </Button>
+                    </View>
+
                 </View>
 
-                <Button
-                    mode="contained"
-                    containerStyle={styles.bottomCenterButton}
-                    style={{ width: constants.ScreenWidth - theme.padding * 2 }}
-                    onPress={callBack}>
-                    Commencer
-                </Button>
+
 
             </View>
         )
@@ -251,7 +291,7 @@ const styles = StyleSheet.create({
     },
     welcomeHeader: {
         justifyContent: "center",
-        paddingTop: theme.padding * 3,
+        paddingTop: theme.padding / 2,
         backgroundColor: "#003250",
         borderBottomWidth: 2,
         borderBottomColor: theme.colors.primary
@@ -260,24 +300,34 @@ const styles = StyleSheet.create({
         color: theme.colors.white,
         textAlign: "center",
         letterSpacing: 1,
-        marginBottom: 48,
+        marginBottom: 28,
         marginTop: 16
     },
     welcomeInstructionsContainer: {
         flex: 1,
         paddingHorizontal: theme.padding,
-        paddingVertical: theme.padding * 2
+        paddingVertical: theme.padding * 2,
     },
     welcomeSeparator: {
         borderColor: theme.colors.gray_light,
         borderWidth: StyleSheet.hairlineWidth,
         marginVertical: 24
     },
-    bottomCenterButton: {
+    bottomContainer: {
         position: "absolute",
         bottom: 0,
-        alignSelf: "center"
+        alignSelf: "center",
+        paddingHorizontal: theme.padding
     },
 })
 
-export default CreateSimulation
+const mapStateToProps = (state) => {
+    return {
+        // role: state.roles.role,
+        // network: state.network,
+        currentUser: state.currentUser
+        //fcmToken: state.fcmtoken
+    }
+}
+
+export default connect(mapStateToProps)(CreateSimulation)

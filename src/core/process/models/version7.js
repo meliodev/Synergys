@@ -3,13 +3,13 @@
 export const version7 = {
     'init': {
         title: 'Prospect',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 1,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
             'prospectCreation': {
                 title: 'Création prospect',
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 1,
                 actions: [
                     //#Task make all verifications of same document on SAME ACTION (to avoid function verifyDataFill_sameDoc)
@@ -17,7 +17,7 @@ export const version7 = {
                         //General
                         id: 'nom',
                         title: 'Nom',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         //Verification
                         collection: 'Clients',
@@ -38,7 +38,7 @@ export const version7 = {
                         //General
                         id: 'prenom',
                         title: 'Prénom',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         //Verification
                         collection: 'Clients',
@@ -58,7 +58,7 @@ export const version7 = {
                     {
                         id: 'address',
                         title: 'Adresse postale',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 3,
                         collection: 'Clients',
                         documentId: '', //dynamic
@@ -75,7 +75,7 @@ export const version7 = {
                     {
                         id: 'phone',
                         title: 'Numéro de téléphone',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 4,
                         collection: 'Clients',
                         documentId: '', // dynamic
@@ -95,19 +95,19 @@ export const version7 = {
     },
     'rd1': {
         title: 'Visite technique préalable',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 2,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
             'priorTechnicalVisit': {
                 title: 'Visite technique préalable',
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 1,
                 actions: [
                     {
                         id: 'createPriorTechnicalVisit',
                         title: 'Créer une visite technique préalable',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
@@ -131,7 +131,7 @@ export const version7 = {
                     {
                         id: 'address',
                         title: 'Lieu du rendez-vous',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Agenda',
                         documentId: '', //#dynamic
@@ -153,7 +153,7 @@ export const version7 = {
                     {
                         id: 'rd1Choice',
                         title: 'Modifier le statut du rendez-vous 1',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 3,
                         collection: 'Agenda',
                         documentId: '',
@@ -179,13 +179,13 @@ export const version7 = {
             },
             'housingActionFile': {
                 title: 'Évaluation des besoins',
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 2,
                 actions: [
                     {
                         id: 'eebFileCreation',
                         title: 'Créer une fiche Étude et Évaluation des besoins',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Documents',
                         //Verification:
@@ -213,13 +213,13 @@ export const version7 = {
             },
             'rd2Creation': {
                 title: 'Initiation rendez-vous 2',
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 3,
                 actions: [
                     {
                         id: 'rd2Creation',
                         title: 'Créer un rendez-vous 2',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
@@ -240,13 +240,13 @@ export const version7 = {
             },
             'quoteCreation': {
                 title: "Création d'un devis",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 4,
                 actions: [
                     {
                         id: 'quoteCreation',
                         title: 'Créer un devis',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Documents',
                         //Verification
@@ -276,19 +276,19 @@ export const version7 = {
     },
     'rdn': {
         title: 'Présentation étude',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 3,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
             'rd2Creation': {
                 title: 'Créer un rendez-vous 2', //1. verify if RD2 exists
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 1,
                 actions: [
                     {
                         id: 'rd2Creation',
                         title: 'Créer un rendez-vous 2',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
@@ -309,7 +309,7 @@ export const version7 = {
             },
             'signature': {
                 title: 'Signature des documents',
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 2,
                 actions: [
                     {
@@ -333,7 +333,7 @@ export const version7 = {
                     {
                         id: 'proofOfAddress',
                         title: "Justificatif de domicile (moins de 3 mois)",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
@@ -386,7 +386,7 @@ export const version7 = {
                     {
                         id: 'quoteCreation', //Verify if quote exists
                         title: 'Créer un devis',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 5,
                         collection: 'Documents',
                         //Verification
@@ -412,7 +412,7 @@ export const version7 = {
                     {
                         id: 'signedQuoteCreation', //#task: check if devis is still existing..
                         title: 'Signer le devis',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 6,
                         collection: 'Documents',
                         queryFilters: [ //VERIFICATION: verify if signed quote exists
@@ -440,7 +440,7 @@ export const version7 = {
                     {
                         id: 'mandatMPRCreation',
                         title: 'Créer un mandat MaPrimeRénov',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 7,
                         collection: 'Documents',
                         //Verification
@@ -466,7 +466,7 @@ export const version7 = {
                     {
                         id: 'signedMandatMPRCreation', //#task: check if devis is still existing..
                         title: 'Signer le mandat MaPrimeRénov',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 8,
                         collection: 'Documents',
                         queryFilters: [ //VERIFICATION: verify if signed quote exists
@@ -496,13 +496,13 @@ export const version7 = {
             },
             'payModeValidation': {
                 title: "Modalité de paiement",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 3,
                 actions: [
                     {
                         id: 'payModeChoice',
                         title: 'Modalité de paiement',
-                        instructions: "Lorem ipsum dolor",
+                        instructions: "",
                         actionOrder: 1,
                         type: 'manual',
                         comment: '',
@@ -517,7 +517,7 @@ export const version7 = {
                     {
                         id: 'financingWebsite',
                         title: 'Propositions de financement',
-                        instructions: "Lorem ipsum dolor",
+                        instructions: "",
                         actionOrder: 2,
                         type: 'manual',
                         comment: '',
@@ -535,13 +535,13 @@ export const version7 = {
             },
             'technicalVisitCreation': {
                 title: "Création d'une visite technique",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 4,
                 actions: [
                     {
                         id: 'technicalVisitCreation', //1. verify if RD2 exists
                         title: 'Créer une visite technique',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
@@ -564,19 +564,19 @@ export const version7 = {
     },
     'technicalVisitManagement': {
         title: 'Visite technique',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 4,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
             'siteCreation': {
                 title: 'Planification visite technique',
-                instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
+                instructions: '',  // Example: process.init.create-prospect.nom.title
                 stepOrder: 1,
                 actions: [
                     {
                         id: 'technicalVisitCreation', //1. verify if Visite Technique exists
                         title: 'Créer une visite technique',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
@@ -595,7 +595,7 @@ export const version7 = {
                     {
                         id: 'technicalVisitValidation',
                         title: "Valider la date de la visite technique",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Agenda',
                         queryFilters: [
@@ -619,7 +619,7 @@ export const version7 = {
                     {
                         id: 'poseurAffectation', //Validate "poseur" set previously
                         title: "Affecter un technicien à la visite technique",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 3,
                         collection: 'Agenda',
                         queryFilters: [
@@ -644,14 +644,14 @@ export const version7 = {
             },
             'technicalVisitFile': {
                 title: 'Remplissage visite technique',
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 2,
                 actions: [
                     //#task: add Visite technique (montant de l'accompte available) (dynamic: false, public: true)
                     {
                         id: 'technicalVisitFileCreation',
                         title: 'Remplir la visite technique',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Documents',
                         //Verification
@@ -677,7 +677,7 @@ export const version7 = {
                     {
                         id: 'technicalVisitChoice',
                         title: "Voulez-vous cloturer la visite technique",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Agenda',
                         documentId: '',
@@ -703,19 +703,19 @@ export const version7 = {
     },
     'installation': {
         title: 'Installation',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 5,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
             'installationCreation': {
                 title: 'Plannification installation',
-                instructions: 'Lorem ipsum dolor',  // Example: process.init.create-prospect.nom.title
+                instructions: '',  // Example: process.init.create-prospect.nom.title
                 stepOrder: 1,
                 actions: [
                     {
                         id: 'installationCreation', //1. verify if RD2 exists
                         title: 'Créer une tâche de type installation',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         queryFilters: [
@@ -736,13 +736,13 @@ export const version7 = {
             },
             'installationChoice': {
                 title: "Mise à jour du statut de l'installation",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 2,
                 actions: [
                     {
                         id: 'installationChoice1',
                         title: "Mettre à jour le statut de l'installation (1)",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Agenda',
                         documentId: '',
@@ -765,7 +765,7 @@ export const version7 = {
                     {
                         id: 'installationChoice2',
                         title: "Mettre à jour le statut de l'installation (2)",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Agenda',
                         documentId: '',
@@ -790,13 +790,13 @@ export const version7 = {
             },
             'pvCreation': {
                 title: "Création d'un PV réception",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 3,
                 actions: [
                     {
                         id: 'pvCreation', //1. verify if RD2 exists
                         title: 'Créer un PV réception',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Documents',
                         //Verification:
@@ -824,13 +824,13 @@ export const version7 = {
             },
             'reserve': {
                 title: "Réserve",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 4,
                 actions: [
                     {
                         id: 'reserve',
                         title: 'Êtes-vous satisfait de notre travail ?',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         type: 'manual',
                         verificationType: 'multiple-choices',
@@ -846,7 +846,7 @@ export const version7 = {
             },
             'catchupCreation': {
                 title: "Plannification tâche rattrapage",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 5,
                 actions: [
                     {
@@ -871,7 +871,7 @@ export const version7 = {
                     {
                         id: 'catchupChoice',
                         title: 'Finaliser la tâche rattrapage',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 3,
                         collection: 'Agenda',
                         documentId: '',
@@ -893,13 +893,13 @@ export const version7 = {
             },
             'poseurValidation': {
                 title: "Validation du technicien",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 6,
                 actions: [
                     {
                         id: 'maintainanceContractChoice',
                         title: 'Voulez-vous initier le contrat de maintenance ?',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
@@ -915,13 +915,13 @@ export const version7 = {
             },
             'maintainanceContract': {
                 title: "Contrat maintenance",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 7,
                 actions: [
                     {
                         id: 'commercialPropositionChoice',
                         title: "Accepter la proposition commerciale",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
@@ -936,7 +936,7 @@ export const version7 = {
                     {
                         id: 'mandatSepaCreation',
                         title: "Créer/Importer un mandat SEPA",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Documents',
                         //Verification:
@@ -967,7 +967,7 @@ export const version7 = {
                     {
                         id: 'signedSEPACreation',
                         title: 'Signer le mandat SEPA',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 3,
                         collection: 'Documents',
                         queryFilters: [ //verify if signed mandat SEPA exists
@@ -995,7 +995,7 @@ export const version7 = {
                     {
                         id: 'contractCreation',
                         title: "Créer/Importer un contrat",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 4,
                         collection: 'Documents',
                         //Verification:
@@ -1026,7 +1026,7 @@ export const version7 = {
                     {
                         id: 'signedContractCreation',
                         title: 'Signer le contrat',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 5,
                         collection: 'Documents',
                         queryFilters: [ //verify if signed mandat SEPA exists
@@ -1057,7 +1057,7 @@ export const version7 = {
             },
             // 'quoteVerification': {
             //     title: "Vérification automatique de l'existence d'un devis généré",
-            //     instructions: 'Lorem ipsum dolor',
+            //     instructions: '',
             //     stepOrder: 8,
             //     //#task: hide it from steps to no show on UI (hidden = true)
             //     actions: [
@@ -1065,7 +1065,7 @@ export const version7 = {
             //         {
             //             id: 'quoteVerification',
             //             title: "Vérification de l'existence d'un devis généré",
-            //             instructions: 'Lorem ipsum dolor',
+            //             instructions: '',
             //             actionOrder: 1,
             //             collection: 'Documents',
             //             queryFilters: [
@@ -1084,7 +1084,7 @@ export const version7 = {
             //         { //Doc found
             //             id: 'billingChoice',
             //             title: "Voulez-vous créer la facture à partir du devis existant de ce projet ?",
-            //             instructions: 'Lorem ipsum dolor',
+            //             instructions: '',
             //             actionOrder: 2,
             //             type: 'manual',
             //             verificationType: 'multiple-choices',
@@ -1100,14 +1100,14 @@ export const version7 = {
             // },
             'facturationOption1': { //no conversion
                 title: "Facturation",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 8,
                 nextStep: '',
                 actions: [
                     {
                         id: 'billCreation',
                         title: 'Créer une facture',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         collection: 'Documents',
                         //Verification:
@@ -1133,7 +1133,7 @@ export const version7 = {
                     {
                         id: 'signedBillCreation', //#task: check if devis is still existing..
                         title: 'Signer la facture',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Documents',
                         queryFilters: [ //VERIFICATION: verify if signed bill exists
@@ -1163,14 +1163,14 @@ export const version7 = {
             },
             'paymentStatus': { //conversion
                 title: "Finalisation de la facturation",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 9,
                 nextStep: '',
                 actions: [
                     {
                         id: 'paymentStatus',
                         title: 'Modifier le statut du paiement',
-                        instructions: "Lorem ipsum dolor",
+                        instructions: "",
                         actionOrder: 1,
                         type: 'manual',
                         verificationType: 'multiple-choices',
@@ -1222,7 +1222,7 @@ export const version7 = {
                     {
                         id: 'attestationCreation',
                         title: 'Créer une attestation fluide',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 4,
                         collection: 'Documents',
                         //Verification:
@@ -1250,7 +1250,7 @@ export const version7 = {
             },
             'emailBill': {
                 title: "Envoi facture par mail",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 10,
                 nextStep: '',
                 actions: [
@@ -1258,7 +1258,7 @@ export const version7 = {
                     {
                         id: 'emailBill',
                         title: 'Envoi automatique de la facture finale + attestation fluide par mail en cours...',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Projects',
                         documentId: '', //#dynamic
@@ -1303,7 +1303,7 @@ export const version7 = {
                     {
                         id: 'clientReview',
                         title: 'Êtes-vous satisfait de notre service ?',
-                        instructions: "Lorem ipsum dolor",
+                        instructions: "",
                         actionOrder: 1,
                         type: 'manual',
                         verificationType: 'multiple-choices',
@@ -1329,19 +1329,19 @@ export const version7 = {
     },
     'maintainance': {
         title: 'Maintenance',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 6,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
             'maintainanceContract': {
                 title: "Contrat maintenance",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 1,
                 actions: [
                     {
                         id: 'commercialPropositionChoice',
                         title: "Accepter la proposition commerciale",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 1,
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
@@ -1355,7 +1355,7 @@ export const version7 = {
                     {
                         id: 'mandatSepaCreation',
                         title: "Créer/Importer un mandat SEPA",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 2,
                         collection: 'Documents',
                         //Verification:
@@ -1385,7 +1385,7 @@ export const version7 = {
                     {
                         id: 'signedSEPACreation',
                         title: 'Signer le mandat SEPA',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 3,
                         collection: 'Documents',
                         queryFilters: [ //verify if signed mandat SEPA exists
@@ -1412,7 +1412,7 @@ export const version7 = {
                     {
                         id: 'contratCreation',
                         title: "Créer/Importer un contrat",
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 4,
                         collection: 'Documents',
                         //Verification:
@@ -1442,7 +1442,7 @@ export const version7 = {
                     {
                         id: 'signedContractCreation',
                         title: 'Signer le contrat',
-                        instructions: 'Lorem ipsum dolor',
+                        instructions: '',
                         actionOrder: 5,
                         collection: 'Documents',
                         queryFilters: [ //verify if signed mandat SEPA exists
@@ -1484,7 +1484,7 @@ export const version7 = {
     },
     'endProject': {
         title: 'Finalisation',
-        instructions: 'Lorem ipsum dolor',
+        instructions: '',
         phaseOrder: 7,
         followers: ['Admin', 'Directeur commercial', 'Commercial', 'Responsable technique', 'Poseur'],
         steps: {
@@ -1496,7 +1496,7 @@ export const version7 = {
                     {
                         id: 'endProject',
                         title: 'Le process du projet est terminé.',
-                        instructions: "Lorem ipsum dolor",
+                        instructions: "",
                         actionOrder: 1,
                         type: 'manual',
                         verificationType: 'no-verification',
@@ -1515,13 +1515,13 @@ export const version7 = {
         steps: {
             'resumeProject': {
                 title: "Reprendre le projet",
-                instructions: 'Lorem ipsum dolor',
+                instructions: '',
                 stepOrder: 1,
                 actions: [
                     {
                         id: 'resumeProject',  //#task: rollback (Resume project)
                         title: 'Appuyez ici pour reprendre le projet',
-                        instructions: "Lorem ipsum dolor",
+                        instructions: "",
                         actionOrder: 1,
                         collection: 'Projects',
                         documentId: '',

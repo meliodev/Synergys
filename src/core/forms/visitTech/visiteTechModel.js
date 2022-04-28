@@ -1,5 +1,5 @@
 
-import { faCheck, faTimes, faQuestionCircle } from "@fortawesome/pro-light-svg-icons";
+import { faCheck, faTimes, faCheckCircle } from "@fortawesome/pro-light-svg-icons";
 import * as theme from '../../theme'
 
 export const visiteTechModel = () => {
@@ -92,8 +92,8 @@ export const visiteTechModel = () => {
                 label: "Type de phase",
                 type: "options",
                 items: [
-                    { label: 'Monophasé', value: 'Monophasé', icon: faQuestionCircle, pdfConfig: { dx: -520, dy: - 301, squareSize: 10, pageIndex: 0 } },
-                    { label: 'Triphasé', value: 'Triphasé', icon: faQuestionCircle, pdfConfig: { dx: -520, dy: - 332, squareSize: 10, pageIndex: 0 } },
+                    { label: 'Monophasé', value: 'Monophasé', icon: faCheckCircle, pdfConfig: { dx: -520, dy: - 301, squareSize: 10, pageIndex: 0 } },
+                    { label: 'Triphasé', value: 'Triphasé', icon: faCheckCircle, pdfConfig: { dx: -520, dy: - 332, squareSize: 10, pageIndex: 0 } },
                 ],
                 mendatory: true,
             }]
