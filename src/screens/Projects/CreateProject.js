@@ -775,7 +775,7 @@ class CreateProject extends Component {
                     {this.isEdit && viewMore || !this.isEdit ?
 
                         <View>
-
+                            
                             {this.viewMore()}
 
                             {this.isEdit &&

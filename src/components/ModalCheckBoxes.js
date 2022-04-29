@@ -12,6 +12,7 @@ import * as theme from '../core/theme'
 import Button from './Button'
 import CustomIcon from './CustomIcon'
 import SquarePlus from './SquarePlus'
+import { isTablet } from 'react-native-device-info'
 
 export default class ModalCheckBoxes extends Component {
     constructor(props) {
@@ -63,7 +64,7 @@ export default class ModalCheckBoxes extends Component {
                 isVisible={isModalVisible}
                 style={modalStyles.modal}
                 onBackdropPress={this.toggleModal}
-                presentationStyle="pageSheet"
+                presentationStyle={isTablet ? "pageSheet" : ""}
                 >
                 <View style={modalStyles.container}>
                     <TouchableOpacity style={modalStyles.closeIcon} hitslop={hitslop}>

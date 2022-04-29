@@ -1,7 +1,20 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Platform, PixelRatio } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
-import { constants } from './constants'
+import { ScreenWidth } from './constants'
 
+
+// based on iphone 5s's scale
+const scale = ScreenWidth / 600;
+
+const normalize = (size) => {
+  const newSize = size * scale
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize))
+  }
+  else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
+  }
+}
 
 const baseColors = {
   gray1: "#F1F2F7"
@@ -91,19 +104,19 @@ const colors = {
 const sizes = {
 
   // global sizes
-  base: 16,
-  font: 14,
-  radius: 6,
-  padding: 16,
+  base: normalize(16),
+  font: normalize(14),
+  radius: normalize(6),
+  padding: normalize(16),
 
   // font sizes
-  h1: 26,
-  h2: 20,
-  h3: 18,
-  title: 18,
-  header: 16,
-  body: 14,
-  caption: 12,
+  h1: normalize(26),
+  h2: normalize(20),
+  h3: normalize(18),
+  title: normalize(18),
+  header: normalize(16),
+  body: normalize(14),
+  caption: normalize(12),
 };
 
 const fonts = {
@@ -143,7 +156,7 @@ const fonts = {
   },
 }
 
-const padding = constants.ScreenWidth * 0.04
+const padding = ScreenWidth * 0.04
 
 //MontSerrat
 const customFontMSbold = {
