@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Dimensions, Alert, Platform } from 'react-native';
+import { StyleSheet, View, Dimensions, Text, Alert, Platform, SafeAreaView } from 'react-native';
 import Geocoder from 'react-native-geocoding'
 import MapView, { Marker, ProviderPropType, PROVIDER_GOOGLE } from 'react-native-maps';
 
@@ -9,7 +9,7 @@ import Loading from "../../components/Loading"
 
 import { db } from '../../firebase'
 import * as theme from "../../core/theme"
-import { constants } from '../../core/constants'
+import { constants, ScreenHeight, ScreenWidth } from '../../core/constants'
 import { load } from '../../core/utils';
 
 Geocoder.init("AIzaSyDKYloIbFHpaNh5QWGa7CWjKr8v-3aiu80", { language: "fr" })
@@ -321,13 +321,15 @@ class MarkerTypes extends React.Component {
                     />
                 }
 
+                <Text onPress={() => console.log("Hey")}>Hhhhhh</Text>
+
                 {!loading ?
-                    <View style={{ flex: 1 }}>
+                    <View style={styles.mapContainer}>
                         <MapView
                             provider={Platform.OS === "android" ? PROVIDER_GOOGLE : null}
                             //customMapStyle={mapStyle}
 
-                            style={{ flex: 1 }}
+                            style={styles.map}
                             initialRegion={{
                                 latitude: LATITUDE,
                                 longitude: LONGITUDE,
@@ -347,7 +349,6 @@ class MarkerTypes extends React.Component {
                             />
                         </MapView>
                     </View>
-
                     :
                     <Loading size='large' />
                 }
@@ -366,6 +367,12 @@ const styles = StyleSheet.create({
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'flex-end',
         alignItems: 'center',
+    },
+    mapContainer: {
+        ...StyleSheet.absoluteFillObject,
+        height: ScreenHeight - 100, // you can customize this
+        width: ScreenWidth,  // you can customize this
+        alignItems: "center"
     },
     map: {
         ...StyleSheet.absoluteFillObject,

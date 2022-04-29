@@ -36,7 +36,7 @@ const Appbar = ({
     }
 
     else return (
-        <appbar.Header style={[{ backgroundColor: appBarColor || theme.colors.appBar, elevation: 0 }, style]}>
+        <appbar.Header style={[{ backgroundColor: appBarColor || theme.colors.appBar, elevation: 0, zIndex: 100 }, style]}>
             {back && <AppBarIcon icon={faArrowLeft} onPress={customBackHandler || navBack} iconColor={iconsColor || theme.colors.secondary} />}
             {close && <AppBarIcon icon={faTimes} onPress={customBackHandler || navBack} iconColor={iconsColor || theme.colors.secondary} />}
             {menu && <AppBarIcon icon={faBars} onPress={showMenu} />}
