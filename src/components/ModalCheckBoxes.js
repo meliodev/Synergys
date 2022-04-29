@@ -46,6 +46,7 @@ export default class ModalCheckBoxes extends Component {
     }
 
     toggleModal() {
+        console.log("toggle....")
         if (!this.props.editable) return
         const { isModalVisible } = this.state
         this.setState({ isModalVisible: !isModalVisible })
@@ -61,7 +62,9 @@ export default class ModalCheckBoxes extends Component {
             <Modal
                 isVisible={isModalVisible}
                 style={modalStyles.modal}
-                onBackdropPress={this.toggleModal}>
+                onBackdropPress={this.toggleModal}
+                presentationStyle="pageSheet"
+                >
                 <View style={modalStyles.container}>
                     <TouchableOpacity style={modalStyles.closeIcon} hitslop={hitslop}>
                         <CustomIcon

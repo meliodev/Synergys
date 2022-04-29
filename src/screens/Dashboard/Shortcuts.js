@@ -9,7 +9,7 @@ moment.locale('fr')
 
 import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
-import { constants } from '../../core/constants'
+import { constants, isTablet, ScreenWidth } from '../../core/constants'
 import { load } from '../../core/utils'
 
 import { ModalForm } from '../../components/ModalOptions'
@@ -97,9 +97,12 @@ class Shortcuts extends Component {
 
     render() {
         const { loading } = this.state
-        const { isConnected } = this.props.network
+       // const { isConnected } = this.props.network
 
-        const elementSize = constants.ScreenWidth * 0.435
+        const elementSize = isTablet ?
+            ScreenWidth * 0.29
+            :
+            ScreenWidth * 0.435
 
         const handleSelectElement = (element, index) => {
             const { screen, params } = element.navigation
@@ -143,7 +146,7 @@ export default connect(mapStateToProps)(Shortcuts)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: theme.padding*0.6,
+        paddingHorizontal: theme.padding * 0.6,
         paddingTop: theme.padding,
         zIndex: 2,
         backgroundColor: theme.colors.white

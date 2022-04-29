@@ -253,22 +253,6 @@ class AddGoal extends Component {
                             form={
                                 <View style={{ flex: 1 }}>
 
-                                    {showMonthPicker && (
-                                        <MonthPicker
-                                            onChange={(event, newDate) => {
-                                                const selectedDate = newDate || monthYear
-                                                const GoalId = moment(selectedDate).format('YYYY')
-                                                this.setState({ monthYear: selectedDate, GoalId, showMonthPicker: false })
-                                            }}
-                                            value={monthYear}
-                                            //minimumDate={new Date()}
-                                            maximumDate={new Date(2030, 5)}
-                                            locale="fr"
-                                            cancelButton="Annuler"
-                                            okButton="Valider"
-                                        />
-                                    )}
-
                                     <ItemPicker
                                         onPress={() => this.setState({ showMonthPicker: !showMonthPicker })}
                                         label={'Mois *'}
@@ -298,9 +282,31 @@ class AddGoal extends Component {
                                     />
 
                                 </View>
-                            } />
+                            }
+                        />
 
-                        {this.isEdit && this.incomeSources.length > 0 && this.renderIncomeSources()}
+                        <View style={{ paddingTop: 100 }}>
+                            {showMonthPicker && (
+                                <MonthPicker
+                                    onChange={(event, newDate) => {
+                                        const selectedDate = newDate || monthYear
+                                        const GoalId = moment(selectedDate).format('YYYY')
+                                        this.setState({ monthYear: selectedDate, GoalId, showMonthPicker: false })
+                                    }}
+                                    value={monthYear}
+                                    //minimumDate={new Date()}
+                                    maximumDate={new Date(2030, 5)}
+                                    locale="fr"
+                                    cancelButton="Annuler"
+                                    okButton="Valider"
+
+                                />
+                            )}
+                        </View>
+
+                        {this.isEdit && this.incomeSources.length > 0 &&
+                            this.renderIncomeSources()
+                        }
 
                         {this.isEdit &&
                             <ActivitySection

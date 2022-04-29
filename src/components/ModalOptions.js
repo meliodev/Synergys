@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview, model = 'Element1' }) => {
+    
     const selectElement = (index) => {
         //Unselect all types
         elements.forEach((element, key) => elements[key].selected = false)
@@ -44,7 +45,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                 width: elementSize,
                 height: elementSize,
                 backgroundColor: theme.colors.white,
-               // ...theme.style.shadow
+                // ...theme.style.shadow
             }
         }
 
@@ -102,7 +103,20 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
 
         return (
             <TouchableOpacity style={elementStyle} onPress={() => onPressElement(element, index)}>
-                <View style={{ position: "absolute", right: 0, top: 0, backgroundColor: element.colors.secondary, borderBottomRightRadius: iconContainer.borderRadius, borderBottomLeftRadius: iconContainer.borderRadius, borderTopLeftRadius: iconContainer.borderRadius, borderTopRightRadius: 20, width: iconContainer.size, height: iconContainer.size, justifyContent: "center", alignItems: "center" }}>
+                <View style={{
+                    position: "absolute",
+                    right: 0,
+                    top: 0,
+                    backgroundColor: element.colors.secondary,
+                    borderBottomRightRadius: iconContainer.borderRadius,
+                    borderBottomLeftRadius: iconContainer.borderRadius,
+                    borderTopLeftRadius: iconContainer.borderRadius,
+                    borderTopRightRadius: 20,
+                    width: iconContainer.size,
+                    height: iconContainer.size,
+                    justifyContent: "center",
+                    alignItems: "center"
+                }}>
                     <CustomIcon icon={element.icon} size={iconSize} color="#fff" />
                 </View>
                 <View style={{ paddingHorizontal: elementSize * 0.15, marginBottom: elementSize * 0.13 }}>
@@ -261,7 +275,7 @@ const ModalOptions = ({
 const styles = StyleSheet.create({
     modal: {
         width: constants.ScreenWidth,
-        marginTop: constants.ScreenHeight*0.58,
+        marginTop: constants.ScreenHeight * 0.58,
         marginHorizontal: 0,
         marginBottom: 0,
         borderTopLeftRadius: constants.ScreenWidth * 0.03,

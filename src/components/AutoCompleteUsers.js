@@ -100,18 +100,22 @@ export default class AutoCompleteUsers extends React.Component {
                 renderSuggestion={this.customRenderSuggestion}
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
-               // autoFocus={this.props.autoFocus}
+                // autoFocus={this.props.autoFocus}
+                style={styles.autotags}
+
                 autoFocus={false}
                 showInput={this.props.showInput}
                 editable={this.props.editable}
                 suggestionsBellow={this.props.suggestionsBellow}
                 createTagOnSpace={false}
 
-                containerStyle={styles.containerStyle}
+                containerStyle={[styles.containerStyle,
+                    //theme.style.shadow
+                ]}
                 inputContainerStyle={styles.inputContainerStyle}
                 listContainerStyle={styles.listContainerStyle}
-                listStyle={styles.listStyle}
-            // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
+                listStyle={[styles.listStyle, theme.style.shadow]}
+            //renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
             />
         )
     }
@@ -142,26 +146,44 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#fff",
     },
-
     inputContainerStyle: {
         marginLeft: -5,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.gray_extraLight,
-        borderWidth: 0
+        borderWidth: 0,
+        paddingVertical: theme.padding/3
     },
     containerStyle: {
         minWidth: 200,
         maxWidth: constants.ScreenWidth - theme.padding,
-        marginLeft:6
+        marginLeft: 6,
+        shadowColor: theme.colors.secondary,
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2.22,
+        elevation: 3,
     },
     listContainerStyle: {
         backgroundColor: "white",
-        borderWidth: 0
+        borderWidth: 0,
     },
     listStyle: {
         backgroundColor: 'white',
         margin: 0,
         paddingHorizontal: theme.padding / 2,
-        borderWidth: 0
-    }
+        borderWidth: 0,
+    },
+    autotags: {
+        //backgroundColor: '#fff',
+        //marginLeft: -constants.ScreenWidth * 0.02,
+        // paddingTop: 5,
+        // paddingBottom: 15,
+        width: constants.ScreenWidth * 0.9,
+        // borderBottomWidth: StyleSheet.hairlineWidth * 3,
+        // borderBottomColor: theme.colors.gray_extraLight
+    },
 })
+

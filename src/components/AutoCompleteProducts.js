@@ -124,9 +124,7 @@ class AutoCompleteProducts extends React.Component {
                 renderTags={this.customRenderTags}
                 onCustomTagCreated={this.onCustomTagCreated}
                 //handleEmptyDate= {() => console.log('Empty data..')}
-                createTagOnSpace
                 style={styles.autotags}
-                listStyle={theme.style.shadow}
                 autoFocus={false}
                 //autoFocus={this.props.autoFocus}
                 showInput={this.props.showInput}
@@ -138,6 +136,7 @@ class AutoCompleteProducts extends React.Component {
                 inputContainerStyle={styles.inputContainerStyle}
                 listContainerStyle={styles.listContainerStyle}
                 listStyle={styles.listStyle}
+
                 showTextInput={this.props.showTextInput}
             // renderTextInput={() => {
             //     return (
@@ -207,7 +206,7 @@ const styles = StyleSheet.create({
     },
     containerStyle: {
         minWidth: 200,
-        maxWidth: constants.ScreenWidth - theme.padding
+        maxWidth: constants.ScreenWidth - theme.padding,
     },
     listContainerStyle: {
         backgroundColor: "white",

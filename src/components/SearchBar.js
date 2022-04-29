@@ -5,7 +5,7 @@ import { Appbar as appbar } from 'react-native-paper'
 import { faBars, faTimes, faSearch, faArrowLeft, faCheck } from '@fortawesome/pro-light-svg-icons'
 import { Searchbar } from "react-native-paper";
 import * as theme from "../core/theme";
-import { constants } from '../core/constants'
+import { constants, isTablet } from '../core/constants'
 import { withNavigation } from 'react-navigation'
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
@@ -39,7 +39,7 @@ const SearchBar = ({
         <appbar.Header style={[{ backgroundColor: theme.colors.appBar, elevation: 0 }, style]}>
 
             {renderLeftIcon()}
-            {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]} />}
+            {title && <appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: isTablet ? 0 : '-5%', letterSpacing: 1 }]} />}
             {showBar &&
                 <Searchbar
                     placeholder={placeholder}

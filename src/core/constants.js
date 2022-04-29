@@ -14,6 +14,9 @@ export const constants = {
     ScreenHeight: height
 }
 
+export const ScreenWidth = width
+export const ScreenHeight = height
+
 //export const appVersionDescription = "Lorem ipsum dolor"
 
 export const latestProcessVersion = "version7"
@@ -338,3 +341,8 @@ export const docsConfig = (index) => {
 
     return config
 }
+
+//##Device Info
+import DeviceInfo from "react-native-device-info"
+
+export const isTablet = DeviceInfo.isTablet()
