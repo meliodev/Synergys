@@ -25,6 +25,7 @@ import { load, setToast, updateField, nameValidator, uuidGenerator, pickDocs, di
 
 import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
 import { uploadFiles } from '../../api/storage-api';
+import AutoCompleteProducts from '../../components/AutoCompleteProducts';
 
 class NewMessage extends Component {
     constructor(props) {
@@ -327,7 +328,7 @@ class NewMessage extends Component {
                         </View>
                     </View>
 
-                    <View style={{ flexDirection: 'row', alignItems: "flex-end", zIndex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: "flex-end", zIndex: 1, marginBottom: 8 }}>
                         <Text style={{ marginTop: 13 }}>À           </Text>
 
                         <AutoCompleteUsers
@@ -369,7 +370,7 @@ class NewMessage extends Component {
                             selectionColor='#333'
                             style={styles.messageInput}
                             editable={!loading}
-                            //autoFocus={this.isReply}
+                        //autoFocus={this.isReply}
                         />
 
                         <View style={{ paddingTop: 30 }}>

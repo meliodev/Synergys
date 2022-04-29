@@ -224,15 +224,15 @@ class CreateSimulation extends Component {
                     }
 
                     <View style={styles.bottomContainer}>
-                        <View style={{ flexDirection: 'row', alignItems: 'flex-end', marginLeft: -10 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -10 }}>
                             <Checkbox.Android
                                 status={privacyPolicyAccepted ? 'checked' : 'unchecked'}
                                 onPress={() => this.setState({ privacyPolicyAccepted: !privacyPolicyAccepted })}
                                 color={theme.colors.primary}
-                                style={{ backgroundColor: "green", borderWidth: 3, borderColor: "green" }}
+                                style={{ borderWidth: 3, borderColor: "green" }}
                             />
                             <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark, flex: 1, flexWrap: 'wrap' }]} onPress={() => this.setState({ privacyPolicyAccepted: !privacyPolicyAccepted })}>
-                                Accepter la conditions de la <Text onPress={() => this.props.navigation.navigate("PrivacyPolicy")} style={[theme.customFontMSregular.body, { color: "blue", textDecorationLine: "underline" }]}>politique de confidentialité des données</Text>
+                                Accepter les conditions de la <Text onPress={() => this.props.navigation.navigate("PrivacyPolicy")} style={[theme.customFontMSregular.body, { color: "blue", textDecorationLine: "underline" }]}>politique de confidentialité des données</Text>
                             </Text>
                         </View>
 
