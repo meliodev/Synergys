@@ -362,11 +362,10 @@ MarkerTypes.propTypes = {
 };
 
 const styles = StyleSheet.create({
-    mapContainer: {
+    container: {
         ...StyleSheet.absoluteFillObject,
-        height: ScreenHeight - 100, // you can customize this
-        width: ScreenWidth,  // you can customize this
-        alignItems: "center"
+        justifyContent: 'flex-end',
+        alignItems: 'center',
     },
     map: {
         ...StyleSheet.absoluteFillObject,

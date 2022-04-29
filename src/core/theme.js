@@ -1,7 +1,20 @@
 import { StyleSheet, Platform, PixelRatio } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
 import { ScreenWidth } from './constants'
-import { scaleFontSize } from './utils'
+
+
+// based on iphone 5s's scale
+const scale = ScreenWidth / 600;
+
+const normalize = (size) => {
+  const newSize = size * scale
+  if (Platform.OS === 'ios') {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize))
+  }
+  else {
+    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
+  }
+}
 
 const baseColors = {
   gray1: "#F1F2F7"
