@@ -134,7 +134,6 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     {renderFooter()}
                 </View>
             </MenuOptions>
-
         </PopupMenu>
     )
 }

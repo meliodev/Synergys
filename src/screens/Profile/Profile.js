@@ -460,7 +460,7 @@ class Profile extends Component {
         return (
             <View>
                 <SquarePlus onPress={() => this.props.navigation.navigate('CreateProject', { client, address, onGoBack: () => this.fetchProfile(1000) })} />
-                <Text style={[theme.customFontMSregular.caption, { marginTop: theme.padding / 2, color: theme.colors.gray_dark }]}>
+                <Text style={[theme.customFontMSregular.caption, { textAlign:"center", marginTop: theme.padding / 2, color: theme.colors.gray_dark }]}>
                     Nouveau projet
                 </Text>
             </View>

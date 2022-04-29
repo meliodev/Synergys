@@ -8,12 +8,12 @@ import Button from './Button'
 import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
+import { constants, isTablet } from "../core/constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview, model = 'Element1' }) => {
-    
+
     const selectElement = (index) => {
         //Unselect all types
         elements.forEach((element, key) => elements[key].selected = false)
@@ -235,7 +235,9 @@ const ModalOptions = ({
             animationIn="slideInUp"
             animationOut="slideOutDown"
             onBackdropPress={!isLoading ? toggleModal : () => console.log('No action...')}
-            style={[styles.modal, modalStyle]} >
+            style={[styles.modal, modalStyle]}
+            presentationStyle={isTablet ? "pageSheet" : ""}
+        >
 
             {isLoading ?
                 <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>

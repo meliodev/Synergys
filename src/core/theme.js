@@ -1,20 +1,7 @@
 import { StyleSheet, Platform, PixelRatio } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
 import { ScreenWidth } from './constants'
-
-
-// based on iphone 5s's scale
-const scale = ScreenWidth / 600;
-
-const normalize = (size) => {
-  const newSize = size * scale
-  if (Platform.OS === 'ios') {
-    return Math.round(PixelRatio.roundToNearestPixel(newSize))
-  } 
-  else {
-    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
-  }
-}
+import { scaleFontSize } from './utils'
 
 const baseColors = {
   gray1: "#F1F2F7"
@@ -104,19 +91,19 @@ const colors = {
 const sizes = {
 
   // global sizes
-  base: normalize(16),
-  font: normalize(14),
-  radius: normalize(6),
-  padding: normalize(16),
+  base: scaleFontSize(16),
+  font: scaleFontSize(14),
+  radius: scaleFontSize(6),
+  padding: scaleFontSize(16),
 
   // font sizes
-  h1: normalize(26),
-  h2: normalize(20),
-  h3: normalize(18),
-  title: normalize(18),
-  header: normalize(16),
-  body: normalize(14),
-  caption: normalize(12),
+  h1: scaleFontSize(26),
+  h2: scaleFontSize(20),
+  h3: scaleFontSize(18),
+  title: scaleFontSize(18),
+  header: scaleFontSize(16),
+  body: scaleFontSize(14),
+  caption: scaleFontSize(12),
 };
 
 const fonts = {
@@ -332,7 +319,10 @@ const style = {
   }
 }
 
-export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold }
+
+const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 }
+
+export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, hitSlop }
 
 
 

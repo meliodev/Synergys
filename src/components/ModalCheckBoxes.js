@@ -6,13 +6,12 @@ import { Checkbox } from 'react-native-paper'
 
 import { faPen, faTimes } from '@fortawesome/pro-light-svg-icons'
 
-import { constants } from '../core/constants'
+import { constants, isTablet } from '../core/constants'
 import * as theme from '../core/theme'
 
 import Button from './Button'
 import CustomIcon from './CustomIcon'
 import SquarePlus from './SquarePlus'
-import { isTablet } from 'react-native-device-info'
 
 export default class ModalCheckBoxes extends Component {
     constructor(props) {
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8,
-        marginRight: theme.padding
+        marginRight: isTablet ? 0 : theme.padding,
     }
 })
 

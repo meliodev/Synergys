@@ -18,7 +18,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { downloadDir, errorMessages, roles, constants } from './constants'
+import { downloadDir, errorMessages, roles, constants, isTablet } from './constants'
 import { mandatSynergysModel, pvReceptionModel } from "./forms";
 import { ficheEEBModel } from './forms/ficheEEB/ficheEEBModel'
 import { mandatMPRModel } from './forms/mandatMPR/mandatMPRModel'
@@ -193,6 +193,12 @@ export const formatRow = (active, data, numColumns) => { //Format rows to displa
   }
 
   return data
+}
+
+export const scaleFontSize = (size) => {
+  const scale = isTablet ? 1.33 : 1
+  const newSize = size * scale
+  return newSize
 }
 
 export const stringifyUndefined = (data) => {

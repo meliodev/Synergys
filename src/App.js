@@ -102,5 +102,3 @@ const codePushOptions = {
 
 
 export default codePush(codePushOptions)(App)
-//export default App
-
