@@ -48,7 +48,7 @@ import {
     pickImage,
 } from '../core/utils';
 
-import { constants, contactForm, errorMessages, pack1, pack2 } from '../core/constants';
+import { constants, contactForm, errorMessages, pack1, pack2, simulationColorCats } from '../core/constants';
 import * as theme from '../core/theme'
 import { setStatusBarColor } from '../core/redux';
 import { db, auth, functions } from '../firebase';
@@ -1137,7 +1137,7 @@ class StepsForm extends Component {
         const slopeOrientationValues = ["Sud-Est/Sud-Ouest", "Sud"]
         const roofSurface = Number(roofWidth) * Number(roofLength)
         const yearlyCost_PerSquareMeter = yearlyElecCost / livingSurface
- 
+
         const paeCondition = energySourceValues.includes(energySource)
         const paaCondition = transmittersTypes.includes("Radiateurs électriques")
         const isoComblesCondition = lostAticsIsolation == "Oui" && lostAticsIsolationAge > 6 && heatedSurface > 24
@@ -1262,7 +1262,7 @@ class StepsForm extends Component {
         const title = "Estimation de votre prime: "
         const { products, colorCat, estimation, submitted } = this.state
         const message1 = "Ce que nous vous recommandons"
-
+        const colorLabel = simulationColorCats.filter((color) => color.id === colorCat)[0].label
         const { packs, isPVElligible } = this.setPacks(products)
 
         return (
@@ -1273,8 +1273,7 @@ class StepsForm extends Component {
                 >
 
                     <View style={styles.sucessMessageContent}>
-                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>Vous êtes dans le barème:   </Text>
-                        <View style={[styles.colorCatCircle, { backgroundColor: colorCat }]} />
+                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>Vous êtes dans le barème: {colorLabel}</Text>
                     </View>
 
                     {/* <View style={{ padding: theme.padding }}>

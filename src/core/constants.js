@@ -81,6 +81,13 @@ export const issuesSubjects = [
     { label: "Autre", value: "Autre" },
 ]
 
+export const simulationColorCats = [
+    {id: "blue", label: "Bleu"},
+    {id: "yellow", label: "Jaune"},
+    {id: "purple", label: "Violet"},
+    {id: "pink", label: "Rose"},
+]
+
 export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }
