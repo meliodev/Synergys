@@ -95,6 +95,8 @@ class CreateProject extends Component {
         this.address = this.props.navigation.getParam('address', { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' })
         this.comContact = this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' }
 
+        console.log(this.client, "...............")
+        
         this.state = {
             //TEXTINPUTS
             name: "",
