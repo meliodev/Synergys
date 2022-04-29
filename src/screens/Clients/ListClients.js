@@ -33,10 +33,9 @@ class ListClients extends Component {
     }
 
     getClient(user) {
-        console.log('user', user)
         this.props.navigation.state.params.onGoBack(user)
         this.props.navigation.goBack()
-    } 
+    }
 
     render() {
         const queryClients = db.collection('Clients').where('deleted', '==', false) //Client + Prospects

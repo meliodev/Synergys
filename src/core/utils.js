@@ -746,7 +746,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var originalPdfBase64 = ficheEEBBase64
       var formPages = ficheEEBModel
     }
-    else if (pdfType === "MandatsMPR") {
+    else if (pdfType === "MandatsMPR") { 
       var originalPdfBase64 = mandatMPRBase64
       var formPages = mandatMPRModel
     }
@@ -1303,15 +1303,7 @@ export function refreshAssignedTo(user) {
 }
 
 export const refreshUser = (user) => {
-  const isPro = user.isPro || false
-  const id = user.id || ""
-  const denom = user.denom || ""
-  const nom = user.nom || ""
-  const prenom = user.prenom || ""
-  const role = user.role || ""
-  const email = user.email || ""
-  const phone = user.phone || ""
-
+  const { isPro, id, denom, nom, prenom, role, email, phone } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
   return userObject

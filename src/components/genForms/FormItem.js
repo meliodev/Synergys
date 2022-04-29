@@ -34,7 +34,7 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={styles.header}>
                 <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
-                {/* {estimation > 0 && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation.toString()}</Text>} */}
+                {estimation > 0 && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation.toString()}</Text>}
             </View>
 
             <View style={styles.body}>
@@ -48,7 +48,7 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
 
             {/* <Text style={[theme.customFontMSregular.caption, { marginBottom: 8, color: theme.colors.gray_dark }]}>Crée par {createdBy.fullName}</Text> */}
 
-            <View style={{ flexDirection: 'row', marginTop: 8, justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(editedAt).format('lll')}</Text>
                 {!isSubmitted && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>Brouillon</Text>}
             </View>
@@ -60,20 +60,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingHorizontal: 15,
-        paddingVertical: theme.padding/2,
+        paddingVertical: 10,
         backgroundColor: theme.colors.background,
         borderRadius: 10,
-        marginVertical: 8,
+        marginVertical: 5,
         ...theme.style.shadow
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        //alignItems: 'flex-end'
+        justifyContent: 'space-between',
+        alignItems: 'center'
     },
     body: {
         marginBottom: 15,
-        //marginTop: 3
+        marginTop: 3
     },
     linearGradient: {
         flex: 1,

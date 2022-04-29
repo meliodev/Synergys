@@ -557,7 +557,7 @@ export const ficheEEBModel = [
             },
             {
                 id: "lostAticsIsolationThickness",
-                label: "Epaisseur en cm",
+                label: "Epaisseur",
                 type: "number",
                 isConditional: true,
                 condition: { with: "lostAticsIsolation", values: ["Oui"] },
@@ -885,14 +885,14 @@ export const ficheEEBModel = [
         fields: [
             {
                 id: "roofLength",
-                label: "Longeur Utile en m",
+                label: "Longeur Utile",
                 type: "number",
                 placeholder: "Exemple: 10m",
                 pdfConfig: { dx: -305, dy: - 794, pageIndex: 0 }
             },
             {
                 id: "roofWidth",
-                label: "Largeur Utile en m",
+                label: "Largeur Utile",
                 type: "number",
                 placeholder: "Exemple: 5m",
                 style: { marginTop: 20 },
@@ -900,7 +900,7 @@ export const ficheEEBModel = [
             },
             {
                 id: "roofTilt",
-                label: "Inclinaison en °C",
+                label: "Inclinaison",
                 type: "number",
                 placeholder: "Exemple: 10°C",
                 style: { marginTop: 20 },
