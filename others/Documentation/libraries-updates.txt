@@ -18,7 +18,7 @@ REACT NAVIGATION:
 Path: D:\React Native\Synergys-Backups\Version Beta\Synergys-04-02-2021\@react-navigation\native\lib\module\createAppContainer.js
 update: (in getStartupParams & constructor)
   if (url.includes('link=')) {
-          url = url.split('link=')[1]
+          url = url.split('link=')[1] 
           url = url.replace(/%3A/g, ':')
           url = url.replace(/%2F/g, '/')
   }

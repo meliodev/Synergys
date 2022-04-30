@@ -24,8 +24,6 @@ export default class TermsConditionsModal extends Component {
 
     renderHeader() {
 
-        const hitslop = { top: 5, bottom: 5, left: 5, right: 5 }
-
         return (
             <View style={styles.headerContainer}>
                 <TouchableOpacity
@@ -42,7 +40,7 @@ export default class TermsConditionsModal extends Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={this.props.toggleTerms}
-                    hitSlop={hitslop}
+                    hitSlop={theme.hitslop}
                 >
                     <MaterialCommunityIcons
                         name='close'

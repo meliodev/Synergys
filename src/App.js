@@ -22,82 +22,82 @@ import MyStatusBar from './components/MyStatusBar'
 import Settings from './screens/Settings/Settings'
 
 const paperTheme = {
-  ...DefaultTheme,
-  fonts: configureFonts(fontsConfig),
-  colors: {
-    primary: theme.colors.primary,
-    accent: theme.colors.secondary,
-    background: theme.colors.background,
-    surface: theme.colors.surface,
-    text: theme.colors.secondary,
-    disabled: theme.colors.gray_medium,
-    placeholder: theme.colors.gray_dark,
-    backdrop: theme.colors.white
-  }
+    ...DefaultTheme,
+    fonts: configureFonts(fontsConfig),
+    colors: {
+        primary: theme.colors.primary,
+        accent: theme.colors.secondary,
+        background: theme.colors.background,
+        surface: theme.colors.surface,
+        text: theme.colors.secondary,
+        disabled: theme.colors.gray_medium,
+        placeholder: theme.colors.gray_dark,
+        backdrop: theme.colors.white
+    }
 }
 
 class App extends Component {
 
-  async componentDidMount() {
-    console.log("Mounting app.js...")
-    SplashScreen.hide()
-    console.log("splash screen hidden...")
+    async componentDidMount() {
+        console.log("Mounting app.js...")
+        SplashScreen.hide()
+        console.log("splash screen hidden...")
 
-    //Notification channels
-    const channelId = await notifee.createChannel({
-      id: 'projects',
-      name: 'projects',
-      lights: false,
-      vibration: true,
-      importance: AndroidImportance.HIGH,
-    })
+        //Notification channels
+        const channelId = await notifee.createChannel({
+            id: 'projects',
+            name: 'projects',
+            lights: false,
+            vibration: true,
+            importance: AndroidImportance.HIGH,
+        })
 
-    this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
-  }
+        this.foregroundMessages = firebase.messaging().onMessage(this.onForegroundMessageReceived)
+    }
 
-  //Forground: messages listener
-  async onForegroundMessageReceived(message) {
-    await notifee.displayNotification(JSON.parse(message.data.notifee))
-  }
+    //Forground: messages listener
+    async onForegroundMessageReceived(message) {
+        await notifee.displayNotification(JSON.parse(message.data.notifee))
+    }
 
-  componentWillUnmount() {
-    this.foregroundMessages && this.foregroundMessages()
-  }
+    componentWillUnmount() {
+        this.foregroundMessages && this.foregroundMessages()
+    }
 
-  render() {
-    let persistor = persistStore(Store)
-    //  persistor.purge()
+    render() {
+        let persistor = persistStore(Store)
+        ////  persistor.purge()
 
-    return (
-      <Provider store={Store}>
-        <PersistGate persistor={persistor}>
-          <PaperProvider theme={paperTheme}>
-            <MenuProvider>
-              <MyStatusBar>
-                <NetworkStatus>
-                  <RootController />
-                  <AppToast />
-                </NetworkStatus>
-              </MyStatusBar>
-            </MenuProvider>
-          </PaperProvider>
-        </PersistGate>
-      </Provider>
-    )
-  }
+        return (
+            <Provider store={Store}>
+                <PersistGate persistor={persistor}>
+                    <PaperProvider theme={paperTheme}>
+                        <MenuProvider>
+                            <MyStatusBar>
+                                <NetworkStatus>
+                                    <RootController />
+                                    <AppToast />
+                                </NetworkStatus>
+                            </MyStatusBar>
+                        </MenuProvider>
+                    </PaperProvider>
+                </PersistGate>
+            </Provider>
+        )
+    }
 }
 
 LogBox.ignoreAllLogs(true)
 
 const styles = StyleSheet.create({
-  safeviewArea: {
-    flex: 1
-  }
+    safeviewArea: {
+        flex: 1
+    }
 })
 
 const codePushOptions = {
-  checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
-  installMode: codePush.InstallMode.IMMEDIATE,
+    checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,
+    installMode: codePush.InstallMode.IMMEDIATE,
 }
 
 

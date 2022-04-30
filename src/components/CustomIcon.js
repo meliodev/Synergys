@@ -14,7 +14,7 @@ const CustomIcon = ({ icon = faCommentDots, size = 24, color = theme.colors.seco
     if(!icon) return null
     
     if (onPress) return (
-        <TouchableOpacity style= {style} onPress={onPress} hitSlop={theme.hitSlop}>
+        <TouchableOpacity style= {style} onPress={onPress} hitSlop={theme.hitslop}>
             <FontAwesomeIcon
                 icon={icon}
                 style={[styles.iconStyle, style]}

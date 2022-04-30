@@ -701,7 +701,7 @@ class ProcessAction extends Component {
         return (
             <View style={styles.headerBarContainer}>
                 <Text style={[theme.customFontMSmedium.header, styles.headerBarText]}>Suivi</Text>
-                <TouchableOpacity style={styles.eye} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }} onPress={onPressEye}>
+                <TouchableOpacity style={styles.eye} hitSlop={theme.hitslop} onPress={onPressEye}>
                     <CustomIcon
                         icon={faEye}
                         size={21}
