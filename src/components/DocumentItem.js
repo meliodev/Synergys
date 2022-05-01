@@ -10,7 +10,7 @@ moment.locale('fr')
 import Menu from './Menu'
 
 import * as theme from '../core/theme';
-import { constants } from '../core/constants';
+import { constants, isTablet } from '../core/constants';
 
 import { ThemeColors, withNavigation } from 'react-navigation'
 import { color } from 'react-native-reanimated';
@@ -79,7 +79,7 @@ const DocumentItem = ({ document, options, functions, onPress, ...props }) => {
     // }
 
     return (
-        <Card style={{ marginVertical: 3, marginHorizontal: 5, elevation: 2, backgroundColor: theme.colors.white }} onPress={onPress}>
+        <Card style={{ paddingVertical: isTablet ? 12 : 0, marginVertical: 3, marginHorizontal: 5, elevation: 2, backgroundColor: theme.colors.white }} onPress={onPress}>
 
             <Card.Content style={{ flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
                 <View style={{ flex: 0.15, justifyContent: 'center', alignItems: 'flex-start' }}>

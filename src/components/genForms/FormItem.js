@@ -12,7 +12,7 @@ moment.locale('fr')
 import Button from '../Button'
 
 import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import { constants, isTablet } from '../../core/constants';
 
 import { withNavigation } from 'react-navigation'
 
@@ -33,7 +33,7 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={styles.header}>
-                <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
+                <Text style={[isTablet ? theme.customFontMSregular.caption : theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
                 {estimation > 0 && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation.toString()}</Text>}
             </View>
 
@@ -59,17 +59,18 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: 10,
+        paddingHorizontal: isTablet ? 24 : 15,
+        paddingVertical: isTablet ? 24 : 10,
         backgroundColor: theme.colors.background,
         borderRadius: 10,
-        marginVertical: 5,
+        marginVertical: isTablet ? 14 : 5,
         ...theme.style.shadow
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
+        marginBottom: isTablet ? 16 : 0
     },
     body: {
         marginBottom: 15,

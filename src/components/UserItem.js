@@ -6,7 +6,7 @@ import { List } from 'react-native-paper';
 import { faAddressCard, faUsers, faUserTie, faUser, faUserShield, faUserCog } from '@fortawesome/pro-solid-svg-icons'
 
 import * as theme from '../core/theme';
-import { constants } from '../core/constants';
+import { constants, isTablet } from '../core/constants';
 import { checkPlural } from '../core/utils';
 
 import Menu from './Menu'
@@ -69,10 +69,10 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: 'row',
         alignItems: 'center',
-        height: 70,
+        height: isTablet ? 100 : 70,
         backgroundColor: theme.colors.section,
         borderRadius: 20,
-        marginVertical: 5
+        marginVertical: isTablet ? 12 : 5,
     },
     visuals: {
         //flex: 0.18,

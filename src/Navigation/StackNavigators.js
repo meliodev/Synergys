@@ -90,7 +90,7 @@ import EditRole from '../screens/Profile/EditRole'
 import Address from '../screens/Profile/Address'
 import VideoPlayer from '../screens/Helpers/VideoPlayer'
 
-import { constants } from '../core/constants'
+import { constants, isTablet } from '../core/constants'
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 import { CustomIcon } from '../components';
 import AboutUs from '../screens/Settings/AboutUs';
@@ -547,6 +547,9 @@ export const GuestTab = createBottomTabNavigator(
             inactiveTintColor: theme.colors.gray_dark,
             safeAreaInset: {
                 bottom: 0,
+            },
+            labelStyle: {
+                fontSize: isTablet ? 22 : undefined,
             },
         },
         initialRouteName: "Auth",

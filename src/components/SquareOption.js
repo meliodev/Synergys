@@ -5,7 +5,7 @@ import { View, StyleSheet, TouchableOpacity, Text, Image } from "react-native";
 import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
+import { constants, isTablet } from "../core/constants";
 
 const SquareOption = ({ element, index, elementSize, onPress }) => {
 
@@ -20,13 +20,13 @@ const SquareOption = ({ element, index, elementSize, onPress }) => {
         else return {}
     }
 
-    const iconColor = element.selected ? theme.colors.primary : element.iconColor
-   // const iconColor = element.iconColor
+    const iconColor = element.selected ? theme.colors.primary : (element.iconColor || theme.colors.gray_medium)
+    // const iconColor = element.iconColor
     const textColor = element.selected ? theme.colors.primary : theme.colors.secondary
 
     return (
         <TouchableOpacity
-            style={[styles.container, { margin: elementSize * 0.03, width: elementSize, height: elementSize }, dynamicStyle()]}
+            style={[styles.container, { marginTop: isTablet ? 70 : 0, margin: elementSize * 0.03, width: elementSize, height: elementSize }, dynamicStyle()]}
             onPress={onPress}
         >
             <View style={{ height: elementSize * 0.55, justifyContent: 'center' }}>
@@ -44,8 +44,8 @@ const SquareOption = ({ element, index, elementSize, onPress }) => {
                     />
                 }
             </View>
-            <View style={{ height: elementSize * 0.45, paddingHorizontal: 3 }}>
-                <Text style={[theme.customFontMSsemibold.caption, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
+            <View style={{ height: elementSize * 0.45, paddingHorizontal: 3, paddingTop: isTablet ? elementSize * 0.1 : 0 }}>
+                <Text style={[isTablet ? theme.customFontMSsemibold.header : theme.customFontMSsemibold.caption, { textAlign: 'center', color: textColor }]}>{element.label}</Text>
             </View>
         </TouchableOpacity>
     )

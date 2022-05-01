@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
-import { LogBox, StatusBar, StyleSheet, Text } from 'react-native'
+import { LogBox, StatusBar, StyleSheet, Text, View, Dimensions } from 'react-native'
 import notifee, { AndroidImportance } from '@notifee/react-native'
+import { LineChart } from 'react-native-chart-kit'
+
 import { connect } from 'react-redux'
 import { persistStore } from 'redux-persist'
 import { Provider } from 'react-redux'
@@ -20,6 +22,7 @@ import { fontsConfig } from '../fontConfig'
 import * as theme from './core/theme'
 import MyStatusBar from './components/MyStatusBar'
 import Settings from './screens/Settings/Settings'
+import ModalTest from './components/ModalTest'
 
 const paperTheme = {
     ...DefaultTheme,
@@ -39,9 +42,7 @@ const paperTheme = {
 class App extends Component {
 
     async componentDidMount() {
-        console.log("Mounting app.js...")
         SplashScreen.hide()
-        console.log("splash screen hidden...")
 
         //Notification channels
         const channelId = await notifee.createChannel({

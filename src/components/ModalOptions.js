@@ -120,7 +120,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                     <CustomIcon icon={element.icon} size={iconSize} color="#fff" />
                 </View>
                 <View style={{ paddingHorizontal: elementSize * 0.15, marginBottom: elementSize * 0.13 }}>
-                    <Text style={[theme.customFontMSbold.h3, { color: theme.colors.white }]}>{element.label}</Text>
+                    <Text style={[theme.customFontMSbold.h3, { color: theme.colors.white }]}>{element.label}s</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -236,7 +236,6 @@ const ModalOptions = ({
             animationOut="slideOutDown"
             onBackdropPress={!isLoading ? toggleModal : () => console.log('No action...')}
             style={[styles.modal, modalStyle]}
-            presentationStyle={isTablet ? "pageSheet" : ""}
         >
 
             {isLoading ?

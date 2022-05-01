@@ -5,6 +5,7 @@ import { faInfoCircle } from '@fortawesome/pro-light-svg-icons';
 
 import { CustomIcon } from '../../../components';
 import * as theme from '../../../core/theme'
+import { isTablet } from '../../../core/constants';
 
 export default function StepInstruction({ instructions }) {
   return (
@@ -12,7 +13,7 @@ export default function StepInstruction({ instructions }) {
       <CustomIcon
         icon={faInfoCircle}
         onPress={() => Alert.alert('', instructions)}
-        size={15}
+        size={isTablet ? 24 : 15}
         color={theme.colors.gray_dark}
       />
     </View>

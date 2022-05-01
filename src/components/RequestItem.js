@@ -15,7 +15,7 @@ import CustomIcon from './CustomIcon'
 import Button from './Button'
 
 import * as theme from '../core/theme';
-import { constants } from '../core/constants';
+import { constants, isTablet } from '../core/constants';
 
 import { ThemeColors, withNavigation } from 'react-navigation'
 
@@ -57,7 +57,7 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
     }
 
     return (
-        <Card style={{ margin: 5 }} onPress={() => navigation.navigate(nextScreen, params)}>
+        <Card style={{ margin: 5, paddingVertical: isTablet ? 15 : 0 }} onPress={() => navigation.navigate(nextScreen, params)}>
 
             <Card.Content style={{ flex: 1, flexDirection: 'row' }}>
                 <View style={{ flex: 1 }}>
@@ -74,7 +74,7 @@ const RequestItem = ({ request, requestType, chatId, navigation, ...props }) => 
 
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', }}>
                         <Paragraph style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder }]} >Par <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, textDecorationLine: 'underline' }]}>{request.editedBy.fullName}</Text></Paragraph>
-                        <View style={{ width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2, ...theme.style.shadow }}>
+                        <View style={{ paddingVertical: isTablet ? 10 : 0, width: constants.ScreenWidth * 0.25, borderRadius: 50, backgroundColor: setStateColor(request.state), padding: 2, ...theme.style.shadow }}>
                             <Paragraph style={[theme.customFontMSmedium.caption, { textAlign: 'center' }]}>{request.state}</Paragraph>
                         </View>
                     </View>

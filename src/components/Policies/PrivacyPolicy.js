@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { View, ScrollView, Dimensions, StyleSheet, Linking } from 'react-native';
-import { Paragraph, Title, Subheading } from 'react-native-paper';
+import { Paragraph as PaperParagraph, Title, Subheading } from 'react-native-paper';
+import { isTablet } from '../../core/constants';
 import * as  theme from '../../core/theme'
 // import { constants } from '../core/constants'
 
@@ -15,6 +16,11 @@ const br = (n) => {
 
 const bold = (text) => {
     return <Paragraph style={{ fontWeight: "bold" }}>{text}</Paragraph>
+}
+
+Paragraph = ({ children }) => {
+    if (isTablet) return <Subheading>{children}</Subheading>
+    else return <PaperParagraph>{children}</PaperParagraph>
 }
 
 BulletPoints = ({ bulletpoints, ...props }) => {

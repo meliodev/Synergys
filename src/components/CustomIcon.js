@@ -8,8 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 
 import PropTypes from 'prop-types'
+import { isTablet } from "../core/constants"
 
-const CustomIcon = ({ icon = faCommentDots, size = 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, ...props }) => {
+const CustomIcon = ({ icon = faCommentDots, size = isTablet ? 42 : 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, ...props }) => {
 
     if(!icon) return null
     

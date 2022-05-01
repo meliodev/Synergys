@@ -4,7 +4,7 @@ import StepIndicator from 'react-native-step-indicator';
 import PhaseTitle from '../attributes/PhastTitle';
 import PhaseStatus from '../attributes/PhaseStatus';
 import { PRIMARY_COLOR } from '../utils/color';
-import { constants } from '../../../core/constants';
+import { constants, isTablet } from '../../../core/constants';
 import * as theme from '../../../core/theme';
 
 const secondIndicatorStyles = {
@@ -40,7 +40,10 @@ export default function PhaseComponent({ labels, status, currentPage, setCurrent
   }
 
   const renderStepIndicator = (params) => (
-    <PhaseStatus params={params} status={status[params.position]} />
+    <PhaseStatus
+      params={params}
+      status={status[params.position]}
+    />
   )
 
   const renderLabel = ({ position, label, currentPosition }) => {
@@ -48,7 +51,12 @@ export default function PhaseComponent({ labels, status, currentPage, setCurrent
     const color = position === currentPosition ? theme.colors.primary : status[position] === 'grayed' ? theme.colors.gray_dark : theme.colors.secondary
 
     return (
-        <Text style={[theme.customFontMSregular.extraSmall, { textAlign: 'center', color }]}>{label}</Text>
+      <View style={{ marginTop: isTablet ? 15 : 0 }}>
+        <Text style={[isTablet ?
+          theme.customFontMSregular.caption
+          :
+          theme.customFontMSregular.extraSmall, { textAlign: 'center', color }]}>{label}</Text>
+      </View>
     )
   }
 

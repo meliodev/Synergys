@@ -1,12 +1,12 @@
 import { faChevronRight, faFile, faInfoCircle, faLock, faPen } from '@fortawesome/pro-light-svg-icons';
 import React, { Component } from 'react';
 import { StyleSheet, SafeAreaView, View } from 'react-native'
-import { Subheading } from 'react-native-paper';
+import { Subheading, Title } from 'react-native-paper';
 import { TouchableOpacity } from 'react-native-ui-lib';
 import { CustomIcon } from '../../components';
 
 import Appbar from '../../components/Appbar'
-import { constants } from '../../core/constants';
+import { constants, isTablet } from '../../core/constants';
 import * as theme from "../../core/theme"
 
 
@@ -17,11 +17,15 @@ const SettingItem = ({ icon, title, onPress }) => {
             onPress={onPress}
         >
             <View style={[styles.rowStyle, styles.settingItemContentWrapper]}>
-                <CustomIcon icon={icon} size={19} style={{ marginRight: theme.padding }} />
-                <Subheading>{title}</Subheading>
+                <CustomIcon icon={icon} size={isTablet ? 24 : 19} style={{ marginRight: theme.padding }} />
+                {isTablet ?
+                    <Title>{title}</Title>
+                    :
+                    <Subheading>{title}</Subheading>
+                }
             </View>
             <View>
-                <CustomIcon icon={faChevronRight} color={theme.colors.gray_medium} size={18}></CustomIcon>
+                <CustomIcon icon={faChevronRight} color={theme.colors.gray_medium} size={19}></CustomIcon>
             </View>
         </TouchableOpacity>
     )

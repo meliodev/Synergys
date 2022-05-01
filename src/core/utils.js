@@ -195,12 +195,6 @@ export const formatRow = (active, data, numColumns) => { //Format rows to displa
   return data
 }
 
-export const scaleFontSize = (size) => {
-  const scale = isTablet ? 1.33 : 1
-  const newSize = size * scale
-  return newSize
-}
-
 export const stringifyUndefined = (data) => {
   const stringifiedData = typeof (data) !== 'undefined' ? data : ''
   return stringifiedData
@@ -746,7 +740,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var originalPdfBase64 = ficheEEBBase64
       var formPages = ficheEEBModel
     }
-    else if (pdfType === "MandatsMPR") { 
+    else if (pdfType === "MandatsMPR") {
       var originalPdfBase64 = mandatMPRBase64
       var formPages = mandatMPRModel
     }
@@ -1034,18 +1028,18 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
 
     let errorMessage = null
 
+    console.log("12345")
+
     if (response.didCancel) {
       resolve(previousAttachments)
     }
 
     else if (response.error) {
-      console.log(response.error)
       errorMessage = "Erreur lors de la sélection du fichier. Veuillez réessayer."
       reject(new Error(errorMessage))
     }
 
     else {
-      console.log("res", response)
       const image = {
         type: response.type,
         name: response.fileName || `Image ${moment().format("DD-MM-YYYY-HH-mm")}`,

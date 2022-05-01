@@ -10,7 +10,7 @@ import Filter from './Filter'
 import { setFilter } from '../core/utils'
 
 import * as theme from "../core/theme";
-import { constants } from '../core/constants'
+import { constants, isTablet } from '../core/constants'
 import { withNavigation } from 'react-navigation'
 
 const PickerBar = ({
@@ -70,7 +70,7 @@ const PickerBar = ({
                 functions={functions}
                 menuTrigger={menuTrigger} /> */}
 
-            {<appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: '-5%', letterSpacing: 1 }]}/>}
+            {<appbar.Content title={titleText} titleStyle={[theme.customFontMSregular.header, { marginLeft: isTablet ? 10 : '-5%', letterSpacing: 1 }]}/>}
 
             <Filter
                 isAppBar={true}

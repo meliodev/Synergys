@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { StyleSheet, SafeAreaView, View, Image, ScrollView } from 'react-native'
-import { Headline, Paragraph } from 'react-native-paper';
+import { Headline, Paragraph as PaperParagraph, Subheading } from 'react-native-paper';
 
 import Appbar from '../../components/Appbar'
-import { constants } from '../../core/constants';
+import { constants, isTablet } from '../../core/constants';
 import * as theme from "../../core/theme"
 
 
@@ -11,6 +11,11 @@ const Separator = ({ style }) => {
     return (
         <View style={[{ width: constants.ScreenWidth - theme.padding * 6, alignSelf: "center", height: StyleSheet.hairlineWidth, backgroundColor: theme.colors.gray_medium }]} />
     )
+}
+
+const Paragraph = ({ children }) => {
+    if (isTablet) return <Subheading>{children}</Subheading>
+    else return <PaperParagraph>{children}</PaperParagraph>
 }
 
 const MyHeadline = ({ style, showSeparator = true, ...props }) => {

@@ -23,8 +23,8 @@ class NetworkStatus extends Component {
         this.networkListener()
     }
 
-    networkListener() {
-        this.unsubscribeNetwork = NetInfo.addEventListener(state => {
+   async networkListener() {
+        this.unsubscribeNetwork = NetInfo.addEventListener(async state => {
             const { type, isConnected } = state
             const network = { type, isConnected }
             if (!isConnected && !this.alertDisplayed) Alert.alert('Mode Hors-Ligne', "L'application risque de ne pas fonctionner de façon optimale en mode hors-ligne. Veuillez rétablir votre connection réseau.")
@@ -40,6 +40,8 @@ class NetworkStatus extends Component {
     render() {
         const { network } = this.props
         const { isConnected } = network
+
+        console.log("is connected::::", isConnected)
 
         return (
             <View style={styles.container}>

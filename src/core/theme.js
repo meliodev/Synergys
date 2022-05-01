@@ -1,13 +1,11 @@
 import { StyleSheet } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
-import { constants } from './constants'
-import { scaleFontSize } from './utils'
+import { constants, isTablet } from './constants'
+
 
 const baseColors = {
   gray1: "#F1F2F7"
 }
-
-const hitslop = { top: 10, bottom: 10, left: 10, right: 10 }
 
 const colors = {
   statusbar: "#013220",
@@ -90,8 +88,14 @@ const colors = {
   miLogout: '#000',
 }
 
-const sizes = {
 
+const scaleFontSize = (size) => {
+  const scale = isTablet ? 1.63 : 1
+  const newSize = size * scale
+  return newSize
+}
+
+const sizes = {
   // global sizes
   base: scaleFontSize(16),
   font: scaleFontSize(14),
@@ -321,8 +325,7 @@ const style = {
   }
 }
 
-export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, hitslop }
-
+export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold }
 
 
 

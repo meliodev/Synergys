@@ -48,7 +48,7 @@ import {
     pickImage,
 } from '../core/utils';
 
-import { constants, contactForm, errorMessages, pack1, pack2 } from '../core/constants';
+import { constants, contactForm, errorMessages, isTablet, pack1, pack2 } from '../core/constants';
 import * as theme from '../core/theme'
 import { setStatusBarColor } from '../core/redux';
 import { db, auth, functions } from '../firebase';
@@ -207,7 +207,7 @@ class StepsForm extends Component {
                     color={theme.colors.primary}
                     visible={true}
                 />
-                <Text style={[theme.customFontMSregular.small, { color: theme.colors.white, marginVertical: 8 }]}>
+                <Text style={[isTablet ? theme.customFontMSregular.caption : theme.customFontMSregular.small, { color: theme.colors.white, marginVertical: 8 }]}>
                     {progress}%
                 </Text>
             </View>
@@ -594,6 +594,7 @@ class StepsForm extends Component {
                                 error={error}
                                 errorText={error}
                                 editable={true}
+                                
                             />
                         </View>
                     )
@@ -1137,7 +1138,7 @@ class StepsForm extends Component {
         const slopeOrientationValues = ["Sud-Est/Sud-Ouest", "Sud"]
         const roofSurface = Number(roofWidth) * Number(roofLength)
         const yearlyCost_PerSquareMeter = yearlyElecCost / livingSurface
- 
+
         const paeCondition = energySourceValues.includes(energySource)
         const paaCondition = transmittersTypes.includes("Radiateurs électriques")
         const isoComblesCondition = lostAticsIsolation == "Oui" && lostAticsIsolationAge > 6 && heatedSurface > 24

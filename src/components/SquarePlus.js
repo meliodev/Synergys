@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     error: {
         // paddingHorizontal: 4,
         paddingTop: theme.padding,
-        color: theme.colors.error,
+        color: theme.myRedColor,
         textAlign: "center"
     }
 })
