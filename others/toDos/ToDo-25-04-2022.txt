@@ -58,3 +58,8 @@ Exemple pour avoir un pack propose dans les resultats:
 5. Dépense annuelle en électricité  = 5000 ; Surface habitable = 500
 
 
+-----------------
+iPad responsivity tasks:
+
+- Modal not responding (not fixing: Upgraded react-native-reanimated from 1.13.0 to 2.2.3)
+- Font size: added util function to scale for iPad

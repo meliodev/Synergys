@@ -21,7 +21,7 @@ import { getCurrentStep, getCurrentAction, handleTransition, getPhaseId, process
 import { enableProcessAction } from '../core/privileges'
 import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
-import { constants, errorMessages } from "../core/constants"
+import { constants, errorMessages, isTablet } from "../core/constants"
 import { processModels } from '../core/process/models/index'
 import ProcessContainer from "../screens/src/container/ProcessContainer"
 
@@ -619,7 +619,7 @@ class ProcessAction extends Component {
                     {!loading &&
                         <CustomIcon
                             icon={leftIcon}
-                            size={18}
+                            size={isTablet ? 28 : 16}
                             color={leftIconColor}
                             style={{ marginRight: 10 }}
                         />
@@ -639,14 +639,15 @@ class ProcessAction extends Component {
                         {isComment &&
                             <CustomIcon
                                 icon={faExclamationCircle}
-                                size={16}
+                                size={isTablet ? 28 : 16}
                                 color={mainColor}
                                 onPress={() => Alert.alert('Commentaire', action.comment)}
+                                style={{ marginRight: isTablet ? 8 : 5 }}
                             />
                         }
                         <CustomIcon
                             icon={faInfoCircle}
-                            size={16}
+                            size={isTablet ? 28 : 16}
                             color={mainColor}
                             onPress={() => Alert.alert('Instructions', action.instructions)}
                         />
@@ -700,11 +701,11 @@ class ProcessAction extends Component {
         const onPressEye = () => this.props.navigation.navigate('Progression', navParams)
         return (
             <View style={styles.headerBarContainer}>
-                <Text style={[theme.customFontMSmedium.header, styles.headerBarText]}>Suivi</Text>
-                <TouchableOpacity style={styles.eye} hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }} onPress={onPressEye}>
+                <Text style={[theme.customFontMSsemibold.header, styles.headerBarText]}>Suivi</Text>
+                <TouchableOpacity style={styles.eye} hitSlop={theme.hitslop} onPress={onPressEye}>
                     <CustomIcon
                         icon={faEye}
-                        size={21}
+                        //size={21}
                         color={theme.colors.white}
                     />
                 </TouchableOpacity>
@@ -730,7 +731,7 @@ class ProcessAction extends Component {
                     {showProgress &&
                         <StepProgress
                             progress={progress}
-                            size={60}
+                            size={isTablet ? 200 : 60}
                             style={{ alignSelf: "center", marginTop: theme.padding * 0.8 }}
                         />
                     }
@@ -741,7 +742,7 @@ class ProcessAction extends Component {
                         <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.white, marginBottom: theme.padding }]}>Action à faire:</Text>
                         {this.renderAction(canUpdate, currentAction, { mainColor: theme.colors.white, textFont: theme.customFontMSbold.body }, {})}
                         {currentAction && currentAction.responsable &&
-                            <Text style={[theme.customFontMSregular.small, { color: theme.colors.white, marginTop: theme.padding }]}>
+                            <Text style={[isTablet ? theme.customFontMSregular.caption : theme.customFontMSregular.small, { color: theme.colors.white, marginTop: theme.padding }]}>
                                 Responsable: {currentAction.responsable}
                             </Text>
                         }

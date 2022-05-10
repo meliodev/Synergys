@@ -12,7 +12,7 @@ moment.locale('fr')
 import Button from '../Button'
 
 import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import { constants, isTablet } from '../../core/constants';
 
 import { withNavigation } from 'react-navigation'
 
@@ -33,8 +33,8 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <View style={styles.header}>
-                <Text style={[theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
-                {/* {estimation > 0 && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation.toString()}</Text>} */}
+                <Text style={[isTablet ? theme.customFontMSregular.caption : theme.customFontMSregular.small, { color: theme.colors.gray_medium }]}>{id}</Text>
+                {estimation > 0 && <Text style={[theme.customFontMSmedium.header, { backgroundColor: colorCat, paddingHorizontal: theme.padding, paddingVertical: 2, borderRadius: 4, color: 'white' }]}>€ {estimation.toString()}</Text>}
             </View>
 
             <View style={styles.body}>
@@ -48,7 +48,7 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
 
             {/* <Text style={[theme.customFontMSregular.caption, { marginBottom: 8, color: theme.colors.gray_dark }]}>Crée par {createdBy.fullName}</Text> */}
 
-            <View style={{ flexDirection: 'row', marginTop: 8, justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>{moment(editedAt).format('lll')}</Text>
                 {!isSubmitted && <Text style={[theme.customFontMSregular.caption, { color: theme.colors.gray_dark }]}>Brouillon</Text>}
             </View>
@@ -59,21 +59,22 @@ const FormItem = ({ item, onPress, navigation, nameClient1, nameClient2, ...prop
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 15,
-        paddingVertical: theme.padding/2,
+        paddingHorizontal: isTablet ? 24 : 15,
+        paddingVertical: isTablet ? 24 : 10,
         backgroundColor: theme.colors.background,
         borderRadius: 10,
-        marginVertical: 8,
+        marginVertical: isTablet ? 14 : 5,
         ...theme.style.shadow
     },
     header: {
         flexDirection: 'row',
-        justifyContent: 'flex-end',
-        //alignItems: 'flex-end'
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: isTablet ? 16 : 0
     },
     body: {
         marginBottom: 15,
-        //marginTop: 3
+        marginTop: 3
     },
     linearGradient: {
         flex: 1,

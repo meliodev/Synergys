@@ -11,7 +11,7 @@ moment.locale('fr')
 
 import { db, auth } from '../../firebase'
 import * as theme from '../../core/theme'
-import { constants, highRoles } from '../../core/constants'
+import { constants, highRoles, isTablet } from '../../core/constants'
 import { displayError, load, sortMonths } from '../../core/utils'
 import { fetchTurnoverData } from '../../api/firestore-api'
 import { analyticsQueriesBasedOnRole, initTurnoverObjects, setTurnoverArr, setMonthlyGoals } from './helpers'
@@ -235,12 +235,12 @@ class Analytics extends Component {
             { label: "L'année dernière", value: 'lastYear' },
         ]
 
-        let labels = chartLabels
+        const labels = chartLabels
+
         let datasets = []
-        for (const chartData of chartDataSets) {
-            const data = chartData
-            datasets.push({ data })
-        }
+        const formatedChartDataSets = chartDataSets[0].map((data) => { return data / 1000 })
+        const dataObject = { data: formatedChartDataSets }
+        datasets[0] = dataObject
 
         const data = { labels, datasets }
 
@@ -259,9 +259,9 @@ class Analytics extends Component {
                 <LineChart
                     data={data}
                     width={Dimensions.get("window").width - theme.padding * 2} // from react-native
-                    height={220}
+                    height={isTablet ? 500 : 220}
                     yAxisLabel="€"
-                    yAxisSuffix=""
+                    yAxisSuffix="k"
                     yAxisInterval={1} // optional, defaults to 1
                     paddingTop={"15"}
                     chartConfig={{
@@ -280,9 +280,13 @@ class Analytics extends Component {
                             stroke: "#ffa726"
                         },
                         propsForHorizontalLabels: {
-                            fontSize: "10",
-                            x: "52"
+                            fontSize: isTablet ? "12" : "10",
+                            x: "54"
                         },
+                        propsForVerticalLabels: {
+                            fontSize: isTablet ? "16" : "10",
+                           // y: "0"
+                        }
                     }}
                     decorator={() => this.tooltipDecorators(selectedPointChart, data)}
                     onDataPointClick={(data) => {
@@ -297,6 +301,7 @@ class Analytics extends Component {
                         //paddingTop: 20
                     }}
                 />
+
             </View>
 
         )

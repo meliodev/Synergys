@@ -12,7 +12,7 @@ moment.locale('fr')
 import Button from './Button'
 
 import * as theme from '../core/theme';
-import { constants } from '../core/constants';
+import { constants, isTablet } from '../core/constants';
 
 import { ThemeColors, withNavigation } from 'react-navigation'
 
@@ -57,9 +57,9 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
     return (
         <Card style={styles.container} onPress={onPress}>
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(step)} style={[styles.linearGradient, styles.stepContainer]}>
-                <Text style={[theme.customFontMSmedium.extraSmall, styles.header]} numberOfLines={1}>{id}</Text>
+                <Text style={[isTablet ? theme.customFontMSmedium.caption : theme.customFontMSmedium.extraSmall, styles.header]} numberOfLines={1}>{id}</Text>
                 <Text style={[theme.customFontMSbold.caption, { color: theme.colors.white }]}>{step}</Text>
-                <Text style={[theme.customFontMSregular.small, styles.processVersion]}>V{version}</Text>
+                <Text style={[isTablet ? theme.customFontMSmedium.caption : theme.customFontMSregular.small, styles.processVersion]}>V{version}</Text>
             </LinearGradient>
 
             <Card.Content style={styles.content}>
@@ -108,10 +108,10 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         flexDirection: 'row',
-        paddingTop: 5
+        paddingTop: isTablet ? 15 : 5
     },
     stepContainer: {
-        height: 33,
+        height: isTablet ? 49 :  33,
         justifyContent: 'center',
         alignItems: 'center',
         borderTopLeftRadius: 10,

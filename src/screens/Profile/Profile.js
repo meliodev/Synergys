@@ -25,7 +25,7 @@ import EmptyList from "../../components/EmptyList"
 
 import firebase, { db, auth } from '../../firebase'
 import * as theme from "../../core/theme"
-import { constants, highRoles, lowRoles, staffRoles } from '../../core/constants'
+import { constants, highRoles, isTablet, lowRoles, staffRoles } from '../../core/constants'
 import { fetchDocs, fetchTurnoverData, fetchDocument, fetchDocuments } from '../../api/firestore-api'
 import { sortMonths, navigateToScreen, nameValidator, emailValidator, passwordValidator, updateField, load, setToast, formatRow, generateId, refreshAddress, setAddress, displayError, countDown } from "../../core/utils"
 import { handleReauthenticateError, handleUpdatePasswordError } from '../../core/exceptions'
@@ -201,7 +201,7 @@ class Profile extends Component {
 
 
         let clientProjectsList = await fetchDocuments(query)
-        if(this.isCurrentUserStaff) {
+        if (this.isCurrentUserStaff) {
             clientProjectsList = [...[{ id: "addNewProject" }], ...clientProjectsList]
         }
 
@@ -384,7 +384,7 @@ class Profile extends Component {
 
         return (
             <View style={styles.avatar} >
-                <CustomIcon icon={icon} color={iconColor} size={30} />
+                <CustomIcon icon={icon} color={iconColor} size={isTablet ? 35 : 30} />
                 {deleted && <Text style={[theme.customFontMSregular.extraSmall, { position: 'absolute', bottom: 15, color: theme.colors.gray_dark, textAlign: 'center' }]}>Utilisateur supprimé</Text>}
             </View>
         )
@@ -460,7 +460,7 @@ class Profile extends Component {
         return (
             <View>
                 <SquarePlus onPress={() => this.props.navigation.navigate('CreateProject', { client, address, onGoBack: () => this.fetchProfile(1000) })} />
-                <Text style={[theme.customFontMSregular.caption, { marginTop: theme.padding / 2, color: theme.colors.gray_dark }]}>
+                <Text style={[theme.customFontMSregular.caption, { textAlign: "center", marginTop: theme.padding / 2, color: theme.colors.gray_dark }]}>
                     Nouveau projet
                 </Text>
             </View>
@@ -625,7 +625,7 @@ class Profile extends Component {
                         <TextInput.Icon
                             name='pencil'
                             color={theme.colors.gray_medium}
-                            size={21}
+                            size={isTablet ? 33 : 21}
                             onPress={() => this.onPressRole(isAdmin, isConnected)}
                         />
                     }
@@ -740,7 +740,7 @@ class Profile extends Component {
                                                 }
 
                                                 {viewMore &&
-                                                    <View style={{ flex: 1 }}>
+                                                    <View style={{ flex: 1, marginTop: isTablet ? 18 : 0 }}>
                                                         <MyInput
                                                             label="Numéro utilisateur"
                                                             returnKeyType="done"
@@ -755,12 +755,12 @@ class Profile extends Component {
                                                             label="Email"
                                                             returnKeyType="done"
                                                             value={email.value}
-                                                            multiline={true}
+
+                                                            // numberOfLine={3}
                                                             onChangeText={text => updateField(this, email, text)}
                                                             autoCapitalize="none"
                                                             error={!!email.error}
                                                             errorText={email.error}
-                                                            autoCapitalize="none"
                                                             textContentType='emailAddress'
                                                             keyboardType='email-address'
                                                             editable={this.isEdit && this.isClient && isProspect}
@@ -772,12 +772,10 @@ class Profile extends Component {
                                                                 label="Email 2"
                                                                 returnKeyType="done"
                                                                 value={email2.value}
-                                                                multiline={true}
                                                                 onChangeText={text => updateField(this, email2, text)}
                                                                 autoCapitalize="none"
                                                                 error={!!email2.error}
                                                                 errorText={email2.error}
-                                                                autoCapitalize="none"
                                                                 textContentType='emailAddress'
                                                                 keyboardType='email-address'
                                                                 editable={this.isEdit && (canUpdate || this.isProcess)}
@@ -850,7 +848,7 @@ class Profile extends Component {
                                             onPressSection={() => this.toggleSection("pw")}
                                             form={
                                                 <View>
-                                                    <View style={{ paddingTop: 15 }}>
+                                                    <View style={{ paddingTop: isTablet ? 25 : 15 }}>
                                                         <Text style={[theme.customFontMSregular.body, { color: theme.colors.placeholder }]}>Laissez le mot de passe vide si vous ne voulez pas le changer.</Text>
                                                     </View>
 
@@ -863,10 +861,14 @@ class Profile extends Component {
                                                         errorText={currentPass.error}
                                                         autoCapitalize="none"
                                                         secureTextEntry={!currentPass.show}
-                                                        right={<TextInput.Icon name={currentPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                                                            currentPass.show = !currentPass.show
-                                                            this.setState({ currentPass })
-                                                        }} />}
+                                                        right={<TextInput.Icon
+                                                            name={currentPass.show ? 'eye-off' : 'eye'}
+                                                            color={theme.colors.placeholder}
+                                                            size={isTablet ? 33 : 21}
+                                                            onPress={() => {
+                                                                currentPass.show = !currentPass.show
+                                                                this.setState({ currentPass })
+                                                            }} />}
                                                     />
 
                                                     <MyInput
@@ -878,10 +880,14 @@ class Profile extends Component {
                                                         errorText={newPass.error}
                                                         autoCapitalize="none"
                                                         secureTextEntry={!newPass.show}
-                                                        right={<TextInput.Icon name={newPass.show ? 'eye-off' : 'eye'} color={theme.colors.placeholder} onPress={() => {
-                                                            newPass.show = !newPass.show
-                                                            this.setState({ newPass })
-                                                        }} />}
+                                                        right={<TextInput.Icon
+                                                            name={newPass.show ? 'eye-off' : 'eye'}
+                                                            color={theme.colors.placeholder}
+                                                            size={isTablet ? 33 : 21}
+                                                            onPress={() => {
+                                                                newPass.show = !newPass.show
+                                                                this.setState({ newPass })
+                                                            }} />}
                                                     />
 
                                                     <Button
@@ -936,8 +942,8 @@ const styles = StyleSheet.create({
         backgroundColor: theme.colors.background,
     },
     avatar: {
-        width: 130,
-        height: 130,
+        width: isTablet ? 167 : 130,
+        height: isTablet ? 167 : 130,
         marginTop: 10,
         paddingHorizontal: 10,
         borderRadius: 10,

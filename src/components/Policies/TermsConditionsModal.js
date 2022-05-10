@@ -4,7 +4,7 @@ import Modal from 'react-native-modal'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import * as  theme from '../../core/theme'
-import { constants } from '../../core/constants'
+import { constants, isTablet } from '../../core/constants'
 import TermsConditions from './TermsConditions';
 
 const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
@@ -16,15 +16,13 @@ const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
 export default class TermsConditionsModal extends Component {
 
     constructor(props) {
-        super(props)
+        super(props) 
         this.state = {
             accepted: false
         }
     }
 
     renderHeader() {
-
-        const hitslop = { top: 5, bottom: 5, left: 5, right: 5 }
 
         return (
             <View style={styles.headerContainer}>
@@ -42,7 +40,7 @@ export default class TermsConditionsModal extends Component {
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={this.props.toggleTerms}
-                    hitSlop={hitslop}
+                    hitSlop={theme.hitslop}
                 >
                     <MaterialCommunityIcons
                         name='close'
@@ -104,7 +102,7 @@ const styles = StyleSheet.create({
     downloadButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     container: {
         marginTop: 20,
@@ -139,7 +137,7 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: theme.colors.primary,
         // borderRadius: 5,
-        padding: 10
+        padding: isTablet ? 30 : 10
     },
 
     buttonDisabled: {
@@ -149,7 +147,7 @@ const styles = StyleSheet.create({
     },
 
     buttonLabel: {
-        fontSize: 14,
+        fontSize: isTablet ? 28 : 14,
         color: '#FFF',
         alignSelf: 'center'
     },

@@ -9,7 +9,7 @@ import { faBell, faBellExclamation } from '@fortawesome/pro-solid-svg-icons'
 
 import { db, auth } from '../firebase'
 import * as theme from '../core/theme'
-import { constants } from '../core/constants'
+import { constants, isTablet } from '../core/constants'
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -92,16 +92,16 @@ const styles = StyleSheet.create({
     leftIcon: {
         justifyContent: 'center',
         alignItems: 'center',
-        width: 45,
-        height: 45,
-        borderRadius: 25,
+        width: isTablet ? 80 : 45,
+        height: isTablet ? 80 : 45,
+        borderRadius: isTablet ? 40 : 25,
         marginTop: 3,
         ...theme.style.shadow
     },
     content: {
         flex: 1,
         flexDirection: 'row',
-        marginLeft: 15,
+        marginLeft: isTablet ? 35 : 15,
         marginRight: 0,
         paddingBottom: 9,
         borderBottomWidth: StyleSheet.hairlineWidth * 2,

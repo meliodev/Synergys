@@ -32,7 +32,7 @@ import { uploadFile } from "../../api/storage-api";
 
 import { generateId, myAlert, updateField, pickImage, renderImages, nameValidator, positiveNumberValidator, arrayValidator, setToast, load, displayError } from "../../core/utils";
 import * as theme from "../../core/theme";
-import { constants } from "../../core/constants";
+import { constants, isTablet, ScreenWidth } from "../../core/constants";
 import SquarePlus from '../../components/SquarePlus';
 import { setCategories, setProducts } from '../../core/admin-utils';
 
@@ -279,6 +279,7 @@ class CreateProduct extends Component {
     //Logo brand
     async pickNewBrandLogo() {
         let { newBrandLogo } = this.state
+        console.log("...")
         const attachments = await pickImage([])
         newBrandLogo = attachments[0]
         newBrandLogo.ref = "newBrandLogo"
@@ -296,11 +297,11 @@ class CreateProduct extends Component {
         const label = isCategory ? 'catégorie' : 'marque'
 
         if (loadingDialog) {
-            const progression = isCategory ? '' : this.state.newBrandLogo.progress * 100
+            const progression = isCategory ? '' : Math.round(this.state.newBrandLogo.progress * 100)
             const title = `Ajout de la ${label} en cours... ${progression}%`
             return (
                 <View style={styles.dialogContainer} >
-                    <Dialog.Container visible={showDialog}>
+                    <Dialog.Container visible={showDialog} contentStyle={{ paddingVertical: 15 }}>
                         <Dialog.Title style={[theme.customFontMSsemibold.body, { marginBottom: 5 }]}>{title}</Dialog.Title>
                         <ActivityIndicator color={theme.colors.primary} size='small' />
                     </Dialog.Container>
@@ -310,15 +311,19 @@ class CreateProduct extends Component {
 
         else return (
             <View style={styles.dialogContainer} >
-                <Dialog.Container visible={showDialog}>
+                <Dialog.Container visible={showDialog} contentStyle={{ width: dialogContainerSize, alignItems: "center" }}>
                     {!isCategory &&
-                        <View style={{ marginBottom: 20 }}>
+                        <View style={{ marginBottom: isTablet ? 90 : 20, width: 800, alignSelf: "center" }}>
                             {newBrandLogo.path ?
                                 <TouchableOpacity onPress={this.pickNewBrandLogo}>
-                                    <Image source={{ uri: newBrandLogo.path }} style={{ width: 90, height: 90 }} />
+                                    <Image source={{ uri: newBrandLogo.path }} style={styles.logo} />
                                 </TouchableOpacity>
                                 :
-                                <SquarePlus onPress={this.pickNewBrandLogo} title='LOGO' />
+                                <SquarePlus
+                                    onPress={this.pickNewBrandLogo}
+                                    title='LOGO'
+                                    style={styles.logo}
+                                />
                             }
                         </View>
                     }
@@ -336,9 +341,13 @@ class CreateProduct extends Component {
                                 this.setState({ newBrandName })
                             }
                         }}
-                        // autoFocus={showDialog}
+                        //autoFocus={showDialog}
                         autoFocus={false}
-                        style={{ borderBottomColor: theme.colors.graySilver, borderBottomWidth: StyleSheet.hairlineWidth }}
+                        style={{
+                            borderBottomColor: theme.colors.graySilver,
+                            borderBottomWidth: StyleSheet.hairlineWidth,
+                            width: logoSize
+                        }}
                     />
                     <Dialog.Button label="Annuler" onPress={() => this.toggleDialog('')} style={{ color: theme.colors.placeholder }} />
                     <Dialog.Button label="Confirmer" onPress={async () => {
@@ -399,7 +408,7 @@ class CreateProduct extends Component {
         return (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View>
-                    <Text style={theme.customFontMSregular.body}>Type de l'article</Text>
+                    <Text style={[theme.customFontMSregular.body, { marginBottom: isTablet ? 15 : 0 }]}>Type de l'article</Text>
                     <RadioButton
                         checked={checked}
                         firstChoice={{ title: 'Service', value: 'service' }}
@@ -410,7 +419,12 @@ class CreateProduct extends Component {
                         textRight={true}
                         isRow={false} />
                 </View>
-                {isLogo && <Image source={{ uri: logoUrl }} style={{ width: 90, height: 90 }} />}
+                {isLogo &&
+                    <Image
+                        source={{ uri: logoUrl }}
+                        style={{ width: 90, height: 90 }}
+                    />
+                }
             </View>
         )
     }
@@ -419,7 +433,7 @@ class CreateProduct extends Component {
         const { category, categories, dialogType } = this.state
 
         return (
-            <View style={{ marginBottom: 20 }}>
+            <View style={{ marginBottom: isTablet ? 50 : 20 }}>
                 <Picker
                     title="Catégorie *"
                     returnKeyType="next"
@@ -430,9 +444,12 @@ class CreateProduct extends Component {
                     editable
                 />
 
-                <TouchableOpacity onPress={() => this.toggleDialog('category')} style={{ marginTop: 10 }}>
-                    <Text style={[theme.customFontMSmedium.caption, { color: theme.colors.primary }]}>+ Nouvelle catégorie</Text>
-                </TouchableOpacity>
+                <Text
+                    onPress={() => this.toggleDialog('category')}
+                    style={[theme.customFontMSmedium.caption, { color: theme.colors.primary, marginTop: Platform.OS === "android" ? 10 : 0 }]}
+                >
+                    + Nouvelle catégorie
+                </Text>
             </View>
         )
     }
@@ -441,6 +458,7 @@ class CreateProduct extends Component {
         const { suggestions, tagsSelected, brandError } = this.state
         const noItemSelected = tagsSelected.length === 0
         const { isConnected } = this.props.network
+        const iconSize = isTablet ? 32 : 21
 
         return (
             <View style={{ marginBottom: 5, zIndex: 2 }}>
@@ -463,11 +481,11 @@ class CreateProduct extends Component {
                     {noItemSelected ?
                         isConnected &&
                         <TouchableOpacity style={styles.plusIcon} onPress={() => this.toggleDialog('brand')}>
-                            <MaterialCommunityIcons name='plus' color={theme.colors.primary} size={21} />
+                            <CustomIcon icon={faPlusCircle} color={theme.colors.primary} size={iconSize} />
                         </TouchableOpacity>
                         :
                         <TouchableOpacity style={[styles.plusIcon, { paddingTop: 0 }]} onPress={() => this.setState({ tagsSelected: [] })}>
-                            <MaterialCommunityIcons name='close' color={theme.colors.placeholder} size={21} />
+                            <CustomIcon icon={faTimes} color={theme.colors.placeholder} size={iconSize} />
                         </TouchableOpacity>
                     }
                 </View>
@@ -491,7 +509,7 @@ class CreateProduct extends Component {
                     :
                     <View style={{ flex: 1 }}>
 
-                        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: constants.ScreenWidth * 0.02 }}>
+                        <ScrollView style={styles.container} contentContainerStyle={{ padding: theme.padding }}>
 
                             <KeyboardAvoidingView
                                 style={{ flex: 1 }}
@@ -499,67 +517,60 @@ class CreateProduct extends Component {
                                 keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
                             >
 
-                                <Card style={{ margin: 5, paddingVertical: 10 }}>
-                                    <Card.Content>
+                                {this.renderTypeAndLogo()}
 
-                                        {this.renderTypeAndLogo()}
+                                <MyInput
+                                    label="Numéro de l'article"
+                                    returnKeyType="done"
+                                    value={ProductId}
+                                    editable={false}
+                                    disabled
+                                />
 
+                                {this.renderCategory()}
+                                {this.renderBrand()}
+
+                                <MyInput
+                                    label="Désignation *"
+                                    value={name.value}
+                                    onChangeText={text => updateField(this, name, text)}
+                                    error={!!name.error}
+                                    errorText={name.error}
+                                    multiline={true} />
+
+                                <MyInput
+                                    label="Description"
+                                    value={description.value}
+                                    onChangeText={text => updateField(this, description, text)}
+                                    error={!!description.error}
+                                    errorText={description.error}
+                                    multiline={true} />
+
+                                <View style={{ flexDirection: 'row' }}>
+                                    <View style={{ flex: 0.5, paddingRight: 15 }}>
                                         <MyInput
-                                            label="Numéro de l'article"
+                                            label="Prix de vente (€) *"
                                             returnKeyType="done"
-                                            value={ProductId}
-                                            editable={false}
-                                            disabled
+                                            keyboardType='numeric'
+                                            value={price.value}
+                                            onChangeText={text => updateField(this, price, text)}
+                                            error={!!price.error}
+                                            errorText={price.error}
                                         />
+                                    </View>
 
-                                        {this.renderCategory()}
-                                        {this.renderBrand()}
-
+                                    <View style={{ flex: 0.5, paddingLeft: 15 }}>
                                         <MyInput
-                                            label="Désignation *"
-                                            value={name.value}
-                                            onChangeText={text => updateField(this, name, text)}
-                                            error={!!name.error}
-                                            errorText={name.error}
-                                            multiline={true} />
-
-                                        <MyInput
-                                            label="Description"
-                                            value={description.value}
-                                            onChangeText={text => updateField(this, description, text)}
-                                            error={!!description.error}
-                                            errorText={description.error}
-                                            multiline={true} />
-
-                                        <View style={{ flexDirection: 'row' }}>
-                                            <View style={{ flex: 0.5, paddingRight: 15 }}>
-                                                <MyInput
-                                                    label="Prix de vente (€) *"
-                                                    returnKeyType="done"
-                                                    keyboardType='numeric'
-                                                    value={price.value.toString()}
-                                                    onChangeText={text => updateField(this, price, text)}
-                                                    error={!!price.error}
-                                                    errorText={price.error}
-                                                />
-                                            </View>
-
-                                            <View style={{ flex: 0.5, paddingLeft: 15 }}>
-                                                <MyInput
-                                                    label="Taxe (%)"
-                                                    returnKeyType="done"
-                                                    keyboardType='numeric'
-                                                    value={taxe.value.toString()}
-                                                    onChangeText={text => updateField(this, taxe, text)}
-                                                    error={!!taxe.error}
-                                                    errorText={taxe.error}
-                                                />
-                                            </View>
-                                        </View>
-
-                                    </Card.Content>
-                                </Card>
-
+                                            label="Taxe (%)"
+                                            returnKeyType="done"
+                                            keyboardType='numeric'
+                                            value={taxe.value}
+                                            onChangeText={text => updateField(this, taxe, text)}
+                                            error={!!taxe.error}
+                                            errorText={taxe.error}
+                                        />
+                                    </View>
+                                </View>
                             </KeyboardAvoidingView>
                         </ScrollView>
 
@@ -592,6 +603,7 @@ export default connect(mapStateToProps)(CreateProduct)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.white
     },
     fab: {
         //flex: 1,
@@ -647,6 +659,7 @@ const styles = StyleSheet.create({
     },
     dialogContainer: {
         flex: 1,
+        width: ScreenWidth * 0.5,
         backgroundColor: '#fff',
         alignItems: "center",
         justifyContent: "center",
@@ -655,7 +668,7 @@ const styles = StyleSheet.create({
         flex: 0.1,
         padding: 5,
         justifyContent: 'flex-start',
-        alignItems: 'center',
+        alignItems: isTablet ? 'flex-end' : "center",
     },
     emptyLogo: {
         backgroundColor: '#fff',
@@ -664,6 +677,11 @@ const styles = StyleSheet.create({
         width: 90,
         height: 90,
         ...theme.style.shadow
+    },
+    logo: {
+        alignSelf: "center",
+        width: logoSize,
+        height: logoSize
     }
 })
 

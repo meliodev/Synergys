@@ -18,7 +18,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { downloadDir, errorMessages, roles, constants } from './constants'
+import { downloadDir, errorMessages, roles, constants, isTablet } from './constants'
 import { mandatSynergysModel, pvReceptionModel } from "./forms";
 import { ficheEEBModel } from './forms/ficheEEB/ficheEEBModel'
 import { mandatMPRModel } from './forms/mandatMPR/mandatMPRModel'
@@ -1028,18 +1028,18 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
 
     let errorMessage = null
 
+    console.log("12345")
+
     if (response.didCancel) {
       resolve(previousAttachments)
     }
 
     else if (response.error) {
-      console.log(response.error)
       errorMessage = "Erreur lors de la sélection du fichier. Veuillez réessayer."
       reject(new Error(errorMessage))
     }
 
     else {
-      console.log("res", response)
       const image = {
         type: response.type,
         name: response.fileName || `Image ${moment().format("DD-MM-YYYY-HH-mm")}`,
@@ -1297,15 +1297,7 @@ export function refreshAssignedTo(user) {
 }
 
 export const refreshUser = (user) => {
-  const isPro = user.isPro || false
-  const id = user.id || ""
-  const denom = user.denom || ""
-  const nom = user.nom || ""
-  const prenom = user.prenom || ""
-  const role = user.role || ""
-  const email = user.email || ""
-  const phone = user.phone || ""
-
+  const { isPro, id, denom, nom, prenom, role, email, phone } = user
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
   return userObject

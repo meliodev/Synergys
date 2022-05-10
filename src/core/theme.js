@@ -1,20 +1,7 @@
-import { StyleSheet, Platform, PixelRatio } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { DefaultTheme } from 'react-native-paper'
-import { ScreenWidth } from './constants'
+import { constants, isTablet } from './constants'
 
-
-// based on iphone 5s's scale
-const scale = ScreenWidth / 300;
-
-const normalize = (size) => {
-  const newSize = size * scale
-  if (Platform.OS === 'ios') {
-    return Math.round(PixelRatio.roundToNearestPixel(newSize))
-  } 
-  else {
-    return Math.round(PixelRatio.roundToNearestPixel(newSize)) - 2
-  }
-}
 
 const baseColors = {
   gray1: "#F1F2F7"
@@ -101,22 +88,28 @@ const colors = {
   miLogout: '#000',
 }
 
-const sizes = {
 
+const scaleFontSize = (size) => {
+  const scale = isTablet ? 1.63 : 1
+  const newSize = size * scale
+  return newSize
+}
+
+const sizes = {
   // global sizes
-  base: normalize(16),
-  font: normalize(14),
-  radius: normalize(6),
-  padding: normalize(16),
+  base: scaleFontSize(16),
+  font: scaleFontSize(14),
+  radius: scaleFontSize(6),
+  padding: scaleFontSize(16),
 
   // font sizes
-  h1: normalize(26),
-  h2: normalize(20),
-  h3: normalize(18),
-  title: normalize(18),
-  header: normalize(16),
-  body: normalize(14),
-  caption: normalize(12),
+  h1: scaleFontSize(26),
+  h2: scaleFontSize(20),
+  h3: scaleFontSize(18),
+  title: scaleFontSize(18),
+  header: scaleFontSize(16),
+  body: scaleFontSize(14),
+  caption: scaleFontSize(12),
 };
 
 const fonts = {
@@ -156,7 +149,7 @@ const fonts = {
   },
 }
 
-const padding = ScreenWidth * 0.04
+const padding = constants.ScreenWidth * 0.04
 
 //MontSerrat
 const customFontMSbold = {
@@ -324,7 +317,7 @@ const style = {
     },
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
-    elevation: 2,
+    elevation: 3,
   },
   inputBorderBottom: {
     borderBottomWidth: StyleSheet.hairlineWidth * 2,
@@ -346,39 +339,3 @@ export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMS
 
 
 
-
-
-
-
-
-
-
-
-
-//https://learnui.design/blog/android-material-design-font-size-guidelines.html
-
-
-// <Text style={{ fontFamily: 'Montserrat-Black' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-ExtraBold' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-SemiBold' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-Medium' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-Regular' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-Light' }}>List of records</Text>
-
-// <Text style={{ fontFamily: 'Montserrat-ExtraLight' }}>List of records</Text>
-
-// <Text style={{ fontFamily: 'Montserrat-Thin' }}>List of records</Text>
-
-//https://learnui.design/blog/android-material-design-font-size-guidelines.html
-
-
-// <Text style={{ fontFamily: 'Montserrat-Black' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-ExtraBold' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-SemiBold' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-Medium' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-Regular' }}>List of records</Text>
-// <Text style={{ fontFamily: 'Montserrat-Light' }}>List of records</Text>
-
-// <Text style={{ fontFamily: 'Montserrat-ExtraLight' }}>List of records</Text>
-
-// <Text style={{ fontFamily: 'Montserrat-Thin' }}>List of records</Text>

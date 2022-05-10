@@ -1,20 +1,17 @@
-import React, { Component } from 'react'
-import { StyleSheet, SafeAreaView, StatusBar, Text, Dimensions, TouchableOpacity, View, FlatList } from 'react-native'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import React from 'react'
+import { StyleSheet, Text, TouchableOpacity, View, FlatList } from 'react-native'
 import { faHomeLgAlt, faInbox, faConstruction, faCalendarAlt, faUserFriends, faAddressCard, faTicketAlt, faFileInvoice, faFolder, faNewspaper, faSignOutAlt, faScroll, faVials, faHandHoldingUsd, faCogs } from '@fortawesome/pro-light-svg-icons'
 import { faCommentDots, faCog } from "@fortawesome/free-solid-svg-icons"
 
 import firebase, { db } from '../firebase'
 import { connect } from 'react-redux'
-import NetInfo from "@react-native-community/netinfo"
 
 import AvatarText from '../components/AvatarText'
 import CustomIcon from '../components/CustomIcon'
 
 import * as theme from '../core/theme';
-import { constants } from '../core/constants';
-import { resetState, setNetwork, setStatusBarColor } from '../core/redux'
+import { constants, isTablet } from '../core/constants';
+import { setStatusBarColor } from '../core/redux'
 import AppVersion from '../components/AppVersion';
 
 const menuPrivilleges = {
@@ -95,7 +92,7 @@ class DrawerMenu extends React.Component {
         return (
             <TouchableOpacity style={styles.headerContainer} onPress={() => this.navigateToScreen('Profile', { isRoot: false })}>
                 <View style={{ flex: 0.22, justifyContent: 'center', alignItems: 'center' }}>
-                    <AvatarText size={45} label={currentUser.fullName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
+                    <AvatarText size={isTablet ? 90 : 45} label={currentUser.fullName.charAt(0)} labelStyle={{ color: theme.colors.white }} />
                 </View>
 
                 <View style={{ flex: 0.78, flexDirection: 'row', marginBottom: 3 }}>
@@ -109,7 +106,13 @@ class DrawerMenu extends React.Component {
                     </View>
                     <View style={{ flex: 0.27, flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center' }}>
                         <CustomIcon icon={faCog} color={theme.colors.gray_medium} />
-                        {showChatIcon && <CustomIcon icon={faCommentDots} color={theme.colors.primary} onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })} />}
+                        {showChatIcon &&
+                            <CustomIcon
+                                icon={faCommentDots}
+                                color={theme.colors.primary}
+                                onPress={() => this.navigateToScreen('Chat', { chatId: 'GlobalChat' })}
+                            />
+                        }
                     </View>
                 </View>
             </TouchableOpacity>
@@ -118,14 +121,15 @@ class DrawerMenu extends React.Component {
 
     renderMenu() {
         const arrMenu = this.setMenuItems(this.props.role.id)
-        const { notificationCount } = this.state
 
         return (
             <FlatList
                 //scrollEnabled={!(constants.ScreenHeight >= 5000)}
                 data={arrMenu}
+                showsVerticalScrollIndicator
                 keyExtractor={item => item.id.toString()}
-                style={{ paddingTop: theme.padding, paddingLeft: theme.padding }}
+                contentContainerStyle={{ paddingVertical: theme.padding/2, paddingLeft: theme.padding }}
+                //contentContainerStyle={{paddingVertical}}
                 renderItem={({ item }) => this.renderMenuItem(item)} />
         )
     }
@@ -145,11 +149,11 @@ class DrawerMenu extends React.Component {
             <TouchableOpacity onPress={() => this.navigateToScreen(item.navScreen)} style={styles.menuItem}>
                 <CustomIcon icon={item.icon} color={item.color} />
                 {item.id === 'inbox' ?
-                    <View style={{ flexDirection: 'row' }}>
+                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
                         <Text style={[styles.menuText, theme.customFontMSmedium.body]}>{item.name}</Text>
                         {notificationCount > 0 &&
                             <View style={styles.notificationBadge}>
-                                <Text style={{ fontSize: 8, color: '#fff' }}>{notificationCount}</Text>
+                                <Text style={{ fontSize: isTablet ? 14 : 8, color: '#fff', fontWeight:"bold" }}>{notificationCount}</Text>
                             </View>
                         }
                     </View>
@@ -169,7 +173,6 @@ class DrawerMenu extends React.Component {
     }
 
     render() {
-        const { role, fcmToken, statusBar } = this.props
         const { currentUser } = firebase.auth()
 
         return (
@@ -236,11 +239,11 @@ const styles = StyleSheet.create({
     },
     notificationBadge: {
         backgroundColor: '#00ACC1',
-        borderRadius: 11,
+        borderRadius: isTablet ? 20 : 11,
         justifyContent: 'center',
         alignItems: 'center',
-        width: 22,
-        height: 22
+        width: isTablet ? 40 : 22,
+        height: isTablet ? 40 : 22
     },
     menuText: {
         marginHorizontal: constants.ScreenWidth * 0.05,

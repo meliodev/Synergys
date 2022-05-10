@@ -3,6 +3,7 @@
 import React from 'react';
 import { StyleSheet, Text } from 'react-native';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import { isTablet } from '../../core/constants';
 import * as theme from '../../core/theme'
 
 export default function StepProgress({ progress, style, size = 27 }) {
@@ -21,7 +22,7 @@ export default function StepProgress({ progress, style, size = 27 }) {
         return (
           <Text
             style={[
-              theme.customFontMSbold.extraSmall,
+             isTablet ? theme.customFontMSbold.body : theme.customFontMSbold.extraSmall,
               { color: progress >= 75 ? theme.colors.primary : theme.colors.secondary },
             ]}>
             {parseInt(fill)}%

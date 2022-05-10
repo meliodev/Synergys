@@ -20,7 +20,7 @@ import RNFetchBlob from 'rn-fetch-blob'
 import { PDFDocument, rgb } from "pdf-lib";
 
 import * as theme from '../../core/theme'
-import { autoSignDocs, constants, downloadDir, errorMessages, docsConfig, termsUrl } from '../../core/constants'
+import { autoSignDocs, constants, downloadDir, errorMessages, docsConfig, termsUrl, isTablet } from '../../core/constants'
 import { loadLog, setToast, uint8ToBase64, base64ToArrayBuffer, myAlert, uuidGenerator, displayError, downloadFile, readFile, deleteFile } from '../../core/utils'
 import { uploadFile } from "../../api/storage-api";
 import { script as emailTemplate } from '../../emailTemplates/signatureRequest'
@@ -371,10 +371,11 @@ class Signature extends Component {
 
                 else {
                     const firstPage = pages[page - 1]
+                    const yRatio = isTablet ? 2 : 12
 
                     firstPage.drawText(signature, {
                         x: (firstPage.getWidth() * x) / (this.state.pageWidth) - 16 * 6,
-                        y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + 12 * this.state.pageHeight * 0.005,
+                        y: (firstPage.getHeight() - ((firstPage.getHeight() * y) / this.state.pageHeight)) + paddingTop + yRatio * this.state.pageHeight * 0.005,
                         size: 10,
                         lineHeight: 10,
                         color: rgb(0, 0, 0),
@@ -743,7 +744,7 @@ const styles = StyleSheet.create({
     },
     button1: {
         width: constants.ScreenWidth * 0.45,
-        height: constants.ScreenWidth * 0.15,
+        height: constants.ScreenWidth * 0.1,
         marginVertical: 10,
         flexDirection: 'row',
         justifyContent: 'center',

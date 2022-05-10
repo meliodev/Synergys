@@ -5,7 +5,7 @@ import { View, StyleSheet, TouchableOpacity, Text, Image, TextInput } from "reac
 import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
+import { constants, isTablet } from "../core/constants";
 //import TextInput from "./TextInput";
 import { faMinus, faPlus } from "@fortawesome/pro-light-svg-icons";
 
@@ -28,6 +28,7 @@ const NumberInput = ({ number, changeValue, error, ...props }) => {
                         returnKeyType="done"
                         keyboardType='numeric'
                         textAlign={'center'}
+                        style={{ fontSize: isTablet ? 38 : undefined }}
                         {...props}
                     />
                 </View>

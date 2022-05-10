@@ -6,7 +6,7 @@ import { connect } from 'react-redux'
 
 import { db } from '../../firebase'
 import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import { constants, isTablet } from '../../core/constants';
 
 import Appbar from '../../components/Appbar'
 import AutoCompleteProducts from '../../components/AutoCompleteProducts'
@@ -15,6 +15,8 @@ import Picker from "../../components/Picker"
 
 import { updateField, nameValidator, arrayValidator, positiveNumberValidator, setToast, load } from "../../core/utils";
 import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
+import { faPlusCircle, faTimes } from '@fortawesome/pro-light-svg-icons';
+import { CustomIcon } from '../../components';
 
 class AddItem extends Component {
     constructor(props) {
@@ -135,103 +137,98 @@ class AddItem extends Component {
     render() {
         const { item, description, suggestions, tagsSelected, quantity, price, taxe, loading } = this.state
         const noItemSelected = tagsSelected.length === 0
-
         const { isConnected } = this.props.network
         const isAdmin = this.props.role.id === "admin"
+        const iconSize = isTablet ? 32 : 21
 
         return (
             <View style={styles.container}>
                 <Appbar back={!loading} title titleText='Ligne de commande' check={!loading} handleSubmit={this.handleSubmit} />
 
-                <Card style={{ margin: 10, paddingVertical: 10, paddingHorizontal: 5 }}>
-                    <Card.Content>
-                        <Text style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Article</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'flex-start', zIndex: 2 }}>
-
-                            <View style={{ flex: 0.9 }}>
-                                <AutoCompleteProducts
-                                    placeholder='Écrivez pour choisir un article'
-                                    suggestions={suggestions}
-                                    tagsSelected={tagsSelected}
-                                    main={this}
-                                    //autoFocus={false}
-                                    showInput={noItemSelected}
-                                    errorText=''
-                                    suggestionsBellow={true}
-                                    role={this.props.role.id}
-                                    showTextInput={tagsSelected.length === 0}
-                                />
-                            </View>
-
-                            {noItemSelected ?
-                                (
-                                    isAdmin &&
-                                    <TouchableOpacity style={styles.plusIcon} onPress={this.addItem}>
-                                        <MaterialCommunityIcons name='plus' color={theme.colors.primary} size={21} />
-                                    </TouchableOpacity>
-                                )
-                                :
-                                <TouchableOpacity style={[styles.plusIcon, { paddingTop: 0 }]} onPress={this.handleDelete}>
-                                    <MaterialCommunityIcons name='close' color={theme.colors.placeholder} size={21} />
-                                </TouchableOpacity>
-                            }
-                        </View>
-
-                        <MyInput
-                            label="Description"
-                            returnKeyType="done"
-                            value={description.value}
-                            onChangeText={text => updateField(this, description, text)}
-                            error={!!description.error}
-                            errorText={description.error}
-                            multiline={true} />
-
-                        <View style={{ flexDirection: 'row' }}>
-                            <View style={{ flex: 0.5, paddingRight: 15 }}>
-                                <MyInput
-                                    label="Quantité"
-                                    returnKeyType="done"
-                                    keyboardType='numeric'
-                                    value={quantity.value}
-                                    onChangeText={text => updateField(this, quantity, text)}
-                                    error={!!quantity.error}
-                                    errorText={quantity.error}
-                                />
-                            </View>
-
-                            <View style={{ flex: 0.5, paddingLeft: 15 }}>
-                                <MyInput
-                                    label="Prix unitaire"
-                                    returnKeyType="done"
-                                    keyboardType='numeric'
-                                    value={price.value.toString()}
-                                    onChangeText={text => updateField(this, price, text)}
-                                    error={!!price.error}
-                                    errorText={price.error}
-                                    editable={isAdmin}
-                                />
-                            </View>
-                        </View>
-
-                        <View>
-                            <MyInput
-                                label="Taxe (%)"
-                                returnKeyType="done"
-                                keyboardType='numeric'
-                                value={taxe.name.toString()}
-                                onChangeText={rate => {
-                                    let { taxe } = this.state
-                                    taxe.name = rate
-                                    taxe.rate = Number(rate)
-                                    this.setState({ taxe })
-                                }}
-                                editable={isAdmin}
+                <View style={{ padding: theme.padding }}>
+                    <Text style={[theme.customFontMSsemibold.caption, { color: theme.colors.primary }]}>Article</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'flex-start', zIndex: 2 }}>
+                        <View style={{ flex: 0.9 }}>
+                            <AutoCompleteProducts
+                                placeholder='Écrivez pour choisir un article'
+                                suggestions={suggestions}
+                                tagsSelected={tagsSelected}
+                                main={this}
+                                //autoFocus={false}
+                                showInput={noItemSelected}
+                                errorText=''
+                                suggestionsBellow={true}
+                                role={this.props.role.id}
+                                showTextInput={tagsSelected.length === 0}
                             />
                         </View>
 
-                    </Card.Content>
-                </Card>
+                        {noItemSelected ?
+                            (
+                                isAdmin &&
+                                <TouchableOpacity style={styles.plusIcon} onPress={this.addItem}>
+                                    <CustomIcon icon={faPlusCircle} color={theme.colors.primary} size={iconSize} />
+                                </TouchableOpacity>
+                            )
+                            :
+                            <TouchableOpacity style={[styles.plusIcon, { paddingTop: 0 }]} onPress={this.handleDelete}>
+                                <CustomIcon icon={faTimes} color={theme.colors.placeholder} size={iconSize} />
+                            </TouchableOpacity>
+                        }
+                    </View>
 
+                    <MyInput
+                        label="Description"
+                        returnKeyType="done"
+                        value={description.value}
+                        onChangeText={text => updateField(this, description, text)}
+                        error={!!description.error}
+                        errorText={description.error}
+                        multiline={true} />
+
+                    <View style={{ flexDirection: 'row' }}>
+                        <View style={{ flex: 0.5, paddingRight: 15 }}>
+                            <MyInput
+                                label="Quantité"
+                                returnKeyType="done"
+                                keyboardType='numeric'
+                                value={quantity.value}
+                                onChangeText={text => updateField(this, quantity, text)}
+                                error={!!quantity.error}
+                                errorText={quantity.error}
+                            />
+                        </View>
+
+                        <View style={{ flex: 0.5, paddingLeft: 15 }}>
+                            <MyInput
+                                label="Prix unitaire"
+                                returnKeyType="done"
+                                keyboardType='numeric'
+                                value={price.value}
+                                onChangeText={text => updateField(this, price, text)}
+                                error={!!price.error}
+                                errorText={price.error}
+                                editable={isAdmin}
+                            />
+                        </View>
+                    </View>
+
+                    <View>
+                        <MyInput
+                            label="Taxe (%)"
+                            returnKeyType="done"
+                            keyboardType='numeric'
+                            value={taxe.name}
+                            onChangeText={rate => {
+                                let { taxe } = this.state
+                                taxe.name = rate
+                                taxe.rate = Number(rate)
+                                this.setState({ taxe })
+                            }}
+                            editable={isAdmin}
+                        />
+                    </View>
+                </View>
             </View>
         )
     }
@@ -250,6 +247,7 @@ export default connect(mapStateToProps)(AddItem)
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: theme.colors.white
     },
     plusIcon: {
         flex: 0.1,

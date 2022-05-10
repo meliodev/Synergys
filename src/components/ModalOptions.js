@@ -8,12 +8,12 @@ import Button from './Button'
 import CustomIcon from './CustomIcon'
 
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
+import { constants, isTablet } from "../core/constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
 export const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview, model = 'Element1' }) => {
-    
+
     const selectElement = (index) => {
         //Unselect all types
         elements.forEach((element, key) => elements[key].selected = false)
@@ -120,7 +120,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                     <CustomIcon icon={element.icon} size={iconSize} color="#fff" />
                 </View>
                 <View style={{ paddingHorizontal: elementSize * 0.15, marginBottom: elementSize * 0.13 }}>
-                    <Text style={[theme.customFontMSbold.h3, { color: theme.colors.white }]}>{element.label}</Text>
+                    <Text style={[theme.customFontMSbold.h3, { color: theme.colors.white }]}>{element.label}s</Text>
                 </View>
             </TouchableOpacity>
         )
@@ -235,7 +235,8 @@ const ModalOptions = ({
             animationIn="slideInUp"
             animationOut="slideOutDown"
             onBackdropPress={!isLoading ? toggleModal : () => console.log('No action...')}
-            style={[styles.modal, modalStyle]} >
+            style={[styles.modal, modalStyle]}
+        >
 
             {isLoading ?
                 <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>

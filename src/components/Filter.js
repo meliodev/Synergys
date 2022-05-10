@@ -61,7 +61,7 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
 
     //RENDERERS
     const renderFilterIcon = () => {
-        if (isAppBar) return <Appbar.Action icon={<CustomIcon icon={faFilter} color={theme.colors.appBarIcon} />} />
+        if (isAppBar) return <Appbar.Action icon={<CustomIcon icon={faFilter} color={theme.colors.appBarIcon} size={24}/>} />
         else return <CustomIcon icon={faFilter} />
     }
 
@@ -134,7 +134,6 @@ const Filter = ({ main, opened, toggleFilter, setFilter, resetFilter, options, f
                     {renderFooter()}
                 </View>
             </MenuOptions>
-
         </PopupMenu>
     )
 }

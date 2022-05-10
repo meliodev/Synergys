@@ -2,6 +2,7 @@ import { faInfoCircle } from "@fortawesome/pro-light-svg-icons";
 import React, { memo, useEffect, useRef } from "react";
 import { View, StyleSheet, Text, Alert, TextInput as NativeTextInput } from "react-native";
 import { TextInput as Input } from "react-native-paper";
+import { isTablet } from "../core/constants";
 import * as theme from "../core/theme";
 import CustomIcon from "./CustomIcon";
 
@@ -47,9 +48,13 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.gray_extraLight,
     textAlign: 'center',
     paddingHorizontal: 0,
-    textAlign: 'auto'
-
+    textAlign: 'auto',
+    height: isTablet ? 85 : undefined,
     //    backgroundColor: 'pink'
+    textAlignVertical: "center",
+    paddingTop: 0,
+    paddingBottom: 0
+
   },
   error: {
     // paddingHorizontal: 4,

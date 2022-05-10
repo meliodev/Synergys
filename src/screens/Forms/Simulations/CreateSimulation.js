@@ -10,7 +10,7 @@ import { CustomIcon, Button } from '../../../components/index'
 import { ficheEEBBase64 } from '../../../assets/files/ficheEEBBase64'
 
 import { ficheEEBModel } from '../../../core/forms/ficheEEB/ficheEEBModel'
-import { constants } from '../../../core/constants'
+import { constants, isTablet } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 import { Checkbox } from 'react-native-paper';
 import { auth } from '../../../firebase';
@@ -213,12 +213,7 @@ class CreateSimulation extends Component {
                         instructions.map((instruction, index) => {
                             const count = index + 1
                             return (
-                                <View key={index.toString()} style={{ flexDirection: 'row' }}>
-                                    <Text style={{ color: theme.colors.primary }}>{count}. </Text>
-                                    <Text style={[theme.customFontMSregular.body, { marginBottom: 12 }]}>
-                                        {instruction}
-                                    </Text>
-                                </View>
+                                <Text key={index.toString()} style={[theme.customFontMSregular.body, { color: theme.colors.primary, marginBottom: isTablet ? 15 : 0 }]}>{count}. <Text style={[theme.customFontMSregular.body, { color: theme.colors.secondary, marginBottom: 12 }]}>{instruction}</Text></Text>
                             )
                         })
                     }

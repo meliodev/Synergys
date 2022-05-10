@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { GiftedChat, Bubble, Send, SystemMessage, Day, Actions } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble, Send, SystemMessage, Day, Time, Actions } from 'react-native-gifted-chat'
 import { TouchableOpacity, ActivityIndicator, View, StyleSheet, Text, Alert, ImageBackground } from 'react-native'
 import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 import DocumentPicker from 'react-native-document-picker';
@@ -28,7 +28,7 @@ import { uuidGenerator, setAttachmentIcon, downloadFile, getRoleIdFromValue, dis
 
 import firebase, { db } from '../../firebase'
 import * as theme from '../../core/theme'
-import { constants, errorMessages } from '../../core/constants'
+import { constants, errorMessages, isTablet } from '../../core/constants'
 import { uploadFiles } from '../../api/storage-api'
 import EmptyList from '../../components/EmptyList';
 
@@ -208,6 +208,8 @@ class Chat extends Component {
                 pending: false,
             }
 
+            console.log("Message date", msg.createdAt)
+
             // Handle attachments
             if (imageSource || videoSource || file && file.source) {
                 console.log('imageSource', imageSource)
@@ -257,39 +259,51 @@ class Chat extends Component {
         </View>
     }
 
-    renderBubble(props) {
-        return (
-            <Bubble
-                {...props}
+    renderBubble = props => (
+        <Bubble
+            {...props}
 
-                wrapperStyle={{
-                    right: {
-                        backgroundColor: '#C5E1A5',
-                        borderRadius: 7,
-                        marginVertical: 10
-                        // backgroundColor: theme.colors.secondary,
-                    }
-                }}
+            wrapperStyle={{
+                right: {
+                    backgroundColor: "#3eb47a",
+                    borderTopLeftRadius: 20,
+                    borderTopRightRadius: 0,
+                    borderBottomRightRadius: 20,
+                    borderBottomLeftRadius: 20,
+                    padding: 10,
+                    marginBottom: 12
+                },
+                left: {
+                    backgroundColor: "#f5f6fa",
+                    borderTopLeftRadius: 0,
+                    borderTopRightRadius: 20,
+                    borderBottomRightRadius: 20,
+                    borderBottomLeftRadius: 20,
+                    padding: 10,
+                    marginBottom: 12
+                }
+            }}
 
-                textStyle={{
-                    right: [theme.customFontMSmedium.body, {
-                        color: '#333'
-                    }]
-                }}
-
-                timeTextStyle={{
-                    right: [theme.customFontMSregular.caption, {
-                        color: theme.colors.placeholder
-                    }]
-                }}
-
-                tickStyle={{
-                    color: theme.colors.primary
-                }}
-
-            />
-        )
-    }
+            textStyle={{
+                right: [isTablet ? theme.customFontMSmedium.body : theme.customFontMSmedium.caption, {
+                    color: '#fff',
+                    marginBottom: 0,
+                    lineHeight: isTablet ? 30 : undefined
+                }],
+                left: [isTablet ? theme.customFontMSmedium.body : theme.customFontMSmedium.caption, {
+                    color: '#333',
+                    marginBottom: 0,
+                    lineHeight: isTablet ? 30 : undefined
+                }]
+            }}
+            timeTextStyle={{
+                right: { color: '#fff', opacity: 0.9, fontSize: 16 },
+                left: { color: '#fff' },
+            }}
+            tickStyle={{ color: props.currentMessage.seen ? '#fff' : '#000' }}
+            usernameStyle={{ color: theme.colors.gray_dark, marginTop: 10, fontSize: 14 }}
+        />
+    )
 
     renderLoading() {
         return (
@@ -497,36 +511,38 @@ class Chat extends Component {
         else return (
             <View style={{ flex: 1 }}>
                 <Appbar back title titleText='Espace messagerie' />
-                <GiftedChat
-                    ref={(ref) => { this.chatRef = ref }}
-                    renderUsernameOnMessage={true}
-                    onPressAvatar={(user) => this.navigateToProfile(user)}
-                    messagesContainerStyle={{ backgroundColor: theme.colors.chatBackground }}
-                    messages={messages}
-                    onSend={this.handleSend}
-                    user={{ _id: this.currentUser.uid, _name: this.currentUser.displayName }}
-                    placeholder='Tapez un message'
-                    alwaysShowSend
-                    showUserAvatar={false}
-                    scrollToBottom
-                    renderCustomView={this.renderCustomView}
-                    renderBubble={this.renderBubble}
-                    renderLoading={this.renderLoading}
-                    renderSend={this.renderSend}
-                    renderActions={(props) => this.renderActions(props, isConnected)}
-                    renderMessageVideo={(props) => this.renderMessageVideo(props, this.props.navigation)}
-                    renderMessageImage={this.renderMessageImage}
-                    scrollToBottomComponent={this.scrollToBottomComponent}
-                    renderSystemMessage={this.renderSystemMessage}
-                    renderDay={(props) => <Day {...props} dateFormat={'D MMM YYYY'} textStyle={[{ color: '#fafafa' }]} />}
-                    renderChatEmpty={this.renderChatEmpty.bind(this)}
-                />
+                <View style={{ flex: 1, backgroundColor: theme.colors.background, padding: theme.padding / 2 }}>
+                    <GiftedChat
+                        ref={(ref) => { this.chatRef = ref }}
+                        renderUsernameOnMessage={true}
+                        onPressAvatar={(user) => this.navigateToProfile(user)}
+                        messagesContainerStyle={{ backgroundColor: theme.colors.chatBackground }}
+                        messages={messages}
+                        onSend={this.handleSend}
+                        user={{ _id: this.currentUser.uid, _name: this.currentUser.displayName }}
+                        placeholder='Tapez un message'
+                        alwaysShowSend
+                        showUserAvatar={false}
+                        scrollToBottom
+                        renderCustomView={this.renderCustomView}
+                        renderBubble={this.renderBubble.bind(this)}
+                        renderLoading={this.renderLoading}
+                        renderSend={this.renderSend}
+                        renderActions={(props) => this.renderActions(props, isConnected)}
+                        renderMessageVideo={(props) => this.renderMessageVideo(props, this.props.navigation)}
+                        renderMessageImage={this.renderMessageImage}
+                        scrollToBottomComponent={this.scrollToBottomComponent}
+                        renderSystemMessage={this.renderSystemMessage}
+                        renderDay={(props) => <Day {...props} dateFormat={'D MMM YYYY'} textStyle={[{ color: theme.colors.gray_dark, fontSize: isTablet ? 16 : undefined }]} />}
+                        renderChatEmpty={this.renderChatEmpty.bind(this)}
+                    />
+                </View>
                 <Toast
                     containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
                     message={toastMessage}
                     type={toastType}
                     onDismiss={() => this.setState({ toastMessage: '' })} />
-            </View>
+            </View >
         )
     }
 

@@ -48,7 +48,7 @@ import {
     pickImage,
 } from '../core/utils';
 
-import { constants, contactForm, errorMessages, pack1, pack2, simulationColorCats } from '../core/constants';
+import { constants, contactForm, errorMessages, isTablet, pack1, pack2 } from '../core/constants';
 import * as theme from '../core/theme'
 import { setStatusBarColor } from '../core/redux';
 import { db, auth, functions } from '../firebase';
@@ -207,7 +207,7 @@ class StepsForm extends Component {
                     color={theme.colors.primary}
                     visible={true}
                 />
-                <Text style={[theme.customFontMSregular.small, { color: theme.colors.white, marginVertical: 8 }]}>
+                <Text style={[isTablet ? theme.customFontMSregular.caption : theme.customFontMSregular.small, { color: theme.colors.white, marginVertical: 8 }]}>
                     {progress}%
                 </Text>
             </View>
@@ -594,6 +594,7 @@ class StepsForm extends Component {
                                 error={error}
                                 errorText={error}
                                 editable={true}
+                                
                             />
                         </View>
                     )
@@ -1262,7 +1263,7 @@ class StepsForm extends Component {
         const title = "Estimation de votre prime: "
         const { products, colorCat, estimation, submitted } = this.state
         const message1 = "Ce que nous vous recommandons"
-        const colorLabel = simulationColorCats.filter((color) => color.id === colorCat)[0].label
+
         const { packs, isPVElligible } = this.setPacks(products)
 
         return (
@@ -1273,7 +1274,8 @@ class StepsForm extends Component {
                 >
 
                     <View style={styles.sucessMessageContent}>
-                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>Vous êtes dans le barème: {colorLabel}</Text>
+                        <Text style={[theme.customFontMSmedium.body, styles.successMessageTitle]}>Vous êtes dans le barème:   </Text>
+                        <View style={[styles.colorCatCircle, { backgroundColor: colorCat }]} />
                     </View>
 
                     {/* <View style={{ padding: theme.padding }}>

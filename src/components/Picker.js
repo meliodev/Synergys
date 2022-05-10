@@ -3,17 +3,23 @@ import { View, StyleSheet, Text, TouchableOpacity, Platform } from "react-native
 import { Picker } from '@react-native-picker/picker'
 import Modal from "react-native-modal"
 import * as theme from "../core/theme";
-import { constants } from "../core/constants";
+import { constants, isTablet } from "../core/constants";
 import CustomIcon from './CustomIcon'
 import { Caption, Body } from './typography/Typography'
-import { faAngleDown } from "@fortawesome/pro-light-svg-icons";
+import { faAngleDown, faCheck } from "@fortawesome/pro-light-svg-icons";
+import CloseIcon from "./CloseIcon";
 
 const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title, showTitle = true, errorText, enabled = true, ...props }) => {
 
     const [isModalVisible, setIsModalVisible] = React.useState(false)
+    const [isPickerVisible, setIsPickerVisible] = React.useState(false)
 
     const toggleModal = () => {
         setIsModalVisible(!isModalVisible)
+    }
+
+    const togglePicker = () => {
+        setIsPickerVisible(!isPickerVisible)
     }
 
     const picker = () => {
@@ -34,37 +40,62 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
         )
     }
 
+
+
     renderPicker = () => {
         if (Platform.OS === "android")
             return picker()
 
         else return (
             <View>
-                <TouchableOpacity style={styles.iosPicker} onPress={toggleModal}>
+                <TouchableOpacity style={styles.iosPicker} onPress={togglePicker} >
                     <Caption text={props.selectedValue} />
                     <CustomIcon icon={faAngleDown} color={theme.colors.gray_dark} />
                 </TouchableOpacity>
 
-                <Modal
-                    isVisible={isModalVisible}
-                    onBackdropPress={toggleModal}
-                    style={styles.modal}
-                    backdropOpacity={0.25}
-                >
-                    <View style={styles.modalContainer}>
-                        <Body text={title} style={{ textAlign: "center" }} />
-                        {picker()}
-                    </View>
-                </Modal>
-            </View>
+                <View>
+                    {isPickerVisible &&
+                        <CloseIcon
+                            icon={faCheck}
+                            onPress={togglePicker}
+                            color={"green"}
+                            style={{ zIndex: 10, position: "absolute", right: 0, top: 10, padding : 15 }}
+                        />
+                    }
+                    {isPickerVisible && picker()}
+                </View>
+            </View >
+
         )
+        // else return (
+        //     <View>
+        //         <TouchableOpacity style={styles.iosPicker} onPress={toggleModal}>
+        //             <Caption text={props.selectedValue} />
+        //             <CustomIcon icon={faAngleDown} color={theme.colors.gray_dark} />
+        //         </TouchableOpacity>
+
+        //         <Modal
+        //             isVisible={isModalVisible}
+        //             onBackdropPress={toggleModal}
+        //             style={styles.modal}
+        //             backdropOpacity={0.25}
+        //         >
+        //             <View style={styles.modalContainer}>
+        //                 <Body text={title} style={{ textAlign: "center" }} />
+        //                 {picker()}
+        //             </View>
+        //         </Modal>
+        //     </View>
+        // )
     }
 
     return (
         <View style={[styles.container, style]}>
 
             <View style={[styles.pickerContainer, pickerContainerStyle]}>
-                {showTitle && <Caption text={title} />}
+                {showTitle &&
+                    <Caption text={title} />
+                }
                 {renderPicker()}
             </View>
 
@@ -82,6 +113,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         paddingTop: 15,
+        marginVertical: isTablet ? 15 : 0
     },
     pickerContainer: {
         borderBottomWidth: Platform.OS === "android" ? StyleSheet.hairlineWidth * 3 : 0,

@@ -7,7 +7,7 @@ import AutoTags from "react-native-tag-autocomplete"
 
 import { db } from '../firebase'
 import * as theme from "../core/theme";
-import { constants, errorMessages } from "../core/constants";
+import { constants, errorMessages, isTablet, ScreenWidth } from "../core/constants";
 import { displayError, myAlert } from "../core/utils";
 
 import { withNavigation } from 'react-navigation'
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
         marginLeft: -constants.ScreenWidth * 0.02,
         paddingTop: 5,
         paddingBottom: 15,
-        width: constants.ScreenWidth * 0.85,
+        width: constants.ScreenWidth - theme.padding*2,
         borderBottomWidth: StyleSheet.hairlineWidth * 3,
         borderBottomColor: theme.colors.gray_extraLight
     },
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
         color: theme.colors.error
     },
     inputContainerStyle: {
-        marginLeft: 7,
+        marginLeft: isTablet ? 21 : 7,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.gray_extraLight,
         borderWidth: 0,

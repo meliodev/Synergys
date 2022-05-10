@@ -39,6 +39,8 @@ const DashboardMenu = ({ ...props }) => {
       barStyle={{ backgroundColor: '#fff', height: 55 }}
       activeColor={"#061357"}
       safeAreaInset={{ bottom: 0 }}
+      labelMaxFontSizeMultiplier={1.5}
+   //   renderLabel={(label)=><Text style={[theme.customFontMSregular.caption]}>{label.route.title}</Text>}
     />
     // </Provider>
   )

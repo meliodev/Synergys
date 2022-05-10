@@ -95,8 +95,6 @@ class CreateProject extends Component {
         this.address = this.props.navigation.getParam('address', { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' })
         this.comContact = this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' }
 
-        console.log(this.client, "...............")
-        
         this.state = {
             //TEXTINPUTS
             name: "",
@@ -413,7 +411,7 @@ class CreateProject extends Component {
         setTimeout(() => this.props.navigation.goBack(), 1000)
     }
 
-    //Delete URLs from FIRESTORE 
+    //Delete URLs from FIRESTORE
     async handleDeleteImage(allImages, currentImage) {
         let { attachments } = this.state
         attachments[currentImage].deleted = true
@@ -762,22 +760,22 @@ class CreateProject extends Component {
             >
                 <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="never">
 
-                    {showProcessAction &&
-                        <ProcessAction
+                    {showProcessAction && 
+                         <ProcessAction
                             process={this.state.process}
-                            project={this.project} 
+                            project={this.project}
                             clientId={client.id}
                             step={step}
                             canUpdate={canWrite}
                             isAllProcess={false}
                             role={this.props.role}
-                        />
+                         />
                     }
 
                     {this.isEdit && viewMore || !this.isEdit ?
 
                         <View>
-                            
+
                             {this.viewMore()}
 
                             {this.isEdit &&
@@ -1093,6 +1091,7 @@ class CreateProject extends Component {
         )
     }
 
+
     render() {
         const { docNotFound, loading, uploading, toastMessage, toastType, isBlockedUpdates } = this.state
         const { isConnected } = this.props.network
@@ -1146,13 +1145,13 @@ class CreateProject extends Component {
                     customBackHandler={this.customBackHandler}
                 />
 
-                {this.renderStandardView(canWrite, isConnected)}
+             {this.renderStandardView(canWrite, isConnected)}
 
-                <Toast
+            {/*    <Toast
                     containerStyle={{ bottom: constants.ScreenWidth * 0.6 }}
                     message={toastMessage}
                     type={toastType}
-                    onDismiss={() => this.setState({ toastMessage: '' })} />
+                    onDismiss={() => this.setState({ toastMessage: '' })} /> */}
 
             </View >
         )

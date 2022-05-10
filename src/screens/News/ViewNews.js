@@ -6,6 +6,7 @@ import HTML from 'react-native-render-html'
 import Appbar from '../../components/Appbar'
 
 import { constants } from '../../core/constants'
+import * as theme from "../../core/theme"
 
 export default class ViewNews extends Component {
 
@@ -30,18 +31,25 @@ export default class ViewNews extends Component {
                 <Appbar back title titleText={this.newspost.postTitle} />
 
                 <ScrollView>
-                    <View style={{ paddingHorizontal: 20, marginTop: -constants.ScreenHeight * 0.04 }}>
+                    <View style={{ paddingVertical: 80, paddingHorizontal: theme.padding, marginTop: -constants.ScreenHeight * 0.04 }}>
                         <HTML
                             tagsStyles={{
                                 // h1: { fontSize: 50 },
                                 // body: { fontSize: 20 },
-                                // p: { fontSize: 20, fontWeight: "normal" },
+                                p: { fontSize: 20, fontWeight: "normal" },
                                 // strong: { fontSize: 20, },
                                 // blockquote: { fontSize: 20 },
-                                a: { marginVertical: 10},
+                                a: { marginVertical: 10 },
                                 // em: { fontSize: 20, },
-                                img: { height: constants.ScreenHeight * 0.25, width: constants.ScreenWidth * 0.9 },
+                                img: {
+                                    height: constants.ScreenHeight * 0.25,
+                                    width: constants.ScreenWidth * 0.9,
+                                    marginVertical: 50
+                                },
                             }}
+                            classesStyles={
+                                { "qui-somme-nous": { transform: [{ scale: 0 }] } }
+                            }
                             styleName="paper md-gutter multiline"
                             source={{ html: this.newspost.postContent }}
                             imagesMaxWidth={Dimensions.get('window').width * 0.5}
@@ -49,8 +57,10 @@ export default class ViewNews extends Component {
                             onLinkPress={(evt, href) => this.onLinkPress(href)}
                             alterData={(node) => {
                                 let { parent, data } = node;
-                                return data.replace("Read More", "Voir plus");
+                                data = data.replace("Read More", "Voir plus");
+                                return data
                             }}
+
                         />
                         {/* <Divider styleName="line" /> */}
                     </View>

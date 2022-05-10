@@ -6,13 +6,12 @@ import { Checkbox } from 'react-native-paper'
 
 import { faPen, faTimes } from '@fortawesome/pro-light-svg-icons'
 
-import { constants } from '../core/constants'
+import { constants, isTablet } from '../core/constants'
 import * as theme from '../core/theme'
 
 import Button from './Button'
 import CustomIcon from './CustomIcon'
 import SquarePlus from './SquarePlus'
-import { isTablet } from 'react-native-device-info'
 
 export default class ModalCheckBoxes extends Component {
     constructor(props) {
@@ -57,7 +56,6 @@ export default class ModalCheckBoxes extends Component {
         let { isModalVisible } = this.state
         let { items } = this.props
         const header = (text) => <Text style={[theme.customFontMSregular.body, { color: theme.colors.gray_dark }]}>{text}</Text>
-        const hitslop = { top: 5, bottom: 5, left: 5, right: 5 }
 
         return (
             <Modal
@@ -67,7 +65,7 @@ export default class ModalCheckBoxes extends Component {
                 presentationStyle={isTablet ? "pageSheet" : ""}
                 >
                 <View style={modalStyles.container}>
-                    <TouchableOpacity style={modalStyles.closeIcon} hitslop={hitslop}>
+                    <TouchableOpacity style={modalStyles.closeIcon} hitslop={theme.hitslop}>
                         <CustomIcon
                             icon={faTimes}
                             color={theme.colors.gray_dark}
@@ -167,7 +165,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 8,
-        marginRight: theme.padding
+        marginRight: isTablet ? 0 : theme.padding,
     }
 })
 

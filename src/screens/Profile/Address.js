@@ -321,8 +321,6 @@ class MarkerTypes extends React.Component {
                     />
                 }
 
-                <Text onPress={() => console.log("Hey")}>Hhhhhh</Text>
-
                 {!loading ?
                     <View style={styles.mapContainer}>
                         <MapView
@@ -363,16 +361,12 @@ MarkerTypes.propTypes = {
 };
 
 const styles = StyleSheet.create({
-    container: {
-        ...StyleSheet.absoluteFillObject,
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-    },
     mapContainer: {
         ...StyleSheet.absoluteFillObject,
         height: ScreenHeight - 100, // you can customize this
         width: ScreenWidth,  // you can customize this
-        alignItems: "center"
+        alignItems: "center",
+        marginTop: 60,
     },
     map: {
         ...StyleSheet.absoluteFillObject,

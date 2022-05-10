@@ -7,7 +7,7 @@ import AutoTags from "react-native-tag-autocomplete"
 
 import { db } from '../firebase'
 import * as theme from "../core/theme";
-import { constants, errorMessages } from "../core/constants";
+import { constants, errorMessages, isTablet } from "../core/constants";
 import { displayError, myAlert } from "../core/utils";
 
 import { withNavigation } from 'react-navigation'
@@ -126,9 +126,8 @@ class AutoCompleteBrands extends React.Component {
                     renderTags={this.customRenderTags}
                     onCustomTagCreated={this.onCustomTagCreated}
                     //handleEmptyDate= {() => console.log('Empty data..')}
-                    createTagOnSpace
                     style={styles.autotags}
-                   // autoFocus={this.props.autoFocus}
+                    // autoFocus={this.props.autoFocus}
                     autoFocus={false}
                     showInput={this.props.showInput}
                     suggestionsBellow={this.props.suggestionsBellow}
@@ -138,7 +137,7 @@ class AutoCompleteBrands extends React.Component {
                     containerStyle={styles.containerStyle}
                     inputContainerStyle={styles.inputContainerStyle}
                     listContainerStyle={styles.listContainerStyle}
-                    listStyle={styles.listStyle}
+                    listStyle={[styles.listStyle, theme.style.shadow]}
                 // renderTextInput={() => <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.gray_light }]} {...this.props} />}
                 />
                 {this.props.errorText !== '' && <Text style={[theme.customFontMSregular.caption, styles.error]}>{this.props.errorText}</Text>}
@@ -199,14 +198,22 @@ const styles = StyleSheet.create({
 
 
     inputContainerStyle: {
-        marginLeft: 5,
+        marginLeft: isTablet ? 21 : 5,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: theme.colors.gray_extraLight,
         borderWidth: 0
     },
     containerStyle: {
         minWidth: 200,
-        maxWidth: constants.ScreenWidth - theme.padding
+        maxWidth: constants.ScreenWidth - theme.padding,
+        // shadowColor: theme.colors.secondary,
+        // shadowOffset: {
+        //     width: 0,
+        //     height: 1,
+        // },
+        // shadowOpacity: 0.1,
+        // shadowRadius: 2.22,
+        // elevation: 3,
     },
     listContainerStyle: {
         backgroundColor: "white",

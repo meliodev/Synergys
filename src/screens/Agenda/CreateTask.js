@@ -488,6 +488,7 @@ class CreateTask extends Component {
 
     createTasks(tasks) {
         for (const task of tasks) {
+            console.log("...", task.id)
             db.collection('Agenda').doc(task.id).set(task)
         }
     }
