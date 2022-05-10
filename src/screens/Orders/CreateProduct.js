@@ -1,4 +1,3 @@
-
 //Category: name : Picker + Dialog (add new cat)
 //Taxe: value : TextInput (numeric)
 //Marque: {id, name, logo} : AutoCompleteTag (like articles)
@@ -34,7 +33,11 @@ import { generateId, myAlert, updateField, pickImage, renderImages, nameValidato
 import * as theme from "../../core/theme";
 import { constants, isTablet, ScreenWidth } from "../../core/constants";
 import SquarePlus from '../../components/SquarePlus';
-import { setCategories, setProducts } from '../../core/admin-utils';
+import { CustomIcon } from '../../components';
+import { faPlusCircle, faTimes } from '@fortawesome/pro-light-svg-icons';
+
+const dialogContainerSize = ScreenWidth * 0.8
+const logoSize = dialogContainerSize * 0.6
 
 class CreateProduct extends Component {
     constructor(props) {
@@ -70,7 +73,7 @@ class CreateProduct extends Component {
             taxe: { value: '', error: '' },
 
             //Category
-            category: { value: '-', error: '' }, //Selected category
+            category: { value: '', error: '' }, //Selected category
             categories: [{ label: 'Selectionnez une catégorie', value: '' }], //Picker with dynamic values
             showDialog: false, //Dialog to add new category
             dialogType: '', //category or brand
@@ -99,9 +102,6 @@ class CreateProduct extends Component {
     }
 
     async componentDidMount() {
-
-        //  setProducts()
-        // setCategories()
 
         this.fetchCategories()
         this.fetchSuggestions()
@@ -205,11 +205,7 @@ class CreateProduct extends Component {
 
     //Handle inputs & Submit
     setProductType(checked, type) {
-        let update = { checked, type }
-        if (checked === "first")
-            update.category = "-"
-
-        this.setState(update)
+        this.setState({ checked, type })
     }
 
     validateInputs() {
@@ -218,7 +214,7 @@ class CreateProduct extends Component {
         const categoryError = nameValidator(category.value, `"Catégorie"`)
         brandError = arrayValidator(tagsSelected, `"Marque"`)
         const nameError = nameValidator(name.value, `"Désignation"`)
-        const priceError = positiveNumberValidator(price.value, `"Prix de vente HT"`)
+        const priceError = positiveNumberValidator(price.value, `"Prix de vente"`)
 
         if (categoryError || brandError || nameError || priceError) {
             category.error = categoryError
@@ -440,9 +436,7 @@ class CreateProduct extends Component {
                     selectedValue={category.value}
                     onValueChange={(text) => updateField(this, category, text)}
                     elements={categories}
-                    errorText={category.error}
-                    editable
-                />
+                    errorText={category.error} />
 
                 <Text
                     onPress={() => this.toggleDialog('category')}
