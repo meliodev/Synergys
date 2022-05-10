@@ -11,7 +11,7 @@ import { constants, isTablet } from '../../core/constants';
 import Appbar from '../../components/Appbar'
 import AutoCompleteProducts from '../../components/AutoCompleteProducts'
 import MyInput from '../../components/TextInput'
-import Picker from "../../components/Picker"
+// import Picker from "../../components/Picker"
 
 import { updateField, nameValidator, arrayValidator, positiveNumberValidator, setToast, load } from "../../core/utils";
 import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
@@ -204,7 +204,7 @@ class AddItem extends Component {
                                 label="Prix unitaire"
                                 returnKeyType="done"
                                 keyboardType='numeric'
-                                value={price.value}
+                                value={price.value.toString()}
                                 onChangeText={text => updateField(this, price, text)}
                                 error={!!price.error}
                                 errorText={price.error}
@@ -218,7 +218,7 @@ class AddItem extends Component {
                             label="Taxe (%)"
                             returnKeyType="done"
                             keyboardType='numeric'
-                            value={taxe.name}
+                            value={taxe.name.toString()}
                             onChangeText={rate => {
                                 let { taxe } = this.state
                                 taxe.name = rate

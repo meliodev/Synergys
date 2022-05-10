@@ -103,6 +103,8 @@ class CreateProduct extends Component {
 
     async componentDidMount() {
 
+
+
         this.fetchCategories()
         this.fetchSuggestions()
 
@@ -205,7 +207,11 @@ class CreateProduct extends Component {
 
     //Handle inputs & Submit
     setProductType(checked, type) {
-        this.setState({ checked, type })
+        let update = { checked, type }
+        if (type === "option") {
+            update.category = { value: "-", error: "" }
+        }
+        this.setState(update)
     }
 
     validateInputs() {
@@ -407,9 +413,9 @@ class CreateProduct extends Component {
                     <Text style={[theme.customFontMSregular.body, { marginBottom: isTablet ? 15 : 0 }]}>Type de l'article</Text>
                     <RadioButton
                         checked={checked}
-                        firstChoice={{ title: 'Service', value: 'service' }}
+                        firstChoice={{ title: 'Option', value: 'option' }}
                         secondChoice={{ title: 'Produit', value: 'good' }}
-                        onPress1={() => this.setProductType('first', 'service')}
+                        onPress1={() => this.setProductType('first', 'option')}
                         onPress2={() => this.setProductType('second', 'good')}
                         style={{ marginBottom: 10 }}
                         textRight={true}
@@ -426,7 +432,7 @@ class CreateProduct extends Component {
     }
 
     renderCategory() {
-        const { category, categories, dialogType } = this.state
+        const { type, category, categories, dialogType } = this.state
 
         return (
             <View style={{ marginBottom: isTablet ? 50 : 20 }}>
@@ -436,7 +442,9 @@ class CreateProduct extends Component {
                     selectedValue={category.value}
                     onValueChange={(text) => updateField(this, category, text)}
                     elements={categories}
-                    errorText={category.error} />
+                    errorText={category.error}
+                    enabled={type !== "option"}
+                />
 
                 <Text
                     onPress={() => this.toggleDialog('category')}
@@ -546,7 +554,7 @@ class CreateProduct extends Component {
                                             label="Prix de vente (€) *"
                                             returnKeyType="done"
                                             keyboardType='numeric'
-                                            value={price.value}
+                                            value={price.value.toString()}
                                             onChangeText={text => updateField(this, price, text)}
                                             error={!!price.error}
                                             errorText={price.error}
@@ -558,7 +566,7 @@ class CreateProduct extends Component {
                                             label="Taxe (%)"
                                             returnKeyType="done"
                                             keyboardType='numeric'
-                                            value={taxe.value}
+                                            value={taxe.value.toString()}
                                             onChangeText={text => updateField(this, taxe, text)}
                                             error={!!taxe.error}
                                             errorText={taxe.error}
