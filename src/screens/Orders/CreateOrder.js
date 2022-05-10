@@ -449,12 +449,12 @@ class CreateOrder extends Component {
                 <SummaryRow label="Total H.T" valuePrefix="€" value={subTotal} />
                 <SummarySeparator />
 
-                {discount > 0 && <SummaryRow label={`Remise (${discount}%)`} valuePrefix="- €" value={discountValue} />}
+                {discount > 0 && <SummaryRow label={`Remise (${discount}%)`} valuePrefix="- €" value={(discountValue).toFixed(2)} />}
                 {showTotalNetHT && <SummaryRow label="Total Net HT" valuePrefix="€" value={totalNetHT} />}
                 {showTotalNetHT && <SummarySeparator />}
 
                 {this.renderTaxes()}
-                <SummaryRow label="Total T.T.C" valuePrefix="€" value={totalTTC} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
+                <SummaryRow label="Total T.T.C" valuePrefix="€" value={(totalTTC).toFixed(2)} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
 
                 {primeCEE > 0 || primeRenov > 0 || aidRegion > 0 && <SummarySeparator />}
                 {primeCEE > 0 && <SummaryRow label="Prime Cee" valuePrefix="- €" value={primeCEE} />}
@@ -462,7 +462,7 @@ class CreateOrder extends Component {
                 {aidRegion > 0 && <SummaryRow label="Aides région" valuePrefix="- €" value={aidRegion} />}
                 <SummarySeparator />
 
-                <SummaryRow label="Net à payer" valuePrefix="€" value={totalNet} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
+                <SummaryRow label="Net à payer" valuePrefix="€" value={(totalNet).toFixed(2)} textTheme={theme.customFontMSmedium.body} labelStyle={{ color: theme.colors.secondary }} />
             </View >
         )
     }

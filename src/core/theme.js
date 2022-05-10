@@ -4,7 +4,7 @@ import { ScreenWidth } from './constants'
 
 
 // based on iphone 5s's scale
-const scale = ScreenWidth / 600;
+const scale = ScreenWidth / 300;
 
 const normalize = (size) => {
   const newSize = size * scale

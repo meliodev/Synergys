@@ -14,7 +14,7 @@ import AppToast from './components/global/AppToast'
 import NetworkStatus from './NetworkStatus'
 import RootController from './Navigation/DrawerNavigator'
 
-import firebase, { crashlytics, remoteConfig } from './firebase'
+import firebase, { crashlytics, functions, remoteConfig } from './firebase'
 import Store from './Store/configureStore'
 import { fontsConfig } from '../fontConfig'
 import * as theme from './core/theme'
@@ -42,6 +42,7 @@ class App extends Component {
     console.log("Mounting app.js...")
     SplashScreen.hide()
     console.log("splash screen hidden...")
+
 
     //Notification channels
     const channelId = await notifee.createChannel({
