@@ -46,7 +46,6 @@ export default class ModalCheckBoxes extends Component {
     }
 
     toggleModal() {
-        console.log("toggle....")
         if (!this.props.editable) return
         const { isModalVisible } = this.state
         this.setState({ isModalVisible: !isModalVisible })

@@ -1296,12 +1296,22 @@ export function refreshAssignedTo(user) {
   this.setState({ assignedTo, assignedToError: "" })
 }
 
+
 export const refreshUser = (user) => {
-  const { isPro, id, denom, nom, prenom, role, email, phone } = user
+  const isPro = user.isPro || false
+  const id = user.id || ""
+  const denom = user.denom || ""
+  const nom = user.nom || ""
+  const prenom = user.prenom || ""
+  const role = user.role || ""
+  const email = user.email || ""
+  const phone = user.phone || ""
+
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
   return userObject
 }
+
 
 export function refreshAddress(address) {
   this.setState({ address })

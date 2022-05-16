@@ -315,7 +315,7 @@ export const version7 = {
                     {
                         id: 'taxStatement',
                         title: "Relevé d'impôt",
-                        instructions: "Veuillez importer le relevé d'impôt du client.",
+                        instructions: "Appuyer sur valider pour passer à l'action suivante.",
                         actionOrder: 1,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
@@ -333,7 +333,7 @@ export const version7 = {
                     {
                         id: 'proofOfAddress',
                         title: "Justificatif de domicile (moins de 3 mois)",
-                        instructions: '',
+                        instructions: "Appuyer sur valider pour passer à l'action suivante.",
                         actionOrder: 2,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
@@ -350,7 +350,7 @@ export const version7 = {
                     {
                         id: 'taxStatement',
                         title: "Plan cadastral",
-                        instructions: "Veuillez importer le plan cadastral du client.",
+                        instructions: "Appuyer sur valider pour passer à l'action suivante.",
                         actionOrder: 3,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
@@ -368,8 +368,27 @@ export const version7 = {
                     {
                         id: 'propertyTax',
                         title: "Taxe foncière",
-                        instructions: "Veuillez importer la taxe foncière du client.",
+                        instructions: "Appuyer sur valider pour passer à l'action suivante.",
                         actionOrder: 4,
+                        screenName: 'UploadDocument', //creation
+                        screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
+                        type: 'manual', //Check manually
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                            { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    //##task:done: Autre documents
+                    {
+                        id: 'otherDocs',
+                        title: "Autre(s) document(s)",
+                        instructions: "Veuillez importer tout autre document. Appuyer sur valider pour passer à l'action suivante",
+                        actionOrder: 5,
                         screenName: 'UploadDocument', //creation
                         screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
                         type: 'manual', //Check manually
@@ -640,6 +659,26 @@ export const version7 = {
                         responsable: 'Poseur',
                         status: 'pending',
                     },
+                    //##task: Choisir les types de travaux
+                    {
+                        id: 'workTypesSelection',
+                        title: "Selectionnez les types de travaux",
+                        instructions: "Appuyer sur moifier pour selectionner les types de travaux. Ou appuyer sur valider pour passer à l'action suivante.",
+                        actionOrder: 4,
+                        // screenName: 'UploadDocument', //creation
+                        // screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
+                        type: 'manual', //Check manually
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                            { label: 'Modifier', id: 'upload', onSelectType: 'callBack' },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+
                 ]
             },
             'technicalVisitFile': {
@@ -674,6 +713,7 @@ export const version7 = {
                         responsable: 'Poseur',
                         status: 'pending',
                     },
+                    //##task: Signer la VT
                     {
                         id: 'technicalVisitChoice',
                         title: "Voulez-vous cloturer la visite technique",
@@ -1130,6 +1170,7 @@ export const version7 = {
                         responsable: 'Poseur',
                         status: 'pending',
                     },
+                    //##task: Delete "Signer la facture"
                     {
                         id: 'signedBillCreation', //#task: check if devis is still existing..
                         title: 'Signer la facture',
@@ -1161,6 +1202,7 @@ export const version7 = {
                     },
                 ]
             },
+            //##task: add Multi choices
             'paymentStatus': { //conversion
                 title: "Finalisation de la facturation",
                 instructions: '',
@@ -1178,6 +1220,7 @@ export const version7 = {
                         choices: [
                             { label: 'Attente paiement client', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Attente paiement financement', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
+                            //##task: Diviser Attente paiement aide en MPR et CEE
                             { label: 'Attente paiement aide', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             { label: 'Payé', id: 'confirm', onSelectType: 'commentPicker', selected: false, stay: false },
                         ],
@@ -1200,6 +1243,7 @@ export const version7 = {
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
                         ],
                     },
+                    //##task: Ajouter montant HT + TTC ??
                     {
                         id: 'billAmount',
                         title: "Montant de la facture", //#task allow adv to view devis before validating (multi-choice: voir/valider)

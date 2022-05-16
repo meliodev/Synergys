@@ -288,16 +288,18 @@ class ProcessAction extends Component {
                                     await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                             }
                         }
+
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage
+                        })
+
                         if (screenName) {
                             if (screenPush)
                                 this.props.navigation.push(screenName, screenParams)
                             else
                                 this.props.navigation.navigate(screenName, screenParams)
                         }
-                        this.setState({
-                            loading: false,
-                            loadingMessage: this.initialLoadingMessage
-                        })
                     }
                 }
 
@@ -387,7 +389,7 @@ class ProcessAction extends Component {
             this.setState({ loadingModal: true, choice })  //used in case of comment
             await countDown(500)
             const { process, pressedAction } = this.state
-            let { screenName, screenParams, choices } = pressedAction
+            let { screenName, screenParams, screenPush, choices } = pressedAction
             const { onSelectType, commentRequired, operation, link } = choice
             const { nextStep, nextPhase } = choice
 
@@ -419,8 +421,15 @@ class ProcessAction extends Component {
                                 await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                         }
                     }
+                    
                     this.setState({ showModal: false, loadingModal: false })
-                    this.props.navigation.navigate(screenName, screenParams)
+
+                    if (screenName) {
+                        if (screenPush)
+                            this.props.navigation.push(screenName, screenParams)
+                        else
+                            this.props.navigation.navigate(screenName, screenParams)
+                    }
                 }
 
                 else {
