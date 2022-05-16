@@ -235,6 +235,17 @@ export const configChoiceIcon = (choice) => {
   return element
 }
 
+export const initFormSections = (sections, sectionsTarget) => {
+  for (const key in sectionsTarget) {
+    sections[key].isExpanded = true
+    sections[key].show = true
+    for (const i in sectionsTarget[key]) {
+      sections[key]["fields"][i].show = true
+    }
+  }
+  return sections
+}
+
 export const articles_fr = (masc, masculins, target) => {
 
   let resp

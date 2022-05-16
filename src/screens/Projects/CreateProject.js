@@ -16,15 +16,16 @@ import { Appbar, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, 
 
 import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, highRoles, workTypes, errorMessages, latestProcessVersion } from "../../core/constants";
+import { constants, highRoles, workTypes, errorMessages, latestProcessVersion, sectionsModels } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
-import { generateId, navigateToScreen, myAlert, nameValidator, setToast, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, nameValidator, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError, initFormSections } from "../../core/utils";
 
 import { uploadFiles } from "../../api/storage-api";
 import { getLatestProcessModelVersion } from '../../core/process/algorithm/process'
 
 import { connect } from 'react-redux'
 import ModalCheckBoxes from '../../components/ModalCheckBoxes';
+import { setAppToast } from '../../core/redux';
 
 const states = [
     { label: 'En attente', value: 'En attente' },
@@ -85,7 +86,8 @@ class CreateProject extends Component {
         this.isCurrentHighRole = highRoles.includes(this.props.role.id)
         this.isClient = this.props.role.id === 'client'
 
-        this.ProjectId = this.props.navigation.getParam('ProjectId', '')
+        this.projectParam = this.props.navigation.getParam('project', '')
+        this.ProjectId = this.props.navigation.getParam('ProjectId', this.projectParam.id) || ""
         this.isEdit = this.ProjectId !== ""
         this.ProjectId = this.isEdit ? this.ProjectId : generateId('GS-PR-')
         this.title = this.isEdit ? 'Modifier le projet' : 'Nouveau projet'
@@ -94,9 +96,83 @@ class CreateProject extends Component {
         this.client = this.props.navigation.getParam('client', { id: '', fullName: '', email: '', role: '', phone: "" })
         this.address = this.props.navigation.getParam('address', { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' })
         this.comContact = this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' }
+        this.sections = this.props.navigation.getParam('sections', null) //EXP: { info: { projectWorkTypes: true } }
+
+        //onSubmit, Go back if goBackConditions elements are not null
+        const goBackConditions = [this.sections]
+        this.isGoBack = !goBackConditions.includes(null)
 
         const showClient = !this.isClient && (this.client.id === "" || this.isEdit)
         const showAddress = !this.isClient && (this.client.id === "" || this.isEdit)
+        const sections = initFormSections(sectionsModels.project, this.sections)
+        const defaultSections = {
+            activity: {
+                isExpanded: !this.isEdit,
+                show: this.isEdit,
+                fields: {}
+            },
+            info: {
+                isExpanded: !this.isEdit,
+                show: true,
+                fields: {
+                    projectId: { show: this.isEdit },
+                    projectName: { show: true },
+                    projectStep: { show: !this.isClient },
+                    projectState: { show: !this.isClient && this.isEdit },
+                    projectPhase: { show: this.isClient },
+                    projectWorkTypes: { show: true }
+                }
+            },
+            client: {
+                isExpanded: !this.isEdit,
+                show: showClient && showAddress,
+                fields: {
+                    client: { show: showClient },
+                    address: { show: showAddress }
+                }
+            },
+            contacts: {
+                isExpanded: !this.isEdit,
+                show: this.comContact.id === "" || this.isEdit,
+                fields: {
+                    com: { show: true },
+                    tech: { show: this.isEdit }
+                }
+            },
+            documents: {
+                isExpanded: !this.isEdit,
+                show: this.isEdit,
+                fields: {
+                    documents: { show: true }
+                }
+            },
+            tasks: {
+                isExpanded: !this.isEdit,
+                show: false,
+                fields: {
+                    tasks: true
+                }
+            },
+            billing: {
+                isExpanded: !this.isEdit,
+                show: false,
+                fields: {
+                    billAmount: { show: true }
+                }
+            },
+            pictures: {
+                isExpanded: !this.isEdit,
+                show: true,
+                fields: {}
+            },
+            notes: {
+                isExpanded: !this.isEdit,
+                show: true,
+                fields: {
+                    notes: { show: true }
+                }
+            }
+        }
 
         this.state = {
             //TEXTINPUTS
@@ -159,89 +235,15 @@ class CreateProject extends Component {
 
             isModalCheckBoxesVisible: false,
             scrollViewRef: null,
-            sections: {
-                activity: {
-                    isExpanded: !this.isEdit,
-                    show: this.isEdit,
-                    fields: {}
-                },
-                info: {
-                    isExpanded: !this.isEdit,
-                    show: true,
-                    fields: {
-                        projectId: { show: this.isEdit },
-                        projectName: { show: true },
-                        projectStep: { show: !this.isClient },
-                        projectState: { show: !this.isClient && this.isEdit },
-                        projectPhase: { show: this.isClient },
-                        projectWorkTypes: { show: true }
-                    }
-                },
-                client: {
-                    isExpanded: !this.isEdit,
-                    show: showClient && showAddress,
-                    fields: {
-                        client: { show: showClient },
-                        address: { show: showAddress }
-                    }
-                },
-                contacts: {
-                    isExpanded: !this.isEdit,
-                    show: this.comContact.id === "" || this.isEdit,
-                    fields: {
-                        com: { show: true },
-                        tech: { show: this.isEdit }
-                    }
-                },
-                documents: {
-                    isExpanded: !this.isEdit,
-                    show: this.isEdit,
-                    fields: {
-                        documents: { show: true }
-                    }
-                },
-                tasks: {
-                    isExpanded: !this.isEdit,
-                    show: false,
-                    fields: {
-                        tasks: true
-                    }
-                },
-                billing: {
-                    isExpanded: !this.isEdit,
-                    show: this.isEdit && bill,
-                    fields: {
-                        billAmount: { show: true }
-                    }
-                },
-                pictures: {
-                    isExpanded: !this.isEdit,
-                    show: true,
-                    fields: {}
-                },
-                notes: {
-                    isExpanded: !this.isEdit,
-                    show: true,
-                    fields: {
-                        notes: { show: true }
-                    }
-                }
-            },
+            sections: this.sections ? sections : defaultSections,
             viewMore: false,
         }
     }
 
-
+    //Requires bill amount (from backend)s
     updateSectionsConfig() {
-        const canReadTasks = this.props.permissions.tasks.canRead
-        const { name, step, client, address, comContact, techContact } = this.state
-        const prerequiredFields = [name, client.id, address.description, comContact.id]
-        const isStepTech = techSteps.includes(step)
-        let showTasksSection = !prerequiredFields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
-        showTasksSection = canReadTasks && (this.isEdit || !this.isEdit && showTasksSection)
-
-        let { sections } = this.state
-        sections.tasks.show = showTasksSection
+        let { sections, bill } = this.state
+        sections.billing.show = this.isEdit && bill && bill.amount !== "" && !this.sections
         this.setState({ sections })
     }
 
@@ -250,7 +252,7 @@ class CreateProject extends Component {
         else this.setWorkTypes()
         this.updateSectionsConfig()
         this.initialState = _.cloneDeep(this.state)
-        load(this, false)
+        this.setState({ loading: false })
     }
 
     componentWillUnmount() {
@@ -269,11 +271,11 @@ class CreateProject extends Component {
     async initEditMode() {
         this.isEdit = true
         this.title = 'Modifier le projet'
-        this.initSectionsExpansion()
+        if (!this.sections)
+            this.initSectionsExpansion()
         let query = db.collection("Projects").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
             this.projectListener = query.onSnapshot(async (doc) => {
-                console.log("Project was updated...")
                 if (!doc.exists) return null
                 let project = doc.data()
                 project.id = doc.id
@@ -392,7 +394,8 @@ class CreateProject extends Component {
             techContact.error = techContactError
             address.error = addressError
             this.setState({ client, nameError, address, comContact, techContact, hasPriorTechVisitError, loading: false })
-            setToast(this, 'e', errorMessages.invalidFields)
+            const toast = { message: errorMessages.invalidFields, type: "error" }
+            setAppToast(this, toast)
             return false
         }
 
@@ -434,7 +437,10 @@ class CreateProject extends Component {
                     this.setImageCarousel(attachments)
                     this.setState({ attachments, newAttachments: [] })
                 }
-                else setToast(this, 'e', "Les images n'ont pas pu être importées. Veuillez réessayer.")
+                else {
+                    const toast = { message: errorMessages.documents.upload, type: "error" }
+                    setAppToast(this, toast)
+                }
                 this.setState({ uploading: false })
             }
         }
@@ -456,7 +462,12 @@ class CreateProject extends Component {
         if (!this.isEdit)
             await this.initEditMode()
         load(this, false)
-        setToast(this, 'i', toastMessage)
+
+        const toast = { message: toastMessage, type: "info" }
+        setAppToast(this, toast)
+
+        if (this.isGoBack)
+            this.props.navigation.goBack()
     }
 
     persistData(project) {
@@ -1015,8 +1026,7 @@ class CreateProject extends Component {
 
     renderGeneralInfoSection(showFields, isExpanded, canWrite, loading) {
 
-        console.log('000000000', showFields.projectPhase)
-
+        console.log('is expanded', isExpanded)
         return (
             <FormSection
                 sectionTitle='Informations générales'
@@ -1080,7 +1090,7 @@ class CreateProject extends Component {
                 form={
                     <View style={{ flex: 1 }}>
                         {tasksList.length > 0 ?
-                            showFields.tasks.show && this.renderTasksFields()
+                            this.renderTasksFields()
                             :
                             this.renderPriorTechVisitField()
                         }
@@ -1267,13 +1277,16 @@ class CreateProject extends Component {
 
     renderForm(canWrite, loading, isConnected) {
 
-        const { address, bill, showFields, sections } = this.state
-
-        console.log('sections["info"].fields', sections["info"].fields)
+        const { sections, bill, name, step, client, address, comContact, techContact } = this.state
+        const canReadTasks = this.props.permissions.tasks.canRead
+        const prerequiredFields = [name, client.id, address.description, comContact.id]
+        const isStepTech = techSteps.includes(step)
+        let showTasksSection = !prerequiredFields.includes("") && (!isStepTech || isStepTech && techContact.id !== "")
+        showTasksSection = canReadTasks && (this.isEdit || !this.isEdit && showTasksSection) && !this.sections
 
         return (
             <View>
-                {this.viewMore()}
+                {!this.sections && this.viewMore()}
 
                 {sections["activity"].show &&
                     this.renderActivitySection(sections["activity"].fields, sections["activity"].isExpanded)
@@ -1295,8 +1308,8 @@ class CreateProject extends Component {
                     this.renderDocumentsSection(sections["documents"].fields, sections["documents"].isExpanded, canWrite)
                 }
 
-                {sections["tasks"].show &&
-                    this.renderTasksSection(sections["tasks"].fields, sections["tasks"].isExpanded)
+                {showTasksSection &&
+                    this.renderTasksSection(sections["tasks"].fields, sections["tasks"].isExpanded, showTasksSection)
                 }
 
                 {sections["billing"].show &&
@@ -1317,7 +1330,7 @@ class CreateProject extends Component {
     renderStandardView(canWrite, isConnected, loading) {
 
         const { client, step, viewMore } = this.state
-        const showProcessAction = this.isEdit && this.project && this.state.process
+        const showProcessAction = this.isEdit && this.project && this.state.process && !this.sections
 
         return (
             <KeyboardAvoidingView
@@ -1330,7 +1343,7 @@ class CreateProject extends Component {
                         this.renderProcessAction(client, step, canWrite)
                     }
 
-                    {this.isEdit && viewMore || !this.isEdit ?
+                    {this.isEdit && viewMore || !this.isEdit || this.sections ?
                         this.renderForm(canWrite, loading, isConnected)
                         :
                         this.viewMore()
@@ -1411,9 +1424,8 @@ class CreateProject extends Component {
                     handleRefresh={this.handleRefresh}
                     customBackHandler={this.customBackHandler}
                 />
-
+                {/* <Text>Hello</Text> */}
                 {this.renderStandardView(canWrite, isConnected, loading)}
-
             </View >
         )
     }

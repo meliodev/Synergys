@@ -58,6 +58,8 @@ class ProcessAction extends Component {
             currentAction: null,
             pressedAction: null,
 
+            multiComments: [],
+
             showModal: false,
             showDialog: false,
             expanded: true,
@@ -396,9 +398,19 @@ class ProcessAction extends Component {
             //Highlight selected choice
             if (typeof (choice.selected) === 'boolean') {
                 choices.forEach((item) => {
-                    if (item.label === choice.label) item.selected = true
-                    else item.selected = false
+                    const value = onSelectType === 'multiCommentsPicker' ? !item.selected : true
+                    if (item.label === choice.label) item.selected = value
+                    else item.selected = onSelectType === 'multiCommentsPicker' ? item.selected : false
                 })
+            }
+
+            //Handle MultiComments
+            if (onSelectType === 'multiCommentsPicker') {
+                let { multiComments } = this.state
+                if (multiComments.includes(choice.label))
+                    multiComments.pop(choice.label)
+                else multiComments.push(choice.label)
+                this.setState({ multiComments })
             }
 
             if (commentRequired) {
@@ -421,7 +433,7 @@ class ProcessAction extends Component {
                                 await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                         }
                     }
-                    
+
                     this.setState({ showModal: false, loadingModal: false })
 
                     if (screenName) {
@@ -452,11 +464,18 @@ class ProcessAction extends Component {
                         await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
                     }
 
+                    else if (onSelectType === 'multiCommentsPicker') {
+                        const comments = this.state.multiComments.join(", ")
+                        console.log('COMMENTS', comments) //##task: How to validate ??
+                        // await this.runOperation(operation, pressedAction)
+                        // await this.validateAction(comments, choices, choice.stay, nextStep, nextPhase)
+                    }
+
                     else if (onSelectType === "openLink") {
                         await Linking.openURL(link)
                     }
 
-                    this.setState({ showModal: false, loadingModal: false })
+                    this.setState({ showModal: onSelectType === 'multiCommentsPicker' ? true : false, loadingModal: false })
                 }
             }
         }

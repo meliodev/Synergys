@@ -383,7 +383,7 @@ export const version7 = {
                         responsable: 'Commercial',
                         status: 'pending',
                     },
-                    //##task:done: Autre documents
+                    //##done:task Autre documents
                     {
                         id: 'otherDocs',
                         title: "Autre(s) document(s)",
@@ -659,26 +659,29 @@ export const version7 = {
                         responsable: 'Poseur',
                         status: 'pending',
                     },
-                    //##task: Choisir les types de travaux
+                    //##done:task: Choisir les types de travaux
                     {
                         id: 'workTypesSelection',
                         title: "Selectionnez les types de travaux",
                         instructions: "Appuyer sur moifier pour selectionner les types de travaux. Ou appuyer sur valider pour passer à l'action suivante.",
                         actionOrder: 4,
-                        // screenName: 'UploadDocument', //creation
-                        // screenParams: { project: null, documentType: { label: 'Autre', value: 'Autre', selected: false } },
+                        screenName: 'CreateProject', //creation
+                        screenParams: {
+                            project: null,
+                            sections: { info: { projectWorkTypes: true } }
+                        },
+                        screenPush: true,
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
                             // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
-                            { label: 'Modifier', id: 'upload', onSelectType: 'callBack' },
+                            { label: 'Modifier', id: 'edit', onSelectType: 'navigation' },
                         ],
-                        responsable: 'Commercial',
+                        responsable: 'Poseur',
                         status: 'pending',
                     },
-
                 ]
             },
             'technicalVisitFile': {
@@ -713,7 +716,6 @@ export const version7 = {
                         responsable: 'Poseur',
                         status: 'pending',
                     },
-                    //##task: Signer la VT
                     {
                         id: 'technicalVisitChoice',
                         title: "Voulez-vous cloturer la visite technique",
@@ -736,7 +738,36 @@ export const version7 = {
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
-                    }
+                    },
+                    //##done:task: Signer la VT
+                    {
+                        id: 'signedVTCreation', //#task: check if devis is still existing..
+                        title: 'Signer la visite technique',
+                        instructions: '',
+                        actionOrder: 3,
+                        collection: 'Documents',
+                        queryFilters: [ //VERIFICATION: verify if signed quote exists
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
+                        ],
+                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
+                            { filter: 'project.id', operation: '==', value: '' },
+                            { filter: 'type', operation: '==', value: 'Visite technique' },
+                            { filter: 'deleted', operation: '==', value: false },
+                        ],
+                        screenName: 'UploadDocument',
+                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Visite technique', value: 'Visite technique', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
+                        type: 'auto',
+                        choices: [
+                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
+                            { label: 'Signer la visite technique', id: 'sign', onSelectType: 'navigation' },
+                        ],
+                        responsable: 'Client',
+                        status: 'pending',
+                        verificationType: 'doc-creation',
+                    },
                 ]
             },
         },
@@ -1095,49 +1126,6 @@ export const version7 = {
                     //#task: Add last action multi-choice (contrat "en cours" or "terminé")
                 ]
             },
-            // 'quoteVerification': {
-            //     title: "Vérification automatique de l'existence d'un devis généré",
-            //     instructions: '',
-            //     stepOrder: 8,
-            //     //#task: hide it from steps to no show on UI (hidden = true)
-            //     actions: [
-            //         //Devis verification #ask: It is possible that a project starts from Installation phase so quote does not exist -> cannot create bill from quote. Is it possible that somebody deletes the signed quote ? Or is it possible that If yes should we do quote existance verification to import/sign it again before moving to billing ?
-            //         {
-            //             id: 'quoteVerification',
-            //             title: "Vérification de l'existence d'un devis généré",
-            //             instructions: '',
-            //             actionOrder: 1,
-            //             collection: 'Documents',
-            //             queryFilters: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Devis' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //                 { filter: 'attachmentSource', operation: '==', value: 'generation' }
-            //             ],
-            //             screenName: 'UploadDocument', //creation
-            //             screenParams: { project: null, documentType: { label: 'Devis', value: 'Devis', selected: false }, dynamicType: true },
-            //             type: 'auto',
-            //             verificationType: 'doc-creation',
-            //             status: 'pending',
-            //             events: { onDocFound: { nextStep: '' }, onDocNotFound: { nextStep: 'facturationOption1' } }
-            //         },
-            //         { //Doc found
-            //             id: 'billingChoice',
-            //             title: "Voulez-vous créer la facture à partir du devis existant de ce projet ?",
-            //             instructions: '',
-            //             actionOrder: 2,
-            //             type: 'manual',
-            //             verificationType: 'multiple-choices',
-            //             comment: '', //motif
-            //             choices: [
-            //                 { label: 'NON', id: 'cancel', nextStep: 'facturationOption1', onSelectType: 'transition', commentRequired: true, operation: null }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-            //                 { label: 'OUI', id: 'confirm', nextStep: 'facturationOption2', onSelectType: 'transition', operation: null },
-            //             ],
-            //             responsable: 'Poseur',
-            //             status: 'pending',
-            //         },
-            //     ]
-            // },
             'facturationOption1': { //no conversion
                 title: "Facturation",
                 instructions: '',
@@ -1169,40 +1157,11 @@ export const version7 = {
                         verificationType: 'doc-creation',
                         responsable: 'Poseur',
                         status: 'pending',
-                    },
-                    //##task: Delete "Signer la facture"
-                    {
-                        id: 'signedBillCreation', //#task: check if devis is still existing..
-                        title: 'Signer la facture',
-                        instructions: '',
-                        actionOrder: 2,
-                        collection: 'Documents',
-                        queryFilters: [ //VERIFICATION: verify if signed bill exists
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Facture' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
-                        ],
-                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing bill (to update signature) 
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Facture' },
-                            { filter: 'deleted', operation: '==', value: false },
-                        ],
-                        screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Facture', value: 'Facture', selected: false }, dynamicType: true, isSignature: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                            { label: 'Signer la facture', id: 'sign', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Client',
-                        status: 'pending',
                         nextStep: 'paymentStatus'
                     },
+                    //##done:task: Delete "Signer la facture"
                 ]
             },
-            //##task: add Multi choices
             'paymentStatus': { //conversion
                 title: "Finalisation de la facturation",
                 instructions: '',
@@ -1210,6 +1169,7 @@ export const version7 = {
                 nextStep: '',
                 actions: [
                     {
+                        //##task: add multiCommentsPicker
                         id: 'paymentStatus',
                         title: 'Modifier le statut du paiement',
                         instructions: "",
@@ -1218,11 +1178,11 @@ export const version7 = {
                         verificationType: 'multiple-choices',
                         comment: '',
                         choices: [
-                            { label: 'Attente paiement client', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
-                            { label: 'Attente paiement financement', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
+                            { label: 'Attente paiement client', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            { label: 'Attente paiement financement', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
                             //##task: Diviser Attente paiement aide en MPR et CEE
-                            { label: 'Attente paiement aide', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
-                            { label: 'Payé', id: 'confirm', onSelectType: 'commentPicker', selected: false, stay: false },
+                            { label: 'Attente paiement aide', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            { label: 'Payé', id: 'confirm', onSelectType: 'multiCommentsPicker', selected: false, stay: false },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',

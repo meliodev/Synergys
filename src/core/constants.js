@@ -73,6 +73,77 @@ export const errorMessages = {
     map: "Erreur lors de la communication avec le serveur Google Maps. Veuillez réessayer..."
 }
 
+export const sectionsModels = {
+    project: {
+        activity: {
+            isExpanded: false,
+            show: false,
+            fields: {}
+        },
+        info: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                projectId: { show: false },
+                projectName: { show: false },
+                projectStep: { show: false },
+                projectState: { show: false },
+                projectPhase: { show: false },
+                projectWorkTypes: { show: false }
+            }
+        },
+        client: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                client: { show: false },
+                address: { show: false }
+            }
+        },
+        contacts: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                com: { show: false },
+                tech: { show: false }
+            }
+        },
+        documents: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                documents: { show: false }
+            }
+        },
+        tasks: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                tasks: false
+            }
+        },
+        billing: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                billAmount: { show: false }
+            }
+        },
+        pictures: {
+            isExpanded: false,
+            show: false,
+            fields: {}
+        },
+        notes: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                notes: { show: false }
+            }
+        }
+    }
+}
+
 export const issuesSubjects = [
     { label: 'Bug', value: 'Bug' },
     { label: 'Suggestion', value: 'Suggestion' },

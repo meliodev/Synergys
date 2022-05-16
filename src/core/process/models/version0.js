@@ -109,141 +109,41 @@ export const version0 = {
             },
         }
     },
-    'rdn': {
-        title: 'Présentation étude',
-        instructions: 'Lorem ipsum dolor',
+    'installation': {
+        title: 'Installation',
+        instructions: '',
         phaseOrder: 2,
-        followers: ['Admin', 'Directeur commercial', 'Commercial'],
+        followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
-            // 'signature': {
-            //     title: 'Signature des documents',
-            //     instructions: 'Lorem ipsum dolor',
-            //     stepOrder: 1,
-            //     actions: [
-            //         {
-            //             id: 'mandatMPRCreation',
-            //             title: 'Créer un mandat MaPrimeRénov',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 1,
-            //             collection: 'Documents',
-            //             //Verification
-            //             queryFilters: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //                 { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-            //             ],
-            //             //Navigation
-            //             queryFiltersUpdateNav: [
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //             ],
-            //             screenName: 'UploadDocument', //creation
-            //             screenParams: { project: null, documentType: { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', selected: false }, dynamicType: true },
-            //             type: 'auto',
-            //             verificationType: 'doc-creation',
-            //             responsable: 'Commercial',
-            //             status: 'pending',
-            //         },
-            //         {
-            //             id: 'signedMandatMPRCreation', //#task: check if devis is still existing..
-            //             title: 'Signer le mandat MaPrimeRénov',
-            //             instructions: 'Lorem ipsum dolor',
-            //             actionOrder: 2,
-            //             collection: 'Documents',
-            //             queryFilters: [ //VERIFICATION: verify if signed quote exists
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //                 { filter: 'attachmentSource', operation: '==', value: 'signature' }
-            //             ],
-            //             queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
-            //                 { filter: 'project.id', operation: '==', value: '' },
-            //                 { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
-            //                 { filter: 'deleted', operation: '==', value: false },
-            //             ],
-            //             screenName: 'UploadDocument',
-            //             screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
-            //             type: 'auto',
-            //             choices: [
-            //                 { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-            //                 { label: 'Signer le mandat MaPrimeRénov', id: 'sign', onSelectType: 'navigation' },
-            //             ],
-            //             responsable: 'Client',
-            //             status: 'pending',
-            //             verificationType: 'doc-creation',
-            //             nextStep: 'payModeValidation'
-            //         },
-            //     ]
-            // },
-            // 'payModeValidation': {
-            //     title: "Modalité de paiement",
-            //     instructions: 'Lorem ipsum dolor',
-            //     stepOrder: 2,
-            //     actions: [
-            //         {
-            //             id: 'payModeChoice',
-            //             title: 'Modalité de paiement',
-            //             instructions: "Lorem ipsum dolor",
-            //             actionOrder: 1,
-            //             type: 'manual',
-            //             comment: '',
-            //             verificationType: 'multiple-choices',
-            //             choices: [
-            //                 { label: 'Paiement comptant', id: 'cashPayment', onSelectType: 'commentPicker' },
-            //                 { label: 'Financement', id: 'financing', onSelectType: 'commentPicker' },
-            //             ],
-            //             responsable: 'Commercial',
-            //             status: 'pending',
-            //         },
-            //         {
-            //             id: 'financingWebsite',
-            //             title: 'Propositions de financement',
-            //             instructions: "Lorem ipsum dolor",
-            //             actionOrder: 2,
-            //             type: 'manual',
-            //             comment: '',
-            //             verificationType: 'multiple-choices',
-            //             choices: [
-            //                 { label: 'Adhefi.com', id: 'cashPayment', image: "sofincoLogo", onSelectType: 'openLink', link: 'https://www.adhefi.com' },
-            //                 { label: 'Moncofidispro.fr', id: 'financing', image: "cofidisLogo", onSelectType: 'openLink', link: 'https://www.moncofidispro.fr' },
-            //                 { label: 'Continuer', id: 'confirm', nextStep: 'technicalVisitCreation', onSelectType: 'transition' },
-            //             ],
-            //             responsable: 'Commercial',
-            //             status: 'pending',
-            //         },
-            //         //Montant de l'acompte? (zone de saisie) //operation: add it to bill sub attributes
-            //     ]
-            // },
-            'technicalVisitCreation': {
-                title: "Création d'une visite technique",
-                instructions: 'Lorem ipsum dolor',
+            'paymentStatus': { //conversion
+                title: "Finalisation de la facturation",
+                instructions: '',
                 stepOrder: 1,
+                nextStep: '',
                 actions: [
                     {
-                        id: 'technicalVisitCreation', //1. verify if RD2 exists
-                        title: 'Créer une visite technique',
-                        instructions: 'Lorem ipsum dolor',
+                        //##task: add multiCommentsPicker
+                        id: 'paymentStatus',
+                        title: 'Modifier le statut du paiement',
+                        instructions: "",
                         actionOrder: 1,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'status', operation: '!=', value: 'Annulé' },
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        comment: '',
+                        choices: [
+                            { label: 'Attente paiement client', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            { label: 'Attente paiement financement', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            //##done:task: Diviser Attente paiement aide en MPR et CEE
+                            { label: 'Attente paiement aide en MPR', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            { label: 'Attente paiement aide en CEE', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            { label: 'Payé', id: 'confirm', onSelectType: 'multiCommentsPicker', selected: false, stay: false },
                         ],
-                        screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        responsable: 'Commercial',
+                        responsable: 'Poseur',
                         status: 'pending',
-                        nextPhase: 'technicalVisitManagement',
-                    }
+                    },
                 ]
             },
-        }
+        },
     },
     'version': 0
 }
