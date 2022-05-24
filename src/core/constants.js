@@ -156,8 +156,8 @@ export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
-export const generableDocTypes = ["Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
-export const onlyImportableDocTypes = ["Devis", "Facture"]
+export const generableDocTypes = ["Devis", "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
+export const onlyImportableDocTypes = ["Facture"]
 export const masculinsDocTypes = ['Devis', 'Bon de commande', 'Dossier CEE', 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
 
 export const phases = [

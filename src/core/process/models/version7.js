@@ -1178,11 +1178,11 @@ export const version7 = {
                         verificationType: 'multiple-choices',
                         comment: '',
                         choices: [
-                            { label: 'Attente paiement client', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
-                            { label: 'Attente paiement financement', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
+                            { label: 'Attente paiement client', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
+                            { label: 'Attente paiement financement', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
                             //##task: Diviser Attente paiement aide en MPR et CEE
-                            { label: 'Attente paiement aide', id: 'pending', onSelectType: 'multiCommentsPicker', selected: false, stay: true },
-                            { label: 'Payé', id: 'confirm', onSelectType: 'multiCommentsPicker', selected: false, stay: false },
+                            { label: 'Attente paiement aide', id: 'pending', onSelectType: 'commentPicker', selected: false, stay: true },
+                            { label: 'Payé', id: 'confirm', onSelectType: 'commentPicker', selected: false, stay: false },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',

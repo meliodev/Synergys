@@ -113,6 +113,7 @@ export default class PdfGeneration extends Component {
     }
 
     componentDidMount() {
+        console.log('type....', this.docType)
         const purchasDocs = ['Bon de commande', 'Devis', 'Facture']
         if (purchasDocs.includes(this.docType)) {
             this.generatePurchaseDoc()
@@ -488,7 +489,7 @@ export default class PdfGeneration extends Component {
 
                 rowData.forEach((row, key) => {
                     const index = key > 0 ? key + 1 : key
-                    pages[pageIndex].drawText(row,
+                    pages[pageIndex].drawText(row.toString(),
                         {
                             x: marginLeftCalculator(line_x_positions, index) - 2,
                             y: height - marginTop,
@@ -500,7 +501,6 @@ export default class PdfGeneration extends Component {
                 })
 
                 textArrayFormated = lineBreaker(orderLine.product.name, timesRomanFont, caption, maxWidth)
-
                 textArrayFormated.forEach((productName) => {
                     pages[pageIndex].drawText(productName,
                         {

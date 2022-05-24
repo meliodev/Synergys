@@ -570,7 +570,7 @@ class UploadDocument extends Component {
     }
 
     //1.
-    async configDocument(elements, index) {
+    async handleSelectOption(elements, index) {
 
         this.setState({ modalLoading: true })
         const { modalContent } = this.state
@@ -613,13 +613,13 @@ class UploadDocument extends Component {
             this.setState({ modalContent: 'imageSources' })
         else {
             const { type } = this.state
-            if (type === 'Facture')
+            if (type === 'Facture' || type === 'Devis')
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
             if (type === 'PV réception' || type === 'Mandat Synergys')
                 this.setState({ modalContent: 'genFormSources' })
-            else if (type === 'Devis' || type === 'Mandat MaPrimeRénov' || type === "Visite technique")
+            else if (type === 'Mandat MaPrimeRénov' || type === "Visite technique")
                 this.startGenPdf(1)
         }
     }
@@ -872,7 +872,7 @@ class UploadDocument extends Component {
                     toggleModal={() => this.toggleModal()}
                     elements={elements}
                     autoValidation={true}
-                    handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                    handleSelectElement={async (elements, index) => this.handleSelectOption(elements, index)}
                 />
             </View>
         )
@@ -1007,7 +1007,7 @@ class UploadDocument extends Component {
                                         toggleModal={() => this.toggleModal()}
                                         elements={elements}
                                         autoValidation={true}
-                                        handleSelectElement={async (elements, index) => this.configDocument(elements, index)}
+                                        handleSelectElement={async (elements, index) => this.handleSelectOption(elements, index)}
                                     />
 
                                 </View>
