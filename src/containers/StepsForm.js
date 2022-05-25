@@ -1442,9 +1442,7 @@ class StepsForm extends Component {
     const title = 'Estimation de votre prime: ';
     const {products, colorCat, estimation, submitted} = this.state;
     const message1 = 'Ce que nous vous recommandons';
-    const colorLabel = simulationColorCats.filter(
-      (color) => color.id === colorCat,
-    )[0].label;
+    const colorLabel = this.setColorLabel(colorCat);
     const {packs, isPVElligible} = this.setPacks(products);
 
     return (
@@ -1704,6 +1702,14 @@ class StepsForm extends Component {
     return {stepIndex, subStepIndex};
   }
 
+  setColorLabel(colorCat) {
+    const simulationColorCat = simulationColorCats.filter(
+      (color) => color.id === colorCat,
+    );
+    const colorLabel =
+      simulationColorCat.length > 0 ? simulationColorCat[0].label : '';
+  }
+
   //##Overview
   renderOverview() {
     const {readOnly, isEdit} = this.state;
@@ -1715,9 +1721,7 @@ class StepsForm extends Component {
     if (collection === 'Simulations') {
       const {colorCat, estimation} = form;
       const products = form.products.join(', ');
-      const colorLabel = simulationColorCats.filter(
-        (color) => color.id === colorCat,
-      )[0].label;
+      const colorLabel = this.setColorLabel(colorCat);
 
       var summary = [
         {title: 'Couleur', value: colorLabel, isColor: true},

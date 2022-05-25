@@ -445,6 +445,7 @@ class Signature extends Component {
     return paddingTop;
   }
 
+  //work on auto sign devis
   handleSingleTap = async (page, x, y, isAuto, signatures) => {
     console.log(`tap: ${page}`);
     console.log(`x: ${x}`);
@@ -459,9 +460,6 @@ class Signature extends Component {
         //Getting tapped page
         const pdfDoc = await PDFDocument.load(this.state.pdfArrayBuffer);
         const pages = pdfDoc.getPages();
-
-        //Adjust paddingTop
-        const paddingTop = this.calculatePaddingTop(pdfDoc, page);
 
         this.setState({
           filePath: null,
@@ -480,6 +478,7 @@ class Signature extends Component {
         if (isAuto) {
           for (const s of signatures) {
             const {pageIndex, position} = s;
+            var paddingTop = this.calculatePaddingTop(pdfDoc, pageIndex);
             const {x, y} = position;
             if (pageIndex < pages.length)
               pages[pageIndex].drawText(signature, {
@@ -491,6 +490,7 @@ class Signature extends Component {
               });
           }
         } else {
+          var paddingTop = this.calculatePaddingTop(pdfDoc, pageIndex);
           const nthPage = pages[page - 1];
           const yRatio = isTablet ? 2 : 12;
 

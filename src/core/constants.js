@@ -291,7 +291,7 @@ export const pack2 = [choice3, choice4, choice5, choice6]
 
 
 //Auto-Sign docs
-export const autoSignDocs = ["Mandat MaPrimeRénov"]
+export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis"]
 export const docsConfig = (index) => {
 
     const config = {
