@@ -449,8 +449,8 @@ class CreateProject extends Component {
         let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
         project.process = {
-            //version: latestProcessVersion
-            version: "version0" //Used for testing
+            version: latestProcessVersion
+            //version: "version0" //Used for testing
         }
         const selectedWorkTypes = this.state.workTypes.filter((wt) => wt.selected === true)
         const selectedWorkTypesValues = selectedWorkTypes.map((wt) => wt.value)

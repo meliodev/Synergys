@@ -272,6 +272,13 @@ export const contactForm = [
     },
 ]
 
+export const simulationColorCats = [
+    {id: "blue", label: "Bleu"},
+    {id: "yellow", label: "Jaune"},
+    {id: "purple", label: "Violet"},
+    {id: "pink", label: "Rose"},
+]
+
 const choice1 = ["PAC AIR EAU", "Chauffage solaire combiné"]
 const choice2 = ["Chaudière à granulé", "Chauffage solaire combiné"]
 export const pack1 = [choice1, choice2]

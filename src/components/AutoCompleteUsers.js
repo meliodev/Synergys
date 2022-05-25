@@ -104,7 +104,7 @@ export default class AutoCompleteUsers extends React.Component {
                 style={styles.autotags}
 
                 autoFocus={false}
-                showInput={this.props.showInput}
+                showTextInput={this.props.showInput}
                 editable={this.props.editable}
                 suggestionsBellow={this.props.suggestionsBellow}
                 createTagOnSpace={false}

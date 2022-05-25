@@ -286,6 +286,11 @@ export const checkPlural = (arrayLength, string) => {
   return str
 }
 
+export const formatPrice = (price) => {
+  price = (Math.round(price * 100) / 100).toFixed(2)
+  return price.toString()
+}
+
 export const countDown = async (ms) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {

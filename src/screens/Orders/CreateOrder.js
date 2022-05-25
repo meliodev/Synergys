@@ -55,6 +55,7 @@ import {
   refreshProject,
   formatDocument,
   unformatDocument,
+  formatPrice,
 } from '../../core/utils';
 import * as theme from '../../core/theme';
 import {constants, highRoles} from '../../core/constants';
@@ -243,7 +244,7 @@ class CreateOrder extends Component {
 
   //FETCH-INITIALIZE
   async componentDidMount() {
-    //setProducts();
+   // setProducts();
     if (this.isEdit) await this.initEditMode();
     this.initialState = _.cloneDeep(this.state);
     load(this, false);
@@ -456,6 +457,10 @@ class CreateOrder extends Component {
     //Taxes
     const taxes = this.setTaxes(orderLines);
 
+    //Formating...
+    subTotal = subTotal.toFixed(2)
+    subTotalProducts = subTotalProducts.toFixed(2)
+
     this.setState({orderLines, subTotal, subTotalProducts, taxes});
   }
 
@@ -569,10 +574,11 @@ class CreateOrder extends Component {
       discount,
     } = this.state;
     const showTotalNetHT = discount > 0;
-    //Discount on products only (not on services)
+    //Discount is applied on products only (not on options)
     const discountValue = (subTotalProducts * discount) / 100;
     const totalNetHT = subTotal - discountValue;
-    const totalTTC = totalNetHT + this.sumTaxes(taxes);
+    let totalTTC = totalNetHT + this.sumTaxes(taxes);
+    totalTTC = Math.round(totalTTC)
     const totalNet = totalTTC - primeCEE - primeRenov - aidRegion;
 
     return (
@@ -638,7 +644,9 @@ class CreateOrder extends Component {
     const {taxes} = this.state;
     if (taxes.length === 0) return null;
     return taxes.map((taxe) => {
-      const {name, value} = taxe;
+      let {name, value} = taxe;
+      console.log(".....", value)
+      value = formatPrice(value)
       if (!taxe.name) return null;
       return (
         <SummaryRow

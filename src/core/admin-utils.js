@@ -12,7 +12,7 @@ const products = [
         },
         "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
         "description": "-",
-        "price": 10173.33,
+        "price": 11571.56,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -40,9 +40,9 @@ const products = [
             "name": "HITACHI YUTAKI"
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 6 KW",
         "description": "-",
-        "price": 10647.5,
+        "price": 12110.90,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -70,9 +70,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 8 KW",
         "description": "-",
-        "price": 11120.83,
+        "price": 12649.29,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -100,9 +100,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 11 KW",
         "description": "-",
-        "price": 12069.17,
+        "price": 13727.96,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -130,9 +130,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 14 KW",
         "description": "-",
-        "price": 13016.67,
+        "price": 14805.69,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -160,9 +160,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 16 KW",
         "description": "-",
-        "price": 13881.67,
+        "price": 15789.57,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -190,9 +190,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S80 HAUTE TEMPERATURE  TAILLE 11 KW",
         "description": "-",
-        "price": 14533.33,
+        "price": 16530.81,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -220,9 +220,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S80 HAUTE TEMPERATURE TAILLE 14 KW",
         "description": "-",
-        "price": 15481.67,
+        "price": 17609.48,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -250,9 +250,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S80 HAUTE TEMPERATURE  TAILLE 16 KW",
         "description": "-",
-        "price": 16425.83,
+        "price": 18683.41,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -280,9 +280,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S COMBI MOYENNE TEMPERATURE  TAILLE 4,3 KW ",
         "description": "-",
-        "price": 11590,
+        "price": 13182.94,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -310,9 +310,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S COMBI MOYENNE TEMPERATURE  TAILLE 6 KW",
         "description": "-",
-        "price": 12064.17,
+        "price": 13722.27,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -340,9 +340,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S COMBI MOYENNE TEMPERATURE  TAILLE 8 KW",
         "description": "-",
-        "price": 12537.5,
+        "price": 14260.66,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -370,9 +370,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S COMBI MOYENNE TEMPERATURE  TAILLE 11 KW",
         "description": "-",
-        "price": 13485.83,
+        "price": 15339.34,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -400,9 +400,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S COMBI MOYENNE TEMPERATURE  TAILLE 14 KW",
         "description": "-",
-        "price": 14433.33,
+        "price": 16417.06,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -430,9 +430,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI S COMBI MOYENNE TEMPERATURE  TAILLE 16 KW",
         "description": "-",
-        "price": 15298.33,
+        "price": 17400.95,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -460,9 +460,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI 80 COMBI HAUTE TEMPERATURE MOYENNE TEMPERATURE  TAILLE 11 KW",
         "description": "-",
-        "price": 15950,
+        "price": 18142.18,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -489,9 +489,9 @@ const products = [
         "brand": {
             "name": "HITACHI YUTAKI"
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI 80 COMBI HAUTE TEMPERATURE MOYENNE TEMPERATURE  TAILLE 14 KW",
         "description": "-",
-        "price": 16898.33,
+        "price": 19220.85,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -519,9 +519,9 @@ const products = [
             "name": "HITACHI YUTAKI",
 
         },
-        "name": "PAC AIR EAU HITACHI YUTAKI S MOYENNE TEMPERATURE TAILLE 4,3 KW",
+        "name": "PAC AIR EAU HITACHI YUTAKI 80 COMBI HAUTE TEMPERATURE MOYENNE TEMPERATURE  TAILLE 16 KW",
         "description": "-",
-        "price": 17842.5,
+        "price": 20294.79,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -551,7 +551,7 @@ const products = [
         },
         "name": "AJOUTER UNE OPTION TRIPHASE",
         "description": "-",
-        "price": 833.33,
+        "price": 947.87,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -581,7 +581,7 @@ const products = [
         },
         "name": "CHAUDIERE A GRANULES FROLING PECO 15 KW + Silo 300 KG",
         "description": "-",
-        "price": 17491.67,
+        "price": 19895.73,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -611,7 +611,7 @@ const products = [
         },
         "name": "CHAUDIERE A GRANULES FROLING PECO 20 KW + Silo 300 KG",
         "description": "-",
-        "price": 18325,
+        "price": 20843.60,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -641,7 +641,7 @@ const products = [
         },
         "name": "CHAUDIERE A GRANULES FROLING PECO 25 KW + Silo 300 KG",
         "description": "-",
-        "price": 19158.33,
+        "price": 21791.47,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -671,7 +671,7 @@ const products = [
         },
         "name": "CHAUDIERE A GRANULES FROLING PECO 30 KW + Silo 300 KG",
         "description": "-",
-        "price": 20825,
+        "price": 23687.20,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -701,7 +701,7 @@ const products = [
         },
         "name": "CHAUDIERE A GRANULES FROLING PECO 35 KW + Silo 300 KG",
         "description": "-",
-        "price": 21658.33,
+        "price": 24635.07,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -731,7 +731,7 @@ const products = [
         },
         "name": "* OPTION SILO 500 KG",
         "description": "-",
-        "price": 500,
+        "price": 568.72,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -761,7 +761,7 @@ const products = [
         },
         "name": "* OPTION SILO TEXTILE 2,4 TONNES",
         "description": "-",
-        "price": 2916.67,
+        "price": 3317.54,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -791,7 +791,7 @@ const products = [
         },
         "name": "* OPTION SILO TEXTILE 3,7 TONNES",
         "description": "-",
-        "price": 3541.67,
+        "price": 4028.44,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -821,7 +821,7 @@ const products = [
         },
         "name": "* OPTION SILO TEXTILE 3,7 TONNES",
         "description": "-",
-        "price": 4333.33,
+        "price": 4928.91,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -851,7 +851,7 @@ const products = [
         },
         "name": "* OPTION TRIPHASE",
         "description": "-",
-        "price": 833.33,
+        "price": 947.87,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -881,7 +881,7 @@ const products = [
         },
         "name": "Chauffe-eau thermodynamique Monobloc BOURGEOIS GLOBAL 200 L",
         "description": "-",
-        "price": 2491.67,
+        "price": 2834.12,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -911,7 +911,7 @@ const products = [
         },
         "name": "Chauffe-eau thermodynamique Monobloc BOURGEOIS GLOBAL 270 L",
         "description": "-",
-        "price": 2625,
+        "price": 2985.78,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -941,7 +941,7 @@ const products = [
         },
         "name": "Chauffe-eau thermodynamique Bi-bloc HITACHI Yutampo 200 L",
         "description": "-",
-        "price": 3083.33,
+        "price": 3507.11,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -971,7 +971,7 @@ const products = [
         },
         "name": "Chauffe-eau thermodynamique Bi-bloc HITACHI Yutampo 270 L",
         "description": "-",
-        "price": 3395.83,
+        "price": 3862.56,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1001,7 +1001,7 @@ const products = [
         },
         "name": "CESI ALLIANTZ 1 capteur 200 L surface 2m² (jusqu’à 2 personnes dans le foyer)",
         "description": "-",
-        "price": 4791.67,
+        "price": 5450.24,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1031,7 +1031,7 @@ const products = [
         },
         "name": "CESI ALLIANTZ 2 capteurs 300 L surface 4m² (à partir de 3 personnes dans le foyer)",
         "description": "-",
-        "price": 5825,
+        "price": 6625.59,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1061,7 +1061,7 @@ const products = [
         },
         "name": "VMC Double flux Domeo 210",
         "description": "-",
-        "price": 4691.67,
+        "price": 5336.49,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1091,7 +1091,7 @@ const products = [
         },
         "name": "Système solaire combiné ALLIANTZ 5 capteurs surface 10m²",
         "description": "-",
-        "price": 10416.67,
+        "price": 11848.34,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1121,7 +1121,7 @@ const products = [
         },
         "name": "Poêle à granulés STOVE ITALIA MARINA 8 KW",
         "description": "-",
-        "price": 3659.17,
+        "price": 4162.09,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1151,7 +1151,7 @@ const products = [
         },
         "name": "Poêle à granulés STOVE ITALIA GIULIA 9 KW",
         "description": "-",
-        "price": 4158.33,
+        "price": 4729.86,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1181,7 +1181,7 @@ const products = [
         },
         "name": "Poêle à granulés STOVE ITALIA PAOLA 12 KW",
         "description": "-",
-        "price": 4491.67,
+        "price": 5109.00,
         "taxe": 5.5,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1211,7 +1211,7 @@ const products = [
         },
         "name": "Kit 1,5 Kwc BOURGEOIS GLOBAL 4 module 375 Kwc + 1 Micro onduleur BOURGEOIS GLOBAL",
         "description": "-",
-        "price": 5083.33,
+        "price": 5545.45,
         "taxe": 10,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1241,7 +1241,7 @@ const products = [
         },
         "name": "Kit 3 Kwc BOURGEOIS GLOBAL  8 module 375 Kwc + 2 Micro onduleur BOURGEOIS GLOBAL",
         "description": "-",
-        "price": 8325,
+        "price": 9081.82,
         "taxe": 10,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1301,7 +1301,7 @@ const products = [
         },
         "name": "Kit 6 Kwc BOURGEOIS GLOBAL 16 module 375 Kwc + 4 Micro onduleur BOURGEOIS GLOBAL",
         "description": "-",
-        "price": 15000,
+        "price": 15000.00,
         "taxe": 20,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1331,7 +1331,7 @@ const products = [
         },
         "name": "Kit 7,5 Kwc BOURGEOIS GLOBAL 20 module 375 Kwc + 5 Micro onduleur BOURGEOIS GLOBAL",
         "description": "-",
-        "price": 18325,
+        "price": 18325.00,
         "taxe": 20,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1391,7 +1391,7 @@ const products = [
         },
         "name": "Kit DUAL SUN 3 Kwc 4 module 375 Kwc + 4 modules Photovoltaiques 375 Kwc + 2 micro onduleur + ballon 200 l",
         "description": "-",
-        "price": 14991.67,
+        "price": 16354.55,
         "taxe": 10,
         "createdBy": {
             "id": "GS-US-F4TB",
@@ -1421,7 +1421,7 @@ const products = [
         },
         "name": "Kit DUAL SUN 3 Kwc 4 module 375 Kwc + 4 modules Photovoltaiques 375 Kwc + 2 micro onduleur + ballon 300 l",
         "description": "-",
-        "price": 15825,
+        "price": 17263.64,
         "taxe": 10,
         "createdBy": {
             "id": "GS-US-F4TB",
