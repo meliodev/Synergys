@@ -1724,7 +1724,7 @@ class StepsForm extends Component {
       const colorLabel = this.setColorLabel(colorCat);
 
       var summary = [
-        {title: 'Couleur', value: colorLabel, isColor: true},
+        {title: 'Couleur', value: colorLabel},
         // { title: "Produits recommandés", value: products },
         // { title: "Estimation", value: `${estimation} €` },
       ];

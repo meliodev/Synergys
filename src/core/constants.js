@@ -156,8 +156,8 @@ export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
-export const generableDocTypes = ["Devis", "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
-export const onlyImportableDocTypes = ["Facture"]
+export const generableDocTypes = ["Devis", "Facture", "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
+export const onlyImportableDocTypes = []
 export const masculinsDocTypes = ['Devis', 'Bon de commande', 'Dossier CEE', 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
 
 export const phases = [
@@ -291,7 +291,7 @@ export const pack2 = [choice3, choice4, choice5, choice6]
 
 
 //Auto-Sign docs
-export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis"]
+export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Facture"]
 export const docsConfig = (index) => {
 
     const config = {

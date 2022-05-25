@@ -1206,7 +1206,7 @@ export const version7 = {
                     //##task: Ajouter montant HT + TTC ??
                     {
                         id: 'billAmount',
-                        title: "Montant de la facture", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+                        title: "Montant de la facture (TTC)", //#task allow adv to view devis before validating (multi-choice: voir/valider)
                         instructions: "",
                         actionOrder: 3,
                         collection: 'Projects',

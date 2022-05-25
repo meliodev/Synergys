@@ -456,7 +456,7 @@ class ProcessAction extends Component {
 
                     else if (onSelectType === 'validation') {
                         await this.runOperation(operation, pressedAction)
-                        await this.validateAction(null, null, false, null, null, true)
+                        await this.validateAction(null, null, false, nextStep, nextPhase)
                     }
 
                     else if (onSelectType === 'commentPicker') {
@@ -523,7 +523,7 @@ class ProcessAction extends Component {
     }
 
     //func5
-    validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
+    validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
 
         try {
             const { process, currentPhaseId, currentStepId, pressedAction } = this.state

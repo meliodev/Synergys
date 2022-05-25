@@ -437,7 +437,7 @@ class Signature extends Component {
     const screenWidth = constants.ScreenWidth;
     const screenHeight = constants.ScreenHeight;
     const pages = pdfDoc.getPages();
-    const nthPage = pages[n];
+    const nthPage = pages[n-1];
     const ratio = nthPage.getHeight() / nthPage.getWidth();
     const pageWidth = screenWidth;
     const pageHeight = pageWidth * ratio;
@@ -490,7 +490,7 @@ class Signature extends Component {
               });
           }
         } else {
-          var paddingTop = this.calculatePaddingTop(pdfDoc, pageIndex);
+          var paddingTop = this.calculatePaddingTop(pdfDoc, page);
           const nthPage = pages[page - 1];
           const yRatio = isTablet ? 2 : 12;
 

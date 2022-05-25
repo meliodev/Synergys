@@ -193,14 +193,14 @@ class CreateTask extends Component {
 
         return defaultState
     }
-
+ 
     //##GET
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
         const isComAndVT = this.props.role.id === "com" && this.state.type === "Visite technique" 
-        const isInstallation = this.state.type === "Installation"
-        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || isComAndVT || isInstallation 
+       // const isInstallation = this.state.type === "Installation" 
+        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || isComAndVT 
         //##task: test if assignedTo is hidden on "VT" & "Installation" during process
         load(this, false)
     }
