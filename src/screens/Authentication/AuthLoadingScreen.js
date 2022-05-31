@@ -1,5 +1,5 @@
 import React, { memo, Component } from "react"
-import { View, Alert, Text, StyleSheet, Linking } from "react-native"
+import { View, Alert, Text, StyleSheet, Linking, Platform } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
 import { ProgressBar } from "react-native-paper"
 import RNFS from 'react-native-fs'
@@ -86,8 +86,10 @@ class AuthLoadingScreen extends Component {
       console.log('No configs were fetched from the backend, and the local configs were already activated',)
     }
 
-    const minAppVersion = remoteConfig.getValue('minAppVersion').asString() //exp: 1.3.0
-    const latestVersionDownloadLink = remoteConfig.getValue('latestVersionDownloadLink').asString()
+    const remoteMinAppVersion = Platform.OS === "android" ? "minAppVersionAndroid" : "minAppVersionIos"
+    const remoteLatestVersionDownloadLink = Platform.OS === "android" ? "latestVersionDownloadLinkAndroid" : "latestVersionDownloadLinkIos"
+    const minAppVersion = remoteConfig.getValue(remoteMinAppVersion).asString() //exp: 1.3.0
+    const latestVersionDownloadLink = remoteConfig.getValue(remoteLatestVersionDownloadLink).asString()
     const isUpToDate = compareVersions.compare(appVersion, minAppVersion, '>=');
     return { isUpToDate, latestVersionDownloadLink }
   }

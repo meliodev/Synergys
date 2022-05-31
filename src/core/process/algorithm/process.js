@@ -713,6 +713,7 @@ export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
 
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
+    console.log('current step...', currentStepId)
 
     let { actions } = process[currentPhaseId].steps[currentStepId]
     actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)

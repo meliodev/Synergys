@@ -19,6 +19,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
     }
 
     const togglePicker = () => {
+        if(!enabled) return
         setIsPickerVisible(!isPickerVisible)
     }
 
@@ -42,7 +43,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
 
 
 
-    renderPicker = () => {
+    const renderPicker = () => {
         if (Platform.OS === "android")
             return picker()
 

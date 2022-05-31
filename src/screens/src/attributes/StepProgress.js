@@ -19,7 +19,7 @@ export default function StepProgress({ progress }) {
       backgroundColor="#D8D8D8"
       rotation={0}>
       {(fill) => (
-        <Text style={[extraSmall, { fontSize: isTablet ? 17 : undefined, color, textAlign: 'center' },]}>
+        <Text style={[extraSmall, { fontSize: isTablet ? 17 : 8, color, textAlign: 'center' },]}>
           {parseInt(progress)}%
         </Text>
       )}

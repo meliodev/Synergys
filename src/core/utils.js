@@ -235,6 +235,17 @@ export const configChoiceIcon = (choice) => {
   return element
 }
 
+export const initFormSections = (sections, sectionsTarget) => {
+  for (const key in sectionsTarget) {
+    sections[key].isExpanded = true
+    sections[key].show = true
+    for (const i in sectionsTarget[key]) {
+      sections[key]["fields"][i].show = true
+    }
+  }
+  return sections
+}
+
 export const articles_fr = (masc, masculins, target) => {
 
   let resp
@@ -273,6 +284,11 @@ export const checkPlural = (arrayLength, string) => {
     str = arrayLength + string + 's'
 
   return str
+}
+
+export const formatPrice = (price) => {
+  price = (Math.round(price * 100) / 100).toFixed(2)
+  return price.toString()
 }
 
 export const countDown = async (ms) => {
@@ -1296,12 +1312,22 @@ export function refreshAssignedTo(user) {
   this.setState({ assignedTo, assignedToError: "" })
 }
 
+
 export const refreshUser = (user) => {
-  const { isPro, id, denom, nom, prenom, role, email, phone } = user
+  const isPro = user.isPro || false
+  const id = user.id || ""
+  const denom = user.denom || ""
+  const nom = user.nom || ""
+  const prenom = user.prenom || ""
+  const role = user.role || ""
+  const email = user.email || ""
+  const phone = user.phone || ""
+
   const fullName = isPro ? nom : `${prenom} ${nom}`
   const userObject = { id, fullName, email, role, phone }
   return userObject
 }
+
 
 export function refreshAddress(address) {
   this.setState({ address })

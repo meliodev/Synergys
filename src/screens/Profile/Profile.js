@@ -110,6 +110,8 @@ class Profile extends Component {
         }
     }
 
+    //##task: add Billing tab
+    
     componentWillUnmount() {
         if (this.willFocusSubscription)
             this.willFocusSubscription.remove()
@@ -796,12 +798,12 @@ class Profile extends Component {
                                                             keyboardType='phone-pad'
                                                             dataDetectorTypes='phoneNumber'
                                                             editable={this.isEdit && (canUpdate || this.isProcess)}
-                                                            render={props =>
-                                                                <TextInputMask
-                                                                    {...props}
-                                                                    mask="+[00] [0] [00] [00] [00] [00]"
-                                                                />
-                                                            }
+                                                            // render={props =>
+                                                            //     <TextInputMask
+                                                            //         {...props}
+                                                            //         mask="+[00] [0] [00] [00] [00] [00]"
+                                                            //     />
+                                                            // }
                                                         />
 
                                                         <AddressInput

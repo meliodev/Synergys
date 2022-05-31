@@ -382,7 +382,7 @@ export const privilleges = {
             "canDelete": false,
             "canRead": true,
             "canCreate": true,
-            "canUpdate": true
+            "canUpdate": true,
         },
         "users": {
             "canDelete": false,

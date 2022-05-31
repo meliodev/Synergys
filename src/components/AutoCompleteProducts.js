@@ -127,7 +127,7 @@ class AutoCompleteProducts extends React.Component {
                 style={styles.autotags}
                 autoFocus={false}
                 //autoFocus={this.props.autoFocus}
-                showInput={this.props.showInput}
+                showTextInput={this.props.showInput}
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
                 createTagOnSpace={false}
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
         alignItems: 'center',
         paddingTop: 10,
-        width: 300
+        width: ScreenWidth*0.9
     },
     customTag: {
         flexDirection: 'row',
@@ -178,11 +178,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 10,
+        paddingHorizontal: 18,
         paddingVertical: 10,
-        // backgroundColor: 'pink'
+       // backgroundColor: 'pink',
         borderBottomWidth: StyleSheet.hairlineWidth * 0.5,
-        borderBottomColor: theme.colors.gray2
+        borderBottomColor: theme.colors.gray2,
     },
     autotags: {
         backgroundColor: '#fff',

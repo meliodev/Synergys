@@ -71,7 +71,7 @@ class CreateTask extends Component {
         this.isInit = true
 
         this.isProcess = this.props.navigation.getParam('isProcess', false)
-        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false)
+
         //Params (task properties)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
@@ -193,11 +193,15 @@ class CreateTask extends Component {
 
         return defaultState
     }
-
+ 
     //##GET
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
+        const isComAndVT = this.props.role.id === "com" && this.state.type === "Visite technique" 
+       // const isInstallation = this.state.type === "Installation" 
+        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || isComAndVT 
+        //##task: test if assignedTo is hidden on "VT" & "Installation" during process
         load(this, false)
     }
 
@@ -414,7 +418,6 @@ class CreateTask extends Component {
 
             //7. Persist task(s)
             await this.persistTasks(tasks)
-
 
             //8. Verify if contact technique/commercial changed
             this.checkAndUpdateProjectContacts()
@@ -709,7 +712,8 @@ class CreateTask extends Component {
     }
 
     renderProcessView(canWrite) {
-        const { showTasksConflicts, toastMessage, toastType } = this.state
+        const { showTasksConflicts, toastMessage, toastType, type } = this.state
+
         return (
             < ScrollView
                 keyboardShouldPersistTaps="never"

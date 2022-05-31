@@ -58,6 +58,8 @@ class ProcessAction extends Component {
             currentAction: null,
             pressedAction: null,
 
+            multiComments: [],
+
             showModal: false,
             showDialog: false,
             expanded: true,
@@ -288,16 +290,18 @@ class ProcessAction extends Component {
                                     await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                             }
                         }
+
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage
+                        })
+
                         if (screenName) {
                             if (screenPush)
                                 this.props.navigation.push(screenName, screenParams)
                             else
                                 this.props.navigation.navigate(screenName, screenParams)
                         }
-                        this.setState({
-                            loading: false,
-                            loadingMessage: this.initialLoadingMessage
-                        })
                     }
                 }
 
@@ -387,16 +391,26 @@ class ProcessAction extends Component {
             this.setState({ loadingModal: true, choice })  //used in case of comment
             await countDown(500)
             const { process, pressedAction } = this.state
-            let { screenName, screenParams, choices } = pressedAction
+            let { screenName, screenParams, screenPush, choices } = pressedAction
             const { onSelectType, commentRequired, operation, link } = choice
             const { nextStep, nextPhase } = choice
 
             //Highlight selected choice
             if (typeof (choice.selected) === 'boolean') {
                 choices.forEach((item) => {
-                    if (item.label === choice.label) item.selected = true
-                    else item.selected = false
+                    const value = onSelectType === 'multiCommentsPicker' ? !item.selected : true
+                    if (item.label === choice.label) item.selected = value
+                    else item.selected = onSelectType === 'multiCommentsPicker' ? item.selected : false
                 })
+            }
+
+            //Handle MultiComments
+            if (onSelectType === 'multiCommentsPicker') {
+                let { multiComments } = this.state
+                if (multiComments.includes(choice.label))
+                    multiComments.pop(choice.label)
+                else multiComments.push(choice.label)
+                this.setState({ multiComments })
             }
 
             if (commentRequired) {
@@ -419,8 +433,15 @@ class ProcessAction extends Component {
                                 await this.onPressAction(this.props.canUpdate, this.state.currentAction)
                         }
                     }
+
                     this.setState({ showModal: false, loadingModal: false })
-                    this.props.navigation.navigate(screenName, screenParams)
+
+                    if (screenName) {
+                        if (screenPush)
+                            this.props.navigation.push(screenName, screenParams)
+                        else
+                            this.props.navigation.navigate(screenName, screenParams)
+                    }
                 }
 
                 else {
@@ -435,7 +456,7 @@ class ProcessAction extends Component {
 
                     else if (onSelectType === 'validation') {
                         await this.runOperation(operation, pressedAction)
-                        await this.validateAction(null, null, false, null, null, true)
+                        await this.validateAction(null, null, false, nextStep, nextPhase)
                     }
 
                     else if (onSelectType === 'commentPicker') {
@@ -443,11 +464,18 @@ class ProcessAction extends Component {
                         await this.validateAction(choice.label, choices, choice.stay, nextStep, nextPhase)
                     }
 
+                    else if (onSelectType === 'multiCommentsPicker') {
+                        const comments = this.state.multiComments.join(", ")
+                        console.log('COMMENTS', comments) //##task: How to validate ??
+                        // await this.runOperation(operation, pressedAction)
+                        // await this.validateAction(comments, choices, choice.stay, nextStep, nextPhase)
+                    }
+
                     else if (onSelectType === "openLink") {
                         await Linking.openURL(link)
                     }
 
-                    this.setState({ showModal: false, loadingModal: false })
+                    this.setState({ showModal: onSelectType === 'multiCommentsPicker' ? true : false, loadingModal: false })
                 }
             }
         }
@@ -495,7 +523,7 @@ class ProcessAction extends Component {
     }
 
     //func5
-    validateAction = async (comment, choices, stay, nextStep, nextPhase, forceUpdate = false) => {
+    validateAction = async (comment, choices, stay, nextStep, nextPhase) => {
 
         try {
             const { process, currentPhaseId, currentStepId, pressedAction } = this.state

@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.5"
+export const appVersion = "1.5.6"
 
 export const constants = {
     ScreenWidth: width,
@@ -73,6 +73,77 @@ export const errorMessages = {
     map: "Erreur lors de la communication avec le serveur Google Maps. Veuillez réessayer..."
 }
 
+export const sectionsModels = {
+    project: {
+        activity: {
+            isExpanded: false,
+            show: false,
+            fields: {}
+        },
+        info: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                projectId: { show: false },
+                projectName: { show: false },
+                projectStep: { show: false },
+                projectState: { show: false },
+                projectPhase: { show: false },
+                projectWorkTypes: { show: false }
+            }
+        },
+        client: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                client: { show: false },
+                address: { show: false }
+            }
+        },
+        contacts: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                com: { show: false },
+                tech: { show: false }
+            }
+        },
+        documents: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                documents: { show: false }
+            }
+        },
+        tasks: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                tasks: false
+            }
+        },
+        billing: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                billAmount: { show: false }
+            }
+        },
+        pictures: {
+            isExpanded: false,
+            show: false,
+            fields: {}
+        },
+        notes: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                notes: { show: false }
+            }
+        }
+    }
+}
+
 export const issuesSubjects = [
     { label: 'Bug', value: 'Bug' },
     { label: 'Suggestion', value: 'Suggestion' },
@@ -85,8 +156,8 @@ export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
-export const generableDocTypes = ["Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
-export const onlyImportableDocTypes = ["Devis", "Facture"]
+export const generableDocTypes = ["Devis", "Facture", "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
+export const onlyImportableDocTypes = []
 export const masculinsDocTypes = ['Devis', 'Bon de commande', 'Dossier CEE', 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
 
 export const phases = [
@@ -201,6 +272,13 @@ export const contactForm = [
     },
 ]
 
+export const simulationColorCats = [
+    {id: "blue", label: "Bleu"},
+    {id: "yellow", label: "Jaune"},
+    {id: "purple", label: "Violet"},
+    {id: "pink", label: "Rose"},
+]
+
 const choice1 = ["PAC AIR EAU", "Chauffage solaire combiné"]
 const choice2 = ["Chaudière à granulé", "Chauffage solaire combiné"]
 export const pack1 = [choice1, choice2]
@@ -213,7 +291,7 @@ export const pack2 = [choice3, choice4, choice5, choice6]
 
 
 //Auto-Sign docs
-export const autoSignDocs = ["Mandat MaPrimeRénov"]
+export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Facture"]
 export const docsConfig = (index) => {
 
     const config = {
