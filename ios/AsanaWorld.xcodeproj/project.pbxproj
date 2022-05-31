@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		00E356F31AD99517003FC87E /* AsanaWorldTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* AsanaWorldTests.m */; };
+		0487D33D282D619B009064A7 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
+		0487D341282E79E3009064A7 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 0487D340282E79E3009064A7 /* GoogleService-Info.plist */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -39,8 +41,6 @@
 		16484230276CF4AA001B33CA /* Roboto-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 16484214276CF4AA001B33CA /* Roboto-Regular.ttf */; };
 		16484231276CF4AA001B33CA /* fa-duotone-900.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 16484215276CF4AA001B33CA /* fa-duotone-900.ttf */; };
 		16484232276CF4AA001B33CA /* Roboto-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 16484216276CF4AA001B33CA /* Roboto-LightItalic.ttf */; };
-		16484236277E7221001B33CA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 16484235277E7221001B33CA /* GoogleService-Info.plist */; };
-		165F20672807D74200E4AA79 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
 		2D02E4BC1E0B4A80006451C7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		2D02E4BD1E0B4A84006451C7 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
@@ -76,6 +76,7 @@
 		00E356F21AD99517003FC87E /* AsanaWorldTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AsanaWorldTests.m; sourceTree = "<group>"; };
 		03ADF9970B8048F3BBA4F0FF /* Roboto-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Roboto-ThinItalic.ttf"; path = "../assets/fonts/Roboto-ThinItalic.ttf"; sourceTree = "<group>"; };
 		042057EB12154E3EBB6D8A14 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/native-base/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
+		0487D340282E79E3009064A7 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		0B7366BA7D8248519BA39035 /* AntDesign.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = AntDesign.ttf; path = "../node_modules/react-native-vector-icons/Fonts/AntDesign.ttf"; sourceTree = "<group>"; };
 		0FFAF32318F545E7BE8365EA /* MaterialIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = MaterialIcons.ttf; path = "../node_modules/native-base/Fonts/MaterialIcons.ttf"; sourceTree = "<group>"; };
 		1181AFD3D28A43669BE609E8 /* -Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "-Light.ttf"; path = "../assets/fonts/-Light.ttf"; sourceTree = "<group>"; };
@@ -115,7 +116,6 @@
 		16484214276CF4AA001B33CA /* Roboto-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Roboto-Regular.ttf"; path = "../src/assets/fonts/Roboto-Regular.ttf"; sourceTree = "<group>"; };
 		16484215276CF4AA001B33CA /* fa-duotone-900.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "fa-duotone-900.ttf"; path = "../src/assets/fonts/fa-duotone-900.ttf"; sourceTree = "<group>"; };
 		16484216276CF4AA001B33CA /* Roboto-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Roboto-LightItalic.ttf"; path = "../src/assets/fonts/Roboto-LightItalic.ttf"; sourceTree = "<group>"; };
-		16484235277E7221001B33CA /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Desktop/Synergys/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		16484237277E80EC001B33CA /* AsanaWorldRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = AsanaWorldRelease.entitlements; path = AsanaWorld/AsanaWorldRelease.entitlements; sourceTree = "<group>"; };
 		1654FC7A2781D48300FA72A9 /* RCTTypeSafety.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RCTTypeSafety.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1654FC7C2781D48300FA72A9 /* RCTAnimation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = RCTAnimation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -315,6 +315,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				0487D340282E79E3009064A7 /* GoogleService-Info.plist */,
 				16484201276CF4A8001B33CA /* fa-brands-400.ttf */,
 				16484215276CF4AA001B33CA /* fa-duotone-900.ttf */,
 				16484200276CF4A8001B33CA /* fa-light-300.ttf */,
@@ -332,7 +333,6 @@
 				16484211276CF4AA001B33CA /* Montserrat-SemiBold.ttf */,
 				16484207276CF4A9001B33CA /* Montserrat-Thin.ttf */,
 				16484204276CF4A9001B33CA /* Roboto-Black.ttf */,
-				16484235277E7221001B33CA /* GoogleService-Info.plist */,
 				16484208276CF4A9001B33CA /* Roboto-BlackItalic.ttf */,
 				164841FD276CF4A8001B33CA /* Roboto-Bold.ttf */,
 				164841FE276CF4A8001B33CA /* Roboto-BoldItalic.ttf */,
@@ -612,7 +612,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				165F20672807D74200E4AA79 /* main.jsbundle in Resources */,
+				0487D33D282D619B009064A7 /* main.jsbundle in Resources */,
 				16484217276CF4AA001B33CA /* Roboto-Thin.ttf in Resources */,
 				16484219276CF4AA001B33CA /* Roboto-Bold.ttf in Resources */,
 				16484218276CF4AA001B33CA /* Roboto-Light.ttf in Resources */,
@@ -628,7 +628,6 @@
 				16484223276CF4AA001B33CA /* Montserrat-Thin.ttf in Resources */,
 				16484224276CF4AA001B33CA /* Roboto-BlackItalic.ttf in Resources */,
 				16484225276CF4AA001B33CA /* Montserrat-Regular.ttf in Resources */,
-				16484236277E7221001B33CA /* GoogleService-Info.plist in Resources */,
 				16484226276CF4AA001B33CA /* Montserrat-Light.ttf in Resources */,
 				16484227276CF4AA001B33CA /* Lato-Regular.ttf in Resources */,
 				16484228276CF4AA001B33CA /* fa-regular-400.ttf in Resources */,
@@ -638,6 +637,7 @@
 				1648422C276CF4AA001B33CA /* fa-solid-900.ttf in Resources */,
 				1648422D276CF4AA001B33CA /* Montserrat-SemiBold.ttf in Resources */,
 				1648422E276CF4AA001B33CA /* Montserrat-Medium.ttf in Resources */,
+				0487D341282E79E3009064A7 /* GoogleService-Info.plist in Resources */,
 				1648422F276CF4AA001B33CA /* Roboto-MediumItalic.ttf in Resources */,
 				16484230276CF4AA001B33CA /* Roboto-Regular.ttf in Resources */,
 				16484231276CF4AA001B33CA /* fa-duotone-900.ttf in Resources */,
@@ -1071,7 +1071,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = AsanaWorld/AsanaWorldDebug.entitlements;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73KP962TM3;
 				ENABLE_BITCODE = NO;
 				EXCLUDED_ARCHS = "";
@@ -1183,14 +1183,14 @@
 				INFOPLIST_FILE = AsanaWorld/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.5;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = fr.groupe.synergys;
 				PRODUCT_NAME = AsanaWorld;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -1206,7 +1206,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = NO;
 				CODE_SIGN_ENTITLEMENTS = AsanaWorld/AsanaWorldRelease.entitlements;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 73KP962TM3;
 				EXCLUDED_ARCHS = "";
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -1221,13 +1221,13 @@
 				INFOPLIST_FILE = AsanaWorld/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.5.1;
+				MARKETING_VERSION = 1.5.5;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
+				PRODUCT_BUNDLE_IDENTIFIER = fr.groupe.synergys;
 				PRODUCT_NAME = AsanaWorld;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

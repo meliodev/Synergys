@@ -7,7 +7,8 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build:ios": "react-native bundle --entry-file='index.js' --bundle-output='./ios/main.jsbundle' --dev=false --platform='ios'"
   },
   "dependencies": {
     "@amazingbeerbelly/react-native-snap-carousel": "^1.0.0",
@@ -59,7 +60,7 @@
     "react-native-file-picker": "0.0.19",
     "react-native-file-viewer": "^2.1.4",
     "react-native-fontawesome": "^7.0.0",
-    "react-native-fs": "^2.16.6",
+    "react-native-fs": "2.20.0",
     "react-native-geocoding": "^0.4.0",
     "react-native-gesture-handler": "^1.7.0",
     "react-native-gifted-chat": "^0.16.3",

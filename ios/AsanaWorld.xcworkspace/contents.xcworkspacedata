@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:AsanaWorld.xcodeproj">
+      location = "group:/Users/mac/Documents/GitHub/Synergys/ios/AsanaWorld.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
