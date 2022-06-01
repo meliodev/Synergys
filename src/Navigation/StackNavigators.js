@@ -47,6 +47,7 @@ import DatePicker from '../screens/Helpers/DatePicker'
 //Projects
 import ListProjects from '../screens/Projects/ListProjects'
 import CreateProject from '../screens/Projects/CreateProject'
+import Process from '../screens/Projects/Process'
 import Progression from '../screens/src/screen/Progression'
 
 //Documents
@@ -214,6 +215,11 @@ const appScreens = {
     CreateProject: {
         screen: CreateProject,
         path: 'project/:ProjectId',
+        navigationOptions: hideHeader
+    },
+    Process: {
+        screen: Process,
+        path: 'process/:ProjectId',
         navigationOptions: hideHeader
     },
     Progression: {

@@ -782,7 +782,7 @@ export const ficheEEBModel = [
           },
           {
               id: "lostAticsIsolationThickness",
-              label: "Epaisseur",
+              label: "Epaisseur (en cm)",
               type: "number",
               isConditional: true,
               condition: { with: "lostAticsIsolation", values: ["Oui"] },

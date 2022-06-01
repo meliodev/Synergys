@@ -148,14 +148,14 @@ class ProcessAction extends Component {
     }
 
     updateProcess(updatedProcess, process) {
+        updatedProcess.editedAt = moment().format()
+        updatedProcess.editedBy = this.props.currentUser
         return db
             .collection('Projects')
             .doc(this.props.project.id)
-            .update({
-                process: updatedProcess,
-                editedAt: moment().format(),
-                editedBy: this.props.currentUser
-            })
+            .collection("Process")
+            .doc(this.props.project.id)
+            .set(updatedProcess, { merge: true })
             .catch((e) => { throw new Error(errorMessages.firestore.update) })
     }
 
@@ -824,7 +824,7 @@ class ProcessAction extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        //  flex: 1,
         borderRadius: 5,
         backgroundColor: theme.colors.white,
         marginHorizontal: 15,

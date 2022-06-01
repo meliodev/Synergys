@@ -28,7 +28,7 @@ import LoadDialog from "../../components/LoadDialog"
 import firebase, { db, auth } from '../../firebase'
 import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
 import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument, formatSpaces } from "../../core/utils";
 import * as theme from "../../core/theme";
 import { constants, docsConfig, errorMessages, generableDocTypes, onlyImportableDocTypes, highRoles, imageSources, masculinsDocTypes, staffRoles } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
@@ -163,7 +163,7 @@ class UploadDocument extends Component {
         let defaultState = {}
 
         if (this.project && this.documentType) {
-            const name = `${this.documentType.value} - ${this.project.id}`
+            const name = this.documentType.value !== "Autre" ? `${this.documentType.value} ${this.project.id}` : ""
             defaultState = {
                 name,
                 type: this.documentType.value,

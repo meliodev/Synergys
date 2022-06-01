@@ -19,8 +19,8 @@ import { ThemeColors, withNavigation } from 'react-navigation'
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
     const { id, step, name, description, address, state, client, editedAt, editedBy } = project
-    let { version } = project.process
-    version = version.replace("version", "")
+    let { processVersion } = project
+    processVersion = processVersion.replace("version", "")
 
     const setStateColor = (state) => {
         switch (state) {
@@ -59,7 +59,7 @@ const ProjectItem = ({ project, onPress, navigation, ...props }) => {
             <LinearGradient start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} colors={setStepColor(step)} style={[styles.linearGradient, styles.stepContainer]}>
                 <Text style={[isTablet ? theme.customFontMSmedium.caption : theme.customFontMSmedium.extraSmall, styles.header]} numberOfLines={1}>{id}</Text>
                 <Text style={[theme.customFontMSbold.caption, { color: theme.colors.white }]}>{step}</Text>
-                <Text style={[isTablet ? theme.customFontMSmedium.caption : theme.customFontMSregular.small, styles.processVersion]}>V{version}</Text>
+                <Text style={[isTablet ? theme.customFontMSmedium.caption : theme.customFontMSregular.small, styles.processVersion]}>V{processVersion}</Text>
             </LinearGradient>
 
             <Card.Content style={styles.content}>
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
         paddingTop: isTablet ? 15 : 5
     },
     stepContainer: {
-        height: isTablet ? 49 :  33,
+        height: isTablet ? 49 : 33,
         justifyContent: 'center',
         alignItems: 'center',
         borderTopLeftRadius: 10,

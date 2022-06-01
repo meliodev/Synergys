@@ -87,6 +87,7 @@ class CreateClient extends Component {
       email: {value: '', error: ''},
       email2: {value: '', error: ''},
       phone: {value: '', error: ''},
+      phone2: {value: '', error: ''},
 
       password: {value: '', error: '', show: false},
 
@@ -159,6 +160,7 @@ class CreateClient extends Component {
       address,
       addressError,
       phone,
+      phone2,
       email,
       email2,
       password,
@@ -262,12 +264,18 @@ class CreateClient extends Component {
                 textContentType="telephoneNumber"
                 keyboardType="phone-pad"
                 dataDetectorTypes="phoneNumber"
-                // render={(props) => (
-                //   <TextInputMask
-                //     {...props}
-                //     mask="+33 [0] [00] [00] [00] [00]"
-                //   />
-                // )}
+              />
+
+              <MyInput
+                label="Téléphone 2 (optionnel)"
+                returnKeyType="done"
+                value={phone2.value}
+                onChangeText={(text) => updateField(this, phone2, text)}
+                error={!!phone2.error}
+                errorText={phone2.error}
+                textContentType="telephoneNumber"
+                keyboardType="phone-pad"
+                dataDetectorTypes="phoneNumber"
               />
 
               <MyInput

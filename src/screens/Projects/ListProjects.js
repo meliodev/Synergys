@@ -133,7 +133,7 @@ class ListProjects extends Component {
 
     onPressProject(project) {
         if (this.isRoot)
-            this.props.navigation.navigate('CreateProject', { ProjectId: project.id })
+            this.props.navigation.navigate('Process', { ProjectId: project.id })
 
         else {
             this.props.navigation.state.params.onGoBack(project)

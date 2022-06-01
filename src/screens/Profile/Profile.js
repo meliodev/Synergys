@@ -79,6 +79,7 @@ class Profile extends Component {
             email: { value: '', error: '' },
             email2: { value: '', error: '' },
             phone: { value: '', error: '' },
+            phone2: { value: '', error: '' },
             address: { description: '', place_id: '', marker: { latitude: '', longitude: '' } },
             addressError: '',
 
@@ -111,7 +112,7 @@ class Profile extends Component {
     }
 
     //##task: add Billing tab
-    
+
     componentWillUnmount() {
         if (this.willFocusSubscription)
             this.willFocusSubscription.remove()
@@ -171,11 +172,13 @@ class Profile extends Component {
         if (this.isClient)
             var isProspect = user.isProspect
 
+            console.log("phone 2", user.email2)
         const email = { value: user.email, error: '' }
         const email2 = { value: user.email2 || "", error: '' }
         const phone = { value: user.phone, error: '' }
+        const phone2 = { value: user.phone2, error: '' }
         const { role, address, isPro, deleted } = user
-        const formatedUser = { isPro, role, email, email2, phone, address, isProspect, deleted }
+        const formatedUser = { isPro, role, email, email2, phone, phone2, address, isProspect, deleted }
 
         if (user.isPro) {
             var denom = { value: user.denom, error: "" }
@@ -220,7 +223,7 @@ class Profile extends Component {
         let nomError = ''
         let prenomError = ''
 
-        const { isPro, denom, nom, prenom, phone, email, email2, address, isProspect } = this.state
+        const { isPro, denom, nom, prenom, phone, phone2, email, email2, address, isProspect } = this.state
 
         if (isPro)
             denomError = nameValidator(denom.value, '"Dénomination sociale"')
@@ -231,13 +234,15 @@ class Profile extends Component {
         }
 
         const phoneError = nameValidator(phone.value, '"Téléphone"')
+        const phoneError2 = phone2 && phone2.value !== "" ? nameValidator(phone.value, '"Téléphone 2"') : ""
         const addressError = nameValidator(address.description, '"Adresse"')
         const emailError = isProspect ? '' : emailValidator(email.value)
         const emailError2 = email2 && email2.value !== "" ? emailValidator(email2.value) : ""
 
-        if (denomError || nomError || prenomError || phoneError || emailError || emailError2 || addressError) {
+        if (denomError || nomError || prenomError || phoneError || phoneError2 || emailError || emailError2 || addressError) {
 
             phone.error = phoneError
+            phone2.error = phoneError2
             email.error = emailError
             email2.error = emailError2
 
@@ -252,7 +257,7 @@ class Profile extends Component {
                 this.setState({ nom, prenom })
             }
 
-            this.setState({ phone, email, email2, addressError, loading: false })
+            this.setState({ phone, phone2, email, email2, addressError, loading: false })
             setToast(this, 'e', 'Erreur de saisie, veuillez verifier les champs.')
             return false
         }
@@ -273,7 +278,7 @@ class Profile extends Component {
 
         //Format data
         let userData = []
-        let { isPro, nom, prenom, denom, phone, address, email, email2 } = this.state
+        let { isPro, nom, prenom, denom, phone, phone2, address, email, email2 } = this.state
         const { isConnected } = this.props.network
         const fullName = isPro ? denom.value : `${prenom.value} ${nom.value}`
 
@@ -294,6 +299,7 @@ class Profile extends Component {
         if (this.isClient) {
             user.email = email.value
             user.email2 = email2.value
+            user.phone2 = phone2.value
         }
 
         //Persist data
@@ -656,6 +662,7 @@ class Profile extends Component {
             email,
             email2,
             phone,
+            phone2,
             address,
             addressError,
             newPass,
@@ -683,6 +690,7 @@ class Profile extends Component {
 
         const changePwButtonColor = newPass.value === "" || currentPass.value === "" ? theme.colors.gray_medium : theme.colors.primary
         const showEmail2 = this.isClient
+        const showPhone2 = this.isClient
 
         return (
             <View style={{ flex: 1 }}>
@@ -798,13 +806,24 @@ class Profile extends Component {
                                                             keyboardType='phone-pad'
                                                             dataDetectorTypes='phoneNumber'
                                                             editable={this.isEdit && (canUpdate || this.isProcess)}
-                                                            // render={props =>
-                                                            //     <TextInputMask
-                                                            //         {...props}
-                                                            //         mask="+[00] [0] [00] [00] [00] [00]"
-                                                            //     />
-                                                            // }
                                                         />
+
+                                                        {
+                                                            showPhone2 &&
+                                                            <MyInput
+                                                                label="Téléphone 2"
+                                                                returnKeyType="done"
+                                                                value={phone2.value}
+                                                                onChangeText={text => updateField(this, phone2, text)}
+                                                                error={!!phone2.error}
+                                                                errorText={phone2.error}
+                                                                autoCapitalize="none"
+                                                                textContentType='telephoneNumber'
+                                                                keyboardType='phone-pad'
+                                                                dataDetectorTypes='phoneNumber'
+                                                                editable={this.isEdit && (canUpdate || this.isProcess)}
+                                                            />
+                                                        }
 
                                                         <AddressInput
                                                             offLine={!isConnected}

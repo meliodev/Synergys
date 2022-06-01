@@ -385,89 +385,122 @@ export const version7 = {
         stepOrder: 2,
         actions: [
           {
-            id: 'taxStatement',
+            id: 'taxStatement', //Verify if quote exists
             title: "Relevé d'impôt",
-            instructions:
-              "Appuyer sur valider pour passer à l'action suivante.",
+            instructions: '',
             actionOrder: 1,
+            collection: 'Documents',
+            //Verification
+            queryFilters: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Relevé d'impôt"},
+              {filter: 'deleted', operation: '==', value: false},
+              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+            ],
+            //Navigation
+            queryFiltersUpdateNav: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Relevé d'impôt"},
+              {filter: 'deleted', operation: '==', value: false},
+            ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Autre', value: 'Autre', selected: false},
+              documentType: {label: "Relevé d'impôt", value: "Relevé d'impôt", selected: false},
+              dynamicType: true,
             },
-            type: 'manual', //Check manually
-            verificationType: 'multiple-choices',
-            comment: '', //motif
-            choices: [
-              // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
-              {label: 'Valider', id: 'confirm', onSelectType: 'validation'},
-              {label: 'Importer', id: 'upload', onSelectType: 'navigation'},
-            ],
+            type: 'auto',
+            verificationType: 'doc-creation',
             responsable: 'Commercial',
             status: 'pending',
           },
           {
-            id: 'proofOfAddress',
-            title: 'Justificatif de domicile (moins de 3 mois)',
-            instructions:
-              "Appuyer sur valider pour passer à l'action suivante.",
+            id: 'taxStatement', //Verify if quote exists
+            title: "Justificatif de domicile",
+            instructions: '',
             actionOrder: 2,
+            collection: 'Documents',
+            //Verification
+            queryFilters: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Justificatif de domicile"},
+              {filter: 'deleted', operation: '==', value: false},
+              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+            ],
+            //Navigation
+            queryFiltersUpdateNav: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Justificatif de domicile"},
+              {filter: 'deleted', operation: '==', value: false},
+            ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Autre', value: 'Autre', selected: false},
+              documentType: {label: "Justificatif de domicile", value: "Justificatif de domicile", selected: false},
+              dynamicType: true,
             },
-            type: 'manual', //Check manually
-            verificationType: 'multiple-choices',
-            comment: '', //motif
-            choices: [
-              {label: 'Valider', id: 'confirm', onSelectType: 'validation'},
-              {label: 'Importer', id: 'upload', onSelectType: 'navigation'},
-            ],
+            type: 'auto',
+            verificationType: 'doc-creation',
             responsable: 'Commercial',
             status: 'pending',
           },
           {
-            id: 'taxStatement',
-            title: 'Plan cadastral',
-            instructions:
-              "Appuyer sur valider pour passer à l'action suivante.",
+            id: 'taxStatement', //Verify if quote exists
+            title: "Plan cadastral",
+            instructions: '',
             actionOrder: 3,
+            collection: 'Documents',
+            //Verification
+            queryFilters: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Plan cadastral"},
+              {filter: 'deleted', operation: '==', value: false},
+              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+            ],
+            //Navigation
+            queryFiltersUpdateNav: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Plan cadastral"},
+              {filter: 'deleted', operation: '==', value: false},
+            ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Autre', value: 'Autre', selected: false},
+              documentType: {label: "Plan cadastral", value: "Plan cadastral", selected: false},
+              dynamicType: true,
             },
-            type: 'manual', //Check manually
-            verificationType: 'multiple-choices',
-            comment: '', //motif
-            choices: [
-              // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
-              {label: 'Valider', id: 'confirm', onSelectType: 'validation'},
-              {label: 'Importer', id: 'upload', onSelectType: 'navigation'},
-            ],
+            type: 'auto',
+            verificationType: 'doc-creation',
             responsable: 'Commercial',
             status: 'pending',
           },
           {
-            id: 'propertyTax',
-            title: 'Taxe foncière',
-            instructions:
-              "Appuyer sur valider pour passer à l'action suivante.",
+            id: 'taxStatement', //Verify if quote exists
+            title: "Taxe foncière",
+            instructions: '',
             actionOrder: 4,
+            collection: 'Documents',
+            //Verification
+            queryFilters: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Taxe foncière"},
+              {filter: 'deleted', operation: '==', value: false},
+              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+            ],
+            //Navigation
+            queryFiltersUpdateNav: [
+              {filter: 'project.id', operation: '==', value: ''},
+              {filter: 'type', operation: '==', value: "Taxe foncière"},
+              {filter: 'deleted', operation: '==', value: false},
+            ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Autre', value: 'Autre', selected: false},
+              documentType: {label: "Taxe foncière", value: "Taxe foncière", selected: false},
+              dynamicType: true,
             },
-            type: 'manual', //Check manually
-            verificationType: 'multiple-choices',
-            comment: '', //motif
-            choices: [
-              // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
-              {label: 'Valider', id: 'confirm', onSelectType: 'validation'},
-              {label: 'Importer', id: 'upload', onSelectType: 'navigation'},
-            ],
+            type: 'auto',
+            verificationType: 'doc-creation',
             responsable: 'Commercial',
             status: 'pending',
           },

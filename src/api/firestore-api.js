@@ -137,7 +137,7 @@ export const validateUserInputs = function validateUserInputs(thisState, checkPa
 
 export const formatNewUser = function formatNewUser(thisState) {
 
-  const { isPro, nom, prenom, denom, siret, address, phone, email, email2, password, role, userType, ClientId, userId, isProspect } = thisState
+  const { isPro, nom, prenom, denom, siret, address, phone, phone2, email, email2, password, role, userType, ClientId, userId, isProspect } = thisState
 
   let user = {
     isPro,//
@@ -173,6 +173,7 @@ export const formatNewUser = function formatNewUser(thisState) {
     user.isProspect = isProspect
     user.status = "pending"
     user.email2 = email2.value.toLowerCase()
+    user.phone2 = phone2.value
     if (!isProspect)
       user.role = 'Client'
   }

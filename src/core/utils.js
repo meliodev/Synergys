@@ -134,6 +134,11 @@ export const navigateToScreen = (main, screen, params) => {
 
 //##HELPERS
 
+export const formatSpaces = (str) => {
+  str = str.replace(/\s+/g, '-').toLowerCase();
+  return str
+}
+
 //Get zip code + city
 export const getAddressDetails = async (lat, lng) => {
 
@@ -1187,6 +1192,10 @@ const allDocTypes = [
   { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
   { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
 
+  { label: "Relevé d'impôt", value: "Relevé d'impôt", icon: faFile },
+  { label: "Justificatif de domicile", value: "Justificatif de domicile", icon: faFile },
+  { label: "Plan cadastral", value: "Plan cadastral", icon: faFile },
+  { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
 

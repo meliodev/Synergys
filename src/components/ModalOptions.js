@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Image } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Image, ScrollView } from "react-native";
 import Modal from 'react-native-modal'
 import { Title } from 'react-native-paper'
 import { faTimes, faUserAlt } from '@fortawesome/pro-light-svg-icons'
@@ -185,7 +185,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
         )
 
     else return (
-        <View style={[containerStyle, { justifyContent: elements.length > 1 ? 'space-between' : 'center' }]}>
+        <ScrollView contentContainerStyle={[containerStyle, { justifyContent: elements.length > 1 ? 'space-between' : 'center' }]}>
             {elements.map((element, index) => {
                 if (model === 'Element1')
                     return (
@@ -206,7 +206,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, autoVali
                         />
                     )
             })}
-        </View>
+        </ScrollView>
     )
 
 }

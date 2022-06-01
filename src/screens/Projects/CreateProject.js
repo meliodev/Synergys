@@ -6,13 +6,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { faInfoCircle, faQuoteRight, faTasks, faFolder, faImage, faTimes, faChevronRight, faFileAlt, faCheckCircle, faEye, faArrowRight, faRedo, faAddressBook, faEuroSign, faRetweet, faUser } from '@fortawesome/pro-light-svg-icons'
 import ImageView from 'react-native-image-view'
 import { SliderBox } from "react-native-image-slider-box"
+import { connect } from 'react-redux'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
 import ActivitySection from '../../containers/ActivitySection';
-import { Appbar, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, ProcessAction, ColorPicker, SquarePlus, Toast, Loading, EmptyList } from '../../components'
+import { Appbar, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, ItemPicker, AddressInput, Picker, SquarePlus, Toast, Loading, EmptyList } from '../../components'
 
 import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
@@ -21,9 +22,6 @@ import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, nameValidator, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError, initFormSections } from "../../core/utils";
 
 import { uploadFiles } from "../../api/storage-api";
-import { getLatestProcessModelVersion } from '../../core/process/algorithm/process'
-
-import { connect } from 'react-redux'
 import ModalCheckBoxes from '../../components/ModalCheckBoxes';
 import { setAppToast } from '../../core/redux';
 
@@ -45,15 +43,6 @@ const steps = [
 
 const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
 const techSteps = ['Visite technique', 'Installation', 'Maintenance']
-
-const imagePickerOptions = {
-    title: 'Selectionner une image',
-    takePhotoButtonTitle: 'Prendre une photo',
-    chooseFromLibraryButtonTitle: 'Choisir de la librairie',
-    cancelButtonTitle: 'Annuler',
-    noData: true,
-}
-
 const properties = ["client", "name", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
 
 class CreateProject extends Component {
@@ -179,7 +168,6 @@ class CreateProject extends Component {
             name: "",
             nameError: "",
             workTypes,
-            isModalVisible: false,
             note: "",
 
             //Screens
@@ -190,7 +178,6 @@ class CreateProject extends Component {
             state: 'En cours',
             step: 'Prospect',
             color: theme.colors.primary,
-            process: null,
 
             comContact: this.comContact,
             techContact: { id: '', fullName: '', email: '', role: '' },
@@ -236,7 +223,6 @@ class CreateProject extends Component {
             isModalCheckBoxesVisible: false,
             scrollViewRef: null,
             sections: this.sections ? sections : defaultSections,
-            viewMore: false,
         }
     }
 
@@ -255,11 +241,6 @@ class CreateProject extends Component {
         this.setState({ loading: false })
     }
 
-    componentWillUnmount() {
-        if (this.projectListener)
-            this.projectListener()
-    }
-
     initSectionsExpansion() {
         let { sections } = this.state
         for (const key in sections) {
@@ -268,22 +249,23 @@ class CreateProject extends Component {
         this.setState({ sections })
     }
 
-    async initEditMode() {
+    async initEditMode(localProject) {
         this.isEdit = true
         this.title = 'Modifier le projet'
         if (!this.sections)
             this.initSectionsExpansion()
-        let query = db.collection("Projects").doc(this.ProjectId)
+
+        const query = db.collection("Projects").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
-            this.projectListener = query.onSnapshot(async (doc) => {
-                if (!doc.exists) return null
-                let project = doc.data()
+            query.get().then(async (doc) => {
+                if (!doc.exists && !localProject) return null
+                let project = localProject || doc.data()
                 project.id = doc.id
                 this.project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address', 'workTypes'])
                 project = this.setProject(project)
-                if (!project) return
+                if (!project) return null
                 this.setImageCarousel(project.attachments)
-                this.setUserAccess(project.step)
+                this.configUserAccess(project.step)
                 await this.fetchOtherData()
                 resolve(true)
             })
@@ -324,7 +306,7 @@ class CreateProject extends Component {
         this.setState({ imagesView, imagesCarousel })
     }
 
-    setUserAccess(step) {
+    configUserAccess(step) {
         const currentRole = this.props.role.id
         const isBlockedUpdates = blockRoleUpdateOnPhase(currentRole, step)
         this.setState({ isBlockedUpdates })
@@ -448,7 +430,8 @@ class CreateProject extends Component {
         const props = ["name", "client", "note", "state", "step", "address", "color", "bill", "comContact", "techContact", "intervenant"]
         let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
-        project.process = {
+        project.processVersion = latestProcessVersion
+        const process = {
             version: latestProcessVersion
             //version: "version0" //Used for testing
         }
@@ -456,33 +439,35 @@ class CreateProject extends Component {
         const selectedWorkTypesValues = selectedWorkTypes.map((wt) => wt.value)
         project.workTypes = selectedWorkTypesValues
 
-        this.persistData(project)
+        this.persistData({ project, process })
 
         const toastMessage = this.isEdit ? 'Le projet a été modifié' : 'Le projet a été crée.'
-        if (!this.isEdit)
-            await this.initEditMode()
         load(this, false)
-
         const toast = { message: toastMessage, type: "info" }
         setAppToast(this, toast)
+
+        if (!this.isEdit) {
+            this.props.navigation.replace("Process", { ProjectId: this.ProjectId })
+            //await this.initEditMode(project)
+        }
 
         if (this.isGoBack)
             this.props.navigation.goBack()
     }
 
-    persistData(project) {
-        if (this.isEdit)
-            db.collection('Projects').doc(this.ProjectId).set(project, { merge: true })
-
-        else {
-            const batch = db.batch()
-            const projectRef = db.collection('Projects').doc(this.ProjectId)
-            const clientRef = db.collection('Clients').doc(project.client.id)
-            batch.set(projectRef, project)
+    persistData(data) {
+        const { project, process } = data
+        const batch = db.batch()
+        const projectRef = db.collection('Projects').doc(this.ProjectId)
+        const processRef = projectRef.collection("Process").doc(this.ProjectId)
+        const clientRef = db.collection('Clients').doc(project.client.id)
+        batch.set(projectRef, project)
+        batch.set(processRef, process)
+        if (!this.isEdit) {
             batch.update(clientRef, { isProspect: false }) //For offline support
-            batch.commit()
-            //TF should be now running to create user account for the client...
         }
+        batch.commit()
+        //Trigger Function should be now running to create user account for the client...
     }
 
     showAlert() {
@@ -549,20 +534,7 @@ class CreateProject extends Component {
         this.setState({ sections })
     }
 
-    //FIELDS:
-    renderProcessAction(client, step, canWrite) {
-        return (
-            <ProcessAction
-                process={this.state.process}
-                project={this.project}
-                clientId={client.id}
-                step={step}
-                canUpdate={canWrite}
-                isAllProcess={false}
-                role={this.props.role}
-            />
-        )
-    }
+
 
     renderClientField(canWrite) {
         const { client } = this.state
@@ -725,12 +697,6 @@ class CreateProject extends Component {
 
         const {
             name,
-            client,
-            step,
-            address,
-            comContact,
-            techContact,
-            intervenant,
             expandedTaskId,
             taskTypes,
             tasksList
@@ -1026,7 +992,6 @@ class CreateProject extends Component {
 
     renderGeneralInfoSection(showFields, isExpanded, canWrite, loading) {
 
-        console.log('is expanded', isExpanded)
         return (
             <FormSection
                 sectionTitle='Informations générales'
@@ -1069,15 +1034,6 @@ class CreateProject extends Component {
     renderTasksSection(showFields, isExpanded) {
         const {
             tasksList,
-            taskTypes,
-            expandedTaskId,
-            name,
-            client,
-            step,
-            address,
-            comContact,
-            techContact,
-            intervenant,
         } = this.state
 
         return (
@@ -1164,7 +1120,7 @@ class CreateProject extends Component {
                 containerStyle={{ marginBottom: 1 }}
                 form={
                     <View style={{ flex: 1 }}>
-                        {showFields.billAmount.show, this.renderBillAmountField(bill, canWrite)}
+                        {showFields.billAmount.show && this.renderBillAmountField(bill, canWrite)}
                     </View>
                 }
             />
@@ -1286,8 +1242,6 @@ class CreateProject extends Component {
 
         return (
             <View>
-                {!this.sections && this.viewMore()}
-
                 {sections["activity"].show &&
                     this.renderActivitySection(sections["activity"].fields, sections["activity"].isExpanded)
                 }
@@ -1329,9 +1283,6 @@ class CreateProject extends Component {
 
     renderStandardView(canWrite, isConnected, loading) {
 
-        const { client, step, viewMore } = this.state
-        const showProcessAction = this.isEdit && this.project && this.state.process && !this.sections
-
         return (
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
@@ -1339,42 +1290,15 @@ class CreateProject extends Component {
                 keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
             >
                 <ScrollView style={styles.dataContainer} keyboardShouldPersistTaps="never">
-                    {showProcessAction &&
-                        this.renderProcessAction(client, step, canWrite)
-                    }
-
-                    {this.isEdit && viewMore || !this.isEdit || this.sections ?
-                        this.renderForm(canWrite, loading, isConnected)
-                        :
-                        this.viewMore()
-                    }
+                    {this.renderForm(canWrite, loading, isConnected)}
                 </ScrollView>
             </KeyboardAvoidingView>
 
         )
     }
 
-    viewMore() {
-        if (!this.isEdit) return null
-
-        const { viewMore } = this.state
-        const text = viewMore ? "Voir moins..." : "Voir plus..."
-
-        return (
-            <Text
-                onPress={() => {
-                    this.setState({ viewMore: !viewMore })
-                    this.toggleSection()
-                }}
-                style={[theme.customFontMSbold.body, { color: theme.colors.primary, alignSelf: "center", marginBottom: theme.padding * 2 }]}
-            >
-                {text}
-            </Text>
-        )
-    }
 
     render() {
-
         const { sections, docNotFound, loading, uploading, isBlockedUpdates } = this.state
         const { isConnected } = this.props.network
         let { canCreate, canUpdate, canDelete } = this.props.permissions.projects
@@ -1383,7 +1307,7 @@ class CreateProject extends Component {
         if (docNotFound)
             return (
                 <View style={styles.mainContainer}>
-                    <Appbar close title titleText={this.title} />
+                    <Appbar back title titleText={this.title} />
                     <EmptyList
                         icon={faTimes}
                         header='Projet introuvable'
@@ -1396,7 +1320,7 @@ class CreateProject extends Component {
         else if (uploading)
             return (
                 <View style={styles.mainContainer}>
-                    <Appbar close title titleText={this.title} />
+                    <Appbar back title titleText={this.title} />
                     {this.renderPicturesSection(sections["pictures"].fields, sections["pictures"].isExpanded, loading, canWrite, isConnected)}
                 </View>
             )
@@ -1404,7 +1328,7 @@ class CreateProject extends Component {
         else if (loading)
             return (
                 <View style={styles.mainContainer}>
-                    <Appbar close title titleText={this.title} />
+                    <Appbar back title titleText={this.title} />
                     <Loading />
                 </View>
             )
@@ -1412,7 +1336,7 @@ class CreateProject extends Component {
         else return (
             <View style={styles.mainContainer}>
                 <Appbar
-                    close
+                    back
                     title
                     titleText={this.title}
                     check={this.isEdit ? canWrite && !loading : !loading}
@@ -1424,7 +1348,6 @@ class CreateProject extends Component {
                     handleRefresh={this.handleRefresh}
                     customBackHandler={this.customBackHandler}
                 />
-                {/* <Text>Hello</Text> */}
                 {this.renderStandardView(canWrite, isConnected, loading)}
             </View >
         )

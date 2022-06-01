@@ -165,6 +165,10 @@ class StepsForm extends Component {
 
   async componentDidMount() {
     try {
+
+      const colorLabel = this.setColorLabel("blue");
+      console.log("color", colorLabel)
+
       this.addNavigationListeners();
 
       if (this.state.isEdit) await this.initEditMode();
@@ -1706,8 +1710,11 @@ class StepsForm extends Component {
     const simulationColorCat = simulationColorCats.filter(
       (color) => color.id === colorCat,
     );
+
     const colorLabel =
       simulationColorCat.length > 0 ? simulationColorCat[0].label : '';
+
+      return colorLabel
   }
 
   //##Overview
@@ -1724,7 +1731,7 @@ class StepsForm extends Component {
       const colorLabel = this.setColorLabel(colorCat);
 
       var summary = [
-        {title: 'Couleur', value: colorLabel},
+        {title: 'Barème', value: colorLabel},
         // { title: "Produits recommandés", value: products },
         // { title: "Estimation", value: `${estimation} €` },
       ];
