@@ -193,14 +193,15 @@ class CreateTask extends Component {
 
         return defaultState
     }
- 
+
     //##GET
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
-        const isComAndVT = this.props.role.id === "com" && this.state.type === "Visite technique" 
-       // const isInstallation = this.state.type === "Installation" 
-        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || isComAndVT 
+        const isComAndVT = this.props.role.id === "com" && this.state.type === "Visite technique"
+        // const isInstallation = this.state.type === "Installation" 
+        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || isComAndVT
+        this.hideHours = this.props.navigation.getParam('hideTimeslots', false) || isComAndVT
         //##task: test if assignedTo is hidden on "VT" & "Installation" during process
         load(this, false)
     }
@@ -242,15 +243,16 @@ class CreateTask extends Component {
 
     validateInputs() {
         const { name, assignedTo, endDateError, dueHourError } = this.state
-        let isValid1 = true
+        //let isValid1 = true
         // const nameError = nameValidator(name, '"Nom de la tâche"')
-        const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
-        if (assignedToError) {
-            isValid1 = false
-            this.setState({ assignedToError })
-        }
+        // const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
+        // if (assignedToError) {
+        //     isValid1 = false
+        //     this.setState({ assignedToError })
+        // }
         const isValid2 = this.validateSchedule()
-        const isValid = isValid1 && isValid2
+        const isValid = isValid2
+       // const isValid = isValid1 && isValid2
         if (!isValid) {
             this.setState({ toastMessage: errorMessages.invalidFields, toastType: "error", loading: false })
         }
@@ -663,6 +665,7 @@ class CreateTask extends Component {
                 dueHourError={dueHourError}
                 endDateError={endDateError}
                 hideEndDate={this.isEdit || isCommercialNature}
+                showHours={!this.hideHours}
                 setParentState={
                     (mode, dateId, value) => {
                         let update = {}

@@ -75,7 +75,8 @@ class ClientsManagement extends React.Component {
                             offLine={!isConnected}
                             permissions={permissionsClients}
                             query={queryClients}
-                            showButton={permissionsClients.canCreate}
+                            //showButton={permissionsClients.canCreate}
+                            showButton={false}
                             onPress={this.viewProfile.bind(this)}
                             emptyListIcon={faUser}
                             emptyListHeader='Aucun client'

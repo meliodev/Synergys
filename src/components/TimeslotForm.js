@@ -15,7 +15,8 @@ import { navigateToScreen } from '../core/utils'
 import * as theme from '../core/theme'
 import { constants } from '../core/constants'
 
-export default class TimeslotForm extends Component {
+class TimeslotForm extends Component {
+
     constructor(props) {
         super(props)
 
@@ -42,7 +43,7 @@ export default class TimeslotForm extends Component {
     }
 
     async componentDidUpdate(prevProps, prevState, snapshot) {
-        
+
         if (prevProps.isAllDay !== this.props.isAllDay) {
             this.setState({ isAllDay: this.props.isAllDay })
         }
@@ -111,7 +112,7 @@ export default class TimeslotForm extends Component {
                 </View>
 
                 {this.renderDates(togglePickers)}
-                {this.renderHours(togglePickers)}
+                {this.props.showHours && this.renderHours(togglePickers)}
 
             </View>
         )
@@ -221,6 +222,10 @@ export default class TimeslotForm extends Component {
         return this.renderForm()
     }
 }
+
+
+
+export default TimeslotForm
 
 const styles = StyleSheet.create({
     isAllDayContainer: {

@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native'
-import { faUserAlt, faAddressCard, faClipboardUser, faConstruction, faCalendarAlt, faFolder } from '@fortawesome/pro-solid-svg-icons'
+import { faUserAlt, faAddressCard, faClipboardUser, faConstruction, faCalendarAlt, faFolder, faVials } from '@fortawesome/pro-solid-svg-icons'
 import { connect } from 'react-redux'
 
 import moment from 'moment';
@@ -25,16 +25,16 @@ const shortcutsModel = {
         colors: { primary: '#ff6968', secondary: '#fe8280' },
         navigation: { screen: 'CreateClient', params: { prevScreen: 'Dashboard', isProspect: true } }
     },
-    createClient: {
-        label: 'Nouveau client',
-        value: '',
-        icon: faAddressCard,
-        colors: { primary: '#7a54ff', secondary: '#946afc' },
-        navigation: {
-            screen: 'CreateClient',
-            params: { prevScreen: 'Dashboard', isProspect: false }
-        }
-    },
+    // createClient: {
+    //     label: 'Nouveau client',
+    //     value: '',
+    //     icon: faAddressCard,
+    //     colors: { primary: '#7a54ff', secondary: '#946afc' },
+    //     navigation: {
+    //         screen: 'CreateClient',
+    //         params: { prevScreen: 'Dashboard', isProspect: false }
+    //     }
+    // },
     createUser: {
         label: 'Nouvel utilisateur',
         value: '',
@@ -62,6 +62,13 @@ const shortcutsModel = {
         icon: faFolder,
         colors: { primary: '#96da45', secondary: '#ace558' },
         navigation: { screen: 'UploadDocument', params: { prevScreen: 'Dashboard' } }
+    },
+    createSimulation: {
+        label: 'Nouvelle simulation',
+        value: '',
+        icon: faVials,
+        colors: { primary: theme.colors.primary, secondary: '#35E999' },
+        navigation: { screen: 'CreateSimulation', params: { prevScreen: 'Dashboard' } }
     }
 }
 
@@ -82,14 +89,15 @@ class Shortcuts extends Component {
     setPermissionBasedShortcuts() {
         let shortcuts = []
         const { clients, users, projects, tasks, documents } = this.props.permissions
-        const { createProspect, createClient, createUser, createProject, createTask, createDocument } = shortcutsModel
+        const { createProspect, createUser, createProject, createTask, createDocument, createSimulation } = shortcutsModel
 
         if (clients.canCreate) shortcuts.push(createProspect)
-        if (clients.canCreate) shortcuts.push(createClient)
+        // if (clients.canCreate) shortcuts.push(createClient)
         if (users.canCreate) shortcuts.push(createUser)
         if (projects.canCreate) shortcuts.push(createProject)
         if (tasks.canCreate) shortcuts.push(createTask)
         if (documents.canCreate) shortcuts.push(createDocument)
+        if (this.props.role.id !== "client") shortcuts.push(createSimulation)
 
         return shortcuts
     }
@@ -97,7 +105,7 @@ class Shortcuts extends Component {
 
     render() {
         const { loading } = this.state
-       // const { isConnected } = this.props.network
+        // const { isConnected } = this.props.network
 
         const elementSize = isTablet ?
             ScreenWidth * 0.29

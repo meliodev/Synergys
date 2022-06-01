@@ -827,7 +827,7 @@ export const version7 = {
               dynamicType: true,
             },
             type: 'auto',
-            responsable: 'Poseur',
+            responsable: 'Responsable technique',
             status: 'pending',
             verificationType: 'doc-creation',
           },
@@ -876,7 +876,7 @@ export const version7 = {
                 onSelectType: 'navigation',
               },
             ],
-            responsable: 'Poseur',
+            responsable: 'Responsable technique',
             status: 'pending',
           },
           {
@@ -916,7 +916,7 @@ export const version7 = {
                 onSelectType: 'navigation',
               }, //#ask: isn't the poseur already predefined with project as technical contact ?
             ],
-            responsable: 'Poseur',
+            responsable: 'Responsable technique',
             status: 'pending',
           },
           //##done:task: Choisir les types de travaux

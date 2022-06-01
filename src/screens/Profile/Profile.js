@@ -495,7 +495,7 @@ class Profile extends Component {
     }
 
     onPressProject(ProjectId) {
-        this.props.navigation.navigate('CreateProject', { ProjectId, onGoBack: () => this.fetchProfile(1000) })
+        this.props.navigation.navigate('Process', { ProjectId, onGoBack: () => this.fetchProfile(1000) })
     }
 
     renderClientProjects(currentUser) {

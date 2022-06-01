@@ -294,7 +294,8 @@ class CreateUser extends Component {
                 textContentType='telephoneNumber'
                 keyboardType='phone-pad'
                 dataDetectorTypes='phoneNumber'
-                render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
+                //render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} 
+                />
 
               <MyInput
                 label="Email *"
