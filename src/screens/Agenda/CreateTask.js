@@ -198,12 +198,17 @@ class CreateTask extends Component {
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
         this.initialState = _.cloneDeep(this.state)
-        const isComAndVT = this.props.role.id === "com" && this.state.type === "Visite technique"
-        // const isInstallation = this.state.type === "Installation" 
-        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || isComAndVT
-        this.hideHours = this.props.navigation.getParam('hideTimeslots', false) || isComAndVT
-        //##task: test if assignedTo is hidden on "VT" & "Installation" during process
+        this.configFieldsDisplay()
         load(this, false)
+    }
+
+    //##task: test if assignedTo is hidden on "VT" & "Installation" during process
+    configFieldsDisplay() {
+        const { type } = this.state
+        const isComAndVT = this.props.role.id === "com" && type === "Visite technique"
+        const isInstallation = type === "Installation"
+        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || (this.isProcess && (isComAndVT || isInstallation))
+        this.hideHours = this.props.navigation.getParam('hideTimeslots', false) || isComAndVT
     }
 
     async initEditMode() {
@@ -252,7 +257,7 @@ class CreateTask extends Component {
         // }
         const isValid2 = this.validateSchedule()
         const isValid = isValid2
-       // const isValid = isValid1 && isValid2
+        // const isValid = isValid1 && isValid2
         if (!isValid) {
             this.setState({ toastMessage: errorMessages.invalidFields, toastType: "error", loading: false })
         }
@@ -705,7 +710,7 @@ class CreateTask extends Component {
                     else nav()
                 }}
 
-                label="Attribuée à *"
+                label="Attribuée à"
                 value={assignedTo.fullName}
                 error={!!assignedToError}
                 errorText={assignedToError}
@@ -778,7 +783,6 @@ class CreateTask extends Component {
                                 selectedValue={type}
                                 onValueChange={(type) => {
                                     //Toggle all date pickers
-
                                     //Sync Date début et date fin
                                     this.setState({ type, endDate: this.state.startDate })
                                 }}

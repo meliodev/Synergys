@@ -60,7 +60,7 @@ class ProcessContainer extends Component {
                           const isActionPending = action.status === 'pending'
                           const canUpdateAction = canUpdateStep && (isFirstAction || isPreviousActionDone) && isActionPending
                           return this.props.renderAction(false, action, actionStyle, { marginVertical: theme.padding / 2 })
-                        })
+                        }) 
                         }
                       </View>
                     }

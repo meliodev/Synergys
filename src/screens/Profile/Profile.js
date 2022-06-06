@@ -6,10 +6,15 @@ import NetInfo from "@react-native-community/netinfo"
 import _ from 'lodash'
 import { faUser, faUserSlash } from '@fortawesome/pro-solid-svg-icons'
 import { faPlusCircle } from '@fortawesome/pro-duotone-svg-icons'
-import { faBullseyeArrow, faConstruction, faInfo, faLock, faRedo } from '@fortawesome/pro-light-svg-icons'
+import { faBullseyeArrow, faCheck, faConstruction, faInfo, faLock, faMoneyBill, faRedo, faTimes } from '@fortawesome/pro-light-svg-icons'
 import { connect } from 'react-redux'
 
+import moment from 'moment';
+import 'moment/locale/fr'
+moment.locale('fr')
+
 import TurnoverGoalsContainer from '../../containers/TurnoverGoalsContainer'
+import ClientBillingSection from './containers/ClientBillingSection'
 import Appbar from '../../components/Appbar'
 import CustomIcon from '../../components/CustomIcon'
 import FormSection from '../../components/FormSection'
@@ -17,6 +22,7 @@ import MyInput from '../../components/TextInput'
 import AddressInput from '../../components/AddressInput'
 import Button from "../../components/Button"
 import ProjectItem2 from "../../components/ProjectItem2"
+import ClientPaymentItem from "../../components/ClientPaymentItem"
 import TurnoverGoal from "../../components/TurnoverGoal"
 import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
@@ -87,6 +93,7 @@ class Profile extends Component {
             newPass: { value: '', error: '', show: false },
 
             loadingClientProjects: true,
+            loadingClientPayments: false,
             clientProjectsList: [],
             monthlyGoals: [],
 
@@ -95,7 +102,8 @@ class Profile extends Component {
                 info: true,
                 pw: true,
                 turnoverGoals: true,
-                projects: true
+                projects: true,
+                billing: true,
             },
             viewMore: false,
 
@@ -127,6 +135,10 @@ class Profile extends Component {
                 this.fetchClientProjects()
                 this.willFocusSubscription = this.props.navigation.addListener('willFocus', () => this.fetchClientProjects())
             }
+
+            // if (this.isCurrentUserBackOffice) {
+            //this.fetchClientPayments()
+            // }
 
             // DC can view/add Coms goals
             if (this.userParam.roleId === 'com') {
@@ -172,7 +184,6 @@ class Profile extends Component {
         if (this.isClient)
             var isProspect = user.isProspect
 
-            console.log("phone 2", user.email2)
         const email = { value: user.email, error: '' }
         const email2 = { value: user.email2 || "", error: '' }
         const phone = { value: user.phone, error: '' }
@@ -198,7 +209,7 @@ class Profile extends Component {
     async fetchClientProjects() {
         this.setState({ loadingClientProjects: true })
 
-        var query = db
+        const query = db
             .collection('Projects')
             .where('client.id', '==', this.userParam.id)
             .where('deleted', '==', false)
@@ -215,6 +226,25 @@ class Profile extends Component {
             clientProjectsCount: clientProjectsList.length,
             loadingClientProjects: false
         })
+    }
+
+    async fetchClientPayments() {
+        this.setState({ loadingClientPayments: true })
+
+        const query = db
+            .collection('Clients')
+            .doc(this.userParam.id)
+            .collection("Payments")
+            .orderBy('createdAt', 'DESC')
+
+        const clientPayments = await fetchDocuments(query)
+
+        this.setState({
+            clientPayments,
+            clientPayments: clientPayments.length,
+            loadingClientPayments: false
+        })
+
     }
 
     //##VALIDATE
@@ -500,8 +530,7 @@ class Profile extends Component {
 
     renderClientProjects(currentUser) {
         const mes = this.isProfileOwner ? 'Mes ' : ''
-        const { loadingClientProjects, clientProjectsList, isPro, denom, nom, prenom, email, address } = this.state
-        const { sectionsExpansion } = this.state
+        const { loadingClientProjects, clientProjectsList, sectionsExpansion } = this.state
 
         return (
             <View style={{ flex: 1 }}>
@@ -543,6 +572,9 @@ class Profile extends Component {
             </View>
         )
     }
+
+    //FACTURATION
+
 
     onPressNewGoal() {
         this.props.navigation.navigate('AddGoal', { userId: this.userParam.id, onGoBack: this.refreshMonthlyGoals })
@@ -857,6 +889,13 @@ class Profile extends Component {
                                         }
                                     />
 
+                                    <ClientBillingSection
+                                        canUpdate={canUpdate}
+                                        isExpanded={true}
+                                        ClientId = {this.userParam.id}
+                                        toggleSection={() => this.toggleSection("billing")}
+                                    />
+
                                     {this.isClient && this.renderClientProjects(currentUser)}
                                     {this.renderCommercialGoals(monthlyGoals, role)}
 
@@ -995,6 +1034,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 10,
         backgroundColor: 'transparent'
+    },
+    clientPaymentContainer: {
+        flex: 1,
+        backgroundColor: theme.colors.white,
+        borderRadius: 8,
+        marginTop: 12,
+        ...theme.style.shadow
+    },
+    clientPaymentHeader: {
+        flexDirection: 'row',
+        padding: theme.padding,
+        borderTopLeftRadius: 8,
+        borderTopRightRadius: 8,
+        justifyContent: 'space-between',
+        backgroundColor: '#EAF7F1'
+    },
+    clientPaymentRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        // alignItems:"center",
+        padding: theme.padding,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: theme.colors.gray_light,
     }
 })
 

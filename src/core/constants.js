@@ -19,7 +19,7 @@ export const ScreenHeight = height
 
 //export const appVersionDescription = "Lorem ipsum dolor"
 
-export const latestProcessVersion = "version7"
+export const latestProcessVersion = "version8"
 
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },
@@ -70,7 +70,10 @@ export const errorMessages = {
         newUser: "La création d'un nouvel utilisateur nécessite une connection réseau."
     },
     chat: "Erreur lors de l'envoi du message, veuillez réessayer",
-    map: "Erreur lors de la communication avec le serveur Google Maps. Veuillez réessayer..."
+    map: "Erreur lors de la communication avec le serveur Google Maps. Veuillez réessayer...",
+    fields: {
+        empty: 'Erreur de saisie, veuillez verifier les champs.'
+    }
 }
 
 export const sectionsModels = {
@@ -273,10 +276,10 @@ export const contactForm = [
 ]
 
 export const simulationColorCats = [
-    {id: "blue", label: "Bleu"},
-    {id: "yellow", label: "Jaune"},
-    {id: "purple", label: "Violet"},
-    {id: "pink", label: "Rose"},
+    { id: "blue", label: "Bleu" },
+    { id: "yellow", label: "Jaune" },
+    { id: "purple", label: "Violet" },
+    { id: "pink", label: "Rose" },
 ]
 
 const choice1 = ["PAC AIR EAU", "Chauffage solaire combiné"]
@@ -289,6 +292,12 @@ const choice5 = ["Chaudière à granulé", "Chauffe-eau solaire individuel"]
 const choice6 = ["Chaudière à granulé", "Ballon thermodynamique"]
 export const pack2 = [choice3, choice4, choice5, choice6]
 
+export const collectionScreenNameMap = {
+    "Clients": "Profile",
+    "Projects": "CreateProject",
+    "Documents": "UploadDocument",
+    "Agenda": "CreateTask"
+}
 
 //Auto-Sign docs
 export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Facture"]

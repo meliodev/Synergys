@@ -30,6 +30,14 @@ class Process extends Component {
     }
 
     async componentDidMount() {
+        const properties = ["project", "client", "id"]
+        const test = {
+            project: { client: { id: "123" } }
+        }
+
+        const nestedVal = properties.reduce((a, prop) => a[prop], test)
+        console.log(nestedVal)
+
         const project = await this.fetchProject()
         const process = await this.fetchProcess()
         const isBlockedUpdates = this.configUserAccess(project.step)
@@ -141,34 +149,33 @@ class Process extends Component {
         )
     }
 
-    render() {
-        const { docNotFound, loading, isBlockedUpdates } = this.state
+    renderContent(loading) {
+        const { docNotFound, isBlockedUpdates } = this.state
         const { isConnected } = this.props.network
         const { canUpdate } = this.props.permissions.projects
         const canWrite = (canUpdate && !isBlockedUpdates)
 
-        if (docNotFound)
+        if (docNotFound) {
             return (
-                <View style={styles.container}>
-                    <Appbar close title titleText={this.title} />
-                    <EmptyList
-                        icon={faTimes}
-                        header='Projet introuvable'
-                        description="Le projet est introuvable dans la base de données. Il se peut qu'il ait été supprimé."
-                        offLine={!isConnected}
-                    />
-                </View>
+                <EmptyList
+                    icon={faTimes}
+                    header='Projet introuvable'
+                    description="Le projet est introuvable dans la base de données. Il se peut qu'il ait été supprimé."
+                    offLine={!isConnected}
+                />
             )
-
-        else if (loading)
-            return (
-                <View style={styles.container}>
-                    <Appbar back title titleText={this.title} />
-                    <Loading />
-                </View>
-            )
-
+        }
+        else if (loading) {
+            return <Loading />
+        }
         else return (
+            this.renderStandardView(canWrite)
+        )
+    }
+
+    render() {
+        const { loading } = this.state
+        return (
             <View style={styles.container}>
                 <Appbar
                     back
@@ -176,7 +183,7 @@ class Process extends Component {
                     titleText={this.title}
                     loading={loading}
                 />
-                {this.renderStandardView(canWrite)}
+                {this.renderContent(loading)}
             </View >
         )
     }

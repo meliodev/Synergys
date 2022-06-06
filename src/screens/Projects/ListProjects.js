@@ -28,6 +28,7 @@ import { withNavigation } from 'react-navigation'
 
 import SearchInput, { createFilter } from 'react-native-search-filter'
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { buildQueryFilters, queryFilters_Agenda_Map, queryFilters_Documents_Map } from '../../core/process/models/version8';
 const KEYS_TO_FILTERS = ['id', 'name', 'state', 'step',]
 
 const states = [
@@ -105,6 +106,7 @@ class ListProjects extends Component {
         else {
             const params = { role: this.props.role.value }
             const query = configureQuery('Projects', queryFilters, params)
+
             const projectsList = await fetchDocuments(query)
 
             this.setState({

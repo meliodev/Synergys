@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { StyleSheet, Text, View, FlatList, ScrollView } from 'react-native'
 import { faUserAlt, faAddressCard, faClipboardUser, faConstruction, faCalendarAlt, faFolder, faVials } from '@fortawesome/pro-solid-svg-icons'
 import { connect } from 'react-redux'
+import _ from "lodash"
 
 import moment from 'moment';
 import 'moment/locale/fr'
@@ -84,6 +85,18 @@ class Shortcuts extends Component {
 
     componentDidMount() {
         load(this, false)
+        const process = {
+            phase: {
+                steps: {
+                    actions: ["1", "2", "3"]
+                }
+            }
+        }
+
+        let actions = process.phase.steps.actions
+        actions.push("4")
+
+        console.log(process.phase.steps.actions)
     }
 
     setPermissionBasedShortcuts() {

@@ -1170,8 +1170,28 @@ import { not } from 'react-native-reanimated';
 const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
-  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
   { label: 'Autre', value: 'Autre', icon: faFile },
+]
+
+export const privateDocTypes = [
+  { label: 'Devis', value: 'Devis', icon: faFileInvoice },
+  { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
+  { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
+  { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
+  { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
+  // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
+  { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
+  // { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
+  { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
+  { label: 'PV réception', value: 'PV réception', icon: faReceipt },
+  { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
+  { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
+  { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
+  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
+  { label: "Relevé d'impôt", value: "Relevé d'impôt", icon: faFile },
+  { label: "Justificatif de domicile", value: "Justificatif de domicile", icon: faFile },
+  { label: "Plan cadastral", value: "Plan cadastral", icon: faFile },
+  { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
 ]
 
 const allDocTypes = [
@@ -1205,6 +1225,14 @@ let publicTaskTypes = [
   { label: 'Entretien', value: 'Entretien', natures: ['com', 'tech'] }, //#static
 ]
 
+export const privateTaskTypes = [
+  { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, //#dynamic
+  { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
+  { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
+  { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
+  { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] },
+]
+
 let alltaskTypes = [
   { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
   { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, //#dynamic
@@ -1215,6 +1243,12 @@ let alltaskTypes = [
   { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
   { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
+
+export const getTaskNatures = (taskLabel) => {
+  const task = alltaskTypes.find((task) => task.label === taskLabel)
+  const taskNatures = task.natures
+  return taskNatures
+}
 
 //Documents
 export const setPickerDocTypes = (currentRole, dynamicType, documentType) => {

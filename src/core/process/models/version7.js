@@ -23,7 +23,10 @@ export const version7 = {
             properties: ['nom'],
             //Navigation
             screenName: 'Profile',
-            screenParams: {user: {id: '', roleId: 'client'}, project: null},
+            screenParams: {
+              user: { id: '', roleId: 'client' },
+              project: null
+            },
             screenPush: true,
             //Verification
             type: 'auto',
@@ -44,7 +47,10 @@ export const version7 = {
             properties: ['prenom'],
             //Navigation
             screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-            screenParams: {user: {id: '', roleId: 'client'}, project: null},
+            screenParams: {
+              user: { id: '', roleId: 'client' },
+              project: null
+            },
             screenPush: true,
             //Verification
             type: 'auto',
@@ -62,7 +68,10 @@ export const version7 = {
             documentId: '', //dynamic
             properties: ['address', 'description'],
             screenName: 'Profile',
-            screenParams: {user: {id: '', roleId: 'client'}, project: null},
+            screenParams: {
+              user: { id: '', roleId: 'client' },
+              project: null
+            },
             screenPush: true,
             type: 'auto',
             verificationType: 'data-fill',
@@ -79,7 +88,10 @@ export const version7 = {
             documentId: '', // dynamic
             properties: ['phone'],
             screenName: 'Profile', //#task OnUpdate client name on his profile: triggered cloud function should run to update all documents containing this client data.
-            screenParams: {user: {id: '', roleId: 'client'}, project: null},
+            screenParams: {
+              user: { id: '', roleId: 'client' },
+              project: null
+            },
             screenPush: true,
             type: 'auto',
             responsable: 'Commercial',
@@ -109,15 +121,15 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
               {
                 filter: 'type',
                 operation: '==',
                 value: 'Visite technique préalable',
               },
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
-              //#task: add orderBy createdAt to get only the latest document (ignore old ones)
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
+              //##task: add orderBy createdAt to get only the latest document (ignore old ones)
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -143,14 +155,14 @@ export const version7 = {
             documentId: '', //#dynamic
             properties: ['address', 'description'],
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
               {
                 filter: 'type',
                 operation: '==',
                 value: 'Visite technique préalable',
               },
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask',
             screenParams: {
@@ -162,6 +174,7 @@ export const version7 = {
                 natures: ['tech'],
               },
               dynamicType: true,
+
             }, //#dynamic
             type: 'auto',
             verificationType: 'data-fill',
@@ -177,19 +190,19 @@ export const version7 = {
             collection: 'Agenda',
             documentId: '',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
               {
                 filter: 'type',
                 operation: '==',
                 value: 'Visite technique préalable',
               },
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask',
             screenParams: {
-              project: null,
-              TaskId: '',
+              project: null, //yes
+              TaskId: '', //
               taskType: {
                 label: 'Visite technique préalable',
                 value: 'Visite technique préalable',
@@ -207,13 +220,13 @@ export const version7 = {
                 onSelectType: 'transition',
                 commentRequired: true,
               },
-              {label: 'Reporter', id: 'postpone', onSelectType: 'navigation'},
+              { label: 'Reporter', id: 'postpone', onSelectType: 'navigation' },
               {
                 label: 'Confirmer',
                 id: 'confirm',
                 nextStep: 'housingActionFile',
                 onSelectType: 'transition',
-                operation: {type: 'update', field: 'status', value: 'Terminé'},
+                operation: { type: 'update', field: 'status', value: 'Terminé' },
               },
             ],
             responsable: 'Commercial',
@@ -234,16 +247,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Fiche EEB'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Fiche EEB' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Fiche EEB'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Fiche EEB' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -275,10 +288,10 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Présentation étude'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Présentation étude' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -311,21 +324,25 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Devis'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Devis' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Devis'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Devis' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Devis', value: 'Devis', selected: false},
+              documentType: {
+                label: 'Devis',
+                value: 'Devis',
+                selected: false
+              },
               dynamicType: true,
             },
             type: 'auto',
@@ -356,10 +373,10 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Présentation étude'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Présentation étude' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -392,21 +409,25 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Relevé d'impôt"},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Relevé d'impôt" },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Relevé d'impôt"},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Relevé d'impôt" },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: "Relevé d'impôt", value: "Relevé d'impôt", selected: false},
+              documentType: {
+                label: "Relevé d'impôt",
+                value: "Relevé d'impôt",
+                selected: false
+              },
               dynamicType: true,
             },
             type: 'auto',
@@ -422,21 +443,25 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Justificatif de domicile"},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Justificatif de domicile" },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Justificatif de domicile"},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Justificatif de domicile" },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: "Justificatif de domicile", value: "Justificatif de domicile", selected: false},
+              documentType: {
+                label: "Justificatif de domicile",
+                value: "Justificatif de domicile",
+                selected: false
+              },
               dynamicType: true,
             },
             type: 'auto',
@@ -452,21 +477,25 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Plan cadastral"},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Plan cadastral" },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Plan cadastral"},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Plan cadastral" },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: "Plan cadastral", value: "Plan cadastral", selected: false},
+              documentType: {
+                label: "Plan cadastral",
+                value: "Plan cadastral",
+                selected: false
+              },
               dynamicType: true,
             },
             type: 'auto',
@@ -482,21 +511,25 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Taxe foncière"},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Taxe foncière" },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: "Taxe foncière"},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: "Taxe foncière" },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: "Taxe foncière", value: "Taxe foncière", selected: false},
+              documentType: {
+                label: "Taxe foncière",
+                value: "Taxe foncière",
+                selected: false
+              },
               dynamicType: true,
             },
             type: 'auto',
@@ -514,15 +547,19 @@ export const version7 = {
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Autre', value: 'Autre', selected: false},
+              documentType: {
+                label: 'Autre',
+                value: 'Autre',
+                selected: false
+              },
             },
             type: 'manual', //Check manually
             verificationType: 'multiple-choices',
             comment: '', //motif
             choices: [
               // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
-              {label: 'Valider', id: 'confirm', onSelectType: 'validation'},
-              {label: 'Importer', id: 'upload', onSelectType: 'navigation'},
+              { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+              { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
             ],
             responsable: 'Commercial',
             status: 'pending',
@@ -535,21 +572,25 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Devis'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Devis' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Devis'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Devis' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
               project: null,
-              documentType: {label: 'Devis', value: 'Devis', selected: false},
+              documentType: {
+                label: 'Devis',
+                value: 'Devis',
+                selected: false
+              },
               dynamicType: true,
             },
             type: 'auto',
@@ -565,24 +606,28 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //VERIFICATION: verify if signed quote exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Devis'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Devis' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //NAVIGATION: Get id of the existing quote (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Devis'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Devis' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
+              project: null,
+              documentType: {
+                label: 'Devis',
+                value: 'Devis',
+                selected: false
+              },
+              dynamicType: true,
               DocumentId: '',
               onSignaturePop: 2,
-              project: null,
-              documentType: {label: 'Devis', value: 'Devis', selected: false},
-              dynamicType: true,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -612,16 +657,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -646,21 +691,19 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //VERIFICATION: verify if signed quote exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //NAVIGATION: Get id of the existing quote (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat MaPrimeRénov' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
-              DocumentId: '',
-              onSignaturePop: 2,
               project: null,
               documentType: {
                 label: 'Mandat MaPrimeRénov',
@@ -668,6 +711,8 @@ export const version7 = {
                 selected: false,
               },
               dynamicType: true,
+              DocumentId: '',
+              onSignaturePop: 2,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -768,10 +813,10 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -811,10 +856,10 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -838,10 +883,10 @@ export const version7 = {
             actionOrder: 2,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -886,10 +931,10 @@ export const version7 = {
             actionOrder: 3,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask',
             screenParams: {
@@ -929,7 +974,7 @@ export const version7 = {
             screenName: 'CreateProject', //creation
             screenParams: {
               project: null,
-              sections: {info: {projectWorkTypes: true}},
+              sections: { info: { projectWorkTypes: true } },
             },
             screenPush: true,
             type: 'manual', //Check manually
@@ -943,7 +988,7 @@ export const version7 = {
                 onSelectType: 'validation',
                 nextStep: 'technicalVisitFile',
               },
-              {label: 'Modifier', id: 'edit', onSelectType: 'navigation'},
+              { label: 'Modifier', id: 'edit', onSelectType: 'navigation' },
             ],
             responsable: 'Poseur',
             status: 'pending',
@@ -964,16 +1009,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -998,10 +1043,10 @@ export const version7 = {
             collection: 'Agenda',
             documentId: '',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             type: 'manual', //Check manually
             verificationType: 'multiple-choices',
@@ -1013,13 +1058,13 @@ export const version7 = {
                 nextPhase: 'cancelProject',
                 onSelectType: 'transition',
                 commentRequired: true,
-                operation: {type: 'update', field: 'status', value: 'Annulé'},
+                operation: { type: 'update', field: 'status', value: 'Annulé' },
               },
               {
                 label: 'Oui',
                 id: 'confirm',
                 onSelectType: 'validation',
-                operation: {type: 'update', field: 'status', value: 'Terminé'},
+                operation: { type: 'update', field: 'status', value: 'Terminé' },
               },
             ],
             responsable: 'Poseur',
@@ -1034,21 +1079,19 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //VERIFICATION: verify if signed quote exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //NAVIGATION: Get id of the existing quote (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Visite technique'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Visite technique' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
-              DocumentId: '',
-              onSignaturePop: 2,
               project: null,
               documentType: {
                 label: 'Visite technique',
@@ -1056,6 +1099,8 @@ export const version7 = {
                 selected: false,
               },
               dynamicType: true,
+              DocumentId: '',
+              onSignaturePop: 2,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -1100,10 +1145,10 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Installation'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Installation' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -1136,10 +1181,10 @@ export const version7 = {
             collection: 'Agenda',
             documentId: '',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Installation'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Installation' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             type: 'manual', //Check manually
             verificationType: 'multiple-choices',
@@ -1161,7 +1206,7 @@ export const version7 = {
                 id: 'confirm',
                 nextStep: 'pvCreation',
                 onSelectType: 'transition',
-                operation: {type: 'update', field: 'status', value: 'Terminé'},
+                operation: { type: 'update', field: 'status', value: 'Terminé' },
               },
             ],
             responsable: 'Poseur',
@@ -1175,10 +1220,10 @@ export const version7 = {
             collection: 'Agenda',
             documentId: '',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Installation'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Installation' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             type: 'manual',
             verificationType: 'multiple-choices',
@@ -1190,13 +1235,13 @@ export const version7 = {
                 nextPhase: 'cancelProject',
                 onSelectType: 'transition',
                 commentRequired: true,
-                operation: {type: 'update', field: 'status', value: 'Annulé'},
+                operation: { type: 'update', field: 'status', value: 'Annulé' },
               },
               {
                 label: 'En cours',
                 id: 'confirm',
                 onSelectType: 'actionRollBack',
-                operation: {type: 'update', field: 'status', value: 'En cours'},
+                operation: { type: 'update', field: 'status', value: 'En cours' },
               },
             ],
             responsable: 'Poseur',
@@ -1218,16 +1263,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'PV réception'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'PV réception' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'PV réception'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'PV réception' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -1292,10 +1337,10 @@ export const version7 = {
             actionOrder: 1,
             collection: 'Agenda',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Rattrapage'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Rattrapage' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             screenName: 'CreateTask', //creation
             screenParams: {
@@ -1320,10 +1365,10 @@ export const version7 = {
             collection: 'Agenda',
             documentId: '',
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Rattrapage'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'status', operation: '!=', value: 'Annulé'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Rattrapage' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'status', operation: '!=', value: 'Annulé' },
             ],
             type: 'manual',
             verificationType: 'multiple-choices',
@@ -1333,7 +1378,7 @@ export const version7 = {
                 id: 'finish',
                 nextStep: 'reserve',
                 onSelectType: 'transition',
-                operation: {type: 'update', field: 'status', value: 'Terminé'},
+                operation: { type: 'update', field: 'status', value: 'Terminé' },
               },
             ],
             responsable: 'Poseur',
@@ -1394,7 +1439,7 @@ export const version7 = {
                 nextStep: 'facturationOption1',
                 onSelectType: 'transition',
               },
-              {label: 'Accepter', id: 'confirm', onSelectType: 'validation'},
+              { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
             ],
             responsable: 'Poseur',
             status: 'pending',
@@ -1407,16 +1452,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -1455,21 +1500,19 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //verify if signed mandat SEPA exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //Get id of the existing signed mandat (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
-              DocumentId: '',
-              onSignaturePop: 2,
               project: null,
               documentType: {
                 label: 'Mandat SEPA',
@@ -1477,6 +1520,8 @@ export const version7 = {
                 selected: false,
               },
               dynamicType: true,
+              DocumentId: '',
+              onSignaturePop: 2,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -1506,16 +1551,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
@@ -1554,21 +1599,19 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //verify if signed mandat SEPA exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //Get id of the existing signed mandat (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
-              DocumentId: '',
-              onSignaturePop: 2,
               project: null,
               documentType: {
                 label: 'Contrat CGU-CGV',
@@ -1576,6 +1619,8 @@ export const version7 = {
                 selected: false,
               },
               dynamicType: true,
+              DocumentId: '',
+              onSignaturePop: 2,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -1616,16 +1661,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Facture'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Facture' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Facture'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Facture' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -1650,7 +1695,7 @@ export const version7 = {
         //conversion
         title: 'Finalisation de la facturation',
         instructions: '',
-        stepOrder: 9,
+        stepOrder: 1,
         nextStep: '',
         actions: [
           {
@@ -1661,34 +1706,42 @@ export const version7 = {
             actionOrder: 1,
             type: 'manual',
             verificationType: 'multiple-choices',
+            onSelectType: 'multiCommentsPicker', //only in multiCommentsPicker
             comment: '',
             choices: [
               {
                 label: 'Attente paiement client',
                 id: 'pending',
-                onSelectType: 'commentPicker',
+                onSelectType: 'multiCommentsPicker',
                 selected: false,
                 stay: true,
               },
               {
                 label: 'Attente paiement financement',
                 id: 'pending',
-                onSelectType: 'commentPicker',
+                onSelectType: 'multiCommentsPicker',
                 selected: false,
                 stay: true,
               },
               //##task: Diviser Attente paiement aide en MPR et CEE
               {
-                label: 'Attente paiement aide',
+                label: 'Attente paiement aide MPR',
                 id: 'pending',
-                onSelectType: 'commentPicker',
+                onSelectType: 'multiCommentsPicker',
+                selected: false,
+                stay: true,
+              },
+              {
+                label: 'Attente paiement aide CEE',
+                id: 'pending',
+                onSelectType: 'multiCommentsPicker',
                 selected: false,
                 stay: true,
               },
               {
                 label: 'Payé',
                 id: 'confirm',
-                onSelectType: 'commentPicker',
+                onSelectType: 'multiCommentsPicker',
                 selected: false,
                 stay: false,
               },
@@ -1715,28 +1768,34 @@ export const version7 = {
                 onSelectType: 'transition',
                 commentRequired: true,
               },
-              {label: 'Valider', id: 'confirm', onSelectType: 'validation'},
+              { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
             ],
           },
-          //##task: Ajouter montant HT + TTC ??
+          //##done:task: Ajouter montant HT + TTC ??
           {
-            id: 'billAmount',
-            title: 'Montant de la facture (TTC)', //#task allow adv to view devis before validating (multi-choice: voir/valider)
-            instructions: '',
+            id: 'billingAmount',
+            title: 'Saisir le montant de la facture',
+            instructions: "Veuillez saisir le montant HT et TTC de la facture.",
             actionOrder: 3,
+            //Verification
             collection: 'Projects',
-            documentId: '',
-            operation: {type: 'update', field: 'bill.amount'},
-            type: 'manual',
-            verificationType: 'comment',
-            comment: '',
-            formSettings: {
-              label: 'Montant de la facture',
-              description:
-                'Veuillez renseigner le montant total de la facture de ce projet.',
-              keyboardType: 'numeric',
+            documentId: '', //#dynamic
+            properties: ['bill', "amount"],
+            //Navigation
+            screenName: 'CreateProject', //creation
+            screenParams: {
+              project: null,
+              sections: { billing: { billAmount: true } },
             },
-            responsable: 'ADV',
+            screenPush: true,
+            //Comment
+            comment: '',
+            //Verification
+            type: 'auto',
+            verificationType: 'data-fill',
+            verificationValue: '',
+            //Others
+            responsable: 'Poseur',
             status: 'pending',
           },
           {
@@ -1747,16 +1806,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Attestation fluide'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Attestation fluide' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Attestation fluide'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Attestation fluide' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -1791,7 +1850,7 @@ export const version7 = {
             actionOrder: 2,
             collection: 'Projects',
             documentId: '', //#dynamic
-            queryFilters: [{filter: 'project.id', operation: '==', value: ''}],
+            queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
             properties: ['finalBillSentViaEmail'],
             status: 'pending',
             verificationType: 'data-fill',
@@ -1800,8 +1859,8 @@ export const version7 = {
               endpoint: 'sendEmail',
               queryAttachmentsUrls: {
                 Facture: [
-                  {filter: 'project.id', operation: '==', value: ''},
-                  {filter: 'type', operation: '==', value: 'Facture'},
+                  { filter: 'project.id', operation: '==', value: '' },
+                  { filter: 'type', operation: '==', value: 'Facture' },
                   {
                     filter: 'attachment.downloadURL',
                     operation: '!=',
@@ -1809,7 +1868,7 @@ export const version7 = {
                   },
                 ],
                 'Attestation fluide': [
-                  {filter: 'project.id', operation: '==', value: ''},
+                  { filter: 'project.id', operation: '==', value: '' },
                   {
                     filter: 'type',
                     operation: '==',
@@ -1947,7 +2006,7 @@ export const version7 = {
             verificationType: 'multiple-choices',
             comment: '', //motif
             choices: [
-              {label: 'Accepter', id: 'confirm', onSelectType: 'validation'},
+              { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
             ],
             responsable: 'Poseur',
             status: 'pending',
@@ -1960,16 +2019,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument', //creation
             screenParams: {
@@ -2002,21 +2061,19 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //verify if signed mandat SEPA exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //Get id of the existing signed mandat (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Mandat SEPA'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Mandat SEPA' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
-              DocumentId: '',
-              onSignaturePop: 2,
               project: null,
               documentType: {
                 label: 'Mandat SEPA',
@@ -2024,6 +2081,8 @@ export const version7 = {
                 selected: false,
               },
               dynamicType: true,
+              DocumentId: '',
+              onSignaturePop: 2,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -2046,16 +2105,16 @@ export const version7 = {
             collection: 'Documents',
             //Verification:
             queryFilters: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachment.downloadURL', operation: '!=', value: ''},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachment.downloadURL', operation: '!=', value: '' },
             ],
             //Navigation
             queryFiltersUpdateNav: [
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
@@ -2088,21 +2147,19 @@ export const version7 = {
             collection: 'Documents',
             queryFilters: [
               //verify if signed mandat SEPA exists
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
-              {filter: 'attachmentSource', operation: '==', value: 'signature'},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
+              { filter: 'attachmentSource', operation: '==', value: 'signature' },
             ],
             queryFiltersUpdateNav: [
               //Get id of the existing signed mandat (to update signature)
-              {filter: 'project.id', operation: '==', value: ''},
-              {filter: 'type', operation: '==', value: 'Contrat CGU-CGV'},
-              {filter: 'deleted', operation: '==', value: false},
+              { filter: 'project.id', operation: '==', value: '' },
+              { filter: 'type', operation: '==', value: 'Contrat CGU-CGV' },
+              { filter: 'deleted', operation: '==', value: false },
             ],
             screenName: 'UploadDocument',
             screenParams: {
-              DocumentId: '',
-              onSignaturePop: 2,
               project: null,
               documentType: {
                 label: 'Contrat CGU-CGV',
@@ -2110,6 +2167,8 @@ export const version7 = {
                 selected: false,
               },
               dynamicType: true,
+              DocumentId: '',
+              onSignaturePop: 2,
               isSignature: true,
             }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
             type: 'auto',
@@ -2197,7 +2256,7 @@ export const version7 = {
             documentId: '',
             type: 'manual',
             verificationType: 'phaseRollback',
-            operation: {type: 'update', field: 'state', value: 'En cours'},
+            operation: { type: 'update', field: 'state', value: 'En cours' },
             status: 'pending',
           },
         ],

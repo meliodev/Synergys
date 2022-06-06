@@ -1,4 +1,115 @@
 
+const queryFilters_Documents_Map = (documentType) => {
+    const map = {
+        create: {
+            onProgress: {
+                collection: "Documents",
+                operation: "create",
+                params: {
+                    documentType,
+                    isOnProgress: true
+                }
+            },
+            onCreate: {
+                collection: "Documents",
+                operation: "create",
+                params: {
+                    documentType
+                }
+            }
+        },
+        sign: {
+            onProgress: {
+                collection: "Documents",
+                operation: "sign",
+                params: {
+                    isOnProgress: true,
+                    documentType
+                }
+            },
+            onCreate: {
+                collection: "Documents",
+                operation: "sign",
+                params: {
+                    documentType
+                }
+            }
+        }
+    }
+    return map
+}
+
+const queryFilters_Agenda_Map = (taskType) => {
+    const map = {
+        create: {
+            collection: "Agenda",
+            params: {
+                taskType,
+            }
+        },
+        update: {
+            collection: "Agenda",
+            params: {
+                taskType,
+            }
+        }
+    }
+    return map
+}
+
+const buildQueryFilters = (config) => {
+    const { collection, operation, params } = config
+    let queryFilters = null
+
+    if (collection === "Documents") {
+        const { isOnProgress, documentType } = params
+        if (operation === "create") {
+            if (isOnProgress)
+                queryFilters = [
+                    { filter: 'project.id', operation: '==', value: '' },
+                    { filter: 'type', operation: '==', value: documentType },
+                    { filter: 'deleted', operation: '==', value: false },
+                    { filter: 'attachment.downloadURL', operation: '!=', value: '' },
+                ]
+            else
+                queryFilters = [
+                    { filter: 'project.id', operation: '==', value: '' },
+                    { filter: 'type', operation: '==', value: documentType },
+                    { filter: 'deleted', operation: '==', value: false },
+                ]
+        }
+
+        else if (operation === "sign") {
+            if (isOnProgress)
+                queryFilters = [
+                    //VERIFICATION: verify if signed quote exists
+                    { filter: 'project.id', operation: '==', value: '' },
+                    { filter: 'type', operation: '==', value: documentType },
+                    { filter: 'deleted', operation: '==', value: false },
+                    { filter: 'attachmentSource', operation: '==', value: 'signature' },
+                ]
+            else queryFilters = [
+                //NAVIGATION: Get id of the existing quote (to update signature)
+                { filter: 'project.id', operation: '==', value: '' },
+                { filter: 'type', operation: '==', value: documentType },
+                { filter: 'deleted', operation: '==', value: false },
+            ]
+        }
+    }
+
+    else if (collection === "Agenda") {
+        const { taskType } = params
+        queryFilters = [
+            { filter: 'project.id', operation: '==', value: '' },
+            { filter: 'type', operation: '==', value: taskType },
+            { filter: 'deleted', operation: '==', value: false },
+            { filter: 'status', operation: '!=', value: 'Annulé' },
+        ]
+    }
+
+    return queryFilters
+}
+
 
 export const version0 = {
     'init': {
@@ -109,194 +220,234 @@ export const version0 = {
             },
         }
     },
-    'technicalVisitManagement': {
-        title: 'Visite technique',
+    installation: {
+        title: 'Installation',
         instructions: '',
         phaseOrder: 2,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
-            'siteCreation': {
-                title: 'Planification visite technique',
-                instructions: '',  // Example: process.init.create-prospect.nom.title
+            poseurValidation: {
+                title: 'Validation du technicien',
+                instructions: '',
                 stepOrder: 1,
                 actions: [
                     {
-                        id: 'technicalVisitCreation', //1. verify if Visite Technique exists
-                        title: 'Créer une visite technique',
+                        id: 'maintainanceContractChoice',
+                        title: 'Voulez-vous initier le contrat de maintenance ?',
                         instructions: '',
                         actionOrder: 1,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'status', operation: '!=', value: 'Annulé' },
-                        ],
-                        screenName: 'CreateTask', //creation
-                        screenParams: { project: null, taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
-                        type: 'auto',
-                        responsable: 'Poseur',
-                        status: 'pending',
-                        verificationType: 'doc-creation',
-                    },
-                    {
-                        id: 'technicalVisitValidation',
-                        title: "Valider la date de la visite technique",
-                        instructions: '',
-                        actionOrder: 2,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'status', operation: '!=', value: 'Annulé' },
-                        ],
-                        screenName: 'CreateTask', //creation
-                        screenParams: { project: null, TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
-                        type: 'manual',
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation', operation: { collection: "Clients", docId: "", type: 'update', field: 'status', value: "active" } },
-                            { label: 'Modifier la date', id: 'edit', onSelectType: 'navigation' },
+                            {
+                                label: 'Décider plus tard, passer à la facturation',
+                                id: 'cancel',
+                                nextStep: 'facturationOption1',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            {
+                                label: 'OUI',
+                                id: 'confirm',
+                                nextStep: 'maintainanceContract',
+                                onSelectType: 'transition',
+                            },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
                     },
-                    {
-                        id: 'poseurAffectation', //Validate "poseur" set previously
-                        title: "Affecter un technicien à la visite technique",
-                        instructions: '',
-                        actionOrder: 3,
-                        collection: 'Agenda',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'status', operation: '!=', value: 'Annulé' },
-                        ],
-                        screenName: 'CreateTask',
-                        screenParams: { TaskId: '', taskType: { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, dynamicType: true },
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '',
-                        choices: [
-                            { label: 'Valider le technicien', id: 'confirm', onSelectType: 'validation' },
-                            { label: 'Modifier le technicien', id: 'edit', onSelectType: 'navigation' }, //#ask: isn't the poseur already predefined with project as technical contact ?
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    //##done:task: Choisir les types de travaux
-                    {
-                        id: 'workTypesSelection',
-                        title: "Selectionnez les types de travaux",
-                        instructions: "Appuyer sur modifier pour selectionner les types de travaux. Ou appuyer sur valider pour passer à l'action suivante.",
-                        actionOrder: 4,
-                        screenName: 'CreateProject', //creation
-                        screenParams: {
-                            project: null,
-                            sections: { info: { projectWorkTypes: true } }
-                        },
-                        screenPush: true,
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation', nextStep: 'technicalVisitFile' },
-                            { label: 'Modifier', id: 'edit', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                ]
+                ],
             },
-            'technicalVisitFile': {
-                title: 'Remplissage visite technique',
+            maintainanceContract: {
+                title: 'Contrat maintenance',
                 instructions: '',
                 stepOrder: 2,
                 actions: [
-                    //#task: add Visite technique (montant de l'accompte available) (dynamic: false, public: true)
                     {
-                        id: 'technicalVisitFileCreation',
-                        title: 'Remplir la visite technique',
+                        id: 'commercialPropositionChoice',
+                        title: 'Accepter la proposition commerciale',
                         instructions: '',
                         actionOrder: 1,
-                        collection: 'Documents',
-                        //Verification
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'attachment.downloadURL', operation: '!=', value: '' }
-                        ],
-                        //Navigation
-                        queryFiltersUpdateNav: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                        ],
-                        screenName: 'UploadDocument', //creation
-                        screenParams: { project: null, documentType: { label: 'Visite technique', value: 'Visite technique', selected: false }, dynamicType: true },
-                        type: 'auto',
-                        verificationType: 'doc-creation',
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'technicalVisitChoice',
-                        title: "Voulez-vous cloturer la visite technique",
-                        instructions: '',
-                        actionOrder: 2,
-                        collection: 'Agenda',
-                        documentId: '',
-                        queryFilters: [
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'status', operation: '!=', value: 'Annulé' },
-                        ],
                         type: 'manual', //Check manually
                         verificationType: 'multiple-choices',
                         comment: '', //motif
                         choices: [
-                            { label: 'Abandonner', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true, operation: { type: 'update', field: 'status', value: 'Annulé' } },
-                            { label: 'Oui', id: 'confirm', onSelectType: 'validation', operation: { type: 'update', field: 'status', value: 'Terminé' } },
+                            {
+                                label: 'Décider plus tard, passer à la facturation',
+                                id: 'skip',
+                                nextStep: 'facturationOption1',
+                                onSelectType: 'transition',
+                            },
+                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
                         ],
                         responsable: 'Poseur',
                         status: 'pending',
                     },
-                    //##done:task: Signer la VT
-                    {
-                        id: 'signedVTCreation', //#task: check if devis is still existing..
-                        title: 'Signer la visite technique',
-                        instructions: '',
-                        actionOrder: 3,
-                        collection: 'Documents',
-                        queryFilters: [ //VERIFICATION: verify if signed quote exists
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                            { filter: 'attachmentSource', operation: '==', value: 'signature' }
-                        ],
-                        queryFiltersUpdateNav: [ //NAVIGATION: Get id of the existing quote (to update signature) 
-                            { filter: 'project.id', operation: '==', value: '' },
-                            { filter: 'type', operation: '==', value: 'Visite technique' },
-                            { filter: 'deleted', operation: '==', value: false },
-                        ],
-                        screenName: 'UploadDocument',
-                        screenParams: { DocumentId: '', onSignaturePop: 2, project: null, documentType: { label: 'Visite technique', value: 'Visite technique', selected: false }, dynamicType: true, isSignature: true }, //requires TaskId from { filter: 'project.id', operation: '==', value: '' },  { filter: 'type', operation: '==', value: 'Devis' },
-                        type: 'auto',
-                        choices: [
-                            { label: 'Annuler', id: 'cancel', nextPhase: 'cancelProject', onSelectType: 'transition', commentRequired: true },
-                            { label: 'Signer la visite technique', id: 'sign', onSelectType: 'navigation' },
-                        ],
-                        responsable: 'Client',
-                        status: 'pending',
+                    {   //##new
+                        id: 'mandatSepaCreation',
+                        title: 'Créer/Importer un mandat SEPA',
+                        instructions: 'Créer/Importer un mandat SEPA',
+                        actionOrder: 2,
+                        responsable: 'Poseur',
                         verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Mandat SEPA",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
+                        comment: '', //motif
+                        choices: [
+                            {
+                                id: 'skip',
+                                label: 'Décider plus tard, passer à la facturation',
+                                nextStep: 'facturationOption1',
+                                onSelectType: 'transition',
+                            },
+                            {
+                                id: 'upload',
+                                label: 'Importer le document',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                        nextStep: 'reserve',
                     },
-                ]
+                    {   //##new
+                        id: 'signedSEPACreation',
+                        title: 'Signer le mandat SEPA',
+                        instructions: 'Signer le mandat SEPA',
+                        actionOrder: 3,
+                        responsable: 'Client',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //edit
+                        params: {
+                            documentType: "Mandat SEPA",
+                            isSignature: true
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
+                        comment: "",
+                        choices: [
+                            {
+                                id: 'cancel',
+                                label: 'Décider plus tard, passer à la facturation',
+                                nextStep: 'facturationOption1',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            },
+                            {
+                                id: 'sign',
+                                label: 'Signer le mandat SEPA',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {   //##new
+                        id: 'contractCreation',
+                        title: 'Créer/Importer un contrat',
+                        instructions: 'Créer/Importer un contrat',
+                        actionOrder: 4,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Contrat CGU-CGV",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
+                        comment: '', //motif
+                        choices: [
+                            {
+                                label: 'Décider plus tard, passer à la facturation',
+                                id: 'skip',
+                                nextStep: 'facturationOption1',
+                                onSelectType: 'transition',
+                            },
+                            {
+                                label: 'Importer le contrat',
+                                id: 'upload',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {   //##new
+                        id: 'signedContractCreation',
+                        title: 'Signer le contrat',
+                        instructions: 'Signer le contrat',
+                        actionOrder: 5,
+                        responsable: 'Client',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //edit
+                        params: {
+                            documentType: "Contrat CGU-CGV",
+                            isSignature: true
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
+                        comment: "",
+                        choices: [
+                            {
+                                label: 'Décider plus tard, passer à la facturation',
+                                id: 'cancel',
+                                nextStep: 'facturationOption1',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            },
+                            {
+                                label: 'Signer le contrat',
+                                id: 'sign',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                        nextStep: 'facturationOption1',
+                    },
+                    //#task: Add last action multi-choice (contrat "en cours" or "terminé")
+                ],
+            },
+            facturationOption1: {
+                //no conversion
+                title: 'Facturation',
+                instructions: '',
+                stepOrder: 3,
+                nextStep: '',
+                actions: [
+                    {
+                        id: 'billCreation',
+                        title: 'Créer une facture',
+                        instructions: 'Créer une facture',
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Facture",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Facture").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Facture").create.onCreate),
+                        status: 'pending',
+                        nextStep: 'paymentStatus',
+                    }
+                    //##done:task: Delete "Signer la facture"
+                ],
             },
         },
     },

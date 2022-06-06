@@ -42,8 +42,8 @@ const states = [
 ]
 
 const docSources = [
-    { label: 'Importer', value: 'upload', icon: faCloudUploadAlt },
-    { label: 'Générer', value: 'generate', icon: faMagic }
+    { label: 'Importer', value: 'upload', icon: faCloudUploadAlt, selected: false },
+    { label: 'Générer', value: 'generate', icon: faMagic, selected: false }
 ]
 
 const genOrderSources = [
@@ -101,6 +101,7 @@ class UploadDocument extends Component {
         this.onSignaturePop = this.props.navigation.getParam('onSignaturePop', 1)
 
         //Process params
+        this.isProcess = this.props.navigation.getParam('isProcess', false)
         this.isSignature = this.props.navigation.getParam('isSignature', false)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false)
         this.documentType = this.props.navigation.getParam('documentType', undefined) //Not editable
@@ -163,7 +164,7 @@ class UploadDocument extends Component {
         let defaultState = {}
 
         if (this.project && this.documentType) {
-            const name = this.documentType.value !== "Autre" ? `${this.documentType.value} ${this.project.id}` : ""
+            const name = this.documentType.value !== "Autre" ? `${this.documentType.value} ${this.project.id}` : `Autre ${this.project.id}`
             defaultState = {
                 name,
                 type: this.documentType.value,
@@ -256,7 +257,7 @@ class UploadDocument extends Component {
         let projectError = nameValidator(project.id, '"Projet"')
         let nameError = nameValidator(name, '"Nom du document"')
         let attachmentError = !attachment ? 'La pièce jointe est obligatoire' : ""
-
+        console.log(projectError, nameError, attachmentError)
         if (projectError || nameError || attachmentError) {
             this.setState({ projectError, nameError, attachmentError, loading: false, loadingConversion: false })
             return false
@@ -266,7 +267,7 @@ class UploadDocument extends Component {
 
     async handleSubmit(isConversion, DocumentId) {
         Keyboard.dismiss()
-
+        console.log("123")
         //0. Reject offline updates
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
@@ -291,6 +292,7 @@ class UploadDocument extends Component {
         //3. Validate
         const isValid = this.validateInputs()
         if (!isValid) return
+        console.log("456")
 
         //4. Persist
         const props = ["project", "name", "description", "type", "state", "attachment", "attachmentSource", "orderData"]
@@ -488,7 +490,7 @@ class UploadDocument extends Component {
                             label="Pièce jointe"
                             value={attachment && attachment.name}
                             editable={false}
-                            multiline
+                            //multiline
                             right={<TextInput.Icon name='attachment' color={theme.colors.placeholder} onPress={() => this.onPressAttachment(canWrite)} />}
                         />
                     </TouchableOpacity>
@@ -1079,7 +1081,8 @@ class UploadDocument extends Component {
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit) && !loading
         canDelete = canDelete && this.isEdit && !loading
 
-        const titleText = loading ? 'Importation du document...' : this.isEdit ? 'Modifier le document' : this.isProcess ? type : 'Nouveau document'
+        console.log("type", this.isProcess)
+        const titleText = loading ? 'Importation du document...' : (this.isProcess ? type : (this.isEdit ? 'Modifier le document' : 'Nouveau document'))
 
         if (initialLoading)
             return (

@@ -118,6 +118,16 @@ class TimeslotForm extends Component {
         )
     }
 
+    renderSingleDateForm() {
+        const { togglePickers, startDate } = this.state
+        return (
+            <View>
+                {this.renderItemPicker("startDate", "Date *", startDate, this.props.startDateError, "date")}
+                {togglePickers["startDate"] && this.renderDatePicker("date", "startDate", startDate)}
+            </View>
+        )
+    }
+
     renderDatePicker(mode, dateId, date) {
         return (
             <DatePicker
@@ -191,6 +201,7 @@ class TimeslotForm extends Component {
         )
     }
 
+
     renderHours(togglePickers) {
 
         const { isAllDay, startHour, dueHour, startHourError, dueHourError } = this.state
@@ -219,7 +230,9 @@ class TimeslotForm extends Component {
     }
 
     render() {
-        return this.renderForm()
+        if (this.props.isSingleDate)
+            return this.renderSingleDateForm()
+        else return this.renderForm()
     }
 }
 

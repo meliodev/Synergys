@@ -19,17 +19,11 @@ import Loading from './Loading'
 
 import { getCurrentStep, getCurrentAction, handleTransition, getPhaseIdFormValue, processHandler, checkForcedValidations } from '../core/process/algorithm/process'
 import { enableProcessAction } from '../core/privileges'
-import { configChoiceIcon, countDown, displayError, getTaskNatures, load, privateDocTypes, privateTaskTypes } from '../core/utils'
+import { configChoiceIcon, countDown, displayError, load } from '../core/utils'
 import * as theme from "../core/theme"
-import { collectionScreenNameMap, constants, errorMessages, isTablet } from "../core/constants"
+import { constants, errorMessages, isTablet } from "../core/constants"
 import { processModels } from '../core/process/models/index'
 import ProcessContainer from "../screens/src/container/ProcessContainer"
-
-
-const automaticActionTypes = [
-    "doc-creation",
-    "data-fill"
-]
 
 //component
 class ProcessAction extends Component {
@@ -107,10 +101,9 @@ class ProcessAction extends Component {
         return new Promise(async (resolve, reject) => {
             load(this, true)
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
-            const isEmptyProcess = Object.keys(updatedProcess).length === 1
-            if (isEmptyProcess) return
             this.setState({ skipProcessHandler }, async () => {
-                await this.handleUpdateProcess(updatedProcess)
+                await this.updateProcess(updatedProcess)
+                await this.refreshProcessOnstate(updatedProcess)
                 resolve(true)
             })
         })
@@ -122,14 +115,6 @@ class ProcessAction extends Component {
         const processModel = _.cloneDeep(this.processModel)
         var updatedProcess = await processHandler(processModel, currentProcess, startPhaseId, project)
         return updatedProcess
-    }
-
-    async handleUpdateProcess(updatedProcess) {
-        console.log("2")
-        await this.updateProcess(updatedProcess)
-        console.log("3")
-        await this.refreshProcessOnstate(updatedProcess)
-        console.log("4")
     }
 
     updateProcess(updatedProcess, process) {
@@ -230,115 +215,6 @@ class ProcessAction extends Component {
         })
     }
 
-    buildEntityType = (collection, type) => {
-        let typeObject = {
-            label: type,
-            value: type,
-        }
-        if (collection === "Documents") {
-            typeObject = {
-                ...typeObject,
-                selected: false,
-            }
-        }
-
-        else if (collection === "Agenda") {
-            typeObject = {
-                ...typeObject,
-                natures: getTaskNatures(type)
-            }
-        }
-
-        return typeObject
-    }
-
-    isPrivateType = (collection, type) => {
-        const privateTypes = collection === "Documents" ? privateDocTypes : (collection === "Agenda" ? privateTaskTypes : "")
-        const index = privateTypes.find((t) => t.label === type)
-        const isPrivate = index !== -1
-        return isPrivate
-    }
-
-    buileNavigationOptions = (currentAction) => {
-        const { collection, params, documentId } = currentAction
-        const { canUpdate, project } = this.props
-        const screenName = collectionScreenNameMap[collection]
-        const screenPush = collection === "Clients" //Because already on the nav stack
-        const onGoBack = async () => {
-            await this.mainHandler(this.state.process, true)
-            //Auto trigger next action
-            const { verificationType } = this.state.currentAction
-            if (verificationType !== 'validation')
-                await this.onPressAction(canUpdate, this.state.currentAction)
-        }
-
-        let screenParams = {
-            isProcess: true,
-            project,
-            screenPush,
-            onGoBack,
-        }
-
-        if (screenName === "UploadDocument") {
-            screenParams = {
-                ...screenParams,
-                DocumentId: documentId || "",
-                documentType: this.buildEntityType(collection, params.documentType),
-                dynamicType: this.isPrivateType(collection, params.documentType),
-            }
-
-            if (params.isSignature) {
-                screenParams = {
-                    ...screenParams,
-                    isSignature: true,
-                    onSignaturePop: 2,
-                }
-            }
-        }
-
-        else if (screenName === "CreateTask") {
-            screenParams = {
-                ...screenParams,
-                TaskId: documentId || "",
-                taskType: this.buildEntityType(collection, params.taskType),
-                dynamicType: this.isPrivateType(collection, params.taskType),
-            }
-        }
-
-        else if (screenName === "Profile") {
-            screenParams = {
-                ...screenParams,
-                user: { id: project.client.id, roleId: 'client' },
-            }
-        }
-
-        else if (screenName === "CreateProject") {
-            screenParams = {
-                ...screenParams,
-                ...params.screenParams,
-            }
-        }
-
-        return { screenName, screenParams }
-    }
-
-    handleNavigation = (currentAction) => {
-        const { screenName, screenParams } = this.buileNavigationOptions(currentAction)
-
-        const navigate = () => {
-            if (screenParams.screenPush)
-                this.props.navigation.push(screenName, screenParams)
-            else
-                this.props.navigation.navigate(screenName, screenParams)
-        }
-        this.setState({
-            loading: false,
-            loadingMessage: this.initialLoadingMessage,
-            showModal: false,
-            loadingModal: false,
-        }, navigate())
-    }
-
     //func1
     onPressAction = async (canUpdate, currentAction) => {
 
@@ -364,9 +240,7 @@ class ProcessAction extends Component {
                     return
                 }
 
-                const isAutomaticAction = automaticActionTypes.includes(currentAction.verificationType)
-
-                if (isAutomaticAction) {
+                if (type === 'auto') {
                     //Modal
                     if (currentAction.choices) {
                         this.setState({
@@ -377,10 +251,34 @@ class ProcessAction extends Component {
                     }
 
                     //Navigation
-                    else this.handleNavigation(currentAction)
+                    else {
+                        let { screenParams, screenName, screenPush } = currentAction
+                        if (screenParams) {
+                            screenParams.isProcess = true
+                            screenParams.onGoBack = async () => {
+                                await this.mainHandler(process, true)
+                                //Auto trigger next action
+                                const { verificationType } = this.state.currentAction
+                                if (verificationType !== 'validation')
+                                    await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+                            }
+                        }
+
+                        this.setState({
+                            loading: false,
+                            loadingMessage: this.initialLoadingMessage
+                        })
+
+                        if (screenName) {
+                            if (screenPush)
+                                this.props.navigation.push(screenName, screenParams)
+                            else
+                                this.props.navigation.navigate(screenName, screenParams)
+                        }
+                    }
                 }
 
-                else {
+                else if (type === 'manual') {
                     const { verificationType, nextStep, nextPhase, formSettings } = currentAction
 
                     //Dialog
@@ -465,8 +363,8 @@ class ProcessAction extends Component {
         try {
             this.setState({ loadingModal: true, choice })  //used in case of comment
             await countDown(500)
-            const { pressedAction } = this.state
-            let { choices } = pressedAction
+            const { process, pressedAction } = this.state
+            let { screenName, screenParams, screenPush, choices } = pressedAction
             const { onSelectType, commentRequired, operation, link, nextStep, nextPhase } = choice
 
             //Highlight selected choice
@@ -492,19 +390,31 @@ class ProcessAction extends Component {
                 this.setNextStepOrPhase(nextStep, nextPhase) //used in case of comment
                 const dialogTitle = this.configDialogLabels(choice.id).title
                 const dialogDescription = this.configDialogLabels(choice.id).description
-                this.setState({
-                    dialogTitle,
-                    dialogDescription,
-                    showModal: false,
-                    loadingModal: false,
-                    showDialog: true
-                })
+                this.setState({ dialogTitle, dialogDescription, showModal: false, loadingModal: false, showDialog: true })
                 return
             }
 
             else {
                 if (onSelectType === 'navigation') {
-                    this.handleNavigation(pressedAction)
+                    if (screenParams) {
+                        screenParams.isProcess = true
+                        screenParams.onGoBack = async () => {
+                            await this.mainHandler(process, true)
+                            //Auto trigger next action
+                            const { verificationType } = this.state.currentAction
+                            if (verificationType !== 'validation')
+                                await this.onPressAction(this.props.canUpdate, this.state.currentAction)
+                        }
+                    }
+
+                    this.setState({ showModal: false, loadingModal: false })
+
+                    if (screenName) {
+                        if (screenPush)
+                            this.props.navigation.push(screenName, screenParams)
+                        else
+                            this.props.navigation.navigate(screenName, screenParams)
+                    }
                 }
 
                 else {
@@ -513,14 +423,8 @@ class ProcessAction extends Component {
                     }
 
                     else if (onSelectType === 'transition') { //No comment, No "actionData" field -> Choice not needed
-                        console.log("choice...", onSelectType)
-
                         await this.runOperation(operation, pressedAction)
-                        console.log("choice...0", onSelectType)
-
                         await this.validateAction(null, null, false, nextStep, nextPhase)
-                        console.log("choice...1", onSelectType)
-
                     }
 
                     else if (onSelectType === 'validation') {
@@ -537,7 +441,6 @@ class ProcessAction extends Component {
                         await Linking.openURL(link)
                     }
 
-                    console.log("88888")
                     this.setState({
                         showModal: onSelectType === 'multiCommentsPicker',
                         loadingModal: false
@@ -559,8 +462,7 @@ class ProcessAction extends Component {
 
             const { pressedAction, choice, nextStep, nextPhase } = this.state
             const operation = choice && choice.operation || pressedAction.operation || null
-            if (operation && !operation.value)
-                operation.value = comment
+            if (operation && !operation.value) operation.value = comment //Like in case updating bill amount
 
             await this.runOperation(operation, pressedAction)
             await this.validateAction(comment, null, false, nextStep, nextPhase)
@@ -619,8 +521,6 @@ class ProcessAction extends Component {
                 }
             })
 
-            console.log("------")
-
             this.setState({
                 currentStep: processTemp[currentPhaseId].steps[currentStepId] //for progress animation
             })
@@ -628,14 +528,11 @@ class ProcessAction extends Component {
             // await countDown(1000)
 
             if (nextStep || nextPhase) {
-                console.log("nextStep", nextStep)
-                console.log(currentPhaseId, currentStepId)
                 processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
                 const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
                 processTemp = transitionRes.process
             }
 
-            await this.handleUpdateProcess(processTemp)
             await this.mainHandler(processTemp, true)
 
             //Auto trigger next action
@@ -801,8 +698,6 @@ class ProcessAction extends Component {
                 isReview={pressedAction.isReview}
                 autoValidation={!isManualValidation}
                 hideCancelButton={true}
-                returnSingleElement={true}
-                //handleReturnSelectedElement={(element, index) => this.onSelectChoice(element)}
                 handleSelectElement={(element, index) => this.onSelectChoice(element)}
             />
         )

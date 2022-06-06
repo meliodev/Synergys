@@ -17,7 +17,7 @@ import { Appbar, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, 
 
 import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, highRoles, workTypes, errorMessages, latestProcessVersion, sectionsModels } from "../../core/constants";
+import { constants, highRoles, workTypes, errorMessages, latestProcessVersion } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, nameValidator, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError, initFormSections } from "../../core/utils";
 
@@ -44,6 +44,78 @@ const steps = [
 const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
 const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 const properties = ["client", "name", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
+
+const sectionsModels = {
+    project: {
+        activity: {
+            isExpanded: false,
+            show: false,
+            fields: {}
+        },
+        info: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                projectId: { show: false },
+                projectName: { show: false },
+                projectStep: { show: false },
+                projectState: { show: false },
+                projectPhase: { show: false },
+                projectWorkTypes: { show: false }
+            }
+        },
+        client: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                client: { show: false },
+                address: { show: false }
+            }
+        },
+        contacts: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                com: { show: false },
+                tech: { show: false }
+            }
+        },
+        documents: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                documents: { show: false }
+            }
+        },
+        tasks: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                tasks: false
+            }
+        },
+        billing: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                billAmount: { show: false }
+            }
+        },
+        pictures: {
+            isExpanded: false,
+            show: false,
+            fields: {}
+        },
+        notes: {
+            isExpanded: false,
+            show: false,
+            fields: {
+                notes: { show: false }
+            }
+        }
+    }
+}
+
 
 class CreateProject extends Component {
     constructor(props) {
@@ -86,14 +158,16 @@ class CreateProject extends Component {
         this.address = this.props.navigation.getParam('address', { description: '', place_id: '', marker: { latitude: '', longitude: '' }, error: '' })
         this.comContact = this.props.role.id === "com" && !this.isEdit ? this.props.currentUser : { id: '', fullName: '', email: '', role: '' }
         this.sections = this.props.navigation.getParam('sections', null) //EXP: { info: { projectWorkTypes: true } }
-
         //onSubmit, Go back if goBackConditions elements are not null
         const goBackConditions = [this.sections]
         this.isGoBack = !goBackConditions.includes(null)
 
+        console.log("sections....", this.sections)
         const showClient = !this.isClient && (this.client.id === "" || this.isEdit)
         const showAddress = !this.isClient && (this.client.id === "" || this.isEdit)
         const sections = initFormSections(sectionsModels.project, this.sections)
+        console.log("sections build....", sectionsModels.project.billing)
+
         const defaultSections = {
             activity: {
                 isExpanded: !this.isEdit,
@@ -144,7 +218,7 @@ class CreateProject extends Component {
             },
             billing: {
                 isExpanded: !this.isEdit,
-                show: false,
+                show: this.isEdit,
                 fields: {
                     billAmount: { show: true }
                 }
@@ -184,8 +258,17 @@ class CreateProject extends Component {
             intervenant: null,
 
             //Billing
-            bill: { amount: '', closedAt: '', closedBy: { id: '', fullName: '', email: '', role: '' } },
-
+            bill: {
+                amount: '',
+                amountHT: '',
+                closedAt: '',
+                closedBy: {
+                    id: '',
+                    fullName: '',
+                    email: '',
+                    role: ''
+                }
+            },
             //logs (Auto-Gen)
             createdAt: '',
             createdBy: { id: '', fullName: '' },
@@ -224,19 +307,14 @@ class CreateProject extends Component {
             scrollViewRef: null,
             sections: this.sections ? sections : defaultSections,
         }
+
+
     }
 
     //Requires bill amount (from backend)s
-    updateSectionsConfig() {
-        let { sections, bill } = this.state
-        sections.billing.show = this.isEdit && bill && bill.amount !== "" && !this.sections
-        this.setState({ sections })
-    }
-
     async componentDidMount() {
         if (this.isEdit) await this.initEditMode()
         else this.setWorkTypes()
-        this.updateSectionsConfig()
         this.initialState = _.cloneDeep(this.state)
         this.setState({ loading: false })
     }
@@ -365,15 +443,15 @@ class CreateProject extends Component {
         const clientError = nameValidator(client.fullName, '"Client"')
         const nameError = nameValidator(name, '"Nom du projet"')
         const comContactError = nameValidator(comContact.id, '"Contact commercial"')
-        const techContactError = isStepTech ? nameValidator(techContact.id, '"Contact technique"') : ''
+        //const techContactError = isStepTech ? nameValidator(techContact.id, '"Contact technique"') : ''
         const addressError = '' //Address optional on offline mode
         //var addressError = isConnected ? nameValidator(address.description, '"Emplacemment"') : '' //Address optional on offline mode
         const hasPriorTechVisitError = this.isEdit ? "" : hasPriorTechVisit ? "" : "La création d'une visite technique préalable est obligatoire."
 
-        if (clientError || nameError || addressError || comContactError || techContactError || hasPriorTechVisitError) {
+        if (clientError || nameError || addressError || comContactError || hasPriorTechVisitError) {
             client.error = clientError
             comContact.error = comContactError
-            techContact.error = techContactError
+            // techContact.error = techContactError
             address.error = addressError
             this.setState({ client, nameError, address, comContact, techContact, hasPriorTechVisitError, loading: false })
             const toast = { message: errorMessages.invalidFields, type: "error" }
@@ -404,6 +482,7 @@ class CreateProject extends Component {
             return
         }
 
+
         let attachments = this.initialState.attachments
         //1. UPLOADING FILES (ONLINE ONLY)
         if (isConnected) {
@@ -431,6 +510,7 @@ class CreateProject extends Component {
         let project = unformatDocument(this.state, props, this.props.currentUser, this.isEdit)
         project.attachments = attachments
         project.processVersion = latestProcessVersion
+        //project.processVersion = "version0"
         const process = {
             version: latestProcessVersion
             //version: "version0" //Used for testing
@@ -451,8 +531,12 @@ class CreateProject extends Component {
             //await this.initEditMode(project)
         }
 
-        if (this.isGoBack)
+        if (this.isGoBack) {
+            if (this.props.navigation.state.params.onGoBack) {
+                this.props.navigation.state.params.onGoBack()
+            }
             this.props.navigation.goBack()
+        }
     }
 
     persistData(data) {
@@ -461,8 +545,8 @@ class CreateProject extends Component {
         const projectRef = db.collection('Projects').doc(this.ProjectId)
         const processRef = projectRef.collection("Process").doc(this.ProjectId)
         const clientRef = db.collection('Clients').doc(project.client.id)
-        batch.set(projectRef, project)
-        batch.set(processRef, process)
+        batch.set(projectRef, project, { merge: true })
+        batch.set(processRef, process, { merge: true })
         if (!this.isEdit) {
             batch.update(clientRef, { isProspect: false }) //For offline support
         }
@@ -660,19 +744,34 @@ class CreateProject extends Component {
 
     renderBillAmountField(bill, canWrite) {
         return (
-            <MyInput
-                label="Montant facturé (€)*"
-                returnKeyType="done"
-                keyboardType='numeric'
-                value={bill.amount}
-                onChangeText={amount => {
-                    bill.amount = amount
-                    this.setState({ bill })
-                }}
-                editable={canWrite && this.isCurrentHighRole}
-            // error={!!price.error}
-            // errorText={price.error}
-            />
+            <View style={{ flex: 1 }}>
+                <MyInput
+                    label="Montant HT facturé (€)*"
+                    returnKeyType="done"
+                    keyboardType='numeric'
+                    value={bill.amountHT}
+                    onChangeText={amountHT => {
+                        bill.amountHT = amountHT
+                        this.setState({ bill })
+                    }}
+                    editable={canWrite && this.isCurrentHighRole}
+                // error={!!price.error}
+                // errorText={price.error}
+                />
+                <MyInput
+                    label="Montant TTC facturé (€)*"
+                    returnKeyType="done"
+                    keyboardType='numeric'
+                    value={bill.amount}
+                    onChangeText={amount => {
+                        bill.amount = amount
+                        this.setState({ bill })
+                    }}
+                    editable={canWrite && this.isCurrentHighRole}
+                // error={!!price.error}
+                // errorText={price.error}
+                />
+            </View>
         )
     }
 

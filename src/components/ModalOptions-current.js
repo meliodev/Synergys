@@ -12,7 +12,7 @@ import { constants, isTablet } from "../core/constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
-export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSingleElement, autoValidation, isReview, model = 'Element1' }) => {
+export const ModalForm = ({ elements, elementSize, handleSelectElement, autoValidation, isReview, model = 'Element1' }) => {
 
     const selectElement = (element, index) => {
         //Unselect all types
@@ -22,15 +22,13 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSi
         elements[index].selected = true
 
         //Handle update on parent component
-        if (returnSingleElement) {
-            handleSelectElement(element, index)
-        }
-        else handleSelectElement(elements, index) //all elements (selected element has "selected" = true)
+        handleSelectElement(elements, element, index) //all elements (selected element has "selected" = true)
     }
 
     const onPressElement = (element, index) => {
+        element.selected = true
         if (autoValidation) {
-            handleSelectElement(element, index) //only the selected element
+            handleSelectElement(elements, element, index) //only the selected element
         }
         else selectElement(element, index)
     }
@@ -63,8 +61,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSi
         }
 
         const { label, selected, icon, image, imageStyle } = element
-        let { iconColor } = element
-        iconColor = selected ? theme.colors.primary : iconColor
+        const iconColor = selected ? theme.colors.primary : element.iconColor
         const textColor = selected ? theme.colors.primary : theme.colors.secondary
 
         return (
@@ -217,7 +214,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSi
 
 const ModalOptions = ({
     title, columns = 3, isVisible, toggleModal, handleCancel, handleConfirm,
-    elements, handleSelectElement, returnSingleElement, autoValidation, hideCancelButton, isLoading, modalStyle, isReview, ...props }) => {
+    elements, handleSelectElement, autoValidation, hideCancelButton, isLoading, modalStyle, isReview, ...props }) => {
 
     let elementSize
 
@@ -229,6 +226,7 @@ const ModalOptions = ({
 
     else if (columns >= 3)
         elementSize = constants.ScreenWidth * 0.3
+
 
     return (
         <Modal
@@ -259,7 +257,6 @@ const ModalOptions = ({
                         elements={elements}
                         elementSize={elementSize}
                         handleSelectElement={handleSelectElement}
-                        returnSingleElement={returnSingleElement}
                         autoValidation={autoValidation}
                         isReview={isReview}
                     />
@@ -268,7 +265,7 @@ const ModalOptions = ({
                         <View style={[styles.buttonsContainer, { justifyContent: autoValidation ? "space-between" : 'flex-end' }]}>
                             {!hideCancelButton && <Button mode="outlined" onPress={handleCancel}>Annuler</Button>}
                             <Button mode="contained" onPress={handleConfirm}>Confirmer</Button>
-                        </View>
+                        </View> 
                     }
                 </SafeAreaView>
             }

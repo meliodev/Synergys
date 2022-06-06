@@ -43,7 +43,6 @@ export function fetchDocuments(query) {
   return query.get()
     .then((querySnapshot) => {
       let documents = []
-
       if (querySnapshot.empty) return documents
       for (const doc of querySnapshot.docs) {
         let data = doc.data()

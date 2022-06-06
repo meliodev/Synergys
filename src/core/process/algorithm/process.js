@@ -8,8 +8,13 @@ import { Text, Alert } from 'react-native'
 import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from '../../utils'
 import { errorMessages, lastAction, phases } from '../../constants';
 
+const documentIdMap = {
+    Projects: { attribute: "project", idPath: ["id"] },
+    Clients: { attribute: "project", idPath: ["client", "id"] },
+}
+
 //#PROCESS ALGORITHM/LOGIC
-export const processHandler = async (processModel, currentProcess, projectSecondPhase, clientId, project) => {
+export const processHandler = async (processModel, currentProcess, startPhaseId, project) => {
 
     try {
         if (!processModel || processModel === undefined || !currentProcess || currentProcess === undefined) {
@@ -20,7 +25,7 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             return currentProcess
         }
 
-        const attributes = { clientId, project }
+        const attributes = { project }
         let process = _.cloneDeep(currentProcess)
 
         let loopHandler = true
@@ -28,8 +33,9 @@ export const processHandler = async (processModel, currentProcess, projectSecond
         while (loopHandler) {
 
             //0. Initialize process with 1st phase/1st step
-            if (Object.keys(process).length === 1) {
-                process = initProcess(processModel, process, projectSecondPhase)
+            const isEmptyProcess = Object.keys(process).length === 1
+            if (isEmptyProcess) {
+                process = initProcess(processModel, process, startPhaseId)
             }
 
             var { currentPhaseId, currentStepId } = getCurrentStep(process)
@@ -41,8 +47,7 @@ export const processHandler = async (processModel, currentProcess, projectSecond
             let nextPhase = ''
 
             //Verify/Update actions status
-            const arr = []
-            actions = actions.filter((a) => a !== null)
+            actions = removeNullActions(actions)
             if (actions.length > 0) {
 
                 //Fill empty params (projectId, clienId, TaskId...)
@@ -92,18 +97,23 @@ export const processHandler = async (processModel, currentProcess, projectSecond
 
 }
 
+const removeNullActions = (actions) => {
+    actions = actions.filter((a) => a !== null)
+    return actions
+}
+
 const handleSendBillEmail = async (action, projectName) => {
     try {
         const sendEmail = functions.httpsCallable('sendEmail')
         const { subject, dest, projectId, attachments } = action.cloudFunction.params
         const html = `<b>${subject} du projet ${projectName}</b>`
         const isSent = await sendEmail({ receivers: dest, subject, html, attachments })
-        console.log("isSent", dest, subject, html, attachments )
+        console.log("isSent", dest, subject, html, attachments)
 
-      //  if (isSent.data)
-            await db.collection(action.collection).doc(projectId).update({ finalBillSentViaEmail: true })
+        //  if (isSent.data)
+        await db.collection(action.collection).doc(projectId).update({ finalBillSentViaEmail: true })
 
-       // else throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
+        // else throw new Error("L'envoie de la facture par email a échoué. Veuillez réessayer plus tard.")
     }
     catch (e) {
         throw new Error(e)
@@ -121,56 +131,45 @@ export const checkForcedValidations = (actions) => {
 
 //#PROCESS TASKS:
 //Task 1. Init
-const initProcess = (processModel, process, projectSecondPhase) => {
-
-    if (projectSecondPhase === 'init') {
-        projectSecondPhase = getSecondPhaseId(processModel)
-    }
+const initProcess = (processModel, process, startPhaseId) => {
 
     //Init project with first phase/first step
-    let firstPhaseId = getFirstPhaseIdFromModel(processModel)
-    process = projectNextPhaseInit(processModel, process, firstPhaseId)
+    const firstPhaseId = getPhaseId(processModel, 1) //Phase "Init"
+    process = initPhase(processModel, process, firstPhaseId)
+
+    //If "init"...Set nextPhase to second phase
+    if (startPhaseId === 'init') {
+        startPhaseId = getPhaseId(processModel, 2) //rd1
+    }
 
     //Set "nextPhase" dynamiclly for last action of last step
     Object.keys(process[firstPhaseId].steps).forEach((stepId) => {
-        let actions = process[firstPhaseId].steps[stepId].actions
-        actions[actions.length - 1].nextPhase = projectSecondPhase
-        process[firstPhaseId].steps[stepId].actions = actions
+        let { actions } = process[firstPhaseId].steps[stepId]
+        actions[actions.length - 1].nextPhase = startPhaseId
     })
 
     return process
 }
 
-export const getLatestProcessModelVersion = (processModels) => {
-    let maxNumber = 0
-    let number = 0
-    for (const version in processModels) {
-        const numberStr = version.replace("version", "")
-        number = Number(numberStr)
-
-        if (number > maxNumber) {
-            maxNumber = number
-        }
-    }
-    const latestVersion = `version${maxNumber}`
-
-    return latestVersion
+const getPhaseId = (processModel, phaseOrder) => {
+    const phaseArray = Object.entries(processModel).filter(([key, value]) => value['phaseOrder'] === phaseOrder)
+    const phase = Object.fromEntries(phaseArray)
+    const phaseId = Object.keys(phase)[0]
+    return phaseId
 }
 
-const getSecondPhaseId = (processModel) => {
-    const firstPhaseArray = Object.entries(processModel).filter(([key, value]) => value['phaseOrder'] === 2)
-    const firstPhase = Object.fromEntries(firstPhaseArray)
-    const firstPhaseId = Object.keys(firstPhase)[0]
-    return firstPhaseId
-}
+export const initPhase = (processModel, process, phaseId) => {
+    //1. Get next Phase from process model
+    const phaseModel = _.cloneDeep(processModel[phaseId])
 
-const getFirstPhaseIdFromModel = (processModel) => {
-    let firstPhaseId
-    const copyProcessModel = _.cloneDeep(processModel)
-    Object.keys(copyProcessModel).forEach(phaseId => {
-        if (copyProcessModel[phaseId].phaseOrder === 1) firstPhaseId = phaseId
-    })
-    return firstPhaseId
+    //2. Keep only first step (stepOrder = 1)
+    const firstStep = getStep(phaseModel.steps, 1)
+    phaseModel.steps = firstStep
+
+    //3. Add next phase to process
+    process[phaseId] = phaseModel
+
+    return process
 }
 
 //Task 2. Configure actions
@@ -181,20 +180,26 @@ const configureActions = async (actions, attributes, process) => {
 
         for (let action of actions) {
 
-            let { collection, documentId, screenParams, cloudFunction, queryFilters, verificationType, queryFiltersUpdateNav, choices } = action
+            let {
+                collection,
+                documentId,
+                cloudFunction,
+                queryFilters,
+                verificationType,
+                queryFilters_onProgressUpload,
+                choices
+            } = action
 
             //1. Complete missing params
             if (collection && documentId === '') {
-                if (collection === 'Projects') action.documentId = attributes.project.id
-                else if (collection === 'Clients') action.documentId = attributes.clientId
-            }
-
-            if (screenParams) {
-                for (let item in screenParams) {
-                    if (item === 'project') action.screenParams.project = attributes.project
-                    if (item === 'user') action.screenParams.user.id = attributes.clientId
+                const idMap = documentIdMap[collection]
+                if (idMap) {
+                    const { attribute, idPath } = idMap
+                    const documentId = idPath.reduce((a, prop) => a[prop], attributes[attribute])
+                    action.documentId = documentId
                 }
             }
+
 
             if (queryFilters) {
                 for (let item of action.queryFilters) {
@@ -202,8 +207,8 @@ const configureActions = async (actions, attributes, process) => {
                 }
             }
 
-            if (queryFiltersUpdateNav) {
-                for (let item of action.queryFiltersUpdateNav) {
+            if (queryFilters_onProgressUpload) {
+                for (let item of action.queryFilters_onProgressUpload) {
                     if (item.filter === 'project.id') item.value = attributes.project.id
                 }
             }
@@ -211,7 +216,7 @@ const configureActions = async (actions, attributes, process) => {
             if (choices) {
                 for (let item of action.choices) {
                     if (item.operation && item.operation.collection === "Clients") {
-                        item.operation.docId = attributes.clientId
+                        item.operation.docId = attributes.project.client.id
                     }
                 }
             }
@@ -248,49 +253,31 @@ const configureActions = async (actions, attributes, process) => {
                 }
             }
 
-            const selectedQueryFilters = queryFiltersUpdateNav || queryFilters || null
+            const selectedQueryFilters = queryFilters_onProgressUpload || queryFilters || null
+
 
             if (selectedQueryFilters && selectedQueryFilters.length > 0) {
 
                 //Set query
                 query = db.collection(collection)
                 selectedQueryFilters.forEach(({ filter, operation, value }, index) => {
-                    console.log(index, filter, operation, value)
                     query = query.where(filter, operation, value)
                 })
                 const querysnapshot = await query.get().catch((e) => { throw new Error(errorMessages.firestore.get) })
 
                 //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
-console.log('EMPTY.......................................')
-                    if (action.screenParams) {
-                        if (collection === 'Agenda')
-                            action.screenParams.TaskId = ''
-                        if (collection === 'Documents')
-                            action.screenParams.DocumentId = ''
-                    }
-
                     action.documentId === ''
                 }
 
                 //Set Navigation Params (exp: temporary access before upload completes)
                 else {
                     const docId = querysnapshot.docs[0].id
-                    if (action.screenParams) {
-                        if (collection === 'Agenda')
-                            action.screenParams.TaskId = docId
-                        if (collection === 'Documents')
-                            action.screenParams.DocumentId = docId
-                    }
                     action.documentId = docId
                 }
             }
 
         }
-
-        console.log('END..')
-
-
         return actions
     }
 
@@ -355,7 +342,12 @@ const verifyActions = async (actions, attributes, process) => {
         allActionsValid = allActionsValid_dataFill && allActionsValid_docCreation && allActionsValid_manual
         verifiedActions = verifiedActions.concat(actions_dataFill, actions_docCreation, actions_manual)
 
-        return { allActionsValid, verifiedActions, nextStep, nextPhase }
+        return {
+            allActionsValid,
+            verifiedActions,
+            nextStep,
+            nextPhase
+        }
     }
 
     catch (e) {
@@ -414,12 +406,10 @@ const verifyActions_dataFill_sameDoc = async (actionsSameDoc) => {
 
             else {
                 const nestedVal = action.properties.reduce((a, prop) => a[prop], data)
-
                 if (typeof (nestedVal) === 'undefined') {
                     action.status = 'pending'
                     allActionsSameDocValid = false
                 }
-
                 else {
                     if (nestedVal !== action.verificationValue) {
                         action.status = 'done'
@@ -503,7 +493,12 @@ const verifyActions_manual = (actions) => {
     }
 
     const verifiedActions_manual = actions
-    return { allActionsValid_manual, verifiedActions_manual, nextStep, nextPhase }
+    return {
+        allActionsValid_manual,
+        verifiedActions_manual,
+        nextStep,
+        nextPhase
+    }
 }
 
 const setActionTimeLog = (actions) => {
@@ -564,22 +559,17 @@ export const handleTransition = (processModel, process, currentPhaseId, currentS
         }
 
         else {
-            process = projectNextPhaseInit(processModel, process, nextPhaseId)
+            process = initPhase(processModel, process, nextPhaseId)
         }
     }
 
     return { process, processEnded }
 }
 
-//Task 4'.
-export const getNextStepId = (process, currentPhaseId, currentStepId) => {
-    const nextStepId = process[currentPhaseId].steps[currentStepId].nextStep || null
-    return nextStepId
-}
-
 export const projectNextStepInit = (processModel, process, currentPhaseId, currentStepId, nextStepId) => {
 
     //0. Handle rollback (report rdn loop)
+    //Delete current step + undo all actions the new step
     if (nextStepId) {
         const currentStepOrder = processModel[currentPhaseId].steps[currentStepId].stepOrder
         const nextStepOrder = processModel[currentPhaseId].steps[nextStepId].stepOrder
@@ -597,33 +587,11 @@ export const projectNextStepInit = (processModel, process, currentPhaseId, curre
 
     //2. Concat next step to process
     process[currentPhaseId].steps[nextStepId] = nextStepModel
-
     return process
 }
 
-//Task 4".
-export const getNextPhaseId = (process, currentPhaseId, currentStepId) => {
-    const nextPhaseId = process[currentPhaseId].steps[currentStepId].nextPhase || null //#rules: Only last step has "nextPhase" property
-    return nextPhaseId
-}
-
-export const projectNextPhaseInit = (processModel, process, nextPhaseId) => {
-    //1. Get next Phase from process model
-    const nextPhaseModel = _.cloneDeep(processModel[nextPhaseId])
-
-
-    //2. Keep only first step (stepOrder = 1)
-    const firstStep = getPhaseFirstStep(nextPhaseModel.steps)
-    nextPhaseModel.steps = firstStep
-
-    //3. Concat next phase to process
-    process[nextPhaseId] = nextPhaseModel
-
-    return process
-}
-
-const getPhaseFirstStep = (steps) => {
-    const firstStepArray = Object.entries(steps).filter(([key, value]) => value['stepOrder'] === 1)
+const getStep = (steps, stepOrder) => {
+    const firstStepArray = Object.entries(steps).filter(([key, value]) => value['stepOrder'] === stepOrder)
     const firstStep = Object.fromEntries(firstStepArray)
     return firstStep
 }
@@ -711,20 +679,14 @@ export const getCurrentStep = (process) => {
 
 export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
-
     const { currentPhaseId, currentStepId } = getCurrentStep(process)
-    console.log('current step...', currentStepId)
-
     let { actions } = process[currentPhaseId].steps[currentStepId]
     actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
-
     let currentAction = null
-
     for (const action of actions) {
         if (!currentAction && action.status === 'pending')
             currentAction = action
     }
-
     return currentAction
 }
 
@@ -738,7 +700,7 @@ const phasesIdsValuesMap = [
     { values: ['Maintenance'], id: 'maintenance' },
 ]
 
-export const getPhaseId = (phaseValue) => {
+export const getPhaseIdFormValue = (phaseValue) => {
     const index = phasesIdsValuesMap.findIndex((item) => item.values.includes(phaseValue))
     const currentPhaseId = phasesIdsValuesMap[index].id
     return currentPhaseId
