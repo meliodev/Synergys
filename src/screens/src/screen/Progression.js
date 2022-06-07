@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Appbar, ProcessAction } from '../../../components/index';
-import ProcessContainer from '../container/ProcessContainer';
+import ProcessAction from '../../../screens/Process/container/ProcessAction';
+import { Appbar } from '../../../components';
 import * as theme from '../../../core/theme'
 
 export default class Progression extends Component {
@@ -14,7 +14,7 @@ export default class Progression extends Component {
     this.step = this.props.navigation.getParam('step', '')
     this.canUpdate = this.props.navigation.getParam('canUpdate', '')
     this.role = this.props.navigation.getParam('role', '')
-  } 
+  }
 
   render() {
 

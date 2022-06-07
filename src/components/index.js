@@ -43,7 +43,6 @@ export { default as PickerBar } from './PickerBar';
 export { default as ProjectItem } from './ProjectItem';
 export { default as ProjectItem2 } from './ProjectItem2';
 export { default as ProspectItem } from './ProspectItem';
-export { default as ProcessAction } from './ProcessAction';
 export { default as RadioButton } from './RadioButton';
 export { default as RequestItem } from './RequestItem';
 export { default as RequestState } from './RequestState';

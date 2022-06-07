@@ -5,7 +5,8 @@ import { faTimes } from '@fortawesome/pro-light-svg-icons'
 import { faArrowAltRight } from "@fortawesome/pro-solid-svg-icons"
 import { connect } from 'react-redux'
 
-import { Appbar, ProcessAction, Loading, EmptyList, CustomIcon } from '../../components'
+import ProcessAction from './container/ProcessAction'
+import { Appbar, Loading, EmptyList, CustomIcon } from '../../components'
 import { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants } from "../../core/constants";

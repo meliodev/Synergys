@@ -18,7 +18,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { downloadDir, errorMessages, roles, constants, isTablet } from './constants'
+import { downloadDir, errorMessages, roles, constants, isTablet, collectionScreenNameMap } from './constants'
 import { mandatSynergysModel, pvReceptionModel } from "./forms";
 import { ficheEEBModel } from './forms/ficheEEB/ficheEEBModel'
 import { mandatMPRModel } from './forms/mandatMPR/mandatMPRModel'

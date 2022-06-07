@@ -7,7 +7,7 @@ export const configureQuery = (collection, queryFilters, params) => {
     let query = db.collection(collection)
 
     // (if undefined -> user has full read access)
-    if (queryFilters) { 
+    if (queryFilters) {
 
         //Add missing values
         queryFilters = configureQueryParams(queryFilters, params)

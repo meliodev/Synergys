@@ -1,22 +1,32 @@
 import React from "react";
-import { 
-    Caption as CaptionPaper,
-    Paragraph,
-    Headline, 
-} from "react-native-paper";
+import { Text } from "react-native";
 import * as theme from "../../core/theme";
 
-const Caption = ({ fontFamily = theme.customFontMSregular, style, text }) => (
-    <CaptionPaper style={[fontFamily.caption, style]}>
-        {text}
-    </CaptionPaper>
+const { title, header, body, caption } = theme.customFontMSregular
+
+const Caption = ({ style, children }) => (
+    <Text style={[caption, style]}>
+        {children}
+    </Text>
 )
 
-const Body = ({ style, text }) => (
-    <Paragraph style={[style]}>
-        {text}
-    </Paragraph>
+const Body = ({ style, children }) => (
+    <Text style={[body, style]}>
+        {children}
+    </Text>
+)
+
+const Header = ({ style, children }) => (
+    <Text style={[header, style]}>
+        {children}
+    </Text>
+)
+
+const Title = ({ style, children }) => (
+    <Text style={[title, style]}>
+        {children}
+    </Text>
 )
 
 
-export { Caption, Body }
+export { Title, Header, Body, Caption }

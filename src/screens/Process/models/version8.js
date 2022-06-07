@@ -1292,7 +1292,6 @@ export const version8 = {
                 title: 'Facturation',
                 instructions: '',
                 stepOrder: 8,
-                nextStep: '',
                 actions: [
                     {
                         id: 'billCreation',

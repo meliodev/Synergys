@@ -47,7 +47,7 @@ import DatePicker from '../screens/Helpers/DatePicker'
 //Projects
 import ListProjects from '../screens/Projects/ListProjects'
 import CreateProject from '../screens/Projects/CreateProject'
-import Process from '../screens/Projects/Process'
+import Process from '../screens/Process/Process'
 import Progression from '../screens/src/screen/Progression'
 
 //Documents

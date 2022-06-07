@@ -1,5 +1,5 @@
-import React, {Component} from 'react';
-import {StyleSheet, Dimensions, View} from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Dimensions, View } from 'react-native';
 import {
   PDFDocument,
   PageSizes,
@@ -14,18 +14,18 @@ import Pdf from 'react-native-pdf';
 import RNFS from 'react-native-fs';
 import RNFetchBlob from 'rn-fetch-blob';
 
-import {db} from '../../firebase';
+import { db } from '../../firebase';
 import Appbar from '../../components/Appbar';
 import Button from '../../components/Button';
 import LoadDialog from '../../components/LoadDialog';
 
-import moment, {months} from 'moment';
+import moment, { months } from 'moment';
 import 'moment/locale/fr';
 moment.locale('fr');
 
 // import { fetchAsset, writePdf } from './assets'
-import {logoBase64} from '../../assets/logoBase64';
-import {termsBase64} from '../../assets/termsAndConditionsBase64';
+import { logoBase64 } from '../../assets/logoBase64';
+import { termsBase64 } from '../../assets/termsAndConditionsBase64';
 import {
   uint8ToBase64,
   base64ToArrayBuffer,
@@ -34,11 +34,11 @@ import {
   saveFile,
   displayError,
 } from '../../core/utils';
-import {sizes} from '../../core/theme';
+import { sizes } from '../../core/theme';
 import * as theme from '../../core/theme';
-import {constants, errorMessages} from '../../core/constants';
-import {Alert} from 'react-native';
-import {groupBy} from '../../core/process/algorithm/process';
+import { errorMessages } from '../../core/constants';
+import { Alert } from 'react-native';
+import { groupBy } from '../Process/algorithm/process';
 
 //urls
 const urlForm =
@@ -53,7 +53,7 @@ const formPath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messager
 const marioImagePath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messagerie/small_mario`;
 const emblemImagePath = `${RNFetchBlob.fs.dirs.DownloadDir}/Synergys/Documents/Messagerie/mario_emblem`;
 
-const {base, font, radius, padding, h1, h2, h3, header, body} = sizes;
+const { base, font, radius, padding, h1, h2, h3, header, body } = sizes;
 const caption = 10;
 const lineHeight = 12;
 
@@ -176,7 +176,7 @@ export default class PdfGeneration extends Component {
       pages[pageIndex] = pdfDoc.addPage(PageSizes.A4);
 
       // Get the width and height of the page
-      const {width, height} = pages[pageIndex].getSize();
+      const { width, height } = pages[pageIndex].getSize();
 
       // Margin & Padding initialization
       const marginLeft = 30;
@@ -199,7 +199,7 @@ export default class PdfGeneration extends Component {
         discount,
         editedBy,
       } = this.order;
-      const {client} = this.project;
+      const { client } = this.project;
       const workTypes = this.project.workTypes || [];
       const responsable = await db
         .collection('Users')
@@ -439,8 +439,8 @@ export default class PdfGeneration extends Component {
       for (const y of line_y_positions) {
         //remove 3rd line (belongs to footer)
         pages[pageIndex].drawLine({
-          start: {x: marginLeft, y},
-          end: {x: width - marginRight, y},
+          start: { x: marginLeft, y },
+          end: { x: width - marginRight, y },
           thickness: 1,
           color: colors.gray,
         });
@@ -456,14 +456,14 @@ export default class PdfGeneration extends Component {
       };
 
       const titles = [
-        {label: 'N°', marginLeft: marginLeftCalculator(line_x_positions, 0)},
+        { label: 'N°', marginLeft: marginLeftCalculator(line_x_positions, 0) },
         {
           label: 'Désignation',
           marginLeft: marginLeftCalculator(line_x_positions, 1),
         },
-        {label: 'Qté', marginLeft: marginLeftCalculator(line_x_positions, 2)},
-        {label: 'U', marginLeft: marginLeftCalculator(line_x_positions, 3)},
-        {label: 'PUHT', marginLeft: marginLeftCalculator(line_x_positions, 4)},
+        { label: 'Qté', marginLeft: marginLeftCalculator(line_x_positions, 2) },
+        { label: 'U', marginLeft: marginLeftCalculator(line_x_positions, 3) },
+        { label: 'PUHT', marginLeft: marginLeftCalculator(line_x_positions, 4) },
         {
           label: 'Total H.T',
           marginLeft: marginLeftCalculator(line_x_positions, 5),
@@ -497,8 +497,8 @@ export default class PdfGeneration extends Component {
           //draw borderlines on current page
           for (const x of line_x_positions) {
             pages[pageIndex].drawLine({
-              start: {x, y: height - startVerticalLines_x},
-              end: {x, y: height * 0.11},
+              start: { x, y: height - startVerticalLines_x },
+              end: { x, y: height * 0.11 },
               thickness: 1,
               color: colors.gray,
             });
@@ -596,16 +596,16 @@ export default class PdfGeneration extends Component {
 
       for (const x of line_x_positions) {
         pages[pageIndex].drawLine({
-          start: {x, y: height - startVerticalLines_x},
-          end: {x, y: height - marginTop},
+          start: { x, y: height - startVerticalLines_x },
+          end: { x, y: height - marginTop },
           thickness: 1,
           color: colors.gray,
         });
       }
 
       pages[pageIndex].drawLine({
-        start: {x: marginLeft, y: height - marginTop},
-        end: {x: width - marginRight, y: height - marginTop},
+        start: { x: marginLeft, y: height - marginTop },
+        end: { x: width - marginRight, y: height - marginTop },
         thickness: 1,
         color: colors.gray,
       });
@@ -666,36 +666,35 @@ export default class PdfGeneration extends Component {
 
       //2.2 Draw price details
       const priceDatas = [
-        {label: 'Total H.T', value: formatPrice(subTotal)}, //subtotal, primeCEE, primeRenov, AidRegion, discount, taxes
+        { label: 'Total H.T', value: formatPrice(subTotal) }, //subtotal, primeCEE, primeRenov, AidRegion, discount, taxes
         {
-          label: `Remise ${discount > 0 ? discount : ''}${
-            discount > 0 ? '%' : ''
-          }`,
+          label: `Remise ${discount > 0 ? discount : ''}${discount > 0 ? '%' : ''
+            }`,
           value: `-${formatPrice(discountValue)}`,
         },
-        {label: 'Total Net H.T', value: formatPrice(totalNetHT)}, //calculable
+        { label: 'Total Net H.T', value: formatPrice(totalNetHT) }, //calculable
 
-        {label: 'TVA', value: formatPrice(totalTaxe)},
+        { label: 'TVA', value: formatPrice(totalTaxe) },
         {
           label: 'Total T.T.C',
           value: formatPrice(totalTTC),
-          pdfConfig: {font: timesRomanBoldFont},
+          pdfConfig: { font: timesRomanBoldFont },
         }, //calculable
 
-        {label: 'PRIME CEE COUP DE POUCE', value: `-${formatPrice(primeCEE)}`},
-        {label: 'Maprimerévov', value: `-${formatPrice(primeRenov)}`},
-        {label: 'Aides région', value: `-${formatPrice(aidRegion)}`},
+        { label: 'PRIME CEE COUP DE POUCE', value: `-${formatPrice(primeCEE)}` },
+        { label: 'Maprimerévov', value: `-${formatPrice(primeRenov)}` },
+        { label: 'Aides région', value: `-${formatPrice(aidRegion)}` },
 
         {
           label: 'Net à payer',
           value: formatPrice(totalNet),
-          pdfConfig: {font: timesRomanBoldFont},
+          pdfConfig: { font: timesRomanBoldFont },
         }, //calculable
       ];
 
       priceDatas.forEach((priceData) => {
         marginTop += padding + timesRomanFont.heightAtSize(caption);
-        const {pdfConfig} = priceData;
+        const { pdfConfig } = priceData;
 
         pages[pageIndex].drawText(priceData.label, {
           x: headerRigth_x_start + padding,
@@ -762,9 +761,9 @@ export default class PdfGeneration extends Component {
       //3.2 TVA table: Draw taxes details
       for (const taxe of taxes) {
         const taxeItems = [
-          {value: taxe.name, marginRef: tva_secondVerticalLine},
-          {value: subTotal.toString(), marginRef: tva_thirdVerticalLine},
-          {value: taxe.value.toString(), marginRef: tva_fourthVerticalLine},
+          { value: taxe.name, marginRef: tva_secondVerticalLine },
+          { value: subTotal.toString(), marginRef: tva_thirdVerticalLine },
+          { value: taxe.value.toString(), marginRef: tva_fourthVerticalLine },
         ];
 
         taxeItems.forEach((item) => {
@@ -802,7 +801,7 @@ export default class PdfGeneration extends Component {
       //3.3 TVA table: Draw table borders
       for (const x of tva_lines_x_positions) {
         pages[pageIndex].drawLine({
-          start: {x, y: tva_firstHorizontalLine},
+          start: { x, y: tva_firstHorizontalLine },
           end: {
             x,
             y: height - marginTop + timesRomanFont.heightAtSize(caption),
@@ -814,8 +813,8 @@ export default class PdfGeneration extends Component {
 
       for (const y of tva_lines_y_positions) {
         pages[pageIndex].drawLine({
-          start: {x: tva_firstVerticalLine, y},
-          end: {x: width - marginRight - padding, y},
+          start: { x: tva_firstVerticalLine, y },
+          end: { x: width - marginRight - padding, y },
           thickness: 1,
           color: colors.gray,
         });
@@ -1004,7 +1003,7 @@ export default class PdfGeneration extends Component {
         const boxWidth = cste * 6.5;
         for (let i = 0; i < 9; i++) {
           pages[pageIndex].drawLine({
-            start: {x: marginLeft + p2 + i * boxWidth, y: height - marginTop},
+            start: { x: marginLeft + p2 + i * boxWidth, y: height - marginTop },
             end: {
               x: marginLeft + p2 + i * boxWidth,
               y:
@@ -1021,8 +1020,8 @@ export default class PdfGeneration extends Component {
 
         for (let j = 0; j < 3; j++) {
           pages[pageIndex].drawLine({
-            start: {x: marginLeft + p2, y: height - pt_marginTop},
-            end: {x: marginLeft + p2 + 8 * boxWidth, y: height - pt_marginTop},
+            start: { x: marginLeft + p2, y: height - pt_marginTop },
+            end: { x: marginLeft + p2 + 8 * boxWidth, y: height - pt_marginTop },
             thickness: 1,
             color: colors.gray,
           });
@@ -1110,7 +1109,7 @@ export default class PdfGeneration extends Component {
         });
 
         pages[pageIndex].drawLine({
-          start: {x: marginLeft + p2, y: height - marginTop},
+          start: { x: marginLeft + p2, y: height - marginTop },
           end: {
             x: marginLeft + p2 + timesRomanFont.widthOfTextAtSize(str, caption),
             y: height - marginTop,
@@ -1205,8 +1204,8 @@ export default class PdfGeneration extends Component {
         let footer_MarginBottom = page.getHeight() * 0.075;
 
         page.drawLine({
-          start: {x: marginLeft, y: footer_MarginBottom},
-          end: {x: width - marginRight, y: footer_MarginBottom},
+          start: { x: marginLeft, y: footer_MarginBottom },
+          end: { x: width - marginRight, y: footer_MarginBottom },
           thickness: 1,
           color: colors.gray,
         });
@@ -1291,12 +1290,12 @@ export default class PdfGeneration extends Component {
         ];
 
         for (const item of cerfaClient) {
-          const color = {color: rgb(1, 1, 1)};
-          const rectangle = {...item.pdfConfig, ...color};
+          const color = { color: rgb(1, 1, 1) };
+          const rectangle = { ...item.pdfConfig, ...color };
           mergedPdf.getPages()[lastPageIndex].drawRectangle(rectangle);
           if (item.text) {
-            const moreConfig = {size: caption, font: timesRomanFont};
-            const textConfig = {...item.pdfConfig, ...moreConfig};
+            const moreConfig = { size: caption, font: timesRomanFont };
+            const textConfig = { ...item.pdfConfig, ...moreConfig };
             mergedPdf.getPages()[lastPageIndex].drawText(item.text, textConfig);
           }
         }
@@ -1305,11 +1304,11 @@ export default class PdfGeneration extends Component {
       } else pdfBytes = await pdfDoc.save();
 
       const pdfBase64 = uint8ToBase64(pdfBytes);
-      const source = {uri: `data:application/pdf;base64,${pdfBase64}`};
-      this.setState({source, pdfBase64}, () => this.setState({loading: false}));
+      const source = { uri: `data:application/pdf;base64,${pdfBase64}` };
+      this.setState({ source, pdfBase64 }, () => this.setState({ loading: false }));
     } catch (e) {
       console.log(e);
-      displayError({message: errorMessages.pdfGen});
+      displayError({ message: errorMessages.pdfGen });
     }
   }
 
@@ -1334,18 +1333,18 @@ export default class PdfGeneration extends Component {
   }
 
   render() {
-    const {source, pdfBase64, loading} = this.state;
+    const { source, pdfBase64, loading } = this.state;
 
     if (loading)
       return (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Appbar title titleText={`${this.titleText}`} />
           <LoadDialog loading message={`${this.titleText} en cours...`} />
         </View>
       );
     else
       return (
-        <View style={{flex: 1}}>
+        <View style={{ flex: 1 }}>
           <Appbar back title titleText={this.titleText} />
           <View style={styles.container}>
             {source !== '' && (

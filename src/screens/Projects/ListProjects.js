@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList, Keyboard, RefreshControl } from 'react-native';
-import { List, Card } from 'react-native-paper';
+import { StyleSheet, View, FlatList, RefreshControl } from 'react-native';
 import { connect } from 'react-redux'
 import { faConstruction } from '@fortawesome/pro-light-svg-icons'
 import { faThLarge, faList } from '@fortawesome/pro-solid-svg-icons'
@@ -17,18 +16,11 @@ import Background from '../../components/NewBackground'
 import CustomIcon from '../../components/CustomIcon'
 
 import * as theme from '../../core/theme';
-import { constants, highRoles } from '../../core/constants';
-import { load, toggleFilter, setFilter, handleFilter, formatRow, stringifyUndefined, countDown } from '../../core/utils'
-import { requestRESPermission, requestWESPermission } from '../../core/permissions'
+import { constants } from '../../core/constants';
+import { toggleFilter, setFilter, handleFilter, formatRow } from '../../core/utils'
 import { configureQuery } from '../../core/privileges'
-import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
-import { db, auth } from '../../firebase'
+import { fetchDocuments } from '../../api/firestore-api';
 
-import { withNavigation } from 'react-navigation'
-
-import SearchInput, { createFilter } from 'react-native-search-filter'
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { buildQueryFilters, queryFilters_Agenda_Map, queryFilters_Documents_Map } from '../../core/process/models/version8';
 const KEYS_TO_FILTERS = ['id', 'name', 'state', 'step',]
 
 const states = [

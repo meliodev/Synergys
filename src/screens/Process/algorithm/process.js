@@ -5,8 +5,8 @@ moment.locale('fr')
 import { db, functions } from '../../../firebase'
 import _ from 'lodash'
 import { Text, Alert } from 'react-native'
-import { stringifyUndefined, getMinObjectProp, getMaxObjectProp, displayError } from '../../utils'
-import { errorMessages, lastAction, phases } from '../../constants';
+import { stringifyUndefined, getMinObjectProp, displayError } from '../../../core/utils'
+import { errorMessages, lastAction } from '../../../core/constants';
 
 const documentIdMap = {
     Projects: { attribute: "project", idPath: ["id"] },
@@ -37,6 +37,7 @@ export const processHandler = async (processModel, currentProcess, startPhaseId,
             if (isEmptyProcess) {
                 process = initProcess(processModel, process, startPhaseId)
             }
+
 
             var { currentPhaseId, currentStepId } = getCurrentStep(process)
 
@@ -718,3 +719,11 @@ export const groupBy = (arr, property) => {
 }
 
 
+
+export const sortPhases = (process) => {
+    const procesTemp = Object.entries(process).sort(([keyA, valueA], [keyB, valueB]) => {
+        return (valueA.phaseOrder > valueB.phaseOrder ? 1 : -1)
+    })
+    process = Object.fromEntries(procesTemp)
+    return process
+}

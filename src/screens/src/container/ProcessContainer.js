@@ -5,9 +5,9 @@ import _ from 'lodash'
 import { withNavigation } from 'react-navigation'
 import PhaseComponent from '../components/PhaseComponent';
 import StepComponent from '../components/StepComponent';
-import ProcessAction from '../../../components/ProcessAction';
 import { constants } from '../../../core/constants';
 import * as theme from '../../../core/theme';
+import Action from '../../Process/components/Action';
 //import processModel from '../processModel.json';
 
 class ProcessContainer extends Component {
@@ -22,7 +22,7 @@ class ProcessContainer extends Component {
 
   render() {
     const { phaseLabels, phaseStatuses, stepsData } = this.props
-    let { canUpdate } = this.props
+    //let { canUpdate } = this.props
     const { currentPage } = this.state
 
     return (
@@ -43,7 +43,7 @@ class ProcessContainer extends Component {
               const isLastPhase = currentPage === stepsData.length - 1
               const isLastStep = index === stepsData[currentPage].length - 1
               const isLastStepOfLastPhase = isLastPhase && isLastStep
-              const canUpdateStep = canUpdate && isLastStepOfLastPhase
+              // const canUpdateStep = canUpdate && isLastStepOfLastPhase
 
               return (
                 <View key={index.toString()}>
@@ -54,13 +54,17 @@ class ProcessContainer extends Component {
                     children={
                       <View style={{ marginLeft: constants.ScreenWidth * 0.035, paddingBottom: 15, borderLeftWidth: index !== stepsData[currentPage].length - 1 ? 2 : 0, borderLeftColor: theme.colors.gray_light }}>
                         {item.actions.map((action, index) => {
-                          const actionStyle = { mainColor: theme.colors.gray_dark, textFont: theme.customFontMSregular.caption, marginVertical: 50 }
-                          const isFirstAction = index === 0
-                          const isPreviousActionDone = index > 0 && item.actions[index - 1].status === 'done'
-                          const isActionPending = action.status === 'pending'
-                          const canUpdateAction = canUpdateStep && (isFirstAction || isPreviousActionDone) && isActionPending
-                          return this.props.renderAction(false, action, actionStyle, { marginVertical: theme.padding / 2 })
-                        }) 
+                          return (
+                            <Action
+                              isProcessHistory={true}
+                              action={action}
+                              actionTheme={{ mainColor: theme.colors.gray_dark, textFont: theme.customFontMSregular.caption, marginVertical: 50 }}
+                              style={{ marginVertical: theme.padding / 2 }}
+                              loading={this.props.loadingAction}
+                              loadingMessage={this.props.loadingMessageAction}
+                            />
+                          )
+                        })
                         }
                       </View>
                     }
