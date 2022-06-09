@@ -13,7 +13,7 @@ import { CustomIcon, Button } from '../../../components/index'
 import { pvReceptionBase64 } from '../../../assets/files/pvReceptionBase64'
 
 import { pvReceptionModel } from '../../../core/forms'
-import { generatePdfForm, generatePvReception } from '../../../core/utils'
+import { generateId, generatePdfForm, generatePvReception } from '../../../core/utils'
 import { constants } from '../../../core/constants'
 import * as theme from '../../../core/theme'
 
@@ -85,6 +85,7 @@ class CreatePvReception extends Component {
 
         this.PvReceptionId = this.props.navigation.getParam('PvReceptionId', '')
         this.project = this.props.navigation.getParam('project', null)
+        this.pvId = this.project ? this.project.id : `anonyme-${generateId("pv-", 4)}`
         this.clientFullName = this.project ? this.project.client.fullName : ""
         this.clientPhone = this.project ? this.project.client.phone : ""
         this.clientAddress = this.project ? this.project.address : ""
@@ -101,8 +102,8 @@ class CreatePvReception extends Component {
 
     render() {
 
-        const { clientFullName, billingDate } = this
-        const pdfParams = { clientFullName, billingDate }
+        const { pvId, clientFullName, billingDate } = this
+        const pdfParams = { pvId, clientFullName, billingDate }
         const { model } = pvReceptionModel({ clientFullName, billingDate })
 
         return (
