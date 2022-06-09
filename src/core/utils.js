@@ -780,7 +780,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
 
     //Theme config
     const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-    const timesRomanBoldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
     const colors = {
       primary: rgb(0.576, 0.768, 0.486),
       black: rgb(0, 0, 0),
@@ -794,7 +793,11 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       for (const field of formPage.fields) {
         const { id, isMultiOptions, isStepMultiOptions, pdfConfig, type, splitArobase } = field
 
-        const isHandleField = isMultiOptions && formInputs[id].length > 0 || formInputs[id]
+        const isNotEmptyArray = isMultiOptions && formInputs[id].length > 0
+        const isNotEmptyString = formInputs[id]
+        const isNotEmpty = isNotEmptyArray || isNotEmptyString
+        const isAutoGen = field.type === "autogen"
+        const isHandleField = isNotEmpty || isAutoGen
 
         if (isHandleField) {
 
@@ -929,17 +932,21 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
             case "autogen":
 
               const condtionUnsatisfied = field.isConditional && !field.condition.values.includes(formInputs[field.condition.with])
-              if (condtionUnsatisfied)
-                console.log("Skip drawing text..")
+              if (condtionUnsatisfied) {
+                console.log("Skip drawing text..", field.id)
+              }
 
               else {
 
                 if (field.value) {
+                  console.log("field value...", field.value)
                   text = field.value
                   if (field.pdfConfig.spaces) {
                     const { afterEach, str } = field.pdfConfig.spaces
                     text = chunk(text, afterEach).join(str)
                   }
+
+                  console.log("text to draw...", text)
                   pages[pdfConfig.pageIndex].drawText(text,
                     {
                       x: pages[pdfConfig.pageIndex].getWidth() + pdfConfig.dx,
@@ -1020,8 +1027,6 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
         }
       }
     }
-
-    console.log("Finalizing PDF GEN........................")
 
     const pdfBytes = await pdfDoc.save()
     const pdfBase64 = uint8ToBase64(pdfBytes)

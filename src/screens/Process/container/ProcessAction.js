@@ -17,9 +17,8 @@ import { errorMessages } from "../../../core/constants"
 import ProcessContainer from "../../src/container/ProcessContainer"
 import ActionHeader from "../components/ActionHeader"
 import ProcessTool from "../components/ProcessTool"
-import { buildValidateActionParams, buileNavigationOptions, configProcessDialogLabels, handleUpdateAction, runOperation } from "../core/utils"
-import { processModels } from '../models/index'
-import { getCurrentStep, getCurrentAction, handleTransition, getPhaseIdFormValue, processHandler, checkForcedValidations, sortPhases } from '../algorithm/process'
+import { buildValidateActionParams, buileNavigationOptions, configProcessDialogLabels, handleUpdateAction, runOperation, setProcessModel } from "../core/utils"
+import { getCurrentStepPath, getCurrentAction, handleTransition, getPhaseIdFormValue, processHandler, checkForcedValidations, sortPhases } from '../algorithm/process'
 
 
 const automaticActionTypes = [
@@ -74,7 +73,6 @@ class ProcessAction extends Component {
             loadingModal: false,
             loading: true,
             loadingMessage: this.initialLoadingMessage,
-            skipProcessHandler: false
         }
 
     }
@@ -87,31 +85,25 @@ class ProcessAction extends Component {
     }
 
     async componentDidMount() {
-        await this.initializer(true)
+        await this.initProcess()
     }
 
-    async initializer(skipProcessHandler) {
-        this.processModel = this.setProcessModel(this.props.process)
-        await this.mainHandler(this.props.process, skipProcessHandler)
+    async initProcess() {
+        const { process } = this.props
+        // console.log(process.installation.steps.installationChoice.actions[1].status, "----")
+        this.processModel = setProcessModel(process)
+        await this.mainHandler(process)
             .catch((e) => displayError({ message: e.message }))
     }
 
-    setProcessModel(process) {
-        const { version } = process
-        const processModel = processModels[version]
-        return processModel
-    }
-
-    async mainHandler(process, skipProcessHandler) {
+    async mainHandler(process) {
         return new Promise(async (resolve, reject) => {
             load(this, true)
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
             const isEmptyProcess = Object.keys(updatedProcess).length === 1
             if (isEmptyProcess) return
-            this.setState({ skipProcessHandler }, async () => {
-                await this.handleUpdateProcess(updatedProcess)
-                resolve(true)
-            })
+            await this.handleUpdateProcess(updatedProcess)
+            resolve(true)
         })
     }
 
@@ -119,7 +111,7 @@ class ProcessAction extends Component {
         const { project, step } = this.props
         const startPhaseId = getPhaseIdFormValue(step)
         const processModel = _.cloneDeep(this.processModel)
-        var updatedProcess = await processHandler(processModel, currentProcess, startPhaseId, project)
+        var updatedProcess = await processHandler(processModel, currentProcess, startPhaseId, { project })
         return updatedProcess
     }
 
@@ -128,12 +120,13 @@ class ProcessAction extends Component {
         await this.refreshProcessOnstate(updatedProcess)
     }
 
-    updateProcess(updatedProcess, process) {
+    updateProcess(updatedProcess) {
+        const { project } = this.props
         return db
             .collection('Projects')
-            .doc(this.props.project.id)
+            .doc(project.id)
             .collection("Process")
-            .doc(this.props.project.id)
+            .doc(project.id)
             .set(updatedProcess, { merge: true })
             .catch((e) => { throw new Error(errorMessages.firestore.update) })
     }
@@ -149,15 +142,15 @@ class ProcessAction extends Component {
     //3. Refresh latest process locally
     async refreshProcess(process) {
         return new Promise((resolve, reject) => {
-            const { currentPhaseId, currentStepId } = getCurrentStep(process)
+            const { currentPhaseId, currentStepId } = getCurrentStepPath(process)
             const currentPhase = process[currentPhaseId]
             const currentStep = process[currentPhaseId].steps[currentStepId]
             const currentAction = getCurrentAction(process)
 
             this.setState({
                 process,
-                currentPhase, currentStep,
-                currentPhaseId, currentStepId,
+                currentPhase, currentPhaseId,
+                currentStep, currentStepId,
                 currentAction,
                 nextStep: '',
                 nextPhase: '',
@@ -280,20 +273,17 @@ class ProcessAction extends Component {
             const { pressedAction } = this.state
             let { choices } = pressedAction
             const { onSelectType, commentRequired, operation, link, nextStep, nextPhase } = choice
-            console.log(pressedAction.id, nextStep)
 
             //Highlight selected choice
             choices = this.highLightChoice(choices, choice)
-            console.log("A")
             //Handle MultiComments
+
             if (onSelectType === 'multiCommentsPicker') {
                 await this.handleMultiCommentsPicker(choice.label)
             }
 
             if (commentRequired) {
-                console.log("B")
                 await this.handleCommentInit(choice)
-                console.log("D")
                 return
             }
 
@@ -307,14 +297,9 @@ class ProcessAction extends Component {
                 }
 
                 else if (onSelectType === 'transition' || onSelectType === 'validation' || onSelectType === 'commentPicker') {
-                    console.log("1")
                     const validateActionParams = buildValidateActionParams(onSelectType, choices, choice, nextStep, nextPhase)
-                    console.log("2")
-
                     await runOperation(operation, pressedAction)
                     await this.validateAction(validateActionParams)
-                    console.log("3")
-
                 }
 
                 else if (onSelectType === "openLink") {
@@ -350,10 +335,14 @@ class ProcessAction extends Component {
                 choices: null,
                 stay: false,
                 nextStep,
-                nextPhase
+                nextPhase,
+                choice
             })
 
-            this.setState({ loadingDialog: false, showDialog: false })
+            this.setState({
+                loadingDialog: false,
+                showDialog: false
+            })
             clearComment()
         }
         catch (e) {
@@ -362,17 +351,40 @@ class ProcessAction extends Component {
         }
     }
 
-    handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase) {
+    async handleTransition(params) {
+        let { nextStep, nextPhase, processTemp, choice } = params
         if (nextStep || nextPhase) {
-            const transitionRes = handleTransition(this.processModel, processTemp, currentPhaseId, currentStepId, nextStep, nextPhase, this.props.project.id)
+            const {
+                currentPhaseId,
+                currentStepId,
+                actions
+            } = params
+
+            console.log("choice", choice)
+            processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions, choice)
+
+            const { processModel } = this
+            const ProjectId = this.props.project.id
+            const transitionParams = {
+                processModel,
+                process: processTemp,
+                currentPhaseId,
+                currentStepId,
+                nextStepId: nextStep,
+                nextPhaseId: nextPhase,
+                ProjectId
+            }
+            const transitionRes = handleTransition(transitionParams)
             processTemp = transitionRes.process
+            await this.handleUpdateProcess(processTemp)
         }
+        else console.log("No transition...")
         return processTemp
     }
 
     async autoTriggerNextAction() {
         const { verificationType } = this.state.currentAction
-        const isAutoPress = verificationType !== 'validation' && verificationType !== "phaseRollback"
+        const isAutoPress = verificationType !== "phaseRollback"
         if (isAutoPress)
             await this.onPressAction(this.props.canUpdate, this.state.currentAction)
     }
@@ -382,12 +394,15 @@ class ProcessAction extends Component {
 
         try {
             const { process, currentPhaseId, currentStepId, pressedAction } = this.state
-            const { nextStep, nextPhase } = params
+            const { nextStep, nextPhase, choice } = params
 
             //Update action fields
             let processTemp = _.cloneDeep(process)
             let { actions } = processTemp[currentPhaseId].steps[currentStepId]
+            // console.log("process before verify...", processTemp[currentPhaseId].steps[currentStepId].actions, "********")
+
             actions = handleUpdateAction(actions, pressedAction, params)
+            processTemp[currentPhaseId].steps[currentStepId].actions = actions
 
             //For stepProgress animation
             this.setState({
@@ -396,9 +411,23 @@ class ProcessAction extends Component {
 
             // await countDown(1000)
 
-            processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions)
-            processTemp = this.handleTransition(processTemp, currentPhaseId, currentStepId, nextStep, nextPhase)
-            await this.handleUpdateProcess(processTemp)
+            // console.log("process before transition...", processTemp[currentPhaseId].steps[currentStepId].actions, "----------------")
+
+            console.log(choice, "========")
+            const transitionParams = {
+                processTemp,
+                currentPhaseId,
+                currentStepId,
+                nextStep,
+                nextPhase,
+                actions,
+                choice
+            }
+
+            processTemp = await this.handleTransition(transitionParams)
+
+            // console.log("process after transition...", processTemp[currentPhaseId].steps[currentStepId].actions, ";;;;;")
+
             await this.mainHandler(processTemp, true)
 
             //Auto trigger next action
@@ -416,7 +445,7 @@ class ProcessAction extends Component {
             const { process, currentPhaseId } = this.state
             let processTemp = _.cloneDeep(process)
             delete processTemp[currentPhaseId]
-            await this.mainHandler(processTemp, true)
+            await this.mainHandler(processTemp)
         }
         catch (e) {
             throw new Error(e)
@@ -447,21 +476,16 @@ class ProcessAction extends Component {
             const { choices, nextStep, nextPhase, operation } = pressedAction
             await runOperation(operation, pressedAction)
             await this.validateAction({ comment, choices, stay: false, nextStep, nextPhase })
-
         }
     }
 
     //NAVIGATION HANDLERS
     async onGoBack() {
-        console.log("1...")
         await this.mainHandler(this.state.process, true)
-        console.log("2...")
-
         //Auto trigger next action
         const { verificationType } = this.state.currentAction
         if (verificationType !== 'validation')
             await this.onPressAction(this.state.currentAction)
-        console.log("3...")
     }
 
     handleNavigation = (currentAction) => {
@@ -529,7 +553,6 @@ class ProcessAction extends Component {
     }
 
     async handleAction(action) {
-        console.log("A")
         const isAutomaticAction = automaticActionTypes.includes(action.verificationType)
         if (isAutomaticAction)
             this.handleAutomaticAction(action)
@@ -556,11 +579,7 @@ class ProcessAction extends Component {
                         return
                     }
                     //Handle action
-                    console.log("3")
-
                     await this.handleAction(pressedAction)
-                    console.log("4")
-
                     this.disableLoading()
                     resolve(true)
                 })

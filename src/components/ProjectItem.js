@@ -1,26 +1,22 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { List, Card, Avatar, Title } from 'react-native-paper';
-import Ionicons from 'react-native-vector-icons/Ionicons'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import { Card, Title } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient'
 
 import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-import Button from './Button'
-
 import * as theme from '../core/theme';
 import { constants, isTablet } from '../core/constants';
 
-import { ThemeColors, withNavigation } from 'react-navigation'
+import { withNavigation } from 'react-navigation'
 
 const ProjectItem = ({ project, onPress, navigation, ...props }) => {
 
     const { id, step, name, description, address, state, client, editedAt, editedBy } = project
     let { processVersion } = project
-    processVersion = processVersion.replace("version", "")
+    processVersion = processVersion.replace("version", "") || ""
 
     const setStateColor = (state) => {
         switch (state) {

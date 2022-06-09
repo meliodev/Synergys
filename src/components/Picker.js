@@ -5,7 +5,7 @@ import Modal from "react-native-modal"
 import * as theme from "../core/theme";
 import { constants, isTablet } from "../core/constants";
 import CustomIcon from './CustomIcon'
-import { Caption, Body } from './typography/Typography'
+import { Caption } from './typography/Typography'
 import { faAngleDown, faCheck } from "@fortawesome/pro-light-svg-icons";
 import CloseIcon from "./CloseIcon";
 
@@ -19,7 +19,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
     }
 
     const togglePicker = () => {
-        if(!enabled) return
+        if (!enabled) return
         setIsPickerVisible(!isPickerVisible)
     }
 
@@ -50,7 +50,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
         else return (
             <View>
                 <TouchableOpacity style={styles.iosPicker} onPress={togglePicker} >
-                    <Caption text={props.selectedValue} />
+                    <Caption>{props.selectedValue}</Caption>
                     <CustomIcon icon={faAngleDown} color={theme.colors.gray_dark} />
                 </TouchableOpacity>
 
@@ -60,7 +60,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
                             icon={faCheck}
                             onPress={togglePicker}
                             color={"green"}
-                            style={{ zIndex: 10, position: "absolute", right: 0, top: 10, padding : 15 }}
+                            style={{ zIndex: 10, position: "absolute", right: 0, top: 10, padding: 15 }}
                         />
                     }
                     {isPickerVisible && picker()}
@@ -95,7 +95,7 @@ const MyPicker = ({ containerStyle, style, pickerContainerStyle, elements, title
 
             <View style={[styles.pickerContainer, pickerContainerStyle]}>
                 {showTitle &&
-                    <Caption text={title} />
+                    <Caption>{title}</Caption>
                 }
                 {renderPicker()}
             </View>

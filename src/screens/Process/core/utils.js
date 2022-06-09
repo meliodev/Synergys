@@ -4,6 +4,7 @@ import { db } from '../../../firebase'
 
 import moment from 'moment';
 import 'moment/locale/fr'
+import { processModels } from "../models";
 moment.locale('fr')
 
 export const configProcessDialogLabels = (choiceId) => {
@@ -126,7 +127,8 @@ export const buildValidateActionParams = (onSelectType, choices, choice, nextSte
       choices: null,
       stay: false,
       nextStep,
-      nextPhase
+      nextPhase,
+      choice
     }
   }
   else if (onSelectType === "commentPicker") {
@@ -164,4 +166,10 @@ export const handleUpdateAction = (actions, pressedAction, params) => {
     }
   }
   return actions
+}
+
+export const setProcessModel = (process) => {
+  const { version } = process
+  const processModel = processModels[version]
+  return processModel
 }

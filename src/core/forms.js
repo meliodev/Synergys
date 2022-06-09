@@ -20,11 +20,11 @@ export const pvReceptionModel = (params) => {
     const model = [
         //---------------------------  Page 1
         { //2
-            id: "acceptReception",
+            id: "worksWithReserves",
             title: "",
             fields: [
                 {
-                    id: "acceptReception",
+                    id: "worksWithReserves",
                     label: "Travaux avec ou sans réserves ?",
                     type: "options",
                     items: [
@@ -51,7 +51,7 @@ export const pvReceptionModel = (params) => {
                             }
                         },
                     ],
-                    errorId: "acceptReceptionError",
+                    errorId: "worksWithReservesError",
                     mendatory: true,
                 },
             ]
@@ -79,7 +79,7 @@ export const pvReceptionModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -174, dy: - 225, pageIndex: 0 },
                     isConditional: true,
-                    condition: { with: "acceptReception", values: ["Sans réserves"] },
+                    condition: { with: "worksWithReserves", values: ["Sans réserves"] },
                 },
                 {
                     id: "reserveDate2",
@@ -87,7 +87,7 @@ export const pvReceptionModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -200, dy: - 249, pageIndex: 0 },
                     isConditional: true,
-                    condition: { with: "acceptReception", values: ["Avec réserves"] },
+                    condition: { with: "worksWithReserves", values: ["Avec réserves"] },
                 },
                 {
                     id: "todayDate1",
@@ -154,6 +154,8 @@ export const pvReceptionModel = (params) => {
                         }
                     },
                     mendatory: true,
+                    isConditional: true,
+                    condition: { with: "worksWithReserves", values: ["Avec réserves"] },
                 },
             ],
         },
@@ -181,6 +183,8 @@ export const pvReceptionModel = (params) => {
                         }
                     },
                     mendatory: true,
+                    isConditional: true,
+                    condition: { with: "worksWithReserves", values: ["Avec réserves"] },
                 },
             ],
         },
@@ -195,6 +199,8 @@ export const pvReceptionModel = (params) => {
                     errorId: "timeLimitFromTodayError",
                     pdfConfig: { dx: -265, dy: - 428, pageIndex: 0 },
                     mendatory: true,
+                    isConditional: true,
+                    condition: { with: "worksWithReserves", values: ["Avec réserves"] },
                 },
             ],
         },

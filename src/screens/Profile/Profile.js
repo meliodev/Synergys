@@ -103,7 +103,7 @@ class Profile extends Component {
                 pw: true,
                 turnoverGoals: true,
                 projects: true,
-                billing: true,
+                billing: false,
             },
             viewMore: false,
 
@@ -891,7 +891,7 @@ class Profile extends Component {
 
                                     <ClientBillingSection
                                         canUpdate={canUpdate}
-                                        isExpanded={true}
+                                        isExpanded={sectionsExpansion["billing"]}
                                         ClientId = {this.userParam.id}
                                         toggleSection={() => this.toggleSection("billing")}
                                     />

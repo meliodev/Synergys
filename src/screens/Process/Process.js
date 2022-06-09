@@ -78,7 +78,7 @@ class Process extends Component {
         return new Promise((resolve, reject) => {
             this.processListener = query.onSnapshot(async (doc) => {
                 if (!doc.exists) resolve(null)
-                const process = doc.data()
+                const process = doc.data()   
                 resolve(process)
             })
         })
@@ -119,7 +119,7 @@ class Process extends Component {
                     {showProcessAction ?
                         this.renderProcessAction(canWrite)
                         :
-                        this.processNotFound()
+                        this.processNotFound()  
                     }
                     {this.viewMore()}
                 </View>

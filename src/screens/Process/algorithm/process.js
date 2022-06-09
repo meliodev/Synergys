@@ -4,7 +4,6 @@ moment.locale('fr')
 
 import { db, functions } from '../../../firebase'
 import _ from 'lodash'
-import { Text, Alert } from 'react-native'
 import { stringifyUndefined, getMinObjectProp, displayError } from '../../../core/utils'
 import { errorMessages, lastAction } from '../../../core/constants';
 
@@ -13,89 +12,167 @@ const documentIdMap = {
     Clients: { attribute: "project", idPath: ["client", "id"] },
 }
 
-//#PROCESS ALGORITHM/LOGIC
-export const processHandler = async (processModel, currentProcess, startPhaseId, project) => {
-
+export const processHandler = async (processModel, currentProcess, startPhaseId, attributes) => {
     try {
-        if (!processModel || processModel === undefined || !currentProcess || currentProcess === undefined) {
-            Alert.alert(
-                'Erreur inattendue',
-                "Le model du process n'a pas été initialisé."
-            )
-            return currentProcess
-        }
-
-        const attributes = { project }
         let process = _.cloneDeep(currentProcess)
-
-        let loopHandler = true
-
-        while (loopHandler) {
-
-            //0. Initialize process with 1st phase/1st step
-            const isEmptyProcess = Object.keys(process).length === 1
-            if (isEmptyProcess) {
-                process = initProcess(processModel, process, startPhaseId)
-            }
-
-
-            var { currentPhaseId, currentStepId } = getCurrentStep(process)
-
-            //Actions of current step
-            let { actions } = process[currentPhaseId].steps[currentStepId]
-            let allActionsValid = true
-            let nextStep = ''
-            let nextPhase = ''
-
-            //Verify/Update actions status
-            actions = removeNullActions(actions)
-            if (actions.length > 0) {
-
-                //Fill empty params (projectId, clienId, TaskId...)
-                actions = await configureActions(actions, attributes, process)
-
-                //Send Bill & Attestation fluide
-                const firstAction = actions[0]
-                if (firstAction.cloudFunction) {
-                    const projectName = attributes.project.name
-                    await handleSendBillEmail(firstAction, projectName)
-                }
-
-                var verif_res = await verifyActions(actions, attributes, process)
-
-                //Update actions of current step
-                actions = verif_res.verifiedActions
-                actions = setActionTimeLog(actions)
-                process[currentPhaseId].steps[currentStepId].actions = actions
-
-                //Get nextStep/nextPhase (if available)
-                nextStep = verif_res.nextStep
-                nextPhase = verif_res.nextPhase
-                //allActionsValid = verif_res.allActionsValid
-            }
-
-            //3'. Found nextStep/nextPhase -> All actions valid -> Transition
-            //ie: Next step/phase found means we are on last action of current step -> we do transition.
-            if (nextStep || nextPhase) {
-                const transitionRes = handleTransition(processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes.project.id)
-                process = transitionRes.process
-                const { processEnded } = transitionRes
-                if (processEnded) loopHandler = false
-            }
-
-            //3". No nextStep/nextPhase found -> At least one action is not valid -> No transition & Break loop
-            else loopHandler = false
-        }
-
-        return process || currentProcess
+        isCorruptedProcess(processModel, process)
+        const updatedProcess = await updateProcess(processModel, process, startPhaseId, attributes)
+        return updatedProcess || currentProcess
     }
-
     catch (e) {
         const { message } = e
         displayError({ message })
         return currentProcess
     }
+}
 
+const isCorruptedProcess = (processModel, process) => {
+    const corruptedProcessModel = !processModel || processModel === undefined || typeof (processModel) === "undefined"
+    const corruptedProcess = !process || process === undefined || typeof (process) === "undefined"
+    const isError = (corruptedProcessModel || corruptedProcess)
+    if (isError) {
+        throw new Error("Le model du process n'a pas été initialisé... Veuillez réessayer")
+    }
+    return
+}
+
+const updateProcess = async (processModel, process, startPhaseId, attributes) => {
+    let isUpdateNextStep = true
+    while (isUpdateNextStep) {
+        console.log("1..")
+        process = initProcessOnStartNewProject(processModel, process, startPhaseId)
+        console.log("2..")
+        const resp = await updateLastStepActions_And_HandleTransition({ processModel, process, attributes })
+        console.log("3..")
+        process = resp.process
+        isUpdateNextStep = resp.isUpdateNextStep
+    }
+    return process
+}
+
+const initProcessOnStartNewProject = (processModel, process, startPhaseId) => {
+
+    const isEmptyProcess = Object.keys(process).length === 1
+    if (!isEmptyProcess) return process
+
+    //Init project with first phase/first step
+    const firstPhaseId = getPhaseId(processModel, 1) //Phase "Init"
+    process = initPhase(processModel, process, firstPhaseId)
+
+
+    //If "init"...Set nextPhase to second phase
+    if (startPhaseId === 'init') {
+        startPhaseId = getPhaseId(processModel, 2) //rd1
+    }
+
+    //Set "nextPhase" dynamiclly for last action of last step
+    Object.keys(process[firstPhaseId].steps).forEach((stepId) => {
+        let { actions } = process[firstPhaseId].steps[stepId]
+        actions[actions.length - 1].nextPhase = startPhaseId
+    })
+
+    return process
+}
+
+const updateLastStepActions_And_HandleTransition = async ({ processModel, process, attributes }) => {
+    //update actions
+    var { currentPhaseId, currentStepId } = getCurrentStepPath(process)
+    let { actions } = process[currentPhaseId].steps[currentStepId]
+    const { verifiedActions, nextStep, nextPhase } = await updateActions({ actions, attributes })
+    actions = verifiedActions
+
+    //Handle step/phase transition
+    const transitionResp = handleStepOrPhaseTransition({
+        processModel,
+        process,
+        currentPhaseId,
+        currentStepId,
+        nextStep,
+        nextPhase,
+        attributes
+    })
+    process = transitionResp.process
+    const isUpdateNextStep = transitionResp.isUpdateNextStep
+    return { process, isUpdateNextStep }
+}
+
+const updateActions = async (params) => {
+    let { actions, attributes } = params
+    actions = removeNullActions(actions)
+    if (actions.length === 0) return
+    actions = await configureActions(actions, attributes)
+
+    //Send email handler
+    const firstAction = actions[0]
+    if (firstAction.cloudFunction) {
+        const projectName = attributes.project.name
+        await handleSendBillEmail(firstAction, projectName)
+    }
+
+    var res = await verifyActions(actions)
+    let { verifiedActions, nextStep, nextPhase } = res
+    verifiedActions = setActionTimeLog(verifiedActions)
+    return { verifiedActions, nextStep, nextPhase }
+}
+
+const handleStepOrPhaseTransition = ({ processModel, process, currentPhaseId, currentStepId, nextStep, nextPhase, attributes }) => {
+    let isUpdateNextStep = true
+
+    if (nextStep || nextPhase) {
+        const ProjectId = attributes.project.id
+        const transitionParams = {
+            processModel,
+            process,
+            currentPhaseId,
+            currentStepId,
+            nextStepId: nextStep,
+            nextPhaseId: nextPhase,
+            ProjectId
+        }
+        const transitionRes = handleTransition(transitionParams)
+        process = transitionRes.process
+        const { processEnded } = transitionRes
+        isUpdateNextStep = !processEnded
+    }
+    else isUpdateNextStep = false
+
+    console.log("isUpdateNextStep.....", isUpdateNextStep)
+    return { process, isUpdateNextStep }
+}
+
+export const handleTransition = ({ processModel, process, currentPhaseId, currentStepId, nextStepId, nextPhaseId, ProjectId }) => {
+    let processEnded = false
+    //Next step transition
+    if (nextStepId) {
+        console.log("uuuuu", nextStepId)
+        process = projectNextStepInit(processModel, process, currentPhaseId, currentStepId, nextStepId)
+    }
+    //Next phase transition
+    else if (nextPhaseId) {
+        //Update project (status/step)
+        if (nextPhaseId === 'cancelProject') {
+            cancelProject(ProjectId)
+        }
+
+        else if (nextPhaseId === 'endProject') {
+            endProject(ProjectId)
+            processEnded = true
+        }
+
+        else {
+            updateProjectPhase(processModel, nextPhaseId, ProjectId)
+        }
+
+        //Resume maintenance
+        if (nextPhaseId === 'maintainance' && process['installation'].steps['maintainanceContract']) {
+            process = resumeMaintainance(processModel, process)
+        }
+
+        else {
+            process = initPhase(processModel, process, nextPhaseId)
+        }
+    }
+    return { process, processEnded }
 }
 
 const removeNullActions = (actions) => {
@@ -121,35 +198,15 @@ const handleSendBillEmail = async (action, projectName) => {
     }
 }
 
-export const checkForcedValidations = (actions) => {
+export const checkForcedValidations = (actions, choice) => {
     for (let action of actions) {
         if (action.forceValidation) {
-            action.status = 'done'
+            if (choice && choice.nextPhase === "cancelProject") //Pour contourner forceValidation
+                action.status = 'pending'
+            else action.status = 'done'
         }
     }
     return actions
-}
-
-//#PROCESS TASKS:
-//Task 1. Init
-const initProcess = (processModel, process, startPhaseId) => {
-
-    //Init project with first phase/first step
-    const firstPhaseId = getPhaseId(processModel, 1) //Phase "Init"
-    process = initPhase(processModel, process, firstPhaseId)
-
-    //If "init"...Set nextPhase to second phase
-    if (startPhaseId === 'init') {
-        startPhaseId = getPhaseId(processModel, 2) //rd1
-    }
-
-    //Set "nextPhase" dynamiclly for last action of last step
-    Object.keys(process[firstPhaseId].steps).forEach((stepId) => {
-        let { actions } = process[firstPhaseId].steps[stepId]
-        actions[actions.length - 1].nextPhase = startPhaseId
-    })
-
-    return process
 }
 
 const getPhaseId = (processModel, phaseOrder) => {
@@ -174,7 +231,7 @@ export const initPhase = (processModel, process, phaseId) => {
 }
 
 //Task 2. Configure actions
-const configureActions = async (actions, attributes, process) => {
+const configureActions = async (actions, attributes) => {
 
     try {
         let query
@@ -288,7 +345,7 @@ const configureActions = async (actions, attributes, process) => {
 }
 
 //Task 3. Verifications & Status Update
-const verifyActions = async (actions, attributes, process) => {
+const verifyActions = async (actions) => {
     try {
         let allActionsValid = true
         let verifiedActions = []
@@ -528,45 +585,6 @@ const setActionTimeLog = (actions) => {
     return actions
 }
 
-//Task 4. Phase/Step transition
-export const handleTransition = (processModel, process, currentPhaseId, currentStepId, nextStepId, nextPhaseId, ProjectId) => {
-
-    let processEnded = false
-
-    //Next step transition
-    if (nextStepId) {
-        process = projectNextStepInit(processModel, process, currentPhaseId, currentStepId, nextStepId)
-    }
-
-    //Next phase transition
-    else if (nextPhaseId) {
-        //Update project (status/step)
-        if (nextPhaseId === 'cancelProject') {
-            cancelProject(ProjectId)
-        }
-
-        else if (nextPhaseId === 'endProject') {
-            endProject(ProjectId)
-            processEnded = true
-        }
-
-        else {
-            updateProjectPhase(processModel, nextPhaseId, ProjectId)
-        }
-
-        //Phase transition
-        if (nextPhaseId === 'maintainance' && process['installation'].steps['maintainanceContract']) {
-            process = resumeMaintainance(processModel, process)
-        }
-
-        else {
-            process = initPhase(processModel, process, nextPhaseId)
-        }
-    }
-
-    return { process, processEnded }
-}
-
 export const projectNextStepInit = (processModel, process, currentPhaseId, currentStepId, nextStepId) => {
 
     //0. Handle rollback (report rdn loop)
@@ -588,6 +606,7 @@ export const projectNextStepInit = (processModel, process, currentPhaseId, curre
 
     //2. Concat next step to process
     process[currentPhaseId].steps[nextStepId] = nextStepModel
+
     return process
 }
 
@@ -641,8 +660,8 @@ const cancelProject = (ProjectId) => {
     db.collection('Projects').doc(ProjectId).update({ state: 'Annulé' })
 }
 
-//#UI FUNCTIONS (PROCESS OVERVIEW)
-// Process object at the instant t contains only the current state of the global process model --> So we are sure that the object with max order is the latest phase/step
+
+//#Helpers
 export const getCurrentPhase = (process) => {
 
     const phases = Object.entries(process)
@@ -660,7 +679,7 @@ export const getCurrentPhase = (process) => {
     return currentPhaseId
 }
 
-export const getCurrentStep = (process) => {
+export const getCurrentStepPath = (process) => {
     let maxStepOrder = 0
     var currentPhaseId = getCurrentPhase(process)
     let currentStepId
@@ -680,7 +699,7 @@ export const getCurrentStep = (process) => {
 
 export const getCurrentAction = (process) => {
     if (_.isEmpty(process)) return null
-    const { currentPhaseId, currentStepId } = getCurrentStep(process)
+    const { currentPhaseId, currentStepId } = getCurrentStepPath(process)
     let { actions } = process[currentPhaseId].steps[currentStepId]
     actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
     let currentAction = null
@@ -691,7 +710,6 @@ export const getCurrentAction = (process) => {
     return currentAction
 }
 
-//#Helpers
 const phasesIdsValuesMap = [
     { values: ['Prospect', 'Initialisation'], id: 'init' },
     { values: ['Visite technique préalable', 'Rendez-vous 1'], id: 'rd1' },
@@ -717,8 +735,6 @@ export const groupBy = (arr, property) => {
         return memo
     }, {})
 }
-
-
 
 export const sortPhases = (process) => {
     const procesTemp = Object.entries(process).sort(([keyA, valueA], [keyB, valueB]) => {

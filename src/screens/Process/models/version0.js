@@ -226,10 +226,215 @@ export const version0 = {
         phaseOrder: 2,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
+            installationCreation: {
+                title: 'Plannification installation',
+                instructions: '', // Example: process.init.create-prospect.nom.title
+                stepOrder: 1,
+                actions: [
+                    {
+                        id: 'installationCreation',
+                        title: 'Créer une tâche de type installation',
+                        instructions: 'Créer une tâche de type installation',
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Agenda',
+                        documentId: "",
+                        params: {
+                            taskType: "Installation",
+                        },
+                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Installation").create),
+                        status: 'pending',
+                        nextStep: 'installationChoice',
+                    },
+                ],
+            },
+            installationChoice: {
+                title: "Mise à jour du statut de l'installation",
+                instructions: '',
+                stepOrder: 2,
+                actions: [
+                    {
+                        id: 'installationChoice1',
+                        title: "Mettre à jour le statut de l'installation (1)",
+                        instructions: "Mettre à jour le statut de l'installation (1)",
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        collection: 'Agenda',
+                        documentId: "",
+                        params: {
+                            taskType: "Installation",
+                        },
+                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Installation").create),
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            {
+                                id: 'block',
+                                label: 'Bloquée',
+                                onSelectType: 'validation',
+                                commentRequired: true,
+                                operation: {
+                                    type: 'update',
+                                    field: 'status',
+                                    value: 'En attente',
+                                },
+                            },
+                            {
+                                id: 'confirm',
+                                label: 'Finalisée',
+                                nextStep: 'pvCreation',
+                                onSelectType: 'transition',
+                                operation: { type: 'update', field: 'status', value: 'Terminé' },
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {
+                        id: 'installationChoice2',
+                        title: "Mettre à jour le statut de l'installation (2)",
+                        instructions: "Mettre à jour le statut de l'installation (2)",
+                        actionOrder: 2,
+                        responsable: 'Poseur',
+                        collection: 'Agenda',
+                        documentId: "",
+                        params: {
+                            taskType: "Installation",
+                        },
+                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Installation").create),
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif            
+                        choices: [
+                            {
+                                label: 'Abandonnée',
+                                id: 'cancel',
+                                nextPhase: 'cancelProject',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                                operation: { type: 'update', field: 'status', value: 'Annulé' },
+                            },
+                            {
+                                label: 'En cours',
+                                id: 'confirm',
+                                onSelectType: 'actionRollBack',
+                                operation: { type: 'update', field: 'status', value: 'En cours' },
+                            },
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
+                        forceValidation: true,
+                    },
+                ],
+            },
+            pvCreation: {
+                title: "Création d'un PV réception",
+                instructions: '',
+                stepOrder: 3,
+                actions: [
+                    {   //##new
+                        id: 'pvCreation',
+                        title: 'Créer un PV réception',
+                        instructions: 'Créer un PV réception',
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "PV réception",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("PV réception").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("PV réception").create.onCreate),
+                        status: 'pending',
+                        nextStep: 'reserve',
+                    },
+                ],
+            },
+            reserve: {
+                title: 'Réserve',
+                instructions: '',
+                stepOrder: 4,
+                actions: [
+                    {
+                        id: 'reserve',
+                        title: 'Êtes-vous satisfait de notre travail ?',
+                        instructions: '',
+                        actionOrder: 1,
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        comment: '', //#task: comments are joined (separated by ;)
+                        choices: [
+                            {
+                                label: 'NON',
+                                id: 'comment',
+                                nextStep: 'catchupCreation',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                            {
+                                label: 'OUI',
+                                id: 'confirm',
+                                nextStep: 'poseurValidation',
+                                onSelectType: 'transition',
+                            },
+                        ],
+                        responsable: 'Client',
+                        status: 'pending',
+                    },
+                ],
+            },
+            catchupCreation: {
+                title: 'Plannification tâche rattrapage',
+                instructions: '',
+                stepOrder: 5,
+                actions: [
+                    {
+                        id: 'catchupCreation',
+                        title: 'Créer une tâche rattrapage',
+                        instructions: 'Créer une tâche rattrapage',
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Agenda',
+                        documentId: "",
+                        params: {
+                            taskType: "Installation",
+                        },
+                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Rattrapage").create),
+                        status: 'pending',
+                    },
+                    {
+                        id: 'catchupChoice',
+                        title: 'Finaliser la tâche rattrapage',
+                        instructions: 'Finaliser la tâche rattrapage',
+                        actionOrder: 3,
+                        responsable: 'Poseur',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                id: 'finish',
+                                label: 'Finaliser',
+                                nextStep: 'reserve',
+                                onSelectType: 'transition',
+                                operation: { type: 'update', field: 'status', value: 'Terminé' },
+                            },
+                        ],
+                        collection: 'Agenda',
+                        documentId: "",
+                        params: {
+                            taskType: "Rattrapage",
+                        },
+                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Rattrapage").create),
+                        status: 'pending',
+                    },
+                ],
+            },
             poseurValidation: {
                 title: 'Validation du technicien',
                 instructions: '',
-                stepOrder: 1,
+                stepOrder: 6,
                 actions: [
                     {
                         id: 'maintainanceContractChoice',
@@ -261,7 +466,7 @@ export const version0 = {
             maintainanceContract: {
                 title: 'Contrat maintenance',
                 instructions: '',
-                stepOrder: 2,
+                stepOrder: 7,
                 actions: [
                     {
                         id: 'commercialPropositionChoice',
@@ -424,8 +629,7 @@ export const version0 = {
                 //no conversion
                 title: 'Facturation',
                 instructions: '',
-                stepOrder: 3,
-                nextStep: '',
+                stepOrder: 8,
                 actions: [
                     {
                         id: 'billCreation',
@@ -447,6 +651,281 @@ export const version0 = {
                         nextStep: 'paymentStatus',
                     }
                     //##done:task: Delete "Signer la facture"
+                ],
+            },
+            paymentStatus: {
+                //conversion
+                title: 'Finalisation de la facturation',
+                instructions: '',
+                stepOrder: 9,
+                nextStep: '',
+                actions: [
+                    {
+                        //##task: add multiCommentsPicker
+                        id: 'paymentStatus',
+                        title: 'Modifier le statut du paiement',
+                        instructions: '',
+                        actionOrder: 1,
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        onSelectType: 'multiCommentsPicker', //only in multiCommentsPicker
+                        comment: '',
+                        choices: [
+                            {
+                                label: 'Attente paiement client',
+                                id: 'pending',
+                                onSelectType: 'multiCommentsPicker',
+                                selected: false,
+                                stay: true,
+                            },
+                            {
+                                label: 'Attente paiement financement',
+                                id: 'pending',
+                                onSelectType: 'multiCommentsPicker',
+                                selected: false,
+                                stay: true,
+                            },
+                            //##task: Diviser Attente paiement aide en MPR et CEE
+                            {
+                                label: 'Attente paiement aide MPR',
+                                id: 'pending',
+                                onSelectType: 'multiCommentsPicker',
+                                selected: false,
+                                stay: true,
+                            },
+                            {
+                                label: 'Attente paiement aide CEE',
+                                id: 'pending',
+                                onSelectType: 'multiCommentsPicker',
+                                selected: false,
+                                stay: true,
+                            },
+                            {
+                                label: 'Payé',
+                                id: 'confirm',
+                                onSelectType: 'multiCommentsPicker',
+                                selected: false,
+                                stay: false,
+                            },
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'advValidation',
+                        title: "Validation de la facture par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+                        instructions: '',
+                        actionOrder: 2,
+                        type: 'manual',
+                        //verificationType: 'validation',
+                        comment: '',
+                        responsable: 'ADV',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Annuler',
+                                id: 'cancel',
+                                nextPhase: 'cancelProject',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            },
+                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                        ],
+                    },
+                    //##done:task: Ajouter montant HT + TTC ??
+                    {
+                        id: 'billingAmount',
+                        title: 'Saisir le montant de la facture',
+                        instructions: "Veuillez saisir le montant HT et TTC de la facture.",
+                        actionOrder: 3,
+                        //Verification
+                        collection: 'Projects',
+                        documentId: '', //#dynamic
+                        properties: ['bill', "amount"],
+                        params: {
+                            screenParams: {
+                                sections: { billing: { billAmount: true } },
+                            }
+                        },
+                        screenPush: true,
+                        //Comment
+                        comment: '',
+                        //Verification
+                        type: 'auto',
+                        verificationType: 'data-fill',
+                        verificationValue: '',
+                        //Others
+                        responsable: 'Poseur',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'attestationCreation',
+                        title: 'Créer une attestation fluide',
+                        instructions: 'Créer une attestation fluide',
+                        actionOrder: 4,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Attestation fluide",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onCreate),
+                        status: 'pending',
+                        nextStep: 'emailBill',
+                    }
+                ],
+            },
+            emailBill: {
+                title: 'Envoi facture par mail',
+                instructions: '',
+                stepOrder: 10,
+                nextStep: '',
+                actions: [
+                    //task: verify if bill & attestation fluide are still existing
+                    {
+                        id: 'emailBill',
+                        title: 'Envoi automatique de la facture finale + attestation fluide par mail en cours...',
+                        instructions: '',
+                        actionOrder: 2,
+                        collection: 'Projects',
+                        documentId: '', //#dynamic
+                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
+                        properties: ['finalBillSentViaEmail'],
+                        status: 'pending',
+                        verificationType: 'data-fill',
+                        verificationValue: false,
+                        cloudFunction: {
+                            endpoint: 'sendEmail',
+                            queryAttachmentsUrls: {
+                                Facture: [
+                                    { filter: 'project.id', operation: '==', value: '' },
+                                    { filter: 'type', operation: '==', value: 'Facture' },
+                                    {
+                                        filter: 'attachment.downloadURL',
+                                        operation: '!=',
+                                        value: '',
+                                    },
+                                ],
+                                'Attestation fluide': [
+                                    { filter: 'project.id', operation: '==', value: '' },
+                                    {
+                                        filter: 'type',
+                                        operation: '==',
+                                        value: 'Attestation fluide',
+                                    },
+                                    {
+                                        filter: 'attachment.downloadURL',
+                                        operation: '!=',
+                                        value: '',
+                                    },
+                                ],
+                            },
+                            params: {
+                                subject: 'Facture finale et attestation fluide',
+                                dest: 'sa.lyoussi@gmail.com', //#task: change it
+                                projectId: '',
+                                attachments: [],
+                            },
+                        },
+                        nextStep: 'clientReview',
+                    },
+                ],
+            },
+            clientReview: {
+                title: 'Satisfaction client',
+                instructions:
+                    "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
+                stepOrder: 11,
+                nextStep: '',
+                actions: [
+                    {
+                        id: 'clientReview',
+                        title: 'Êtes-vous satisfait de notre service ?',
+                        instructions: '',
+                        actionOrder: 1,
+                        type: 'manual',
+                        verificationType: 'multiple-choices',
+                        isReview: true,
+                        comment: '',
+                        choices: [
+                            {
+                                label: '1',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '2',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '3',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '4',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '5',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '6',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '7',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '8',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '9',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                saty: false,
+                                nextPhase: 'maintainance',
+                            },
+                            {
+                                label: '10',
+                                onSelectType: 'commentPicker',
+                                selected: false,
+                                stay: false,
+                                nextPhase: 'maintainance',
+                            },
+                        ],
+                        status: 'pending',
+                    },
                 ],
             },
         },

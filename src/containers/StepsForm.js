@@ -357,7 +357,7 @@ class StepsForm extends Component {
         items,
         isConditional,
         condition,
-        isNumeric,
+        isNumeric, 
         isEmail,
         isMultiOptions,
         isStepMultiOptions,

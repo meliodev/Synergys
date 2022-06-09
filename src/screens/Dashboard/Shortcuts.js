@@ -85,18 +85,10 @@ class Shortcuts extends Component {
 
     componentDidMount() {
         load(this, false)
-        const process = {
-            phase: {
-                steps: {
-                    actions: ["1", "2", "3"]
-                }
-            }
-        }
+    }
 
-        let actions = process.phase.steps.actions
-        actions.push("4")
-
-        console.log(process.phase.steps.actions)
+    doSomething() {
+        return { a: 1, b: 2 }
     }
 
     setPermissionBasedShortcuts() {
