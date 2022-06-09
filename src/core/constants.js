@@ -300,7 +300,7 @@ export const collectionScreenNameMap = {
 }
 
 //Auto-Sign docs
-export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Facture"]
+export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Facture", "PV réception"]
 export const docsConfig = (index) => {
 
     const config = {
@@ -409,6 +409,38 @@ export const docsConfig = (index) => {
             },
         },
         "PV réception": {
+            signatures: [
+                {
+                    pageIndex: 0,
+                    position: {
+                        x: 370,
+                        y: 247,
+                        size: 7,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
+                    }
+                },
+                {
+                    pageIndex: 1,
+                    position: {
+                        x: 370,
+                        y: 247,
+                        size: 7,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
+                    }
+                },
+                {
+                    pageIndex: 2,
+                    position: {
+                        x: 375,
+                        y: 90,
+                        size: 7,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
+                    }
+                },
+            ],
             genNavigation: {
                 titleText: "Choix du formulaire",
                 listScreen: "ListPvReceptions",

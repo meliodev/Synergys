@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   StyleSheet,
   View,
@@ -8,15 +8,15 @@ import {
   Alert,
   BackHandler,
 } from 'react-native';
-import {ProgressBar} from 'react-native-paper';
+import { ProgressBar } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import firebase, {db, functions} from '../../firebase';
+import firebase, { db, functions } from '../../firebase';
 import Dialog from 'react-native-dialog';
 import _ from 'lodash';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import DeviceInfo from 'react-native-device-info';
-import {NetworkInfo} from 'react-native-network-info';
+import { NetworkInfo } from 'react-native-network-info';
 
 import moment from 'moment';
 import 'moment/locale/fr';
@@ -25,7 +25,7 @@ moment.locale('fr');
 import Pdf from 'react-native-pdf';
 import RNFS from 'react-native-fs';
 import RNFetchBlob from 'rn-fetch-blob';
-import {PDFDocument, rgb} from 'pdf-lib';
+import { PDFDocument, rgb } from 'pdf-lib';
 
 import * as theme from '../../core/theme';
 import {
@@ -51,8 +51,8 @@ import {
   readFile,
   deleteFile,
 } from '../../core/utils';
-import {uploadFile} from '../../api/storage-api';
-import {script as emailTemplate} from '../../emailTemplates/signatureRequest';
+import { uploadFile } from '../../api/storage-api';
+import { script as emailTemplate } from '../../emailTemplates/signatureRequest';
 
 import Appbar from '../../components/Appbar';
 import LoadDialog from '../../components/LoadDialog';
@@ -152,8 +152,6 @@ class Signature extends Component {
   }
 
   async componentDidMount() {
-    const x = '132';
-    const txt = `hello ${x}`;
     await this.init();
   }
 
@@ -168,9 +166,10 @@ class Signature extends Component {
     try {
       loadLog(this, true, 'Initialisation des données...');
       await this.loadOriginalFile();
-      if (this.initMode === 'sign') this.toggleTerms();
+      if (this.initMode === 'sign')
+        this.toggleTerms();
     } catch (e) {
-      displayError({message: e.message});
+      displayError({ message: e.message });
     } finally {
       loadLog(this, false, '');
     }
@@ -191,10 +190,10 @@ class Signature extends Component {
 
   async downloadFile() {
     try {
-      this.setState({loadingMessage: 'Téléchargement du document...'});
+      this.setState({ loadingMessage: 'Téléchargement du document...' });
       const updateProgress = (downloadProgress) => {
         const loadingMessage = `Téléchargement en cours... ${downloadProgress.toString()}%`;
-        this.setState({loadingMessage});
+        this.setState({ loadingMessage });
       };
       await downloadFile(this.fileName, this.sourceUrl, false, updateProgress);
     } catch (e) {
@@ -208,7 +207,7 @@ class Signature extends Component {
         fileDownloaded: true,
         loadingMessage: 'Initialisation du document...',
       });
-      const {pdfBase64, pdfArrayBuffer} = await readFile(this.originalFilePath);
+      const { pdfBase64, pdfArrayBuffer } = await readFile(this.originalFilePath);
       this.setState({
         pdfBase64,
         pdfArrayBuffer,
@@ -221,8 +220,8 @@ class Signature extends Component {
 
   //2. Show/hide terms
   toggleTerms() {
-    const {showTerms} = this.state;
-    this.setState({showTerms: !showTerms});
+    const { showTerms } = this.state;
+    this.setState({ showTerms: !showTerms });
   }
 
   //3. OTP verification + Email send
@@ -232,7 +231,7 @@ class Signature extends Component {
         showTerms: false,
         showDialog: true,
       });
-      const {timeLeft} = this.state;
+      const { timeLeft } = this.state;
       if (timeLeft > 0 && timeLeft < 60) return;
       this.setState({
         timeLeft: 60,
@@ -252,7 +251,7 @@ class Signature extends Component {
         'e',
         "Erreur lors de l'envoie du code, veuillez réessayer...",
       );
-      this.setState({showDialog: false});
+      this.setState({ showDialog: false });
     }
   }
 
@@ -265,9 +264,9 @@ class Signature extends Component {
         .doc(firebase.auth().currentUser.uid)
         .get(); //#task: not needed when using SMS RETRIEVER
       const phoneNumber = user.data().phone;
-      this.setState({phoneNumber});
+      this.setState({ phoneNumber });
       const sendCode = functions.httpsCallable('sendCode');
-      const resp = await sendCode({phoneNumber: phoneNumber});
+      const resp = await sendCode({ phoneNumber: phoneNumber });
       if (resp.data.status !== 'pending') throw new Error(errorMessage);
     } catch (e) {
       throw new Error(errorMessage);
@@ -275,28 +274,28 @@ class Signature extends Component {
   }
 
   async verifyCode() {
-    this.setState({status: true, statusMessage: 'Vérification du code...'});
-    const {phoneNumber} = this.state;
+    this.setState({ status: true, statusMessage: 'Vérification du code...' });
+    const { phoneNumber } = this.state;
     const verifyCode = functions.httpsCallable('verifyCode');
     const resp = await verifyCode({
       phoneNumber: phoneNumber,
       code: this.state.code,
     });
     if (resp.data.status === 'pending') {
-      this.setState({status: false, statusMessage: ''});
+      this.setState({ status: false, statusMessage: '' });
       Alert.alert(
         '',
         'Le code que vous avez saisi est incorrecte.',
-        [{text: 'OK', style: 'cancel'}],
-        {cancelable: false},
+        [{ text: 'OK', style: 'cancel' }],
+        { cancelable: false },
       );
       return;
     } else if (resp.data.error) {
       Alert.alert(
         '',
         'Erreur inattendue lors de la vérification du code',
-        [{text: 'OK', style: 'cancel'}],
-        {cancelable: false},
+        [{ text: 'OK', style: 'cancel' }],
+        { cancelable: false },
       );
       return;
     }
@@ -312,10 +311,10 @@ class Signature extends Component {
         0,
       );
       setTimeout(
-        () => this.setState({approvalMessage: 'Signature autorisée...'}),
+        () => this.setState({ approvalMessage: 'Signature autorisée...' }),
         2000,
       );
-      setTimeout(() => this.setState({showDialog: false}), 4000);
+      setTimeout(() => this.setState({ showDialog: false }), 4000);
       setTimeout(() => this.startSignature(), 4200);
     }
   }
@@ -333,15 +332,15 @@ class Signature extends Component {
 
   tick() {
     this.countDown = setInterval(() => {
-      let {timeLeft} = this.state;
+      let { timeLeft } = this.state;
       if (timeLeft === 1) clearInterval(this.countDown);
       timeLeft -= 1;
-      this.setState({timeLeft});
+      this.setState({ timeLeft });
     }, 1000);
   }
 
   renderDialog = () => {
-    let {code, showDialog, codeApproved, status, timeLeft} = this.state;
+    let { code, showDialog, codeApproved, status, timeLeft } = this.state;
     let disableResend = timeLeft > 0;
 
     if (status || codeApproved)
@@ -350,13 +349,13 @@ class Signature extends Component {
           <Dialog.Container visible={this.state.showDialog}>
             {status && (
               <Dialog.Title
-                style={[theme.customFontMSsemibold.header, {marginBottom: 5}]}>
+                style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>
                 {this.state.statusMessage}
               </Dialog.Title>
             )}
             {codeApproved && (
               <Dialog.Title
-                style={[theme.customFontMSsemibold.header, {marginBottom: 5}]}>
+                style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>
                 {this.state.approvalMessage}
               </Dialog.Title>
             )}
@@ -369,7 +368,7 @@ class Signature extends Component {
         <View style={styles.dialogContainer}>
           <Dialog.Container visible={this.state.showDialog}>
             <Dialog.Title
-              style={[theme.customFontMSsemibold.header, {marginBottom: 5}]}>
+              style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>
               Veuillez saisir le code de sécurité que nous vous avons transmis
               via SMS au +33*******{this.state.phoneNumber.slice(-2)}
             </Dialog.Title>
@@ -377,7 +376,7 @@ class Signature extends Component {
               label="Code de confirmation"
               returnKeyType="done"
               value={this.state.code}
-              onChangeText={(code) => this.setState({code: Number(code)})}
+              onChangeText={(code) => this.setState({ code: Number(code) })}
               // autoFocus={showDialog}
               autoFocus={false}
             />
@@ -403,20 +402,20 @@ class Signature extends Component {
                   Renvoyer le code
                 </Text>
               </TouchableOpacity>
-              <Text style={{color: theme.colors.placeholder}}>
+              <Text style={{ color: theme.colors.placeholder }}>
                 00:{timeLeft < 10 && 0}
                 {timeLeft}
               </Text>
             </View>
             <Dialog.Button
               label="Annuler"
-              onPress={() => this.setState({showDialog: false})}
-              style={{color: theme.colors.error}}
+              onPress={() => this.setState({ showDialog: false })}
+              style={{ color: theme.colors.error }}
             />
             <Dialog.Button
               label="Valider"
               onPress={async () => await this.verifyCode()}
-              style={{color: theme.colors.primary}}
+              style={{ color: theme.colors.primary }}
             />
           </Dialog.Container>
         </View>
@@ -437,7 +436,7 @@ class Signature extends Component {
     const screenWidth = constants.ScreenWidth;
     const screenHeight = constants.ScreenHeight;
     const pages = pdfDoc.getPages();
-    const nthPage = pages[n-1];
+    const nthPage = pages[n - 1];
     const ratio = nthPage.getHeight() / nthPage.getWidth();
     const pageWidth = screenWidth;
     const pageHeight = pageWidth * ratio;
@@ -451,7 +450,7 @@ class Signature extends Component {
     console.log(`x: ${x}`);
     console.log(`y: ${y}`);
 
-    const {pdfEditMode} = this.state;
+    const { pdfEditMode } = this.state;
     if (!pdfEditMode) return;
     loadLog(this, true, 'Début du processus de signature...');
 
@@ -473,21 +472,24 @@ class Signature extends Component {
         const motif = 'Acceptation des conditions';
         const signedAt = moment().format('Do/MM/YYYY, HH:mm');
         const signature = `Signé électroniquement par: ${signee} \n Référence: ${ref} \n Date ${signedAt} \n Motif: ${motif}`;
-        this.setState({signee, signedAt, ref, motif});
+        this.setState({ signee, signedAt, ref, motif });
 
         if (isAuto) {
           for (const s of signatures) {
-            const {pageIndex, position} = s;
-            var paddingTop = this.calculatePaddingTop(pdfDoc, pageIndex);
-            const {x, y} = position;
-            if (pageIndex < pages.length)
+            const { pageIndex, position } = s;
+            const pageNumber = pageIndex + 1
+            var paddingTop = this.calculatePaddingTop(pdfDoc, pageNumber);
+            const { x, y, size: customSize } = position;
+
+            if (pageIndex < pages.length) {
               pages[pageIndex].drawText(signature, {
                 x,
                 y,
-                size: 10,
+                size: customSize || 10,
                 lineHeight: 10,
                 color: rgb(0, 0, 0),
               });
+            }
           }
         } else {
           var paddingTop = this.calculatePaddingTop(pdfDoc, page);
@@ -507,13 +509,13 @@ class Signature extends Component {
           });
         }
 
-        this.setState({loadingMessage: 'Génération du document signé...'});
+        this.setState({ loadingMessage: 'Génération du document signé...' });
         const pdfBytes = await pdfDoc.save();
         const pdfBase64 = uint8ToBase64(pdfBytes);
         const filePath = `${downloadDir}/Synergys/Documents/Scan signé ${moment().format(
           'DD-MM-YYYY HHmmss',
         )}.pdf`;
-        this.setState({loadingMessage: 'Enregistrement du document signé...'});
+        this.setState({ loadingMessage: 'Enregistrement du document signé...' });
         RNFS.writeFile(filePath, pdfBase64, 'base64')
           .then((success) =>
             this.setState({
@@ -530,7 +532,7 @@ class Signature extends Component {
           .finally(() => loadLog(this, false, ''));
       } catch (e) {
         console.log('error...', e);
-        displayError({message: errorMessages.pdfGen});
+        displayError({ message: errorMessages.pdfGen });
       }
     }, 1000);
   };
@@ -553,7 +555,7 @@ class Signature extends Component {
       //start signature
       this.startSignature();
     } catch (e) {
-      displayError({message: 'Erreur inattendue. Veuillez réessayer.'});
+      displayError({ message: 'Erreur inattendue. Veuillez réessayer.' });
     }
   }
 
@@ -570,7 +572,7 @@ class Signature extends Component {
       const device = await DeviceInfo.getDevice();
       const device_id = await DeviceInfo.getDeviceId();
 
-      const {signedAttachment, phoneNumber, ref, motif} = this.state;
+      const { signedAttachment, phoneNumber, ref, motif } = this.state;
 
       //store max of data (Audit) about the signee
       const document = {
@@ -616,7 +618,7 @@ class Signature extends Component {
       await db
         .collection('Documents')
         .doc(this.DocumentId)
-        .set(document, {merge: true});
+        .set(document, { merge: true });
       await db
         .collection('Documents')
         .doc(this.DocumentId)
@@ -632,13 +634,13 @@ class Signature extends Component {
         "Erreur lors de l'importation du document signé, veuillez réessayer.",
       );
     } finally {
-      this.setState({uploading: false});
+      this.setState({ uploading: false });
     }
   }
 
   async uploadSignedFile() {
     try {
-      this.setState({uploading: true});
+      this.setState({ uploading: true });
       const stats = await RNFetchBlob.fs.stat(this.state.newPdfPath);
       let signedAttachment = {
         path: this.state.newPdfPath,
@@ -648,15 +650,14 @@ class Signature extends Component {
         progress: 0,
         ref: 'signedAttachment',
       };
-      this.setState({signedAttachment});
+      this.setState({ signedAttachment });
       const metadata = {
         signedAt: moment().format(),
         signedBy: this.currentUser.uid,
         phoneNumber: this.state.phoneNumber,
       };
-      const storageRefPath = `Projects/${this.ProjectId}/Documents/${
-        this.DocumentType
-      }/${this.DocumentId}/${moment().format('ll')}/${signedAttachment.name}`;
+      const storageRefPath = `Projects/${this.ProjectId}/Documents/${this.DocumentType
+        }/${this.DocumentId}/${moment().format('ll')}/${signedAttachment.name}`;
       const response = await this.uploadFile(
         signedAttachment,
         storageRefPath,
@@ -665,7 +666,7 @@ class Signature extends Component {
       );
       return response;
     } catch (e) {
-      this.setState({uploading: false});
+      this.setState({ uploading: false });
       throw new Error("Erreur lors de l'importation du document.");
     }
   }
@@ -686,7 +687,7 @@ class Signature extends Component {
           marginTop: 15,
           ...theme.style.shadow,
         }}>
-        <View style={{flex: 0.9, flexDirection: 'row', alignItems: 'center'}}>
+        <View style={{ flex: 0.9, flexDirection: 'row', alignItems: 'center' }}>
           <View
             style={{
               flex: 0.17,
@@ -699,7 +700,7 @@ class Signature extends Component {
               color={theme.colors.primary}
             />
           </View>
-          <View style={{flex: 0.68}}>
+          <View style={{ flex: 0.68 }}>
             <Text
               numberOfLines={1}
               ellipsizeMode="middle"
@@ -709,16 +710,16 @@ class Signature extends Component {
             <Text
               style={[
                 theme.customFontMSmedium.caption,
-                {color: theme.colors.placeholder},
+                { color: theme.colors.placeholder },
               ]}>
               {readableSize} KB
             </Text>
           </View>
           <View
-            style={{flex: 0.15, justifyContent: 'center', alignItems: 'center'}}
+            style={{ flex: 0.15, justifyContent: 'center', alignItems: 'center' }}
           />
         </View>
-        <View style={{flex: 0.1, justifyContent: 'flex-end'}}>
+        <View style={{ flex: 0.1, justifyContent: 'flex-end' }}>
           <ProgressBar
             progress={attachment.progress}
             color={theme.colors.primary}
@@ -730,7 +731,7 @@ class Signature extends Component {
   }
 
   handleBackButtonClick() {
-    const {newPdfSaved} = this.state;
+    const { newPdfSaved } = this.state;
 
     if (newPdfSaved) {
       try {
@@ -751,16 +752,16 @@ class Signature extends Component {
     const isAutoSign = autoSignDocs.includes(this.DocumentType); //#task: add isGenerated as condition + remove Devis & Facture
     const isGenerated = this.attachmentSource === 'generation';
 
+    console.log("isAutoSign", isAutoSign)
+    console.log("isGenerated", isGenerated)
     if (isGenerated && isAutoSign) {
       const config = docsConfig(0);
-      const {signatures} = config[this.DocumentType];
-
+      const { signatures } = config[this.DocumentType];
+      console.log("signatures", signatures)
       this.setState(
         {
           showTerms: false,
           pdfEditMode: true,
-          // toastType: 'info',
-          // toastMessage: "Touchez à l'endroit où vous voulez placer la signature."
         },
         () => this.handleSingleTap(null, null, null, true, signatures),
       );
@@ -769,7 +770,7 @@ class Signature extends Component {
   }
 
   renderPDF() {
-    const {filePath} = this.state;
+    const { filePath } = this.state;
 
     return (
       <View style={styles.pdfContainer}>
@@ -780,12 +781,12 @@ class Signature extends Component {
           spacing={0}
           fitPolicy={0}
           enablePaging={true}
-          source={{uri: filePath}}
+          source={{ uri: filePath }}
           usePDFKit={true}
-          onLoadComplete={(numberOfPages, filePath, {width, height}) => {
+          onLoadComplete={(numberOfPages, filePath, { width, height }) => {
             console.log('W', width);
             console.log('H', height);
-            this.setState({pageWidth: width, pageHeight: height});
+            this.setState({ pageWidth: width, pageHeight: height });
           }}
           onPageSingleTap={(page, x, y) => {
             this.handleSingleTap(page, x, y, false, []);
@@ -810,8 +811,8 @@ class Signature extends Component {
       toastType,
       toastMessage,
     } = this.state;
-    var {canUpdate} = this.props.permissions.documents;
-    const {isConnected} = this.props.network;
+    var { canUpdate } = this.props.permissions.documents;
+    const { isConnected } = this.props.network;
 
     if (uploading) {
       return (
@@ -849,7 +850,7 @@ class Signature extends Component {
                     <Text
                       style={[
                         theme.customFontMSsemibold.body,
-                        {color: theme.colors.gray_dark, marginLeft: 5},
+                        { color: theme.colors.gray_dark, marginLeft: 5 },
                       ]}>
                       RÉESSAYER
                     </Text>
@@ -859,12 +860,12 @@ class Signature extends Component {
                     onPress={this.confirmSign}
                     style={[
                       styles.button1,
-                      {backgroundColor: theme.colors.primary},
+                      { backgroundColor: theme.colors.primary },
                     ]}>
                     <Text
                       style={[
                         theme.customFontMSsemibold.body,
-                        {color: '#fff', marginLeft: 5},
+                        { color: '#fff', marginLeft: 5 },
                       ]}>
                       VALIDER
                     </Text>
@@ -874,18 +875,18 @@ class Signature extends Component {
 
               {!newPdfSaved && fileDownloaded && isConnected && canUpdate && (
                 <TouchableOpacity
-                  onPress={() => this.setState({showTerms: true})}
+                  onPress={() => this.setState({ showTerms: true })}
                   style={styles.button2}>
                   <FontAwesome5
                     name="signature"
                     size={17}
                     color="#fff"
-                    style={{marginRight: 7}}
+                    style={{ marginRight: 7 }}
                   />
                   <Text
                     style={[
                       theme.customFontMSsemibold.header,
-                      {color: '#fff', marginLeft: 7, letterSpacing: 1},
+                      { color: '#fff', marginLeft: 7, letterSpacing: 1 },
                     ]}>
                     SIGNER
                   </Text>
@@ -912,8 +913,8 @@ class Signature extends Component {
             duration={3500}
             message={toastMessage}
             type={toastType}
-            onDismiss={() => this.setState({toastMessage: ''})}
-            containerStyle={{bottom: 0, zIndex: 10}}
+            onDismiss={() => this.setState({ toastMessage: '' })}
+            containerStyle={{ bottom: 0, zIndex: 10 }}
           />
         </View>
       );
