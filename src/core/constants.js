@@ -430,16 +430,16 @@ export const docsConfig = (index) => {
                         color: rgb(0, 0, 0),
                     }
                 },
-                {
-                    pageIndex: 2,
-                    position: {
-                        x: 375,
-                        y: 90,
-                        size: 7,
-                        lineHeight: 10,
-                        color: rgb(0, 0, 0),
-                    }
-                },
+                // {
+                //     pageIndex: 2,
+                //     position: {
+                //         x: 375,
+                //         y: 90,
+                //         size: 7,
+                //         lineHeight: 10,
+                //         color: rgb(0, 0, 0),
+                //     }
+                // },
             ],
             genNavigation: {
                 titleText: "Choix du formulaire",

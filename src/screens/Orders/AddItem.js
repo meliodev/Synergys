@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Platform,
   StyleSheet,
@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   Keyboard,
 } from 'react-native';
-import {Card, Title, FAB, ProgressBar, List} from 'react-native-paper';
+import { Card, Title, FAB, ProgressBar, List } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 
-import {db} from '../../firebase';
+import { db } from '../../firebase';
 import * as theme from '../../core/theme';
-import {constants, isTablet} from '../../core/constants';
+import { constants, isTablet } from '../../core/constants';
 
 import Appbar from '../../components/Appbar';
 import AutoCompleteProducts from '../../components/AutoCompleteProducts';
@@ -29,9 +29,9 @@ import {
   setToast,
   load,
 } from '../../core/utils';
-import {fetchDocs, fetchDocuments} from '../../api/firestore-api';
-import {faPlusCircle, faTimes} from '@fortawesome/pro-light-svg-icons';
-import {CustomIcon} from '../../components';
+import { fetchDocs, fetchDocuments } from '../../api/firestore-api';
+import { faPlusCircle, faTimes } from '@fortawesome/pro-light-svg-icons';
+import { CustomIcon } from '../../components';
 
 class AddItem extends Component {
   constructor(props) {
@@ -47,11 +47,11 @@ class AddItem extends Component {
     this.isEdit = this.orderLine ? true : false;
 
     this.state = {
-      item: {id: '', name: ''},
-      description: {value: '', error: ''},
-      quantity: {value: '', error: ''},
-      price: {value: '', error: ''},
-      taxe: {name: '', rate: '', value: ''},
+      item: { id: '', name: '' },
+      description: { value: '', error: '' },
+      quantity: { value: '', error: '' },
+      price: { value: '', error: '' },
+      taxe: { name: '', rate: '', value: '' },
 
       loading: false,
       tagsSelected: [],
@@ -61,13 +61,13 @@ class AddItem extends Component {
 
   async componentDidMount() {
     if (this.isEdit) {
-      let {description, quantity, price, taxe, tagsSelected} = this.state;
+      let { description, quantity, price, taxe, tagsSelected } = this.state;
       description.value = this.orderLine.description;
       quantity.value = this.orderLine.quantity;
       price.value = this.orderLine.price;
       taxe = this.orderLine.taxe;
       tagsSelected.push(this.orderLine.product);
-      this.setState({description, quantity, price, taxe, tagsSelected});
+      this.setState({ description, quantity, price, taxe, tagsSelected });
     }
 
     load(this, false);
@@ -84,11 +84,11 @@ class AddItem extends Component {
     const query = db.collection('Products');
     // this.fetchDocs(query, 'suggestions', '', () => { load(this, false) })
     const suggestions = await fetchDocuments(query);
-    this.setState({suggestions, loading: false});
+    this.setState({ suggestions, loading: false });
   }
 
   validateInputs() {
-    let {tagsSelected, tagsSelectedError, quantity, price} = this.state;
+    let { tagsSelected, tagsSelectedError, quantity, price } = this.state;
 
     let tagsError = arrayValidator(tagsSelected, `"Article"`);
     let quantityError = nameValidator(quantity.value, `"Quantité"`);
@@ -99,7 +99,7 @@ class AddItem extends Component {
       tagsSelectedError = tagsError;
       quantity.error = quantityError;
       price.error = priceError;
-      this.setState({tagsSelected, quantity, price, loading: false});
+      this.setState({ tagsSelected, quantity, price, loading: false });
       return false;
     }
 
@@ -117,7 +117,7 @@ class AddItem extends Component {
     if (!isValid) return;
 
     // 1. ADDING product to firestore
-    let {tagsSelected, description, quantity, price, taxe} = this.state;
+    let { tagsSelected, description, quantity, price, taxe } = this.state;
     const taxeValue = (taxe.rate / 100) * price.value * quantity.value;
     taxe.value = Number(taxeValue).toFixed(2);
     const product = tagsSelected[0];
@@ -128,24 +128,26 @@ class AddItem extends Component {
       quantity: Number(quantity.value),
       price: Number(price.value).toFixed(2),
       taxe,
-      priority: product.type === 'product' ? 0 : 1,
+      priority: product.type === 'produit' ? 0 : 1,
       category: product.category,
     };
+
+    console.log("priority......", product.type)
 
     this.props.navigation.state.params.onGoBack(orderLine, this.orderKey);
     this.props.navigation.goBack();
   }
 
   handleDelete() {
-    this.setState({tagsSelected: [], price: {value: '', error: ''}});
+    this.setState({ tagsSelected: [], price: { value: '', error: '' } });
   }
 
   refreshProduct(product) {
     this.setState({
       tagsSelected: [product],
-      price: {value: product.price, error: ''},
-      quantity: {value: '1', error: ''},
-      taxe: {name: product.taxe, rate: Number(product.taxe), value: ''},
+      price: { value: product.price, error: '' },
+      quantity: { value: '1', error: '' },
+      taxe: { name: product.taxe, rate: Number(product.taxe), value: '' },
     });
   }
 
@@ -167,7 +169,7 @@ class AddItem extends Component {
       loading,
     } = this.state;
     const noItemSelected = tagsSelected.length === 0;
-    const {isConnected} = this.props.network;
+    const { isConnected } = this.props.network;
     const isAdmin = this.props.role.id === 'admin';
     const iconSize = isTablet ? 32 : 21;
 
@@ -181,17 +183,17 @@ class AddItem extends Component {
           handleSubmit={this.handleSubmit}
         />
 
-        <View style={{padding: theme.padding}}>
+        <View style={{ padding: theme.padding }}>
           <Text
             style={[
               theme.customFontMSsemibold.caption,
-              {color: theme.colors.primary},
+              { color: theme.colors.primary },
             ]}>
             Article
           </Text>
           <View
-            style={{flexDirection: 'row', alignItems: 'flex-start', zIndex: 2}}>
-            <View style={{flex: 0.9}}>
+            style={{ flexDirection: 'row', alignItems: 'flex-start', zIndex: 2 }}>
+            <View style={{ flex: 0.9 }}>
               <AutoCompleteProducts
                 placeholder="Écrivez pour choisir un article"
                 suggestions={suggestions}
@@ -220,7 +222,7 @@ class AddItem extends Component {
               )
             ) : (
               <TouchableOpacity
-                style={[styles.plusIcon, {paddingTop: 0}]}
+                style={[styles.plusIcon, { paddingTop: 0 }]}
                 onPress={this.handleDelete}>
                 <CustomIcon
                   icon={faTimes}
@@ -241,8 +243,8 @@ class AddItem extends Component {
             multiline={true}
           />
 
-          <View style={{flexDirection: 'row'}}>
-            <View style={{flex: 0.5, paddingRight: 15}}>
+          <View style={{ flexDirection: 'row' }}>
+            <View style={{ flex: 0.5, paddingRight: 15 }}>
               <MyInput
                 label="Quantité"
                 returnKeyType="done"
@@ -254,7 +256,7 @@ class AddItem extends Component {
               />
             </View>
 
-            <View style={{flex: 0.5, paddingLeft: 15}}>
+            <View style={{ flex: 0.5, paddingLeft: 15 }}>
               <MyInput
                 label="Prix unitaire HT"
                 returnKeyType="done"
@@ -275,10 +277,10 @@ class AddItem extends Component {
               keyboardType="numeric"
               value={taxe.name.toString()}
               onChangeText={(rate) => {
-                let {taxe} = this.state;
+                let { taxe } = this.state;
                 taxe.name = rate;
                 taxe.rate = Number(rate);
-                this.setState({taxe});
+                this.setState({ taxe });
               }}
               editable={isAdmin}
             />

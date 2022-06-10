@@ -804,10 +804,13 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
           let positions = []
           let text = ""
 
+          console.log("id", field.id)
+
           if (pdfConfig && pdfConfig.skip)
             console.log('Skip drawing pdf...')
 
           else switch (type) {
+
             case "textInput":
 
               if (pdfConfig) {

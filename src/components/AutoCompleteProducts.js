@@ -127,7 +127,6 @@ class AutoCompleteProducts extends React.Component {
                 style={styles.autotags}
                 autoFocus={false}
                 //autoFocus={this.props.autoFocus}
-                showTextInput={this.props.showInput}
                 suggestionsBellow={this.props.suggestionsBellow}
                 editable={this.props.editable}
                 createTagOnSpace={false}
@@ -137,7 +136,7 @@ class AutoCompleteProducts extends React.Component {
                 listContainerStyle={styles.listContainerStyle}
                 listStyle={styles.listStyle}
 
-                showTextInput={this.props.showTextInput}
+                showInput={this.props.showTextInput}
             // renderTextInput={() => {
             //     return (
             //         <TextInput style={[theme.customFontMSregular.body, { color: theme.colors.secondary }]} {...this.props} />
@@ -157,7 +156,7 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
         alignItems: 'center',
         paddingTop: 10,
-        width: ScreenWidth*0.9
+        width: ScreenWidth * 0.9
     },
     customTag: {
         flexDirection: 'row',
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 18,
         paddingVertical: 10,
-       // backgroundColor: 'pink',
+        // backgroundColor: 'pink',
         borderBottomWidth: StyleSheet.hairlineWidth * 0.5,
         borderBottomColor: theme.colors.gray2,
     },
@@ -189,7 +188,7 @@ const styles = StyleSheet.create({
         marginLeft: -constants.ScreenWidth * 0.02,
         paddingTop: 5,
         paddingBottom: 15,
-        width: constants.ScreenWidth - theme.padding*2,
+        width: constants.ScreenWidth - theme.padding * 2,
         borderBottomWidth: StyleSheet.hairlineWidth * 3,
         borderBottomColor: theme.colors.gray_extraLight
     },

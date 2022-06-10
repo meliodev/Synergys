@@ -129,7 +129,7 @@ class AutoCompleteBrands extends React.Component {
                     style={styles.autotags}
                     // autoFocus={this.props.autoFocus}
                     autoFocus={false}
-                    showTextInput={this.props.showInput}
+                    showInput={this.props.showInput}
                     suggestionsBellow={this.props.suggestionsBellow}
                     editable={this.props.editable}
                     createTagOnSpace={false}

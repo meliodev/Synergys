@@ -95,50 +95,50 @@ export const pvReceptionModel = (params) => {
                     value: moment().format('DD/MM/YYYY'),
                     pdfConfig: { dx: -295, dy: - 547, pageIndex: 0 }
                 },
-                {
-                    id: "appreciationDate",
-                    type: "autogen",
-                    value: moment().format('DD/MM/YYYY'),
-                    pdfConfig: { dx: -500, dy: -747, pageIndex: 1 },
-                },
-                {
-                    id: "dayNow",
-                    type: "autogen",
-                    value: moment().format('DD'),
-                    pdfConfig: {
-                        dx: -182, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
-                        mendatory: true,
-                    }
-                },
-                {
-                    id: "monthNow",
-                    type: "autogen",
-                    value: moment().format('MM'),
-                    pdfConfig: {
-                        dx: -148, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
-                        mendatory: true,
-                    }
-                },
-                {
-                    id: "yearNow",
-                    type: "autogen",
-                    value: moment().format('YYYY'),
-                    pdfConfig: {
-                        dx: -115, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
-                        mendatory: true,
-                    }
-                },
-                {
-                    id: "pvId",
-                    type: "autogen",
-                    value: pvId,
-                    pdfConfig: {
-                        dx: -489,
-                        dy: -188,
-                        pageIndex: 1,
-                        mendatory: true,
-                    }
-                },
+                // {
+                //     id: "appreciationDate",
+                //     type: "autogen",
+                //     value: moment().format('DD/MM/YYYY'),
+                //     pdfConfig: { dx: -500, dy: -747, pageIndex: 1 },
+                // },
+                // {
+                //     id: "dayNow",
+                //     type: "autogen",
+                //     value: moment().format('DD'),
+                //     pdfConfig: {
+                //         dx: -182, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
+                //         mendatory: true,
+                //     }
+                // },
+                // {
+                //     id: "monthNow",
+                //     type: "autogen",
+                //     value: moment().format('MM'),
+                //     pdfConfig: {
+                //         dx: -148, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
+                //         mendatory: true,
+                //     }
+                // },
+                // {
+                //     id: "yearNow",
+                //     type: "autogen",
+                //     value: moment().format('YYYY'),
+                //     pdfConfig: {
+                //         dx: -115, dy: - 313, pageIndex: 1, spaces: { afterEach: 1, str: '   ' },
+                //         mendatory: true,
+                //     }
+                // },
+                // {
+                //     id: "pvId",
+                //     type: "autogen",
+                //     value: pvId,
+                //     pdfConfig: {
+                //         dx: -489,
+                //         dy: -188,
+                //         pageIndex: 1,
+                //         mendatory: true,
+                //     }
+                // },
             ]
         },
         {//5
@@ -230,51 +230,51 @@ export const pvReceptionModel = (params) => {
             ],
         },
         //----------------------- PAGE2
-        {//1
-            id: "clientName",
-            title: "Coordonnées du chantier",
-            fields: [
-                {
-                    id: "clientName",
-                    type: "textInput",
-                    label: "Nom et prénom du client",
-                    errorId: "clientNameError",
-                    pdfConfig: { dx: -430, dy: - 239, pageIndex: 1 },
-                    mendatory: true,
-                },
-            ],
-        },
-        {//2
-            id: "installationAddress",
-            title: "Coordonnées du chantier",
-            fields: [
-                {
-                    id: "installationAddress",
-                    type: "address",
-                    label: "Adresse complète de l'installation",
-                    errorId: "installationAddressError",
-                    pdfConfig: { dx: -393, dy: - 262, pageIndex: 1 },
-                    mendatory: true,
-                }
-            ]
-        },
-        {//3
-            id: "clientPhone",
-            title: "Coordonnées du chantier",
-            fields: [
-                {
-                    id: "phone",
-                    type: "textInput",
-                    mask: "[00][00][00][00][00]",
-                    isNumeric: true,
-                    label: "Téléphone du client",
-                    errorId: "phoneError",
-                    mendatory: true,
-                    pdfConfig: { dx: -453, dy: - 314, pageIndex: 1 }, //task: make spacing pattern to be more dynamic
-                    mendatory: true,
-                },
-            ]
-        },
+        // {//1
+        //     id: "clientName",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "clientName",
+        //             type: "textInput",
+        //             label: "Nom et prénom du client",
+        //             errorId: "clientNameError",
+        //             pdfConfig: { dx: -430, dy: - 239, pageIndex: 1 },
+        //             mendatory: true,
+        //         },
+        //     ],
+        // },
+        // {//2
+        //     id: "installationAddress",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "installationAddress",
+        //             type: "address",
+        //             label: "Adresse complète de l'installation",
+        //             errorId: "installationAddressError",
+        //             pdfConfig: { dx: -393, dy: - 262, pageIndex: 1 },
+        //             mendatory: true,
+        //         }
+        //     ]
+        // },
+        // {//3
+        //     id: "clientPhone",
+        //     title: "Coordonnées du chantier",
+        //     fields: [
+        //         {
+        //             id: "phone",
+        //             type: "textInput",
+        //             mask: "[00][00][00][00][00]",
+        //             isNumeric: true,
+        //             label: "Téléphone du client",
+        //             errorId: "phoneError",
+        //             mendatory: true,
+        //             pdfConfig: { dx: -453, dy: - 314, pageIndex: 1 }, //task: make spacing pattern to be more dynamic
+        //             mendatory: true,
+        //         },
+        //     ]
+        // },
         // //********************************* INSTALLATIONS
         // { //Inst1
         //     id: "installations",
@@ -712,45 +712,45 @@ export const pvReceptionModel = (params) => {
         //         },
         //     ]
         // },
-        { //5
-            id: "appreciation",
-            title: "Appréciation de la prestation",
-            fields: [
-                {
-                    id: "appreciation",
-                    label: "Qualité globale de la prestation",
-                    type: "options",
-                    items: [
-                        {
-                            label: 'Très satisfaisante',
-                            value: 'Très satisfaisante',
-                            icon: faCheckCircle,
-                            pdfConfig: { dx: -340, dy: - 723, pageIndex: 1, squareSize: 10 },
-                        },
-                        {
-                            label: 'Satisfaisante',
-                            value: 'Satisfaisante',
-                            icon: faCheckCircle,
-                            pdfConfig: { dx: -257, dy: - 723, pageIndex: 1, squareSize: 12 },
-                        },
-                        {
-                            label: 'Peu satisfaisante',
-                            value: 'Peu satisfaisante',
-                            icon: faCheckCircle,
-                            pdfConfig: { dx: -176, dy: - 723, pageIndex: 1, squareSize: 12 },
-                        },
-                        {
-                            label: 'Insatisfaisante',
-                            value: 'Insatisfaisante',
-                            icon: faCheckCircle,
-                            pdfConfig: { dx: -94, dy: - 723, pageIndex: 1, squareSize: 12 },
-                        },
-                    ],
-                    mendatory: true,
-                },
-            ],
-            isLast: true
-        },
+        // { //5
+        //     id: "appreciation",
+        //     title: "Appréciation de la prestation",
+        //     fields: [
+        //         {
+        //             id: "appreciation",
+        //             label: "Qualité globale de la prestation",
+        //             type: "options",
+        //             items: [
+        //                 {
+        //                     label: 'Très satisfaisante',
+        //                     value: 'Très satisfaisante',
+        //                     icon: faCheckCircle,
+        //                     pdfConfig: { dx: -340, dy: - 723, pageIndex: 1, squareSize: 10 },
+        //                 },
+        //                 {
+        //                     label: 'Satisfaisante',
+        //                     value: 'Satisfaisante',
+        //                     icon: faCheckCircle,
+        //                     pdfConfig: { dx: -257, dy: - 723, pageIndex: 1, squareSize: 12 },
+        //                 },
+        //                 {
+        //                     label: 'Peu satisfaisante',
+        //                     value: 'Peu satisfaisante',
+        //                     icon: faCheckCircle,
+        //                     pdfConfig: { dx: -176, dy: - 723, pageIndex: 1, squareSize: 12 },
+        //                 },
+        //                 {
+        //                     label: 'Insatisfaisante',
+        //                     value: 'Insatisfaisante',
+        //                     icon: faCheckCircle,
+        //                     pdfConfig: { dx: -94, dy: - 723, pageIndex: 1, squareSize: 12 },
+        //                 },
+        //             ],
+        //             mendatory: true,
+        //         },
+        //     ],
+        //     isLast: true
+        // },
     ]
 
     return { model, globalConfig }
