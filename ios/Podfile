@@ -18,6 +18,7 @@ target 'AsanaWorld' do
   pod 'GoogleMaps'  # Remove this line if you don't want to support GoogleMaps on iOS
   pod 'react-native-maps', path: '../node_modules/react-native-maps'
   pod 'react-native-google-maps', path: '../node_modules/react-native-maps'  # If you need GoogleMaps support on iOS
+  pod 'RNFBCrashlytics', :path => '../node_modules/@react-native-firebase/crashlytics'
 
   target 'AsanaWorldTests' do
     inherit! :complete

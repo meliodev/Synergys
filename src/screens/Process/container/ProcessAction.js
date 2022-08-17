@@ -260,8 +260,12 @@ class ProcessAction extends Component {
                 dialogDescription,
                 loadingModal: false,
                 showModal: false,
-                showDialog: true
-            }, () => resolve(true))
+            }, () => {
+                setTimeout(() => {
+                    this.setState({ showDialog: true })
+                    resolve(true)
+                }, 500)
+            })
         })
     }
 
@@ -358,9 +362,8 @@ class ProcessAction extends Component {
                 currentPhaseId,
                 currentStepId,
                 actions
-            } = params
+            } = params 
 
-            console.log("choice", choice)
             processTemp[currentPhaseId].steps[currentStepId].actions = checkForcedValidations(actions, choice)
 
             const { processModel } = this
@@ -413,7 +416,6 @@ class ProcessAction extends Component {
 
             // console.log("process before transition...", processTemp[currentPhaseId].steps[currentStepId].actions, "----------------")
 
-            console.log(choice, "========")
             const transitionParams = {
                 processTemp,
                 currentPhaseId,
@@ -680,8 +682,8 @@ class ProcessAction extends Component {
     }
 
     renderHeader() {
-        const { process, project } = this.state
-        const { canUpdate, role, navigation } = this.props
+        const { process } = this.state
+        const { canUpdate, role, navigation, project } = this.props
         return (
             <ActionHeader
                 process={process}
@@ -743,7 +745,7 @@ class ProcessAction extends Component {
     render() {
         const { isAllProcess } = this.props
         return (
-            <View>
+            <View style={isAllProcess ? { flex: 1 } : {}}>
                 {isAllProcess
                     ?
                     this.renderHistoryView()

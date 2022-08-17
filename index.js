@@ -2,7 +2,8 @@
  * @format
  */
 
-import { AppRegistry, Platform } from 'react-native';
+import React from "react"
+ import { AppRegistry, Platform, Text } from 'react-native';
 import App from './src/App';
 import { name as appName } from './app.json';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler'
@@ -22,5 +23,6 @@ async function onBackgroundMessageReceived(message) {
 }
 
 messaging().setBackgroundMessageHandler(onBackgroundMessageReceived)
+
 
 AppRegistry.registerComponent(Platform.OS === "ios" ? 'AsanaWorld' : appName, () => gestureHandlerRootHOC(App));

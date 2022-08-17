@@ -33,6 +33,7 @@ import {
   setToast,
   saveFile,
   displayError,
+  docType_LabelValueMap,
 } from '../../core/utils';
 import { sizes } from '../../core/theme';
 import * as theme from '../../core/theme';
@@ -115,14 +116,15 @@ export default class PdfGeneration extends Component {
     this.savePdfBase64 = this.savePdfBase64.bind(this);
     this.project = this.props.navigation.getParam('project', '');
     this.order = this.props.navigation.getParam('order', '');
-    this.docType = this.props.navigation.getParam('docType', ''); //Devis ou Facture (Proposal or Bill)
+    this.docType = this.props.navigation.getParam('docType', ''); //Offre précontractuelle ou Facture (Proposal or Bill)
+    this.isQuote = this.docType === 'Devis' || this.docType === 'Offre précontractuelle'
     this.DocumentId = this.props.navigation.getParam('DocumentId', '');
-    this.isConversion = this.props.navigation.getParam('isConversion', false); //Conversion from Devis to Facture
-    this.popCount = this.props.navigation.getParam('popCount', 1); //Conversion from Devis to Facture
+    this.isConversion = this.props.navigation.getParam('isConversion', false); //Conversion from Offre précontractuelle  to Facture
+    this.popCount = this.props.navigation.getParam('popCount', 1); //Conversion from Offre précontractuelle  to Facture
 
     const masculins = ['Devis', 'Bon de commande', 'Dossier CEE'];
     this.titleText = `Génération ${articles_fr(
-      'du',
+      "d'un",
       masculins,
       this.docType,
     )} ${this.docType}`;
@@ -135,9 +137,8 @@ export default class PdfGeneration extends Component {
   }
 
   componentDidMount() {
-    console.log('type....', this.docType);
-    const purchasDocs = ['Bon de commande', 'Devis', 'Facture'];
-    if (purchasDocs.includes(this.docType)) {
+    const purchaseDocs = ['Devis', "Offre précontractuelle", 'Facture'];
+    if (purchaseDocs.includes(this.docType)) {
       this.generatePurchaseDoc();
     }
   }
@@ -254,7 +255,7 @@ export default class PdfGeneration extends Component {
 
       //#dynamic #LL
       //3. HeaderRight: Pdf Title
-      const title = `${this.docType} n° ${this.DocumentId} du ${createdAt}`;
+      const title = `${this.docType} n° ${this.DocumentId}`;
       const titleHeight = timesRomanBoldFont.heightAtSize(body);
 
       pages[pageIndex].drawText(title, {
@@ -655,7 +656,7 @@ export default class PdfGeneration extends Component {
 
       //2. Draw pricing
       //2.1 Draw title
-      pages[pageIndex].drawText('Devis (EUR)', {
+      pages[pageIndex].drawText('Offre précontractuelle (EUR)', {
         x: headerRigth_x_start + padding,
         y: height - marginTop + padding / 2,
         size: caption,
@@ -832,13 +833,13 @@ export default class PdfGeneration extends Component {
         marginTop = 35;
       }
 
-      if (this.docType === 'Devis') {
+      if (this.isQuote) {
         //Draw Proposal expiry date
         const proposalExpiryDate = moment()
           .add(6, 'months')
           .format('DD/MM/YYYY');
         pages[pageIndex].drawText(
-          `Validité du devis:     ${proposalExpiryDate}`,
+          `Validité de l'offre précontractuelle:     ${proposalExpiryDate}`,
           {
             x: marginLeft,
             y: height - marginTop,
@@ -1175,7 +1176,7 @@ export default class PdfGeneration extends Component {
 
         marginTop += padding * 1.5;
 
-        pages[pageIndex].drawText(`Devis n° ${this.DocumentId}`, {
+        pages[pageIndex].drawText(`Offre précontractuelle: n° ${this.DocumentId}`, {
           x: marginRight + p2 * 2,
           y: height - marginTop,
           size: caption,
@@ -1187,7 +1188,7 @@ export default class PdfGeneration extends Component {
         marginTop += p2;
 
         pages[pageIndex].drawText(
-          'Signature précédée de la mention "devis accepté le".',
+          'Signature précédée de la mention "offre précontractuelle: accepté le".',
           {
             x: marginRight + p2 * 2,
             y: height - marginTop,
@@ -1244,7 +1245,7 @@ export default class PdfGeneration extends Component {
       let pdfBytes;
 
       //Merge "Devis" with "Conditions générales"
-      if (this.docType === 'Devis') {
+      if (this.isQuote) {
         const mergedPdf = await PDFDocument.create();
         const termsPdf = await PDFDocument.load(termsBase64);
         const copiedPagesA = await mergedPdf.copyPages(

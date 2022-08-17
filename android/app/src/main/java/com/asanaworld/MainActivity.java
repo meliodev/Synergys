@@ -1,4 +1,4 @@
-package com.synergys;
+package fr.groupe.synergys;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

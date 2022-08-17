@@ -255,13 +255,13 @@ export const articles_fr = (masc, masculins, target) => {
 
   let resp
   if (masc === 'du') {
-    resp = masculins.includes(target) ? 'du' : 'de la'
+    resp = masculins.includes(target) ? 'du' : "d'une"
   }
   else if (masc === 'un') {
     resp = masculins.includes(target) ? "un" : "une"
   }
   else if (masc === "d'un") {
-    resp = masculins.includes(target) ? "d'un" : "une"
+    resp = masculins.includes(target) ? "d'un" : "d'une"
   }
   else if (masc === 'le') {
     resp = masculins.includes(target) ? 'le' : 'la'
@@ -484,7 +484,10 @@ export const downloadFile = async (fileName, url, open = true, updateProgress) =
           updateProgress(downloadProgress)
         }
       })
-      .then(() => { FileViewer.open(path, { showOpenWithDialog: true }) })
+      .then(() => { 
+       // FileViewer.open(path, { showOpenWithDialog: true })
+       console.log("Opening ??")
+       })
       .catch((e) => { throw new Error(e) })
   }
 
@@ -763,7 +766,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
     else if (pdfType === "MandatsMPR") {
       var originalPdfBase64 = mandatMPRBase64
-      var formPages = mandatMPRModel
+      var formPages = mandatMPRModel 
     }
     else if (pdfType === "MandatsSynergys") {
       var originalPdfBase64 = mandatSynergysBase64
@@ -1057,8 +1060,6 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
 
     let errorMessage = null
 
-    console.log("12345")
-
     if (response.didCancel) {
       resolve(previousAttachments)
     }
@@ -1179,13 +1180,15 @@ const publicDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
   { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
   { label: 'Autre', value: 'Autre', icon: faFile },
-]
+] 
 
 export const privateDocTypes = [
-  { label: 'Devis', value: 'Devis', icon: faFileInvoice },
+  //{ label: 'Devis', value: 'Devis', icon: faFileInvoice },
+  { label: 'Offre précontractuelle', value: 'Offre précontractuelle', icon: faFileInvoice },
   { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
   { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
   { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
+  { label: 'Dossier de cheminement', value: 'Dossier de cheminement', icon: faFileAlt },
   { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
   // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
   { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
@@ -1202,12 +1205,14 @@ export const privateDocTypes = [
   { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
 ]
 
-const allDocTypes = [
+export const allDocTypes = [
   { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
-  { label: 'Devis', value: 'Devis', icon: faFileInvoice },
+  //{ label: 'Devis', value: 'Devis', icon: faFileInvoice },
+  { label: 'Offre précontractuelle', value: 'Offre précontractuelle', icon: faFileInvoice },
   { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
   { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
   { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
+  { label: 'Dossier de cheminement', value: 'Dossier de cheminement', icon: faFileAlt },
   { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
   // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
   { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
@@ -1226,6 +1231,9 @@ const allDocTypes = [
   { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
   { label: 'Autre', value: 'Autre', icon: faFile },
 ]
+
+export const docType_LabelValueMap = (value) => allDocTypes.filter((type) => type.value === value)[0].label
+
 
 let publicTaskTypes = [
   { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
@@ -1251,6 +1259,9 @@ let alltaskTypes = [
   { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static
   { label: 'Présentation étude', value: 'Présentation étude', natures: ['com'] }, //restriction: user can not create rdn manually (only during the process and only DC can posptpone it during the process)
 ]
+
+export const taskType_LabelValueMap = (value) => alltaskTypes.filter((type) => type.value === value)[0].label
+
 
 export const getTaskNatures = (taskLabel) => {
   const task = alltaskTypes.find((task) => task.label === taskLabel)

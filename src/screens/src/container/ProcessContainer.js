@@ -38,11 +38,11 @@ class ProcessContainer extends Component {
 
         <View style={{ flex: 1, marginTop: theme.padding }}>
           <ScrollView >
-            {stepsData.length > 0 && stepsData[currentPage].map((item, index) => {
+            {stepsData.length > 0 && stepsData[currentPage].reverse().map((item, index) => {
 
-              const isLastPhase = currentPage === stepsData.length - 1
-              const isLastStep = index === stepsData[currentPage].length - 1
-              const isLastStepOfLastPhase = isLastPhase && isLastStep
+              // const isLastPhase = currentPage === stepsData.length - 1
+              // const isLastStep = index === stepsData[currentPage].length - 1
+              // const isLastStepOfLastPhase = isLastPhase && isLastStep
               // const canUpdateStep = canUpdate && isLastStepOfLastPhase
 
               return (

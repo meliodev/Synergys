@@ -11,16 +11,21 @@ import CustomIcon from '../../../components/CustomIcon'
 import { isTablet } from '../../../core/constants'
 
 import * as theme from "../../../core/theme"
-import { Header} from "../../../components/typography/Typography"
+import { Header } from "../../../components/typography/Typography"
 import { faEye } from "@fortawesome/pro-solid-svg-icons"
 
 
 class ActionHeader extends Component {
 
+    constructor(props) {
+        super(props)
+        this.navigateToProcessHistory = this.navigateToProcessHistory.bind(this)
+    }
+
     navigateToProcessHistory() {
         const { process, project, canUpdate, role } = this.props
-        const { clientId, step } = project
-        const navParams = { process, project, clientId, step, canUpdate, role }
+        const { client, step } = project
+        const navParams = { process, project, clientId: client.id, step, canUpdate, role }
         this.props.navigation.navigate('Progression', navParams)
     }
 

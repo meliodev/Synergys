@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Keyboard, Alert } from 'react-native';
-import { Card, Title, TextInput } from 'react-native-paper'
+import { TextInput } from 'react-native-paper'
 import DocumentPicker from 'react-native-document-picker';
-import { faTimes, faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, faPen, fal, faCamera, faImages, faInfoCircle, faSignature, faFileSignature, faTrumpet, } from '@fortawesome/pro-light-svg-icons'
+import { faTimes, faCloudUploadAlt, faMagic, faFilePlus, faFileSearch, faInfoCircle, faSignature, faFileSignature } from '@fortawesome/pro-light-svg-icons'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 
@@ -15,7 +15,6 @@ import Appbar from '../../components/Appbar'
 import FormSection from '../../components/FormSection'
 import SquarePlus from '../../components/SquarePlus'
 import MyInput from '../../components/TextInput'
-import Picker from "../../components/Picker"
 import ItemPicker from "../../components/ItemPicker"
 import Button from "../../components/Button"
 import ModalOptions from "../../components/ModalOptions"
@@ -24,22 +23,45 @@ import Toast from "../../components/Toast"
 import EmptyList from "../../components/EmptyList"
 import Loading from "../../components/Loading"
 import LoadDialog from "../../components/LoadDialog"
-
-import firebase, { db, auth } from '../../firebase'
-import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
-import { uploadFileNew } from "../../api/storage-api";
-import { generateId, navigateToScreen, myAlert, updateField, nameValidator, setToast, load, pickDoc, articles_fr, isEditOffline, setPickerDocTypes, refreshProject, pickImage, saveFile, convertImageToPdf, displayError, formatDocument, unformatDocument, formatSpaces } from "../../core/utils";
-import * as theme from "../../core/theme";
-import { constants, docsConfig, errorMessages, generableDocTypes, onlyImportableDocTypes, highRoles, imageSources, masculinsDocTypes, staffRoles } from "../../core/constants";
-import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import CustomIcon from '../../components/CustomIcon';
 
+import { db, auth } from '../../firebase'
+import { fetchDocument, fetchDocuments } from "../../api/firestore-api";
+import { uploadFileNew } from "../../api/storage-api";
+import {
+    generateId,
+    navigateToScreen,
+    myAlert,
+    nameValidator,
+    setToast,
+    pickDoc,
+    articles_fr,
+    isEditOffline,
+    setPickerDocTypes,
+    refreshProject,
+    pickImage,
+    saveFile,
+    convertImageToPdf,
+    displayError,
+    formatDocument,
+    unformatDocument
+} from "../../core/utils";
+import * as theme from "../../core/theme";
+
+import {
+    constants,
+    docsConfig,
+    errorMessages,
+    generableDocTypes,
+    onlyImportableDocTypes,
+    highRoles,
+    imageSources,
+    masculinsDocTypes,
+    staffRoles
+} from "../../core/constants";
+import { blockRoleUpdateOnPhase } from '../../core/privileges';
+
 //Pickers items
-const states = [
-    { label: 'A faire', value: 'A faire' },
-    { label: 'En cours', value: 'En cours' },
-    { label: 'Validé', value: 'Validé' },
-]
 
 const docSources = [
     { label: 'Importer', value: 'upload', icon: faCloudUploadAlt, selected: false },
@@ -267,7 +289,6 @@ class UploadDocument extends Component {
 
     async handleSubmit(isConversion, DocumentId) {
         Keyboard.dismiss()
-        console.log("123")
         //0. Reject offline updates
         const { isConnected } = this.props.network
         let isEditOffLine = isEditOffline(this.isEdit, isConnected)
@@ -292,7 +313,6 @@ class UploadDocument extends Component {
         //3. Validate
         const isValid = this.validateInputs()
         if (!isValid) return
-        console.log("456")
 
         //4. Persist
         const props = ["project", "name", "description", "type", "state", "attachment", "attachmentSource", "orderData"]
@@ -349,7 +369,7 @@ class UploadDocument extends Component {
         document.name = `${document.name} (Facture générée)`
         document.type = 'Facture'
         document.attachmentSource = 'conversion'
-        document.conversionSource = this.DocumentId //Id of the current "Devis"
+        document.conversionSource = this.DocumentId //Id of the current "OP"
         return document
     }
 
@@ -615,7 +635,7 @@ class UploadDocument extends Component {
             this.setState({ modalContent: 'imageSources' })
         else {
             const { type } = this.state
-            if (type === 'Facture' || type === 'Devis')
+            if (type === 'Facture' || type === 'Devis' || type === "Offre précontractuelle")
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })
@@ -732,9 +752,9 @@ class UploadDocument extends Component {
             DocumentId
         } = genPdf
 
-        //#todo: order is specific to devis/facture
-        //order: The order from which this "Devis" was generated
-        //isConversion: Conversion from Devis to Facture (boolean)
+        //#todo: order is specific to OP/facture
+        //order: The order from which this "OP" was generated
+        //isConversion: Conversion from OP to Facture (boolean)
         const attachment = {
             path,
             type: 'application/pdf',
@@ -820,7 +840,7 @@ class UploadDocument extends Component {
     setAllowedActions(canWrite) {
         const { type, orderData, attachment } = this.state
 
-        const isGeneratedQuote = type === 'Devis' && orderData !== null //orderData existing means Devis was generated
+        const isGeneratedQuote = (type === 'Devis' || type === "Offre précontractuelle") && orderData !== null //orderData existing means OP was generated
 
         const isAttachmentSelected = attachment !== null
         const noDownloadUrl = isAttachmentSelected && (attachment.downloadURL === "" || attachment.downloadURL === undefined)
@@ -887,8 +907,6 @@ class UploadDocument extends Component {
             modalLoading,
             project,
             name,
-            description,
-            state,
             attachment,
             type,
             signatures,
@@ -1081,7 +1099,6 @@ class UploadDocument extends Component {
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit) && !loading
         canDelete = canDelete && this.isEdit && !loading
 
-        console.log("type", this.isProcess)
         const titleText = loading ? 'Importation du document...' : (this.isProcess ? type : (this.isEdit ? 'Modifier le document' : 'Nouveau document'))
 
         if (initialLoading)

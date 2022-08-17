@@ -86,13 +86,13 @@ const buildQueryFilters = (config) => {
                     { filter: 'project.id', operation: '==', value: '' },
                     { filter: 'type', operation: '==', value: documentType },
                     { filter: 'deleted', operation: '==', value: false },
-                    { filter: 'attachmentSource', operation: '==', value: 'signature' },
                 ]
             else queryFilters = [
                 //NAVIGATION: Get id of the existing quote (to update signature)
                 { filter: 'project.id', operation: '==', value: '' },
                 { filter: 'type', operation: '==', value: documentType },
                 { filter: 'deleted', operation: '==', value: false },
+                { filter: 'attachmentSource', operation: '==', value: 'signature' }
             ]
         }
     }
@@ -226,215 +226,10 @@ export const version0 = {
         phaseOrder: 2,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
-            installationCreation: {
-                title: 'Plannification installation',
-                instructions: '', // Example: process.init.create-prospect.nom.title
-                stepOrder: 1,
-                actions: [
-                    {
-                        id: 'installationCreation',
-                        title: 'Créer une tâche de type installation',
-                        instructions: 'Créer une tâche de type installation',
-                        actionOrder: 1,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Installation",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Installation").create),
-                        status: 'pending',
-                        nextStep: 'installationChoice',
-                    },
-                ],
-            },
-            installationChoice: {
-                title: "Mise à jour du statut de l'installation",
-                instructions: '',
-                stepOrder: 2,
-                actions: [
-                    {
-                        id: 'installationChoice1',
-                        title: "Mettre à jour le statut de l'installation (1)",
-                        instructions: "Mettre à jour le statut de l'installation (1)",
-                        actionOrder: 1,
-                        responsable: 'Poseur',
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Installation",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Installation").create),
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'block',
-                                label: 'Bloquée',
-                                onSelectType: 'validation',
-                                commentRequired: true,
-                                operation: {
-                                    type: 'update',
-                                    field: 'status',
-                                    value: 'En attente',
-                                },
-                            },
-                            {
-                                id: 'confirm',
-                                label: 'Finalisée',
-                                nextStep: 'pvCreation',
-                                onSelectType: 'transition',
-                                operation: { type: 'update', field: 'status', value: 'Terminé' },
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {
-                        id: 'installationChoice2',
-                        title: "Mettre à jour le statut de l'installation (2)",
-                        instructions: "Mettre à jour le statut de l'installation (2)",
-                        actionOrder: 2,
-                        responsable: 'Poseur',
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Installation",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Installation").create),
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif            
-                        choices: [
-                            {
-                                label: 'Abandonnée',
-                                id: 'cancel',
-                                nextPhase: 'cancelProject',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                                operation: { type: 'update', field: 'status', value: 'Annulé' },
-                            },
-                            {
-                                label: 'En cours',
-                                id: 'confirm',
-                                onSelectType: 'actionRollBack',
-                                operation: { type: 'update', field: 'status', value: 'En cours' },
-                            },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                        forceValidation: true,
-                    },
-                ],
-            },
-            pvCreation: {
-                title: "Création d'un PV réception",
-                instructions: '',
-                stepOrder: 3,
-                actions: [
-                    {   //##new
-                        id: 'pvCreation',
-                        title: 'Créer un PV réception',
-                        instructions: 'Créer un PV réception',
-                        actionOrder: 1,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "PV réception",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("PV réception").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("PV réception").create.onCreate),
-                        status: 'pending',
-                        nextStep: 'reserve',
-                    },
-                ],
-            },
-            reserve: {
-                title: 'Réserve',
-                instructions: '',
-                stepOrder: 4,
-                actions: [
-                    {
-                        id: 'reserve',
-                        title: 'Êtes-vous satisfait de notre travail ?',
-                        instructions: '',
-                        actionOrder: 1,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        comment: '', //#task: comments are joined (separated by ;)
-                        choices: [
-                            {
-                                label: 'NON',
-                                id: 'comment',
-                                nextStep: 'catchupCreation',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                            {
-                                label: 'OUI',
-                                id: 'confirm',
-                                nextStep: 'poseurValidation',
-                                onSelectType: 'transition',
-                            },
-                        ],
-                        responsable: 'Client',
-                        status: 'pending',
-                    },
-                ],
-            },
-            catchupCreation: {
-                title: 'Plannification tâche rattrapage',
-                instructions: '',
-                stepOrder: 5,
-                actions: [
-                    {
-                        id: 'catchupCreation',
-                        title: 'Créer une tâche rattrapage',
-                        instructions: 'Créer une tâche rattrapage',
-                        actionOrder: 1,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Installation",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Rattrapage").create),
-                        status: 'pending',
-                    },
-                    {
-                        id: 'catchupChoice',
-                        title: 'Finaliser la tâche rattrapage',
-                        instructions: 'Finaliser la tâche rattrapage',
-                        actionOrder: 3,
-                        responsable: 'Poseur',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            {
-                                id: 'finish',
-                                label: 'Finaliser',
-                                nextStep: 'reserve',
-                                onSelectType: 'transition',
-                                operation: { type: 'update', field: 'status', value: 'Terminé' },
-                            },
-                        ],
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Rattrapage",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Rattrapage").create),
-                        status: 'pending',
-                    },
-                ],
-            },
             poseurValidation: {
                 title: 'Validation du technicien',
                 instructions: '',
-                stepOrder: 6,
+                stepOrder: 1,
                 actions: [
                     {
                         id: 'maintainanceContractChoice',
@@ -466,7 +261,7 @@ export const version0 = {
             maintainanceContract: {
                 title: 'Contrat maintenance',
                 instructions: '',
-                stepOrder: 7,
+                stepOrder: 2,
                 actions: [
                     {
                         id: 'commercialPropositionChoice',
@@ -519,7 +314,6 @@ export const version0 = {
                             },
                         ],
                         status: 'pending',
-                        nextStep: 'reserve',
                     },
                     {   //##new
                         id: 'signedSEPACreation',
@@ -629,7 +423,7 @@ export const version0 = {
                 //no conversion
                 title: 'Facturation',
                 instructions: '',
-                stepOrder: 8,
+                stepOrder: 3,
                 actions: [
                     {
                         id: 'billCreation',
@@ -657,8 +451,7 @@ export const version0 = {
                 //conversion
                 title: 'Finalisation de la facturation',
                 instructions: '',
-                stepOrder: 9,
-                nextStep: '',
+                stepOrder: 4,
                 actions: [
                     {
                         //##task: add multiCommentsPicker
@@ -783,8 +576,7 @@ export const version0 = {
             emailBill: {
                 title: 'Envoi facture par mail',
                 instructions: '',
-                stepOrder: 10,
-                nextStep: '',
+                stepOrder: 5,
                 actions: [
                     //task: verify if bill & attestation fluide are still existing
                     {
@@ -840,8 +632,7 @@ export const version0 = {
                 title: 'Satisfaction client',
                 instructions:
                     "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 11,
-                nextStep: '',
+                stepOrder: 6,
                 actions: [
                     {
                         id: 'clientReview',
@@ -925,6 +716,154 @@ export const version0 = {
                             },
                         ],
                         status: 'pending',
+                    },
+                ],
+            },
+        },
+    },
+    maintainance: {
+        title: 'Maintenance',
+        instructions: '',
+        phaseOrder: 3,
+        followers: ['Admin', 'Responsable technique', 'Poseur'],
+        steps: {
+            maintainanceContract: {
+                title: 'Contrat maintenance',
+                instructions: '',
+                stepOrder: 1,
+                actions: [
+                    {
+                        id: 'commercialPropositionChoice',
+                        title: 'Accepter la proposition commerciale',
+                        instructions: '',
+                        actionOrder: 1,
+                        type: 'manual', //Check manually
+                        verificationType: 'multiple-choices',
+                        comment: '', //motif
+                        choices: [
+                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
+                        ],
+                        responsable: 'Poseur',
+                        status: 'pending',
+                    },
+                    {   //##new
+                        id: 'mandatSepaCreation',
+                        title: 'Créer/Importer un mandat SEPA',
+                        instructions: 'Créer/Importer un mandat SEPA',
+                        actionOrder: 2,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Mandat SEPA",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
+                        comment: '', //motif
+                        choices: [
+                            {
+                                id: 'upload',
+
+                                label: 'Importer le document',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {   //##new
+                        id: 'signedSEPACreation',
+                        title: 'Signer le mandat SEPA',
+                        instructions: 'Signer le mandat SEPA',
+                        actionOrder: 3,
+                        responsable: 'Client',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //edit
+                        params: {
+                            documentType: "Mandat SEPA",
+                            isSignature: true
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
+                        comment: "",
+                        choices: [
+                            {
+                                id: 'sign',
+                                label: 'Signer le mandat SEPA',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {   //##new
+                        id: 'contractCreation',
+                        title: 'Créer/Importer un contrat',
+                        instructions: 'Créer/Importer un contrat',
+                        actionOrder: 4,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Contrat CGU-CGV",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
+                        comment: '', //motif
+                        choices: [
+                            {
+                                id: 'upload',
+                                label: 'Importer le contrat',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {   //##new
+                        id: 'signedContractCreation',
+                        title: 'Signer le contrat',
+                        instructions: 'Signer le contrat',
+                        actionOrder: 5,
+                        responsable: 'Client',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //edit
+                        params: {
+                            documentType: "Contrat CGU-CGV",
+                            isSignature: true
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
+                        comment: "",
+                        choices: [
+                            {
+                                id: 'sign',
+                                label: 'Signer le contrat',
+                                onSelectType: 'navigation',
+                            },
+                        ],
+                        status: 'pending',
+                    },
+                    {
+                        id: 'endProject',
+                        title: 'Finaliser le projet',
+                        instructions: '',
+                        actionOrder: 6,
+                        type: 'manual',
+                        verificationType: 'validation',
+                        comment: '',
+                        responsable: 'ADV',
+                        status: 'pending',
+                        nextPhase: 'endProject',
                     },
                 ],
             },

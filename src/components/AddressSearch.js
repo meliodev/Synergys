@@ -49,13 +49,13 @@ export default class AddressSearch extends Component {
         let main = this.props.main
 
         return (
-            <View style={{ flex: 1 }}>
+            <View style={{ flex: 1, zIndex: 1000, backgroundColor: "#fff" }}>
 
                 {this.props.showInput &&
                     <GooglePlacesAutocomplete
                         placeholder='Recherchez une adresse'
                         //autoFocus 
-                        autoFocus={false}
+                        autoFocus={true}
                         onPress={(data, details = null) => {
                             //'details' are provided when fetchDetails = true (it costs higher)
                             // console.log(data, details)

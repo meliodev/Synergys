@@ -52,6 +52,8 @@ import {
   formatDocument,
   unformatDocument,
   formatPrice,
+  allDocTypes,
+  docType_LabelValueMap
 } from '../../core/utils';
 import * as theme from '../../core/theme';
 import { constants, highRoles } from '../../core/constants';
@@ -122,8 +124,8 @@ class CreateOrder extends Component {
     this.OrderId = this.props.navigation.getParam('OrderId', '');
     this.isEdit = this.OrderId !== '' ? true : false;
     this.OrderId = this.isEdit ? this.OrderId : generateId('GS-CO-');
-    this.titleText = `Création ${articles_fr('du', masculins, this.docType)} ${this.docType
-      }`;
+    const docTypelabel = docType_LabelValueMap(this.docType)
+    this.titleText = `Création ${articles_fr("d'un", masculins, docTypelabel)} ${docTypelabel}`;
     this.title = this.autoGenPdf
       ? this.titleText
       : this.isEdit
@@ -367,7 +369,6 @@ class CreateOrder extends Component {
   //Helpers
   refreshOrderLine(orderLine, overwriteIndex) {
     let { orderLines } = this.state;
-    console.log(orderLine)
     if (overwriteIndex.toString())
       orderLines[overwriteIndex] = orderLine;
     else
@@ -919,7 +920,7 @@ class CreateOrder extends Component {
                       />
 
                       <MyInput
-                        label="Prime Renov (€)"
+                        label="Maprimerénov (€)"
                         returnKeyType="done"
                         keyboardType="numeric"
                         value={primeRenov}

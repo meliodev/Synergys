@@ -166,33 +166,33 @@ export const mandatMPRModel = [
         title: '',
         fields: [
             //AUTO-GEN
-            {
-                id: "dayNow",
-                type: "autogen",
-                value: moment().format('DD'),
-                pdfConfig: {
-                    dx: -423, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
-                    mendatory: true,
-                }
-            },
-            {
-                id: "monthNow",
-                type: "autogen",
-                value: moment().format('MM'),
-                pdfConfig: {
-                    dx: -398, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
-                    mendatory: true,
-                }
-            },
-            {
-                id: "yearNow",
-                type: "autogen",
-                value: moment().format('YYYY'),
-                pdfConfig: {
-                    dx: -372, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
-                    mendatory: true,
-                }
-            },
+            // {
+            //     id: "dayNow",
+            //     type: "autogen",
+            //     value: moment().format('DD'),
+            //     pdfConfig: {
+            //         dx: -423, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
+            //         mendatory: true,
+            //     }
+            // },
+            // {
+            //     id: "monthNow",
+            //     type: "autogen",
+            //     value: moment().format('MM'),
+            //     pdfConfig: {
+            //         dx: -398, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
+            //         mendatory: true,
+            //     }
+            // },
+            // {
+            //     id: "yearNow",
+            //     type: "autogen",
+            //     value: moment().format('YYYY'),
+            //     pdfConfig: {
+            //         dx: -372, dy: - 692, pageIndex: 1, spaces: { afterEach: 1, str: '  ' },
+            //         mendatory: true,
+            //     }
+            // },
             {
                 id: "isProprio",
                 type: "autogen",

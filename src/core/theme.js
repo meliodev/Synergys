@@ -7,13 +7,13 @@ const baseColors = {
   gray1: "#F1F2F7"
 }
 
-const colors = {
+const colors = { 
   statusbar: "#013220",
   background: '#ffffff', //new
   primary: "#25D366", //new
   secondary: "#1B2331",
   surface: '#F5F5F5',
-  appBar: '#FFFFFF',
+  appBar: '#FFFFFF', 
   section: "#33aa78", //Dark green: #33aa78, Dark blue: #01192b, light green: 
   //section: "#33aa78",
   tabs: baseColors.gray1,
@@ -325,7 +325,7 @@ const style = {
   }
 }
 
-const hitslop = { top: 20, bottom: 20, left: 20, right: 20 }
+const hitslop = { top: 15, bottom: 15, left: 15, right: 15 }
 
 export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, hitslop }
 

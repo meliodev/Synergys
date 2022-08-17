@@ -36,7 +36,8 @@ const states = [
 let types = [
     { label: 'Tous', value: '' },
     { label: 'Bon de commande', value: 'Bon de commande' },
-    { label: 'Devis', value: 'Devis' },
+    //{ label: 'Devis', value: 'Devis' },
+    { label: 'Offre précontractuelle', value: 'Offre précontractuelle' },
     { label: 'Facture', value: 'Facture' },
     { label: 'Dossier CEE', value: 'Dossier CEE' },
     { label: 'Fiche EEB', value: 'Fiche EEB' },
@@ -222,7 +223,7 @@ class ListDocuments extends Component {
                                 }
                             />
                             :
-                            <EmptyList icon={faFolder} header='Aucun document' description='Gérez tous vos documents (factures, devis, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
+                            <EmptyList icon={faFolder} header='Aucun document' description='Gérez tous vos documents (factures, Offres, etc). Appuyez sur le boutton "+" pour en ajouter.' offLine={!isConnected} />
                         }
                         {canCreate &&
                             <MyFAB onPress={() => this.props.navigation.navigate('UploadDocument', { onGoBack: () => this.fetchSynergysDocuments(2000) })} />

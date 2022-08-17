@@ -1,39 +1,34 @@
-import React, {Component} from 'react';
+import { Component } from 'react';
+import * as React from 'react';
+
 import {
   LogBox,
-  StatusBar,
   StyleSheet,
-  Text,
-  View,
-  Dimensions,
+  Text
 } from 'react-native';
-import notifee, {AndroidImportance} from '@notifee/react-native';
-import {LineChart} from 'react-native-chart-kit';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
-import {connect} from 'react-redux';
-import {persistStore} from 'redux-persist';
-import {Provider} from 'react-redux';
-import {PersistGate} from 'redux-persist/es/integration/react';
+import { persistStore } from 'redux-persist';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/es/integration/react';
 import {
   Provider as PaperProvider,
   DefaultTheme,
   configureFonts,
 } from 'react-native-paper';
-import {MenuProvider} from 'react-native-popup-menu';
+import { MenuProvider } from 'react-native-popup-menu';
 import SplashScreen from 'react-native-splash-screen';
-import codePush from 'react-native-code-push';
+ import codePush from 'react-native-code-push';
 
 import AppToast from './components/global/AppToast';
 import NetworkStatus from './NetworkStatus';
 import RootController from './Navigation/DrawerNavigator';
 
-import firebase, {crashlytics, functions} from './firebase';
+import firebase from './firebase';
 import Store from './Store/configureStore';
-import {fontsConfig} from '../fontConfig';
+import { fontsConfig } from '../fontConfig';
 import * as theme from './core/theme';
 import MyStatusBar from './components/MyStatusBar';
-import Settings from './screens/Settings/Settings';
-import ModalTest from './components/ModalTest';
 
 const paperTheme = {
   ...DefaultTheme,
@@ -52,6 +47,7 @@ const paperTheme = {
 
 class App extends Component {
   async componentDidMount() {
+
     SplashScreen.hide();
 
     //Notification channels
@@ -79,7 +75,7 @@ class App extends Component {
 
   render() {
     let persistor = persistStore(Store);
-    ////  persistor.purge()
+    persistor.purge()
 
     return (
       <Provider store={Store}>

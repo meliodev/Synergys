@@ -12,7 +12,15 @@ import { constants, isTablet } from "../core/constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 
-export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSingleElement, autoValidation, isReview, model = 'Element1' }) => {
+export const ModalForm = ({
+    elements,
+    elementSize,
+    handleSelectElement,
+    returnSingleElement,
+    autoValidation,
+    isReview,
+    model = 'Element1'
+}) => {
 
     const selectElement = (element, index) => {
         //Unselect all types
@@ -44,7 +52,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSi
                 borderRadius: 5,
                 justifyContent: 'center',
                 alignItems: 'center',
-                margin: elementSize * 0.03,
+                margin: elementSize * 0.02,
                 width: elementSize,
                 height: elementSize,
                 backgroundColor: theme.colors.white,
@@ -76,7 +84,7 @@ export const ModalForm = ({ elements, elementSize, handleSelectElement, returnSi
                     {icon && <CustomIcon icon={icon} size={elementSize * 0.3} color={iconColor} />}
                     {image && <Image style={[{ width: elementSize * 0.2, height: elementSize * 0.2 / (1200 / 1722) }, imageStyle]} source={image} />}
                 </View>
-                <View style={{ height: elementSize * 0.43, paddingHorizontal: elementSize * 0.1 }}>
+                <View style={{ height: elementSize * 0.43, paddingHorizontal: elementSize * 0.05 }}>
                     <Text style={[theme.customFontMSsemibold.caption, { textAlign: 'center', color: textColor }]}>
                         {label}
                     </Text>
@@ -228,7 +236,7 @@ const ModalOptions = ({
         elementSize = constants.ScreenWidth * 0.45
 
     else if (columns >= 3)
-        elementSize = constants.ScreenWidth * 0.3
+        elementSize = constants.ScreenWidth * 0.31
 
     return (
         <Modal

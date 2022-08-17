@@ -1,4 +1,4 @@
-package com.synergys; // Replace this with your package name
+package fr.groupe.synergys; // Replace this with your package name
 
 import android.content.Intent;
 import android.os.Bundle;

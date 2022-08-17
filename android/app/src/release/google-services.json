@@ -15,6 +15,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "423334078415-7u7uh2bdub5hf37s4vgjlqlqhr2socjt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.asanaworld",
+            "certificate_hash": "5846d6812cc9d4f64af59475773da27ffb6a739b"
+          }
+        },
+        {
+          "client_id": "423334078415-9vjgdiviaqtn3bvcs73249fgl8qd2egc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.asanaworld",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "423334078415-9j0u5suqp1cs6nig21jjo3b7kc7qp7bh.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -30,6 +46,13 @@
             {
               "client_id": "423334078415-9j0u5suqp1cs6nig21jjo3b7kc7qp7bh.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "423334078415-h9cvu66ra2b760uien1s7uah1rdu1pq6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.AsanaWorld"
+              }
             }
           ]
         }
@@ -59,6 +82,49 @@
             {
               "client_id": "423334078415-9j0u5suqp1cs6nig21jjo3b7kc7qp7bh.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "423334078415-h9cvu66ra2b760uien1s7uah1rdu1pq6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.AsanaWorld"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423334078415:android:34cfdb9ca0c596578954ba",
+        "android_client_info": {
+          "package_name": "fr.groupe.synergys"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "423334078415-9j0u5suqp1cs6nig21jjo3b7kc7qp7bh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCCKJPRf-sXsgFnNavfXxYevIDEHTIN9qI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "423334078415-9j0u5suqp1cs6nig21jjo3b7kc7qp7bh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "423334078415-h9cvu66ra2b760uien1s7uah1rdu1pq6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.AsanaWorld"
+              }
             }
           ]
         }

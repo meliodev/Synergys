@@ -889,12 +889,14 @@ class Profile extends Component {
                                         }
                                     />
 
-                                    <ClientBillingSection
-                                        canUpdate={canUpdate}
-                                        isExpanded={sectionsExpansion["billing"]}
-                                        ClientId = {this.userParam.id}
-                                        toggleSection={() => this.toggleSection("billing")}
-                                    />
+                                    {this.isClient &&
+                                        <ClientBillingSection
+                                            canUpdate={canUpdate}
+                                            isExpanded={sectionsExpansion["billing"]}
+                                            ClientId={this.userParam.id}
+                                            toggleSection={() => this.toggleSection("billing")}
+                                        />
+                                    }
 
                                     {this.isClient && this.renderClientProjects(currentUser)}
                                     {this.renderCommercialGoals(monthlyGoals, role)}

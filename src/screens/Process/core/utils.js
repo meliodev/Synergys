@@ -1,5 +1,5 @@
 import { collectionScreenNameMap } from "../../../core/constants";
-import { getTaskNatures, privateDocTypes, privateTaskTypes } from "../../../core/utils";
+import { docType_LabelValueMap, getTaskNatures, privateDocTypes, privateTaskTypes, taskType_LabelValueMap } from "../../../core/utils";
 import { db } from '../../../firebase'
 
 import moment from 'moment';
@@ -25,11 +25,13 @@ export const isPrivateType = (collection, type) => {
 }
 
 export const buildEntityType = (collection, type) => {
-  let typeObject = {
-    label: type,
-    value: type,
-  }
+
+  let typeObject = {}
   if (collection === "Documents") {
+    typeObject = {
+      label: docType_LabelValueMap(type),
+      value: type,
+    }
     typeObject = {
       ...typeObject,
       selected: false,
@@ -37,6 +39,10 @@ export const buildEntityType = (collection, type) => {
   }
 
   else if (collection === "Agenda") {
+    typeObject = {
+      label: taskType_LabelValueMap(type),
+      value: type,
+    }
     typeObject = {
       ...typeObject,
       natures: getTaskNatures(type)

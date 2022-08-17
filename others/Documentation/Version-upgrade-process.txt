@@ -7,9 +7,13 @@ Android:
 1.2 Increase Android build version
 2. Deploy on Dev server (optional for testing): 
 appcenter codepush release-react -a salimlyoussi1gmail.com/Synergys-1 -d Staging -m -t MAJOR.MINOR.x
+
 3. Deploy on Prod server: 
-appcenter codepush promote -a salimlyoussi1gmail.com/Synergys-1 -s Staging -d Production
-(or) appcenter codepush release-react -a salimlyoussi1gmail.com/Synergys-1 -d Production -m -t MAJOR.MINOR.x
+ANDROID: appcenter codepush promote -a salimlyoussi1gmail.com/Synergys-1 -s Staging -d Production
+IOS:     appcenter codepush promote -a salimlyoussi1gmail.com/Synergys-2 -s Staging -d Production
+(or) 
+ANDROID: appcenter codepush release-react -a salimlyoussi1gmail.com/Synergys-1 -d Production -m -t MAJOR.MINOR.x
+IOS:     appcenter codepush release-react -a salimlyoussi1gmail.com/Synergys-2 -d Production -m -t MAJOR.MINOR.x
 
 4. EXPECTED RESULT: User's app will fetch & install the latest version from CodePush server (according to the MAJOR.MINOR version installed)
 exp: app with version 1.0.0 will fetch 1.0.63 patch
@@ -23,8 +27,6 @@ exp: app with version 1.0.0 will fetch 1.0.63 patch
 5. EXPECTED RESULT: Users should not be allowed to enter the app only after downloading & installing the latest MAJOR.MINOR version
 
 PS: To set up dev environment: change "prod" to "dev".
-
-
 
 EXPAMPLE OF VERSIONNING TREE:
 

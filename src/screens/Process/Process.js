@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, Text, View, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native';
 import _ from 'lodash'
 import { faTimes } from '@fortawesome/pro-light-svg-icons'
 import { faArrowAltRight } from "@fortawesome/pro-solid-svg-icons"
@@ -31,19 +31,8 @@ class Process extends Component {
     }
 
     async componentDidMount() {
-        const properties = ["project", "client", "id"]
-        const test = {
-            project: { client: { id: "123" } }
-        }
-
-        const nestedVal = properties.reduce((a, prop) => a[prop], test)
-        console.log(nestedVal)
-
         const project = await this.fetchProject()
-        const process = await this.fetchProcess()
-        const isBlockedUpdates = this.configUserAccess(project.step)
-        const data = { project, process, isBlockedUpdates }
-        this.setStateFields(data)
+        this.setState({ project }, async () => await this.fetchProcess())
         this.initialState = _.cloneDeep(this.state)
         this.setState({ loading: false })
     }
@@ -67,6 +56,7 @@ class Process extends Component {
                 let project = doc.data()
                 project.id = doc.id
                 project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address', 'workTypes'])
+
                 resolve(project)
             })
         })
@@ -77,22 +67,32 @@ class Process extends Component {
         const query = db.collection("Projects").doc(this.ProjectId).collection("Process").doc(this.ProjectId)
         return new Promise((resolve, reject) => {
             this.processListener = query.onSnapshot(async (doc) => {
+                console.log("listener fired...", process)
                 if (!doc.exists) resolve(null)
-                const process = doc.data()   
+                const process = doc.data()
+                const { project } = this.state
+                const isBlockedUpdates = this.configUserAccess(project.step)
+                const data = { project, process, isBlockedUpdates }
+                await this.setStateFields(data)
                 resolve(process)
             })
         })
     }
 
-    setStateFields(data) {
-        if (!data.project) this.setState({ docNotFound: true })
-        else this.setState(data)
+    async setStateFields(data) {
+        return new Promise((resolve, reject) => {
+            if (!data.project)
+                this.setState({ docNotFound: true }, () => resolve(true))
+            else
+                this.setState(data, () => resolve(true))
+        })
     }
 
     //FIELDS:
     renderProcessAction(canWrite) {
         const { project, process } = this.state
         const { client, step } = project
+
         return (
             <ProcessAction
                 project={project}
@@ -119,7 +119,7 @@ class Process extends Component {
                     {showProcessAction ?
                         this.renderProcessAction(canWrite)
                         :
-                        this.processNotFound()  
+                        this.processNotFound()
                     }
                     {this.viewMore()}
                 </View>
@@ -136,17 +136,16 @@ class Process extends Component {
 
     viewMore() {
         return (
-            <View style={styles.viewMoreContainer}>
-                <Text
-                    onPress={() => {
-                        this.props.navigation.navigate("CreateProject", { ProjectId: this.ProjectId })
-                    }}
-                    style={[theme.customFontMSbold.header, { color: theme.colors.primary, marginRight: 8 }]}
-                >
+            <TouchableOpacity
+                onPress={() => {
+                    this.props.navigation.navigate("CreateProject", { ProjectId: this.ProjectId })
+                }}
+                style={styles.viewMoreContainer}>
+                <Text style={[theme.customFontMSbold.header, { color: theme.colors.primary, marginRight: 8 }]}>
                     Voir plus
                 </Text>
                 <CustomIcon icon={faArrowAltRight} color={theme.colors.primary} size={16} />
-            </View>
+            </TouchableOpacity>
         )
     }
 
@@ -215,7 +214,9 @@ const styles = StyleSheet.create({
     viewMoreContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        paddingHorizontal: 12,
+        paddingVertical: 8
     }
 })
 

@@ -1,5 +1,5 @@
 
-export const queryFilters_Documents_Map = (documentType) => {
+const queryFilters_Documents_Map = (documentType) => {
     const map = {
         create: {
             onProgress: {
@@ -39,7 +39,7 @@ export const queryFilters_Documents_Map = (documentType) => {
     return map
 }
 
-export const queryFilters_Agenda_Map = (taskType) => {
+const queryFilters_Agenda_Map = (taskType) => {
     const map = {
         create: {
             collection: "Agenda",
@@ -57,7 +57,7 @@ export const queryFilters_Agenda_Map = (taskType) => {
     return map
 }
 
-export const buildQueryFilters = (config) => {
+const buildQueryFilters = (config) => {
     const { collection, operation, params } = config
     let queryFilters = null
 
@@ -82,19 +82,18 @@ export const buildQueryFilters = (config) => {
         else if (operation === "sign") {
             if (isOnProgress)
                 queryFilters = [
-                    //NAVIGATION: Get id of the existing quote (to update signature)
-                    { filter: 'project.id', operation: '==', value: '' },
-                    { filter: 'type', operation: '==', value: documentType },
-                    { filter: 'deleted', operation: '==', value: false },
-                ]
-            else
-                queryFilters = [
                     //VERIFICATION: verify if signed quote exists
                     { filter: 'project.id', operation: '==', value: '' },
                     { filter: 'type', operation: '==', value: documentType },
                     { filter: 'deleted', operation: '==', value: false },
-                    { filter: 'attachmentSource', operation: '==', value: 'signature' },
                 ]
+            else queryFilters = [
+                //NAVIGATION: Get id of the existing quote (to update signature)
+                { filter: 'project.id', operation: '==', value: '' },
+                { filter: 'type', operation: '==', value: documentType },
+                { filter: 'deleted', operation: '==', value: false },
+                { filter: 'attachmentSource', operation: '==', value: 'signature' }
+            ]
         }
     }
 
@@ -110,7 +109,6 @@ export const buildQueryFilters = (config) => {
 
     return queryFilters
 }
-
 
 
 export const version8 = {
@@ -189,102 +187,122 @@ export const version8 = {
         phaseOrder: 2,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
-            priorTechnicalVisit: {
-                title: 'Visite technique préalable',
-                instructions: '',
-                stepOrder: 1,
-                actions: [
-                    {
-                        id: 'createPriorTechnicalVisit',
-                        title: 'Créer une visite technique préalable',
-                        instructions: 'Créer une visite technique préalable',
-                        actionOrder: 1,
-                        responsable: 'Commercial',
-                        verificationType: 'doc-creation',
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Visite technique préalable",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique préalable").create),
-                        status: 'pending',
-                    },
-                    {
-                        id: 'address',
-                        title: 'Lieu du rendez-vous',
-                        instructions: 'Lieu du rendez-vous',
-                        actionOrder: 2,
-                        responsable: 'Commercial',
-                        verificationType: 'data-fill',
-                        verificationValue: '',
-                        properties: ['address', 'description'],
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Visite technique préalable",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique préalable").create),
-                        status: 'pending',
-                    },
-                    {
-                        id: 'rd1Choice',
-                        title: 'Modifier le statut du rendez-vous 1',
-                        instructions: 'Modifier le statut du rendez-vous 1',
-                        actionOrder: 3,
-                        responsable: 'Commercial',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            {
-                                label: 'Annuler',
-                                id: 'cancel',
-                                nextPhase: 'cancelProject',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                label: 'Reporter',
-                                id: 'postpone',
-                                onSelectType: 'navigation'
-                            },
-                            {
-                                label: 'Confirmer',
-                                id: 'confirm',
-                                nextStep: 'housingActionFile',
-                                onSelectType: 'transition',
-                                operation: { type: 'update', field: 'status', value: 'Terminé' },
-                            },
-                        ],
-                        collection: 'Agenda',
-                        documentId: "",
-                        params: {
-                            taskType: "Visite technique préalable",
-                        },
-                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique préalable").create),
-                        status: 'pending',
-                    },
-                ],
-            },
+            //##draft
+            // priorTechnicalVisit: {
+            //     title: 'Visite technique préalable',
+            //     instructions: '',
+            //     stepOrder: 1,
+            //     actions: [
+            //         {
+            //             id: 'createPriorTechnicalVisit',
+            //             title: 'Créer une visite technique préalable',
+            //             instructions: 'Créer une visite technique préalable',
+            //             actionOrder: 1,
+            //             responsable: 'Commercial',
+            //             verificationType: 'doc-creation',
+            //             collection: 'Agenda',
+            //             documentId: "",
+            //             params: {
+            //                 taskType: "Visite technique préalable",
+            //             },
+            //             queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique préalable").create),
+            //             status: 'pending',
+            //         },
+            //         {
+            //             id: 'address',
+            //             title: 'Lieu du rendez-vous',
+            //             instructions: 'Lieu du rendez-vous',
+            //             actionOrder: 2,
+            //             responsable: 'Commercial',
+            //             verificationType: 'data-fill',
+            //             verificationValue: '',
+            //             properties: ['address', 'description'],
+            //             collection: 'Agenda',
+            //             documentId: "",
+            //             params: {
+            //                 taskType: "Visite technique préalable",
+            //             },
+            //             queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique préalable").create),
+            //             status: 'pending',
+            //         },
+            //         {
+            //             id: 'rd1Choice',
+            //             title: 'Modifier le statut du rendez-vous 1',
+            //             instructions: 'Modifier le statut du rendez-vous 1',
+            //             actionOrder: 3,
+            //             responsable: 'Commercial',
+            //             verificationType: 'multiple-choices',
+            //             choices: [
+            //                 {
+            //                     label: 'Annuler',
+            //                     id: 'cancel',
+            //                     nextPhase: 'cancelProject',
+            //                     onSelectType: 'transition',
+            //                     commentRequired: true,
+            //                 },
+            //                 {
+            //                     label: 'Reporter',
+            //                     id: 'postpone',
+            //                     onSelectType: 'navigation'
+            //                 },
+            //                 {
+            //                     label: 'Confirmer',
+            //                     id: 'confirm',
+            //                     nextStep: 'housingActionFile',
+            //                     onSelectType: 'transition',
+            //                     operation: { type: 'update', field: 'status', value: 'Terminé' },
+            //                 },
+            //             ],
+            //             collection: 'Agenda',
+            //             documentId: "",
+            //             params: {
+            //                 taskType: "Visite technique préalable",
+            //             },
+            //             queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique préalable").create),
+            //             status: 'pending',
+            //         },
+            //     ],
+            // },
             housingActionFile: {
                 title: 'Évaluation des besoins',
                 instructions: '',
-                stepOrder: 2,
+                stepOrder: 1,
                 actions: [
+                    // {   //##draft
+                    //     id: 'eebFileCreation',
+                    //     title: 'Créer une fiche Étude et Évaluation des besoins',
+                    //     instructions: 'Créer une fiche Étude et Évaluation des besoins',
+                    //     actionOrder: 1,
+                    //     responsable: 'Commercial',
+                    //     verificationType: 'doc-creation',
+                    //     collection: 'Documents',
+                    //     documentId: "", //creation
+                    //     params: {
+                    //         documentType: "Fiche EEB",
+                    //     },
+                    //     //Updates documentId to view the "onProgress uploading document"
+                    //     queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onProgress),
+                    //     //Verification:
+                    //     queryFilters: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onCreate),
+                    //     status: 'pending',
+                    //     nextStep: 'rd2Creation',
+                    // },
                     {   //##new
                         id: 'eebFileCreation',
-                        title: 'Créer une fiche Étude et Évaluation des besoins',
-                        instructions: 'Créer une fiche Étude et Évaluation des besoins',
+                        title: 'Créer un dossier de cheminement',
+                        instructions: 'Importer un dossier de cheminement dûment rempli',
                         actionOrder: 1,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
                         params: {
-                            documentType: "Fiche EEB",
+                            documentType: "Dossier de cheminement",
                         },
                         //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onProgress),
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Dossier de cheminement").create.onProgress),
                         //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onCreate),
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Dossier de cheminement").create.onCreate),
                         status: 'pending',
                         nextStep: 'rd2Creation',
                     },
@@ -314,26 +332,26 @@ export const version8 = {
                 ],
             },
             quoteCreation: {
-                title: "Création d'un devis",
+                title: "Création d'une offre précontractuelle",
                 instructions: '',
                 stepOrder: 4,
                 actions: [
                     {   //##new
                         id: 'quoteCreation',
-                        title: 'Créer un devis',
-                        instructions: 'Créer un devis',
+                        title: 'Créer une offre précontractuelle',
+                        instructions: 'Créer une offre précontractuelle',
                         actionOrder: 1,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
                         params: {
-                            documentType: "Devis",
+                            documentType: "Offre précontractuelle",
                         },
                         //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Devis").create.onProgress),
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onProgress),
                         //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Devis").create.onCreate),
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onCreate),
                         status: 'pending',
                         nextPhase: 'rdn',
 
@@ -433,7 +451,7 @@ export const version8 = {
                     {   //##new
                         id: 'propertyTax',
                         title: "Taxe foncière",
-                        instructions: "Importer le Taxe foncière du client",
+                        instructions: "Importer la Taxe foncière du client",
                         actionOrder: 4,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
@@ -467,41 +485,68 @@ export const version8 = {
                         ],
                         status: 'pending',
                     },
-                    {   //##new (verify if Devis exists...)
-                        id: 'quoteCreation',
-                        title: 'Créer un devis',
-                        instructions: 'Créer un devis',
+                    //##task: Validation du contrôle de conformité
+                    {
+                        id: 'conformityValidation',
+                        title: "Validation du contrôle de conformité",
+                        instructions: '',
                         actionOrder: 6,
+                        type: 'manual',
+                        //verificationType: 'validation',
+                        comment: '',
+                        responsable: 'Directeur commercial',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Annuler',
+                                id: 'cancel',
+                                nextPhase: 'cancelProject',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            },
+                            {
+                                label: 'Valider',
+                                id: 'confirm',
+                                onSelectType: 'validation'
+                            },
+                        ],
+                    },
+                    {   //##new (verify if Offre précontractuelle exists...)
+                        id: 'quoteCreation',
+                        title: 'Créer une offre précontractuelle',
+                        instructions: 'Créer une offre précontractuelle',
+                        actionOrder: 7,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
                         params: {
-                            documentType: "Devis",
+                            documentType: "Offre précontractuelle",
                         },
                         //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Devis").create.onProgress),
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onProgress),
                         //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Devis").create.onCreate),
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onCreate),
                         status: 'pending',
                     },
                     {   //##new
                         id: 'signedQuoteCreation',
-                        title: 'Signer le devis',
-                        instructions: 'Signature du devis par le client',
-                        actionOrder: 7,
+                        title: "Signer l'offre précontractuelle",
+                        instructions: "Signature de l'offre précontractuelle par le client",
+                        actionOrder: 8,
                         responsable: 'Client',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //edit
                         params: {
-                            documentType: "Devis",
+                            documentType: "Offre précontractuelle",
                             isSignature: true
                         },
                         //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Devis").sign.onProgress),
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").sign.onProgress),
                         //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Devis").sign.onCreate),
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").sign.onCreate),
                         comment: "",
                         choices: [
                             {
@@ -513,7 +558,7 @@ export const version8 = {
                             },
                             {
                                 id: 'sign',
-                                label: 'Signer le devis',
+                                label: "Signer l'offre précontractuelle",
                                 onSelectType: 'navigation',
                             },
                         ],
@@ -523,7 +568,7 @@ export const version8 = {
                         id: 'mandatMPRCreation',
                         title: 'Créer un mandat MaPrimeRénov',
                         instructions: 'Créer un mandat MaPrimeRénov',
-                        actionOrder: 8,
+                        actionOrder: 9,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -541,7 +586,7 @@ export const version8 = {
                         id: 'signedMandatMPRCreation',
                         title: 'Signer le mandat MaPrimeRénov',
                         instructions: 'Signer le mandat MaPrimeRénov',
-                        actionOrder: 9,
+                        actionOrder: 10,
                         responsable: 'Client',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -1010,6 +1055,25 @@ export const version8 = {
                         //Verification:
                         queryFilters: buildQueryFilters(queryFilters_Documents_Map("PV réception").create.onCreate),
                         status: 'pending',
+                    },
+                    {   //##new
+                        id: 'signPV',
+                        title: 'Signer le PV réception',
+                        instructions: 'Signer le PV réception',
+                        actionOrder: 2,
+                        responsable: 'Client',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //edit
+                        params: {
+                            documentType: "PV réception",
+                            isSignature: true
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("PV réception").sign.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("PV réception").sign.onCreate),
+                        status: 'pending',
                         nextStep: 'reserve',
                     },
                 ],
@@ -1181,7 +1245,6 @@ export const version8 = {
                             },
                         ],
                         status: 'pending',
-                        nextStep: 'reserve',
                     },
                     {   //##new
                         id: 'signedSEPACreation',
@@ -1320,7 +1383,6 @@ export const version8 = {
                 title: 'Finalisation de la facturation',
                 instructions: '',
                 stepOrder: 9,
-                nextStep: '',
                 actions: [
                     {
                         //##task: add multiCommentsPicker
@@ -1375,7 +1437,7 @@ export const version8 = {
                     },
                     {
                         id: 'advValidation',
-                        title: "Validation de la facture par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
+                        title: "Validation de la facture par l'ADV", //#task allow adv to view Offre précontractuelle before validating (multi-choice: voir/valider)
                         instructions: '',
                         actionOrder: 2,
                         type: 'manual',
@@ -1446,7 +1508,6 @@ export const version8 = {
                 title: 'Envoi facture par mail',
                 instructions: '',
                 stepOrder: 10,
-                nextStep: '',
                 actions: [
                     //task: verify if bill & attestation fluide are still existing
                     {
@@ -1503,7 +1564,6 @@ export const version8 = {
                 instructions:
                     "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
                 stepOrder: 11,
-                nextStep: '',
                 actions: [
                     {
                         id: 'clientReview',

@@ -7,11 +7,12 @@ import {
   ActivityIndicator,
   Alert,
   BackHandler,
+  Platform,
 } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import firebase, { db, functions } from '../../firebase';
+import firebase, { crashlytics, db, functions } from '../../firebase';
 import Dialog from 'react-native-dialog';
 import _ from 'lodash';
 import { connect } from 'react-redux';
@@ -69,6 +70,7 @@ class Signature extends Component {
     //Storage ref url
     this.ProjectId = this.props.navigation.getParam('ProjectId', '');
     this.DocumentId = this.props.navigation.getParam('DocumentId', '');
+    console.log("Doc id", this.DocumentId)
     this.DocumentType = this.props.navigation.getParam('DocumentType', '');
     this.fileName = this.props.navigation.getParam('fileName', '');
     this.sourceUrl = this.props.navigation.getParam('url', '');
@@ -166,8 +168,11 @@ class Signature extends Component {
     try {
       loadLog(this, true, 'Initialisation des données...');
       await this.loadOriginalFile();
-      if (this.initMode === 'sign')
-        this.toggleTerms();
+      if (this.initMode === 'sign') {
+        setTimeout(() => {
+          this.toggleTerms();
+        }, 500)
+      }
     } catch (e) {
       displayError({ message: e.message });
     } finally {
@@ -444,7 +449,7 @@ class Signature extends Component {
     return paddingTop;
   }
 
-  //work on auto sign devis
+  //work on auto sign offre precontractuelle
   handleSingleTap = async (page, x, y, isAuto, signatures) => {
     console.log(`tap: ${page}`);
     console.log(`x: ${x}`);
@@ -491,7 +496,9 @@ class Signature extends Component {
               });
             }
           }
-        } else {
+        }
+
+        else {
           var paddingTop = this.calculatePaddingTop(pdfDoc, page);
           const nthPage = pages[page - 1];
           const yRatio = isTablet ? 2 : 12;
@@ -564,22 +571,25 @@ class Signature extends Component {
     try {
       await this.uploadSignedFile();
       //Data of proofs
-      const ipLocalAddress = await NetworkInfo.getIPAddress();
-      const ipV4Address = await NetworkInfo.getIPV4Address();
-      const macAddress = await DeviceInfo.getMacAddress();
-      const android_id = await DeviceInfo.getAndroidId();
-      const app_name = await DeviceInfo.getApplicationName();
-      const device = await DeviceInfo.getDevice();
-      const device_id = await DeviceInfo.getDeviceId();
+      const ipLocalAddress = await NetworkInfo.getIPAddress() || "";
+      const ipV4Address = await NetworkInfo.getIPV4Address() || "";
+      const macAddress = await DeviceInfo.getMacAddress() || "";
+      const android_id = await DeviceInfo.getAndroidId() || "";
+      const app_name = await DeviceInfo.getApplicationName() || "";
+      const device = await DeviceInfo.getDevice() || "";
+      const device_id = await DeviceInfo.getDeviceId() || "";
 
       const { signedAttachment, phoneNumber, ref, motif } = this.state;
 
       //store max of data (Audit) about the signee
-      const document = {
+      let document = {
         attachment: signedAttachment,
         attachmentSource: 'signature',
-        //Data of proofs
-        sign_proofs_data: {
+        signedAt: moment().format(), //only when signGenerated = true
+      }
+
+      if (Platform.OS === "android") {
+        document.sign_proofs_data = {
           //User identity
           signedBy: {
             id: this.currentUser.uid,
@@ -595,25 +605,16 @@ class Signature extends Component {
           ipLocalAddress,
           ipV4Address,
           macAddress,
-          android_id,
-          app_name,
+          //android_id,
+          //app_name,
           device,
           device_id,
           //Signature reference
           ref,
           //Other data
           motif,
-        },
-      };
-
-      const newDocument = _.cloneDeep(document);
-      newDocument.createdAt = moment().format();
-      newDocument.createdBy = {
-        id: this.currentUser.uid,
-        fullName: this.currentUser.displayName,
-        email: this.currentUser.email,
-        role: this.props.role.value,
-      };
+        }
+      }
 
       await db
         .collection('Documents')
@@ -623,15 +624,19 @@ class Signature extends Component {
         .collection('Documents')
         .doc(this.DocumentId)
         .collection('AttachmentHistory')
-        .add(newDocument);
+        .add(document);
       this.props.navigation.state.params.onGoBack &&
         this.props.navigation.state.params.onGoBack(); //refresh document to get url of new signed document
       this.props.navigation.pop(this.onSignaturePop);
     } catch (e) {
+
+      crashlytics.log(document)
+      crashlytics.recordError(e, "Erreur d'importation de document signé")
+
       setToast(
         this,
         'e',
-        "Erreur lors de l'importation du document signé, veuillez réessayer.",
+        e.message,
       );
     } finally {
       this.setState({ uploading: false });
@@ -749,7 +754,7 @@ class Signature extends Component {
 
   onAcceptTerms() {
     //Auto Sign
-    const isAutoSign = autoSignDocs.includes(this.DocumentType); //#task: add isGenerated as condition + remove Devis & Facture
+    const isAutoSign = autoSignDocs.includes(this.DocumentType); //#task: add isGenerated as condition + remove Offre précontractuelle & Facture
     const isGenerated = this.attachmentSource === 'generation';
 
     console.log("isAutoSign", isAutoSign)

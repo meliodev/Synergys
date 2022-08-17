@@ -19,7 +19,7 @@ import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
 import { constants, highRoles, workTypes, errorMessages, latestProcessVersion } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
-import { generateId, navigateToScreen, myAlert, nameValidator, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError, initFormSections } from "../../core/utils";
+import { generateId, navigateToScreen, myAlert, nameValidator, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError, initFormSections, docType_LabelValueMap } from "../../core/utils";
 
 import { uploadFiles } from "../../api/storage-api";
 import ModalCheckBoxes from '../../components/ModalCheckBoxes';
@@ -729,7 +729,7 @@ class CreateProject extends Component {
                             <List.Accordion
                                 key={key.toString()}
                                 showArrow
-                                title={type}
+                                title={docType_LabelValueMap(type)}
                                 id={type}
                                 titleStyle={theme.customFontMSregular.body}
                             >

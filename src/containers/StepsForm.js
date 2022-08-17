@@ -1528,15 +1528,15 @@ class StepsForm extends Component {
         circleColor: theme.colors.graySilver,
         barColor: theme.colors.graySilver,
         textColor: theme.colors.graySilver,
-        title: 'Etude et devis',
-        caption: 'Synergys vous remet votre étude et votre devis.',
+        title: 'Etude et offre précontractuelle',
+        caption: 'Synergys vous remet votre étude et votre offre précontractuelle.',
       },
       {
         circleColor: theme.colors.graySilver,
         barColor: theme.colors.graySilver,
         textColor: theme.colors.graySilver,
         title: 'Travaux',
-        caption: 'Le devis accepté, nous entamons les travaux.',
+        caption: 'offre précontractuelle acceptée, nous entamons les travaux.',
       },
       {
         circleColor: theme.colors.graySilver,

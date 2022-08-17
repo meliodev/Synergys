@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.6"
+export const appVersion = "1.5.11"
 
 export const constants = {
     ScreenWidth: width,
@@ -159,9 +159,27 @@ export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
-export const generableDocTypes = ["Devis", "Facture", "Fiche EEB", 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys', 'Visite technique']
+export const generableDocTypes = [
+    "Devis",
+    "Offre précontractuelle",
+    "Facture",
+    "Fiche EEB",
+    "Dossier de cheminement", 
+    'PV réception',
+    'Mandat MaPrimeRénov',
+    'Mandat Synergys',
+    'Visite technique'
+]
 export const onlyImportableDocTypes = []
-export const masculinsDocTypes = ['Devis', 'Bon de commande', 'Dossier CEE', 'PV réception', 'Mandat MaPrimeRénov', 'Mandat Synergys']
+export const masculinsDocTypes = [
+    'Devis',
+    'Bon de commande',
+    'Dossier CEE',
+    'PV réception',
+    'Mandat MaPrimeRénov',
+    'Mandat Synergys',
+    "Dossier de cheminement",
+]
 
 export const phases = [
     { label: 'Prospect', value: 'Prospect', id: 'init' },
@@ -300,11 +318,42 @@ export const collectionScreenNameMap = {
 }
 
 //Auto-Sign docs
-export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Facture", "PV réception"]
+export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Offre précontractuelle", "Facture", "PV réception"]
 export const docsConfig = (index) => {
 
     const config = {
+        //obsolete: only for old documents
         "Devis": {
+            signatures: [
+                {
+                    pageIndex: 1,
+                    position: {
+                        x: 75,
+                        y: 440,
+                        size: 10,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
+                    }
+                },
+                {
+                    pageIndex: 5,
+                    position: {
+                        x: 250,
+                        y: 137,
+                        size: 10,
+                        lineHeight: 10,
+                        color: rgb(0, 0, 0),
+                    }
+                }
+            ],
+            genNavigation: {
+                titleText: "Choix de la commande",
+                listScreen: "ListOrders",
+                creationScreen: "CreateOrder",
+                popCount: index === 0 ? 3 : 2,
+            }
+        },
+        "Offre précontractuelle": {
             signatures: [
                 {
                     pageIndex: 1,
@@ -464,4 +513,7 @@ export const docsConfig = (index) => {
 //##Device Info
 import DeviceInfo from "react-native-device-info"
 
-export const isTablet = DeviceInfo.isTablet()
+export const isTablet = DeviceInfo.isTablet() 
+
+import { allDocTypes } from './utils'
+

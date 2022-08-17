@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { StyleSheet, ActivityIndicator } from "react-native"
+import React, { useState } from "react";
+import { StyleSheet, ActivityIndicator, Keyboard, TouchableOpacity } from "react-native"
 import Dialog from 'react-native-dialog'
 import * as theme from "../core/theme";
 
@@ -15,40 +15,48 @@ const CommentDialog = ({
 
     const [comment, setComment] = useState('')
     const clearComment = () => setComment('')
+    const titleContent = loading ? "Traitement en cours..." : title
 
-    if (loading)
-        return (
-            <Dialog.Container visible={isVisible}>
-                <Dialog.Title style={[theme.customFontMSregular.header, { marginBottom: 5 }]}>Traitement en cours...</Dialog.Title>
+    return (
+        <Dialog.Container
+            visible={isVisible}
+            onBackdropPress={() => Keyboard.dismiss()}
+        >
+            <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{titleContent}</Dialog.Title>
+            {loading &&
                 <ActivityIndicator color={theme.colors.primary} size='small' />
-            </Dialog.Container>
-        )
-
-    else return (
-        <Dialog.Container visible={isVisible}>
-            <Dialog.Title style={[theme.customFontMSsemibold.header, { marginBottom: 5 }]}>{title}</Dialog.Title>
-            <Dialog.Input
-                label={description}
-                returnKeyType="done"
-                value={comment}
-                onChangeText={comment => setComment(comment)}
-               // autoFocus={isVisible}
-                autoFocus={false}
-                keyboardType={keyboardType} />
-
-            <Dialog.Button
-                label="Annuler"
-                onPress={onCancel}
-                style={{ color: theme.colors.error }}
-            />
-            <Dialog.Button
-                label="Valider"
-                onPress={() => onSubmit(comment, clearComment)}
-                style={{ color: theme.colors.primary }}
-            />
+            }
+            {!loading &&
+                <Dialog.Input
+                    label={description}
+                    returnKeyType="done"
+                    value={comment}
+                    onChangeText={comment => setComment(comment)}
+                    autoFocus={isVisible}
+                    multiline={true}
+                    numberOfLines={4}
+                    keyboardType={keyboardType}
+                    style={{ color: theme.colors.gray_dark }}
+                />
+            }
+            {!loading &&
+                <Dialog.Button
+                    label="Annuler"
+                    onPress={onCancel}
+                    style={{ color: theme.colors.error }}
+                />
+            }
+            {!loading &&
+                <Dialog.Button
+                    label="Valider"
+                    onPress={() => onSubmit(comment, clearComment)}
+                    style={{ color: theme.colors.primary }}
+                />
+            }
         </Dialog.Container>
     )
 }
+
 const styles = StyleSheet.create({
     container: {
         width: "100%",
