@@ -724,7 +724,7 @@ export const version8 = {
                         title: 'Créer une visite technique',
                         instructions: 'Créer une visite technique',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: 'Commercial', //Directeur technique
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -739,7 +739,7 @@ export const version8 = {
                         title: 'Valider la date de la visite technique',
                         instructions: 'Valider la date de la visite technique',
                         actionOrder: 2,
-                        responsable: 'Commercial',
+                        responsable: 'Commercial',  //Directeur technique
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -772,7 +772,7 @@ export const version8 = {
                     {
                         id: 'poseurAffectation',
                         title: 'Affecter un technicien à la visite technique',
-                        instructions: 'Affecter un technicien à la visite technique',
+                        instructions: 'Affecter un technicien à la visite technique',  //Directeur technique
                         actionOrder: 3,
                         responsable: 'Responsable technique',
                         collection: 'Agenda',
@@ -800,7 +800,7 @@ export const version8 = {
                     //##done:task: Choisir les types de travaux
                     {
                         id: 'workTypesSelection',
-                        title: 'Selectionnez les types de travaux',
+                        title: 'Selectionnez les types de travaux',  //technicien
                         instructions: "Appuyer sur modifier pour selectionner les types de travaux. Ou appuyer sur valider pour passer à l'action suivante.",
                         actionOrder: 4,
                         collection: "Projects",
@@ -1102,7 +1102,7 @@ export const version8 = {
                             {
                                 label: 'OUI',
                                 id: 'confirm',
-                                nextStep: 'poseurValidation',
+                                nextStep: 'facturationOption1',
                                 onSelectType: 'transition',
                             },
                         ],
@@ -1157,204 +1157,205 @@ export const version8 = {
                     },
                 ],
             },
-            poseurValidation: {
-                title: 'Validation du technicien',
-                instructions: '',
-                stepOrder: 6,
-                actions: [
-                    {
-                        id: 'maintainanceContractChoice',
-                        title: 'Voulez-vous initier le contrat de maintenance ?',
-                        instructions: '',
-                        actionOrder: 1,
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'cancel',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
-                            {
-                                label: 'OUI',
-                                id: 'confirm',
-                                nextStep: 'maintainanceContract',
-                                onSelectType: 'transition',
-                            },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                ],
-            },
-            maintainanceContract: {
-                title: 'Contrat maintenance',
-                instructions: '',
-                stepOrder: 7,
-                actions: [
-                    {
-                        id: 'commercialPropositionChoice',
-                        title: 'Accepter la proposition commerciale',
-                        instructions: '',
-                        actionOrder: 1,
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'skip',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                            },
-                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'mandatSepaCreation',
-                        title: 'Créer/Importer un mandat SEPA',
-                        instructions: 'Créer/Importer un mandat SEPA',
-                        actionOrder: 2,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Mandat SEPA",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'skip',
-                                label: 'Décider plus tard, passer à la facturation',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                            },
-                            {
-                                id: 'upload',
-                                label: 'Importer le document',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedSEPACreation',
-                        title: 'Signer le mandat SEPA',
-                        instructions: 'Signer le mandat SEPA',
-                        actionOrder: 3,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Mandat SEPA",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                id: 'cancel',
-                                label: 'Décider plus tard, passer à la facturation',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                id: 'sign',
-                                label: 'Signer le mandat SEPA',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'contractCreation',
-                        title: 'Créer/Importer un contrat',
-                        instructions: 'Créer/Importer un contrat',
-                        actionOrder: 4,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'skip',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                            },
-                            {
-                                label: 'Importer le contrat',
-                                id: 'upload',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedContractCreation',
-                        title: 'Signer le contrat',
-                        instructions: 'Signer le contrat',
-                        actionOrder: 5,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'cancel',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                label: 'Signer le contrat',
-                                id: 'sign',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                        nextStep: 'facturationOption1',
-                    },
-                    //#task: Add last action multi-choice (contrat "en cours" or "terminé")
-                ],
-            },
+            //##draft
+            // poseurValidation: {
+            //     title: 'Validation du technicien',
+            //     instructions: '',
+            //     stepOrder: 6,
+            //     actions: [ 
+            //         {
+            //             id: 'maintainanceContractChoice',
+            //             title: 'Voulez-vous initier le contrat de maintenance ?',
+            //             instructions: '',
+            //             actionOrder: 1,
+            //             verificationType: 'multiple-choices',
+            //             comment: '', //motif
+            //             choices: [
+            //                 {
+            //                     label: 'Décider plus tard, passer à la facturation',
+            //                     id: 'cancel',
+            //                     nextStep: 'facturationOption1',
+            //                     onSelectType: 'transition',
+            //                     commentRequired: true,
+            //                 }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+            //                 {
+            //                     label: 'OUI',
+            //                     id: 'confirm',
+            //                     nextStep: 'maintainanceContract',
+            //                     onSelectType: 'transition',
+            //                 },
+            //             ],
+            //             responsable: 'Poseur',
+            //             status: 'pending',
+            //         },
+            //     ],
+            // },
+            // maintainanceContract: {
+            //     title: 'Contrat maintenance',
+            //     instructions: '',
+            //     stepOrder: 7,
+            //     actions: [
+            //         {
+            //             id: 'commercialPropositionChoice',
+            //             title: 'Accepter la proposition commerciale',
+            //             instructions: '',
+            //             actionOrder: 1,
+            //             type: 'manual', //Check manually
+            //             verificationType: 'multiple-choices',
+            //             comment: '', //motif
+            //             choices: [
+            //                 {
+            //                     label: 'Décider plus tard, passer à la facturation',
+            //                     id: 'skip',
+            //                     nextStep: 'facturationOption1',
+            //                     onSelectType: 'transition',
+            //                 },
+            //                 { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
+            //             ],
+            //             responsable: 'Poseur',
+            //             status: 'pending',
+            //         },
+            //         {   //##new
+            //             id: 'mandatSepaCreation',
+            //             title: 'Créer/Importer un mandat SEPA',
+            //             instructions: 'Créer/Importer un mandat SEPA',
+            //             actionOrder: 2,
+            //             responsable: 'Poseur',
+            //             verificationType: 'doc-creation',
+            //             collection: 'Documents',
+            //             documentId: "", //creation
+            //             params: {
+            //                 documentType: "Mandat SEPA",
+            //             },
+            //             //Updates documentId to view the "onProgress uploading document"
+            //             queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
+            //             //Verification:
+            //             queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
+            //             comment: '', //motif
+            //             choices: [
+            //                 {
+            //                     id: 'skip',
+            //                     label: 'Décider plus tard, passer à la facturation',
+            //                     nextStep: 'facturationOption1',
+            //                     onSelectType: 'transition',
+            //                 },
+            //                 {
+            //                     id: 'upload',
+            //                     label: 'Importer le document',
+            //                     onSelectType: 'navigation',
+            //                 },
+            //             ],
+            //             status: 'pending',
+            //         },
+            //         {   //##new
+            //             id: 'signedSEPACreation',
+            //             title: 'Signer le mandat SEPA',
+            //             instructions: 'Signer le mandat SEPA',
+            //             actionOrder: 3,
+            //             responsable: 'Client',
+            //             verificationType: 'doc-creation',
+            //             collection: 'Documents',
+            //             documentId: "", //edit
+            //             params: {
+            //                 documentType: "Mandat SEPA",
+            //                 isSignature: true
+            //             },
+            //             //Updates documentId to view the "onProgress uploading document"
+            //             queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
+            //             //Verification:
+            //             queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
+            //             comment: "",
+            //             choices: [
+            //                 {
+            //                     id: 'cancel',
+            //                     label: 'Décider plus tard, passer à la facturation',
+            //                     nextStep: 'facturationOption1',
+            //                     onSelectType: 'transition',
+            //                     commentRequired: true,
+            //                 },
+            //                 {
+            //                     id: 'sign',
+            //                     label: 'Signer le mandat SEPA',
+            //                     onSelectType: 'navigation',
+            //                 },
+            //             ],
+            //             status: 'pending',
+            //         },
+            //         {   //##new
+            //             id: 'contractCreation',
+            //             title: 'Créer/Importer un contrat',
+            //             instructions: 'Créer/Importer un contrat',
+            //             actionOrder: 4,
+            //             responsable: 'Poseur',
+            //             verificationType: 'doc-creation',
+            //             collection: 'Documents',
+            //             documentId: "", //creation
+            //             params: {
+            //                 documentType: "Contrat CGU-CGV",
+            //             },
+            //             //Updates documentId to view the "onProgress uploading document"
+            //             queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
+            //             //Verification:
+            //             queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
+            //             comment: '', //motif
+            //             choices: [
+            //                 {
+            //                     label: 'Décider plus tard, passer à la facturation',
+            //                     id: 'skip',
+            //                     nextStep: 'facturationOption1',
+            //                     onSelectType: 'transition',
+            //                 },
+            //                 {
+            //                     label: 'Importer le contrat',
+            //                     id: 'upload',
+            //                     onSelectType: 'navigation',
+            //                 },
+            //             ],
+            //             status: 'pending',
+            //         },
+            //         {   //##new
+            //             id: 'signedContractCreation',
+            //             title: 'Signer le contrat',
+            //             instructions: 'Signer le contrat',
+            //             actionOrder: 5,
+            //             responsable: 'Client',
+            //             verificationType: 'doc-creation',
+            //             collection: 'Documents',
+            //             documentId: "", //edit
+            //             params: {
+            //                 documentType: "Contrat CGU-CGV",
+            //                 isSignature: true
+            //             },
+            //             //Updates documentId to view the "onProgress uploading document"
+            //             queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
+            //             //Verification:
+            //             queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
+            //             comment: "",
+            //             choices: [
+            //                 {
+            //                     label: 'Décider plus tard, passer à la facturation',
+            //                     id: 'cancel',
+            //                     nextStep: 'facturationOption1',
+            //                     onSelectType: 'transition',
+            //                     commentRequired: true,
+            //                 },
+            //                 {
+            //                     label: 'Signer le contrat',
+            //                     id: 'sign',
+            //                     onSelectType: 'navigation',
+            //                 },
+            //             ],
+            //             status: 'pending',
+            //             nextStep: 'facturationOption1',
+            //         },
+            //         //#task: Add last action multi-choice (contrat "en cours" or "terminé")
+            //     ],
+            // },
             facturationOption1: {
                 //no conversion
                 title: 'Facturation',
                 instructions: '',
-                stepOrder: 8,
+                stepOrder: 6,
                 actions: [
                     {
                         id: 'billCreation',
@@ -1382,7 +1383,7 @@ export const version8 = {
                 //conversion
                 title: 'Finalisation de la facturation',
                 instructions: '',
-                stepOrder: 9,
+                stepOrder: 7,
                 actions: [
                     {
                         //##task: add multiCommentsPicker
@@ -1437,7 +1438,7 @@ export const version8 = {
                     },
                     {
                         id: 'advValidation',
-                        title: "Validation de la facture par l'ADV", //#task allow adv to view Offre précontractuelle before validating (multi-choice: voir/valider)
+                        title: "Validation de la facture par le DAF", //#task allow adv to view Offre précontractuelle before validating (multi-choice: voir/valider)
                         instructions: '',
                         actionOrder: 2,
                         type: 'manual',
@@ -1507,7 +1508,7 @@ export const version8 = {
             emailBill: {
                 title: 'Envoi facture par mail',
                 instructions: '',
-                stepOrder: 10,
+                stepOrder: 8,
                 actions: [
                     //task: verify if bill & attestation fluide are still existing
                     {
@@ -1563,7 +1564,7 @@ export const version8 = {
                 title: 'Satisfaction client',
                 instructions:
                     "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 11,
+                stepOrder: 9,
                 actions: [
                     {
                         id: 'clientReview',
@@ -1580,70 +1581,70 @@ export const version8 = {
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '2',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '3',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '4',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '5',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '6',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '7',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '8',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '9',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 saty: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                             {
                                 label: '10',
                                 onSelectType: 'commentPicker',
                                 selected: false,
                                 stay: false,
-                                nextPhase: 'maintainance',
+                                nextPhase: 'endProject',
                             },
                         ],
                         status: 'pending',
@@ -1652,154 +1653,155 @@ export const version8 = {
             },
         },
     },
-    maintainance: {
-        title: 'Maintenance',
-        instructions: '',
-        phaseOrder: 6,
-        followers: ['Admin', 'Responsable technique', 'Poseur'],
-        steps: {
-            maintainanceContract: {
-                title: 'Contrat maintenance',
-                instructions: '',
-                stepOrder: 1,
-                actions: [
-                    {
-                        id: 'commercialPropositionChoice',
-                        title: 'Accepter la proposition commerciale',
-                        instructions: '',
-                        actionOrder: 1,
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'mandatSepaCreation',
-                        title: 'Créer/Importer un mandat SEPA',
-                        instructions: 'Créer/Importer un mandat SEPA',
-                        actionOrder: 2,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Mandat SEPA",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'upload',
+    //##draft
+    // maintainance: {
+    //     title: 'Maintenance',
+    //     instructions: '',
+    //     phaseOrder: 6,
+    //     followers: ['Admin', 'Responsable technique', 'Poseur'],
+    //     steps: {
+    //         maintainanceContract: {
+    //             title: 'Contrat maintenance',
+    //             instructions: '',
+    //             stepOrder: 1,
+    //             actions: [
+    //                 {
+    //                     id: 'commercialPropositionChoice',
+    //                     title: 'Accepter la proposition commerciale',
+    //                     instructions: '',
+    //                     actionOrder: 1,
+    //                     type: 'manual', //Check manually
+    //                     verificationType: 'multiple-choices',
+    //                     comment: '', //motif
+    //                     choices: [
+    //                         { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
+    //                     ],
+    //                     responsable: 'Poseur',
+    //                     status: 'pending',
+    //                 },
+    //                 {   //##new
+    //                     id: 'mandatSepaCreation',
+    //                     title: 'Créer/Importer un mandat SEPA',
+    //                     instructions: 'Créer/Importer un mandat SEPA',
+    //                     actionOrder: 2,
+    //                     responsable: 'Poseur',
+    //                     verificationType: 'doc-creation',
+    //                     collection: 'Documents',
+    //                     documentId: "", //creation
+    //                     params: {
+    //                         documentType: "Mandat SEPA",
+    //                     },
+    //                     //Updates documentId to view the "onProgress uploading document"
+    //                     queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
+    //                     //Verification:
+    //                     queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
+    //                     comment: '', //motif
+    //                     choices: [
+    //                         {
+    //                             id: 'upload',
 
-                                label: 'Importer le document',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedSEPACreation',
-                        title: 'Signer le mandat SEPA',
-                        instructions: 'Signer le mandat SEPA',
-                        actionOrder: 3,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Mandat SEPA",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                id: 'sign',
-                                label: 'Signer le mandat SEPA',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'contractCreation',
-                        title: 'Créer/Importer un contrat',
-                        instructions: 'Créer/Importer un contrat',
-                        actionOrder: 4,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'upload',
-                                label: 'Importer le contrat',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedContractCreation',
-                        title: 'Signer le contrat',
-                        instructions: 'Signer le contrat',
-                        actionOrder: 5,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                id: 'sign',
-                                label: 'Signer le contrat',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {
-                        id: 'endProject',
-                        title: 'Finaliser le projet',
-                        instructions: '',
-                        actionOrder: 6,
-                        type: 'manual',
-                        verificationType: 'validation',
-                        comment: '',
-                        responsable: 'ADV',
-                        status: 'pending',
-                        nextPhase: 'endProject',
-                    },
-                ],
-            },
-        },
-    },
+    //                             label: 'Importer le document',
+    //                             onSelectType: 'navigation',
+    //                         },
+    //                     ],
+    //                     status: 'pending',
+    //                 },
+    //                 {   //##new
+    //                     id: 'signedSEPACreation',
+    //                     title: 'Signer le mandat SEPA',
+    //                     instructions: 'Signer le mandat SEPA',
+    //                     actionOrder: 3,
+    //                     responsable: 'Client',
+    //                     verificationType: 'doc-creation',
+    //                     collection: 'Documents',
+    //                     documentId: "", //edit
+    //                     params: {
+    //                         documentType: "Mandat SEPA",
+    //                         isSignature: true
+    //                     },
+    //                     //Updates documentId to view the "onProgress uploading document"
+    //                     queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
+    //                     //Verification:
+    //                     queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
+    //                     comment: "",
+    //                     choices: [
+    //                         {
+    //                             id: 'sign',
+    //                             label: 'Signer le mandat SEPA',
+    //                             onSelectType: 'navigation',
+    //                         },
+    //                     ],
+    //                     status: 'pending',
+    //                 },
+    //                 {   //##new
+    //                     id: 'contractCreation',
+    //                     title: 'Créer/Importer un contrat',
+    //                     instructions: 'Créer/Importer un contrat',
+    //                     actionOrder: 4,
+    //                     responsable: 'Poseur',
+    //                     verificationType: 'doc-creation',
+    //                     collection: 'Documents',
+    //                     documentId: "", //creation
+    //                     params: {
+    //                         documentType: "Contrat CGU-CGV",
+    //                     },
+    //                     //Updates documentId to view the "onProgress uploading document"
+    //                     queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
+    //                     //Verification:
+    //                     queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
+    //                     comment: '', //motif
+    //                     choices: [
+    //                         {
+    //                             id: 'upload',
+    //                             label: 'Importer le contrat',
+    //                             onSelectType: 'navigation',
+    //                         },
+    //                     ],
+    //                     status: 'pending',
+    //                 },
+    //                 {   //##new
+    //                     id: 'signedContractCreation',
+    //                     title: 'Signer le contrat',
+    //                     instructions: 'Signer le contrat',
+    //                     actionOrder: 5,
+    //                     responsable: 'Client',
+    //                     verificationType: 'doc-creation',
+    //                     collection: 'Documents',
+    //                     documentId: "", //edit
+    //                     params: {
+    //                         documentType: "Contrat CGU-CGV",
+    //                         isSignature: true
+    //                     },
+    //                     //Updates documentId to view the "onProgress uploading document"
+    //                     queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
+    //                     //Verification:
+    //                     queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
+    //                     comment: "",
+    //                     choices: [
+    //                         {
+    //                             id: 'sign',
+    //                             label: 'Signer le contrat',
+    //                             onSelectType: 'navigation',
+    //                         },
+    //                     ],
+    //                     status: 'pending',
+    //                 },
+    //                 {
+    //                     id: 'endProject',
+    //                     title: 'Finaliser le projet',
+    //                     instructions: '',
+    //                     actionOrder: 6,
+    //                     type: 'manual',
+    //                     verificationType: 'validation',
+    //                     comment: '',
+    //                     responsable: 'ADV',
+    //                     status: 'pending',
+    //                     nextPhase: 'endProject',
+    //                 },
+    //             ],
+    //         },
+    //     },
+    // },
     endProject: {
         title: 'Finalisation',
         instructions: '',

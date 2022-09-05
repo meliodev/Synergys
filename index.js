@@ -2,7 +2,7 @@
  * @format
  */
 
-import React from "react"
+import * as React from "react"
  import { AppRegistry, Platform, Text } from 'react-native';
 import App from './src/App';
 import { name as appName } from './app.json';

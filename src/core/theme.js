@@ -7,7 +7,7 @@ const baseColors = {
   gray1: "#F1F2F7"
 }
 
-const colors = { 
+const colors = {    
   statusbar: "#013220",
   background: '#ffffff', //new
   primary: "#25D366", //new

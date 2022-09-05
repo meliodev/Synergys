@@ -773,7 +773,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
       var { model: formPages, globalConfig } = mandatSynergysModel()
     }
     if (pdfType === "VisitesTech") {
-      var { model: formPages, checklistBase64 } = params
+      var { model: formPages, checklistBase64 } = params   
       var pdfDoc = await mergePDFDocuments(checklistBase64)
     }
     else var pdfDoc = await PDFDocument.load(originalPdfBase64)
@@ -782,7 +782,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     const pages = pdfDoc.getPages()
 
     //Theme config
-    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman) 
     const colors = {
       primary: rgb(0.576, 0.768, 0.486),
       black: rgb(0, 0, 0),
