@@ -17,7 +17,7 @@ export const constants = {
 export const ScreenWidth = width
 export const ScreenHeight = height
 
-export const latestProcessVersion = "version8"
+export const latestProcessVersion = "version9"
 
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },

@@ -1,4 +1,4 @@
-Process documentation: (45 actions)
+Process V8 documentation: (45 actions)
 
 1. Initialisation
 1.1 Création prospect
