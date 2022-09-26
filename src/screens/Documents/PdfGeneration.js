@@ -683,8 +683,8 @@ export default class PdfGeneration extends Component {
         }, //calculable
 
         { label: 'PRIME CEE COUP DE POUCE', value: `-${formatPrice(primeCEE)}` },
-        { label: 'Maprimerévov', value: `-${formatPrice(primeRenov)}` },
-        { label: 'Aides région', value: `-${formatPrice(aidRegion)}` },
+        { label: 'Maprime Révov', value: `-${formatPrice(primeRenov)}` },
+        //{ label: 'Aides région', value: `-${formatPrice(aidRegion)}` },
 
         {
           label: 'Net à payer',

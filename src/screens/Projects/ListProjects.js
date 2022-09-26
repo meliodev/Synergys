@@ -16,7 +16,7 @@ import Background from '../../components/NewBackground'
 import CustomIcon from '../../components/CustomIcon'
 
 import * as theme from '../../core/theme';
-import { constants } from '../../core/constants';
+import { constants, phases } from '../../core/constants';
 import { toggleFilter, setFilter, handleFilter, formatRow } from '../../core/utils'
 import { configureQuery } from '../../core/privileges'
 import { fetchDocuments } from '../../api/firestore-api';
@@ -29,16 +29,6 @@ const states = [
     { label: 'En cours', value: 'En cours' },
     { label: 'Terminé', value: 'Terminé' },
     { label: 'Annulé', value: 'Annulé' },
-]
-
-const steps = [
-    { label: 'Toutes', value: '' },
-    { label: 'Prospect', value: 'Prospect' },
-    { label: 'Visite technique préalable', value: 'Visite technique préalable' },
-    { label: 'Présentation étude', value: 'Présentation étude' },
-    { label: 'Visite technique', value: 'Visite technique' },
-    { label: 'Installation', value: 'Installation' },
-    { label: 'Maintenance', value: 'Maintenance' },
 ]
 
 class ListProjects extends Component {
@@ -159,7 +149,7 @@ class ListProjects extends Component {
                         setFilter={(field, value) => setFilter(this, field, value)}
                         resetFilter={() => this.setState({ step: '', state: '', client: { id: '', fullName: '' } })}
                         options={[
-                            { id: 0, type: 'picker', title: "Étape", values: steps, value: step, field: 'step' },
+                            { id: 0, type: 'picker', title: "Étape", values: phases, value: step, field: 'step' },
                             { id: 1, type: 'picker', title: "État", values: states, value: state, field: 'state' },
                             { id: 2, type: 'screen', title: "Client", value: client.fullName, field: 'client', screen: 'ListClients', titleText: 'Filtre par client' },
                         ]}

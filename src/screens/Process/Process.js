@@ -109,6 +109,7 @@ class Process extends Component {
     renderStandardView(canWrite) {
         const { project, process } = this.state
         const showProcessAction = project && process
+        const isNotDesignOffice = this.props.role.id !== "designoffice"
         return (
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
@@ -121,7 +122,7 @@ class Process extends Component {
                         :
                         this.processNotFound()
                     }
-                    {this.viewMore()}
+                    {isNotDesignOffice && this.viewMore()}
                 </View>
             </KeyboardAvoidingView>
 

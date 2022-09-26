@@ -912,5 +912,69 @@ export const privilleges = {
             "canCreate": true,
             "canUpdate": true
         }
+    },
+    "Bureau d'étude": {
+        "tasks": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "users": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "requests": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "orders": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "messages": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "teams": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "clients": {
+            "canDelete": false,
+            "canRead": false,
+            "canCreate": false,
+            "canUpdate": false
+        },
+        "projects": {
+            "queryFilters": [
+                { "sort": "desc", "filterOrder": 2, "field": "createdAt", "clause": "orderBy" },
+                { "operation": "==", "value": false, "filterOrder": "1", "clause": "where", "filter": "deleted" }
+            ],
+            "canDelete": false,
+            "canRead": true,
+            "canCreate": false,
+            "canUpdate": true
+        },
+        "documents": {
+            "queryFilters": [
+                { "sort": "desc", "filterOrder": 2, "field": "createdAt", "clause": "orderBy" },
+                { "operation": "==", "value": false, "filterOrder": "1", "clause": "where", "filter": "deleted" }
+            ],
+            "canDelete": false,
+            "canRead": true,
+            "canCreate": true,
+            "canUpdate": false
+        }
     }
 }

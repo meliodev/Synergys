@@ -10,7 +10,7 @@ import ShortUniqueId from 'short-unique-id'
 import UUIDGenerator from 'react-native-uuid-generator'
 import { PDFDocument, degrees, PageSizes, StandardFonts, rgb } from 'pdf-lib'
 import _ from 'lodash'
-import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faPauseCircle, faSave, faUserHardHat } from '@fortawesome/pro-light-svg-icons'
+import { faCheck, faFlag, faTimes, faClock, faUpload, faFileSignature, faSackDollar, faEnvelopeOpenDollar, faEye, faPen, faBan, faEllipsisH, faPauseCircle, faSave, faUserHardHat } from '@fortawesome/pro-light-svg-icons'
 import Geocoder from 'react-native-geocoding';
 
 import moment from 'moment';
@@ -18,7 +18,7 @@ import 'moment/locale/fr'
 moment.locale('fr')
 
 import * as theme from './theme'
-import { downloadDir, errorMessages, roles, constants, isTablet, collectionScreenNameMap } from './constants'
+import { downloadDir, errorMessages, roles, constants, isTablet, collectionScreenNameMap, publicDocTypes, allDocTypes } from './constants'
 import { mandatSynergysModel, pvReceptionModel } from "./forms";
 import { ficheEEBModel } from './forms/ficheEEB/ficheEEBModel'
 import { mandatMPRModel } from './forms/mandatMPR/mandatMPRModel'
@@ -218,6 +218,10 @@ export const configChoiceIcon = (choice) => {
       element.image = require("../assets/icons/cofidisLogo.png")
       element.imageStyle = { width, height: width / (5000 / 2749) }
     }
+    else if (element.image === "domofinanceLogo") {
+      element.image = require("../assets/icons/domofinanceLogo.jpg")
+      element.imageStyle = { width, height: width / (500 / 296) }
+    }
   }
 
   else {
@@ -235,6 +239,7 @@ export const configChoiceIcon = (choice) => {
     else if (element.id === 'financing') { element.icon = faEnvelopeOpenDollar; element.iconColor = theme.colors.secondary }
     else if (element.id === 'block') { element.icon = faBan; element.iconColor = theme.colors.error }
     else if (element.id === 'pending') { element.icon = faPauseCircle; element.iconColor = theme.colors.gray_dark }
+    else if (element.id === 'other') { element.icon = faEllipsisH; element.iconColor = theme.colors.gray_dark }
   }
 
   return element
@@ -484,10 +489,10 @@ export const downloadFile = async (fileName, url, open = true, updateProgress) =
           updateProgress(downloadProgress)
         }
       })
-      .then(() => { 
-       // FileViewer.open(path, { showOpenWithDialog: true })
-       console.log("Opening ??")
-       })
+      .then(() => {
+        // FileViewer.open(path, { showOpenWithDialog: true })
+        console.log("Opening ??")
+      })
       .catch((e) => { throw new Error(e) })
   }
 
@@ -766,14 +771,14 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     }
     else if (pdfType === "MandatsMPR") {
       var originalPdfBase64 = mandatMPRBase64
-      var formPages = mandatMPRModel 
+      var formPages = mandatMPRModel
     }
     else if (pdfType === "MandatsSynergys") {
       var originalPdfBase64 = mandatSynergysBase64
       var { model: formPages, globalConfig } = mandatSynergysModel()
     }
     if (pdfType === "VisitesTech") {
-      var { model: formPages, checklistBase64 } = params   
+      var { model: formPages, checklistBase64 } = params
       var pdfDoc = await mergePDFDocuments(checklistBase64)
     }
     else var pdfDoc = await PDFDocument.load(originalPdfBase64)
@@ -782,7 +787,7 @@ export const generatePdfForm = async (formInputs, pdfType, params) => {
     const pages = pdfDoc.getPages()
 
     //Theme config
-    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman) 
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
     const colors = {
       primary: rgb(0.576, 0.768, 0.486),
       black: rgb(0, 0, 0),
@@ -1166,7 +1171,6 @@ export const pickDoc = async (genName = false, type = [DocumentPicker.types.allF
   }
 }
 
-import { faCloudUploadAlt, faMagic, faFileInvoice, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFilePlus, faFileSearch, faFileAlt, faFileEdit, fal } from '@fortawesome/pro-light-svg-icons'
 import { highRoles } from './constants'
 
 import { mandatMPRBase64 } from '../assets/files/mandatMPRBase64';
@@ -1174,63 +1178,7 @@ import { ficheEEBBase64 } from '../assets/files/ficheEEBBase64';
 import { pvReceptionBase64 } from '../assets/files/pvReceptionBase64';
 import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
 import { lineBreaker } from '../screens/Documents/PdfGeneration';
-import { not } from 'react-native-reanimated';
 
-const publicDocTypes = [
-  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
-  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
-  { label: 'Autre', value: 'Autre', icon: faFile },
-] 
-
-export const privateDocTypes = [
-  //{ label: 'Devis', value: 'Devis', icon: faFileInvoice },
-  { label: 'Offre précontractuelle', value: 'Offre précontractuelle', icon: faFileInvoice },
-  { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
-  { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
-  { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
-  { label: 'Dossier de cheminement', value: 'Dossier de cheminement', icon: faFileAlt },
-  { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
-  // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
-  { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
-  // { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
-  { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
-  { label: 'PV réception', value: 'PV réception', icon: faReceipt },
-  { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
-  { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
-  { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
-  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
-  { label: "Relevé d'impôt", value: "Relevé d'impôt", icon: faFile },
-  { label: "Justificatif de domicile", value: "Justificatif de domicile", icon: faFile },
-  { label: "Plan cadastral", value: "Plan cadastral", icon: faFile },
-  { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
-]
-
-export const allDocTypes = [
-  { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
-  //{ label: 'Devis', value: 'Devis', icon: faFileInvoice },
-  { label: 'Offre précontractuelle', value: 'Offre précontractuelle', icon: faFileInvoice },
-  { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
-  { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
-  { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
-  { label: 'Dossier de cheminement', value: 'Dossier de cheminement', icon: faFileAlt },
-  { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
-  // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
-  { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
-  // { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
-  { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
-  { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
-  { label: 'PV réception', value: 'PV réception', icon: faReceipt },
-  { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
-  { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
-  { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
-  { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
-
-  { label: "Relevé d'impôt", value: "Relevé d'impôt", icon: faFile },
-  { label: "Justificatif de domicile", value: "Justificatif de domicile", icon: faFile },
-  { label: "Plan cadastral", value: "Plan cadastral", icon: faFile },
-  { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
-  { label: 'Autre', value: 'Autre', icon: faFile },
-]
 
 export const docType_LabelValueMap = (value) => allDocTypes.filter((type) => type.value === value)[0].label
 

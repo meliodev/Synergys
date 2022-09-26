@@ -35,6 +35,7 @@ const rolesPicker = {
     { label: 'Responsable technique', value: 'Responsable technique' },
     { label: 'Poseur', value: 'Poseur' },
     { label: 'Back office', value: 'Back office' },
+    { label: "Bureau d'étude", value: "Bureau d'étude" },
   ],
   2: [
     { label: 'Commercial', value: 'Commercial' },
@@ -78,7 +79,7 @@ class CreateUser extends Component {
 
       loading: false,
       loadingDialog: false,
-      error: "", 
+      error: "",
       toastType: '',
       toastMessage: '',
     }
@@ -294,8 +295,7 @@ class CreateUser extends Component {
                 textContentType='telephoneNumber'
                 keyboardType='phone-pad'
                 dataDetectorTypes='phoneNumber'
-                //render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} 
-                />
+                render={props => <TextInputMask {...props} mask="+33 [0] [00] [00] [00] [00]" />} />
 
               <MyInput
                 label="Email *"

@@ -21,7 +21,8 @@ const menuPrivilleges = {
     com: ['home', 'inbox', 'projects', 'planning', 'clients', 'requests', 'documents', 'simulator', 'news', "settings", 'logout'],
     tech: ['home', 'inbox', 'projects', 'planning', 'users', 'clients', 'requests', 'orders', 'documents', 'simulator', 'news', "settings", 'logout'],
     poseur: ['projects', 'inbox', 'planning', 'requests', 'news', "settings", 'logout'],
-    client: ['projects', 'inbox', 'requests', 'documents', 'news', "settings", 'logout']
+    client: ['projects', 'inbox', 'requests', 'documents', 'news', "settings", 'logout'],
+    designoffice: ['projects', 'inbox', 'news', "settings", 'logout'],
 }
 
 const menuItems = [

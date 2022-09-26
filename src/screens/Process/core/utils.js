@@ -1,5 +1,5 @@
-import { collectionScreenNameMap } from "../../../core/constants";
-import { docType_LabelValueMap, getTaskNatures, privateDocTypes, privateTaskTypes, taskType_LabelValueMap } from "../../../core/utils";
+import { collectionScreenNameMap, privateDocTypes } from "../../../core/constants";
+import { docType_LabelValueMap, getTaskNatures, privateTaskTypes, taskType_LabelValueMap } from "../../../core/utils";
 import { db } from '../../../firebase'
 
 import moment from 'moment';
@@ -57,6 +57,8 @@ export const buileNavigationOptions = (currentAction, project) => {
   const screenName = collectionScreenNameMap[collection]
   const screenPush = collection === "Clients" //Because already on the nav stack
 
+  console.log("1")
+
   let screenParams = {
     isProcess: true,
     project,
@@ -65,12 +67,16 @@ export const buileNavigationOptions = (currentAction, project) => {
 
   if (screenName === "UploadDocument") {
 
+    console.log("1...", buildEntityType(collection, params.documentType))
+    console.log("1...", isPrivateType(collection, params.documentType))
+
     screenParams = {
       ...screenParams,
       DocumentId: documentId || "",
       documentType: buildEntityType(collection, params.documentType),
       dynamicType: isPrivateType(collection, params.documentType),
     }
+
 
     if (params.isSignature) {
       screenParams = {
@@ -107,6 +113,9 @@ export const buileNavigationOptions = (currentAction, project) => {
       ...params.screenParams,
     }
   }
+
+  console.log("2")
+
 
   return { screenName, screenParams }
 }

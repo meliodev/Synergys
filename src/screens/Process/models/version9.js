@@ -111,8 +111,9 @@ const buildQueryFilters = (config) => {
 }
 
 
-export const version8 = {
+export const version9 = {
     init: {
+        phaseValue: "Prospect",
         title: 'Prospect',
         instructions: '',
         phaseOrder: 1,
@@ -182,6 +183,7 @@ export const version8 = {
         },
     },
     rd1: {
+        phaseValue: "Visite technique préalable",
         title: 'Visite technique préalable',
         instructions: '',
         phaseOrder: 2,
@@ -264,45 +266,44 @@ export const version8 = {
             //     ],
             // },
             housingActionFile: {
-                title: 'Évaluation des besoins',
+                title: "Évaluation des besoins ou rapport du bureau d'étude",
                 instructions: '',
                 stepOrder: 1,
                 actions: [
-                    // {   //##draft
-                    //     id: 'eebFileCreation',
-                    //     title: 'Créer une fiche Étude et Évaluation des besoins',
-                    //     instructions: 'Créer une fiche Étude et Évaluation des besoins',
-                    //     actionOrder: 1,
-                    //     responsable: 'Commercial',
-                    //     verificationType: 'doc-creation',
-                    //     collection: 'Documents',
-                    //     documentId: "", //creation
-                    //     params: {
-                    //         documentType: "Fiche EEB",
-                    //     },
-                    //     //Updates documentId to view the "onProgress uploading document"
-                    //     queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onProgress),
-                    //     //Verification:
-                    //     queryFilters: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onCreate),
-                    //     status: 'pending',
-                    //     nextStep: 'rd2Creation',
-                    // },
+                    {   //##draft
+                        id: 'eebFileCreation',
+                        title: 'Créer une fiche Étude et Évaluation des besoins',
+                        instructions: 'Créer une fiche Étude et Évaluation des besoins',
+                        actionOrder: 1,
+                        responsable: "Bureau d'étude",
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Fiche EEB",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onCreate),
+                        status: 'pending',
+                    },
                     {   //##new
                         id: 'eebFileCreation',
-                        title: 'Créer un dossier de cheminement',
-                        instructions: 'Importer un dossier de cheminement dûment rempli',
-                        actionOrder: 1,
+                        title: 'Créer un dossier client',
+                        instructions: 'Importer un dossier client dûment rempli',
+                        actionOrder: 2,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
                         params: {
-                            documentType: "Dossier de cheminement",
+                            documentType: "Dossier client",
                         },
                         //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Dossier de cheminement").create.onProgress),
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Dossier client").create.onProgress),
                         //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Dossier de cheminement").create.onCreate),
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Dossier client").create.onCreate),
                         status: 'pending',
                         nextStep: 'rd2Creation',
                     },
@@ -361,6 +362,7 @@ export const version8 = {
         },
     },
     rdn: {
+        phaseValue: "Présentation étude",
         title: 'Présentation étude',
         instructions: '',
         phaseOrder: 3,
@@ -394,11 +396,29 @@ export const version8 = {
                 instructions: '',
                 stepOrder: 2,
                 actions: [
+                    {   //##new (verify if Offre précontractuelle exists...)
+                        id: 'quoteCreation',
+                        title: 'Créer une offre précontractuelle',
+                        instructions: 'Créer une offre précontractuelle',
+                        actionOrder: 1,
+                        responsable: 'Commercial',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Offre précontractuelle",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onCreate),
+                        status: 'pending',
+                    },
                     {   //##new
                         id: 'taxStatement',
                         title: "Relevé d'impôt",
                         instructions: "Importer le Relevé d'impôt du client",
-                        actionOrder: 1,
+                        actionOrder: 2,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -416,7 +436,7 @@ export const version8 = {
                         id: 'proofOfAddress',
                         title: "Justificatif de domicile",
                         instructions: "Importer le Justificatif de domicile du client",
-                        actionOrder: 2,
+                        actionOrder: 3,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -434,7 +454,7 @@ export const version8 = {
                         id: 'cadastralMap',
                         title: "Plan cadastral",
                         instructions: "Importer le Plan cadastral du client",
-                        actionOrder: 3,
+                        actionOrder: 4,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -452,7 +472,7 @@ export const version8 = {
                         id: 'propertyTax',
                         title: "Taxe foncière",
                         instructions: "Importer la Taxe foncière du client",
-                        actionOrder: 4,
+                        actionOrder: 5,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -471,7 +491,7 @@ export const version8 = {
                         id: 'otherDocs',
                         title: 'Autre(s) document(s)',
                         instructions: "Veuillez importer tout autre document. Appuyer sur valider pour passer à l'action suivante",
-                        actionOrder: 5,
+                        actionOrder: 6,
                         responsable: 'Commercial',
                         verificationType: 'multiple-choices',
                         collection: "Documents",
@@ -480,61 +500,16 @@ export const version8 = {
                             documentType: "Autre",
                         },
                         choices: [
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                            { label: 'Continuer', id: 'confirm', onSelectType: 'validation' },
                             { label: 'Importer', id: 'upload', onSelectType: 'navigation' },
                         ],
-                        status: 'pending',
-                    },
-                    //##task: Validation du contrôle de conformité
-                    {
-                        id: 'conformityValidation',
-                        title: "Validation du contrôle de conformité",
-                        instructions: '',
-                        actionOrder: 6,
-                        type: 'manual',
-                        //verificationType: 'validation',
-                        comment: '',
-                        responsable: 'Directeur commercial',
-                        status: 'pending',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            {
-                                label: 'Annuler',
-                                id: 'cancel',
-                                nextPhase: 'cancelProject',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                label: 'Valider',
-                                id: 'confirm',
-                                onSelectType: 'validation'
-                            },
-                        ],
-                    },
-                    {   //##new (verify if Offre précontractuelle exists...)
-                        id: 'quoteCreation',
-                        title: 'Créer une offre précontractuelle',
-                        instructions: 'Créer une offre précontractuelle',
-                        actionOrder: 7,
-                        responsable: 'Commercial',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Offre précontractuelle",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Offre précontractuelle").create.onCreate),
                         status: 'pending',
                     },
                     {   //##new
                         id: 'signedQuoteCreation',
                         title: "Signer l'offre précontractuelle",
                         instructions: "Signature de l'offre précontractuelle par le client",
-                        actionOrder: 8,
+                        actionOrder: 7,
                         responsable: 'Client',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -568,7 +543,7 @@ export const version8 = {
                         id: 'mandatMPRCreation',
                         title: 'Créer un mandat MaPrimeRénov',
                         instructions: 'Créer un mandat MaPrimeRénov',
-                        actionOrder: 9,
+                        actionOrder: 8,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -586,7 +561,7 @@ export const version8 = {
                         id: 'signedMandatMPRCreation',
                         title: 'Signer le mandat MaPrimeRénov',
                         instructions: 'Signer le mandat MaPrimeRénov',
-                        actionOrder: 10,
+                        actionOrder: 9,
                         responsable: 'Client',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
@@ -615,7 +590,32 @@ export const version8 = {
                             },
                         ],
                         status: 'pending',
-                        nextStep: 'payModeValidation',
+                    },
+                    {
+                        id: 'conformityValidation',
+                        title: "Validation du contrôle de conformité",
+                        instructions: '',
+                        actionOrder: 10,
+                        type: 'manual',
+                        comment: '',
+                        responsable: 'Directeur commercial',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Annuler',
+                                id: 'cancel',
+                                nextPhase: 'cancelProject',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            },
+                            {
+                                label: 'Valider',
+                                id: 'confirm',
+                                onSelectType: 'validation',
+                                nextStep: 'payModeValidation',
+                            },
+                        ],
                     },
                 ],
             },
@@ -648,9 +648,9 @@ export const version8 = {
                         status: 'pending',
                     },
                     {
-                        id: 'financingWebsite',
+                        id: 'financingAidsWebsite',
                         title: 'Propositions de financement',
-                        instructions: '',
+                        instructions: 'Naviguer vers le lien du partenaire financier sélectionné, et suivre la procédure selon le partenaire choisi.',
                         actionOrder: 2,
                         type: 'manual',
                         comment: '',
@@ -671,10 +671,56 @@ export const version8 = {
                                 link: 'https://www.moncofidispro.fr',
                             },
                             {
+                                label: 'domofinance.com',
+                                id: 'financing',
+                                image: 'domofinanceLogo',
+                                onSelectType: 'openLink',
+                                link: 'https://www.domofinance.com/login',
+                            },
+                            {
                                 label: 'Continuer',
                                 id: 'confirm',
+                                onSelectType: 'validation',
+                            },
+                        ],
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'financingAidsSelection',
+                        title: 'Selection du partenaire financier',
+                        instructions: 'Selectionnez le partenaire financier de ce projet.',
+                        actionOrder: 3,
+                        type: 'manual',
+                        comment: '',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Adhefi.com',
+                                id: 'cashPayment',
+                                image: 'sofincoLogo',
+                                onSelectType: 'commentPicker',
                                 nextStep: 'technicalVisitCreation',
-                                onSelectType: 'transition',
+                            },
+                            {
+                                label: 'Moncofidispro.fr',
+                                id: 'financing',
+                                image: 'cofidisLogo',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                            {
+                                label: 'domofinance.com',
+                                id: 'financing',
+                                image: 'domofinanceLogo',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                            {
+                                label: 'Autres',
+                                id: 'other',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
                             },
                         ],
                         responsable: 'Commercial',
@@ -709,6 +755,7 @@ export const version8 = {
         },
     },
     technicalVisitManagement: {
+        phaseValue: "Visite technique",
         title: 'Visite technique',
         instructions: '',
         phaseOrder: 4,
@@ -786,7 +833,7 @@ export const version8 = {
                         choices: [
                             {
                                 id: 'confirm',
-                                label: 'Valider le technicien',
+                                label: 'Continuer',
                                 onSelectType: 'validation',
                             },
                             {
@@ -814,7 +861,7 @@ export const version8 = {
                         choices: [
                             // { label: 'Ignorer', id: 'cancel', onSelectType: 'validation' },
                             {
-                                label: 'Valider',
+                                label: 'Continuer',
                                 id: 'confirm',
                                 onSelectType: 'validation',
                                 nextStep: 'technicalVisitFile',
@@ -921,6 +968,32 @@ export const version8 = {
                             },
                         ],
                         status: 'pending',
+                        nextStep: "uploadQuote"
+                    },
+                ],
+            },
+            uploadQuote: {
+                title: "Devis",
+                instructions: '',
+                stepOrder: 3,
+                actions: [
+                    {   //##new
+                        id: 'uploadQuote',
+                        title: 'Importer un devis',
+                        instructions: 'Importer un devis de votre appareil',
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Devis",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Devis").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Devis").create.onCreate),
+                        status: 'pending',
                         nextPhase: "installation"
                     },
                 ],
@@ -928,6 +1001,7 @@ export const version8 = {
         },
     },
     installation: {
+        phaseValue: "En attente d'installation",
         title: "En attente d'installation",
         instructions: '',
         phaseOrder: 5,
@@ -967,7 +1041,7 @@ export const version8 = {
                         id: 'receptionInstallationMaterial',
                         title: "Réception du matériel",
                         instructions: '',
-                        actionOrder: 1,
+                        actionOrder: 2,
                         type: 'manual',
                         comment: '',
                         responsable: 'Poseur',
@@ -992,7 +1066,7 @@ export const version8 = {
                         id: 'installationDateProposition',
                         title: "Proposition de date",
                         instructions: '',
-                        actionOrder: 1,
+                        actionOrder: 3,
                         type: 'manual',
                         comment: '',
                         responsable: 'Poseur',
@@ -1017,7 +1091,7 @@ export const version8 = {
                         id: 'installationConfirmation',
                         title: "Confirmation d'installation",
                         instructions: '',
-                        actionOrder: 1,
+                        actionOrder: 4,
                         type: 'manual',
                         comment: '',
                         responsable: 'Poseur',
@@ -1142,7 +1216,7 @@ export const version8 = {
                 ],
             },
             pvCreation: {
-                title: "Création d'un PV réception",
+                title: "PV réception",
                 instructions: '',
                 stepOrder: 4,
                 actions: [
@@ -1182,14 +1256,40 @@ export const version8 = {
                         //Verification:
                         queryFilters: buildQueryFilters(queryFilters_Documents_Map("PV réception").sign.onCreate),
                         status: 'pending',
-                        nextStep: 'reserve',
+                        nextStep: 'attestationFluid',
                     },
+                ],
+            },
+            attestationFluid: {
+                title: "Attestation fluide",
+                instructions: '',
+                stepOrder: 5,
+                actions: [
+                    {
+                        id: 'attestationCreation',
+                        title: 'Créer une attestation fluide',
+                        instructions: 'Créer une attestation fluide',
+                        actionOrder: 1,
+                        responsable: 'Poseur',
+                        verificationType: 'doc-creation',
+                        collection: 'Documents',
+                        documentId: "", //creation
+                        params: {
+                            documentType: "Attestation fluide",
+                        },
+                        //Updates documentId to view the "onProgress uploading document"
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onProgress),
+                        //Verification:
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onCreate),
+                        status: 'pending',
+                        nextStep: 'reserve',
+                    }
                 ],
             },
             reserve: {
                 title: 'Réserve',
                 instructions: '',
-                stepOrder: 5,
+                stepOrder: 6,
                 actions: [
                     {
                         id: 'reserve',
@@ -1222,7 +1322,7 @@ export const version8 = {
             catchupCreation: {
                 title: 'Plannification tâche rattrapage',
                 instructions: '',
-                stepOrder: 6,
+                stepOrder: 7,
                 actions: [
                     {
                         id: 'catchupCreation',
@@ -1463,7 +1563,7 @@ export const version8 = {
                 //no conversion
                 title: 'Facturation',
                 instructions: '',
-                stepOrder: 7,
+                stepOrder: 8,
                 actions: [
                     {
                         id: 'billCreation',
@@ -1488,59 +1588,38 @@ export const version8 = {
                 ],
             },
             paymentStatus: {
-                //conversion
                 title: 'Finalisation de la facturation',
                 instructions: '',
-                stepOrder: 8,
+                stepOrder: 9,
                 actions: [
                     {
-                        //##task: add multiCommentsPicker
-                        id: 'paymentStatus',
-                        title: 'Modifier le statut du paiement',
-                        instructions: '',
+                        id: 'billingAmount',
+                        title: 'Saisir les montants restant à payer par les aides',
+                        instructions: "Veuillez saisir les montants restant à payer par les aides",
                         actionOrder: 1,
-                        type: 'manual',
+                        collection: 'Projects',
+                        params: {
+                            screenParams: {
+                                sections: { billing: { billAids: true } },
+                            }
+                        },
                         verificationType: 'multiple-choices',
-                        onSelectType: 'multiCommentsPicker', //only in multiCommentsPicker
-                        comment: '',
                         choices: [
                             {
-                                label: 'Attente paiement client',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            {
-                                label: 'Attente paiement financement',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            //##task: Diviser Attente paiement aide en MPR et CEE
-                            {
-                                label: 'Attente paiement aide MPR',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            {
-                                label: 'Attente paiement aide CEE',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            {
-                                label: 'Payé',
                                 id: 'confirm',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: false,
+                                label: 'Continuer',
+                                onSelectType: 'validation',
+                            },
+                            {
+                                id: 'edit',
+                                label: 'Modifier',
+                                onSelectType: 'navigation'
                             },
                         ],
+                        screenPush: true,
+                        //Comment
+                        comment: '',
+                        //Others
                         responsable: 'Poseur',
                         status: 'pending',
                     },
@@ -1550,9 +1629,8 @@ export const version8 = {
                         instructions: '',
                         actionOrder: 2,
                         type: 'manual',
-                        //verificationType: 'validation',
                         comment: '',
-                        responsable: 'ADV',
+                        responsable: 'Admin',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -1563,7 +1641,11 @@ export const version8 = {
                                 onSelectType: 'transition',
                                 commentRequired: true,
                             },
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+                            { 
+                                label: 'Valider', 
+                                id: 'confirm', 
+                                onSelectType: 'validation' 
+                            },
                         ],
                     },
                     //##done:task: Ajouter montant HT + TTC ??
@@ -1591,39 +1673,129 @@ export const version8 = {
                         //Others
                         responsable: 'Poseur',
                         status: 'pending',
-                    },
-                    {
-                        id: 'attestationCreation',
-                        title: 'Créer une attestation fluide',
-                        instructions: 'Créer une attestation fluide',
-                        actionOrder: 4,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Attestation fluide",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onCreate),
-                        status: 'pending',
                         nextStep: 'emailBill',
-                    }
-                ],
+                    },
+                ]
             },
+            // paymentStatus: {
+            //     //conversion
+            //     title: 'Finalisation de la facturation',
+            //     instructions: '',
+            //     stepOrder: 9,
+            //     actions: [
+            //         {
+            //             //##task: add multiCommentsPicker
+            //             id: 'paymentStatus',
+            //             title: 'Modifier le statut du paiement',
+            //             instructions: '',
+            //             actionOrder: 1,
+            //             type: 'manual',
+            //             verificationType: 'multiple-choices',
+            //             onSelectType: 'multiCommentsPicker', //only in multiCommentsPicker
+            //             comment: '',
+            //             choices: [
+            //                 {
+            //                     label: 'Attente paiement client',
+            //                     id: 'pending',
+            //                     onSelectType: 'multiCommentsPicker',
+            //                     selected: false,
+            //                     stay: true,
+            //                 },
+            //                 {
+            //                     label: 'Attente paiement financement',
+            //                     id: 'pending',
+            //                     onSelectType: 'multiCommentsPicker',
+            //                     selected: false,
+            //                     stay: true,
+            //                 },
+            //                 //##task: Diviser Attente paiement aide en MPR et CEE
+            //                 {
+            //                     label: 'Attente paiement aide MPR',
+            //                     id: 'pending',
+            //                     onSelectType: 'multiCommentsPicker',
+            //                     selected: false,
+            //                     stay: true,
+            //                 },
+            //                 {
+            //                     label: 'Attente paiement aide CEE',
+            //                     id: 'pending',
+            //                     onSelectType: 'multiCommentsPicker',
+            //                     selected: false,
+            //                     stay: true,
+            //                 },
+            //                 {
+            //                     label: 'Payé',
+            //                     id: 'confirm',
+            //                     onSelectType: 'multiCommentsPicker',
+            //                     selected: false,
+            //                     stay: false,
+            //                 },
+            //             ],
+            //             responsable: 'Poseur',
+            //             status: 'pending',
+            //         },
+            //         {
+            //             id: 'advValidation',
+            //             title: "Validation de la facture par le DAF", //#task allow adv to view Offre précontractuelle before validating (multi-choice: voir/valider)
+            //             instructions: '',
+            //             actionOrder: 2,
+            //             type: 'manual',
+            //             //verificationType: 'validation',
+            //             comment: '',
+            //             responsable: 'DAF',
+            //             status: 'pending',
+            //             verificationType: 'multiple-choices',
+            //             choices: [
+            //                 {
+            //                     label: 'Annuler',
+            //                     id: 'cancel',
+            //                     nextPhase: 'cancelProject',
+            //                     onSelectType: 'transition',
+            //                     commentRequired: true,
+            //                 },
+            //                 { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
+            //             ],
+            //         },
+            //         //##done:task: Ajouter montant HT + TTC ??
+            //         {
+            //             id: 'billingAmount',
+            //             title: 'Saisir le montant de la facture',
+            //             instructions: "Veuillez saisir le montant HT et TTC de la facture.",
+            //             actionOrder: 3,
+            //             //Verification
+            //             collection: 'Projects',
+            //             documentId: '', //#dynamic
+            //             properties: ['bill', "amount"],
+            //             params: {
+            //                 screenParams: {
+            //                     sections: { billing: { billAmount: true } },
+            //                 }
+            //             },
+            //             screenPush: true,
+            //             //Comment
+            //             comment: '',
+            //             //Verification
+            //             type: 'auto',
+            //             verificationType: 'data-fill',
+            //             verificationValue: '',
+            //             //Others
+            //             responsable: 'Poseur',
+            //             status: 'pending',
+            //             nextStep: 'emailBill',
+            //         },
+            //     ],
+            // },
             emailBill: {
                 title: 'Envoi facture par mail',
                 instructions: '',
-                stepOrder: 9,
+                stepOrder: 10,
                 actions: [
                     //task: verify if bill & attestation fluide are still existing
                     {
                         id: 'emailBill',
                         title: 'Envoi automatique de la facture finale + attestation fluide par mail en cours...',
                         instructions: '',
-                        actionOrder: 2,
+                        actionOrder: 1,
                         collection: 'Projects',
                         documentId: '', //#dynamic
                         queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
@@ -1672,7 +1844,7 @@ export const version8 = {
                 title: 'Satisfaction client',
                 instructions:
                     "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 10,
+                stepOrder: 11,
                 actions: [
                     {
                         id: 'clientReview',
@@ -1763,6 +1935,7 @@ export const version8 = {
     },
     //##draft
     // maintainance: {
+    //     phaseValue: "Maintenance"
     //     title: 'Maintenance',
     //     instructions: '',
     //     phaseOrder: 6,
@@ -1911,6 +2084,7 @@ export const version8 = {
     //     },
     // },
     endProject: {
+        phaseValue: "Finalisation",
         title: 'Finalisation',
         instructions: '',
         phaseOrder: 7,
@@ -1929,7 +2103,7 @@ export const version8 = {
                 actions: [
                     {
                         id: 'endProject',
-                        title: 'Le process du projet est terminé.',
+                        title: 'Le projet est terminé.',
                         instructions: '',
                         actionOrder: 1,
                         type: 'manual',
@@ -1942,6 +2116,7 @@ export const version8 = {
         },
     },
     cancelProject: {
+        phaseValue: "Annulation",
         title: 'Annulation',
         instructions: 'Annulation du projet',
         phaseOrder: 7,

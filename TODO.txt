@@ -1,0 +1,24 @@
+- Buy french number on twilio
+
+TO DO:
+
+DONE: 
+
+TESTED:
+- Dans signature des documents: Deplacer Creer une offre precontractuelle avant releve d'impot
+- Dans signature des documents: Deplacer Validation du controle de conformite a la fin de l'etape
+- Remplacer creation dossier de cheminement par Creation dossier client
+- Dans le devis, il faut ecrire "Maprime Rénov": Le devis est importé donc la géneration est mise en brouillon
+- Mettre en brouillon Aides region: Le devis est importé donc la géneration est mise en brouillon
+- Rendre obligatoire la saisie d'un technicien lors de la creation de la VT
+- Incorporer le Devis (uploadé manuellement) juste apres avoir signé la VT: DEVIS = Offre precontractuelle
+- Mettre l'attestation fluide juste apres le PV reception
+- Enlever limite 7jours dans creation des taches
+- Facture est uploadé manuellement
+- Dans l'action "Modifier le statut du paiement" : la DAF doit plutot saisir les montants restant à payer par aides 
+- Ajouter une case Autres dans partenaires financier
+- Ajouter a 1. Evaluation des besoins ou rapport du bureau d'etude
+
+
+
+

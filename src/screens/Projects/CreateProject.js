@@ -17,7 +17,7 @@ import { Appbar, UploadProgress, FormSection, CustomIcon, TextInput as MyInput, 
 
 import firebase, { db } from '../../firebase'
 import * as theme from "../../core/theme";
-import { constants, highRoles, workTypes, errorMessages, latestProcessVersion } from "../../core/constants";
+import { constants, highRoles, workTypes, errorMessages, latestProcessVersion, techSteps, phases } from "../../core/constants";
 import { blockRoleUpdateOnPhase } from '../../core/privileges';
 import { generateId, navigateToScreen, myAlert, nameValidator, load, pickImage, isEditOffline, refreshClient, refreshComContact, refreshTechContact, refreshAddress, setAddress, formatDocument, unformatDocument, displayError, initFormSections, docType_LabelValueMap } from "../../core/utils";
 
@@ -32,17 +32,6 @@ const states = [
     { label: 'Annulé', value: 'Annulé' },
 ]
 
-const steps = [
-    { label: 'Prospect', value: 'Prospect' },
-    { label: 'Visite technique préalable', value: 'Visite technique préalable' },
-    { label: 'Présentation étude', value: 'Présentation étude' },
-    { label: 'Visite technique', value: 'Visite technique' },
-    { label: 'Installation', value: 'Installation' },
-    { label: 'Maintenance', value: 'Maintenance' },
-]
-
-const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
-const techSteps = ['Visite technique', 'Installation', 'Maintenance']
 const properties = ["client", "name", "note", "address", "state", "step", "color", "comContact", "techContact", "intervenant", "bill", "attachments", "process", "createdBy", "createdAt", "editedBy", "editedAt"]
 
 const sectionsModels = {
@@ -98,7 +87,8 @@ const sectionsModels = {
             isExpanded: false,
             show: false,
             fields: {
-                billAmount: { show: false }
+                billAmount: { show: false },
+                billAids: { show: false },
             }
         },
         pictures: {
@@ -162,11 +152,9 @@ class CreateProject extends Component {
         const goBackConditions = [this.sections]
         this.isGoBack = !goBackConditions.includes(null)
 
-        console.log("sections....", this.sections)
         const showClient = !this.isClient && (this.client.id === "" || this.isEdit)
         const showAddress = !this.isClient && (this.client.id === "" || this.isEdit)
         const sections = initFormSections(sectionsModels.project, this.sections)
-        console.log("sections build....", sectionsModels.project.billing)
 
         const defaultSections = {
             activity: {
@@ -220,7 +208,8 @@ class CreateProject extends Component {
                 isExpanded: !this.isEdit,
                 show: this.isEdit,
                 fields: {
-                    billAmount: { show: true }
+                    billAmount: { show: true },
+                    billAids: { show: true },
                 }
             },
             pictures: {
@@ -261,6 +250,10 @@ class CreateProject extends Component {
             bill: {
                 amount: '',
                 amountHT: '',
+                customerPayment: '',
+                financingPayment: "",
+                MPRPayment: "",
+                CEEPayment: "",
                 closedAt: '',
                 closedBy: {
                     id: '',
@@ -775,6 +768,57 @@ class CreateProject extends Component {
         )
     }
 
+    renderBillAidsPaymentsField(bill, canWrite) {
+        return (
+            <View style={{ flex: 1 }}>
+                <MyInput
+                    label="Attente paiement client"
+                    returnKeyType="done"
+                    keyboardType='numeric'
+                    value={bill.customerPayment}
+                    onChangeText={customerPayment => {
+                        bill.customerPayment = customerPayment
+                        this.setState({ bill })
+                    }}
+                    editable={canWrite && this.isCurrentHighRole}
+                />
+                <MyInput
+                    label="Attente paiement financement"
+                    returnKeyType="done"
+                    keyboardType='numeric'
+                    value={bill.financingPayment}
+                    onChangeText={financingPayment => {
+                        bill.financingPayment = financingPayment
+                        this.setState({ bill })
+                    }}
+                    editable={canWrite && this.isCurrentHighRole}
+                />
+                <MyInput
+                    label="Attente paiement aide MPR"
+                    returnKeyType="done"
+                    keyboardType='numeric'
+                    value={bill.MPRPayment}
+                    onChangeText={MPRPayment => {
+                        bill.MPRPayment = MPRPayment
+                        this.setState({ bill })
+                    }}
+                    editable={canWrite && this.isCurrentHighRole}
+                />
+                <MyInput
+                    label="Attente paiement financement"
+                    returnKeyType="done"
+                    keyboardType='numeric'
+                    value={bill.CEEPayment}
+                    onChangeText={CEEPayment => {
+                        bill.CEEPayment = CEEPayment
+                        this.setState({ bill })
+                    }}
+                    editable={canWrite && this.isCurrentHighRole}
+                />
+            </View>
+        )
+    }
+
     renderNotesField(canWrite) {
         const { note } = this.state
         return (
@@ -948,7 +992,7 @@ class CreateProject extends Component {
                 selectedValue={step}
                 onValueChange={(step) => this.setState({ step })}
                 title="Étape *"
-                elements={steps}
+                elements={phases}
                 enabled={canWrite && !this.isClient}
             />
         )
@@ -1220,6 +1264,7 @@ class CreateProject extends Component {
                 form={
                     <View style={{ flex: 1 }}>
                         {showFields.billAmount.show && this.renderBillAmountField(bill, canWrite)}
+                        {showFields.billAids.show && this.renderBillAidsPaymentsField(bill, canWrite)}
                     </View>
                 }
             />

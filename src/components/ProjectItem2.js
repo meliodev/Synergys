@@ -36,7 +36,7 @@ const ProjectItem2 = ({ project, onPress, navigation, ...props }) => {
                 return faUserHardHat
                 break
 
-            case 'Installation':
+            case "En attente d'installation":
                 return faTools
                 break
 

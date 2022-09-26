@@ -83,7 +83,6 @@ class CreateTask extends Component {
         this.isEdit = this.TaskId ? true : false
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
         this.title = this.isProcess && this.taskType ? this.taskType.value : this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
-
         const currentRole = this.props.role.id
         this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
         const defaultState = this.setDefaultState(currentRole)
@@ -167,10 +166,12 @@ class CreateTask extends Component {
             const isComTask = _.isEqual(this.taskType.natures, ['com'])
             const isTechTask = _.isEqual(this.taskType.natures, ['tech'])
 
+            console.log("isTechTask", isTechTask)
             if (isComTask) {
                 assignedTo = comContact
             }
             else if (isTechTask) {
+                console.log("techContact", techContact)
                 assignedTo = techContact
             }
         }
@@ -207,7 +208,8 @@ class CreateTask extends Component {
         const { type } = this.state
         const isComAndVT = this.props.role.id === "com" && type === "Visite technique"
         const isInstallation = type === "Installation"
-        this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || (this.isProcess && (isComAndVT || isInstallation))
+        //this.hideAssignedTo = this.props.navigation.getParam('hideAssignedTo', false) || (this.isProcess && (isComAndVT || isInstallation))
+        this.hideAssignedTo = false
         this.hideHours = this.props.navigation.getParam('hideTimeslots', false) || isComAndVT
     }
 
@@ -248,16 +250,15 @@ class CreateTask extends Component {
 
     validateInputs() {
         const { name, assignedTo, endDateError, dueHourError } = this.state
-        //let isValid1 = true
-        // const nameError = nameValidator(name, '"Nom de la tâche"')
-        // const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
-        // if (assignedToError) {
-        //     isValid1 = false
-        //     this.setState({ assignedToError })
-        // }
+        let isValid1 = true
+        const nameError = nameValidator(name, '"Nom de la tâche"')
+        const assignedToError = nameValidator(assignedTo.id, '"Attribuée à"')
+        if (assignedToError) {
+            isValid1 = false
+            this.setState({ assignedToError })
+        }
         const isValid2 = this.validateSchedule()
-        const isValid = isValid2
-        // const isValid = isValid1 && isValid2
+        const isValid = isValid1 && isValid2
         if (!isValid) {
             this.setState({ toastMessage: errorMessages.invalidFields, toastType: "error", loading: false })
         }
@@ -399,13 +400,14 @@ class CreateTask extends Component {
             task = this.addExtraTaskFields(task)
             let tasks = this.isEdit ? [task] : this.buildTasks(task, this.state.startDate, this.state.endDate)
 
-            //5.1
-            const isThisWeek = this.isTasksThisWeek(tasks)
-            if (!isThisWeek) {
-                Alert.alert('Limite dépassée', "Impossible de planifier une tâche avant 7 jours. Veuiller définir une autre date de début.")
-                load(this, false)
-                return
-            }
+            //##draft
+            // //5.1
+            // const isThisWeek = this.isTasksThisWeek(tasks)
+            // if (!isThisWeek) {
+            //     Alert.alert('Limite dépassée', "Impossible de planifier une tâche avant 7 jours. Veuiller définir une autre date de début.")
+            //     load(this, false)
+            //     return
+            // }
 
             //5.2 Limit number of tasks created
             const isOverLimit = this.limitTasks(tasks.length)

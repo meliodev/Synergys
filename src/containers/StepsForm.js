@@ -1544,7 +1544,7 @@ class StepsForm extends Component {
         textColor: theme.colors.graySilver,
         title: 'Aide',
         caption:
-          "Pour les aides ? Vous n'avez pas à les avancer, Synergys est mandataire administratif et financier de maprimerénov !",
+          "Pour les aides ? Vous n'avez pas à les avancer, Synergys est mandataire administratif et financier de Maprime Rénov !",
       },
     ];
 

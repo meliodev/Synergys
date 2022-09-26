@@ -221,653 +221,122 @@ export const version0 = {
         }
     },
     installation: {
-        title: 'Installation',
+        phaseValue: "En attente d'installation",
+        title: "En attente d'installation",
         instructions: '',
         phaseOrder: 2,
         followers: ['Admin', 'Responsable technique', 'Poseur'],
         steps: {
-            poseurValidation: {
-                title: 'Validation du technicien',
+            payModeValidation: {
+                title: 'Modalité de paiement',
                 instructions: '',
                 stepOrder: 1,
                 actions: [
                     {
-                        id: 'maintainanceContractChoice',
-                        title: 'Voulez-vous initier le contrat de maintenance ?',
-                        instructions: '',
+                        id: 'financingAidsWebsite',
+                        title: 'Propositions de financement',
+                        instructions: 'Naviguer vers le lien du partenaire financier sélectionné, et suivre la procédure selon le partenaire choisi.',
                         actionOrder: 1,
+                        type: 'manual',
+                        comment: '',
                         verificationType: 'multiple-choices',
-                        comment: '', //motif
                         choices: [
                             {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'cancel',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            }, //User's manual choice will route to next step (confirmRd2, postponeRd2 or cancelRd2) (it will technically set "nextStep" property)
+                                label: 'Adhefi.com',
+                                id: 'cashPayment',
+                                image: 'sofincoLogo',
+                                onSelectType: 'openLink',
+                                link: 'https://www.adhefi.com',
+                            },
                             {
-                                label: 'OUI',
+                                label: 'Moncofidispro.fr',
+                                id: 'financing',
+                                image: 'cofidisLogo',
+                                onSelectType: 'openLink',
+                                link: 'https://www.moncofidispro.fr',
+                            },
+                            {
+                                label: 'domofinance.com',
+                                id: 'financing',
+                                image: 'domofinanceLogo',
+                                onSelectType: 'openLink',
+                                link: 'https://www.domofinance.com/login',
+                            },
+                            {
+                                label: 'Continuer',
                                 id: 'confirm',
-                                nextStep: 'maintainanceContract',
-                                onSelectType: 'transition',
+                                onSelectType: 'validation',
                             },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Commercial',
+                        status: 'pending',
+                    },
+                    {
+                        id: 'financingAidsSelection',
+                        title: 'Selection du partenaire financier',
+                        instructions: 'Selectionnez le partenaire financier de ce projet.',
+                        actionOrder: 2,
+                        type: 'manual',
+                        comment: '',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Adhefi.com',
+                                id: 'cashPayment',
+                                image: 'sofincoLogo',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                            {
+                                label: 'Moncofidispro.fr',
+                                id: 'financing',
+                                image: 'cofidisLogo',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                            {
+                                label: 'domofinance.com',
+                                id: 'financing',
+                                image: 'domofinanceLogo',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                            {
+                                label: 'Autres',
+                                id: 'other',
+                                onSelectType: 'commentPicker',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                        ],
+                        responsable: 'Commercial',
                         status: 'pending',
                     },
                 ],
             },
-            maintainanceContract: {
-                title: 'Contrat maintenance',
+            technicalVisitCreation: {
+                title: "Création d'une visite technique",
                 instructions: '',
                 stepOrder: 2,
                 actions: [
                     {
-                        id: 'commercialPropositionChoice',
-                        title: 'Accepter la proposition commerciale',
-                        instructions: '',
+                        id: 'technicalVisitCreation',
+                        title: 'Créer une visite technique',
+                        instructions: 'Créer une visite technique',
                         actionOrder: 1,
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'skip',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                            },
-                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'mandatSepaCreation',
-                        title: 'Créer/Importer un mandat SEPA',
-                        instructions: 'Créer/Importer un mandat SEPA',
-                        actionOrder: 2,
-                        responsable: 'Poseur',
+                        responsable: 'Commercial',
                         verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
+                        collection: 'Agenda',
+                        documentId: "",
                         params: {
-                            documentType: "Mandat SEPA",
+                            taskType: "Visite technique",
                         },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'skip',
-                                label: 'Décider plus tard, passer à la facturation',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                            },
-                            {
-                                id: 'upload',
-                                label: 'Importer le document',
-                                onSelectType: 'navigation',
-                            },
-                        ],
+                        queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique").create),
                         status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedSEPACreation',
-                        title: 'Signer le mandat SEPA',
-                        instructions: 'Signer le mandat SEPA',
-                        actionOrder: 3,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Mandat SEPA",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                id: 'cancel',
-                                label: 'Décider plus tard, passer à la facturation',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                id: 'sign',
-                                label: 'Signer le mandat SEPA',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'contractCreation',
-                        title: 'Créer/Importer un contrat',
-                        instructions: 'Créer/Importer un contrat',
-                        actionOrder: 4,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'skip',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                            },
-                            {
-                                label: 'Importer le contrat',
-                                id: 'upload',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedContractCreation',
-                        title: 'Signer le contrat',
-                        instructions: 'Signer le contrat',
-                        actionOrder: 5,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                label: 'Décider plus tard, passer à la facturation',
-                                id: 'cancel',
-                                nextStep: 'facturationOption1',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                label: 'Signer le contrat',
-                                id: 'sign',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                        nextStep: 'facturationOption1',
-                    },
-                    //#task: Add last action multi-choice (contrat "en cours" or "terminé")
-                ],
-            },
-            facturationOption1: {
-                //no conversion
-                title: 'Facturation',
-                instructions: '',
-                stepOrder: 3,
-                actions: [
-                    {
-                        id: 'billCreation',
-                        title: 'Créer une facture',
-                        instructions: 'Créer une facture',
-                        actionOrder: 1,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Facture",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Facture").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Facture").create.onCreate),
-                        status: 'pending',
-                        nextStep: 'paymentStatus',
-                    }
-                    //##done:task: Delete "Signer la facture"
-                ],
-            },
-            paymentStatus: {
-                //conversion
-                title: 'Finalisation de la facturation',
-                instructions: '',
-                stepOrder: 4,
-                actions: [
-                    {
-                        //##task: add multiCommentsPicker
-                        id: 'paymentStatus',
-                        title: 'Modifier le statut du paiement',
-                        instructions: '',
-                        actionOrder: 1,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        onSelectType: 'multiCommentsPicker', //only in multiCommentsPicker
-                        comment: '',
-                        choices: [
-                            {
-                                label: 'Attente paiement client',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            {
-                                label: 'Attente paiement financement',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            //##task: Diviser Attente paiement aide en MPR et CEE
-                            {
-                                label: 'Attente paiement aide MPR',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            {
-                                label: 'Attente paiement aide CEE',
-                                id: 'pending',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: true,
-                            },
-                            {
-                                label: 'Payé',
-                                id: 'confirm',
-                                onSelectType: 'multiCommentsPicker',
-                                selected: false,
-                                stay: false,
-                            },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'advValidation',
-                        title: "Validation de la facture par l'ADV", //#task allow adv to view devis before validating (multi-choice: voir/valider)
-                        instructions: '',
-                        actionOrder: 2,
-                        type: 'manual',
-                        //verificationType: 'validation',
-                        comment: '',
-                        responsable: 'ADV',
-                        status: 'pending',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            {
-                                label: 'Annuler',
-                                id: 'cancel',
-                                nextPhase: 'cancelProject',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            { label: 'Valider', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                    },
-                    //##done:task: Ajouter montant HT + TTC ??
-                    {
-                        id: 'billingAmount',
-                        title: 'Saisir le montant de la facture',
-                        instructions: "Veuillez saisir le montant HT et TTC de la facture.",
-                        actionOrder: 3,
-                        //Verification
-                        collection: 'Projects',
-                        documentId: '', //#dynamic
-                        properties: ['bill', "amount"],
-                        params: {
-                            screenParams: {
-                                sections: { billing: { billAmount: true } },
-                            }
-                        },
-                        screenPush: true,
-                        //Comment
-                        comment: '',
-                        //Verification
-                        type: 'auto',
-                        verificationType: 'data-fill',
-                        verificationValue: '',
-                        //Others
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {
-                        id: 'attestationCreation',
-                        title: 'Créer une attestation fluide',
-                        instructions: 'Créer une attestation fluide',
-                        actionOrder: 4,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Attestation fluide",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Attestation fluide").create.onCreate),
-                        status: 'pending',
-                        nextStep: 'emailBill',
-                    }
-                ],
-            },
-            emailBill: {
-                title: 'Envoi facture par mail',
-                instructions: '',
-                stepOrder: 5,
-                actions: [
-                    //task: verify if bill & attestation fluide are still existing
-                    {
-                        id: 'emailBill',
-                        title: 'Envoi automatique de la facture finale + attestation fluide par mail en cours...',
-                        instructions: '',
-                        actionOrder: 2,
-                        collection: 'Projects',
-                        documentId: '', //#dynamic
-                        queryFilters: [{ filter: 'project.id', operation: '==', value: '' }],
-                        properties: ['finalBillSentViaEmail'],
-                        status: 'pending',
-                        verificationType: 'data-fill',
-                        verificationValue: false,
-                        cloudFunction: {
-                            endpoint: 'sendEmail',
-                            queryAttachmentsUrls: {
-                                Facture: [
-                                    { filter: 'project.id', operation: '==', value: '' },
-                                    { filter: 'type', operation: '==', value: 'Facture' },
-                                    {
-                                        filter: 'attachment.downloadURL',
-                                        operation: '!=',
-                                        value: '',
-                                    },
-                                ],
-                                'Attestation fluide': [
-                                    { filter: 'project.id', operation: '==', value: '' },
-                                    {
-                                        filter: 'type',
-                                        operation: '==',
-                                        value: 'Attestation fluide',
-                                    },
-                                    {
-                                        filter: 'attachment.downloadURL',
-                                        operation: '!=',
-                                        value: '',
-                                    },
-                                ],
-                            },
-                            params: {
-                                subject: 'Facture finale et attestation fluide',
-                                dest: 'sa.lyoussi@gmail.com', //#task: change it
-                                projectId: '',
-                                attachments: [],
-                            },
-                        },
-                        nextStep: 'clientReview',
+                        nextPhase: 'technicalVisitManagement',
                     },
                 ],
             },
-            clientReview: {
-                title: 'Satisfaction client',
-                instructions:
-                    "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 6,
-                actions: [
-                    {
-                        id: 'clientReview',
-                        title: 'Êtes-vous satisfait de notre service ?',
-                        instructions: '',
-                        actionOrder: 1,
-                        type: 'manual',
-                        verificationType: 'multiple-choices',
-                        isReview: true,
-                        comment: '',
-                        choices: [
-                            {
-                                label: '1',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '2',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '3',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '4',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '5',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '6',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '7',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '8',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '9',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                saty: false,
-                                nextPhase: 'maintainance',
-                            },
-                            {
-                                label: '10',
-                                onSelectType: 'commentPicker',
-                                selected: false,
-                                stay: false,
-                                nextPhase: 'maintainance',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                ],
-            },
-        },
-    },
-    maintainance: {
-        title: 'Maintenance',
-        instructions: '',
-        phaseOrder: 3,
-        followers: ['Admin', 'Responsable technique', 'Poseur'],
-        steps: {
-            maintainanceContract: {
-                title: 'Contrat maintenance',
-                instructions: '',
-                stepOrder: 1,
-                actions: [
-                    {
-                        id: 'commercialPropositionChoice',
-                        title: 'Accepter la proposition commerciale',
-                        instructions: '',
-                        actionOrder: 1,
-                        type: 'manual', //Check manually
-                        verificationType: 'multiple-choices',
-                        comment: '', //motif
-                        choices: [
-                            { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
-                        ],
-                        responsable: 'Poseur',
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'mandatSepaCreation',
-                        title: 'Créer/Importer un mandat SEPA',
-                        instructions: 'Créer/Importer un mandat SEPA',
-                        actionOrder: 2,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Mandat SEPA",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'upload',
-
-                                label: 'Importer le document',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedSEPACreation',
-                        title: 'Signer le mandat SEPA',
-                        instructions: 'Signer le mandat SEPA',
-                        actionOrder: 3,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Mandat SEPA",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Mandat SEPA").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                id: 'sign',
-                                label: 'Signer le mandat SEPA',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'contractCreation',
-                        title: 'Créer/Importer un contrat',
-                        instructions: 'Créer/Importer un contrat',
-                        actionOrder: 4,
-                        responsable: 'Poseur',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //creation
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").create.onCreate),
-                        comment: '', //motif
-                        choices: [
-                            {
-                                id: 'upload',
-                                label: 'Importer le contrat',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {   //##new
-                        id: 'signedContractCreation',
-                        title: 'Signer le contrat',
-                        instructions: 'Signer le contrat',
-                        actionOrder: 5,
-                        responsable: 'Client',
-                        verificationType: 'doc-creation',
-                        collection: 'Documents',
-                        documentId: "", //edit
-                        params: {
-                            documentType: "Contrat CGU-CGV",
-                            isSignature: true
-                        },
-                        //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onProgress),
-                        //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Contrat CGU-CGV").sign.onCreate),
-                        comment: "",
-                        choices: [
-                            {
-                                id: 'sign',
-                                label: 'Signer le contrat',
-                                onSelectType: 'navigation',
-                            },
-                        ],
-                        status: 'pending',
-                    },
-                    {
-                        id: 'endProject',
-                        title: 'Finaliser le projet',
-                        instructions: '',
-                        actionOrder: 6,
-                        type: 'manual',
-                        verificationType: 'validation',
-                        comment: '',
-                        responsable: 'ADV',
-                        status: 'pending',
-                        nextPhase: 'endProject',
-                    },
-                ],
-            },
-        },
+        }
     },
     'version': 0
 }

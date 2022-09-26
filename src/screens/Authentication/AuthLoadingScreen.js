@@ -3,7 +3,7 @@ import { View, Alert, Text, StyleSheet, Linking, Platform } from "react-native"
 import LinearGradient from 'react-native-linear-gradient'
 import { ProgressBar } from "react-native-paper"
 import RNFS from 'react-native-fs'
-import firebase, { db, remoteConfig } from '../../firebase'
+import firebase, { auth, db, remoteConfig } from '../../firebase'
 import notifee, { EventType } from '@notifee/react-native'
 import { connect } from 'react-redux'
 import _ from 'lodash'
@@ -33,7 +33,8 @@ const roles = [
   { id: 'com', value: 'Commercial', level: 1, isHighRole: false, isLowRole: true, isClient: false },
   { id: 'poseur', value: 'Poseur', level: 1, isHighRole: false, isLowRole: true, isClient: false },
   { id: 'tech', value: 'Responsable technique', level: 2, isHighRole: true, isLowRole: false, isClient: false },
-  { id: 'client', value: 'Client', level: 0, isHighRole: false, isLowRole: false, isClient: true }
+  { id: 'client', value: 'Client', level: 0, isHighRole: false, isLowRole: false, isClient: true },
+  { id: 'designoffice', value: "Bureau d'étude", level: 0, isHighRole: false, isLowRole: false, isClient: false }
 ]
 
 class AuthLoadingScreen extends Component {
@@ -66,12 +67,18 @@ class AuthLoadingScreen extends Component {
       return
     }
 
+    console.log("2")
+
     await this.bootstrapNotifications()
     this.forgroundNotificationListener()
     this.backgroundNotificationListener()
+    console.log("3")
+
 
     //2. Auth listener: Privileges setting, fcm token setting, Navigation rooter
     this.unsububscribe = this.onAuthStateChanged()
+    console.log("4")
+
   }
 
   async checkAppVersion() {
@@ -162,11 +169,12 @@ class AuthLoadingScreen extends Component {
         const { type, isConnected } = await NetInfo.fetch()
 
         if (user) {
-
           if (isConnected) {
 
             //0. Get idTokenResult
             const idTokenResult = await user.getIdTokenResult()
+            console.log(".......", idTokenResult.claims)
+
             if (!idTokenResult) {
               throw new Error("ID Token Invalide, veuillez contacter un admin.")
             }
@@ -176,9 +184,11 @@ class AuthLoadingScreen extends Component {
               if (idTokenResult.claims[r.id]) {
                 var role = r
                 var roleValue = role.value
+                console.log("5", roleValue)
+
               }
             }
-            
+
 
             //2. Set currentUser
             const currentUser = {
@@ -217,7 +227,9 @@ class AuthLoadingScreen extends Component {
 
           //Default
           else {
-            var routeName = roleValue === 'Client' || roleValue === "Poseur" ? "ProjectsStack" : "App"
+
+            const isExternalEntity = roleValue === 'Client' || roleValue === "Poseur" || roleValue === "Bureau d'étude"
+            var routeName = isExternalEntity ? "ProjectsStack" : "App"
             var routeParams = {}
           }
         }

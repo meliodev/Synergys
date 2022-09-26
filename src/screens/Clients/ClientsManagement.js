@@ -80,7 +80,7 @@ class ClientsManagement extends React.Component {
                             onPress={this.viewProfile.bind(this)}
                             emptyListIcon={faUser}
                             emptyListHeader='Aucun client'
-                            emptyListDesc='Gérez vos clients. Appuyez sur le boutton, en bas à droite, pour en ajouter un nouveau.'
+                            emptyListDesc="Gérez vos clients. Créer un nouveau prospect à partir de l'onglet 'Prospects'"
                         />}
 
                     Tab2={

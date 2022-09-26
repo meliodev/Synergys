@@ -16,7 +16,9 @@ export const processHandler = async (processModel, currentProcess, startPhaseId,
     try {
         let process = _.cloneDeep(currentProcess)
         isCorruptedProcess(processModel, process)
+        console.log("1")
         const updatedProcess = await updateProcess(processModel, process, startPhaseId, attributes)
+        console.log("2")
         return updatedProcess || currentProcess
     }
     catch (e) {
@@ -648,8 +650,8 @@ const resumeMaintainance = (processModel, process) => {
 
 //Update project (status/step)
 const updateProjectPhase = (processModel, nextPhaseId, ProjectId) => {
-    const phaseTitle = processModel[nextPhaseId].title
-    db.collection('Projects').doc(ProjectId).update({ step: phaseTitle })
+    const phaseValue = processModel[nextPhaseId].phaseValue
+    db.collection('Projects').doc(ProjectId).update({ step: phaseValue })
 }
 
 const endProject = (ProjectId) => {
@@ -715,13 +717,14 @@ const phasesIdsValuesMap = [
     { values: ['Visite technique préalable', 'Rendez-vous 1'], id: 'rd1' },
     { values: ['Présentation étude', 'Rendez-vous N'], id: 'rdn' },
     { values: ['Visite technique'], id: 'technicalVisitManagement' },
-    { values: ['Installation'], id: 'installation' },
+    { values: ['Installation', "En attente d'installation"], id: 'installation' },
     { values: ['Maintenance'], id: 'maintenance' },
 ]
 
 export const getPhaseIdFormValue = (phaseValue) => {
     const index = phasesIdsValuesMap.findIndex((item) => item.values.includes(phaseValue))
     const currentPhaseId = phasesIdsValuesMap[index].id
+
     return currentPhaseId
 }
 

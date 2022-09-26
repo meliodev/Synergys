@@ -1,6 +1,6 @@
 import { Alert } from 'react-native'
 import firebase, { db } from '../firebase'
-import { techSteps, highRolesValues } from './constants'
+import { techSteps, highRolesValues, comSteps } from './constants'
 
 export const configureQuery = (collection, queryFilters, params) => {
 
@@ -67,12 +67,10 @@ const configureQueryParams = (queryFilters, params) => { //Task: Send the right 
 }
 
 export const blockRoleUpdateOnPhase = (role, phase) => {
-    const comPhases = ['Prospect', 'Visite technique préalable', 'Présentation étude']
-    const techPhases = ['Visite technique', 'Installation', 'Maintenance']
-    const isComPhase = comPhases.includes(phase)
-    const isTechPhase = techPhases.includes(phase)
+    const isComPhase = comSteps.includes(phase)
+    const isTechPhase = techSteps.includes(phase)
     const isBlockedUpdates = role === 'com' && isTechPhase || role === 'poseur' && isComPhase
-    return isBlockedUpdates
+    return isBlockedUpdates 
 }
 
 export const enableProcessAction = (responsable, currentUserId, currentUserRole, currentPhase) => {
@@ -88,7 +86,7 @@ export const enableProcessAction = (responsable, currentUserId, currentUserRole,
 }
 
 export const checkTechContact = (step, subscribers) => {
-    const isStepTech = techSteps.includes()
+    const isStepTech = techSteps.includes(step)
 
     if (!isStepTech) return true
     else {

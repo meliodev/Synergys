@@ -635,7 +635,8 @@ class UploadDocument extends Component {
             this.setState({ modalContent: 'imageSources' })
         else {
             const { type } = this.state
-            if (type === 'Facture' || type === 'Devis' || type === "Offre précontractuelle")
+            //if (type === 'Facture' || type === 'Devis' || type === "Offre précontractuelle")
+            if (type === "Offre précontractuelle")
                 this.setState({ modalContent: 'genOrderSources' })
             if (type === 'Fiche EEB')
                 this.setState({ modalContent: 'genFicheEEBSources' })

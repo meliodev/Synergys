@@ -23,7 +23,7 @@ const PickerBar = ({
         { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
         { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, //#dynamic
         { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
-        { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
+        { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic 
         { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
         { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static
         { label: 'Entretien', value: 'Entretien', natures: ['tech'] }, //#static

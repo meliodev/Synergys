@@ -52,7 +52,6 @@ import {
   formatDocument,
   unformatDocument,
   formatPrice,
-  allDocTypes,
   docType_LabelValueMap
 } from '../../core/utils';
 import * as theme from '../../core/theme';
@@ -439,7 +438,7 @@ class CreateOrder extends Component {
         {this.renderSeparator(showThirdSeparator)}
         {this.renderPrimeCEE(primeCEE)}
         {this.renderPrimeRenov(primeRenov)}
-        {this.renderAideRegion(aidRegion)}
+        {/* {this.renderAideRegion(aidRegion)} */}
         {this.renderSeparator(showFourthSeparator)}
         {this.renderTotalNet(totalNet)}
       </View>
@@ -572,7 +571,7 @@ class CreateOrder extends Component {
     if (!showPrimeRenov) return null
     return (
       <SummaryRow
-        label="Maprimerévov"
+        label="Maprime Rénov"
         valuePrefix="- €"
         value={primeRenov}
       />
@@ -920,7 +919,7 @@ class CreateOrder extends Component {
                       />
 
                       <MyInput
-                        label="Maprimerénov (€)"
+                        label="Maprime Rénov (€)"
                         returnKeyType="done"
                         keyboardType="numeric"
                         value={primeRenov}
@@ -929,7 +928,7 @@ class CreateOrder extends Component {
                         }}
                       />
 
-                      <MyInput
+                      {/* <MyInput
                         label="Aides région (€)"
                         returnKeyType="done"
                         keyboardType="numeric"
@@ -937,7 +936,7 @@ class CreateOrder extends Component {
                         onChangeText={(aidRegion) => {
                           this.setState({ aidRegion });
                         }}
-                      />
+                      /> */}
                     </View>
                   }
                 />

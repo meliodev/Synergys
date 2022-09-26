@@ -1,13 +1,13 @@
 import { Dimensions, Platform } from 'react-native'
 import RNFetchBlob from 'rn-fetch-blob'
-import { faCamera, faImages } from '@fortawesome/pro-light-svg-icons'
+import { faCamera, faImages, faFileInvoice, faUserHardHat, faFileInvoiceDollar, faBallot, faFileCertificate, faFile, faFolderPlus, faHandHoldingUsd, faHandshake, faHomeAlt, faGlobeEurope, faReceipt, faFileAlt, faFileEdit } from '@fortawesome/pro-light-svg-icons'
 
 import { rgb } from "pdf-lib"
 
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.11"
+export const appVersion = "1.5.19"
 
 export const constants = {
     ScreenWidth: width,
@@ -26,7 +26,8 @@ export const roles = [
     { id: 'com', label: 'Commercial', value: 'Commercial', bool: 'isCom', level: 1 },
     { id: 'tech', label: 'Responsable technique', value: 'Responsable technique', bool: 'isTech', level: 1 },
     { id: 'poseur', label: 'Technicien', value: 'Poseur', bool: 'isPoseur', level: 0 },
-    { id: 'client', label: 'Client', value: 'Client', bool: 'isClient', level: -1 }
+    { id: 'client', label: 'Client', value: 'Client', bool: 'isClient', level: -1 },
+    { id: 'designoffice', label: "Bureau d'étude", value: "Bureau d'étude", bool: 'isClient', level: -1 }
 ]
 
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
@@ -36,7 +37,7 @@ export const highRolesValues = ['Admin', 'Back office', 'Directeur commercial', 
 
 
 export const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']
-export const techSteps = ['Visite technique', 'Installation', 'Maintenance']
+export const techSteps = ['Visite technique', "En attente d'installation", 'Maintenance']
 
 export const downloadDir = Platform.OS === 'ios' ? RNFetchBlob.fs.dirs.DocumentDir : RNFetchBlob.fs.dirs.DownloadDir
 export const termsDir = `${downloadDir}/Synergys/Documents/Termes-et-conditions-générales-de-signature.pdf`
@@ -157,12 +158,45 @@ export const imageSources = [
     { label: 'Caméra', value: 'upload', icon: faCamera },
     { label: 'Gallerie', value: 'generate', icon: faImages }
 ]
+
+
+export const publicDocTypes = [
+    { label: 'Bon de commande', value: 'Bon de commande', icon: faBallot },
+    { label: 'Aide et subvention', value: 'Aide et subvention', icon: faHandshake },
+    { label: 'Autre', value: 'Autre', icon: faFile },
+]
+
+export const privateDocTypes = [
+    { label: 'Devis', value: 'Devis', icon: faFileInvoice },
+    { label: 'Offre précontractuelle', value: 'Offre précontractuelle', icon: faFileInvoice },
+    { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
+    { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
+    { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
+    { label: 'Dossier client', value: 'Dossier client', icon: faFileAlt },
+    { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
+    // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
+    { label: 'Mandat MaPrimeRénov', value: 'Mandat MaPrimeRénov', icon: faHandHoldingUsd },
+    // { label: 'Mandat Synergys', value: 'Mandat Synergys', icon: faSave },
+    { label: 'Action logement', value: 'Action logement', icon: faHomeAlt },
+    { label: 'PV réception', value: 'PV réception', icon: faReceipt },
+    { label: 'Mandat SEPA', value: 'Mandat SEPA', icon: faGlobeEurope },
+    { label: 'Contrat CGU-CGV', value: 'Contrat CGU-CGV', icon: faFileEdit },
+    { label: 'Attestation fluide', value: 'Attestation fluide', icon: faFileEdit },
+    { label: 'Visite technique', value: 'Visite technique', icon: faUserHardHat },
+    { label: "Relevé d'impôt", value: "Relevé d'impôt", icon: faFile },
+    { label: "Justificatif de domicile", value: "Justificatif de domicile", icon: faFile },
+    { label: "Plan cadastral", value: "Plan cadastral", icon: faFile },
+    { label: "Taxe foncière", value: "Taxe foncière", icon: faFile },
+]
+
+export const allDocTypes = [...publicDocTypes, ...privateDocTypes]
+
 export const generableDocTypes = [
-    "Devis",
+    //"Devis",
     "Offre précontractuelle",
-    "Facture",
+    //"Facture",
     "Fiche EEB",
-    "Dossier de cheminement", 
+    //"Dossier client",
     'PV réception',
     'Mandat MaPrimeRénov',
     'Mandat Synergys',
@@ -176,7 +210,7 @@ export const masculinsDocTypes = [
     'PV réception',
     'Mandat MaPrimeRénov',
     'Mandat Synergys',
-    "Dossier de cheminement",
+    "Dossier client",
 ]
 
 export const phases = [
@@ -184,8 +218,8 @@ export const phases = [
     { label: 'Visite technique préalable', value: 'Visite technique préalable', id: 'rd1' },
     { label: 'Présentation étude', value: 'Présentation étude', id: 'rdn' },
     { label: 'Visite technique', value: 'Visite technique', id: 'technicalVisitManagement' },
-    { label: 'Installation', value: 'Installation', id: 'installation' },
-    { label: 'Maintenance', value: 'Maintenance', id: 'maintenance' },
+    { label: "En attente d'installation", value: "En attente d'installation", id: 'installation' },
+    //{ label: 'Maintenance', value: 'Maintenance', id: 'maintenance' },
 ]
 
 export const items_scrollTo = {
@@ -316,7 +350,13 @@ export const collectionScreenNameMap = {
 }
 
 //Auto-Sign docs
-export const autoSignDocs = ["Mandat MaPrimeRénov", "Devis", "Offre précontractuelle", "Facture", "PV réception"]
+export const autoSignDocs = [
+    "Mandat MaPrimeRénov",
+    //"Devis",
+    "Offre précontractuelle",
+    //"Facture",
+    "PV réception"
+]
 export const docsConfig = (index) => {
 
     const config = {
@@ -509,8 +549,8 @@ export const docsConfig = (index) => {
 }
 
 //##Device Info
-import DeviceInfo from "react-native-device-info" 
+import DeviceInfo from "react-native-device-info"
 
-export const isTablet = DeviceInfo.isTablet() 
+export const isTablet = DeviceInfo.isTablet()
 
 
