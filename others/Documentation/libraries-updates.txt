@@ -17,7 +17,8 @@ Path: D:\Github\Groupe-Synergys\node_modules\react-native-tag-autocomplete\index
 update: 
  style={{ backgroundColor: "#fff" }}
 
- 2. Add showInput={this.props.showInput} props to textinput on both libraries: tags autocomplete & autocomlete (autocomplete is included in tags autocomplete node modules)
+2. Add showInput={this.props.showInput} props to textinput on both libraries: tags autocomplete & autocomlete (autocomplete is included in tags autocomplete node modules)
+3. comment onSubmitEditing function content (to avoid selecting what user types)
 
 REACT NAVIGATION: 
 1. Deep link handle gmail links

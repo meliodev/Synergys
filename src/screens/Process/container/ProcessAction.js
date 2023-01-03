@@ -97,13 +97,11 @@ class ProcessAction extends Component {
 
     async mainHandler(process) {
         return new Promise(async (resolve, reject) => {
-            console.log("1...")
             load(this, true)
             const updatedProcess = await this.runProcessHandler(process) //No error thrown (in case of failure it returns previous Json process object)
             const isEmptyProcess = Object.keys(updatedProcess).length === 1
             if (isEmptyProcess) return
             await this.handleUpdateProcess(updatedProcess)
-            console.log("2...")
             resolve(true)
         })
     }
@@ -148,8 +146,6 @@ class ProcessAction extends Component {
             const currentStep = process[currentPhaseId].steps[currentStepId]
             const currentAction = getCurrentAction(process)
 
-            console.log("current step", currentStep)
-            console.log("current action", currentAction)
             this.setState({
                 process,
                 currentPhase, currentPhaseId,
@@ -207,8 +203,6 @@ class ProcessAction extends Component {
                 steps.push(phaseSteps)
             }
         }
-
-        //  console.log("////", phaseLabels)
 
         this.setState({
             phaseLabels,
@@ -304,7 +298,6 @@ class ProcessAction extends Component {
                 }
 
                 else if (onSelectType === 'transition' || onSelectType === 'validation' || onSelectType === 'commentPicker') {
-                    console.log("validation..........")
                     const validateActionParams = buildValidateActionParams(onSelectType, choices, choice, nextStep, nextPhase)
                     await runOperation(operation, pressedAction)
                     await this.validateAction(validateActionParams)
@@ -392,7 +385,7 @@ class ProcessAction extends Component {
     async autoTriggerNextAction() {
         const { verificationType } = this.state.currentAction
         const isAutoPress = verificationType !== "phaseRollback"
-        if (isAutoPress)
+        if (false)
             await this.onPressAction(this.props.canUpdate, this.state.currentAction)
     }
 
@@ -406,17 +399,9 @@ class ProcessAction extends Component {
             //Update action fields
             let processTemp = _.cloneDeep(process)
             let { actions } = processTemp[currentPhaseId].steps[currentStepId]
-            // console.log("process before verify...", processTemp[currentPhaseId].steps[currentStepId].actions, "********")
+            // console.log("process before verify...", processTemp[currentPhaseId].steps[currentStepId].actions, "********"
 
-            for (const a of actions) {
-                console.log(a.actionOrder, a.status, "-------")
-            }
-
-            actions = handleUpdateAction(actions, pressedAction, params)
-
-            for (const a of actions) {
-                console.log(a.actionOrder, a.status, "+++++++++")
-            }
+            actions = handleUpdateAction(actions, pressedAction, params) 
 
             processTemp[currentPhaseId].steps[currentStepId].actions = actions
 
@@ -504,14 +489,12 @@ class ProcessAction extends Component {
     }
 
     handleNavigation = (currentAction) => {
+
         let { screenName, screenParams } = buileNavigationOptions(currentAction, this.props.project)
-        console.log("c")
 
         screenParams.onGoBack = this.onGoBack
-        console.log("d")
 
         const navigate = () => {
-            console.log("e")
             if (screenParams.screenPush)
                 this.props.navigation.push(screenName, screenParams)
             else
@@ -538,6 +521,7 @@ class ProcessAction extends Component {
     handleAutomaticAction(action) {
         //Modal
         const showModal = action.choices
+
         if (showModal)
             this.setState({ showModal })
         //Navigation
@@ -587,8 +571,8 @@ class ProcessAction extends Component {
     onPressAction = async (pressedAction) => {
         try {
             return new Promise(async (resolve, reject) => {
-                console.log("A")
                 if (!this.props.canUpdate) return
+
                 this.setState({
                     loading: true,
                     loadingMessage: pressedAction.cloudFunction ? "Envoie de la Facture + Attestation fluide en cours..." : "Traitement en cours...",
@@ -597,12 +581,13 @@ class ProcessAction extends Component {
                     await countDown(500)
 
                     //Check User Authorization To Handle Action
+                    // console.log("111", pressedAction)
+                    // console.log("222", pressedAction.responsable)
                     const authorized = this.check_User_Authorization_To_Handle_Process_Action(pressedAction.responsable)
-                    console.log("B", authorized)
 
                     if (!authorized) {
                         this.disableLoading()
-                        Alert.alert('Action non autorisée', "Seul un responsable peut effectuer cette opération.")
+                        Alert.alert('', "Action à mener par un autre utilisateur.")
                         return
                     }
 
@@ -730,7 +715,8 @@ class ProcessAction extends Component {
             loading,
             loadingMessage
         } = this.state
-        const onPressAction = () => this.onPressAction(currentAction)
+
+        const onPressAction = async () => await this.onPressAction(currentAction)
         return (
             <ProcessTool
                 currentAction={currentAction}

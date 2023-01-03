@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.19"
+export const appVersion = "1.5.27"
 
 export const constants = {
     ScreenWidth: width,
@@ -172,6 +172,7 @@ export const privateDocTypes = [
     { label: 'Facture', value: 'Facture', icon: faFileInvoiceDollar },
     { label: 'Dossier CEE', value: 'Dossier CEE', icon: faFileCertificate },
     { label: 'Fiche EEB', value: 'Fiche EEB', icon: faFileAlt },
+    { label: 'Audit énergétique', value: 'Audit énergétique', icon: faFileAlt },
     { label: 'Dossier client', value: 'Dossier client', icon: faFileAlt },
     { label: 'Dossier aide', value: 'Dossier aide', icon: faFolderPlus },
     // { label: 'Prime de rénovation', value: 'Prime de rénovation', icon: faHandHoldingUsd },
@@ -211,6 +212,7 @@ export const masculinsDocTypes = [
     'Mandat MaPrimeRénov',
     'Mandat Synergys',
     "Dossier client",
+    "Audit énergétique"
 ]
 
 export const phases = [

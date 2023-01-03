@@ -63,7 +63,11 @@ class AuthLoadingScreen extends Component {
     const { isUpToDate, latestVersionDownloadLink } = await this.checkAppVersion()
     if (!isUpToDate) {
       Alert.alert('Mise à jour', "L'application n'est pas à jour. Veuillez installer la version la plus récente.")
-      this.setState({ requiresUpdate: true, loading: false, latestVersionDownloadLink })
+      this.setState({
+        requiresUpdate: true,
+        loading: false,
+        latestVersionDownloadLink
+      })
       return
     }
 
@@ -126,8 +130,13 @@ class AuthLoadingScreen extends Component {
         case EventType.DISMISSED:
           console.log('User dismissed notification', detail.notification)
           break
-        case EventType.PRESS:
+        case EventType.PRESS: {
+          const { notification } = detail
+          const { screen } = notification.data
+          const params = notification.data
+          this.props.navigation.navigate(screen, params)
           console.log('User pressed notification', detail.notification)
+        }
           break
       }
     })

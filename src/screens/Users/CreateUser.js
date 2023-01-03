@@ -35,7 +35,7 @@ const rolesPicker = {
     { label: 'Responsable technique', value: 'Responsable technique' },
     { label: 'Poseur', value: 'Poseur' },
     { label: 'Back office', value: 'Back office' },
-    { label: "Bureau d'étude", value: "Bureau d'étude" },
+    //{ label: "Bureau d'étude", value: "Bureau d'étude" },
   ],
   2: [
     { label: 'Commercial', value: 'Commercial' },

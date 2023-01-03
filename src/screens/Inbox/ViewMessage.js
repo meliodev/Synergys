@@ -27,11 +27,17 @@ export default class ViewMessage extends Component {
     constructor(props) {
         super(props)
         this.currentUser = firebase.auth().currentUser
-        this.message = this.props.navigation.getParam('message', '')
+        this.MessageId = this.props.navigation.getParam('MessageId', '')
+        //this.message = this.props.navigation.getParam('message', '')
         this.fetchMessages = this.fetchMessages.bind(this)
         // this.fetchDocs = fetchDocs.bind(this)
 
+        console.log("ID", this.MessageID)
+
         this.state = {
+            mainMessage: {
+
+            },
             messagesList: [],
             messagesCount: 0,
             expandedId: '',
@@ -49,19 +55,26 @@ export default class ViewMessage extends Component {
     }
 
     async componentDidMount() {
+        await this.fetchMainMessage()
         await this.fetchMessages()
         this.willFocusSubscription = this.props.navigation.addListener('willFocus', async () => {
             await this.fetchMessages()
         })
+    } 
+
+    async fetchMainMessage() {
+        const mainMessage = (await db.collection("Messages").doc(this.MessageId).get()).data()
+        this.setState({ mainMessage })
     }
 
     async fetchMessages(count) {
         if (count) {
             await countDown(count)
         }
+
         const query = db
             .collection('Messages')
-            .doc(this.message.id)
+            .doc(this.MessageId)
             .collection('AllMessages')
             .where('speakersIds', 'array-contains', this.currentUser.uid)
             .orderBy('sentAt', 'desc')
@@ -75,11 +88,11 @@ export default class ViewMessage extends Component {
         this.setState({ expandedId: '' })
         this.props.navigation.navigate('NewMessage', {
             isReply: true,
-            messageGroupeId: this.message.id,
+            messageGroupeId: this.MessageId,
             tagsSelected,
-            subject: `RE: ${this.message.mainSubject}`,
+            subject: `RE: ${this.state.mainMessage.mainSubject}`,
             oldMessages: messagesRendered,
-            subscribers: this.message.subscribers,
+            subscribers: this.state.mainMessage.subscribers,
         })
     }
 
@@ -88,11 +101,11 @@ export default class ViewMessage extends Component {
         this.setState({ expandedId: '' })
         this.props.navigation.navigate('NewMessage', {
             isReply: true,
-            messageGroupeId: this.message.id,
+            messageGroupeId: this.MessageId,
             tagsSelected: allSpeakers,
-            subject: `RE: ${this.message.mainSubject}`,
+            subject: `RE: ${this.state.mainMessage.mainSubject}`,
             oldMessages: messagesRendered,
-            subscribers: this.message.subscribers,
+            subscribers: this.state.mainMessage.subscribers,
         })
     }
 
@@ -122,7 +135,7 @@ export default class ViewMessage extends Component {
                                 }
                                 {key > 0 && showOldMessages &&
                                     <View>
-                                        <Text style={theme.customFontMSregular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }}>Le <Text style={theme.customFontMSregular.body}>{sentAtDate}</Text> à <Text style={theme.customFontMSregular.body}>{sentAtTime}</Text>, <Text style={theme.customFontMSregular.body}>{msg.sender.fullName}</Text> a écrit:</Text>
+                                        <Text style={[theme.customFontMSregular.caption, { color: theme.colors.placeholder, marginTop: 4, marginBottom: 2 }]}>Le <Text style={theme.customFontMSregular.body}>{sentAtDate}</Text> à <Text style={theme.customFontMSregular.body}>{sentAtTime}</Text>, <Text style={theme.customFontMSregular.body}>{msg.sender.fullName}</Text> a écrit:</Text>
                                         <Text style={[theme.customFontMSregular.body, { marginBottom: 15 }]}>{msg.message}</Text>
                                     </View>
                                 }
@@ -241,13 +254,15 @@ export default class ViewMessage extends Component {
     }
 
     render() {
-        const { toastMessage, toastType } = this.state
+        const { toastMessage, toastType, mainMessage } = this.state
+
+        if(!mainMessage) return null
 
         return (
             <View style={styles.container}>
                 <Appbar back title titleText='File des messages' />
                 <View style={styles.container}>
-                    <Headline style={[theme.customFontMSmedium.h3, { paddingLeft: constants.ScreenWidth * 0.038, marginBottom: 5 }]}>{this.message.mainSubject}</Headline>
+                    <Headline style={[theme.customFontMSmedium.h3, { paddingLeft: constants.ScreenWidth * 0.038, marginBottom: 5 }]}>{this.state.mainMessage.mainSubject}</Headline>
                     <ScrollView style={styles.container} >
                         {this.renderMessages()}
                     </ScrollView >

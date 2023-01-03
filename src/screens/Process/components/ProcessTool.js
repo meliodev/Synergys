@@ -56,8 +56,9 @@ class ProcessTool extends Component {
             loadingMessageAction,
             onPressAction
         } = this.props
+
         return (
-            <TouchableOpacity onPress={onPressAction}>
+            <TouchableOpacity onPress={() => onPressAction(currentAction)}>
                 <Action
                     action={currentAction}
                     actionTheme={{ mainColor: theme.colors.white, textFont: theme.customFontMSbold.body }}

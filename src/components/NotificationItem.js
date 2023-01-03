@@ -15,7 +15,7 @@ import moment from 'moment';
 import 'moment/locale/fr'
 moment.locale('fr')
 
-const NotificationItem = ({ notification, actions, navigation, ...props }) => {
+const NotificationItem = ({ notification, actions, navigation, ...props }) => { 
 
     const setLeftIcon = (topic) => {
         const icon = notification.read ? faBell : faBellExclamation
@@ -42,10 +42,10 @@ const NotificationItem = ({ notification, actions, navigation, ...props }) => {
                 .update({ read: true })
         }
 
-
         if (notification.navigation) {
-            const params = notification.navigation
+            let params = notification.navigation
             const { screen } = params
+            console.log(params)
             navigation.navigate(screen, params)
         }
     }

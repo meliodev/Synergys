@@ -5,16 +5,31 @@ import { Appbar } from '../../components'
 import _ from 'lodash'
 import { connect } from 'react-redux'
 
-import { crashlytics } from '../../firebase';
+import { crashlytics, db } from '../../firebase';
 
 import * as theme from '../../core/theme'
 import { requestRESPermission, requestWESPermission } from '../../core/permissions'
+import { setProducts } from '../../core/admin-utils';
 
 class Dashboard extends Component {
 
-    componentDidMount() {
+    // backupOldProducts() {
+    //     db.collection("Products").get().then((querysnapshot) => {
+    //         querysnapshot.forEach((doc) => {
+    //             const product = doc.data()
+    //             db.collection("ProductsOld").doc(doc.id).set(product)
+    //         })
+    //     })
+    // }
+
+    // db.collection("Products").get().then((querysnapshot) => {
+    //     console.log(querysnapshot.docs.length, '.....')
+    // })
+
+    async componentDidMount() {
         requestWESPermission()
         requestRESPermission()
+        // setProducts()
     }
 
     render() {

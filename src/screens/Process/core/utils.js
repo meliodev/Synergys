@@ -57,8 +57,6 @@ export const buileNavigationOptions = (currentAction, project) => {
   const screenName = collectionScreenNameMap[collection]
   const screenPush = collection === "Clients" //Because already on the nav stack
 
-  console.log("1")
-
   let screenParams = {
     isProcess: true,
     project,
@@ -66,9 +64,6 @@ export const buileNavigationOptions = (currentAction, project) => {
   }
 
   if (screenName === "UploadDocument") {
-
-    console.log("1...", buildEntityType(collection, params.documentType))
-    console.log("1...", isPrivateType(collection, params.documentType))
 
     screenParams = {
       ...screenParams,
@@ -95,9 +90,6 @@ export const buileNavigationOptions = (currentAction, project) => {
       taskType: buildEntityType(collection, params.taskType),
       dynamicType: isPrivateType(collection, params.taskType),
     }
-
-    console.log("build....")
-
   }
 
   else if (screenName === "Profile") {
@@ -113,9 +105,6 @@ export const buileNavigationOptions = (currentAction, project) => {
       ...params.screenParams,
     }
   }
-
-  console.log("2")
-
 
   return { screenName, screenParams }
 }

@@ -87,7 +87,7 @@ class ListMessages extends Component {
             db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
         }
 
-        this.props.navigation.navigate('ViewMessage', { message: message })
+        this.props.navigation.navigate('ViewMessage', { MessageId: message.id }) 
     }
 
 

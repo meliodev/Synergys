@@ -163,6 +163,7 @@ const appScreens = {
     },
     CreateTicketReq: {
         screen: CreateTicketReq,
+        path: 'request/:RequestId',
         navigationOptions: hideHeader
     },
 

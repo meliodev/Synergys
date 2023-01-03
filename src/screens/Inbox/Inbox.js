@@ -24,17 +24,24 @@ class Inbox extends React.Component {
         }
     }
 
-    render() {
-
-        const routes = [
+    defineRoutes() {
+        const enableMessages = this.props.role !== "client"
+        let routes = [
             { key: 'first', title: 'NOTIFICATIONS' },
-            { key: 'second', title: 'MESSAGES' },
         ]
+        if (enableMessages) {
+            routes = [...routes, { key: 'second', title: 'MESSAGES' }]
+        }
+        return routes
+    }
+
+    render() {
 
         let { index } = this.state
         const { isConnected } = this.props.network
         const { role } = this.props
         const permissionsMessages = this.props.permissions.messages
+        const routes = this.defineRoutes()
 
         return (
             <View style={{ flex: 1 }}>
@@ -51,7 +58,8 @@ class Inbox extends React.Component {
                     icon1={faBell}
                     icon2={faEnvelope}
                     Tab1={<ListNotifications offLine={!isConnected} />}
-                    Tab2={<ListMessages offLine={!isConnected} role={role} permissions={permissionsMessages} />} />
+                    Tab2={<ListMessages offLine={!isConnected} role={role} permissions={permissionsMessages} />}
+                />
             </View>
         )
     }

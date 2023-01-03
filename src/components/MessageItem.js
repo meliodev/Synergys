@@ -27,7 +27,7 @@ const MessageItem = ({ message, navigation, options, functions, ...props }) => {
             db.collection('Messages').doc(message.id).update({ haveRead: usersHaveRead })
         }
 
-        navigation.navigate('ViewMessage', { message: message })
+        navigation.navigate('ViewMessage', { MessageId: message.id })
     }
 
 

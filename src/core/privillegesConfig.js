@@ -223,10 +223,10 @@ export const privilleges = {
                     "clause": "orderBy"
                 }
             ],
-            "canDelete": false,
-            "canRead": false,
-            "canCreate": false,
-            "canUpdate": false
+            "canDelete": true,
+            "canRead": true,
+            "canCreate": true,
+            "canUpdate": true
         },
         "teams": {
             "canDelete": false,
@@ -425,7 +425,7 @@ export const privilleges = {
             "canRead": true,
             "canDelete": false,
             "canCreate": true,
-            "canUpdate": false
+            "canUpdate": true
         },
         "orders": {
             "queryFilters": [
@@ -697,9 +697,16 @@ export const privilleges = {
                     "filter": "client.id"
                 },
                 {
+                    "operation": "==",
+                    "value": false,
+                    "filterOrder": 2,
+                    "filter": "deleted",
+                    "clause": "where"
+                },
+                {
                     "field": "createdAt",
                     "sort": "desc",
-                    "filterOrder": 2,
+                    "filterOrder": 3,
                     "clause": "orderBy"
                 }
             ],

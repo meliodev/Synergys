@@ -433,6 +433,8 @@ class UploadDocument extends Component {
 
     //##ATTACHMENT COMPONENT
     async onPressAttachment(canWrite) {
+
+        console.log("..............", canWrite)
         if (!canWrite) return
 
         if (!this.isEdit && !this.documentType) { //Creation & not pre-defined document type {
@@ -1097,6 +1099,7 @@ class UploadDocument extends Component {
         const { isConnected } = network
         let { canCreate, canUpdate, canDelete } = permissions.documents
         canUpdate = canUpdate || this.props.role.id === 'client' && createdBy.id === auth.uid
+        console.log("canCreate/////", canCreate)
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit) && !loading
         canDelete = canDelete && this.isEdit && !loading
 

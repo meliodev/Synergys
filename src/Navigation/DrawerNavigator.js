@@ -43,6 +43,7 @@ const previousGetActionForPathAndParams = MyApp.router.getActionForPathAndParams
 
 Object.assign(MyApp.router, {
   getActionForPathAndParams(path, params) {
+    console.log(path, params)
     // const isAuthLink = path.startsWith('auth-link');
 
     // if (isAuthLink) {

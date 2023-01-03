@@ -46,7 +46,6 @@ import {
   myAlert,
   updateField,
   pickImage,
-  renderImages,
   nameValidator,
   positiveNumberValidator,
   arrayValidator,
@@ -55,7 +54,7 @@ import {
   displayError,
 } from '../../core/utils';
 import * as theme from '../../core/theme';
-import {constants, isTablet, ScreenWidth} from '../../core/constants';
+import { isTablet, ScreenWidth} from '../../core/constants';
 import SquarePlus from '../../components/SquarePlus';
 import {CustomIcon} from '../../components';
 import {faPlusCircle, faTimes} from '@fortawesome/pro-light-svg-icons';
@@ -188,7 +187,6 @@ class CreateProduct extends Component {
       });
       let {
         ProductId,
-        type,
         category,
         name,
         tagsSelected,
@@ -540,7 +538,7 @@ class CreateProduct extends Component {
   }
 
   renderCategory() {
-    const {type, category, categories, dialogType} = this.state;
+    const {type, category, categories } = this.state;
 
     return (
       <View style={{marginBottom: isTablet ? 50 : 20}}>
@@ -560,7 +558,7 @@ class CreateProduct extends Component {
             theme.customFontMSmedium.caption,
             {
               color: theme.colors.primary,
-              marginTop: Platform.OS === 'android' ? 10 : 0,
+              marginTop: Platform.OS === 'android' ? 10 : 10,
             },
           ]}>
           + Nouvelle catégorie
@@ -629,21 +627,15 @@ class CreateProduct extends Component {
   render() {
     const {
       ProductId,
-      checked,
       name,
       brand,
       description,
       price,
       taxe,
-      category,
-      categories,
       showDialog,
       dialogType,
     } = this.state;
-    const {suggestions, tagsSelected} = this.state;
-    const {createdAt, createdBy, editedAt, editedBy} = this.state;
-    const {error, loading, toastType, toastMessage} = this.state;
-    const {isImageViewVisible} = this.state;
+    const { loading, toastType, toastMessage} = this.state;
 
     return (
       <View style={styles.container}>

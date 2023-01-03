@@ -171,16 +171,17 @@ class CreateRequest extends Component {
     }
 
     //POST
-    async AddRequestAndChatRoom(request) { 
+    async AddRequestAndChatRoom(request) {
         if (this.isEdit) {
             db.collection('Requests').doc(this.RequestId).set(request, { merge: true })
             return
         }
 
         const messageId = await uuidGenerator()
+        const text = request.type === "project" ? `La demande de projet a été initiée` : `La demande de ticket a été initiée` 
         const systemMessage = {
             _id: messageId,
-            text: `La demande de projet a été initiée.....`,
+            text,
             createdAt: new Date().getTime(),
             system: true
         }
@@ -245,7 +246,7 @@ class CreateRequest extends Component {
     }
 
     updateRequestState(state) {
-        db.collection('Requests').doc(this.RequestId).update({ state })
+        db.collection('Requests').doc(this.RequestId).update({ state, editedBy: this.props.currentUser })
         this.setState({ state })
     }
 
@@ -442,7 +443,6 @@ class CreateRequest extends Component {
 
         let { canCreate, canUpdate, canDelete } = this.props.permissions.requests
         const canWrite = (canUpdate && this.isEdit || canCreate && !this.isEdit)
-
         const { isConnected } = this.props.network
 
         const title = ' Demande de ' + requestType

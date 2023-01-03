@@ -16,9 +16,7 @@ export const processHandler = async (processModel, currentProcess, startPhaseId,
     try {
         let process = _.cloneDeep(currentProcess)
         isCorruptedProcess(processModel, process)
-        console.log("1")
         const updatedProcess = await updateProcess(processModel, process, startPhaseId, attributes)
-        console.log("2")
         return updatedProcess || currentProcess
     }
     catch (e) {
@@ -327,7 +325,7 @@ const configureActions = async (actions, attributes) => {
 
                 //Reinitialize nav params in case document was deleted
                 if (querysnapshot.empty) {
-                    action.documentId === ''
+                    action.documentId = ''
                 }
 
                 //Set Navigation Params (exp: temporary access before upload completes)
@@ -705,7 +703,7 @@ export const getCurrentAction = (process) => {
     let { actions } = process[currentPhaseId].steps[currentStepId]
     actions.sort((a, b) => (a.actionOrder > b.actionOrder) ? 1 : -1)
     let currentAction = null
-    for (const action of actions) {
+    for (const action of actions) { 
         if (!currentAction && action.status === 'pending')
             currentAction = action
     }

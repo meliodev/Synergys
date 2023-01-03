@@ -73,6 +73,7 @@ class CreateTask extends Component {
         this.isProcess = this.props.navigation.getParam('isProcess', false)
 
         //Params (task properties)
+        this.taskType = this.props.navigation.getParam('taskType', "Normale") //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.dynamicType = this.props.navigation.getParam('dynamicType', false) //User cannot create this task type if not added dynamiclly (useful for process progression)
         this.taskType = this.props.navigation.getParam('taskType', undefined) //Not editable
         this.project = this.props.navigation.getParam('project', undefined)
@@ -84,7 +85,7 @@ class CreateTask extends Component {
         this.TaskId = this.isEdit ? this.TaskId : generateId('GS-TC-')
         this.title = this.isProcess && this.taskType ? this.taskType.value : this.isEdit ? 'Modifier la tâche' : 'Nouvelle tâche'
         const currentRole = this.props.role.id
-        this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.documentType)
+        this.types = setPickerTaskTypes(currentRole, this.dynamicType, this.taskType)
         const defaultState = this.setDefaultState(currentRole)
 
         this.state = {
@@ -166,12 +167,10 @@ class CreateTask extends Component {
             const isComTask = _.isEqual(this.taskType.natures, ['com'])
             const isTechTask = _.isEqual(this.taskType.natures, ['tech'])
 
-            console.log("isTechTask", isTechTask)
             if (isComTask) {
                 assignedTo = comContact
-            }
+            } 
             else if (isTechTask) {
-                console.log("techContact", techContact)
                 assignedTo = techContact
             }
         }
@@ -564,6 +563,8 @@ class CreateTask extends Component {
         const neutral = _.isEqual(natures, ['com', 'tech'])
         const isCom = _.isEqual(natures, ['com'])
         const isTech = _.isEqual(natures, ['tech'])
+
+        console.log(neutral, isCom, isTech, "ppp")
         if (neutral) return "neutral"
         else if (isCom) return "commercial"
         else if (isTech) return "technic"
@@ -574,6 +575,7 @@ class CreateTask extends Component {
         let query
         const nature = this.checkTypeNature(this.state.type)
 
+        console.log("..........", this.state.type)
         if (nature === "neutral") {
             query = db.collection('Users').where('deleted', '==', false)
         }
@@ -688,7 +690,8 @@ class CreateTask extends Component {
     renderAssignedTo(canWrite) {
         const { assignedTo, assignedToError } = this.state
         const { role } = this.props
-        const isEditable = canWrite && role.isHighRole
+        const isEditable = canWrite 
+        //&& role.isHighRole
 
         return (
             <ItemPicker

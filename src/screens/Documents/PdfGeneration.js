@@ -40,6 +40,7 @@ import * as theme from '../../core/theme';
 import { errorMessages } from '../../core/constants';
 import { Alert } from 'react-native';
 import { groupBy } from '../Process/algorithm/process';
+import { formulaireRetraction } from '../../assets/files/formulaireRetraction';
 
 //urls
 const urlForm =
@@ -220,7 +221,7 @@ export default class PdfGeneration extends Component {
 
       //1. HeaderLeft: Logo
       const logoImage = await pdfDoc.embedPng(logoBase64);
-      const logoDims = logoImage.scale(0.2);
+      const logoDims = logoImage.scale(0.33);
 
       marginTop_L += logoDims.height;
 
@@ -242,7 +243,9 @@ export default class PdfGeneration extends Component {
         `11100 MONTREDON DES CORBIERES\n` +
         `Email : contact@groupe-synergys.fr\n` +
         `Tél : (33) 09 70 15 57 16\n` +
-        `RGE : QualiPAC/58669 - QualiPV/58669\n`;
+        `RGE : QualiPAC/58669 - QualiPV/58669\n` +
+        `QualiSOL : QS/58669 - QualiBOIS : QB/58669 -\n` +
+        `Ventillation + : VPLUS/58669`;
 
       pages[pageIndex].drawText(synergysContact, {
         x: marginLeft,
@@ -1214,9 +1217,9 @@ export default class PdfGeneration extends Component {
         footer_MarginBottom -= padding * 2;
 
         const footerText = [
-          'Responsabilité civile et décennale n°SV75018041T03411 ERGO France',
-          'SAS SYNERGYS au capital de 30000.00 € - Siret : 849 583 281 00027',
-          'APE : 4322B - RCS NARBONNE - TVA intracommunautaire : FR68849583281',
+          'Responsabilité civile et décennale n°0000010981242304 AXA',
+          'SAS SYNERGYS au capital de 30000 € - Siret : 849583281 00027',
+          'APE : 4322B - RCS NARBONNE - TVA intracommunautaire : FR68849583281'
         ];
 
         footerText.forEach((text) => {
@@ -1248,16 +1251,20 @@ export default class PdfGeneration extends Component {
       if (this.isQuote) {
         const mergedPdf = await PDFDocument.create();
         const termsPdf = await PDFDocument.load(termsBase64);
+        const formulaireRetractionPdf = await PDFDocument.load(formulaireRetraction);
+
         const copiedPagesA = await mergedPdf.copyPages(
           pdfDoc,
           pdfDoc.getPageIndices(),
         );
         copiedPagesA.forEach((page) => mergedPdf.addPage(page));
+        
         const copiedPagesB = await mergedPdf.copyPages(
           termsPdf,
           termsPdf.getPageIndices(),
         );
         copiedPagesB.forEach((page) => mergedPdf.addPage(page));
+        
 
         //CERFA: Delete existing data (put white square) & set instead Client info
         const lastPageIndex = mergedPdf.getPages().length - 1;
@@ -1301,8 +1308,16 @@ export default class PdfGeneration extends Component {
           }
         }
 
-        pdfBytes = await mergedPdf.save();
-      } else pdfBytes = await pdfDoc.save();
+        // const copiedPagesC = await mergedPdf.copyPages(
+        //   formulaireRetractionPdf,
+        //   formulaireRetractionPdf.getPageIndices(),
+        // );
+        // copiedPagesC.forEach((page) => mergedPdf.addPage(page));
+
+          pdfBytes = await mergedPdf.save();
+      }
+
+      else pdfBytes = await pdfDoc.save();
 
       const pdfBase64 = uint8ToBase64(pdfBytes);
       const source = { uri: `data:application/pdf;base64,${pdfBase64}` };

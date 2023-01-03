@@ -1180,7 +1180,11 @@ import { mandatSynergysBase64 } from '../assets/files/mandatSynergysBase64';
 import { lineBreaker } from '../screens/Documents/PdfGeneration';
 
 
-export const docType_LabelValueMap = (value) => allDocTypes.filter((type) => type.value === value)[0].label
+export const docType_LabelValueMap = (value) => {
+  if (!value) return ""
+  const label = allDocTypes.filter((type) => type.value === value)[0].label
+  return label
+}
 
 
 let publicTaskTypes = [
@@ -1200,7 +1204,7 @@ export const privateTaskTypes = [
 let alltaskTypes = [
   { label: 'Normale', value: 'Normale', natures: ['com', 'tech'] }, //#static
   { label: 'Visite technique préalable', value: 'Visite technique préalable', natures: ['com'] }, //#dynamic
-  { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic
+  { label: 'Visite technique', value: 'Visite technique', natures: ['tech'] }, //#dynamic 
   { label: 'Installation', value: 'Installation', natures: ['tech'] }, //#dynamic
   { label: 'Rattrapage', value: 'Rattrapage', natures: ['tech'] }, //#dynamic
   { label: 'Panne', value: 'Panne', natures: ['tech'] }, //#static

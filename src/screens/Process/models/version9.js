@@ -185,7 +185,7 @@ export const version9 = {
     rd1: {
         phaseValue: "Visite technique préalable",
         title: 'Visite technique préalable',
-        instructions: '',
+        instructions: '', 
         phaseOrder: 2,
         followers: ['Admin', 'Directeur commercial', 'Commercial'],
         steps: {
@@ -269,13 +269,45 @@ export const version9 = {
                 title: "Évaluation des besoins ou rapport du bureau d'étude",
                 instructions: '',
                 stepOrder: 1,
-                actions: [
-                    {   //##draft
-                        id: 'eebFileCreation',
-                        title: 'Créer une fiche Étude et Évaluation des besoins',
-                        instructions: 'Créer une fiche Étude et Évaluation des besoins',
+                actions: [ //Audit energetique
+                    {
+                        id: 'eebOrEnergeticAudit',
+                        title: "Voulez-vous importer une fiche EEB ou bien un Audit énergétique ?",
+                        instructions: '',
                         actionOrder: 1,
-                        responsable: "Bureau d'étude",
+                        type: 'manual',
+                        comment: '',
+                        responsable: 'Commercial',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Fiche EEB',
+                                id: 'confirm',
+                                onSelectType: 'validation',
+                                nextStep: 'eebCreation',
+                            },
+                            {
+                                label: 'Audit énergétique',
+                                id: 'confirm',
+                                onSelectType: 'validation',
+                                nextStep: 'energeticAuditCreation',
+                            },
+                        ],
+                    }
+                ],
+            },
+            eebCreation: {
+                title: "Évaluation des besoins",
+                instructions: '',
+                stepOrder: 2,
+                actions: [
+                    {
+                        id: 'eebFileCreation',
+                        title: 'Importer une fiche Étude et Évaluation des besoins',
+                        instructions: 'Importer une fiche Étude et Évaluation des besoins',
+                        actionOrder: 1,
+                        responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -287,32 +319,67 @@ export const version9 = {
                         //Verification:
                         queryFilters: buildQueryFilters(queryFilters_Documents_Map("Fiche EEB").create.onCreate),
                         status: 'pending',
+                        nextStep: 'rd2Creation',
                     },
-                    {   //##new
-                        id: 'eebFileCreation',
-                        title: 'Créer un dossier client',
-                        instructions: 'Importer un dossier client dûment rempli',
-                        actionOrder: 2,
+                ]
+            },
+            energeticAuditCreation: {
+                title: "Audit énergétique",
+                instructions: '',
+                stepOrder: 3,
+                actions: [
+                    {
+                        id: 'energeticAuditCreation',
+                        title: 'Importer un Audit énergétique',
+                        instructions: 'Importer un Audit énergétique',
+                        actionOrder: 1,
                         responsable: 'Commercial',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
                         params: {
-                            documentType: "Dossier client",
+                            documentType: "Audit énergétique",
                         },
                         //Updates documentId to view the "onProgress uploading document"
-                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Dossier client").create.onProgress),
+                        queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Audit énergétique").create.onProgress),
                         //Verification:
-                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Dossier client").create.onCreate),
+                        queryFilters: buildQueryFilters(queryFilters_Documents_Map("Audit énergétique").create.onCreate),
                         status: 'pending',
                         nextStep: 'rd2Creation',
                     },
-                ],
+                ]
             },
+            //##draft
+            // clientFolderCreation: {
+            //     title: "Dossier client",
+            //     instructions: '',
+            //     stepOrder: 4,
+            //     actions: [
+            //         {   //##new
+            //             id: 'eebFileCreation',
+            //             title: 'Créer un dossier client',
+            //             instructions: 'Importer un dossier client dûment rempli',
+            //             actionOrder: 1,
+            //             responsable: 'Commercial',
+            //             verificationType: 'doc-creation',
+            //             collection: 'Documents',
+            //             documentId: "", //creation
+            //             params: {
+            //                 documentType: "Dossier client",
+            //             },
+            //             //Updates documentId to view the "onProgress uploading document"
+            //             queryFilters_onProgressUpload: buildQueryFilters(queryFilters_Documents_Map("Dossier client").create.onProgress),
+            //             //Verification:
+            //             queryFilters: buildQueryFilters(queryFilters_Documents_Map("Dossier client").create.onCreate),
+            //             status: 'pending',
+            //             nextStep: 'rd2Creation',
+            //         },
+            //     ]
+            // },
             rd2Creation: {
                 title: 'Initiation rendez-vous 2',
                 instructions: '',
-                stepOrder: 3,
+                stepOrder: 4,
                 actions: [
                     {
                         id: 'rd2Creation',
@@ -335,7 +402,7 @@ export const version9 = {
             quoteCreation: {
                 title: "Création d'une offre précontractuelle",
                 instructions: '',
-                stepOrder: 4,
+                stepOrder: 5,
                 actions: [
                     {   //##new
                         id: 'quoteCreation',
@@ -590,32 +657,7 @@ export const version9 = {
                             },
                         ],
                         status: 'pending',
-                    },
-                    {
-                        id: 'conformityValidation',
-                        title: "Validation du contrôle de conformité",
-                        instructions: '',
-                        actionOrder: 10,
-                        type: 'manual',
-                        comment: '',
-                        responsable: 'Directeur commercial',
-                        status: 'pending',
-                        verificationType: 'multiple-choices',
-                        choices: [
-                            {
-                                label: 'Annuler',
-                                id: 'cancel',
-                                nextPhase: 'cancelProject',
-                                onSelectType: 'transition',
-                                commentRequired: true,
-                            },
-                            {
-                                label: 'Valider',
-                                id: 'confirm',
-                                onSelectType: 'validation',
-                                nextStep: 'payModeValidation',
-                            },
-                        ],
+                        nextStep: "payModeValidation"
                     },
                 ],
             },
@@ -700,31 +742,57 @@ export const version9 = {
                                 id: 'cashPayment',
                                 image: 'sofincoLogo',
                                 onSelectType: 'commentPicker',
-                                nextStep: 'technicalVisitCreation',
+                                //nextStep: 'technicalVisitCreation',
                             },
                             {
                                 label: 'Moncofidispro.fr',
                                 id: 'financing',
                                 image: 'cofidisLogo',
                                 onSelectType: 'commentPicker',
-                                nextStep: 'technicalVisitCreation',
+                                //nextStep: 'technicalVisitCreation',
                             },
                             {
                                 label: 'domofinance.com',
                                 id: 'financing',
                                 image: 'domofinanceLogo',
                                 onSelectType: 'commentPicker',
-                                nextStep: 'technicalVisitCreation',
+                               // nextStep: 'technicalVisitCreation',
                             },
                             {
                                 label: 'Autres',
                                 id: 'other',
                                 onSelectType: 'commentPicker',
-                                nextStep: 'technicalVisitCreation',
+                              //  nextStep: 'technicalVisitCreation',
                             },
                         ],
                         responsable: 'Commercial',
                         status: 'pending',
+                    },
+                    {
+                        id: 'conformityValidation',
+                        title: "Validation du contrôle de conformité",
+                        instructions: '',
+                        actionOrder: 4,
+                        type: 'manual',
+                        comment: '',
+                        responsable: 'Directeur commercial',
+                        status: 'pending',
+                        verificationType: 'multiple-choices',
+                        choices: [
+                            {
+                                label: 'Annuler',
+                                id: 'cancel',
+                                nextPhase: 'cancelProject',
+                                onSelectType: 'transition',
+                                commentRequired: true,
+                            },
+                            {
+                                label: 'Valider',
+                                id: 'confirm',
+                                onSelectType: 'validation',
+                                nextStep: 'technicalVisitCreation',
+                            },
+                        ],
                     },
                     //Montant de l'acompte? (zone de saisie) //operation: add it to bill sub attributes
                 ],
@@ -739,11 +807,11 @@ export const version9 = {
                         title: 'Créer une visite technique',
                         instructions: 'Créer une visite technique',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: 'Responsable technique', 
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
-                        params: {
+                        params: { 
                             taskType: "Visite technique",
                         },
                         queryFilters: buildQueryFilters(queryFilters_Agenda_Map("Visite technique").create),
@@ -771,7 +839,7 @@ export const version9 = {
                         title: 'Créer une visite technique',
                         instructions: 'Créer une visite technique',
                         actionOrder: 1,
-                        responsable: 'Commercial', //Directeur technique
+                        responsable: 'Responsable technique', //Directeur technique
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -786,7 +854,7 @@ export const version9 = {
                         title: 'Valider la date de la visite technique',
                         instructions: 'Valider la date de la visite technique',
                         actionOrder: 2,
-                        responsable: 'Commercial',  //Directeur technique
+                        responsable: 'Responsable technique',  //Directeur technique
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -872,7 +940,7 @@ export const version9 = {
                                 onSelectType: 'navigation'
                             },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Responsable technique',
                         status: 'pending',
                     },
                 ],
@@ -888,7 +956,7 @@ export const version9 = {
                         title: 'Remplir la visite technique',
                         instructions: 'Remplir la visite technique',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Responsable technique',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -907,7 +975,7 @@ export const version9 = {
                         title: 'Voulez-vous cloturer la visite technique',
                         instructions: 'Voulez-vous cloturer la visite technique',
                         actionOrder: 2,
-                        responsable: 'Poseur',
+                        responsable: 'Responsable technique',
                         collection: 'Agenda',
                         documentId: "",
                         params: {
@@ -1620,7 +1688,7 @@ export const version9 = {
                         //Comment
                         comment: '',
                         //Others
-                        responsable: 'Poseur',
+                        responsable: 'Responsable technique',
                         status: 'pending',
                     },
                     {
@@ -1641,10 +1709,10 @@ export const version9 = {
                                 onSelectType: 'transition',
                                 commentRequired: true,
                             },
-                            { 
-                                label: 'Valider', 
-                                id: 'confirm', 
-                                onSelectType: 'validation' 
+                            {
+                                label: 'Valider',
+                                id: 'confirm',
+                                onSelectType: 'validation'
                             },
                         ],
                     },
@@ -1673,7 +1741,7 @@ export const version9 = {
                         //Others
                         responsable: 'Poseur',
                         status: 'pending',
-                        nextStep: 'emailBill',
+                        nextStep: 'clientReview',
                     },
                 ]
             },
@@ -1836,6 +1904,7 @@ export const version9 = {
                                 attachments: [],
                             },
                         },
+                       // responsable: 'Poseur',
                         nextStep: 'clientReview',
                     },
                 ],
@@ -1844,7 +1913,7 @@ export const version9 = {
                 title: 'Satisfaction client',
                 instructions:
                     "Le directeur technique devra valider la satisfaction du client vis-à-vis de l'installation",
-                stepOrder: 11,
+                stepOrder: 10,
                 actions: [
                     {
                         id: 'clientReview',
@@ -1855,6 +1924,7 @@ export const version9 = {
                         verificationType: 'multiple-choices',
                         isReview: true,
                         comment: '',
+                        responsable: "Client",
                         choices: [
                             {
                                 label: '1',

@@ -805,7 +805,7 @@ class CreateProject extends Component {
                     editable={canWrite && this.isCurrentHighRole}
                 />
                 <MyInput
-                    label="Attente paiement financement"
+                    label="Attente paiement CEE"
                     returnKeyType="done"
                     keyboardType='numeric'
                     value={bill.CEEPayment}

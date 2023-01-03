@@ -56,7 +56,6 @@ class Process extends Component {
                 let project = doc.data()
                 project.id = doc.id
                 project = _.pick(project, ['id', 'name', 'client', 'step', 'comContact', 'techContact', 'intervenant', 'address', 'workTypes'])
-
                 resolve(project)
             })
         })

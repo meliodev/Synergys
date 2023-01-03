@@ -70,18 +70,25 @@ export const blockRoleUpdateOnPhase = (role, phase) => {
     const isComPhase = comSteps.includes(phase)
     const isTechPhase = techSteps.includes(phase)
     const isBlockedUpdates = role === 'com' && isTechPhase || role === 'poseur' && isComPhase
-    return isBlockedUpdates 
+    return isBlockedUpdates
 }
 
 export const enableProcessAction = (responsable, currentUserId, currentUserRole, currentPhase) => {
 
+    console.log("ooo", responsable)
     const isHighRole = highRolesValues.includes(currentUserRole)
     const isCurrentRoleResponsable = responsable === currentUserRole
 
     let enabledAction = false
-    if (isHighRole || isCurrentRoleResponsable)
-        enabledAction = true
 
+    const isClientAction = responsable === "Client"
+    const isClientCurrent = currentUserRole === "Client"
+    const isEmployeeAction = isHighRole || isCurrentRoleResponsable
+
+    if (isClientAction) {
+        enabledAction = isClientCurrent
+    }
+    else enabledAction = isEmployeeAction
     return enabledAction
 }
 

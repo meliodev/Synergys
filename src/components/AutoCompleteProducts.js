@@ -7,7 +7,7 @@ import AutoTags from "react-native-tag-autocomplete"
 
 import { db } from '../firebase'
 import * as theme from "../core/theme";
-import { constants, errorMessages, isTablet, ScreenWidth } from "../core/constants";
+import { constants, errorMessages, isTablet, ScreenHeight, ScreenWidth } from "../core/constants";
 import { displayError, myAlert } from "../core/utils";
 
 import { withNavigation } from 'react-navigation'
@@ -135,7 +135,7 @@ class AutoCompleteProducts extends React.Component {
                 inputContainerStyle={styles.inputContainerStyle}
                 listContainerStyle={styles.listContainerStyle}
                 listStyle={styles.listStyle}
-
+                flatListProps={{height: ScreenHeight*0.3}} //##bugFix: fix height to be able to scroll
                 showInput={this.props.showTextInput}
             // renderTextInput={() => {
             //     return (
@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
         maxWidth: constants.ScreenWidth - theme.padding,
     },
     listContainerStyle: {
+        flex: 1,
         backgroundColor: "white",
         borderWidth: 0
     },
