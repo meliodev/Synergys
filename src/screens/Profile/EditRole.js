@@ -10,7 +10,7 @@ import Toast from "../../components/Toast"
 import Loading from "../../components/Loading"
 
 import { displayError, isEditOffline, load } from "../../core/utils"
-import { setRole } from "../../core/redux"
+import { setCurrentUser, setRole } from "../../core/redux"
 import * as theme from "../../core/theme"
 import { constants, errorMessages, roles } from '../../core/constants'
 import firebase, { functions, db } from '../../firebase'
@@ -39,25 +39,32 @@ class EditRole extends Component {
     }
 
     async handleSubmit() {
-        const { isConnected } = this.props.network
-        let isEditOffLine = isEditOffline(this.isEdit, isConnected)
-        if (isEditOffLine) {
-            load(this, false)
-            return
-        }
+        try {
+            const { isConnected } = this.props.network
+            let isEditOffLine = isEditOffline(this.isEdit, isConnected)
+            if (isEditOffLine) {
+                load(this, false)
+                return
+            }
 
-        const { loading, role } = this.state
-        if (this.currentRole === role || loading) return
-        load(this, true)
-        await this.setCustomClaim().catch((e) => displayError({ message: errorMessages.profile.roleUpdate }))
-        load(this, false)
+            const { loading, role } = this.state
+            if (this.currentRole === role || loading) return
+            load(this, true)
+            await this.setCustomClaim()
+        }
+        catch (err) {
+            console.log(err)
+        }
+        finally{
+            load(this, false)
+        }
     }
 
     setCustomClaim() {
         const setCustomClaim = functions.httpsCallable('setCustomClaim')
         return setCustomClaim({ role: this.state.role, userId: this.userId })
             .then(async result => {
-                try {
+                try { 
                     const { role } = this.state
                     const { currentUser } = firebase.auth()
                     //Update redux state
@@ -80,7 +87,7 @@ class EditRole extends Component {
                     throw new Error(e)
                 }
             })
-            .catch(err => { throw new Error(e) })
+            .catch(err => { throw new Error(err) })
     }
 
     render() {

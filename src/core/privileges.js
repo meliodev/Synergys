@@ -97,7 +97,7 @@ export const checkTechContact = (step, subscribers) => {
 
     if (!isStepTech) return true
     else {
-        const techContact = subscribers.filter((sub) => sub.role === 'Commercial')
+        const techContact = subscribers.filter((sub) => sub.role === "Chargé d'affaires")
         if (techContact.length > 0)
             return true
 

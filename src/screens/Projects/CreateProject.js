@@ -660,7 +660,7 @@ class CreateProject extends Component {
                     prevScreen: 'CreateProject',
                     isRoot: false,
                     titleText: 'Choisir un commercial',
-                    query: db.collection('Users').where('role', '==', 'Commercial').where('deleted', '==', false)
+                    query: db.collection('Users').where('role', '==', "Chargé d'affaires").where('deleted', '==', false)
                 })
                 }
                 label="Contact commercial *"
@@ -681,7 +681,7 @@ class CreateProject extends Component {
                     prevScreen: 'CreateProject',
                     isRoot: false,
                     titleText: 'Choisir un poseur',
-                    query: db.collection('Users').where('role', '==', 'Poseur').where('deleted', '==', false)
+                    query: db.collection('Users').where('role', '==', 'Équipe technique').where('deleted', '==', false)
                 })
                 }
                 label="Contact technique *"
