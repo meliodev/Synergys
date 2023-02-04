@@ -117,7 +117,7 @@ export const version9 = {
         title: 'Prospect',
         instructions: '',
         phaseOrder: 1,
-        followers: ['Admin', 'Directeur commercial', 'Commercial'],
+        followers: ['Admin', 'Service commercial', "Chargé d'affaires"],
         steps: {
             prospectCreation: {
                 title: 'Création prospect',
@@ -131,7 +131,7 @@ export const version9 = {
                         title: 'Nom',
                         instructions: 'Saisir le Nom du client',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'data-fill',
                         verificationValue: '',
                         collection: 'Clients',
@@ -144,7 +144,7 @@ export const version9 = {
                         title: 'Prénom',
                         instructions: 'Saisir le Prénom du client',
                         actionOrder: 2,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'data-fill',
                         verificationValue: '',
                         collection: 'Clients',
@@ -162,7 +162,7 @@ export const version9 = {
                         properties: ['address', 'description'],
                         verificationType: 'data-fill',
                         verificationValue: '',
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         status: 'pending',
                     },
                     {
@@ -173,7 +173,7 @@ export const version9 = {
                         collection: 'Clients',
                         documentId: '', // dynamic
                         properties: ['phone'],
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         status: 'pending',
                         verificationType: 'data-fill',
                         verificationValue: '',
@@ -185,9 +185,9 @@ export const version9 = {
     rd1: {
         phaseValue: "Visite technique préalable",
         title: 'Visite technique préalable',
-        instructions: '', 
+        instructions: '',
         phaseOrder: 2,
-        followers: ['Admin', 'Directeur commercial', 'Commercial'],
+        followers: ['Admin', 'Service commercial', "Chargé d'affaires"],
         steps: {
             //##draft
             // priorTechnicalVisit: {
@@ -200,7 +200,7 @@ export const version9 = {
             //             title: 'Créer une visite technique préalable',
             //             instructions: 'Créer une visite technique préalable',
             //             actionOrder: 1,
-            //             responsable: 'Commercial',
+            //             responsable: "Chargé d'affaires",
             //             verificationType: 'doc-creation',
             //             collection: 'Agenda',
             //             documentId: "",
@@ -215,7 +215,7 @@ export const version9 = {
             //             title: 'Lieu du rendez-vous',
             //             instructions: 'Lieu du rendez-vous',
             //             actionOrder: 2,
-            //             responsable: 'Commercial',
+            //             responsable: "Chargé d'affaires",
             //             verificationType: 'data-fill',
             //             verificationValue: '',
             //             properties: ['address', 'description'],
@@ -232,7 +232,7 @@ export const version9 = {
             //             title: 'Modifier le statut du rendez-vous 1',
             //             instructions: 'Modifier le statut du rendez-vous 1',
             //             actionOrder: 3,
-            //             responsable: 'Commercial',
+            //             responsable: "Chargé d'affaires",
             //             verificationType: 'multiple-choices',
             //             choices: [
             //                 {
@@ -277,7 +277,7 @@ export const version9 = {
                         actionOrder: 1,
                         type: 'manual',
                         comment: '',
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -307,7 +307,7 @@ export const version9 = {
                         title: 'Importer une fiche Étude et Évaluation des besoins',
                         instructions: 'Importer une fiche Étude et Évaluation des besoins',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -333,7 +333,7 @@ export const version9 = {
                         title: 'Importer un Audit énergétique',
                         instructions: 'Importer un Audit énergétique',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -360,7 +360,7 @@ export const version9 = {
             //             title: 'Créer un dossier client',
             //             instructions: 'Importer un dossier client dûment rempli',
             //             actionOrder: 1,
-            //             responsable: 'Commercial',
+            //             responsable: "Chargé d'affaires",
             //             verificationType: 'doc-creation',
             //             collection: 'Documents',
             //             documentId: "", //creation
@@ -386,7 +386,7 @@ export const version9 = {
                         title: 'Créer un rendez-vous 2',
                         instructions: '',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -409,7 +409,7 @@ export const version9 = {
                         title: 'Créer une offre précontractuelle',
                         instructions: 'Créer une offre précontractuelle',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -433,7 +433,7 @@ export const version9 = {
         title: 'Présentation étude',
         instructions: '',
         phaseOrder: 3,
-        followers: ['Admin', 'Directeur commercial', 'Commercial'],
+        followers: ['Admin', 'Service commercial', "Chargé d'affaires"],
         steps: {
             rd2Creation: {
                 title: 'Créer un rendez-vous 2', //1. verify if RD2 exists
@@ -445,7 +445,7 @@ export const version9 = {
                         title: 'Créer un rendez-vous 2',
                         instructions: '',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -468,7 +468,7 @@ export const version9 = {
                         title: 'Créer une offre précontractuelle',
                         instructions: 'Créer une offre précontractuelle',
                         actionOrder: 1,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -486,7 +486,7 @@ export const version9 = {
                         title: "Relevé d'impôt",
                         instructions: "Importer le Relevé d'impôt du client",
                         actionOrder: 2,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -504,7 +504,7 @@ export const version9 = {
                         title: "Justificatif de domicile",
                         instructions: "Importer le Justificatif de domicile du client",
                         actionOrder: 3,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -522,7 +522,7 @@ export const version9 = {
                         title: "Plan cadastral",
                         instructions: "Importer le Plan cadastral du client",
                         actionOrder: 4,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -540,7 +540,7 @@ export const version9 = {
                         title: "Taxe foncière",
                         instructions: "Importer la Taxe foncière du client",
                         actionOrder: 5,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -559,7 +559,7 @@ export const version9 = {
                         title: 'Autre(s) document(s)',
                         instructions: "Veuillez importer tout autre document. Appuyer sur valider pour passer à l'action suivante",
                         actionOrder: 6,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'multiple-choices',
                         collection: "Documents",
                         documentId: "",
@@ -611,7 +611,7 @@ export const version9 = {
                         title: 'Créer un mandat MaPrimeRénov',
                         instructions: 'Créer un mandat MaPrimeRénov',
                         actionOrder: 8,
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -686,7 +686,7 @@ export const version9 = {
                                 onSelectType: 'commentPicker',
                             },
                         ],
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         status: 'pending',
                     },
                     {
@@ -725,7 +725,7 @@ export const version9 = {
                                 onSelectType: 'validation',
                             },
                         ],
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         status: 'pending',
                     },
                     {
@@ -765,7 +765,7 @@ export const version9 = {
                               //  nextStep: 'technicalVisitCreation',
                             },
                         ],
-                        responsable: 'Commercial',
+                        responsable: "Chargé d'affaires",
                         status: 'pending',
                     },
                     {
@@ -775,7 +775,7 @@ export const version9 = {
                         actionOrder: 4,
                         type: 'manual',
                         comment: '',
-                        responsable: 'Directeur commercial',
+                        responsable: 'Service commercial',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -807,7 +807,7 @@ export const version9 = {
                         title: 'Créer une visite technique',
                         instructions: 'Créer une visite technique',
                         actionOrder: 1,
-                        responsable: 'Responsable technique', 
+                        responsable: 'Service technique', 
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -827,7 +827,7 @@ export const version9 = {
         title: 'Visite technique',
         instructions: '',
         phaseOrder: 4,
-        followers: ['Admin', 'Responsable technique', 'Poseur'],
+        followers: ['Admin', 'Service technique', 'Équipe technique'],
         steps: {
             siteCreation: {
                 title: 'Planification visite technique',
@@ -839,7 +839,7 @@ export const version9 = {
                         title: 'Créer une visite technique',
                         instructions: 'Créer une visite technique',
                         actionOrder: 1,
-                        responsable: 'Responsable technique', //Directeur technique
+                        responsable: 'Service technique', //Service technique
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -854,7 +854,7 @@ export const version9 = {
                         title: 'Valider la date de la visite technique',
                         instructions: 'Valider la date de la visite technique',
                         actionOrder: 2,
-                        responsable: 'Responsable technique',  //Directeur technique
+                        responsable: 'Service technique',  //Service technique
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -887,9 +887,9 @@ export const version9 = {
                     {
                         id: 'poseurAffectation',
                         title: 'Affecter un technicien à la visite technique',
-                        instructions: 'Affecter un technicien à la visite technique',  //Directeur technique
+                        instructions: 'Affecter un technicien à la visite technique',  //Service technique
                         actionOrder: 3,
-                        responsable: 'Responsable technique',
+                        responsable: 'Service technique',
                         collection: 'Agenda',
                         documentId: "",
                         params: {
@@ -940,7 +940,7 @@ export const version9 = {
                                 onSelectType: 'navigation'
                             },
                         ],
-                        responsable: 'Responsable technique',
+                        responsable: 'Service technique',
                         status: 'pending',
                     },
                 ],
@@ -956,7 +956,7 @@ export const version9 = {
                         title: 'Remplir la visite technique',
                         instructions: 'Remplir la visite technique',
                         actionOrder: 1,
-                        responsable: 'Responsable technique',
+                        responsable: 'Service technique',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -975,7 +975,7 @@ export const version9 = {
                         title: 'Voulez-vous cloturer la visite technique',
                         instructions: 'Voulez-vous cloturer la visite technique',
                         actionOrder: 2,
-                        responsable: 'Responsable technique',
+                        responsable: 'Service technique',
                         collection: 'Agenda',
                         documentId: "",
                         params: {
@@ -1050,7 +1050,7 @@ export const version9 = {
                         title: 'Importer un devis',
                         instructions: 'Importer un devis de votre appareil',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -1073,7 +1073,7 @@ export const version9 = {
         title: "En attente d'installation",
         instructions: '',
         phaseOrder: 5,
-        followers: ['Admin', 'Responsable technique', 'Poseur'],
+        followers: ['Admin', 'Service technique', 'Équipe technique'],
         steps: {
             installationPreparation: {
                 title: "Préparation de l'installation",
@@ -1087,7 +1087,7 @@ export const version9 = {
                         actionOrder: 1,
                         type: 'manual',
                         comment: '',
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -1112,7 +1112,7 @@ export const version9 = {
                         actionOrder: 2,
                         type: 'manual',
                         comment: '',
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -1137,7 +1137,7 @@ export const version9 = {
                         actionOrder: 3,
                         type: 'manual',
                         comment: '',
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -1162,7 +1162,7 @@ export const version9 = {
                         actionOrder: 4,
                         type: 'manual',
                         comment: '',
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         status: 'pending',
                         verificationType: 'multiple-choices',
                         choices: [
@@ -1193,7 +1193,7 @@ export const version9 = {
                         title: 'Créer une tâche de type installation',
                         instructions: 'Créer une tâche de type installation',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -1216,7 +1216,7 @@ export const version9 = {
                         title: "Mettre à jour le statut de l'installation (1)",
                         instructions: "Mettre à jour le statut de l'installation (1)",
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         collection: 'Agenda',
                         documentId: "",
                         params: {
@@ -1252,7 +1252,7 @@ export const version9 = {
                         title: "Mettre à jour le statut de l'installation (2)",
                         instructions: "Mettre à jour le statut de l'installation (2)",
                         actionOrder: 2,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         collection: 'Agenda',
                         documentId: "",
                         params: {
@@ -1277,7 +1277,7 @@ export const version9 = {
                                 operation: { type: 'update', field: 'status', value: 'En cours' },
                             },
                         ],
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         status: 'pending',
                         forceValidation: true,
                     },
@@ -1293,7 +1293,7 @@ export const version9 = {
                         title: 'Créer un PV réception',
                         instructions: 'Créer un PV réception',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -1338,7 +1338,7 @@ export const version9 = {
                         title: 'Créer une attestation fluide',
                         instructions: 'Créer une attestation fluide',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -1397,7 +1397,7 @@ export const version9 = {
                         title: 'Créer une tâche rattrapage',
                         instructions: 'Créer une tâche rattrapage',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'doc-creation',
                         collection: 'Agenda',
                         documentId: "",
@@ -1412,7 +1412,7 @@ export const version9 = {
                         title: 'Finaliser la tâche rattrapage',
                         instructions: 'Finaliser la tâche rattrapage',
                         actionOrder: 3,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'multiple-choices',
                         choices: [
                             {
@@ -1461,7 +1461,7 @@ export const version9 = {
             //                     onSelectType: 'transition',
             //                 },
             //             ],
-            //             responsable: 'Poseur',
+            //             responsable: 'Équipe technique',
             //             status: 'pending',
             //         },
             //     ],
@@ -1488,7 +1488,7 @@ export const version9 = {
             //                 },
             //                 { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
             //             ],
-            //             responsable: 'Poseur',
+            //             responsable: 'Équipe technique',
             //             status: 'pending',
             //         },
             //         {   //##new
@@ -1496,7 +1496,7 @@ export const version9 = {
             //             title: 'Créer/Importer un mandat SEPA',
             //             instructions: 'Créer/Importer un mandat SEPA',
             //             actionOrder: 2,
-            //             responsable: 'Poseur',
+            //             responsable: 'Équipe technique',
             //             verificationType: 'doc-creation',
             //             collection: 'Documents',
             //             documentId: "", //creation
@@ -1562,7 +1562,7 @@ export const version9 = {
             //             title: 'Créer/Importer un contrat',
             //             instructions: 'Créer/Importer un contrat',
             //             actionOrder: 4,
-            //             responsable: 'Poseur',
+            //             responsable: 'Équipe technique',
             //             verificationType: 'doc-creation',
             //             collection: 'Documents',
             //             documentId: "", //creation
@@ -1638,7 +1638,7 @@ export const version9 = {
                         title: 'Créer une facture',
                         instructions: 'Créer une facture',
                         actionOrder: 1,
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         verificationType: 'doc-creation',
                         collection: 'Documents',
                         documentId: "", //creation
@@ -1688,7 +1688,7 @@ export const version9 = {
                         //Comment
                         comment: '',
                         //Others
-                        responsable: 'Responsable technique',
+                        responsable: 'Service technique',
                         status: 'pending',
                     },
                     {
@@ -1739,7 +1739,7 @@ export const version9 = {
                         verificationType: 'data-fill',
                         verificationValue: '',
                         //Others
-                        responsable: 'Poseur',
+                        responsable: 'Équipe technique',
                         status: 'pending',
                         nextStep: 'clientReview',
                     },
@@ -1799,7 +1799,7 @@ export const version9 = {
             //                     stay: false,
             //                 },
             //             ],
-            //             responsable: 'Poseur',
+            //             responsable: 'Équipe technique',
             //             status: 'pending',
             //         },
             //         {
@@ -1847,7 +1847,7 @@ export const version9 = {
             //             verificationType: 'data-fill',
             //             verificationValue: '',
             //             //Others
-            //             responsable: 'Poseur',
+            //             responsable: 'Équipe technique',
             //             status: 'pending',
             //             nextStep: 'emailBill',
             //         },
@@ -1904,7 +1904,7 @@ export const version9 = {
                                 attachments: [],
                             },
                         },
-                       // responsable: 'Poseur',
+                       // responsable: 'Équipe technique',
                         nextStep: 'clientReview',
                     },
                 ],
@@ -2009,7 +2009,7 @@ export const version9 = {
     //     title: 'Maintenance',
     //     instructions: '',
     //     phaseOrder: 6,
-    //     followers: ['Admin', 'Responsable technique', 'Poseur'],
+    //     followers: ['Admin', 'Service technique', 'Équipe technique'],
     //     steps: {
     //         maintainanceContract: {
     //             title: 'Contrat maintenance',
@@ -2027,7 +2027,7 @@ export const version9 = {
     //                     choices: [
     //                         { label: 'Accepter', id: 'confirm', onSelectType: 'validation' },
     //                     ],
-    //                     responsable: 'Poseur',
+    //                     responsable: 'Équipe technique',
     //                     status: 'pending',
     //                 },
     //                 {   //##new
@@ -2035,7 +2035,7 @@ export const version9 = {
     //                     title: 'Créer/Importer un mandat SEPA',
     //                     instructions: 'Créer/Importer un mandat SEPA',
     //                     actionOrder: 2,
-    //                     responsable: 'Poseur',
+    //                     responsable: 'Équipe technique',
     //                     verificationType: 'doc-creation',
     //                     collection: 'Documents',
     //                     documentId: "", //creation
@@ -2089,7 +2089,7 @@ export const version9 = {
     //                     title: 'Créer/Importer un contrat',
     //                     instructions: 'Créer/Importer un contrat',
     //                     actionOrder: 4,
-    //                     responsable: 'Poseur',
+    //                     responsable: 'Équipe technique',
     //                     verificationType: 'doc-creation',
     //                     collection: 'Documents',
     //                     documentId: "", //creation
@@ -2160,10 +2160,10 @@ export const version9 = {
         phaseOrder: 7,
         followers: [
             'Admin',
-            'Directeur commercial',
-            'Commercial',
-            'Responsable technique',
-            'Poseur',
+            'Service commercial',
+            "Chargé d'affaires",
+            'Service technique',
+            'Équipe technique',
         ],
         steps: {
             endProject: {
@@ -2192,10 +2192,10 @@ export const version9 = {
         phaseOrder: 7,
         followers: [
             'Admin',
-            'Directeur commercial',
-            'Commercial',
-            'Responsable technique',
-            'Poseur',
+            'Service commercial',
+            "Chargé d'affaires",
+            'Service technique',
+            'Équipe technique',
         ],
         steps: {
             resumeProject: {

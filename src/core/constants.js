@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.27"
+export const appVersion = "1.5.28"
 
 export const constants = {
     ScreenWidth: width,
@@ -22,10 +22,10 @@ export const latestProcessVersion = "version9"
 export const roles = [
     { id: 'admin', label: 'Admin', value: 'Admin', bool: 'isAdmin', level: 3 },
     { id: 'backoffice', label: 'Back office', value: 'Back office', bool: 'isBackOffice', level: 3 },
-    { id: 'dircom', label: 'Directeur commercial', value: 'Directeur commercial', bool: 'isDirCom', level: 2 },
-    { id: 'com', label: 'Commercial', value: 'Commercial', bool: 'isCom', level: 1 },
-    { id: 'tech', label: 'Responsable technique', value: 'Responsable technique', bool: 'isTech', level: 1 },
-    { id: 'poseur', label: 'Technicien', value: 'Poseur', bool: 'isPoseur', level: 0 },
+    { id: 'dircom', label: 'Service commercial', value: 'Service commercial', bool: 'isDirCom', level: 2 },
+    { id: 'com', label: "Chargé d'affaires", value: "Chargé d'affaires", bool: 'isCom', level: 1 },
+    { id: 'tech', label: 'Service technique', value: 'Service technique', bool: 'isTech', level: 1 },
+    { id: 'poseur', label: 'Équipe technique', value: 'Équipe technique', bool: 'isPoseur', level: 0 },
     { id: 'client', label: 'Client', value: 'Client', bool: 'isClient', level: -1 },
     { id: 'designoffice', label: "Bureau d'étude", value: "Bureau d'étude", bool: 'isClient', level: -1 }
 ]
@@ -33,7 +33,7 @@ export const roles = [
 export const highRoles = ['admin', 'backoffice', 'dircom', 'tech']
 export const lowRoles = ["poseur", "com"]
 export const staffRoles = [...highRoles, ...lowRoles]
-export const highRolesValues = ['Admin', 'Back office', 'Directeur commercial', 'Responsable technique']
+export const highRolesValues = ['Admin', 'Back office', 'Service commercial', 'Service technique']
 
 
 export const comSteps = ['Prospect', 'Visite technique préalable', 'Présentation étude']

@@ -1,7 +1,7 @@
 
 
 export const privilleges = {
-    "Responsable technique": {
+    "Service technique": {
         "tasks": {
             "queryFilters": [
                 { "operation": "array-contains", "value": "tech", "filterOrder": 1, "clause": "where", "filter": "natures" },
@@ -104,7 +104,7 @@ export const privilleges = {
             "canUpdate": true
         }
     },
-    "Poseur": {//Tested: 22/09/2021 18:00
+    "Équipe technique": {//Tested: 22/09/2021 18:00
         "tasks": {
             "queryFilters": [
                 {
@@ -270,7 +270,7 @@ export const privilleges = {
             "canUpdate": false
         }
     },
-    "Directeur commercial": {
+    "Service commercial": {
         "tasks": {
             "queryFilters": [
                 { "operation": "array-contains", "value": "com", "filterOrder": 1, "filter": "natures", "clause": "where" },
@@ -367,7 +367,7 @@ export const privilleges = {
             "canUpdate": true
         }
     },
-    "Commercial": { //Tested: 22/09/2021 17:00
+    "Chargé d'affaires": { //Tested: 22/09/2021 17:00
         "tasks": {
             "queryFilters": [
                 {

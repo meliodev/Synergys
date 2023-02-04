@@ -30,18 +30,18 @@ import { setAppToast } from "../../core/redux";
 const rolesPicker = {
   3: [
     { label: 'Admin', value: 'Admin' },
-    { label: 'Directeur commercial', value: 'Directeur commercial' },
-    { label: 'Commercial', value: 'Commercial' },
-    { label: 'Responsable technique', value: 'Responsable technique' },
-    { label: 'Poseur', value: 'Poseur' },
+    { label: 'Service commercial', value: 'Service commercial' },
+    { label: "Chargé d'affaires", value: "Chargé d'affaires" },
+    { label: 'Service technique', value: 'Service technique' },
+    { label: 'Équipe technique', value: 'Équipe technique' },
     { label: 'Back office', value: 'Back office' },
     //{ label: "Bureau d'étude", value: "Bureau d'étude" },
   ],
   2: [
-    { label: 'Commercial', value: 'Commercial' },
-    { label: 'Poseur', value: 'Poseur' },
+    { label: "Chargé d'affaires", value: "Chargé d'affaires" },
+    { label: 'Équipe technique', value: 'Équipe technique' },
   ],
-  1: [],
+  1: [], 
   0: []
 }
 
@@ -60,7 +60,7 @@ class CreateUser extends Component {
 
     this.state = {
       userId: this.userId,
-      role: 'Commercial',
+      role: "Chargé d'affaires",
       checked: 'first', //professional/Particular
       isPro: false,
       nom: { value: '', error: '' },
@@ -180,7 +180,7 @@ class CreateUser extends Component {
     let { denom, siret } = this.state
     const { isConnected } = this.props.network
 
-    const showUserTypeRadio = (role === 'Poseur' || role === 'Client')
+    const showUserTypeRadio = (role === 'Équipe technique' || role === 'Client')
     const roleLevel = this.props.role.level
     const roles = rolesPicker[roleLevel]
 

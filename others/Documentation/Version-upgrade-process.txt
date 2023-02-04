@@ -28,6 +28,10 @@ exp: app with version 1.0.0 will fetch 1.0.63 patch
 
 PS: To set up dev environment: change "prod" to "dev".
 
+ROLLBACK:
+appcenter codepush rollback -a salimlyoussi1gmail.com/Synergys-1 Production
+
+
 EXPAMPLE OF VERSIONNING TREE:
 
 1

@@ -29,10 +29,10 @@ moment.locale('fr')
 const roles = [
   { id: 'admin', value: 'Admin', level: 3, isHighRole: true, isLowRole: false, isClient: false },
   { id: 'backoffice', value: 'Back office', level: 3, isHighRole: true, isLowRole: false, isClient: false },
-  { id: 'dircom', value: 'Directeur commercial', level: 2, isHighRole: true, isLowRole: false, isClient: false },
-  { id: 'com', value: 'Commercial', level: 1, isHighRole: false, isLowRole: true, isClient: false },
-  { id: 'poseur', value: 'Poseur', level: 1, isHighRole: false, isLowRole: true, isClient: false },
-  { id: 'tech', value: 'Responsable technique', level: 2, isHighRole: true, isLowRole: false, isClient: false },
+  { id: 'dircom', value: 'Service commercial', level: 2, isHighRole: true, isLowRole: false, isClient: false },
+  { id: 'com', value: "Chargé d'affaires", level: 1, isHighRole: false, isLowRole: true, isClient: false },
+  { id: 'poseur', value: 'Équipe technique', level: 1, isHighRole: false, isLowRole: true, isClient: false },
+  { id: 'tech', value: 'Service technique', level: 2, isHighRole: true, isLowRole: false, isClient: false },
   { id: 'client', value: 'Client', level: 0, isHighRole: false, isLowRole: false, isClient: true },
   { id: 'designoffice', value: "Bureau d'étude", level: 0, isHighRole: false, isLowRole: false, isClient: false }
 ]
@@ -58,7 +58,6 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
-
     //1. Notification action listeners
     const { isUpToDate, latestVersionDownloadLink } = await this.checkAppVersion()
     if (!isUpToDate) {
@@ -188,13 +187,14 @@ class AuthLoadingScreen extends Component {
               throw new Error("ID Token Invalide, veuillez contacter un admin.")
             }
 
+            console.log("erreur !!....", idTokenResult.claims)
+
             //1. Set role
             for (const r of roles) {
               if (idTokenResult.claims[r.id]) {
                 var role = r
                 var roleValue = role.value
                 console.log("5", roleValue)
-
               }
             }
 
@@ -215,10 +215,12 @@ class AuthLoadingScreen extends Component {
             const action1 = { type: "ROLE", value: role }
             const action2 = { type: "SET_PERMISSIONS", value: privilleges[roleValue] }
             const action3 = { type: "CURRENTUSER", value: currentUser }
+
             this.props.dispatch(action1)
             this.props.dispatch(action2)
             this.props.dispatch(action3)
           }
+
 
           //5. Navigation
           const { initialNotification } = this.state //Notification
@@ -236,8 +238,7 @@ class AuthLoadingScreen extends Component {
 
           //Default
           else {
-
-            const isExternalEntity = roleValue === 'Client' || roleValue === "Poseur" || roleValue === "Bureau d'étude"
+            const isExternalEntity = roleValue === 'Client' || roleValue === "Équipe technique" || roleValue === "Bureau d'étude"
             var routeName = isExternalEntity ? "ProjectsStack" : "App"
             var routeParams = {}
           }

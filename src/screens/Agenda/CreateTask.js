@@ -386,7 +386,7 @@ class CreateTask extends Component {
 
             // //3.3 ADD INTERVENANT IF "ASSIGNED TO" IS NOT ONE OF PROJECT CONTACTS
             // const { assignedTo, project, startDate, endDate, type } = this.state
-            // if (this.isProcess && assignedTo.role === 'Commercial' || assignedTo.role === 'Poseur') {
+            // if (this.isProcess && assignedTo.role === 'Chargé d'affaires' || assignedTo.role === 'Équipe technique') {
             //     const isIntervenant = assignedTo.id !== project.comContact.id && assignedTo.id !== project.techContact.id
             //     if (isIntervenant) {
             //         db.collection('Projects').doc(project.id).update({ intervenant: assignedTo })
@@ -575,16 +575,15 @@ class CreateTask extends Component {
         let query
         const nature = this.checkTypeNature(this.state.type)
 
-        console.log("..........", this.state.type)
         if (nature === "neutral") {
             query = db.collection('Users').where('deleted', '==', false)
         }
 
         else {
             if (nature === "commercial")
-                var queryFilter = 'Commercial'
+                var queryFilter = "Chargé d'affaires"
             else if (nature === "technic")
-                var queryFilter = 'Poseur'
+                var queryFilter = 'Équipe technique'
 
             query = db.collection('Users').where('role', '==', queryFilter).where('deleted', '==', false)
         }
