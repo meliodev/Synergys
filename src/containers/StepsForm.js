@@ -877,7 +877,7 @@ class StepsForm extends Component {
       const totalImagesSize_MB = totalImagesSize / 1048576;
 
       console.log('total image size', totalImagesSize_MB);
-      if (totalImagesSize_MB > 100) {
+      if (totalImagesSize_MB > 20) {
         isTotalImagesSizeExceeded = true;
         this.setState({isTotalImagesSizeExceeded});
         this.displayLimitPhotosSizeExceeded(totalImagesSize);
@@ -898,7 +898,6 @@ class StepsForm extends Component {
       update[fieldId] = attachment;
       this.setState(update);
     } catch (e) {
-      console.log('000', e);
       throw new Error(e);
     }
   }
