@@ -134,6 +134,9 @@ class StepsForm extends Component {
 
       isBack: false,
       ...this.props.initialState,
+
+      totalImagesSize: 0,
+      isTotalImagesSizeExceeded: false,
     };
 
     this.state = this.initialState;
@@ -165,9 +168,8 @@ class StepsForm extends Component {
 
   async componentDidMount() {
     try {
-
-      const colorLabel = this.setColorLabel("blue");
-      console.log("color", colorLabel)
+      const colorLabel = this.setColorLabel('blue');
+      console.log('color', colorLabel);
 
       this.addNavigationListeners();
 
@@ -357,7 +359,7 @@ class StepsForm extends Component {
         items,
         isConditional,
         condition,
-        isNumeric, 
+        isNumeric,
         isEmail,
         isMultiOptions,
         isStepMultiOptions,
@@ -848,6 +850,13 @@ class StepsForm extends Component {
   }
 
   removeImage(fieldId) {
+    //Deduce image size from total images size
+    const imageSize = this.state[fieldId].size;
+    let {totalImagesSize} = this.state;
+    totalImagesSize = totalImagesSize - imageSize;
+    this.setState({totalImagesSize});
+
+    //Remove image from form
     let update = {};
     update[fieldId] = null;
     this.setState(update);
@@ -857,8 +866,23 @@ class StepsForm extends Component {
     try {
       //1. Pick/Take picture
       const attachments = await pickImage([], false, true);
-      if (attachments.length === 0) throw new Error('ignore');
+      if (attachments.length === 0) return;
       let attachment = attachments[0];
+
+      //2. Calculate total size of photos
+      let {totalImagesSize} = this.state;
+      let isTotalImagesSizeExceeded = false;
+      const attachmentSize = attachment.size;
+      totalImagesSize = totalImagesSize + attachmentSize;
+      const totalImagesSize_MB = totalImagesSize / 1048576;
+
+      console.log('total image size', totalImagesSize_MB);
+      if (totalImagesSize_MB > 100) {
+        isTotalImagesSizeExceeded = true;
+        this.setState({isTotalImagesSizeExceeded});
+        this.displayLimitPhotosSizeExceeded(totalImagesSize);
+        return;
+      } else this.setState({totalImagesSize});
 
       // //2. Convert to base64
       // const attachmentBase64 = await RNFS.readFile(attachment.path, "base64")
@@ -874,7 +898,7 @@ class StepsForm extends Component {
       update[fieldId] = attachment;
       this.setState(update);
     } catch (e) {
-      console.log(e);
+      console.log('000', e);
       throw new Error(e);
     }
   }
@@ -962,14 +986,23 @@ class StepsForm extends Component {
   }
 
   //##Handlers
+  displayLimitPhotosSizeExceeded(totalImagesSize) {
+    let totalImagesSize_MB = totalImagesSize / 1048576;
+    totalImagesSize_MB = totalImagesSize_MB.toFixed(2);
+    const title = 'Limite dépassée';
+    const message = `Vous avez importé au total ${totalImagesSize_MB}MB.\nLa taille maximale de l'ensemble des photos importées est de 20MB.`;
+    Alert.alert(title, message);
+  }
+
   async goNext() {
-    const {
-      pageIndex,
-      pagesDone,
-      stepIndex,
-      subStepIndex,
-      showSuccessMessage,
-    } = this.state;
+    const {isTotalImagesSizeExceeded, totalImagesSize} = this.state;
+    if (isTotalImagesSizeExceeded) {
+      this.displayLimitPhotosSizeExceeded(totalImagesSize);
+      return;
+    }
+
+    const {pageIndex, pagesDone, stepIndex, subStepIndex, showSuccessMessage} =
+      this.state;
     const {pages, collection} = this.props;
     let update = {};
 
@@ -1529,7 +1562,8 @@ class StepsForm extends Component {
         barColor: theme.colors.graySilver,
         textColor: theme.colors.graySilver,
         title: 'Etude et offre précontractuelle',
-        caption: 'Synergys vous remet votre étude et votre offre précontractuelle.',
+        caption:
+          'Synergys vous remet votre étude et votre offre précontractuelle.',
       },
       {
         circleColor: theme.colors.graySilver,
@@ -1714,7 +1748,7 @@ class StepsForm extends Component {
     const colorLabel =
       simulationColorCat.length > 0 ? simulationColorCat[0].label : '';
 
-      return colorLabel
+    return colorLabel;
   }
 
   //##Overview
@@ -1874,10 +1908,8 @@ class StepsForm extends Component {
                             key={field.id.toString()}
                             onPress={() => {
                               if (emptyAndConditional) return;
-                              const {
-                                stepIndex,
-                                subStepIndex,
-                              } = this.calculateStepIndex(pageIndex);
+                              const {stepIndex, subStepIndex} =
+                                this.calculateStepIndex(pageIndex);
                               this.setState({
                                 pageIndex,
                                 stepIndex,

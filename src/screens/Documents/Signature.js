@@ -70,7 +70,6 @@ class Signature extends Component {
     //Storage ref url
     this.ProjectId = this.props.navigation.getParam('ProjectId', '');
     this.DocumentId = this.props.navigation.getParam('DocumentId', '');
-    console.log("Doc id", this.DocumentId)
     this.DocumentType = this.props.navigation.getParam('DocumentType', '');
     this.fileName = this.props.navigation.getParam('fileName', '');
     this.sourceUrl = this.props.navigation.getParam('url', '');
