@@ -2,10 +2,10 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "30.0.3"
+        buildToolsVersion = "31.0.0"
         minSdkVersion = 21
-        compileSdkVersion = 30
-        targetSdkVersion = 30
+        compileSdkVersion = 31
+        targetSdkVersion = 31
         // react = [
         //     extraPackagerArgs: [ "--sourcemap-output", "app/build/generated/assets/react/release/index.android.bundle.map" ] // Needed for Bugsnag to decode minimized Javascript.
         // ]

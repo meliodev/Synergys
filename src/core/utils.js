@@ -1057,8 +1057,10 @@ export const pickImage = (previousAttachments, isCamera = false, addPathSuffix =
     takePhotoButtonTitle: 'Prendre une photo',
     chooseFromLibraryButtonTitle: 'Choisir de la librairie',
     cancelButtonTitle: 'Annuler',
+    rotation: 360,
     noData: true,
-    rotation: 360
+    quality:1, 
+    storageOptions: { skipBackup: true }
   }
 
   const imagePickerHandler = (response, resolve, reject) => {

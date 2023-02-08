@@ -58,6 +58,7 @@ class AuthLoadingScreen extends Component {
   }
 
   async componentDidMount() {
+    //auth.signOut()
     //1. Notification action listeners
     const { isUpToDate, latestVersionDownloadLink } = await this.checkAppVersion()
     if (!isUpToDate) {
