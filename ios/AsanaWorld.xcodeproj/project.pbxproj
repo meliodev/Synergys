@@ -1183,7 +1183,7 @@
 				INFOPLIST_FILE = AsanaWorld/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.5.28;
+				MARKETING_VERSION = 1.5.30;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1221,7 +1221,7 @@
 				INFOPLIST_FILE = AsanaWorld/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				MARKETING_VERSION = 1.5.28;
+				MARKETING_VERSION = 1.5.30;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",

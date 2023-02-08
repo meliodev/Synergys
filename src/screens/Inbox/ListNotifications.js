@@ -41,8 +41,9 @@ class ListNotifications extends Component {
 
     async fetchNotifications() {
         this.setState({ refreshing: true })
+        const collection = this.props.role.id === "client" ? "Clients" : "Users"
         let query = db
-            .collection('Users')
+            .collection(collection)
             .doc(this.currentUser.uid)
             .collection('Notifications')
             .where('deleted', '==', false)

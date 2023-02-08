@@ -7,7 +7,7 @@ import { rgb } from "pdf-lib"
 const width = Dimensions.get('window').width
 const height = Dimensions.get('window').height
 
-export const appVersion = "1.5.28"
+export const appVersion = "1.5.30"
 
 export const constants = {
     ScreenWidth: width,

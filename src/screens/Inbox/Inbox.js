@@ -25,7 +25,7 @@ class Inbox extends React.Component {
     }
 
     defineRoutes() {
-        const enableMessages = this.props.role !== "client"
+        const enableMessages = this.props.role.id !== "client"
         let routes = [
             { key: 'first', title: 'NOTIFICATIONS' },
         ]
@@ -57,7 +57,7 @@ class Inbox extends React.Component {
                     onIndexChange={(index) => this.setState({ index, searchInput: '', showInput: false })}
                     icon1={faBell}
                     icon2={faEnvelope}
-                    Tab1={<ListNotifications offLine={!isConnected} />}
+                    Tab1={<ListNotifications offLine={!isConnected} role={this.props.role}/>}
                     Tab2={<ListMessages offLine={!isConnected} role={role} permissions={permissionsMessages} />}
                 />
             </View>

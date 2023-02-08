@@ -264,11 +264,9 @@ class Signature extends Component {
     const errorMessage =
       "Erreur lors de l'envoi du code. Veuillez réessayer plus tard";
     try {
-      const user = await db
-        .collection('Users')
-        .doc(firebase.auth().currentUser.uid)
-        .get(); //#task: not needed when using SMS RETRIEVER
-      const phoneNumber = user.data().phone;
+      const project = (await db.collection("Projects").doc(this.ProjectId).get()).data()
+      const {client} = project
+      const phoneNumber = client.phone;
       this.setState({ phoneNumber });
       const sendCode = functions.httpsCallable('sendCode');
       const resp = await sendCode({ phoneNumber: phoneNumber });
@@ -280,11 +278,11 @@ class Signature extends Component {
 
   async verifyCode() {
     this.setState({ status: true, statusMessage: 'Vérification du code...' });
-    const { phoneNumber } = this.state;
+    const { phoneNumber, code } = this.state;
     const verifyCode = functions.httpsCallable('verifyCode');
     const resp = await verifyCode({
       phoneNumber: phoneNumber,
-      code: this.state.code,
+      code: code,
     });
     if (resp.data.status === 'pending') {
       this.setState({ status: false, statusMessage: '' });
@@ -903,8 +901,8 @@ class Signature extends Component {
             <TermsConditionsModal
               showTerms={showTerms}
               toggleTerms={this.toggleTerms}
-              //acceptTerms={this.verifyUser}
-              acceptTerms={this.onAcceptTerms}
+              acceptTerms={this.verifyUser}
+              //acceptTerms={this.onAcceptTerms}
               downloadPdf={() => {
                 setToast(this, 'i', 'Début du téléchargement...');
                 const fileName = 'Termes-et-conditions-générales-de-signature';

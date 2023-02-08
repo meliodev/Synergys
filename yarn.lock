@@ -1238,10 +1238,10 @@
     "@types/yargs" "^15.0.0"
     "chalk" "^3.0.0"
 
-"@notifee/react-native@^0.16.0":
-  "integrity" "sha512-2ZrebWRli3h0uVqWnXTh+gI3PqoDhGyrb0sBq2wiv6M3Q2bD1TRbDp6CibQTT4zzpO22zmQf9/yeVKZI583M0g=="
-  "resolved" "https://registry.npmjs.org/@notifee/react-native/-/react-native-0.16.0.tgz"
-  "version" "0.16.0"
+"@notifee/react-native@^5.7.0":
+  "integrity" "sha512-2AEI4IJvk+/qij0zkTnhF9aD04u9cs2RwXBk82bR/KaoYhbUc4M97q4IYBEkE+cATGzJE+qZT1rgUWqCiUhuSw=="
+  "resolved" "https://registry.npmjs.org/@notifee/react-native/-/react-native-5.7.0.tgz"
+  "version" "5.7.0"
 
 "@pdf-lib/standard-fonts@^1.0.0":
   "integrity" "sha512-hU30BK9IUN/su0Mn9VdlVKsWBS6GyhVfqjwl1FjZN4TxP6cCw0jP2w7V3Hf5uX7M0AZJ16vey9yE0ny7Sa59ZA=="
@@ -5975,9 +5975,9 @@
     "mime-db" "~1.23.0"
 
 "mime@^2.4.1":
-  "integrity" "sha512-RZKhC3EmpBchfTGBVb8fb+RL2cWyw/32lshnsETttkBAyAUXSGHxbEJWWRXc751DrIxG1q04b8QwMbAwkRPpUA=="
-  "resolved" "https://registry.npmjs.org/mime/-/mime-2.4.6.tgz"
-  "version" "2.4.6"
+  "integrity" "sha512-tqkh47FzKeCPD2PUiPB6pkbMzsCasjxAfC62/Wap5qrUWcb+sFasXUC5I3gYM5iBM8v/Qpn4UK0x+j0iHyFPDg=="
+  "resolved" "https://registry.npmjs.org/mime/-/mime-2.5.2.tgz"
+  "version" "2.5.2"
 
 "mime@^2.4.4":
   "integrity" "sha512-tqkh47FzKeCPD2PUiPB6pkbMzsCasjxAfC62/Wap5qrUWcb+sFasXUC5I3gYM5iBM8v/Qpn4UK0x+j0iHyFPDg=="
