@@ -1,5 +1,5 @@
-import {faTimes} from '@fortawesome/pro-light-svg-icons';
-import React, {Component} from 'react';
+import { faTimes } from '@fortawesome/pro-light-svg-icons';
+import React, { Component } from 'react';
 import {
   KeyboardAvoidingView,
   StyleSheet,
@@ -13,9 +13,9 @@ import {
   Platform,
   Keyboard,
 } from 'react-native';
-import {ProgressBar, Checkbox, TextInput as Input} from 'react-native-paper';
+import { ProgressBar, Checkbox, TextInput as Input } from 'react-native-paper';
 import FileViewer from 'react-native-file-viewer';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import _ from 'lodash';
 import Modal from 'react-native-modal';
 import Pdf from 'react-native-pdf';
@@ -26,7 +26,7 @@ import moment from 'moment';
 import 'moment/locale/fr';
 moment.locale('fr');
 
-import {generatePdfForm} from '../core/utils';
+import { generatePdfForm } from '../core/utils';
 
 import {
   AddressInput,
@@ -45,7 +45,7 @@ import {
   SquarePlus,
   EEBPack,
 } from '../components';
-import {setEstimation} from '../components/EEBPack';
+import { setEstimation } from '../components/EEBPack';
 
 import {
   nameValidator,
@@ -70,9 +70,9 @@ import {
   simulationColorCats,
 } from '../core/constants';
 import * as theme from '../core/theme';
-import {setStatusBarColor} from '../core/redux';
-import {db, auth, functions} from '../firebase';
-import {fetchDocument} from '../api/firestore-api';
+import { setStatusBarColor } from '../core/redux';
+import { db, auth, functions } from '../firebase';
+import { fetchDocument } from '../api/firestore-api';
 
 const mascCollections = ['PvReception', 'MandatsMPR', 'MandatsSynergys'];
 
@@ -98,8 +98,8 @@ class StepsForm extends Component {
     this.DocId = this.isEdit
       ? this.props.DocId
       : this.props.idPattern
-      ? generateId(this.props.idPattern)
-      : '';
+        ? generateId(this.props.idPattern)
+        : '';
 
     this.project = this.props.navigation.getParam('project', null);
     this.DocumentId = this.props.navigation.getParam('DocumentId', '');
@@ -176,19 +176,19 @@ class StepsForm extends Component {
       if (this.state.isEdit) await this.initEditMode();
       else if (this.props.autoGen) await this.handleSubmit(true, false);
       this.initialState = _.cloneDeep(this.state);
-      this.setState({initialLoading: false});
+      this.setState({ initialLoading: false });
     } catch (e) {
-      this.setState({initialLoading: false});
-      displayError({message: e.message});
+      this.setState({ initialLoading: false });
+      displayError({ message: e.message });
     }
   }
 
   async componentDidUpdate(prevProps, prevState, snapshot) {
     //For some forms parent initialState can change --> We have to update the generated PDF.
     if (prevProps.initialState !== this.props.initialState) {
-      this.setState({loading: true});
+      this.setState({ loading: true });
       await this.onInitialStateChange();
-      this.setState({loading: false});
+      this.setState({ loading: false });
     }
   }
 
@@ -205,23 +205,23 @@ class StepsForm extends Component {
           this.props.collection,
           this.props.pdfParams,
         );
-        this.setState({pdfBase64}, () => resolve(true));
+        this.setState({ pdfBase64 }, () => resolve(true));
       });
     });
   }
 
   async initEditMode() {
     try {
-      const {collection, pdfParams} = this.props;
+      const { collection, pdfParams } = this.props;
       let document = await fetchDocument(collection, this.DocId);
       //document = this.setDocument(document)
       if (!document) {
-        this.setState({docNotFound: true});
+        this.setState({ docNotFound: true });
         return;
       }
       this.setState(document);
       const pdfBase64 = await generatePdfForm(document, collection, pdfParams);
-      this.setState({pdfBase64});
+      this.setState({ pdfBase64 });
     } catch (e) {
       throw new Error(e);
     }
@@ -245,7 +245,7 @@ class StepsForm extends Component {
     const progress = Math.round((this.state.pageIndex / pagesCount) * 100);
 
     return (
-      <View style={{marginTop: 16, backgroundColor: '#003250'}}>
+      <View style={{ marginTop: 16, backgroundColor: '#003250' }}>
         <ProgressBar
           progress={progress / 100}
           color={theme.colors.primary}
@@ -256,7 +256,7 @@ class StepsForm extends Component {
             isTablet
               ? theme.customFontMSregular.caption
               : theme.customFontMSregular.small,
-            {color: theme.colors.white, marginVertical: 8},
+            { color: theme.colors.white, marginVertical: 8 },
           ]}>
           {progress}%
         </Text>
@@ -265,15 +265,15 @@ class StepsForm extends Component {
   }
 
   renderStep(step, index) {
-    const {stepIndex} = this.state;
+    const { stepIndex } = this.state;
     const isSelected = stepIndex === index;
-    const {primary, white, gray_medium} = theme.colors;
+    const { primary, white, gray_medium } = theme.colors;
     const backgroundColor = isSelected ? primary : white;
     const color = isSelected ? white : gray_medium;
 
     return (
-      <View key={index.toString()} style={[styles.step, {backgroundColor}]}>
-        <Text style={[theme.customFontMSregular.caption, {color}]}>{step}</Text>
+      <View key={index.toString()} style={[styles.step, { backgroundColor }]}>
+        <Text style={[theme.customFontMSregular.caption, { color }]}>{step}</Text>
       </View>
     );
   }
@@ -299,9 +299,9 @@ class StepsForm extends Component {
   }
 
   renderTitle(pages) {
-    const {pageIndex} = this.state;
-    const {showPagination} = this.props;
-    const {title} = pages[pageIndex];
+    const { pageIndex } = this.state;
+    const { showPagination } = this.props;
+    const { title } = pages[pageIndex];
     const pagination = showPagination
       ? `(${pageIndex + 1}/${pages.length})`
       : '';
@@ -311,7 +311,7 @@ class StepsForm extends Component {
         <Text
           style={[
             theme.customFontMSmedium.body,
-            {textAlign: 'center', color: theme.colors.gray_dark},
+            { textAlign: 'center', color: theme.colors.gray_dark },
           ]}>
           {title}
         </Text>
@@ -327,7 +327,7 @@ class StepsForm extends Component {
       <Text
         style={[
           theme.customFontMSregular.body,
-          {textAlign: 'center', marginTop: 24, marginBottom: 8},
+          { textAlign: 'center', marginTop: 24, marginBottom: 8 },
         ]}>
         {label}
       </Text>
@@ -335,7 +335,7 @@ class StepsForm extends Component {
   }
 
   renderForm(pages) {
-    const {pageIndex, showSuccessMessage} = this.state;
+    const { pageIndex, showSuccessMessage } = this.state;
 
     if (showSuccessMessage) return this.successMessage();
     else
@@ -347,7 +347,7 @@ class StepsForm extends Component {
   }
 
   renderFields(pages, pageIndex) {
-    const {id, layout, fields, items} = pages[pageIndex];
+    const { id, layout, fields, items } = pages[pageIndex];
 
     const fieldsComponents = fields.map((field) => {
       const value = this.state[field.id];
@@ -408,7 +408,7 @@ class StepsForm extends Component {
                 render={(props) => (
                   <TextInputMask
                     {...props}
-                    {...(field.mask && {mask: field.mask})}
+                    {...(field.mask && { mask: field.mask })}
                   />
                 )}
                 right={
@@ -529,7 +529,7 @@ class StepsForm extends Component {
                   },
                 ]}>
                 {items.map((item, index) => {
-                  const {isConditional, condition} = item;
+                  const { isConditional, condition } = item;
                   let hideOption = false;
 
                   if (isConditional) {
@@ -582,7 +582,7 @@ class StepsForm extends Component {
                         }
 
                         //1. Update value & Go Next
-                        const {value} = item;
+                        const { value } = item;
 
                         //Get initial value
                         var selectedOptions = this.state[id];
@@ -704,7 +704,7 @@ class StepsForm extends Component {
               onChangeText={(description) => {
                 const address = {
                   description,
-                  marker: {latitude: '', longitude: ''},
+                  marker: { latitude: '', longitude: '' },
                   place_id: '',
                 };
                 let update = {};
@@ -714,7 +714,7 @@ class StepsForm extends Component {
               clearAddress={() => {
                 const address = {
                   description: '',
-                  marker: {latitude: '', longitude: ''},
+                  marker: { latitude: '', longitude: '' },
                   place_id: '',
                 };
                 let update = {};
@@ -730,7 +730,7 @@ class StepsForm extends Component {
 
         case 'checkbox':
           const onPressCheckBox = () =>
-            this.setState({acceptPhoneCall: !this.state.acceptPhoneCall});
+            this.setState({ acceptPhoneCall: !this.state.acceptPhoneCall });
           return (
             <View
               key={field.id.toString()}
@@ -769,7 +769,7 @@ class StepsForm extends Component {
                 locale="fr"
                 androidVariant="nativeAndroid"
                 fadeToColor={theme.colors.primary}
-                style={{alignSelf: 'center', marginTop: 32}}
+                style={{ alignSelf: 'center', marginTop: 32 }}
               />
             </View>
           );
@@ -788,21 +788,21 @@ class StepsForm extends Component {
     const emptyPage = arr.length === 0;
     if (emptyPage) {
       var delta = this.state.isBack ? -1 : 1; //Update pageIndex depending on if is it going next or back.
-      this.setState({pageIndex: this.state.pageIndex + delta});
+      this.setState({ pageIndex: this.state.pageIndex + delta });
     }
 
     return fieldsComponents;
   }
 
   renderImageField(field) {
-    const {id, label, errorId} = field;
+    const { id, label, errorId } = field;
 
     if (!this.state[id])
       return (
         <View key={id}>
           {this.renderLabel(label)}
           <SquarePlus
-            style={{marginTop: theme.padding}}
+            style={{ marginTop: theme.padding }}
             onPress={() => this.handleImage(id)}
             title="Ajouter une photo"
             isBig={true}
@@ -820,7 +820,7 @@ class StepsForm extends Component {
             alignItems: 'center',
           }}>
           <Image
-            source={{uri: this.state[field.id].path}}
+            source={{ uri: this.state[field.id].path }}
             resizeMode="contain"
             style={{
               alignSelf: 'center',
@@ -852,9 +852,15 @@ class StepsForm extends Component {
   removeImage(fieldId) {
     //Deduce image size from total images size
     const imageSize = this.state[fieldId].size;
-    let {totalImagesSize} = this.state;
+    let { totalImagesSize, isTotalImagesSizeExceeded } = this.state;
     totalImagesSize = totalImagesSize - imageSize;
-    this.setState({totalImagesSize});
+
+    const totalImagesSize_MB = totalImagesSize / 1048576;
+    if (totalImagesSize_MB < 20) {
+      isTotalImagesSizeExceeded = false
+      this.setState({ isTotalImagesSizeExceeded })
+    }
+    this.setState({ totalImagesSize });
 
     //Remove image from form
     let update = {};
@@ -870,7 +876,7 @@ class StepsForm extends Component {
       let attachment = attachments[0];
 
       //2. Calculate total size of photos
-      let {totalImagesSize} = this.state;
+      let { totalImagesSize } = this.state;
       let isTotalImagesSizeExceeded = false;
       const attachmentSize = attachment.size;
       totalImagesSize = totalImagesSize + attachmentSize;
@@ -879,17 +885,17 @@ class StepsForm extends Component {
       console.log('total image size', totalImagesSize_MB);
       if (totalImagesSize_MB > 20) {
         isTotalImagesSizeExceeded = true;
-        this.setState({isTotalImagesSizeExceeded});
+        this.setState({ isTotalImagesSizeExceeded });
         this.displayLimitPhotosSizeExceeded(totalImagesSize);
         return;
-      } else this.setState({totalImagesSize});
+      } else this.setState({ totalImagesSize, isTotalImagesSizeExceeded });
 
       // //2. Convert to base64
       // const attachmentBase64 = await RNFS.readFile(attachment.path, "base64")
       // attachment.base64 = attachmentBase64
 
       //3. Set imageSize/ratio
-      const {width, height} = await this.setImageSize(attachment.path);
+      const { width, height } = await this.setImageSize(attachment.path);
       attachment.width = width;
       attachment.height = height;
 
@@ -913,7 +919,7 @@ class StepsForm extends Component {
           const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
           const width = srcWidth * ratio;
           const height = srcHeight * ratio;
-          const size = {width, height};
+          const size = { width, height };
           resolve(size);
         },
         (error) => {
@@ -925,8 +931,8 @@ class StepsForm extends Component {
   }
 
   renderButtons(pages) {
-    const {pageIndex, showSuccessMessage} = this.state;
-    const {collection} = this.props;
+    const { pageIndex, showSuccessMessage } = this.state;
+    const { collection } = this.props;
     const isLastPage = pageIndex === pages.length - 1;
     const showContactUs =
       collection === 'Simulations' &&
@@ -953,13 +959,13 @@ class StepsForm extends Component {
             <Text
               style={[
                 theme.customFontMSmedium.body,
-                {letterSpacing: 1, color: theme.colors.primary},
+                { letterSpacing: 1, color: theme.colors.primary },
               ]}>
               RETOUR
             </Text>
           </TouchableOpacity>
         ) : (
-          <View style={{width: constants.ScreenWidth * 0.45}} />
+          <View style={{ width: constants.ScreenWidth * 0.45 }} />
         )}
         <TouchableOpacity
           style={{
@@ -975,7 +981,7 @@ class StepsForm extends Component {
           <Text
             style={[
               theme.customFontMSregular.body,
-              {letterSpacing: 1, color: theme.colors.white},
+              { letterSpacing: 1, color: theme.colors.white },
             ]}>
             {title}
           </Text>
@@ -994,15 +1000,15 @@ class StepsForm extends Component {
   }
 
   async goNext() {
-    const {isTotalImagesSizeExceeded, totalImagesSize} = this.state;
+    const { isTotalImagesSizeExceeded, totalImagesSize } = this.state;
     if (isTotalImagesSizeExceeded) {
       this.displayLimitPhotosSizeExceeded(totalImagesSize);
       return;
     }
 
-    const {pageIndex, pagesDone, stepIndex, subStepIndex, showSuccessMessage} =
+    const { pageIndex, pagesDone, stepIndex, subStepIndex, showSuccessMessage } =
       this.state;
-    const {pages, collection} = this.props;
+    const { pages, collection } = this.props;
     let update = {};
 
     //Verify fields
@@ -1014,7 +1020,7 @@ class StepsForm extends Component {
     //Remove errors
     const errorUpdate = this.removeErrors(false);
     if (!_.isEmpty(errorUpdate)) {
-      update = {...update, ...errorUpdate};
+      update = { ...update, ...errorUpdate };
     }
 
     //Add Page browsed + Set direction (useful for handling pageIndex/pagesDone update)
@@ -1030,10 +1036,10 @@ class StepsForm extends Component {
         (collection === 'Simulations' && showSuccessMessage) ||
         collection !== 'Simulations'
       ) {
-        if (this.isGuest) this.setState({showContactModal: true});
+        if (this.isGuest) this.setState({ showContactModal: true });
         else await this.handleSubmit(true, true, update);
       } else if (collection === 'Simulations' && !showSuccessMessage) {
-        const {products, colorCat, estimation} = this.setResults();
+        const { products, colorCat, estimation } = this.setResults();
         update.products = products;
         update.colorCat = colorCat;
         update.estimation = estimation;
@@ -1066,24 +1072,24 @@ class StepsForm extends Component {
   }
 
   goBack() {
-    let {pageIndex, pagesDone, stepIndex, subStepIndex} = this.state;
-    const {pages} = this.props;
+    let { pageIndex, pagesDone, stepIndex, subStepIndex } = this.state;
+    const { pages } = this.props;
 
     //Set direction (useful for handling pageIndex/pagesDone update)
-    this.setState({isBack: true});
+    this.setState({ isBack: true });
 
     //Hide success message
     if (pageIndex === pages.length - 1)
-      this.setState({showSuccessMessage: false});
+      this.setState({ showSuccessMessage: false });
 
     pageIndex = this.state.isEdit
       ? pageIndex - 1
       : pagesDone[pagesDone.length - 1];
 
-    this.setState({pageIndex}, () => {
+    this.setState({ pageIndex }, () => {
       //Pop current page from browsed pages
       pagesDone.pop();
-      this.setState({pagesDone});
+      this.setState({ pagesDone });
     });
 
     //Decrement step
@@ -1091,18 +1097,18 @@ class StepsForm extends Component {
       pages[pageIndex].isLast ||
       (pages[pageIndex + 1] && pages[pageIndex + 1].isFirst)
     )
-      this.setState({stepIndex: stepIndex - 2});
+      this.setState({ stepIndex: stepIndex - 2 });
 
     //Decrement subStep
     if (
       pages[pageIndex].isLastSubStep ||
       (pages[pageIndex + 1] && pages[pageIndex + 1].isFirstSubStep)
     )
-      this.setState({subStepIndex: subStepIndex - 1});
+      this.setState({ subStepIndex: subStepIndex - 1 });
   }
 
   verifyFields(pages, pageIndex) {
-    const {fields} = pages[pageIndex];
+    const { fields } = pages[pageIndex];
     let isValid = true;
     let error = '';
 
@@ -1175,7 +1181,7 @@ class StepsForm extends Component {
   }
 
   removeErrors(errorId) {
-    const {pageIndex, pagesDone} = this.state;
+    const { pageIndex, pagesDone } = this.state;
     let errorUpdate = {};
 
     for (const field of this.props.pages[pageIndex].fields) {
@@ -1191,7 +1197,7 @@ class StepsForm extends Component {
   async handleSubmit(isSubmitted, ignoreVerification, stateUpdate) {
     return new Promise(async (resolve, reject) => {
       try {
-        this.setState({loading: true});
+        this.setState({ loading: true });
 
         //Inputs Verification
         if (!ignoreVerification) {
@@ -1200,12 +1206,12 @@ class StepsForm extends Component {
             this.state.pageIndex,
           );
           if (!isValid) {
-            this.setState({loading: false});
+            this.setState({ loading: false });
             resolve(true);
           }
         }
 
-        const {idPattern, collection, pdfParams} = this.props;
+        const { idPattern, collection, pdfParams } = this.props;
 
         //Set form
         let form = this.unformatDocument();
@@ -1214,8 +1220,8 @@ class StepsForm extends Component {
         const DocId = this.state.isEdit
           ? this.DocId
           : idPattern
-          ? generateId(idPattern)
-          : '';
+            ? generateId(idPattern)
+            : '';
 
         //Persist
         if (collection) {
@@ -1240,17 +1246,17 @@ class StepsForm extends Component {
           showSuccessMessage: false,
         };
 
-        if (stateUpdate) update = {...update, ...stateUpdate};
+        if (stateUpdate) update = { ...update, ...stateUpdate };
 
         this.setState(update, () => {
           resolve(true);
         });
       } catch (e) {
         console.log('ERROR SUBMIT....................', e.message);
-        displayError({message: e.message});
+        displayError({ message: e.message });
         reject(e);
       } finally {
-        this.setState({loading: false});
+        this.setState({ loading: false });
       }
     });
   }
@@ -1299,7 +1305,7 @@ class StepsForm extends Component {
       const createdBy = this.props.currentUser;
       form.createdAt = createdAt;
       form.createdBy = createdBy;
-      this.setState({createdAt, createdBy}); //Used if draft saved multiple times.
+      this.setState({ createdAt, createdBy }); //Used if draft saved multiple times.
     }
 
     form.editedAt = moment().format();
@@ -1310,12 +1316,12 @@ class StepsForm extends Component {
 
   //##Logic: Simulation Results
   setResults() {
-    this.setState({loading: true});
+    this.setState({ loading: true });
     const form = this.unformatDocument();
     const products = this.setProducts(form);
     const colorCat = this.setColorCat(form);
     const estimation = setEstimation(products, colorCat);
-    return {products, colorCat, estimation};
+    return { products, colorCat, estimation };
   }
 
   setProducts(form) {
@@ -1391,7 +1397,7 @@ class StepsForm extends Component {
   }
 
   setColorCat(form) {
-    let {taxIncome, familyMembersCount} = form;
+    let { taxIncome, familyMembersCount } = form;
     taxIncome = Number(taxIncome);
     familyMembersCount = Number(familyMembersCount);
 
@@ -1471,21 +1477,21 @@ class StepsForm extends Component {
       }
     }
 
-    return {packs, isPVElligible};
+    return { packs, isPVElligible };
   }
 
   successMessage() {
     const title = 'Estimation de votre prime: ';
-    const {products, colorCat, estimation, submitted} = this.state;
+    const { products, colorCat, estimation, submitted } = this.state;
     const message1 = 'Ce que nous vous recommandons';
     const colorLabel = this.setColorLabel(colorCat);
-    const {packs, isPVElligible} = this.setPacks(products);
+    const { packs, isPVElligible } = this.setPacks(products);
 
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <ScrollView
-          style={{backgroundColor: theme.colors.white}}
-          contentContainerStyle={{paddingBottom: 8}}>
+          style={{ backgroundColor: theme.colors.white }}
+          contentContainerStyle={{ paddingBottom: 8 }}>
           <View style={styles.sucessMessageContent}>
             <Text
               style={[
@@ -1520,7 +1526,7 @@ class StepsForm extends Component {
 
           <EEBPack packs={packs} isPV={isPVElligible} colorCat={colorCat} />
 
-          <View style={{flex: 1, padding: theme.padding}}>
+          <View style={{ flex: 1, padding: theme.padding }}>
             {/* <Text style={[theme.customFontMSsemibold.body, { opacity: 0.8, marginBottom: 16 }]}>{message3}</Text>
                         {this.renderTrackingSteps()} */}
             <Image
@@ -1583,8 +1589,8 @@ class StepsForm extends Component {
 
     return steps.map((step, index) => {
       return (
-        <View key={index.toString()} style={{flexDirection: 'row'}}>
-          <View style={{alignItems: 'center'}}>
+        <View key={index.toString()} style={{ flexDirection: 'row' }}>
+          <View style={{ alignItems: 'center' }}>
             <View
               style={{
                 width: 16,
@@ -1595,23 +1601,23 @@ class StepsForm extends Component {
             />
             {index !== steps.length - 1 && (
               <View
-                style={{flex: 1, width: 2, backgroundColor: step.barColor}}
+                style={{ flex: 1, width: 2, backgroundColor: step.barColor }}
               />
             )}
           </View>
 
-          <View style={{flex: 1, paddingLeft: 16, marginBottom: 24}}>
+          <View style={{ flex: 1, paddingLeft: 16, marginBottom: 24 }}>
             <Text
               style={[
                 theme.customFontMSsemibold.body,
-                {marginTop: -4, color: step.textColor},
+                { marginTop: -4, color: step.textColor },
               ]}>
               {step.title}
             </Text>
             <Text
               style={[
                 theme.customFontMSregular.caption,
-                {color: theme.colors.gray_dark},
+                { color: theme.colors.gray_dark },
               ]}>
               {step.caption}
             </Text>
@@ -1650,7 +1656,7 @@ class StepsForm extends Component {
   }
 
   handleBackButtonClick() {
-    const {showWelcomeMessage, submitted, readOnly, isEdit} = this.state;
+    const { showWelcomeMessage, submitted, readOnly, isEdit } = this.state;
 
     if (!isEdit && !showWelcomeMessage && !submitted) {
       const title = 'Abandonner';
@@ -1665,7 +1671,7 @@ class StepsForm extends Component {
       };
       this.myAlert(title, message, handleConfirm);
     } else {
-      if (!readOnly) this.setState({readOnly: true});
+      if (!readOnly) this.setState({ readOnly: true });
       else {
         this.initialState.initialLoading = false;
         this.setState(this.initialState, () =>
@@ -1678,7 +1684,7 @@ class StepsForm extends Component {
 
   //##Helpers
   toggleModal() {
-    this.setState({isPdfModalVisible: !this.state.isPdfModalVisible});
+    this.setState({ isPdfModalVisible: !this.state.isPdfModalVisible });
   }
 
   async savePdfBase64(pdfBase64, isProcess) {
@@ -1699,7 +1705,7 @@ class StepsForm extends Component {
             DocumentId: this.DocumentId,
           });
           this.props.navigation.pop(this.popCount);
-        } else FileViewer.open(destPath, {showOpenWithDialog: true});
+        } else FileViewer.open(destPath, { showOpenWithDialog: true });
       })
       .catch((e) => {
         Alert.alert('', e.message);
@@ -1721,7 +1727,7 @@ class StepsForm extends Component {
   calculateStepIndex(selectedPageIndex) {
     let stepIndex = 0;
     let subStepIndex = 0;
-    const {pages} = this.props;
+    const { pages } = this.props;
 
     let i = 0;
     let pagesIterator = pages[i];
@@ -1736,7 +1742,7 @@ class StepsForm extends Component {
       pagesIterator = pages[i];
     }
 
-    return {stepIndex, subStepIndex};
+    return { stepIndex, subStepIndex };
   }
 
   setColorLabel(colorCat) {
@@ -1752,19 +1758,19 @@ class StepsForm extends Component {
 
   //##Overview
   renderOverview() {
-    const {readOnly, isEdit} = this.state;
-    const {pages, collection} = this.props;
+    const { readOnly, isEdit } = this.state;
+    const { pages, collection } = this.props;
     const form = this.unformatDocument();
     let redundantFields = [];
 
     let showSummary = false;
     if (collection === 'Simulations') {
-      const {colorCat, estimation} = form;
+      const { colorCat, estimation } = form;
       const products = form.products.join(', ');
       const colorLabel = this.setColorLabel(colorCat);
 
       var summary = [
-        {title: 'Barème', value: colorLabel},
+        { title: 'Barème', value: colorLabel },
         // { title: "Produits recommandés", value: products },
         // { title: "Estimation", value: `${estimation} €` },
       ];
@@ -1772,7 +1778,7 @@ class StepsForm extends Component {
     }
 
     return (
-      <View style={{flex: 1}}>
+      <View style={{ flex: 1 }}>
         <Text
           style={[
             theme.customFontMSbold.body,
@@ -1803,7 +1809,7 @@ class StepsForm extends Component {
                       style={[
                         theme.customFontMSsemibold.caption,
                         styles.overviewText,
-                        {opacity: 0.8},
+                        { opacity: 0.8 },
                       ]}>
                       {item.title}
                     </Text>
@@ -1820,7 +1826,7 @@ class StepsForm extends Component {
             </View>
           )}
 
-          <View style={{marginBottom: 16, backgroundColor: 'white'}}>
+          <View style={{ marginBottom: 16, backgroundColor: 'white' }}>
             {pages.map((page, pageIndex) => {
               return (
                 <View key={pageIndex.toString()}>
@@ -1881,7 +1887,7 @@ class StepsForm extends Component {
                               <Text
                                 style={[
                                   theme.customFontMSmedium.header,
-                                  {color: theme.colors.white},
+                                  { color: theme.colors.white },
                                 ]}>
                                 {page.subStep.label}
                               </Text>
@@ -1897,7 +1903,7 @@ class StepsForm extends Component {
                               <Text
                                 style={[
                                   theme.customFontMSmedium.body,
-                                  {color: '#003250'},
+                                  { color: '#003250' },
                                 ]}>
                                 {page.section.label}
                               </Text>
@@ -1907,7 +1913,7 @@ class StepsForm extends Component {
                             key={field.id.toString()}
                             onPress={() => {
                               if (emptyAndConditional) return;
-                              const {stepIndex, subStepIndex} =
+                              const { stepIndex, subStepIndex } =
                                 this.calculateStepIndex(pageIndex);
                               this.setState({
                                 pageIndex,
@@ -1962,10 +1968,10 @@ class StepsForm extends Component {
   }
 
   renderSubSteps() {
-    const {stepIndex} = this.state;
+    const { stepIndex } = this.state;
 
     if (this.props.steps[stepIndex])
-      var {subSteps, subStepsCount} = this.props.steps[stepIndex];
+      var { subSteps, subStepsCount } = this.props.steps[stepIndex];
 
     if (!subSteps) return null;
 
@@ -1975,7 +1981,7 @@ class StepsForm extends Component {
       <View style={styles.subStepsContainer}>
         {subSteps.map((subStep, i) => {
           const isSubStepSelected = this.state.subStepIndex === i;
-          const {primary, white} = theme.colors;
+          const { primary, white } = theme.colors;
           const backgroundColor = isSubStepSelected ? primary : white;
           return (
             <View
@@ -2015,12 +2021,12 @@ class StepsForm extends Component {
       submitted,
       isEdit,
     } = this.state;
-    const {pages, steps} = this.props;
+    const { pages, steps } = this.props;
 
     if (initialLoading) return <Loading />;
     else if (isEdit && readOnly) return this.renderOverview();
     else if (showWelcomeMessage && this.props.welcomeMessage) {
-      const callBack = () => this.setState({showWelcomeMessage: false});
+      const callBack = () => this.setState({ showWelcomeMessage: false });
       return this.props.welcomeMessage(callBack);
     } else
       return (
@@ -2033,7 +2039,7 @@ class StepsForm extends Component {
           )}
 
           <KeyboardAvoidingView
-            style={{flex: 1}}
+            style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : null}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
             <View style={styles.body}>
@@ -2049,12 +2055,12 @@ class StepsForm extends Component {
   }
 
   async handleSave() {
-    const {collection, pages} = this.props;
-    const {pageIndex} = this.state;
+    const { collection, pages } = this.props;
+    const { pageIndex } = this.state;
 
     if (collection === 'Simulations') {
-      const {products, colorCat, estimation} = this.setResults();
-      this.setState({products, colorCat, estimation});
+      const { products, colorCat, estimation } = this.setResults();
+      this.setState({ products, colorCat, estimation });
     }
 
     const isLastPage = pageIndex === pages.length - 1;
@@ -2063,7 +2069,7 @@ class StepsForm extends Component {
   }
 
   toggleContactModal() {
-    this.setState({showContactModal: !this.state.showContactModal});
+    this.setState({ showContactModal: !this.state.showContactModal });
   }
 
   async submitContactForm() {
@@ -2073,11 +2079,11 @@ class StepsForm extends Component {
       if (!isValid) return;
 
       //1. Hide contact form
-      this.setState({showContactModal: false});
+      this.setState({ showContactModal: false });
 
       //2. Show loading dialog
       setTimeout(() => {
-        this.setState({loading: true});
+        this.setState({ loading: true });
       }, 500);
 
       // 4. Generate Fiche EEB PDF (page 1) + Products & Packages (page 2) + Contact info (page 3)
@@ -2114,7 +2120,7 @@ class StepsForm extends Component {
         },
       ];
 
-      const {packs, isPVElligible} = this.setPacks(products);
+      const { packs, isPVElligible } = this.setPacks(products);
 
       const packsList = packs.map((choice, i) => {
         let myHtml = `<p>Pack ${i + 1}:</p><ul>`;
@@ -2155,7 +2161,7 @@ class StepsForm extends Component {
                     `;
 
       const sendEmail = functions.httpsCallable('sendEmail');
-      const isSent = await sendEmail({receivers, subject, html, attachments});
+      const isSent = await sendEmail({ receivers, subject, html, attachments });
       console.log('Has email been sent ?', isSent);
 
       //6. Reset state & Go to success screen
@@ -2171,12 +2177,12 @@ class StepsForm extends Component {
       });
     } catch (e) {
       console.log('Error::::::', e);
-      displayError({message: e.message});
+      displayError({ message: e.message });
     }
   }
 
   renderGuestContactModal() {
-    const {showContactModal} = this.state;
+    const { showContactModal } = this.state;
 
     return (
       <Modal
@@ -2193,20 +2199,20 @@ class StepsForm extends Component {
           />
 
           <KeyboardAvoidingView
-            style={{flex: 1}}
+            style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : null}
             keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
             <ScrollView
-              style={{flex: 0.9, paddingHorizontal: theme.padding}}
-              contentContainerStyle={{paddingBottom: 200}}>
+              style={{ flex: 0.9, paddingHorizontal: theme.padding }}
+              contentContainerStyle={{ paddingBottom: 200 }}>
               {this.renderFields(contactForm, 0)}
             </ScrollView>
           </KeyboardAvoidingView>
 
-          <View style={{flex: 0.1, paddingRight: theme.padding}}>
+          <View style={{ flex: 0.1, paddingRight: theme.padding }}>
             <Button
               mode="contained"
-              containerStyle={{alignSelf: 'flex-end'}}
+              containerStyle={{ alignSelf: 'flex-end' }}
               onPress={this.submitContactForm}>
               <Text style={[theme.customFontMSmedium.caption]}>Soumettre</Text>
             </Button>
@@ -2229,7 +2235,7 @@ class StepsForm extends Component {
       toastTypeModal,
     } = this.state;
 
-    const {collection} = this.props;
+    const { collection } = this.props;
     const isProcess =
       this.props.navigation.state.params &&
       this.props.navigation.state.params.onGoBack;
@@ -2257,7 +2263,7 @@ class StepsForm extends Component {
           check={!showWelcomeMessage && !readOnly && !this.isGuest}
           handleSubmit={this.handleSave}
           edit={isEdit && readOnly}
-          handleEdit={() => this.setState({submitted: false, readOnly: false})}
+          handleEdit={() => this.setState({ submitted: false, readOnly: false })}
           titleText={this.props.titleText}
           customBackHandler={this.handleBackButtonClick}
         />
@@ -2281,9 +2287,9 @@ class StepsForm extends Component {
               toggleModal={this.toggleModal}
             />
             {pdfBase64 !== '' && ( //#task: test isPdfModalVisible && pdfBase64 (to avoid crash)
-              <View style={{flex: 1}}>
+              <View style={{ flex: 1 }}>
                 <Pdf
-                  source={{uri: `data:application/pdf;base64,${pdfBase64}`}}
+                  source={{ uri: `data:application/pdf;base64,${pdfBase64}` }}
                   style={modalStyles.pdf}
                 />
               </View>
@@ -2292,19 +2298,19 @@ class StepsForm extends Component {
               duration={1500}
               message={toastMessageModal}
               type={toastTypeModal}
-              onDismiss={() => this.setState({toastMessageModal: ''})}
-              containerStyle={{bottom: constants.ScreenHeight * 0.1}}
+              onDismiss={() => this.setState({ toastMessageModal: '' })}
+              containerStyle={{ bottom: constants.ScreenHeight * 0.1 }}
             />
           </View>
 
-          <View style={{backgroundColor: 'white'}}>
+          <View style={{ backgroundColor: 'white' }}>
             {isProcess
               ? this.renderBottomRightButton('Valider', () =>
-                  this.savePdfBase64(pdfBase64, isProcess),
-                )
+                this.savePdfBase64(pdfBase64, isProcess),
+              )
               : this.renderBottomRightButton('Télécharger', () =>
-                  this.savePdfBase64(pdfBase64, isProcess),
-                )}
+                this.savePdfBase64(pdfBase64, isProcess),
+              )}
           </View>
         </Modal>
 
