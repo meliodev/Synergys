@@ -10,11 +10,11 @@ import { faCommentDots } from '@fortawesome/pro-light-svg-icons'
 import PropTypes from 'prop-types'
 import { isTablet } from "../core/constants"
 
-const CustomIcon = ({ icon = faCommentDots, size = isTablet ? 42 : 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, ...props }) => {
+const CustomIcon = ({ icon = faCommentDots, size = isTablet ? 42 : 24, color = theme.colors.secondary, secondaryColor, onPress, style, headerLeft, headerRight, hitslop = null, ...props }) => {
 
     if (!icon) return null
     if (onPress) return (
-        <TouchableOpacity style={style} onPress={onPress} hitSlop={theme.hitslop}>
+        <TouchableOpacity style={style} onPress={onPress} hitSlop={hitslop || theme.hitslop}>
             <FontAwesomeIcon
                 icon={icon}
                 style={[styles.iconStyle, style]}

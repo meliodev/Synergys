@@ -325,7 +325,7 @@ const style = {
   }
 }
 
-const hitslop = { top: 10, bottom: 10, left: 10, right: 10 }
+const hitslop = { top: 12, bottom: 12, left: 12, right: 12 }
 
 export { colors, sizes, style, padding, fonts, customFontMSregular, customFontMSmedium, customFontMSsemibold, customFontMSbold, hitslop }
 

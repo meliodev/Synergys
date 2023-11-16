@@ -133,7 +133,7 @@ class AutoCompleteProducts extends React.Component {
 
                 containerStyle={styles.containerStyle}
                 inputContainerStyle={styles.inputContainerStyle}
-                listContainerStyle={styles.listContainerStyle}
+                //listContainerStyle={styles.listContainerStyle}
                 listStyle={styles.listStyle}
                 flatListProps={{height: ScreenHeight*0.3}} //##bugFix: fix height to be able to scroll
                 showInput={this.props.showTextInput}

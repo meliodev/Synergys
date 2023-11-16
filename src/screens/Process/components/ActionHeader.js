@@ -30,6 +30,7 @@ class ActionHeader extends Component {
     }
 
     renderHeaderBar() {
+        const hitslop  = { top: 33, bottom: 33, left: 33, right: 33 }
         return (
             <View style={styles.headerBarContainer}>
                 <Header style={styles.headerBarText}>Suivi</Header>
@@ -37,6 +38,7 @@ class ActionHeader extends Component {
                     icon={faEye}
                     color={theme.colors.white}
                     style={styles.eye}
+                    hitslop={hitslop}
                     onPress={this.navigateToProcessHistory}
                 />
             </View>
@@ -63,7 +65,7 @@ const styles = StyleSheet.create({
         color: theme.colors.white
     },
     eye: {
-        zIndex: 1,
+        zIndex: 30,
         position: 'absolute',
         top: theme.padding / 2,
         right: theme.padding / 2

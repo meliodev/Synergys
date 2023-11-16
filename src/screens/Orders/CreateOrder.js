@@ -279,9 +279,11 @@ class CreateOrder extends Component {
     //Disable submit onPress for the following cases...
     const disableSubmit =
       this.state.loading ||
-      (_.isEqual(this.state, this.initialState) && !this.autoGenPdf) ||
-      this.state.discountValidationStep === 'pendingCom' ||
-      this.state.discountValidationStep === 'pendingAdmin';
+      (_.isEqual(this.state, this.initialState) && !this.autoGenPdf)
+    //##discountAutorisation
+    // ||
+    // this.state.discountValidationStep === 'pendingCom' ||
+    // this.state.discountValidationStep === 'pendingAdmin';
     if (disableSubmit) return;
 
     load(this, true);
@@ -290,14 +292,15 @@ class CreateOrder extends Component {
     const isValid = this.validateInputs();
     if (!isValid) return;
 
-    //1. Verify if Discount was applied BY A COMMERCIAL
-    const isAdminValidationRequired =
-      !notifyAdmin && this.checkDiscountValidation();
-    if (isAdminValidationRequired) {
-      this.setState({ discountValidationStep: 'warning' });
-      load(this, false);
-      return;
-    }
+    //##discountAutorisation
+    // //1. Verify if Discount was applied BY A COMMERCIAL
+    // const isAdminValidationRequired =
+    //   !notifyAdmin && this.checkDiscountValidation();
+    // if (isAdminValidationRequired) {
+    //   this.setState({ discountValidationStep: 'warning' });
+    //   load(this, false);
+    //   return;
+    // }
 
     // //POSEUR & COMMERCIAL PHASES UPDATES PRIVILEGES: Check if user has privilege to update selected project
     // const currentRole = this.props.role.id
@@ -333,11 +336,14 @@ class CreateOrder extends Component {
 
     db.collection('Orders').doc(this.OrderId).set(order, { merge: true }); //#task: run trigger CF to notify responsable agence (with link of this order so he can validate it)
 
-    if (notifyAdmin) {
-      this.setState({ enableSubmit: false });
-      this.runOrderListener();
-      load(this, false);
-    } else if (!this.autoGenPdf) {
+    //##discountAutorisation
+    // if (notifyAdmin) {
+    //   this.setState({ enableSubmit: false });
+    //   this.runOrderListener();
+    //   load(this, false);
+    // } 
+
+    if (!this.autoGenPdf) {
       //Refreshing orders list
       if (this.props.navigation.state.params.onGoBack) {
         this.props.navigation.state.params.onGoBack();
